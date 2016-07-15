@@ -148,9 +148,11 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
   _children.clear();
-  [children enumerateObjectsUsingBlock:^(id<ASLayoutable>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-    _children[idx] = [self layoutableToAddFromLayoutable:obj];
-  }];
+  NSUInteger i = 0;
+  for (id<ASLayoutable> child in children) {
+    _children[i] = [self layoutableToAddFromLayoutable:child];
+    i += 1;
+  }
 }
 
 - (id<ASLayoutable>)childForIndex:(NSUInteger)index

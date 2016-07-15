@@ -262,8 +262,9 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   _editingNodes[kind] = editingNodes;
 
   [_mainSerialQueue performBlockOnMainThread:^{
-    NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_completedNodes[kind], indexPaths);
-    ASDeleteElementsInMultidimensionalArrayAtIndexPaths(_completedNodes[kind], indexPaths);
+    NSMutableArray *allNodes = _completedNodes[kind];
+    NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(allNodes, indexPaths);
+    ASDeleteElementsInMultidimensionalArrayAtIndexPaths(allNodes, indexPaths);
     if (completionBlock) {
       completionBlock(nodes, indexPaths);
     }
@@ -472,17 +473,19 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
   
   NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
-  [indexSet enumerateIndexesUsingBlock:^(NSUInteger sectionIndex, BOOL *stop) {
-    NSUInteger rowNum = [_dataSource dataController:self rowsInSection:sectionIndex];
-    for (NSUInteger i = 0; i < rowNum; i++) {
-      NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sectionIndex];
-      ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
-      
-      ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
-      [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
-                                                                indexPath:indexPath
-                                                          constrainedSize:constrainedSize
-                                               environmentTraitCollection:environmentTraitCollection]];
+  [indexSet enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
+    for (NSUInteger sectionIndex = range.location; sectionIndex < NSMaxRange(range); sectionIndex++) {
+      NSUInteger itemCount = [_dataSource dataController:self rowsInSection:sectionIndex];
+      for (NSUInteger i = 0; i < itemCount; i++) {
+        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sectionIndex];
+        ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
+        
+        ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
+        [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
+                                                                  indexPath:indexPath
+                                                            constrainedSize:constrainedSize
+                                                 environmentTraitCollection:environmentTraitCollection]];
+      }
     }
   }];
   return contexts;
@@ -524,10 +527,12 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     // Running these commands may result in blocking on an _editingTransactionQueue operation that started even before -beginUpdates.
     // Each subsequent command in the queue will also wait on the full asynchronous completion of the prior command's edit transaction.
     LOG(@"endUpdatesWithCompletion - %zd blocks to run", _pendingEditCommandBlocks.count);
-    [_pendingEditCommandBlocks enumerateObjectsUsingBlock:^(dispatch_block_t block, NSUInteger idx, BOOL *stop) {
-      LOG(@"endUpdatesWithCompletion - running block #%zd", idx);
+    NSUInteger i = 0;
+    for (dispatch_block_t block in _pendingEditCommandBlocks) {
+      LOG(@"endUpdatesWithCompletion - running block #%zd", i);
       block();
-    }];
+      i += 1;
+    }
     [_pendingEditCommandBlocks removeAllObjects];
     
     [_editingTransactionQueue addOperationWithBlock:^{
@@ -821,8 +826,8 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     
     [_editingTransactionQueue addOperationWithBlock:^{
       LOG(@"Edit Transaction - moveRow: %@ > %@", indexPath, newIndexPath);
-      NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes[ASDataControllerRowNodeKind], @[indexPath]);
       NSArray *indexPaths = @[indexPath];
+      NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(_editingNodes[ASDataControllerRowNodeKind], indexPaths);
       [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
 
       // Don't re-calculate size for moving
@@ -836,12 +841,13 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 - (NSArray *)indexPathsForEditingNodesOfKind:(NSString *)kind
 {
-  return _editingNodes[kind] != nil ? ASIndexPathsForTwoDimensionalArray(_editingNodes[kind]) : nil;
+  NSArray *nodes = _editingNodes[kind];
+  return nodes != nil ? ASIndexPathsForTwoDimensionalArray(nodes) : nil;
 }
 
 - (NSMutableArray *)editingNodesOfKind:(NSString *)kind
 {
-  return _editingNodes[kind] != nil ? _editingNodes[kind] : [NSMutableArray array];
+  return _editingNodes[kind] ? : [NSMutableArray array];
 }
 
 - (NSMutableArray *)completedNodesOfKind:(NSString *)kind
@@ -918,7 +924,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 - (void)dealloc
 {
   ASDisplayNodeAssertMainThread();
-  [_completedNodes enumerateKeysAndObjectsUsingBlock:^(NSString *kind, NSMutableArray *sections, BOOL *stop) {
+  for (NSMutableArray *sections in [_completedNodes objectEnumerator]) {
     for (NSArray *section in sections) {
       for (ASCellNode *node in section) {
         if (node.isNodeLoaded) {
@@ -930,7 +936,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
         }
       }
     }
-  }];
+  }
 }
 
 @end

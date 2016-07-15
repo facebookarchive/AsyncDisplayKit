@@ -14,6 +14,7 @@
 #import "ASInternalHelpers.h"
 #import "NSIndexSet+ASHelpers.h"
 #import "ASAssert.h"
+#import <unordered_map>
 
 NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 {
@@ -308,16 +309,20 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   _ASHierarchyChangeType type = [changes.firstObject changeType];
   
   // Lookup table [Int: AnimationOptions]
-  NSMutableDictionary *animationOptions = [NSMutableDictionary new];
+  __block std::unordered_map<NSUInteger, ASDataControllerAnimationOptions> animationOptions;
   
-  // All changed indexes, sorted
+  // All changed indexes
   NSMutableIndexSet *allIndexes = [NSMutableIndexSet new];
   
   for (_ASHierarchySectionChange *change in changes) {
-    [change.indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, __unused BOOL *stop) {
-      animationOptions[@(idx)] = @(change.animationOptions);
+    ASDataControllerAnimationOptions options = change.animationOptions;
+    NSIndexSet *indexes = change.indexSet;
+    [indexes enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
+      for (NSUInteger i = range.location; i < NSMaxRange(range); i++) {
+        animationOptions[i] = options;
+      }
     }];
-    [allIndexes addIndexes:change.indexSet];
+    [allIndexes addIndexes:indexes];
   }
   
   // Create new changes by grouping sorted changes by animation option
@@ -326,24 +331,30 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   __block ASDataControllerAnimationOptions currentOptions = 0;
   NSMutableIndexSet *currentIndexes = [NSMutableIndexSet indexSet];
 
-  NSEnumerationOptions options = type == _ASHierarchyChangeTypeDelete ? NSEnumerationReverse : kNilOptions;
+  BOOL reverse = type == _ASHierarchyChangeTypeDelete;
+  NSEnumerationOptions options = reverse ? NSEnumerationReverse : kNilOptions;
 
-  [allIndexes enumerateIndexesWithOptions:options usingBlock:^(NSUInteger idx, __unused BOOL * stop) {
-    ASDataControllerAnimationOptions options = [animationOptions[@(idx)] integerValue];
-
-    // End the previous group if needed.
-    if (options != currentOptions && currentIndexes.count > 0) {
-      _ASHierarchySectionChange *change = [[_ASHierarchySectionChange alloc] initWithChangeType:type indexSet:[currentIndexes copy] animationOptions:currentOptions];
-      [result addObject:change];
-      [currentIndexes removeAllIndexes];
+  [allIndexes enumerateRangesWithOptions:options usingBlock:^(NSRange range, BOOL * _Nonnull stop) {
+    NSInteger increment = reverse ? -1 : 1;
+    NSUInteger start = reverse ? NSMaxRange(range) - 1 : range.location;
+    NSInteger limit = reverse ? range.location - 1 : NSMaxRange(range);
+    for (NSInteger i = start; i != limit; i += increment) {
+      ASDataControllerAnimationOptions options = animationOptions[i];
+      
+      // End the previous group if needed.
+      if (options != currentOptions && currentIndexes.count > 0) {
+        _ASHierarchySectionChange *change = [[_ASHierarchySectionChange alloc] initWithChangeType:type indexSet:[currentIndexes copy] animationOptions:currentOptions];
+        [result addObject:change];
+        [currentIndexes removeAllIndexes];
+      }
+      
+      // Start a new group if needed.
+      if (currentIndexes.count == 0) {
+        currentOptions = options;
+      }
+      
+      [currentIndexes addIndex:i];
     }
-
-    // Start a new group if needed.
-    if (currentIndexes.count == 0) {
-      currentOptions = options;
-    }
-
-    [currentIndexes addIndex:idx];
   }];
 
   // Finish up the last group.
