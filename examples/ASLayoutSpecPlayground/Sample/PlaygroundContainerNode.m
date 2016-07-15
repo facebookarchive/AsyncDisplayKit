@@ -41,6 +41,7 @@
     [ASLayoutableInspectorNode sharedInstance].vizNodeInsetSize = 10.0;
     
     self.shouldVisualizeLayoutSpecs = YES;
+    self.shouldCacheLayoutSpec = YES;
   }
   
   return self;
