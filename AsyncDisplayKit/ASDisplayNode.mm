@@ -791,7 +791,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   };
 
   // TODO ihm: Can we always push the measure to the background thread and remove the parameter from the API?
-  if (shouldMeasureAsync) {
+  if (ASDisplayNodeThreadIsMain()) {
     ASPerformBlockOnBackgroundThread(transitionBlock);
   } else {
     transitionBlock();

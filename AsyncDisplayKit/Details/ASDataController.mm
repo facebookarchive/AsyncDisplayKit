@@ -165,16 +165,12 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     return;
   }
   
-  // For any given layout pass that occurs, this method will be called at least twice, once on the main thread and
-  // the background, to result in complete coverage of both loaded and unloaded nodes
-  BOOL isMainThread = ASDisplayNodeThreadIsMain();
+  // Layout node on whatever thread we are on. We handle the trampoline to the main thread in case the node is
+  // already loaded
   for (NSUInteger k = range.location; k < NSMaxRange(range); k++) {
     ASCellNode *node = nodes[k];
-    // Only nodes that are loaded should be layout on the main thread
-    if (node.isNodeLoaded == isMainThread) {
-      ASIndexedNodeContext *context = contexts[k];
-      [self _layoutNode:node withConstrainedSize:context.constrainedSize];
-    }
+    ASIndexedNodeContext *context = contexts[k];
+    [self _layoutNode:node withConstrainedSize:context.constrainedSize];
   }
 }
 
@@ -187,78 +183,42 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   }
 
   NSUInteger nodeCount = contexts.count;
-  NSMutableArray<ASCellNode *> *allocatedNodes = [NSMutableArray<ASCellNode *> arrayWithCapacity:nodeCount];
-  dispatch_group_t layoutGroup = dispatch_group_create();
+  __strong NSIndexPath **allocatedContextIndexPaths = (__strong NSIndexPath **)calloc(nodeCount, sizeof(NSIndexPath *));
+  __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(nodeCount, sizeof(ASCellNode *));
 
   for (NSUInteger j = 0; j < nodeCount; j += kASDataControllerSizingCountPerProcessor) {
     NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, nodeCount - j);
-    
-    // Allocate nodes concurrently.
-    __block NSArray *subarrayOfContexts;
-    __block NSArray *subarrayOfNodes;
-    dispatch_block_t allocationBlock = ^{
-      __strong ASIndexedNodeContext **allocatedContextBuffer = (__strong ASIndexedNodeContext **)calloc(batchCount, sizeof(ASIndexedNodeContext *));
-      __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(batchCount, sizeof(ASCellNode *));
-      dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-      dispatch_apply(batchCount, queue, ^(size_t i) {
-        unsigned long k = j + i;
-        ASIndexedNodeContext *context = contexts[k];
-        ASCellNode *node = [context allocateNode];
-        if (node == nil) {
-          ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
-          node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
-        }
-        allocatedNodeBuffer[i] = node;
-        allocatedContextBuffer[i] = context;
-      });
-      subarrayOfNodes = [NSArray arrayWithObjects:allocatedNodeBuffer count:batchCount];
-      subarrayOfContexts = [NSArray arrayWithObjects:allocatedContextBuffer count:batchCount];
-      // Nil out buffer indexes to allow arc to free the stored cells.
-      for (int i = 0; i < batchCount; i++) {
-        allocatedContextBuffer[i] = nil;
-        allocatedNodeBuffer[i] = nil;
+
+    dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_apply(batchCount, queue, ^(size_t i) {
+      unsigned long k = j + i;
+      ASIndexedNodeContext *context = contexts[k];
+      ASCellNode *node = [context allocateNode];
+      if (node == nil) {
+        ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
+        node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
       }
-      free(allocatedContextBuffer);
-      free(allocatedNodeBuffer);
-    };
-    
-    // Run the allocation block to concurrently create the cell nodes.  Then, handle layout for nodes that are already loaded
-    // (e.g. the dataSource may have provided cells that have been used before), which must do layout on the main thread.
-    NSRange batchRange = NSMakeRange(0, batchCount);
-    if (ASDisplayNodeThreadIsMain()) {
-      dispatch_semaphore_t sema = dispatch_semaphore_create(0);
-      dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-        allocationBlock();
-        dispatch_semaphore_signal(sema);
-      });
-      dispatch_semaphore_wait(sema, DISPATCH_TIME_FOREVER);
+        
+      allocatedContextIndexPaths[k] = context.indexPath;
+      allocatedNodeBuffer[k] = node;
       
-      [self _layoutNodes:subarrayOfNodes fromContexts:subarrayOfContexts atIndexesOfRange:batchRange ofKind:kind];
-    } else {
-      allocationBlock();
-      [_mainSerialQueue performBlockOnMainThread:^{
-        [self _layoutNodes:subarrayOfNodes fromContexts:subarrayOfContexts atIndexesOfRange:batchRange ofKind:kind];
-      }];
-    }
-
-    [allocatedNodes addObjectsFromArray:subarrayOfNodes];
-
-    dispatch_group_async(layoutGroup, dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-      // We should already have measured loaded nodes before we left the main thread. Layout the remaining ones on a background thread.
-      NSRange asyncBatchRange = NSMakeRange(j, batchCount);
-      [self _layoutNodes:allocatedNodes fromContexts:contexts atIndexesOfRange:asyncBatchRange ofKind:kind];
+      [self _layoutNode:node withConstrainedSize:context.constrainedSize];
     });
   }
-
-  // Block the _editingTransactionQueue from executing a new edit transaction until layout is done & _editingNodes array is updated.
-  dispatch_group_wait(layoutGroup, DISPATCH_TIME_FOREVER);
   
-  if (completionBlock) {
-    NSMutableArray *indexPaths = [NSMutableArray arrayWithCapacity:nodeCount];
-    for (ASIndexedNodeContext *context in contexts) {
-      [indexPaths addObject:context.indexPath];
-    }
+  // Create nodes and indexPaths array's
+  NSArray *allocatedNodes = [NSArray arrayWithObjects:allocatedNodeBuffer count:nodeCount];
+  NSArray *indexPaths = [NSArray arrayWithObjects:allocatedContextIndexPaths count:nodeCount];
+  
+  // Nil out buffer indexes to allow arc to free the stored cells.
+  for (int i = 0; i < nodeCount; i++) {
+    allocatedContextIndexPaths[i] = nil;
+    allocatedNodeBuffer[i] = nil;
+  }
+  free(allocatedContextIndexPaths);
+  free(allocatedNodeBuffer);
 
+  if (completionBlock) {
     completionBlock(allocatedNodes, indexPaths);
   }
 }
