@@ -183,17 +183,12 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   }
 
   NSUInteger nodeCount = contexts.count;
-  NSMutableArray<ASCellNode *> *allocatedNodes = [NSMutableArray<ASCellNode *> arrayWithCapacity:nodeCount];
-  NSMutableArray<NSIndexPath *> *indexPaths = nil;
-  if (completionBlock) {
-    indexPaths = [NSMutableArray arrayWithCapacity:nodeCount];
-  }
+  __strong NSIndexPath **allocatedContextIndexPaths = (__strong NSIndexPath **)calloc(nodeCount, sizeof(NSIndexPath *));
+  __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(nodeCount, sizeof(ASCellNode *));
 
   for (NSUInteger j = 0; j < nodeCount; j += kASDataControllerSizingCountPerProcessor) {
     NSInteger batchCount = MIN(kASDataControllerSizingCountPerProcessor, nodeCount - j);
 
-    __strong ASIndexedNodeContext **allocatedContextBuffer = (__strong ASIndexedNodeContext **)calloc(batchCount, sizeof(ASIndexedNodeContext *));
-    __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(batchCount, sizeof(ASCellNode *));
     dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
     dispatch_apply(batchCount, queue, ^(size_t i) {
       unsigned long k = j + i;
@@ -203,25 +198,25 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
         ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
         node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
       }
-      allocatedNodeBuffer[i] = node;
-      allocatedContextBuffer[i] = context;
+        
+      allocatedContextIndexPaths[k] = context.indexPath;
+      allocatedNodeBuffer[k] = node;
       
       [self _layoutNode:node withConstrainedSize:context.constrainedSize];
     });
-
-    // Nil out buffer indexes to allow arc to free the stored cells.
-    for (int i = 0; i < batchCount; i++) {
-      [allocatedNodes addObject:allocatedNodeBuffer[i]];
-      if (indexPaths) {
-        [indexPaths addObject:[allocatedContextBuffer[i] indexPath]];
-      }
-      
-      allocatedContextBuffer[i] = nil;
-      allocatedNodeBuffer[i] = nil;
-    }
-    free(allocatedContextBuffer);
-    free(allocatedNodeBuffer);
   }
+  
+  // Create nodes and indexPaths array's
+  NSArray *allocatedNodes = [NSArray arrayWithObjects:allocatedNodeBuffer count:nodeCount];
+  NSArray *indexPaths = [NSArray arrayWithObjects:allocatedContextIndexPaths count:nodeCount];
+  
+  // Nil out buffer indexes to allow arc to free the stored cells.
+  for (int i = 0; i < nodeCount; i++) {
+    allocatedContextIndexPaths[i] = nil;
+    allocatedNodeBuffer[i] = nil;
+  }
+  free(allocatedContextIndexPaths);
+  free(allocatedNodeBuffer);
 
   if (completionBlock) {
     completionBlock(allocatedNodes, indexPaths);
