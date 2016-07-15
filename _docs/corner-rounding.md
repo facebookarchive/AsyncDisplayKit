@@ -6,7 +6,7 @@ prevPage: drawing-priority.html
 nextPage: hit-test-slop.html
 ---
 
-If you've worked with Scott Goodson before, you will know that CALayer’s `.cornerRadius` property should be avoided whenever possible. This post will cover:
+When it comes to corner rounding, many developers stick with CALayer's `.cornerRadius` property.  Unfortunately, this convenient property greatly taxes performance and should only be used when there is _no_ alternative.  This post will cover:
 
 <ul>
 <li>why you shouldn’t use CALayer’s .cornerRadius</li>
@@ -16,8 +16,6 @@ If you've worked with Scott Goodson before, you will know that CALayer’s `.cor
 </ul>
 
 ## CALayer's .cornerRadius is Expensive
-
-When it comes to corner rounding, many developers stick with CALayer's `.cornerRadius` property.  Unfortunately, this convenient property greatly taxes performance and should only be used when there is _no_ alternative.  
 
 Why is `.cornerRadius` so expensive?  Use of CALayer's `.cornerRadius` property triggers off-screen rendering to perform the clipping operation on every frame - 60 FPS during scrolling - even if the content in that area isn't changing!  This means that the GPU has to switch contexts on every frame, between compositing the overall frame + additional passes for each use of `.cornerRadius`.  
 
