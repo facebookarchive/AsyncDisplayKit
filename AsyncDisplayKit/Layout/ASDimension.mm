@@ -13,7 +13,7 @@
 
 ASRelativeDimension const ASRelativeDimensionUnconstrained = {};
 
-#pragma mark ASRelativeDimension
+#pragma mark - ASRelativeDimension
 
 ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value)
 {
@@ -61,8 +61,7 @@ CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat parent
   }
 }
 
-#pragma mark -
-#pragma mark ASSizeRange
+#pragma mark - ASSizeRange
 
 ASSizeRange ASSizeRangeMake(CGSize min, CGSize max)
 {
