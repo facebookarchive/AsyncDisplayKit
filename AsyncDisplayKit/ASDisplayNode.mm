@@ -883,7 +883,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
 {
-  [self __layoutSublayouts];
+  [self __layoutSubnodes];
   [context completeTransition:YES];
 }
 
@@ -1133,8 +1133,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)measureNodeWithBoundsIfNecessary:(CGRect)bounds
 {
   // Normally measure will be called before layout occurs. If this doesn't happen, nothing is going to call it at all.
-  // We simply call measureWithSizeRange: using a size range equal to whatever bounds were provided to that element or
-  // try to measure the node with the largest size as possible
+  // We simply call measureWithSizeRange: using a size range equal to whatever bounds were provided to that element
   if (self.supernode == nil && !self.supportsRangeManagedInterfaceState && [self _hasDirtyLayout]) {
     if (CGRectEqualToRect(bounds, CGRectZero)) {
       LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
@@ -1152,10 +1151,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return;
   }
   
-  [self __layoutSublayouts];
+  [self __layoutSubnodes];
 }
 
-- (void)__layoutSublayouts
+- (void)__layoutSubnodes
 {
   for (ASLayout *subnodeLayout in _layout.sublayouts) {
     ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
