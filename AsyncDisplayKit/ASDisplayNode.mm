@@ -2749,7 +2749,7 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
   return _flags.shouldAnimateSizeChanges;
 }
 
--(void)setShouldAnimateSizeChanges:(BOOL)shouldAnimateSizeChanges
+- (void)setShouldAnimateSizeChanges:(BOOL)shouldAnimateSizeChanges
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
@@ -2771,7 +2771,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   }
 }
 
--(NSInteger)drawingPriority
+- (NSInteger)drawingPriority
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(_propertyLock);
