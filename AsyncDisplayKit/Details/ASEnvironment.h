@@ -141,8 +141,8 @@ ASDISPLAYNODE_EXTERN_C_END
   ASDN::MutexLocker l(lock);\
   ASEnvironmentTraitCollection oldTraits = self.environmentState.environmentTraitCollection;\
   [super setEnvironmentState:environmentState];\
-\
-   /* Extra Trait Collection Handling */\
+  \
+  /* Extra Trait Collection Handling */\
   /* If the node is not loaded  yet don't do anything as otherwise the access of the view will trigger a load*/\
   if (!self.isNodeLoaded) { return; } \
   ASEnvironmentTraitCollection currentTraits = environmentState.environmentTraitCollection;\
@@ -150,10 +150,11 @@ ASDISPLAYNODE_EXTERN_C_END
     /* Must dispatch to main for self.view && [self.view.dataController completedNodes]*/ \
     ASPerformBlockOnMainThread(^{\
       NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
+      CGSize constrainedSize = environmentState.environmentTraitCollection.containerSize;\
       for (NSArray *sectionArray in completedNodes) {\
         for (ASCellNode *cellNode in sectionArray) {\
           ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
-          [cellNode setNeedsLayout];\
+          [cellNode measure:constrainedSize];\
         }\
       }\
     });\
