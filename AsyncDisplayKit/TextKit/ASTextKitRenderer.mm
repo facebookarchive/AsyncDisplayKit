@@ -123,6 +123,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   if (!CGSizeEqualToSize(constrainedSize, _constrainedSize)) {
     _sizeIsCalculated = NO;
     _constrainedSize = constrainedSize;
+    _calculatedSize = CGSizeZero;
     
     // Throw away the all subcomponents to create them with the new constrained size new as well as let the
     // truncater do it's job again for the new constrained size. This is necessary as after a truncation did happen
