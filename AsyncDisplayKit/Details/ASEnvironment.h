@@ -126,6 +126,7 @@ ASDISPLAYNODE_EXTERN_C_END
 
 /// sets a trait collection on this environment state.
 - (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection;
+
 @end
 
 // ASCollection/TableNodes don't actually have ASCellNodes as subnodes. Because of this we can't rely on display trait

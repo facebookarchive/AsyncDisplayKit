@@ -201,6 +201,7 @@
 		68FC85EA1CE29C7D00EDD713 /* ASVisibilityProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = 68FC85E71CE29C7D00EDD713 /* ASVisibilityProtocols.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		68FC85EB1CE29C7D00EDD713 /* ASVisibilityProtocols.m in Sources */ = {isa = PBXBuildFile; fileRef = 68FC85E81CE29C7D00EDD713 /* ASVisibilityProtocols.m */; };
 		68FC85EC1CE29C7D00EDD713 /* ASVisibilityProtocols.m in Sources */ = {isa = PBXBuildFile; fileRef = 68FC85E81CE29C7D00EDD713 /* ASVisibilityProtocols.m */; };
+		6947AE341D3AB0D300FEA619 /* ASLayoutSpec+Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 6947AE331D3AB0D300FEA619 /* ASLayoutSpec+Private.h */; };
 		697B315A1CFE4B410049936F /* ASEditableTextNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 697B31591CFE4B410049936F /* ASEditableTextNodeTests.m */; };
 		697C0DE41CF38F28001DE0D4 /* ASLayoutValidation.h in Headers */ = {isa = PBXBuildFile; fileRef = 697C0DE11CF38F28001DE0D4 /* ASLayoutValidation.h */; };
 		697C0DE51CF38F28001DE0D4 /* ASLayoutValidation.mm in Sources */ = {isa = PBXBuildFile; fileRef = 697C0DE21CF38F28001DE0D4 /* ASLayoutValidation.mm */; };
@@ -967,6 +968,7 @@
 		68FC85E11CE29B7E00EDD713 /* ASTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTabBarController.m; sourceTree = "<group>"; };
 		68FC85E71CE29C7D00EDD713 /* ASVisibilityProtocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASVisibilityProtocols.h; sourceTree = "<group>"; };
 		68FC85E81CE29C7D00EDD713 /* ASVisibilityProtocols.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASVisibilityProtocols.m; sourceTree = "<group>"; };
+		6947AE331D3AB0D300FEA619 /* ASLayoutSpec+Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ASLayoutSpec+Private.h"; path = "AsyncDisplayKit/Layout/ASLayoutSpec+Private.h"; sourceTree = "<group>"; };
 		697B31591CFE4B410049936F /* ASEditableTextNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASEditableTextNodeTests.m; sourceTree = "<group>"; };
 		697C0DE11CF38F28001DE0D4 /* ASLayoutValidation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASLayoutValidation.h; path = AsyncDisplayKit/Layout/ASLayoutValidation.h; sourceTree = "<group>"; };
 		697C0DE21CF38F28001DE0D4 /* ASLayoutValidation.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASLayoutValidation.mm; path = AsyncDisplayKit/Layout/ASLayoutValidation.mm; sourceTree = "<group>"; };
@@ -1638,6 +1640,7 @@
 				9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */,
 				ACF6ED181B17843500DA7C62 /* ASStaticLayoutSpec.h */,
 				ACF6ED191B17843500DA7C62 /* ASStaticLayoutSpec.mm */,
+				6947AE331D3AB0D300FEA619 /* ASLayoutSpec+Private.h */,
 			);
 			name = Layout;
 			path = ..;
@@ -1752,6 +1755,7 @@
 				B350625B1B010F070018CF92 /* ASEqualityHelpers.h in Headers */,
 				680346941CE4052A0009FEB4 /* ASNavigationController.h in Headers */,
 				B350621B1B010EFD0018CF92 /* ASFlowLayoutController.h in Headers */,
+				6947AE341D3AB0D300FEA619 /* ASLayoutSpec+Private.h in Headers */,
 				B350621D1B010EFD0018CF92 /* ASHighlightOverlayLayer.h in Headers */,
 				C78F7E2B1BF7809800CDEAFC /* ASTableNode.h in Headers */,
 				AC7A2C181BDE11DF0093FE1A /* ASTableViewInternal.h in Headers */,
