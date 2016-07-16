@@ -9,7 +9,7 @@ nextPage: automatic-layout-debugging.html
 Three examples in increasing order of complexity. 
 #NSSpain Talk Example
 
-<img src="/static/layout-example-1.png">
+<img src="/static/images/layout-example-1.png">
 
 ```objective-c
 
@@ -35,7 +35,7 @@ Three examples in increasing order of complexity.
 
 #Social App Layout
 
-<img src="/static/layout-example-2.png">
+<img src="/static/images/layout-example-2.png">
 
 ```objective-c
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
@@ -80,7 +80,7 @@ Get the full ASDK project at examples/ASDKgram.
 
 #Social App Layout 2
 
-<img src="/static/layout-example-3.png">
+<img src="/static/images/layout-example-3.png">
 
 ```objective-c
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize {
