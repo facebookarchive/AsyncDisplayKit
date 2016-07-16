@@ -13,7 +13,6 @@
 #import <objc/runtime.h>
 #import <vector>
 #import <map>
-#import <vector>
 
 typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASChildrenMap;
 
