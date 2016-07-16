@@ -213,7 +213,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   
   if (usesImageDisplay == NO && usesDrawRect == NO && shouldBeginRasterizing == NO) {
     // Early exit before requesting more expensive properties like bounds and opaque from the layer.
-    _propertyLock.unlock();
+    __instanceLock__.unlock();
     return nil;
   }
   
