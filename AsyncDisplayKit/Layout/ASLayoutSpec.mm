@@ -29,6 +29,7 @@
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis,
          alignSelf, ascender, descender, sizeRange, layoutPosition, layoutableType;
+@synthesize parent = _parent;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 
 - (instancetype)init
@@ -108,10 +109,15 @@
     _parent = parent;
   }
   
-  
   if ([parent supportsUpwardPropagation]) {
     ASEnvironmentStatePropagateUp(parent, self.environmentState.layoutOptionsState);
   }
+}
+
+- (id<ASLayoutable>)parent
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _parent;
 }
 
 #pragma mark - Children
