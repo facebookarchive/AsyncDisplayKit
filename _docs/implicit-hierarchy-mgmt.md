@@ -3,7 +3,7 @@ title: Implicit Hierarchy Management
 layout: docs
 permalink: /docs/implicit-hierarchy-mgmt.html
 prevPage: debug-tool-pixel-scaling.html
-nextPage: debug-hit-test.html
+nextPage: hit-test-slop.html
 ---
 
 This feature was initially a result of building the AsyncDisplayKit Layout Transition API. However, even apps using AsyncDisplayKit that don't require animations can still benefit from the reduction in code size that this feature enables.
@@ -24,7 +24,11 @@ When enabled, IHM, means that your nodes no longer require `addSubnode:` or `rem
 ####Example####
 Consider the following `ASCellNode` subclass `PhotoCellNode` from the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a> which produces a simple social media photo feed UI.
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+
+<div class = "code">
+<pre lang="objc" class="objcCode">
 - (instancetype)initWithPhotoObject:(PhotoModel *)photo;
 {
   self = [super init];
@@ -57,10 +61,15 @@ Consider the following `ASCellNode` subclass `PhotoCellNode` from the <a href="h
   
   return self;
 }
+</pre>
+<pre lang="swift" class = "swiftCode hidden">
 
-```
+</pre>
+</div>
+</div>
 
-By setting usesImplicitHierarchyManagement to YES on the ASCellNode, we _no longer_ need to call `addSubnode:` for each of the ASCellNode's subnodes.
+
+By setting usesImplicitHierarchyManagement to YES on the ASCellNode, we _no longer_ need to call `-addSubnode:` for each of the ASCellNode's subnodes.
 
 Several of the elements in this cell - `_userAvatarImageView`, `_photoImageView`, `_photoLocationLabel` and `_photoCommentsView` - depend on seperate data fetches from the network that could return at any time. 
 
@@ -70,7 +79,11 @@ Implicit Hierarchy Management knows whether or not to include these elements in 
 
 Consider the layoutSpecThatFits: method for the ASCellNode subclass
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+
+<div class = "code">
+<pre lang="objc" class="objcCode">
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   // username / photo location header vertical stack
@@ -86,7 +99,7 @@ Consider the layoutSpecThatFits: method for the ASCellNode subclass
   }
   
   // header stack
-  _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);     // constrain avatar image frame size
+  _userAvatarImageView.preferredFrameSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);  // constrain avatar image frame size
 
   ASLayoutSpec *spacer           = [[ASLayoutSpec alloc] init]; 
   spacer.flexGrow                = YES;
@@ -117,7 +130,12 @@ Consider the layoutSpecThatFits: method for the ASCellNode subclass
 
   return verticalStack;
 }
-```
+</pre>
+<pre lang="swift" class = "swiftCode hidden">
+
+</pre>
+</div>
+</div>
 
 Here you can see that I set the children of my `headerSubStack` to depending on wehther or not the `_photoLocationLabel` attributed string has returned from the reverseGeocode process yet. 
 
