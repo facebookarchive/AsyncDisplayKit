@@ -70,7 +70,7 @@
     if (range.length == 1) {
       [result appendFormat:@"%zu ", (unsigned long)range.location];
     } else {
-      [result appendFormat:@"%zu-%u ", (unsigned long)range.location, NSMaxRange(range) - 1];
+      [result appendFormat:@"%zu-%lu ", (unsigned long)range.location, NSMaxRange(range) - 1];
     }
   }];
   [result appendString:@"}"];
