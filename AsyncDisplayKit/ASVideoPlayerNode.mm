@@ -379,19 +379,19 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       slider.maximumValue = 1.0;
 
       if (_delegateFlags.delegateScrubberMinimumTrackTintColor) {
-        slider.minimumTrackTintColor  = [_delegate videoPlayerNodeScrubberMinimumTrackTint:strongSelf];
+        slider.minimumTrackTintColor  = [strongSelf.delegate videoPlayerNodeScrubberMinimumTrackTint:strongSelf];
       }
 
       if (_delegateFlags.delegateScrubberMaximumTrackTintColor) {
-        slider.maximumTrackTintColor  = [_delegate videoPlayerNodeScrubberMaximumTrackTint:strongSelf];
+        slider.maximumTrackTintColor  = [strongSelf.delegate videoPlayerNodeScrubberMaximumTrackTint:strongSelf];
       }
 
       if (_delegateFlags.delegateScrubberThumbTintColor) {
-        slider.thumbTintColor  = [_delegate videoPlayerNodeScrubberThumbTint:strongSelf];
+        slider.thumbTintColor  = [strongSelf.delegate videoPlayerNodeScrubberThumbTint:strongSelf];
       }
 
       if (_delegateFlags.delegateScrubberThumbImage) {
-        UIImage *thumbImage = [_delegate videoPlayerNodeScrubberThumbImage:strongSelf];
+        UIImage *thumbImage = [strongSelf.delegate videoPlayerNodeScrubberThumbImage:strongSelf];
         [slider setThumbImage:thumbImage forState:UIControlStateNormal];
       }
 

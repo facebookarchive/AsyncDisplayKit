@@ -43,7 +43,9 @@ static void ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(NSMutableArray 
       curIdx++;
     }
 
-    updateBlock(mutableArray, indexSet, curIdx);
+    if (updateBlock){
+      updateBlock(mutableArray, indexSet, curIdx);
+    }
   }
 }
 

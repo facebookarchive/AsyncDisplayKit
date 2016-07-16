@@ -75,7 +75,9 @@
                                                           NSTextContainer *))block
 {
   std::lock_guard<std::mutex> l(_textKitMutex);
-  block(_layoutManager, _textStorage, _textContainer);
+  if (block) {
+    block(_layoutManager, _textStorage, _textContainer);
+  }
 }
 
 @end

@@ -560,6 +560,10 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     return;
   }
   
+  if (block == nil) {
+    return;
+  }
+  
   // If we have never performed a reload, there is no value in executing edit operations as the initial
   // reload will directly re-query the latest state of the datasource - so completely skip the block in this case.
   if (_batchUpdateCounter == 0) {

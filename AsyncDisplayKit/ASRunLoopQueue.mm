@@ -59,13 +59,15 @@ static void runLoopSourceCallback(void *info) {
     // It is not guaranteed that the runloop will turn if it has no scheduled work, and this causes processing of
     // the queue to stop. Attaching a custom loop source to the run loop and signal it if new work needs to be done
     CFRunLoopSourceContext *runLoopSourceContext = (CFRunLoopSourceContext *)calloc(1, sizeof(CFRunLoopSourceContext));
-    runLoopSourceContext->perform = runLoopSourceCallback;
+    if (runLoopSourceContext) {
+      runLoopSourceContext->perform = runLoopSourceCallback;
 #if ASRunLoopQueueLoggingEnabled
-    runLoopSourceContext->info = (__bridge void *)self;
+      runLoopSourceContext->info = (__bridge void *)self;
 #endif
-    _runLoopSource = CFRunLoopSourceCreate(NULL, 0, runLoopSourceContext);
-    CFRunLoopAddSource(runloop, _runLoopSource, kCFRunLoopCommonModes);
-    free(runLoopSourceContext);
+      _runLoopSource = CFRunLoopSourceCreate(NULL, 0, runLoopSourceContext);
+      CFRunLoopAddSource(runloop, _runLoopSource, kCFRunLoopCommonModes);
+      free(runLoopSourceContext);
+    }
 
 #if ASRunLoopQueueLoggingEnabled
     _runloopQueueLoggingTimer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(checkRunLoop) userInfo:nil repeats:YES];
