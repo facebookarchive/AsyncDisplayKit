@@ -183,9 +183,9 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 {
   asyncdisplaykit_async_transaction_operation_block_t displayBlock = nil;
   ASDisplayNodeFlags flags;
-  _propertyLock.lock();
+  __instanceLock__.lock();
   flags = _flags;
-  _propertyLock.unlock();
+  __instanceLock__.unlock();
   
   ASDisplayNodeAssert(rasterizing || !(_hierarchyState & ASHierarchyStateRasterized), @"Rasterized descendants should never display unless being drawn into the rasterized container.");
 
@@ -323,7 +323,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 {
   ASDisplayNodeAssertMainThread();
 
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   if (_hierarchyState & ASHierarchyStateRasterized) {
     return;
@@ -398,25 +398,25 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
 - (ASDisplayNodeContextModifier)willDisplayNodeContentWithRenderingContext
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _willDisplayNodeContentWithRenderingContext;
 }
 
 - (ASDisplayNodeContextModifier)didDisplayNodeContentWithRenderingContext
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _didDisplayNodeContentWithRenderingContext;
 }
 
 - (void)setWillDisplayNodeContentWithRenderingContext:(ASDisplayNodeContextModifier)contextModifier
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _willDisplayNodeContentWithRenderingContext = contextModifier;
 }
 
 - (void)setDidDisplayNodeContentWithRenderingContext:(ASDisplayNodeContextModifier)contextModifier;
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _didDisplayNodeContentWithRenderingContext = contextModifier;
 }
 

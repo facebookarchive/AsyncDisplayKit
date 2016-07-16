@@ -25,7 +25,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 
 @interface ASLayoutSpec() {
   ASEnvironmentState _environmentState;
-  ASDN::RecursiveMutex _propertyLock;
+  ASDN::RecursiveMutex __instanceLock__;
   ASChildMap _children;
 }
 @end
@@ -227,7 +227,7 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (ASTraitCollection *)asyncTraitCollection
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
 }
 
