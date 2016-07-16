@@ -14,7 +14,7 @@ Nowadays, many apps have a user experience that relies heavily upon continuous g
 
 AsyncDisplayKit Nodes are a thread-safe abstraction layer over UIViews and CALayers:
 
-<img src="/static/node-view-layer.png" alt="logo">
+<img src="/static/images/node-view-layer.png" alt="logo">
 
 You can access most view and layer properties when using nodes, the difference is that nodes are rendered concurrently by default, and measured and laid out asynchronously when used <a href = "/docs/layout-engine.html">correctly</a>!
 

@@ -51,7 +51,7 @@ Updates to the framework (not reflected in the chart below):
   <li>`ASScrollNode` is now available. It inherits from `ASDisplayNode`.</li>
   <li>`ASCellNode` used by `ASTableNode`, `ASCollectionNode` and `ASPagerNode` inherits from `ASDisplayNode`.
 </ul>
-<img src="/static/node-hierarchy.PNG" alt="node inheritance flowchart">
+<img src="/static/images/node-hierarchy.PNG" alt="node inheritance flowchart">
 
 The blue and green colored nodes are synchronous wrappers of UIKit elements.  For example, ASScrollNode wraps a UIScrollView and ASCollectionNode wraps a UICollectionView.  An ASMapNode in liveMapMode is a synchronous wrapper of UIMapView.
 
