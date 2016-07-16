@@ -34,6 +34,9 @@ BOOL ASSubclassOverridesClassSelector(Class superclass, Class subclass, SEL sele
 
 void ASPerformBlockOnMainThread(void (^block)())
 {
+  if (block == nil){
+    return;
+  }
   if (ASDisplayNodeThreadIsMain()) {
     block();
   } else {
@@ -43,6 +46,9 @@ void ASPerformBlockOnMainThread(void (^block)())
 
 void ASPerformBlockOnBackgroundThread(void (^block)())
 {
+  if (block == nil){
+    return;
+  }
   if (ASDisplayNodeThreadIsMain()) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), block);
   } else {
