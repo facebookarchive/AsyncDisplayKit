@@ -664,12 +664,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return NO;
   }
   
-  // If the constrainedSize is completely zero-area, then there is no possibility for layout calculations to be successful.
-  // This also avoids the issue of an inset being applied to 0, creating negative frame values.
-  if (constrainedSize.min.width * constrainedSize.min.height == 0.0 && constrainedSize.max.width * constrainedSize.max.height == 0.0) {
-    return NO;
-  }
-  
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
     ASLayoutableContext context =  ASLayoutableGetCurrentContext();
     if (ASLayoutableContextIsNull(context) || _pendingTransitionID != context.transitionID) {
