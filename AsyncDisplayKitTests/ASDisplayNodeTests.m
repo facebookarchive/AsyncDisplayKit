@@ -85,15 +85,15 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @end
 
 @interface ASTestDisplayNode : ASDisplayNode
-@property (atomic, copy) void (^willDeallocBlock)(ASTestDisplayNode *node);
-@property (atomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
-@property (atomic) BOOL hasFetchedData;
+@property (nonatomic, copy) void (^willDeallocBlock)(ASTestDisplayNode *node);
+@property (nonatomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
+@property (nonatomic) BOOL hasFetchedData;
 
-@property (atomic) BOOL displayRangeStateChangedToYES;
-@property (atomic) BOOL displayRangeStateChangedToNO;
+@property (nonatomic) BOOL displayRangeStateChangedToYES;
+@property (nonatomic) BOOL displayRangeStateChangedToNO;
 
-@property (atomic) BOOL loadStateChangedToYES;
-@property (atomic) BOOL loadStateChangedToNO;
+@property (nonatomic) BOOL loadStateChangedToYES;
+@property (nonatomic) BOOL loadStateChangedToNO;
 @end
 
 @interface ASTestResponderNode : ASTestDisplayNode

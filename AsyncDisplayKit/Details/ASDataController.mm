@@ -45,7 +45,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   BOOL _delegateDidDeleteSections;
 }
 
-@property (atomic, assign) NSUInteger batchUpdateCounter;
+@property (nonatomic, assign) NSUInteger batchUpdateCounter;
 
 @end
 
@@ -557,6 +557,10 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   // This method needs to block the thread and synchronously perform the operation if we are not
   // queuing commands for begin/endUpdates.  If we are queuing, it needs to return immediately.
   if (!_initialReloadDataHasBeenCalled) {
+    return;
+  }
+  
+  if (block == nil) {
     return;
   }
   

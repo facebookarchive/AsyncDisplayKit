@@ -118,7 +118,7 @@ struct ASImageNodeDrawParameters {
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   // if a preferredFrameSize is set, call the superclass to return that instead of using the image size.
   if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO)
     return [super calculateSizeThatFits:constrainedSize];
@@ -132,7 +132,7 @@ struct ASImageNodeDrawParameters {
 
 - (void)setImage:(UIImage *)image
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (!ASObjectIsEqual(_image, image)) {
     _image = image;
     
@@ -155,7 +155,7 @@ struct ASImageNodeDrawParameters {
 
 - (UIImage *)image
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _image;
 }
 
@@ -171,7 +171,7 @@ struct ASImageNodeDrawParameters {
 
 - (NSObject *)drawParametersForAsyncLayer:(_ASDisplayLayer *)layer
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   
   _drawParameter = {
     .bounds = self.bounds,
@@ -216,7 +216,7 @@ struct ASImageNodeDrawParameters {
   asimagenode_modification_block_t imageModificationBlock;
 
   {
-    ASDN::MutexLocker l(_propertyLock);
+    ASDN::MutexLocker l(__instanceLock__);
     ASImageNodeDrawParameters drawParameter = _drawParameter;
     
     drawParameterBounds       = drawParameter.bounds;
@@ -351,19 +351,19 @@ struct ASImageNodeDrawParameters {
 {
   [super displayDidFinish];
 
-  _propertyLock.lock();
+  __instanceLock__.lock();
     void (^displayCompletionBlock)(BOOL canceled) = _displayCompletionBlock;
     UIImage *image = _image;
-  _propertyLock.unlock();
+  __instanceLock__.unlock();
   
   // If we've got a block to perform after displaying, do it.
   if (image && displayCompletionBlock) {
 
     displayCompletionBlock(NO);
 
-    _propertyLock.lock();
+    __instanceLock__.lock();
       _displayCompletionBlock = nil;
-    _propertyLock.unlock();
+    __instanceLock__.unlock();
   }
 }
 
@@ -376,7 +376,7 @@ struct ASImageNodeDrawParameters {
   }
 
   // Stash the block and call-site queue. We'll invoke it in -displayDidFinish.
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (_displayCompletionBlock != displayCompletionBlock) {
     _displayCompletionBlock = [displayCompletionBlock copy];
   }
@@ -388,7 +388,7 @@ struct ASImageNodeDrawParameters {
 
 - (BOOL)isCropEnabled
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _cropEnabled;
 }
 
@@ -399,7 +399,7 @@ struct ASImageNodeDrawParameters {
 
 - (void)setCropEnabled:(BOOL)cropEnabled recropImmediately:(BOOL)recropImmediately inBounds:(CGRect)cropBounds
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (_cropEnabled == cropEnabled)
     return;
 
@@ -420,13 +420,13 @@ struct ASImageNodeDrawParameters {
 
 - (CGRect)cropRect
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _cropRect;
 }
 
 - (void)setCropRect:(CGRect)cropRect
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (CGRectEqualToRect(_cropRect, cropRect))
     return;
 
@@ -447,25 +447,25 @@ struct ASImageNodeDrawParameters {
 
 - (BOOL)forceUpscaling
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _forceUpscaling;
 }
 
 - (void)setForceUpscaling:(BOOL)forceUpscaling
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _forceUpscaling = forceUpscaling;
 }
 
 - (asimagenode_modification_block_t)imageModificationBlock
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _imageModificationBlock;
 }
 
 - (void)setImageModificationBlock:(asimagenode_modification_block_t)imageModificationBlock
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _imageModificationBlock = imageModificationBlock;
 }
 

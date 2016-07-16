@@ -31,7 +31,7 @@ NSString * const kASBasicImageDownloaderContextCompletionBlock = @"kASBasicImage
 @interface ASBasicImageDownloaderContext ()
 {
   BOOL _invalid;
-  ASDN::RecursiveMutex _propertyLock;
+  ASDN::RecursiveMutex __instanceLock__;
 }
 
 @property (nonatomic, strong) NSMutableArray *callbackDatas;
@@ -76,7 +76,7 @@ static ASDN::RecursiveMutex currentRequestsLock;
 
 - (void)cancel
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   NSURLSessionTask *sessionTask = self.sessionTask;
   if (sessionTask) {
@@ -90,19 +90,19 @@ static ASDN::RecursiveMutex currentRequestsLock;
 
 - (BOOL)isCancelled
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _invalid;
 }
 
 - (void)addCallbackData:(NSDictionary *)callbackData
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   [self.callbackDatas addObject:callbackData];
 }
 
 - (void)performProgressBlocks:(CGFloat)progress
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   for (NSDictionary *callbackData in self.callbackDatas) {
     ASBasicImageDownloaderContextProgressBlock progressBlock = callbackData[kASBasicImageDownloaderContextProgressBlock];
     dispatch_queue_t callbackQueue = callbackData[kASBasicImageDownloaderContextCallbackQueue];
@@ -117,7 +117,7 @@ static ASDN::RecursiveMutex currentRequestsLock;
 
 - (void)completeWithImage:(UIImage *)image error:(NSError *)error
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   for (NSDictionary *callbackData in self.callbackDatas) {
     ASBasicImageDownloaderContextCompletionBlock completionBlock = callbackData[kASBasicImageDownloaderContextCompletionBlock];
     dispatch_queue_t callbackQueue = callbackData[kASBasicImageDownloaderContextCallbackQueue];
@@ -135,7 +135,7 @@ static ASDN::RecursiveMutex currentRequestsLock;
 
 - (NSURLSessionTask *)createSessionTaskIfNecessaryWithBlock:(NSURLSessionTask *(^)())creationBlock {
   {
-    ASDN::MutexLocker l(_propertyLock);
+    ASDN::MutexLocker l(__instanceLock__);
 
     if (self.isCancelled) {
       return nil;
@@ -149,7 +149,7 @@ static ASDN::RecursiveMutex currentRequestsLock;
   NSURLSessionTask *newTask = creationBlock();
 
   {
-    ASDN::MutexLocker l(_propertyLock);
+    ASDN::MutexLocker l(__instanceLock__);
 
     if (self.isCancelled) {
       return nil;

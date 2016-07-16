@@ -77,7 +77,7 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 /*
  * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
  */
-//@property (atomic, retain) UIColor *backgroundColor;
+//@property (nonatomic, retain) UIColor *backgroundColor;
 @property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
 
 /**

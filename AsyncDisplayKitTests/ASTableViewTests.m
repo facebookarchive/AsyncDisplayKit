@@ -22,7 +22,7 @@
 #define NumberOfReloadIterations 50
 
 @interface ASTestDataController : ASChangeSetDataController
-@property (atomic) int numberOfAllNodesRelayouts;
+@property (nonatomic) int numberOfAllNodesRelayouts;
 @end
 
 @implementation ASTestDataController
@@ -36,7 +36,7 @@
 @end
 
 @interface ASTestTableView : ASTableView
-@property (atomic, copy) void (^willDeallocBlock)(ASTableView *tableView);
+@property (nonatomic, copy) void (^willDeallocBlock)(ASTableView *tableView);
 @end
 
 @implementation ASTestTableView
@@ -61,7 +61,7 @@
 @end
 
 @interface ASTableViewTestDelegate : NSObject <ASTableViewDataSource, ASTableViewDelegate>
-@property (atomic, copy) void (^willDeallocBlock)(ASTableViewTestDelegate *delegate);
+@property (nonatomic, copy) void (^willDeallocBlock)(ASTableViewTestDelegate *delegate);
 @end
 
 @implementation ASTableViewTestDelegate
@@ -92,7 +92,7 @@
 
 @interface ASTestTextCellNode : ASTextCellNode
 /** Calculated by counting how many times -layoutSpecThatFits: is called on the main thread. */
-@property (atomic) int numberOfLayoutsOnMainThread;
+@property (nonatomic) int numberOfLayoutsOnMainThread;
 @end
 
 @implementation ASTestTextCellNode
@@ -154,7 +154,7 @@
 @end
 
 @interface ASTableViewTests : XCTestCase
-@property (atomic, retain) ASTableView *testTableView;
+@property (nonatomic, retain) ASTableView *testTableView;
 @end
 
 @implementation ASTableViewTests

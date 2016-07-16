@@ -200,7 +200,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   asyncdisplaykit_async_transaction_operation_block_t displayBlock = nil;
   ASDisplayNodeFlags flags;
   
-  _propertyLock.lock();
+  __instanceLock__.lock();
 
   flags = _flags;
   
@@ -224,7 +224,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
   // Capture drawParameters from delegate on main thread, if this node is displaying itself rather than recursively rasterizing.
   id drawParameters = (shouldBeginRasterizing == NO ? [self drawParameters] : nil);
 
-  _propertyLock.unlock();
+  __instanceLock__.unlock();
   
   // Only the -display methods should be called if we can't size the graphics buffer to use.
   if (CGRectIsEmpty(bounds) && (shouldBeginRasterizing || shouldCreateGraphicsContext)) {
@@ -318,7 +318,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 {
   ASDisplayNodeAssertMainThread();
 
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   if (_hierarchyState & ASHierarchyStateRasterized) {
     return;
@@ -393,25 +393,25 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
 
 - (ASDisplayNodeContextModifier)willDisplayNodeContentWithRenderingContext
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _willDisplayNodeContentWithRenderingContext;
 }
 
 - (ASDisplayNodeContextModifier)didDisplayNodeContentWithRenderingContext
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _didDisplayNodeContentWithRenderingContext;
 }
 
 - (void)setWillDisplayNodeContentWithRenderingContext:(ASDisplayNodeContextModifier)contextModifier
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _willDisplayNodeContentWithRenderingContext = contextModifier;
 }
 
 - (void)setDidDisplayNodeContentWithRenderingContext:(ASDisplayNodeContextModifier)contextModifier;
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _didDisplayNodeContentWithRenderingContext = contextModifier;
 }
 

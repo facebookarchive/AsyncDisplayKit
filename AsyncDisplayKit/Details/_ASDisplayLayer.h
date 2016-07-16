@@ -24,7 +24,7 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 
  @default YES (note that this might change for subclasses)
  */
-@property (atomic, assign) BOOL displaysAsynchronously;
+@property (nonatomic, assign) BOOL displaysAsynchronously;
 
 /**
  @summary Cancels any pending async display.
@@ -48,7 +48,7 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 
  @desc The asyncDelegate will have the opportunity to override the methods related to async display.
  */
-@property (atomic, weak) id<_ASDisplayLayerDelegate> asyncDelegate;
+@property (nonatomic, weak) id<_ASDisplayLayerDelegate> asyncDelegate;
 
 /**
  @summary Suspends both asynchronous and synchronous display of the receiver if YES.
@@ -58,7 +58,7 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 
  @default NO
  */
-@property (atomic, assign, getter=isDisplaySuspended) BOOL displaySuspended;
+@property (nonatomic, assign, getter=isDisplaySuspended) BOOL displaySuspended;
 
 /**
  @summary Bypasses asynchronous rendering and performs a blocking display immediately on the current thread.

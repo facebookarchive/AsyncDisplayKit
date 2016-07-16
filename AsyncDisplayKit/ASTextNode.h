@@ -108,10 +108,10 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 /**
  @abstract When you set these ASDisplayNode properties, they are composited into the bitmap instead of being applied by CA.
 
- @property (atomic, assign) CGColorRef shadowColor;
- @property (atomic, assign) CGFloat    shadowOpacity;
- @property (atomic, assign) CGSize     shadowOffset;
- @property (atomic, assign) CGFloat    shadowRadius;
+ @property (nonatomic, assign) CGColorRef shadowColor;
+ @property (nonatomic, assign) CGFloat    shadowOpacity;
+ @property (nonatomic, assign) CGSize     shadowOffset;
+ @property (nonatomic, assign) CGFloat    shadowRadius;
  */
 
 /**
