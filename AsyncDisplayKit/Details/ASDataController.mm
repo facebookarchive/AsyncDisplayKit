@@ -45,7 +45,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   BOOL _delegateDidDeleteSections;
 }
 
-@property (atomic, assign) NSUInteger batchUpdateCounter;
+@property (nonatomic, assign) NSUInteger batchUpdateCounter;
 
 @end
 

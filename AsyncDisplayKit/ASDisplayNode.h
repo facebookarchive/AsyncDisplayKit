@@ -165,7 +165,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @abstract The name of this node, which will be displayed in `description`. The default value is nil.
  */
-@property (nullable, atomic, copy) NSString *name;
+@property (nullable, nonatomic, copy) NSString *name;
 
 /** 
  * @abstract Returns whether the node is synchronous.
@@ -193,7 +193,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return YES if a view is loaded, or if layerBacked is YES and layer is not nil; NO otherwise.
  */
-@property (atomic, readonly, assign, getter=isNodeLoaded) BOOL nodeLoaded;
+@property (nonatomic, readonly, assign, getter=isNodeLoaded) BOOL nodeLoaded;
 
 /** 
  * @abstract Returns whether the node rely on a layer instead of a view.
@@ -303,7 +303,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return The preferred frame size of this node
  */
-@property (atomic, assign, readwrite) CGSize preferredFrameSize;
+@property (nonatomic, assign, readwrite) CGSize preferredFrameSize;
 
 /** @name Managing the nodes hierarchy */
 
@@ -646,27 +646,27 @@ NS_ASSUME_NONNULL_END
  */
 - (void)setNeedsLayout;
 
-@property (atomic, strong, nullable) id contents;                           // default=nil
-@property (atomic, assign)           BOOL clipsToBounds;                    // default==NO
-@property (atomic, getter=isOpaque)  BOOL opaque;                           // default==YES
+@property (nonatomic, strong, nullable) id contents;                           // default=nil
+@property (nonatomic, assign)           BOOL clipsToBounds;                    // default==NO
+@property (nonatomic, getter=isOpaque)  BOOL opaque;                           // default==YES
 
-@property (atomic, assign)           BOOL allowsEdgeAntialiasing;
-@property (atomic, assign)           unsigned int edgeAntialiasingMask;     // default==all values from CAEdgeAntialiasingMask
+@property (nonatomic, assign)           BOOL allowsEdgeAntialiasing;
+@property (nonatomic, assign)           unsigned int edgeAntialiasingMask;     // default==all values from CAEdgeAntialiasingMask
 
-@property (atomic, getter=isHidden)  BOOL hidden;                           // default==NO
-@property (atomic, assign)           BOOL needsDisplayOnBoundsChange;       // default==NO
-@property (atomic, assign)           BOOL autoresizesSubviews;              // default==YES (undefined for layer-backed nodes)
-@property (atomic, assign)           UIViewAutoresizing autoresizingMask;   // default==UIViewAutoresizingNone  (undefined for layer-backed nodes)
-@property (atomic, assign)           CGFloat alpha;                         // default=1.0f
-@property (atomic, assign)           CGRect bounds;                         // default=CGRectZero
-@property (atomic, assign)           CGRect frame;                          // default=CGRectZero
-@property (atomic, assign)           CGPoint anchorPoint;                   // default={0.5, 0.5}
-@property (atomic, assign)           CGFloat zPosition;                     // default=0.0
-@property (atomic, assign)           CGPoint position;                      // default=CGPointZero
-@property (atomic, assign)           CGFloat cornerRadius;                  // default=0.0
-@property (atomic, assign)           CGFloat contentsScale;                 // default=1.0f. See @contentsScaleForDisplay for more info
-@property (atomic, assign)           CATransform3D transform;               // default=CATransform3DIdentity
-@property (atomic, assign)           CATransform3D subnodeTransform;        // default=CATransform3DIdentity
+@property (nonatomic, getter=isHidden)  BOOL hidden;                           // default==NO
+@property (nonatomic, assign)           BOOL needsDisplayOnBoundsChange;       // default==NO
+@property (nonatomic, assign)           BOOL autoresizesSubviews;              // default==YES (undefined for layer-backed nodes)
+@property (nonatomic, assign)           UIViewAutoresizing autoresizingMask;   // default==UIViewAutoresizingNone  (undefined for layer-backed nodes)
+@property (nonatomic, assign)           CGFloat alpha;                         // default=1.0f
+@property (nonatomic, assign)           CGRect bounds;                         // default=CGRectZero
+@property (nonatomic, assign)           CGRect frame;                          // default=CGRectZero
+@property (nonatomic, assign)           CGPoint anchorPoint;                   // default={0.5, 0.5}
+@property (nonatomic, assign)           CGFloat zPosition;                     // default=0.0
+@property (nonatomic, assign)           CGPoint position;                      // default=CGPointZero
+@property (nonatomic, assign)           CGFloat cornerRadius;                  // default=0.0
+@property (nonatomic, assign)           CGFloat contentsScale;                 // default=1.0f. See @contentsScaleForDisplay for more info
+@property (nonatomic, assign)           CATransform3D transform;               // default=CATransform3DIdentity
+@property (nonatomic, assign)           CATransform3D subnodeTransform;        // default=CATransform3DIdentity
 
 /**
  * @abstract The node view's background color.
@@ -674,9 +674,9 @@ NS_ASSUME_NONNULL_END
  * @discussion In contrast to UIView, setting a transparent color will not set opaque = NO.
  * This only affects nodes that implement +drawRect like ASTextNode.
 */
-@property (atomic, strong, nullable) UIColor *backgroundColor;              // default=nil
+@property (nonatomic, strong, nullable) UIColor *backgroundColor;              // default=nil
 
-@property (atomic, strong, null_resettable)    UIColor *tintColor;          // default=Blue
+@property (nonatomic, strong, null_resettable)    UIColor *tintColor;          // default=Blue
 - (void)tintColorDidChange;     // Notifies the node when the tintColor has changed.
 
 /**
@@ -687,18 +687,18 @@ NS_ASSUME_NONNULL_END
  * Thus, UIViewContentModeRedraw is not allowed; use needsDisplayOnBoundsChange = YES instead, and pick an appropriate 
  * contentMode for your content while it's being re-rendered.
  */
-@property (atomic, assign)           UIViewContentMode contentMode;         // default=UIViewContentModeScaleToFill
+@property (nonatomic, assign)           UIViewContentMode contentMode;         // default=UIViewContentModeScaleToFill
 
-@property (atomic, assign, getter=isUserInteractionEnabled) BOOL userInteractionEnabled; // default=YES (NO for layer-backed nodes)
+@property (nonatomic, assign, getter=isUserInteractionEnabled) BOOL userInteractionEnabled; // default=YES (NO for layer-backed nodes)
 #if TARGET_OS_IOS
-@property (atomic, assign, getter=isExclusiveTouch) BOOL exclusiveTouch;    // default=NO
+@property (nonatomic, assign, getter=isExclusiveTouch) BOOL exclusiveTouch;    // default=NO
 #endif
-@property (atomic, assign, nullable) CGColorRef shadowColor;                // default=opaque rgb black
-@property (atomic, assign)           CGFloat shadowOpacity;                 // default=0.0
-@property (atomic, assign)           CGSize shadowOffset;                   // default=(0, -3)
-@property (atomic, assign)           CGFloat shadowRadius;                  // default=3
-@property (atomic, assign)           CGFloat borderWidth;                   // default=0
-@property (atomic, assign, nullable) CGColorRef borderColor;                // default=opaque rgb black
+@property (nonatomic, assign, nullable) CGColorRef shadowColor;                // default=opaque rgb black
+@property (nonatomic, assign)           CGFloat shadowOpacity;                 // default=0.0
+@property (nonatomic, assign)           CGSize shadowOffset;                   // default=(0, -3)
+@property (nonatomic, assign)           CGFloat shadowRadius;                  // default=3
+@property (nonatomic, assign)           CGFloat borderWidth;                   // default=0
+@property (nonatomic, assign, nullable) CGColorRef borderColor;                // default=opaque rgb black
 
 // UIResponder methods
 // By default these fall through to the underlying view, but can be overridden.

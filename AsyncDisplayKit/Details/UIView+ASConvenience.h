@@ -67,16 +67,16 @@ NS_ASSUME_NONNULL_BEGIN
  We don't declare them here, so _ASPendingState does not complain about them being not implemented,
  as they are already on NSObject
 
- @property (atomic, assign)           BOOL isAccessibilityElement;
- @property (atomic, copy)             NSString *accessibilityLabel;
- @property (atomic, copy)             NSString *accessibilityHint;
- @property (atomic, copy)             NSString *accessibilityValue;
- @property (atomic, assign)           UIAccessibilityTraits accessibilityTraits;
- @property (atomic, assign)           CGRect accessibilityFrame;
- @property (atomic, strong)           NSString *accessibilityLanguage;
- @property (atomic, assign)           BOOL accessibilityElementsHidden;
- @property (atomic, assign)           BOOL accessibilityViewIsModal;
- @property (atomic, assign)           BOOL shouldGroupAccessibilityChildren;
+ @property (nonatomic, assign)           BOOL isAccessibilityElement;
+ @property (nonatomic, copy)             NSString *accessibilityLabel;
+ @property (nonatomic, copy)             NSString *accessibilityHint;
+ @property (nonatomic, copy)             NSString *accessibilityValue;
+ @property (nonatomic, assign)           UIAccessibilityTraits accessibilityTraits;
+ @property (nonatomic, assign)           CGRect accessibilityFrame;
+ @property (nonatomic, strong)           NSString *accessibilityLanguage;
+ @property (nonatomic, assign)           BOOL accessibilityElementsHidden;
+ @property (nonatomic, assign)           BOOL accessibilityViewIsModal;
+ @property (nonatomic, assign)           BOOL shouldGroupAccessibilityChildren;
  */
 
 // Accessibility identification support
