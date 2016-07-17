@@ -10,7 +10,7 @@ In some cases, you can substantially improve your app's performance by using lay
 
 With UIKit, manually converting view-based code to layers is laborious due to the difference in APIs. Worse, if at some point you need to enable touch handling or other view-specific functionality, you have to manually convert everything back (and risk regressions!).
 
-With all AsyncDisplayKit nodes, converting an entire subtree from views to layers is as simple as...
+With all AsyncDisplayKit nodes, converting an entire subtree from views to layers is as simple as:
 
 <div class = "highlight-group">
 <span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
