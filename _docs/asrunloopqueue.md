@@ -11,4 +11,4 @@ Even with main thread work, AsyncDisplayKit is able to dramatically reduce its i
 
 It's a longer discussion why this kind of technique is extremely challenging to implement with `UIKit`, but it has to do with the fact that `AsyncDisplayKit` prepares content in advance, giving it a buffer of time where it can spread out the creation of these objects in tiny chunks. If it doesn't finish by the time it needs to be on screen, then it finishes the rest of what needs to be created in a single chunk. `UIKit` has no similar mechanisms to create things in advance, and there is always just one huge chunk as a view controller or cell needs to come on screen.
 
-**ASRunLoopQueue is enabled by default when running AsyncDisplayKit.** The developer does not need to be aware of it's existence except to know that it helps reduce main thread blockage. 
+**ASRunLoopQueue is enabled by default when running AsyncDisplayKit.** A developer does not need to be aware of it's existence except to know that it helps reduce main thread blockage. 

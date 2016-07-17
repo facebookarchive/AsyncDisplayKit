@@ -10,16 +10,33 @@ nextPage: debug-tool-ASRangeController.html
 <br>
 This debug feature adds a red text overlay on the bottom right hand corner of an ASImageNode if (and only if) the image’s size in pixels does not match it’s bounds size in pixels, e.g.
 
-```objective-c
-imageSizeInPixels = image.size * image.scale
-boundsSizeInPixels = bounds.size * contentsScale
-scaleFactor = imageSizeInPixels / boundsSizeInPixels
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+
+<div class = "code">
+<pre lang="objc" class="objcCode">
+CGFloat imageSizeInPixels = image.size.width * image.size.height;
+CGFloat boundsSizeInPixels = imageView.bounds.size.width * imageView.bounds.size.height;
+CGFloat scaleFactor = imageSizeInPixels / boundsSizeInPixels;
 
 if (scaleFactor != 1.0) {
       NSString *scaleString = [NSString stringWithFormat:@"%.2fx", scaleFactor];
       _debugLabelNode.hidden = NO;
 }
-```
+</pre>
+<pre lang="swift" class = "swiftCode hidden">
+let imageSizeInPixels = image.size.width * image.size.height
+let boundsSizeInPixels = imageView.bounds.size.width * imageView.bounds.size.height
+let scaleFactor = imageSizeInPixels / boundsSizeInPixels
+
+if scaleFactor != 1.0 {
+      let scaleString = "\(scaleFactor)"
+      _debugLabelNode.hidden = false
+}
+</pre>
+</div>
+</div>
+
 
 <b>This debug feature is useful for quickly determining if you are</b>
 

@@ -92,7 +92,7 @@ code {
 
 p code, span code, li code {
     border: 1px solid rgb(220, 220, 220);
-    background-color: rgba(90, 140, 140, 0.1);
+    background-color: rgba(135, 215, 255, 0.2);
 }
 
 .highlight pre, .redhighlight pre {
