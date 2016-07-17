@@ -8,13 +8,15 @@ nextPage: image-modification-block.html
 
 Enabling Implicit Hierarchy Management (IHM) is required to use the <a href="layout-transition-api.html">Layout Transition API</a>. However, apps that don't require animations can still benefit from the reduction in code size that this feature enables.
 
-When enabled, IHM means that your nodes no longer require `-addSubnode:` or `-removeFromSupernode` method calls. The presence or absence of the IHM node _and_ its subnodes is completely determined in its `-layoutSpecThatFits:` method.
+When enabled, IHM means that your nodes no longer require `addSubnode:` or `removeFromSupernode` method calls. The presence or absence of the IHM node _and_ its subnodes is completely determined in its `layoutSpecThatFits:` method.
 
 ### Enabling IHM ###
 <br>
-- import `"ASDisplayNode+Beta.h"`. <b><i>This feature will soon be enabled by default for all ASDisplayNodes using ASLayouts.</b></i>
-- set `.usesImplicitHierarchyManagement = YES` on the node that you would like managed. 
- 
+<ul>
+ <li>import `"ASDisplayNode+Beta.h"`. <b><i>This feature will soon be enabled by default for all ASDisplayNodes using ASLayouts.</b></i></li>
+ <li>set `.usesImplicitHierarchyManagement = YES` on the node that you would like managed.</li>
+</ul>
+
 <div class = "note">
 Note that the subnodes of any node with this property set will inherit IHM, so it is only neccessary to enable IHM on the highest level node. Generally, this will be the highest level node in your app, most likely an ASTableNode, ASCollectionNode or ASPagerNode.
 </div>
@@ -23,9 +25,9 @@ Note that the subnodes of any node with this property set will inherit IHM, so i
 <br>
 Consider the following intialization method from the PhotoCellNode class in <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a>. This ASCellNode subclass produces a simple social media photo feed cell. 
 
-In the "Original Code" we see the familiar `-addSubnode:` calls in bold. In the "Code with IHM" (switch at top right of code block) these have been removed and replaced with a single line that enables IHM. 
+In the "Original Code" we see the familiar `addSubnode:` calls in bold. In the "Code with IHM" (switch at top right of code block) these have been removed and replaced with a single line that enables IHM. 
 
-By setting usesImplicitHierarchyManagement to YES on the ASCellNode, we _no longer_ need to call `-addSubnode:` for each of the ASCellNode's subnodes. These subNodes will be present in the node hierarchy as long as this class' `-layoutSpecThatFits:` method includes them. 
+By setting usesImplicitHierarchyManagement to YES on the ASCellNode, we _no longer_ need to call `addSubnode:` for each of the ASCellNode's subnodes. These subNodes will be present in the node hierarchy as long as this class' `layoutSpecThatFits:` method includes them. 
 
 <div class = "highlight-group">
 <span class="language-toggle">
@@ -107,12 +109,12 @@ IHM knows whether or not to include these elements in the UI based on the inform
 
 <div class = "note">
 An `ASLayoutSpec` completely describes the UI of a view in your app by specifying the hierarchy state of a node and its subnodes. An ASLayoutSpec is returned by a node from its <code>
-`-layoutSpecThatFits:`</code> method. 
+`layoutSpecThatFits:`</code> method. 
 </div> 
 
-**It is your job to construct a `-layoutSpecThatFits:` that handles how the UI should look with and without these elements.**
+**It is your job to construct a `layoutSpecThatFits:` that handles how the UI should look with and without these elements.**
 
-Consider the abreviated `-layoutSpecThatFits:` method for the ASCellNode subclass above.
+Consider the abreviated `layoutSpecThatFits:` method for the ASCellNode subclass above.
 
 <div class = "highlight-group">
 <span class="language-toggle">
@@ -172,7 +174,7 @@ The `_userAvatarImageNode`, `_photoImageNode`, and `_photoCommentsNode` are adde
 
 ### Updating an ASLayoutSpec ###
 <br>
-**If something happens that you know will change your `ASLayoutSpec`,  it is your job to call `-setNeedsLayout`**. This is equivalent to `-transitionLayout:duration:0` in the Transition Layout API. You can see this call in the completion block of the `photo.location reverseGeocodedLocationWithCompletionBlock:` call in the first code block. 
+**If something happens that you know will change your `ASLayoutSpec`,  it is your job to call `setNeedsLayout`**. This is equivalent to `transitionLayout:duration:0` in the Transition Layout API. You can see this call in the completion block of the `photo.location reverseGeocodedLocationWithCompletionBlock:` call in the first code block. 
 
 An appropriately constructed ASLayoutSpec will know which subnodes need to be added, removed or animated. 
 
