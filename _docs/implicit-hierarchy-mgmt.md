@@ -11,7 +11,6 @@ Enabling Implicit Hierarchy Management (IHM) is required to use the <a href="lay
 When enabled, IHM means that your nodes no longer require `addSubnode:` or `removeFromSupernode` method calls. The presence or absence of the IHM node _and_ its subnodes is completely determined in its `layoutSpecThatFits:` method.
 
 ### Enabling IHM ###
-<br>
 <ul>
  <li>import `"ASDisplayNode+Beta.h"`. <b><i>This feature will soon be enabled by default for all ASDisplayNodes using ASLayouts.</b></i></li>
  <li>set `.usesImplicitHierarchyManagement = YES` on the node that you would like managed.</li>
