@@ -35,8 +35,6 @@
   items:
   - automatic-layout-containers
   - layout-api-sizing
-- title: Advanced Layout
-  items:
   - layout-transition-api
 - title: Conveniences
   items:
