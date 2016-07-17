@@ -1,98 +1,142 @@
 ---
-title: Implicit Hierarchy Management
+title: Implicit Hierarchy Management <b><i>(Beta)</i></b>
 layout: docs
 permalink: /docs/implicit-hierarchy-mgmt.html
-prevPage: debug-tool-pixel-scaling.html
-nextPage: debug-hit-test.html
+prevPage: batch-fetching-api.html
+nextPage: image-modification-block.html
 ---
 
-This feature was initially a result of building the AsyncDisplayKit Layout Transition API. However, even apps using AsyncDisplayKit that don't require animations can still benefit from the reduction in code size that this feature enables.
+Enabling Implicit Hierarchy Management (IHM) is required to use the <a href="layout-transition-api.html">Layout Transition API</a>. However, apps that don't require animations can still benefit from the reduction in code size that this feature enables.
 
-**This feature will soon be enabled by default for all ASDisplayNodes using ASLayouts.**
+When enabled, IHM means that your nodes no longer require `-addSubnode:` or `-removeFromSupernode` method calls. The presence or absence of the IHM node _and_ its subnodes is completely determined in its `-layoutSpecThatFits:` method.
 
+### Enabling IHM ###
+<br>
+- import `"ASDisplayNode+Beta.h"`. <b><i>This feature will soon be enabled by default for all ASDisplayNodes using ASLayouts.</b></i>
+- set `.usesImplicitHierarchyManagement = YES` on the node that you would like managed. 
+ 
 <div class = "note">
-Implicit Hierarchy Management is implemented using ASLayoutSpecs. If you are unfamiliar with that concept, please read that documentation (INSERT LINK) first. <br><br>
-To recap, an ASLayoutSpec completely describes the UI of a view in your app by specifying the **hierarchy state of a node and its subnodes**. An ASLayoutSpec is returned by a node from its <br><br>
-`- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize` <br><br>
-method. 
+Note that the subnodes of any node with this property set will inherit IHM, so it is only neccessary to enable IHM on the highest level node. Generally, this will be the highest level node in your app, most likely an ASTableNode, ASCollectionNode or ASPagerNode.
 </div>
 
-When enabled, IHM, means that your nodes no longer require `addSubnode:` or `removeFromSupernode` method calls. The presence or absence of the IHM node _and_ its subnodes are determined in the layoutSpecThatFits: method. 
+### Example ###
+<br>
+Consider the following intialization method from the PhotoCellNode class in <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a>. This ASCellNode subclass produces a simple social media photo feed cell. 
 
-**Note that the subnodes of any node with this property set will inherit IHM, so it is only neccessary to put it on the highest level node. Most likely that will be an ASTableNode, ASCollectionNode or ASPagerNode.**
+In the "Original Code" we see the familiar `-addSubnode:` calls in bold. In the "Code with IHM" (switch at top right of code block) these have been removed and replaced with a single line that enables IHM. 
 
-####Example####
-Consider the following `ASCellNode` subclass `PhotoCellNode` from the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a> which produces a simple social media photo feed UI.
+By setting usesImplicitHierarchyManagement to YES on the ASCellNode, we _no longer_ need to call `-addSubnode:` for each of the ASCellNode's subnodes. These subNodes will be present in the node hierarchy as long as this class' `-layoutSpecThatFits:` method includes them. 
 
-```objective-c
+<div class = "highlight-group">
+<span class="language-toggle">
+  <a data-lang="swift" class="swiftButton">Code with IHM</a>
+  <a data-lang="objective-c" class = "active objcButton">Original Code</a>
+</span>
+<div class = "code">
+<pre lang="objc" class="objcCode">
 - (instancetype)initWithPhotoObject:(PhotoModel *)photo;
 {
   self = [super init];
   
   if (self) {
-  
-    self.usesImplicitHierarchyManagement = YES;
+    _photoModel = photo;
     
-    _photoModel              = photo;
-    
-    _userAvatarImageView     = [[ASNetworkImageNode alloc] init];
-    _userAvatarImageView.URL = photo.ownerUserProfile.userPicURL;
+    _userAvatarImageNode = [[ASNetworkImageNode alloc] init];
+    _userAvatarImageNodeURL = photo.ownerUserProfile.userPicURL;
+    <b>[self addSubnode:_userAvatarImageNode];</b>
 
-    _photoImageView          = [[ASNetworkImageNode alloc] init];
-    _photoImageView.URL      = photo.URL;
+    _photoImageNode = [[ASNetworkImageNode alloc] init];
+    _photoImageNode.URL = photo.URL;
+    <b>[self addSubnode:_photoImageNode];</b>
 
-    _userNameLabel                  = [[ASTextNode alloc] init];
-    _userNameLabel.attributedString = [photo.ownerUserProfile usernameAttributedStringWithFontSize:FONT_SIZE];
+    _userNameTextNode = [[ASTextNode alloc] init];
+    _userNameTextNode.attributedString = [photo.ownerUserProfile usernameAttributedStringWithFontSize:FONT_SIZE];
+    <b>[self addSubnode:_userNameTextNode];</b>
     
-    _photoLocationLabel      = [[ASTextNode alloc] init];
+    _photoLocationTextNode = [[ASTextNode alloc] init];
     [photo.location reverseGeocodedLocationWithCompletionBlock:^(LocationModel *locationModel) {
       if (locationModel == _photoModel.location) {
-        _photoLocationLabel.attributedString = [photo locationAttributedStringWithFontSize:FONT_SIZE];
+        _photoLocationTextNode.attributedString = [photo locationAttributedStringWithFontSize:FONT_SIZE];
         [self setNeedsLayout];
       }
     }];
-
-    _photoCommentsView = [[CommentsNode alloc] init];
+    <b>[self addSubnode:_photoLocationTextNode];</b>
   }
   
   return self;
 }
+</pre>
 
-```
-
-By setting usesImplicitHierarchyManagement to YES on the ASCellNode, we _no longer_ need to call `addSubnode:` for each of the ASCellNode's subnodes.
-
-Several of the elements in this cell - `_userAvatarImageView`, `_photoImageView`, `_photoLocationLabel` and `_photoCommentsView` - depend on seperate data fetches from the network that could return at any time. 
-
-Implicit Hierarchy Management knows whether or not to include these elements in the UI based on information provided in the cell's ASLayoutSpec. 
-
-**It is your job to construct a `layoutSpecThatFits:` that handles how the UI should look with and without these elements.**
-
-Consider the layoutSpecThatFits: method for the ASCellNode subclass
-
-```objective-c
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+<pre lang="swift" class = "swiftCode hidden">
+- (instancetype)initWithPhotoObject:(PhotoModel *)photo;
 {
-  // username / photo location header vertical stack
-  _photoLocationLabel.flexShrink    = YES;
-  _userNameLabel.flexShrink         = YES;
+  self = [super init];
   
-  ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  headerSubStack.flexShrink         = YES;
-  if (_photoLocationLabel.attributedString) {
-    [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
-  } else {
-    [headerSubStack setChildren:@[_userNameLabel]];
+  if (self) {
+    <b>self.usesImplicitHierarchyManagement = YES;</b>
+    
+    _photoModel = photo;
+    
+    _userAvatarImageNode = [[ASNetworkImageNode alloc] init];
+    _userAvatarImageNodeURL = photo.ownerUserProfile.userPicURL;
+
+    _photoImageNode = [[ASNetworkImageNode alloc] init];
+    _photoImageNode.URL = photo.URL;
+
+    _userNameTextNode = [[ASTextNode alloc] init];
+    _userNameTextNode.attributedString = [photo.ownerUserProfile usernameAttributedStringWithFontSize:FONT_SIZE];
+    
+    _photoLocationTextNode = [[ASTextNode alloc] init];
+    [photo.location reverseGeocodedLocationWithCompletionBlock:^(LocationModel *locationModel) {
+      if (locationModel == _photoModel.location) {
+        _photoLocationTextNode.attributedString = [photo locationAttributedStringWithFontSize:FONT_SIZE];
+        [self setNeedsLayout];
+      }
+    }];
   }
   
-  // header stack
-  _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);     // constrain avatar image frame size
+  return self;
+}
+</pre>
+</div>
+</div>
+
+Several of the elements in this cell - `_userAvatarImageNode`, `_photoImageNode`, and `_photoLocationLabel` depend on seperate data fetches from the network that could return at any time. When should they be added to the UI?
+
+IHM knows whether or not to include these elements in the UI based on the information provided in the cell's ASLayoutSpec.
+
+<div class = "note">
+An `ASLayoutSpec` completely describes the UI of a view in your app by specifying the hierarchy state of a node and its subnodes. An ASLayoutSpec is returned by a node from its <code>
+`-layoutSpecThatFits:`</code> method. 
+</div> 
+
+**It is your job to construct a `-layoutSpecThatFits:` that handles how the UI should look with and without these elements.**
+
+Consider the abreviated `-layoutSpecThatFits:` method for the ASCellNode subclass above.
+
+<div class = "highlight-group">
+<span class="language-toggle">
+  <a data-lang="objective-c" class = "active objcButton">Objective-C</a>
+</span>
+<div class = "code">
+<pre lang="objc" class="objcCode">
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{  
+  ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  headerSubStack.flexShrink         = YES;
+  <b>if (_photoLocationLabel.attributedString) {</b>
+    [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
+  <b>} else {</b>
+    [headerSubStack setChildren:@[_userNameLabel]];
+  <b>}</b>
+  
+  _userAvatarImageNode.preferredFrameSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);     // constrain avatar image frame size
 
   ASLayoutSpec *spacer           = [[ASLayoutSpec alloc] init]; 
   spacer.flexGrow                = YES;
   
   UIEdgeInsets avatarInsets      = UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
-  ASInsetLayoutSpec *avatarInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
+  ASInsetLayoutSpec *avatarInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:<b>_userAvatarImageNode</b>];
 
   ASStackLayoutSpec *headerStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
   headerStack.alignItems         = ASStackLayoutAlignItemsCenter;                     // center items vertically in horizontal stack
@@ -105,39 +149,35 @@ Consider the layoutSpecThatFits: method for the ASCellNode subclass
   
   // footer inset stack
   UIEdgeInsets footerInsets          = UIEdgeInsetsMake(VERTICAL_BUFFER, HORIZONTAL_BUFFER, VERTICAL_BUFFER, HORIZONTAL_BUFFER);
-  ASInsetLayoutSpec *footerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:footerInsets child:_photoCommentsView];
+  ASInsetLayoutSpec *footerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:footerInsets child:<b>_photoCommentsNode</b>];
   
   // vertical stack
   CGFloat cellWidth                  = constrainedSize.max.width;
-  _photoImageView.preferredFrameSize = CGSizeMake(cellWidth, cellWidth);              // constrain photo frame size
+  _photoImageNode.preferredFrameSize = CGSizeMake(cellWidth, cellWidth);              // constrain photo frame size
   
   ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;                // stretch headerStack to fill horizontal space
-  [verticalStack setChildren:@[headerWithInset, _photoImageView, footerWithInset]];
+  [verticalStack setChildren:@[headerWithInset, <b>_photoImageNode</b>, footerWithInset]];
 
   return verticalStack;
 }
-```
+</pre>
+</div>
+</div>
 
-Here you can see that I set the children of my `headerSubStack` to depending on wehther or not the `_photoLocationLabel` attributed string has returned from the reverseGeocode process yet. 
 
-The `_userAvatarImageView`, `_photoImageView`, and `_photoCommentsView` are added into the ASLayoutSpec, but will not show up until their data fetches return.
+Here you can see that the children of the `headerSubStack` depend on whether or not the `_photoLocationLabel` attributed string has returned from the reverseGeocode process yet. 
 
-####Updating an ASLayoutSpec####
+The `_userAvatarImageNode`, `_photoImageNode`, and `_photoCommentsNode` are added into the ASLayoutSpec, but will not show up until their data fetches return.
 
-**If something happens that you know will change your `ASLayoutSpec`,  it is your job to call `-setNeedsLayout`** (equivalent to `transitionLayout:duration:0` that will be mentioned in the Transition Layout API). As can be seen in the completion block of the photo.location reverseGeocodedLocationWithCompletionBlock: call above. 
+### Updating an ASLayoutSpec ###
+<br>
+**If something happens that you know will change your `ASLayoutSpec`,  it is your job to call `-setNeedsLayout`**. This is equivalent to `-transitionLayout:duration:0` in the Transition Layout API. You can see this call in the completion block of the `photo.location reverseGeocodedLocationWithCompletionBlock:` call in the first code block. 
 
 An appropriately constructed ASLayoutSpec will know which subnodes need to be added, removed or animated. 
 
-If you try out the ASDKgram sample app after looking at the code above, you can see how simple it is to code a cell node thats layout is responsive to numerous, individual data fetches and returns. While the ASLayoutSpec is coded in a way that leaves holes for the avatar and photo to populate, you can see how the cell's height will automatically adjust to accomodate the comments node at the bottom of the photo. 
+Try out the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a> after looking at the code above, and you will see how simple it is to code an `ASCellNode` whose layout is responsive to numerous, individual data fetches and returns. While the ASLayoutSpec is coded in a way that leaves holes for the avatar and photo to populate, you can see how the cell's height will automatically adjust to accomodate the comments node at the bottom of the photo. 
 
 This is just a simple example, but this feature has many more powerful uses. 
 
-####To Use####
 
-- import `"ASDisplayNode+Beta.h"`
-- set the `.usesImplicitHierarchyManagement = YES` on the node that you would like managed. 
- 
-**Note that the subnodes of any node with this property set will inherit the property, so it is only neccessary to put it on the highest level node. Most likely that will be an ASTableNode, ASCollectionNode or ASPagerNode.**
-
-Please check it out and let us know what you think at <a href="https://github.com/facebook/AsyncDisplayKit/pull/1156">PR #1156</a>!
