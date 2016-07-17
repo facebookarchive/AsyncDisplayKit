@@ -2,8 +2,8 @@
 title: Corner Rounding
 layout: docs
 permalink: /docs/corner-rounding.html
-prevPage: drawing-priority.html
-nextPage: hit-test-slop.html
+prevPage: synchronous-concurrency.html
+nextPage: debug-tools-hit-test-visualization.html
 ---
 
 When it comes to corner rounding, many developers stick with CALayer's `.cornerRadius` property.  Unfortunately, this convenient property greatly taxes performance and should only be used when there is _no_ alternative.  This post will cover:

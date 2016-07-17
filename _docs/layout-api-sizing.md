@@ -2,6 +2,8 @@
 title: Layout API Sizing
 layout: docs
 permalink: /docs/layout-api-sizing.html
+prevPage: automatic-layout-containers.html
+nextPage: layout-transition-api.html
 ---
 
 The easiest way to understand the compound dimension types in the Layout API is to see all the units in relation to one another.

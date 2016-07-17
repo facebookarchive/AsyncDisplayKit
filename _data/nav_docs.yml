@@ -34,13 +34,15 @@
 - title: Layout
   items:
   - automatic-layout-containers
+  - layout-api-sizing
 - title: Advanced Layout
   items:
-  - layout-api-sizing
+  - layout-transition-api
 - title: Conveniences
   items:
   - hit-test-slop
   - batch-fetching-api
+  - implicit-hierarchy-mgmt
   - image-modification-block
   - placeholder-fade-duration
 - title: Optimizations
@@ -52,13 +54,11 @@
 - title: Tools
   items:
   - debug-tool-hit-test-visualization
-  - debug-tool-pixel-scaling 
-- title: Beta
-  items:
-  - implicit-hierarchy-mgmt
-  - layout-transition-api
+  - debug-tool-pixel-scaling
+  - debug-tool-ASRangeController
 - title: Advanced Technologies
   items:
+  - asenvironment
   - asrunloopqueue
   
   
