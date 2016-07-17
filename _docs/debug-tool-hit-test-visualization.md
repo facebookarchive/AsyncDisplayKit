@@ -30,4 +30,5 @@ In your `AppDelegate.m` file,
   <li>import `AsyncDisplayKit+Debug.h`</li>
   <li>add `[ASControlNode setEnableHitTestDebug:YES]` at the top of your AppDelegate's `didFinishLaunchingWithOptions:` method</li>
 </ul>
-Make sure to call this method before initializing any ASControlNodes - including ASButtonNodes, ASImageNodes, and ASTextNodes.
+
+**Make sure to call this method before initializing any ASControlNodes - including ASButtonNodes, ASImageNodes, and ASTextNodes.**
