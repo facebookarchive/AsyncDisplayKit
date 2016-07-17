@@ -289,8 +289,7 @@ ASVisibilityDepthImplementation;
     self.node.environmentState = environmentState;
     [self.node setNeedsLayout];
     
-    NSArray<id<ASEnvironment>> *children = [self.node children];
-    for (id<ASEnvironment> child in children) {
+    for (id<ASEnvironment> child in self.node) {
       ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
     }
   }

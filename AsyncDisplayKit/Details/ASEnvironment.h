@@ -99,7 +99,7 @@ ASDISPLAYNODE_EXTERN_C_END
  * defined in an ASEnvironmentState up and down the ASEnvironment tree. To be able to define how merges of
  * States should happen, specific merge functions can be provided
  */
-@protocol ASEnvironment <NSObject>
+@protocol ASEnvironment <NSObject, NSFastEnumeration>
 
 /// The environment collection of an object which class conforms to the ASEnvironment protocol
 - (ASEnvironmentState)environmentState;

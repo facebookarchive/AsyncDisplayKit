@@ -187,6 +187,36 @@
   return [NSArray arrayWithObjects:&children[0] count:children.size()];
 }
 
+#pragma mark - NSFastEnumeration
+
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state
+                                  objects:(id __unsafe_unretained [])stackbuf
+                                    count:(NSUInteger)stackbufLength
+{
+  NSUInteger count = 0;
+  unsigned long countOfItemsAlreadyEnumerated = state->state;
+  
+  if (countOfItemsAlreadyEnumerated == 0) {
+    state->mutationsPtr = &state->extra[0];
+  }
+
+  if (countOfItemsAlreadyEnumerated < _childrenMap.size()) {
+    state->itemsPtr = stackbuf;
+        
+    while((countOfItemsAlreadyEnumerated < _childrenMap.size()) && (count < stackbufLength)) {
+      stackbuf[count] = _childrenMap[countOfItemsAlreadyEnumerated];
+      countOfItemsAlreadyEnumerated++;
+      count++;
+    }
+  } else {
+    count = 0;
+  }
+  
+  state->state = countOfItemsAlreadyEnumerated;
+
+  return count;
+}
+
 #pragma mark - ASEnvironment
 
 - (ASEnvironmentState)environmentState
