@@ -6,7 +6,9 @@ prevPage: implicit-hierarchy-mgmt.html
 nextPage: placeholder-fade-duration.html
 ---
 
-Many times, operations that would affect the appearance of an image you're displaying are big sources of main thread work.  Naturally, you want to move these to a background thread.  By assigning an `imageModificationBlock` to your imageNode, you can define a set of transformations that need to happen asynchronously to any image that gets set on the imageNode.
+Many times, operations that would affect the appearance of an image you're displaying are big sources of main thread work.  Naturally, you want to move these to a background thread.  
+
+By assigning an `imageModificationBlock` to your imageNode, you can define a set of transformations that need to happen asynchronously to any image that gets set on the imageNode.
 
 <div class = "highlight-group">
 <span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
