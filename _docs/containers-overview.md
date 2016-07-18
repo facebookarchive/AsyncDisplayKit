@@ -3,7 +3,7 @@ title: Node Containers
 layout: docs
 permalink: /docs/containers-overview.html
 prevPage: intelligent-preloading.html
-nextPage: subclassing.html
+nextPage: node-overview.html
 ---
 
 ### Use Nodes in Node Containers
