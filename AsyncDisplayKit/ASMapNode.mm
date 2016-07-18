@@ -222,16 +222,16 @@
                     CGSize pinSize;
                     
                     // Get a standard annotation view pin if there is no custom annotation block.
-                    if (!self.annotationViewInStaticMap) {
+                    if (!strongSelf.annotationViewInStaticMap) {
                       pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
                       pinImage = pin.image;
                       pinSize = pin.bounds.size;
                     }
                     
                     for (id<MKAnnotation> annotation in annotations) {
-                      if (self.annotationViewInStaticMap) {
+                      if (strongSelf.annotationViewInStaticMap) {
                         // Get custom annotation view pin from custom annotation block.
-                        pin = self.annotationViewInStaticMap(annotation);
+                        pin = strongSelf.annotationViewInStaticMap(annotation);
                         if (!pin) {
                           // just for case block returned nil, which can happen
                           pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
