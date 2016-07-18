@@ -2,8 +2,8 @@
 title: FAQ 
 layout: docs
 permalink: /docs/faq.html
-prevPage: layout-engine.html
-nextPage: containers-overview.html
+prevPage: subclassing.html
+nextPage: containers-asviewcontroller.html
 ---
 
 ###Common Developer Mistakes
