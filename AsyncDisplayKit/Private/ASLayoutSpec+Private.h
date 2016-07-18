@@ -11,7 +11,6 @@
 #import "ASLayoutSpec.h"
 
 #import <objc/runtime.h>
-#import <vector>
 #import <map>
 
 typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASChildrenMap;

@@ -17,6 +17,8 @@
 #import "ASThread.h"
 #import "ASTraitCollection.h"
 
+#import <vector>
+
 @interface ASLayoutSpec() {
   ASEnvironmentState _environmentState;
   ASDN::RecursiveMutex __instanceLock__;
