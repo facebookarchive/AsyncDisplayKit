@@ -39,7 +39,7 @@
 {
   CGSize maxConstrainedSize = CGSizeMake(constrainedSize.max.width, constrainedSize.max.height);
   
-  NSMutableArray *sublayouts = [NSMutableArray array];
+  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:self.childrenMap.size()];
   for (id<ASLayoutable> child in self) {
     CGPoint layoutPosition = child.layoutPosition;
     CGSize autoMaxSize = CGSizeMake(maxConstrainedSize.width  - layoutPosition.x,
