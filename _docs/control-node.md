@@ -2,7 +2,7 @@
 title: ASControlNode
 layout: docs
 permalink: /docs/control-node.html
-prevPage: text-cell-node.html
+prevPage: cell-node.html
 nextPage: button-node.html
 ---
 
