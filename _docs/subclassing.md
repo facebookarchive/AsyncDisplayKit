@@ -2,7 +2,7 @@
 title: Subclassing 
 layout: docs
 permalink: /docs/subclassing.html
-prevPage: intelligent-preloading.html
+prevPage: containers-overview.html
 nextPage: faq.html
 ---
 
