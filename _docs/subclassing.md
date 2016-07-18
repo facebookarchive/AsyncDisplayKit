@@ -3,7 +3,7 @@ title: Subclassing
 layout: docs
 permalink: /docs/subclassing.html
 prevPage: intelligent-preloading.html
-nextPage: layout-engine.html
+nextPage: faq.html
 ---
 
 While subclassing nodes is similar to writing a UIView subclass, there are a few guidelines to follow to ensure that both that you're utilizing the framework to its full potential and that your nodes behave as expected.
