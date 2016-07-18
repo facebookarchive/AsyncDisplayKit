@@ -22,6 +22,7 @@
     self.layoutSpec = layoutSpec;
     self.layoutSpec.neverShouldVisualize = YES;
     self.usesImplicitHierarchyManagement = YES;
+    self.shouldCacheLayoutSpec = YES;
     [self addTarget:self action:@selector(visualizerNodeTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
   }
   return self;

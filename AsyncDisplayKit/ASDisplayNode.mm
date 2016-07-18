@@ -47,6 +47,10 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @protocol CALayerDelegate;
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate, _ASDisplayLayerDelegate, _ASTransitionContextCompletionDelegate>
+{
+  BOOL _shouldCacheLayoutSpec;
+  ASLayoutSpec *_layoutSpec;
+}
 
 /**
  *
@@ -1978,11 +1982,16 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(_propertyLock);
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
     
-    ASLayoutSpec *layoutSpec = nil;
-    if (ASLayoutableGetCurrentContext().needsVisualizeNode) {
-      layoutSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[[self layoutSpecThatFits:constrainedSize]]];
-    } else {
-      layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    ASLayoutSpec *layoutSpec = _shouldCacheLayoutSpec ? _layoutSpec : nil;
+    if (layoutSpec == nil) {
+      if (ASLayoutableGetCurrentContext().needsVisualizeNode) {
+        layoutSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[[self layoutSpecThatFits:constrainedSize]]];
+      } else {
+        layoutSpec = [self layoutSpecThatFits:constrainedSize];
+      }
+      if (_shouldCacheLayoutSpec) {
+        _layoutSpec = layoutSpec;
+      }
     }
     
     layoutSpec.parent = self; // This causes upward propogation of any non-default layoutable values.
@@ -3090,6 +3099,29 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 {
   ASDN::MutexLocker l(_propertyLock);
   return ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
+}
+
+- (void)setShouldCacheLayoutSpec:(BOOL)shouldCacheLayoutSpec
+{
+  ASDN::MutexLocker l(_propertyLock);
+  if (_shouldCacheLayoutSpec != shouldCacheLayoutSpec) {
+    _shouldCacheLayoutSpec = shouldCacheLayoutSpec;
+    if (_shouldCacheLayoutSpec == NO) {
+      _layoutSpec = nil;
+    }
+  }
+}
+
+- (BOOL)shouldCacheLayoutSpec
+{
+  ASDN::MutexLocker l(_propertyLock);
+  return _shouldCacheLayoutSpec;
+}
+
+- (void)clearCachedLayoutSpec
+{
+  ASDN::MutexLocker l(_propertyLock);
+  _layoutSpec = nil;
 }
 
 @end

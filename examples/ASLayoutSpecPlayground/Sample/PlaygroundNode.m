@@ -36,6 +36,8 @@
     
     self.backgroundColor                 = [UIColor whiteColor];
     self.usesImplicitHierarchyManagement = YES;
+    self.shouldVisualizeLayoutSpecs = YES;
+    self.shouldCacheLayoutSpec = YES;
     
     _userAvatarImageView     = [[ASNetworkImageNode alloc] init];
     _userAvatarImageView.URL = [NSURL URLWithString:@"https://s-media-cache-ak0.pinimg.com/avatars/503h_1458880322_140.jpg"];
@@ -129,12 +131,11 @@
   
   // vertical stack
   
-  CGFloat cellWidth                  = constrainedSize.max.width;
-  _photoImageView.preferredFrameSize = CGSizeMake(cellWidth, cellWidth);              // constrain photo frame size
+  ASRatioLayoutSpec *photoRatioSpec = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.0 child:_photoImageView];
   
   ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;                // sretch headerStack to fill horizontal space
-  [verticalStack setChildren:@[headerWithInset, _photoImageView, footerWithInset]];
+  [verticalStack setChildren:@[headerWithInset, photoRatioSpec, footerWithInset]];
   verticalStack.flexShrink           = YES;
   
   return verticalStack;
