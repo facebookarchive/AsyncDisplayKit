@@ -2,8 +2,8 @@
 title: Node Containers
 layout: docs
 permalink: /docs/containers-overview.html
-prevPage: layout-engine.html
-nextPage: containers-asviewcontroller.html
+prevPage: intelligent-preloading.html
+nextPage: subclassing.html
 ---
 
 ### Use Nodes in Node Containers
