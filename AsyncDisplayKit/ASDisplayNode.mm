@@ -867,7 +867,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
  */
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
 {
-  [self __layoutSubnodes];
+  [self __layoutSublayouts];
   [context completeTransition:YES];
 }
 
@@ -901,7 +901,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
  */
 - (void)_completePendingLayoutTransition
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (_pendingLayoutTransition) {
     [self setCalculatedLayout:_pendingLayoutTransition.pendingLayout];
     [self _completeLayoutTransition:_pendingLayoutTransition];
@@ -2118,7 +2118,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)setCalculatedLayout:(ASLayout *)layout
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   
   ASDisplayNodeAssertTrue(layout.layoutableObject == self);
   ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
@@ -2575,13 +2575,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
     // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
     ASPerformBlockOnMainThread(^{
-      [layoutTransition startTransition];
+      [layoutTransition commitTransition];
     });
     
     return;
   }
   
-  [layoutTransition startTransition];
+  [layoutTransition commitTransition];
 }
 
 - (void)layout
@@ -2604,7 +2604,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 #pragma mark - Display
 
->>>>>>> Simplify applying layout transition in preparation for bigger layout transition API work
 - (void)displayWillStart
 {
   ASDisplayNodeAssertMainThread();
