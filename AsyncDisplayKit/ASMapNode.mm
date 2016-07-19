@@ -12,13 +12,13 @@
 #import "ASMapNode.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeExtras.h"
+#import "ASDisplayNodeInternal.h"
 #import "ASInsetLayoutSpec.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
 @interface ASMapNode()
 {
-  ASDN::RecursiveMutex _propertyLock;
   MKMapSnapshotter *_snapshotter;
   BOOL _snapshotAfterLayout;
   NSArray *_annotations;
@@ -95,14 +95,14 @@
 
 - (BOOL)isLiveMap
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _liveMap;
 }
 
 - (void)setLiveMap:(BOOL)liveMap
 {
   ASDisplayNodeAssert(!self.isLayerBacked, @"ASMapNode can not use the interactive map feature whilst .isLayerBacked = YES, set .layerBacked = NO to use the interactive map feature.");
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (liveMap == _liveMap) {
     return;
   }
@@ -114,19 +114,19 @@
 
 - (BOOL)needsMapReloadOnBoundsChange
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _needsMapReloadOnBoundsChange;
 }
 
 - (void)setNeedsMapReloadOnBoundsChange:(BOOL)needsMapReloadOnBoundsChange
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _needsMapReloadOnBoundsChange = needsMapReloadOnBoundsChange;
 }
 
 - (MKMapSnapshotOptions *)options
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (!_options) {
     _options = [[MKMapSnapshotOptions alloc] init];
     _options.region = MKCoordinateRegionForMapRect(MKMapRectWorld);
@@ -140,7 +140,7 @@
 
 - (void)setOptions:(MKMapSnapshotOptions *)options
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (!_options || ![options isEqual:_options]) {
     _options = options;
     if (self.isLiveMap) {
@@ -280,7 +280,7 @@
 
 - (NSArray *)annotations
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _annotations;
 }
 
@@ -288,7 +288,7 @@
 {
   annotations = [annotations copy] ? : @[];
 
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _annotations = annotations;
   if (self.isLiveMap) {
     [_mapView removeAnnotations:_mapView.annotations];

@@ -121,7 +121,7 @@ static NSString * const kStatus = @"status";
 
 - (AVPlayerItem *)constructPlayerItem
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   if (_asset != nil) {
     return [[AVPlayerItem alloc] initWithAsset:_asset];
@@ -209,7 +209,7 @@ static NSString * const kStatus = @"status";
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   CGSize calculatedSize = constrainedSize;
   
   // if a preferredFrameSize is set, call the superclass to return that instead of using the image size.
@@ -272,7 +272,7 @@ static NSString * const kStatus = @"status";
 
 - (void)setVideoPlaceholderImage:(UIImage *)image
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (image != nil) {
     self.contentMode = ASContentModeFromVideoGravity(_gravity);
   }
@@ -281,7 +281,7 @@ static NSString * const kStatus = @"status";
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   if (object != _currentPlayerItem) {
     return;
@@ -334,7 +334,7 @@ static NSString * const kStatus = @"status";
 {
   [super fetchData];
   
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   AVAsset *asset = self.asset;
   // Return immediately if the asset is nil;
   if (asset == nil || self.playerState == ASVideoNodePlayerStateInitialLoading) {
@@ -384,7 +384,7 @@ static NSString * const kStatus = @"status";
   [super clearFetchedData];
   
   {
-    ASDN::MutexLocker l(_propertyLock);
+    ASDN::MutexLocker l(__instanceLock__);
 
     self.player = nil;
     self.currentItem = nil;
@@ -395,7 +395,7 @@ static NSString * const kStatus = @"status";
 {
   [super visibleStateDidChange:isVisible];
   
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   
   if (isVisible) {
     if (_shouldBePlaying || _shouldAutoplay) {
@@ -412,7 +412,7 @@ static NSString * const kStatus = @"status";
 
 - (void)setPlayerState:(ASVideoNodePlayerState)playerState
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   
   ASVideoNodePlayerState oldState = _playerState;
   
@@ -429,7 +429,7 @@ static NSString * const kStatus = @"status";
 
 - (void)setAsset:(AVAsset *)asset
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   
   if (ASAssetIsEqual(asset, _asset)) {
     return;
@@ -444,13 +444,13 @@ static NSString * const kStatus = @"status";
 
 - (AVAsset *)asset
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _asset;
 }
 
 - (AVPlayer *)player
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _player;
 }
 
@@ -488,7 +488,7 @@ static NSString * const kStatus = @"status";
 
 - (void)setGravity:(NSString *)gravity
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (_playerNode.isNodeLoaded) {
     ((AVPlayerLayer *)_playerNode.layer).videoGravity = gravity;
   }
@@ -498,19 +498,19 @@ static NSString * const kStatus = @"status";
 
 - (NSString *)gravity
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _gravity;
 }
 
 - (BOOL)muted
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _muted;
 }
 
 - (void)setMuted:(BOOL)muted
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   
   _player.muted = muted;
   _muted = muted;
@@ -520,7 +520,7 @@ static NSString * const kStatus = @"status";
 
 - (void)play
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   if (![self isStateChangeValid:ASVideoNodePlayerStatePlaying]) {
     return;
@@ -557,7 +557,7 @@ static NSString * const kStatus = @"status";
 
 - (void)pause
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (![self isStateChangeValid:ASVideoNodePlayerStatePaused]) {
     return;
   }
@@ -568,7 +568,7 @@ static NSString * const kStatus = @"status";
 
 - (BOOL)isPlaying
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   
   return (_player.rate > 0 && !_player.error);
 }
@@ -636,13 +636,13 @@ static NSString * const kStatus = @"status";
 
 - (AVPlayerItem *)currentItem
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _currentPlayerItem;
 }
 
 - (void)setCurrentItem:(AVPlayerItem *)currentItem
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   [self removePlayerItemObservers:_currentPlayerItem];
 
@@ -655,13 +655,13 @@ static NSString * const kStatus = @"status";
 
 - (ASDisplayNode *)playerNode
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _playerNode;
 }
 
 - (void)setPlayerNode:(ASDisplayNode *)playerNode
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _playerNode = playerNode;
     
   [self setNeedsLayout];
@@ -669,7 +669,7 @@ static NSString * const kStatus = @"status";
 
 - (void)setPlayer:(AVPlayer *)player
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _player = player;
   player.muted = _muted;
   ((AVPlayerLayer *)_playerNode.layer).player = player;
@@ -677,13 +677,13 @@ static NSString * const kStatus = @"status";
 
 - (BOOL)shouldBePlaying
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _shouldBePlaying;
 }
 
 - (void)setShouldBePlaying:(BOOL)shouldBePlaying
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _shouldBePlaying = shouldBePlaying;
 }
 

@@ -164,7 +164,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   [super didLoad];
   {
-    ASDN::MutexLocker l(_propertyLock);
+    ASDN::MutexLocker l(__instanceLock__);
     [self createControls];
   }
 }
@@ -173,7 +173,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   [super visibleStateDidChange:isVisible];
 
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   if (isVisible && _loadAssetWhenNodeBecomesVisible && _asset != _videoNode.asset) {
     _videoNode.asset = _asset;
@@ -195,7 +195,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 #pragma mark - UI
 - (void)createControls
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   if (_controlsDisabled) {
     return;
@@ -246,7 +246,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 
   ASPerformBlockOnMainThread(^{
-    ASDN::MutexLocker l(_propertyLock);
+    ASDN::MutexLocker l(__instanceLock__);
     [self setNeedsLayout];
   });
 }
@@ -492,7 +492,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)showSpinner
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   if (!_spinnerNode) {
   
@@ -520,7 +520,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)removeSpinner
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   if (!_spinnerNode) {
     return;

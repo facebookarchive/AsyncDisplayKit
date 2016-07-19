@@ -37,9 +37,9 @@
 #define __loaded(node) (node->_view != nil || (node->_layer != nil && node->_flags.layerBacked))
 
 #if DISPLAYNODE_USE_LOCKS
-#define _bridge_prologue_read ASDN::MutexLocker l(_propertyLock); ASDisplayNodeAssertThreadAffinity(self)
-#define _bridge_prologue_write ASDN::MutexLocker l(_propertyLock)
-#define _bridge_prologue_write_unlock ASDN::MutexUnlocker u(_propertyLock)
+#define _bridge_prologue_read ASDN::MutexLocker l(__instanceLock__); ASDisplayNodeAssertThreadAffinity(self)
+#define _bridge_prologue_write ASDN::MutexLocker l(__instanceLock__)
+#define _bridge_prologue_write_unlock ASDN::MutexUnlocker u(__instanceLock__)
 #else
 #define _bridge_prologue_read ASDisplayNodeAssertThreadAffinity(self)
 #define _bridge_prologue_write
