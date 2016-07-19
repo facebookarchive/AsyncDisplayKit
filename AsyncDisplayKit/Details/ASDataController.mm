@@ -27,7 +27,7 @@
 
 const static NSUInteger kASDataControllerSizingCountPerProcessor = 5;
 const static char * kASDataControllerEditingQueueKey = "kASDataControllerEditingQueueKey";
-const static char * kASDataControllerEditingQueueContext = "kASDataControllerEditingQueueKey";
+const static char * kASDataControllerEditingQueueContext = "kASDataControllerEditingQueueContext";
 
 NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
