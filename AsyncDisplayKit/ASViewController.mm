@@ -212,9 +212,20 @@ ASVisibilityDepthImplementation;
 
 - (BOOL)_shouldLayoutTheLegacyWay
 {
-  BOOL isModal = (self.presentingViewController != nil && self.presentedViewController == nil);
+  BOOL isModalViewController = (self.presentingViewController != nil && self.presentedViewController == nil);
+  BOOL hasNavigationController = (self.navigationController != nil);
+  BOOL hasParentViewController = (self.parentViewController != nil);
+  if (isModalViewController && !hasNavigationController && !hasParentViewController) {
+    return YES;
+  }
+  
+  // Check if the view controller is a root view controller
   BOOL isRootViewController = self.view.window.rootViewController == self;
-  return isModal || isRootViewController;
+  if (isRootViewController) {
+    return YES;
+  }
+  
+  return NO;
 }
 
 - (ASSizeRange)_legacyConstrainedSize
