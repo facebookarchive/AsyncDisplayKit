@@ -84,6 +84,30 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 @end
 
+#pragma mark - 
+#pragma mark - ASCellNode<->UICollectionReusableView bridging
+
+@class _ASCollectionSupplementaryView;
+
+@interface _ASCollectionSupplementaryView : UICollectionReusableView
+@property (nonatomic, weak) ASCellNode *node;
+@end
+
+@implementation _ASCollectionSupplementaryView
+
+- (void)prepareForReuse
+{
+  self.node = nil;
+  [super prepareForReuse];
+}
+
+- (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
+{
+  [_node applyLayoutAttributes:layoutAttributes];
+}
+
+@end
+
 #pragma mark -
 #pragma mark ASCollectionView.
 
@@ -549,7 +573,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   ASDisplayNodeAssert(elementKind != nil, @"A kind is needed for supplementary node registration");
   [_registeredSupplementaryKinds addObject:elementKind];
-  [self registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:elementKind
+  [self registerClass:[_ASCollectionSupplementaryView class] forSupplementaryViewOfKind:elementKind
                                             withReuseIdentifier:[self __reuseIdentifierForKind:elementKind]];
 }
 
@@ -634,9 +658,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   NSString *identifier = [self __reuseIdentifierForKind:kind];
-  UICollectionReusableView *view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:identifier forIndexPath:indexPath];
+  _ASCollectionSupplementaryView *view = (_ASCollectionSupplementaryView*)[self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:identifier forIndexPath:indexPath];
   ASCellNode *node = [_dataController supplementaryNodeOfKind:kind atIndexPath:indexPath];
   ASDisplayNodeAssert(node != nil, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self);
+  view.node = node;
   [_rangeController configureContentView:view forCellNode:node];
   return view;
 }
