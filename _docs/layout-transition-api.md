@@ -13,7 +13,7 @@ With this system, you simply specify the desired layout and AsyncDisplayKit will
 There are also easy to use APIs that allow you to fully customize the starting position of newly introduced elements, as well as the ending position of removed elements. 
 
 <div class = "note">
-Use of <a href="implicit-hierarchy-management.html">Implicit Hierarchy Management</a> is required to use the Layout Transition API.
+Use of <a href="implicit-hierarchy-management.html">Implicit Hierarchy Management</a> is required to use the Layout Transition API. The Layout Transition API will be moved out of Beta soon, but until then you will need to import <code>ASDisplayNode+Beta.h</code> to use it.
 </div>
 
 ## Animating between Layouts
