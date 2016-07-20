@@ -11,7 +11,6 @@
 #import "ASRangeController.h"
 
 #import "ASAssert.h"
-#import "ASWeakSet.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASMultiDimensionalArrayUtils.h"
@@ -56,7 +55,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _currentRangeMode = ASLayoutRangeModeInvalid;
   _didUpdateCurrentRange = NO;
   
-  [[[self class] allRangeControllersWeakSet] addObject:self];
+  [[[self class] allRangeControllers] addObject:self];
   
 #if AS_RANGECONTROLLER_LOG_UPDATE_FREQ
   _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(_updateCountDisplayLinkDidFire)];
@@ -484,15 +483,15 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 #pragma mark - Class Methods (Application Notification Handlers)
 
-+ (ASWeakSet *)allRangeControllersWeakSet
++ (NSHashTable *)allRangeControllers
 {
-  static ASWeakSet<ASRangeController *> *__allRangeControllersWeakSet;
+  static NSHashTable<ASRangeController *> *__allRangeControllers;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    __allRangeControllersWeakSet = [[ASWeakSet alloc] init];
+    __allRangeControllers = [NSHashTable weakObjectsHashTable];
     [self registerSharedApplicationNotifications];
   });
-  return __allRangeControllersWeakSet;
+  return __allRangeControllers;
 }
 
 + (void)registerSharedApplicationNotifications
@@ -514,7 +513,7 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisible
 
 + (void)didReceiveMemoryWarning:(NSNotification *)notification
 {
-  NSArray *allRangeControllers = [[self allRangeControllersWeakSet] allObjects];
+  NSArray *allRangeControllers = [[self allRangeControllers] allObjects];
   for (ASRangeController *rangeController in allRangeControllers) {
     BOOL isDisplay = ASInterfaceStateIncludesDisplay([rangeController interfaceState]);
     [rangeController updateCurrentRangeWithMode:isDisplay ? ASLayoutRangeModeMinimum : __rangeModeForMemoryWarnings];
@@ -529,7 +528,7 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisible
 
 + (void)didEnterBackground:(NSNotification *)notification
 {
-  NSArray *allRangeControllers = [[self allRangeControllersWeakSet] allObjects];
+  NSArray *allRangeControllers = [[self allRangeControllers] allObjects];
   for (ASRangeController *rangeController in allRangeControllers) {
     // We do not want to fully collapse the Display ranges of any visible range controllers so that flashes can be avoided when
     // the app is resumed.  Non-visible controllers can be more aggressively culled to the LowMemory state (see definitions for documentation)
@@ -552,7 +551,7 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisible
 
 + (void)willEnterForeground:(NSNotification *)notification
 {
-  NSArray *allRangeControllers = [[self allRangeControllersWeakSet] allObjects];
+  NSArray *allRangeControllers = [[self allRangeControllers] allObjects];
   __ApplicationState = UIApplicationStateActive;
   for (ASRangeController *rangeController in allRangeControllers) {
     BOOL isVisible = ASInterfaceStateIncludesVisible([rangeController interfaceState]);
