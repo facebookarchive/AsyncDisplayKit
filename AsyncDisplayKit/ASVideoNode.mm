@@ -69,6 +69,7 @@ static NSString * const kStatus = @"status";
   ASVideoNodePlayerState _playerState;
   
   AVAsset *_asset;
+  NSURL *_assetURL;
   AVVideoComposition *_videoComposition;
   AVAudioMix *_audioMix;
   
@@ -127,13 +128,10 @@ static NSString * const kStatus = @"status";
   ASDN::MutexLocker l(__instanceLock__);
 
   AVPlayerItem *playerItem = nil;
-  if (_asset != nil) {
-    if ([_asset isKindOfClass:[AVURLAsset class]] && [self hasURLAsset]) {
-      playerItem = [[AVPlayerItem alloc] initWithURL:((AVURLAsset *)_asset).URL];
-      _asset = [playerItem asset];
-    } else {
-      playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
-    }
+  if (_assetURL != nil) {
+    playerItem = [[AVPlayerItem alloc] initWithURL:_assetURL];
+  } else if (_asset != nil) {
+    playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
   }
 
   playerItem.videoComposition = _videoComposition;
@@ -446,6 +444,34 @@ static NSString * const kStatus = @"status";
   }
   
   _playerState = playerState;
+}
+
+- (void)setAssetURL:(NSURL *)assetURL
+{
+  ASDN::MutexLocker l(__instanceLock__);
+
+  if ([_asset isKindOfClass:[AVURLAsset class]]) {
+    if (ASObjectIsEqual(assetURL, ((AVURLAsset *)_asset).URL)) {
+      return;
+    }
+  }
+
+  [self clearFetchedData];
+
+  _asset = [AVURLAsset assetWithURL:assetURL];
+
+  [self setNeedsDataFetch];
+}
+
+- (NSURL *)assetURL
+{
+  ASDN::MutexLocker l(__instanceLock__);
+
+  if ([_asset isKindOfClass:AVURLAsset.class]) {
+    return ((AVURLAsset *)_asset).URL;
+  }
+
+  return nil;
 }
 
 - (void)setAsset:(AVAsset *)asset

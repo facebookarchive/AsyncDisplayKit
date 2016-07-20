@@ -41,6 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)isPlaying;
 
 @property (nullable, nonatomic, strong, readwrite) AVAsset *asset;
+@property (nullable, atomic, strong, readwrite) NSURL *assetURL;
 @property (nullable, nonatomic, strong, readwrite) AVVideoComposition *videoComposition;
 @property (nullable, nonatomic, strong, readwrite) AVAudioMix *audioMix;
 
