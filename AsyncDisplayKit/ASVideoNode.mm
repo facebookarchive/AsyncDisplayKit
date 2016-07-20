@@ -139,12 +139,6 @@ static NSString * const kStatus = @"status";
   return playerItem;
 }
 
-- (BOOL)hasURLAsset
-{
-  // The array of AVAssetTrack objects available via the tracks property of an URL asset is typically empty for streaming-based media
-  return _asset.tracks.count == 0;
-}
-
 - (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray<NSString *> *)requestedKeys
 {
   for (NSString *key in requestedKeys) {
@@ -368,7 +362,7 @@ static NSString * const kStatus = @"status";
       [_delegate videoNodeDidStartInitialLoading:self];
   }
   
-  NSArray<NSString *> *requestedKeys = @[@"playable", @"tracks"];
+  NSArray<NSString *> *requestedKeys = @[@"playable"];
   [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
     ASPerformBlockOnMainThread(^{
       if (_delegateFlags.delegateVideoNodeDidFinishInitialLoading) {
