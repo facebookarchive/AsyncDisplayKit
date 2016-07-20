@@ -1080,8 +1080,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)rangeController:(ASRangeController *)rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
-  NSUInteger numberOfUpdateBlocks = _batchUpdateBlocks.count;
-  if (numberOfUpdateBlocks == 0 || !self.asyncDataSource || _superIsPendingDataLoad) {
+  if (!self.asyncDataSource || _superIsPendingDataLoad) {
     if (completion) {
       completion(NO);
     }
@@ -1090,6 +1089,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   ASPerformBlockWithoutAnimation(!animated, ^{
+    NSUInteger numberOfUpdateBlocks = _batchUpdateBlocks.count;
     [_layoutFacilitator collectionViewWillPerformBatchUpdates];
     [self _superPerformBatchUpdates:^{
       for (dispatch_block_t block in _batchUpdateBlocks) {
