@@ -133,7 +133,9 @@ static NSString * const kStatus = @"status";
     playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
   }
 
-  return nil;
+  playerItem.videoComposition = _videoComposition;
+  playerItem.audioMix = _audioMix;
+  return playerItem;
 }
 
 - (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray<NSString *> *)requestedKeys
