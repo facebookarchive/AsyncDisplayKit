@@ -370,7 +370,7 @@ static NSString * const kStatus = @"status";
       [_delegate videoNodeDidStartInitialLoading:self];
   }
   
-  NSArray<NSString *> *requestedKeys = @[@"playable"];
+  NSArray<NSString *> *requestedKeys = @[@"playable", @"tracks"];
   [asset loadValuesAsynchronouslyForKeys:requestedKeys completionHandler:^{
     ASPerformBlockOnMainThread(^{
       if (_delegateFlags.delegateVideoNodeDidFinishInitialLoading) {
