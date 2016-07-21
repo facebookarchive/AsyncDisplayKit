@@ -442,18 +442,9 @@ static NSString * const kStatus = @"status";
 
 - (void)setAssetURL:(NSURL *)assetURL
 {
-  ASDN::MutexLocker l(__instanceLock__);
-
-  if ([_asset isKindOfClass:[AVURLAsset class]] && ASObjectIsEqual(assetURL, ((AVURLAsset *)_asset).URL)) {
-      return;
-    }
+  if (!ASObjectIsEqual(assetURL, self.assetURL)) {
+     self.asset = [AVURLAsset assetWithURL:assetURL];
   }
-
-  [self clearFetchedData];
-
-  _asset = [AVURLAsset assetWithURL:assetURL];
-
-  [self setNeedsDataFetch];
 }
 
 - (NSURL *)assetURL
