@@ -41,6 +41,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)isPlaying;
 
 @property (nullable, nonatomic, strong, readwrite) AVAsset *asset;
+/**
+ ** @abstract The URL with which the asset was initialized.
+ ** @discussion Setting the URL will overwrite the current asset with a newly created AVURLAsset created from the given URL, and AVAsset *asset will point to that newly created AVURLAsset.  Please don't set both assetURL and asset.
+ ** @return Current URL the asset was initialized or nil if no URL was given.
+ **/
 @property (nullable, nonatomic, strong, readwrite) NSURL *assetURL;
 @property (nullable, nonatomic, strong, readwrite) AVVideoComposition *videoComposition;
 @property (nullable, nonatomic, strong, readwrite) AVAudioMix *audioMix;
