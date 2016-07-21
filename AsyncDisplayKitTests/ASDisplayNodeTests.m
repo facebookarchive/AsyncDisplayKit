@@ -1127,7 +1127,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 {
   ASDisplayNode *parent = [[[ASDisplayNode alloc] init] autorelease];
   ASDisplayNode *nilNode = nil;
-  XCTAssertNoThrow([parent addSubnode:nilNode], @"Don't try to add nil, but we'll deal.");
+  XCTAssertThrows([parent addSubnode:nilNode], @"Don't try to add nil, but we'll deal with it in production, but throw in development.");
   XCTAssertNoThrow([parent addSubnode:parent], @"Not good, test that we recover");
   XCTAssertEqual(0u, parent.subnodes.count, @"We shouldn't have any subnodes");
 }
@@ -1320,6 +1320,9 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertEqual(3u, parent.subnodes.count, @"Should have the right subnode count");
   XCTAssertEqualObjects(nilParent, d.supernode, @"d's parent is messed up");
 
+  // Check insert a nil node
+  ASDisplayNode *nilNode = nil;
+  XCTAssertThrows([parent insertSubnode:nilNode atIndex:0], @"Should not allow insertion of nil node. We will throw in development and deal with it in production");
 
   // Check insert at invalid index
   XCTAssertThrows([parent insertSubnode:d atIndex:NSNotFound], @"Should not allow insertion at invalid index");

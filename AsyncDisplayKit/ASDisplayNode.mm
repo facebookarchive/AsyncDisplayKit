@@ -1315,7 +1315,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
   return (id<CAAction>)[NSNull null];
 }
 
-#pragma mark -
+#pragma mark - Managing the Node Hierarchy
 
 static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASDisplayNode *to)
 {
@@ -1331,9 +1331,11 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
 
+  ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
   ASDisplayNode *oldParent = subnode.supernode;
-  if (!subnode || subnode == self || oldParent == self)
+  if (!subnode || subnode == self || oldParent == self) {
     return;
+  }
 
   // Disable appearance methods during move between supernodes, but make sure we restore their state after we do our thing
   BOOL isMovingEquivalentParents = disableNotificationsForMovingBetweenParents(oldParent, self);
@@ -1342,8 +1344,9 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   }
   [subnode removeFromSupernode];
 
-  if (!_subnodes)
+  if (!_subnodes) {
     _subnodes = [[NSMutableArray alloc] init];
+  }
 
   [_subnodes addObject:subnode];
   
@@ -1379,8 +1382,14 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
  */
 - (void)_insertSubnode:(ASDisplayNode *)subnode atSubnodeIndex:(NSInteger)subnodeIndex sublayerIndex:(NSInteger)sublayerIndex andRemoveSubnode:(ASDisplayNode *)oldSubnode
 {
-  if (subnodeIndex == NSNotFound)
+  if (subnodeIndex == NSNotFound) {
     return;
+  }
+  
+  ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
+  if (!subnode) {
+    return;
+  }
 
   ASDisplayNode *oldParent = [subnode _deallocSafeSupernode];
   // Disable appearance methods during move between supernodes, but make sure we restore their state after we do our thing
@@ -1461,12 +1470,14 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDN::MutexLocker l(__instanceLock__);
 
   ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
-  if (!subnode)
+  if (!subnode) {
     return;
+  }
 
   ASDisplayNodeAssert([below _deallocSafeSupernode] == self, @"Node to insert below must be a subnode");
-  if ([below _deallocSafeSupernode] != self)
+  if ([below _deallocSafeSupernode] != self) {
     return;
+  }
 
   ASDisplayNodeAssert(_subnodes, @"You should have subnodes if you have a subnode");
 
@@ -1504,12 +1515,14 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDN::MutexLocker l(__instanceLock__);
 
   ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
-  if (!subnode)
+  if (!subnode) {
     return;
+  }
 
   ASDisplayNodeAssert([above _deallocSafeSupernode] == self, @"Node to insert above must be a subnode");
-  if ([above _deallocSafeSupernode] != self)
+  if ([above _deallocSafeSupernode] != self) {
     return;
+  }
 
   ASDisplayNodeAssert(_subnodes, @"You should have subnodes if you have a subnode");
 
@@ -1553,7 +1566,12 @@ static NSInteger incrementIfFound(NSInteger i) {
     NSString *reason = [NSString stringWithFormat:@"Cannot insert a subnode at index %zd. Count is %zd", idx, _subnodes.count];
     @throw [NSException exceptionWithName:NSInvalidArgumentException reason:reason userInfo:nil];
   }
-
+  
+  ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
+  if (!subnode) {
+    return;
+  }
+  
   NSInteger sublayerIndex = NSNotFound;
 
   // Account for potentially having other subviews
@@ -1601,8 +1619,9 @@ static NSInteger incrementIfFound(NSInteger i) {
 
   // Don't call self.supernode here because that will retain/autorelease the supernode.  This method -_removeSupernode: is often called while tearing down a node hierarchy, and the supernode in question might be in the middle of its -dealloc.  The supernode is never messaged, only compared by value, so this is safe.
   // The particular issue that triggers this edge case is when a node calls -removeFromSupernode on a subnode from within its own -dealloc method.
-  if (!subnode || [subnode _deallocSafeSupernode] != self)
+  if (!subnode || [subnode _deallocSafeSupernode] != self) {
     return;
+  }
 
   [_subnodes removeObjectIdenticalTo:subnode];
 
