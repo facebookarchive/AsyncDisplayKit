@@ -439,8 +439,7 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(__instanceLock__);
 
-  if ([_asset isKindOfClass:[AVURLAsset class]]) {
-    if (ASObjectIsEqual(assetURL, ((AVURLAsset *)_asset).URL)) {
+  if ([_asset isKindOfClass:[AVURLAsset class]] && ASObjectIsEqual(assetURL, ((AVURLAsset *)_asset).URL)) {
       return;
     }
   }
