@@ -16,10 +16,6 @@ When enabled, IHM means that your nodes no longer require `addSubnode:` or `remo
  <li>set `.usesImplicitHierarchyManagement = YES` on the node that you would like managed.</li>
 </ul>
 
-<div class = "note">
-Note that the subnodes of any node with this property set will inherit IHM, so it is only neccessary to enable IHM on the highest level node. Generally, this will be the highest level node in your app, most likely an ASTableNode, ASCollectionNode or ASPagerNode.
-</div>
-
 ### Example ###
 <br>
 Consider the following intialization method from the PhotoCellNode class in <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a>. This ASCellNode subclass produces a simple social media photo feed cell. 
