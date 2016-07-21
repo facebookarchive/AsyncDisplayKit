@@ -35,6 +35,8 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   NSMutableArray *_externalCompletedNodes;    // Main thread only.  External data access can immediately query this if available.
   NSMutableDictionary *_completedNodes;       // Main thread only.  External data access can immediately query this if _externalCompletedNodes is unavailable.
   NSMutableDictionary *_editingNodes;         // Modified on _editingTransactionQueue only.  Updates propagated to _completedNodes.
+  BOOL _itemCountsFromDataSourceAreValid;     // Main thread only.
+  std::vector<NSInteger> _itemCountsFromDataSource;         // Main thread only.
   
   ASMainSerialQueue *_mainSerialQueue;
   
@@ -237,6 +239,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 - (void)insertNodes:(NSArray *)nodes ofKind:(NSString *)kind atIndexPaths:(NSArray *)indexPaths completion:(ASDataControllerCompletionBlock)completionBlock
 {
+  ASSERT_ON_EDITING_QUEUE;
   if (!indexPaths.count || _dataSource == nil) {
     return;
   }
@@ -411,6 +414,10 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     NSIndexSet *sectionIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
     NSArray<ASIndexedNodeContext *> *contexts = [self _populateFromDataSourceWithSectionIndexSet:sectionIndexSet];
 
+    [self invalidateDataSourceItemCounts];
+    // Fetch the new item counts upfront.
+    [self itemCountsFromDataSource];
+    
     // Allow subclasses to perform setup before going into the edit transaction
     [self prepareForReloadData];
     
@@ -492,6 +499,29 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     }
   }];
   return contexts;
+}
+
+- (void)invalidateDataSourceItemCounts
+{
+  ASDisplayNodeAssertMainThread();
+  _itemCountsFromDataSourceAreValid = NO;
+}
+
+- (std::vector<NSInteger>)itemCountsFromDataSource
+{
+  ASDisplayNodeAssertMainThread();
+  if (NO == _itemCountsFromDataSourceAreValid) {
+    id<ASDataControllerSource> source = self.dataSource;
+    NSInteger sectionCount = [source numberOfSectionsInDataController:self];
+    std::vector<NSInteger> newCounts;
+    newCounts.reserve(sectionCount);
+    for (NSInteger i = 0; i < sectionCount; i++) {
+      newCounts.push_back([source dataController:self rowsInSection:i]);
+    }
+    _itemCountsFromDataSource = newCounts;
+    _itemCountsFromDataSourceAreValid = YES;
+  }
+  return _itemCountsFromDataSource;
 }
 
 #pragma mark - Batching (External API)
@@ -720,7 +750,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   [self performEditCommandWithBlock:^{
     ASDisplayNodeAssertMainThread();
     LOG(@"Edit Command - insertRows: %@", indexPaths);
-    
     dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
 
     // Sort indexPath to avoid messing up the index when inserting in several batches

@@ -48,8 +48,8 @@
 #define ASDisplayNodeAssertFalse(condition) ASDisplayNodeAssertWithSignal(!(condition), nil, nil)
 #define ASDisplayNodeCAssertFalse(condition) ASDisplayNodeCAssertWithSignal(!(condition), nil, nil)
 
-#define ASDisplayNodeFailAssert(description, ...) ASDisplayNodeAssertWithSignal(NO, nil, (description), ##__VA_ARGS__)
-#define ASDisplayNodeCFailAssert(description, ...) ASDisplayNodeCAssertWithSignal(NO, nil, (description), ##__VA_ARGS__)
+#define ASDisplayNodeFailAssert(description, ...) ASDisplayNodeAssertWithSignal(NO, (description), ##__VA_ARGS__)
+#define ASDisplayNodeCFailAssert(description, ...) ASDisplayNodeCAssertWithSignal(NO, (description), ##__VA_ARGS__)
 
 #define ASDisplayNodeConditionalAssert(shouldTestCondition, condition, description, ...) ASDisplayNodeAssert((!(shouldTestCondition) || (condition)), nil, (description), ##__VA_ARGS__)
 #define ASDisplayNodeConditionalCAssert(shouldTestCondition, condition, description, ...) ASDisplayNodeCAssert((!(shouldTestCondition) || (condition)), nil, (description), ##__VA_ARGS__)
