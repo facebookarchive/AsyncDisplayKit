@@ -12,7 +12,7 @@
 #import <AsyncDisplayKit/ASButtonNode.h>
 #import <AsyncDisplayKit/ASNetworkImageNode.h>
 
-@class AVAsset, AVPlayer, AVPlayerItem;
+@class AVAsset, AVPlayer, AVPlayerItem, AVVideoComposition, AVAudioMix;
 @protocol ASVideoNodeDelegate;
 
 typedef enum {
