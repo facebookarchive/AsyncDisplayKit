@@ -69,6 +69,7 @@ static NSString * const kStatus = @"status";
   ASVideoNodePlayerState _playerState;
   
   AVAsset *_asset;
+  NSURL *_assetURL;
   AVVideoComposition *_videoComposition;
   AVAudioMix *_audioMix;
   
@@ -127,10 +128,10 @@ static NSString * const kStatus = @"status";
   ASDN::MutexLocker l(__instanceLock__);
 
   AVPlayerItem *playerItem = nil;
-  if (self.assetURL != nil) {
-    playerItem = [[AVPlayerItem alloc] initWithURL:self.assetURL];
+  if (_assetURL != nil) {
+    playerItem = [[AVPlayerItem alloc] initWithURL:_assetURL];
     _asset = [playerItem asset];
-  } else if (_asset != nil) {
+  } else {
     playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
   }
 
@@ -149,7 +150,7 @@ static NSString * const kStatus = @"status";
     }
   }
   
-  if (![asset isPlayable]) {
+  if ([asset isPlayable] == NO) {
     NSLog(@"Asset is not playable.");
     return;
   }
@@ -444,8 +445,8 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(__instanceLock__);
 
-  if (!ASObjectIsEqual(assetURL, self.assetURL)) {
-     self.asset = [AVURLAsset assetWithURL:assetURL];
+  if (ASObjectIsEqual(assetURL, self.assetURL) == NO) {
+    [self _setAndFetchAsset:[AVURLAsset assetWithURL:assetURL] url:assetURL];
   }
 }
 
@@ -453,7 +454,9 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(__instanceLock__);
 
-  if ([_asset isKindOfClass:AVURLAsset.class]) {
+  if (_assetURL != nil) {
+    return _assetURL;
+  } else if ([_asset isKindOfClass:AVURLAsset.class]) {
     return ((AVURLAsset *)_asset).URL;
   }
 
@@ -464,21 +467,23 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(__instanceLock__);
   
-  if (ASAssetIsEqual(asset, _asset)) {
-    return;
+  if (ASAssetIsEqual(asset, _asset) == NO) {
+    [self _setAndFetchAsset:asset url:nil];
   }
-
-  [self clearFetchedData];
-
-  _asset = asset;
-
-  [self setNeedsDataFetch];
 }
 
 - (AVAsset *)asset
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _asset;
+}
+
+- (void)_setAndFetchAsset:(AVAsset *)asset url:(NSURL *)assetURL
+{
+  [self clearFetchedData];
+  _asset = asset;
+  _assetURL = assetURL;
+  [self setNeedsDataFetch];
 }
 
 - (void)setVideoComposition:(AVVideoComposition *)videoComposition
