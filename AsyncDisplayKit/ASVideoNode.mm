@@ -126,14 +126,17 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(__instanceLock__);
 
-  if (_asset != nil) {
-    AVPlayerItem *playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
-    playerItem.videoComposition = _videoComposition;
-    playerItem.audioMix = _audioMix;
-    return playerItem;
+  AVPlayerItem *playerItem = nil;
+  if (self.assetURL != nil) {
+    playerItem = [[AVPlayerItem alloc] initWithURL:self.assetURL];
+    _asset = [playerItem asset];
+  } else if (_asset != nil) {
+    playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
   }
 
-  return nil;
+  playerItem.videoComposition = _videoComposition;
+  playerItem.audioMix = _audioMix;
+  return playerItem;
 }
 
 - (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray<NSString *> *)requestedKeys
@@ -435,6 +438,24 @@ static NSString * const kStatus = @"status";
   }
   
   _playerState = playerState;
+}
+
+- (void)setAssetURL:(NSURL *)assetURL
+{
+  if (!ASObjectIsEqual(assetURL, self.assetURL)) {
+     self.asset = [AVURLAsset assetWithURL:assetURL];
+  }
+}
+
+- (NSURL *)assetURL
+{
+  ASDN::MutexLocker l(__instanceLock__);
+
+  if ([_asset isKindOfClass:AVURLAsset.class]) {
+    return ((AVURLAsset *)_asset).URL;
+  }
+
+  return nil;
 }
 
 - (void)setAsset:(AVAsset *)asset
