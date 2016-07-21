@@ -68,9 +68,9 @@
   NSMutableString *result = [NSMutableString stringWithString:@"{ "];
   [self enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
     if (range.length == 1) {
-      [result appendFormat:@"%zu ", (unsigned long)range.location];
+      [result appendFormat:@"%tu ", range.location];
     } else {
-      [result appendFormat:@"%zu-%lu ", (unsigned long)range.location, NSMaxRange(range) - 1];
+      [result appendFormat:@"%tu-%tu ", range.location, NSMaxRange(range) - 1];
     }
   }];
   [result appendString:@"}"];
