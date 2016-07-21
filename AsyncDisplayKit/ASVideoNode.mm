@@ -446,8 +446,7 @@ static NSString * const kStatus = @"status";
   ASDN::MutexLocker l(__instanceLock__);
 
   if (ASObjectIsEqual(assetURL, self.assetURL) == NO) {
-     _assetURL = assetURL;
-     self.asset = [AVURLAsset assetWithURL:assetURL];
+    [self _setAndFetchAsset:[AVURLAsset assetWithURL:assetURL] url:assetURL];
   }
 }
 
@@ -469,9 +468,7 @@ static NSString * const kStatus = @"status";
   ASDN::MutexLocker l(__instanceLock__);
   
   if (ASAssetIsEqual(asset, _asset) == NO) {
-    [self clearFetchedData];
-    _asset = asset;
-    [self setNeedsDataFetch];
+    [self _setAndFetchAsset:asset url:nil];
   }
 }
 
@@ -479,6 +476,14 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _asset;
+}
+
+- (void)_setAndFetchAsset:(AVAsset *)asset url:(NSURL *)assetURL
+{
+  [self clearFetchedData];
+  _asset = asset;
+  _assetURL = assetURL;
+  [self setNeedsDataFetch];
 }
 
 - (void)setVideoComposition:(AVVideoComposition *)videoComposition
