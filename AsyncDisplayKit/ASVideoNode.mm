@@ -68,7 +68,6 @@ static NSString * const kStatus = @"status";
   ASVideoNodePlayerState _playerState;
   
   AVAsset *_asset;
-  NSURL *_assetURL;
   AVVideoComposition *_videoComposition;
   AVAudioMix *_audioMix;
   
@@ -127,8 +126,9 @@ static NSString * const kStatus = @"status";
   ASDN::MutexLocker l(__instanceLock__);
 
   AVPlayerItem *playerItem = nil;
-  if (_assetURL != nil) {
-    playerItem = [[AVPlayerItem alloc] initWithURL:_assetURL];
+  if (self.assetURL != nil) {
+    playerItem = [[AVPlayerItem alloc] initWithURL:self.assetURL];
+    _asset = [playerItem asset];
   } else if (_asset != nil) {
     playerItem = [[AVPlayerItem alloc] initWithAsset:_asset];
   }
