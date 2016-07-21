@@ -64,8 +64,8 @@
 {
   ASDisplayNodeAssertMainThread();
   _lock.lock();
-    NSArray *dirtyNodes = [_dirtyNodes allObjects];
-    [_dirtyNodes removeAllObjects];
+    NSHashTable *dirtyNodes = _dirtyNodes;
+    _dirtyNodes = [NSHashTable weakObjectsHashTable];
     _flags.pendingFlush = NO;
   _lock.unlock();
 
