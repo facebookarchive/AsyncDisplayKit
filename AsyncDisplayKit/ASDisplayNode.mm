@@ -2070,7 +2070,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (_layoutSpecBlock != NULL) {
     return _layoutSpecBlock(self, constrainedSize);
   }
-  
+
+  ASDisplayNodeAssert(NO, @"ASDisplayNode's ~layoutSpecThatFits: should not be called without a _layoutSpecBlock. You should override this method in the subclass without calling [super layoutSpecThatFits:]");
+
   return nil;
 }
 
