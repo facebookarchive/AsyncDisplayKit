@@ -375,16 +375,19 @@
   XCTAssertEqual(UIViewContentModeScaleAspectFill, _videoNode.contentMode);
 }
 
-- (void)testChangingAssetsChangesPlaceholderImage
+- (void)testChangingAssetsDoesNotChangePlaceholderImage
 {
   UIImage *firstImage = [[UIImage alloc] init];
 
+  // test setting asset then placeholder
   _videoNode.asset = _firstAsset;
   [_videoNode setVideoPlaceholderImage:firstImage];
   XCTAssertEqual(firstImage, _videoNode.image);
 
+  // now setting placeholder followed by asset
+  [_videoNode setVideoPlaceholderImage:firstImage];
   _videoNode.asset = _secondAsset;
-  XCTAssertNotEqual(firstImage, _videoNode.image);
+  XCTAssertEqual(firstImage, _videoNode.image);
 }
 
 - (void)testClearingFetchedContentShouldClearAssetData
