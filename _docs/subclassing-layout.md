@@ -100,5 +100,5 @@ If you desire the same effect in a ASViewController, you can do the same thing i
 ## Begin with a call to super
 <br>
             
-Don't forget to begin each of the methods above with a call to super, _except_ for `layoutSpecThatFits:`. While  possible, calling super in -layoutSpecThatFits: is not the norm and is an advanced concept that will be documented soon. 
+Don't forget to begin each of the methods above with a call to super, _except_ for `layoutSpecThatFits:`. 
 
