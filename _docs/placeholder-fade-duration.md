@@ -16,6 +16,8 @@ For image drawing, use the node's `.calculatedSize` property.
 The <code>-placeholderImage</code> function may be called on a background thread, so it is important that this function is thread safe. Note that <code>-[UIImage imageNamed:]</code> is not thread safe when using image assets. Instead use <code>-[UIImage imageWithContentsOfFile:]</code>.
 </div>
 
+An ideal resource for creating placeholder images, including rounded rect solid colored ones or simple square corner ones is the UIImage+ASConvience category methods in ASDK.
+
 See our ancient <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples_extra/placeholders">Placeholders sample app</a> to see this concept, first invented by the Facebook Paper team, in action. 
 
 ## `.neverShowPlaceholders`
