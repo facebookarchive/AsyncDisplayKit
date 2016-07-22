@@ -26,6 +26,7 @@
   BOOL _rangeIsValid;
   BOOL _needsRangeUpdate;
   BOOL _layoutControllerImplementsSetVisibleIndexPaths;
+  BOOL _layoutControllerImplementsSetViewportSize;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
   ASLayoutRangeMode _currentRangeMode;
   BOOL _didUpdateCurrentRange;
@@ -143,7 +144,8 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 - (void)setLayoutController:(id<ASLayoutController>)layoutController
 {
   _layoutController = layoutController;
-  _layoutControllerImplementsSetVisibleIndexPaths = [_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)];
+  _layoutControllerImplementsSetVisibleIndexPaths = [layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)];
+  _layoutControllerImplementsSetViewportSize = [layoutController respondsToSelector:@selector(setViewportSize:)];
   if (layoutController && _dataSource) {
     [self updateIfNeeded];
   }
@@ -181,7 +183,9 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   }
   
   ASScrollDirection scrollDirection = [_dataSource scrollDirectionForRangeController:self];
-  [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
+  if (_layoutControllerImplementsSetViewportSize) {
+    [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
+  }
   
   // the layout controller needs to know what the current visible indices are to calculate range offsets
   if (_layoutControllerImplementsSetVisibleIndexPaths) {
