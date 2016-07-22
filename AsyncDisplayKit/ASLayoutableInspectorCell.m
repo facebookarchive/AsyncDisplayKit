@@ -61,6 +61,8 @@ __weak static ASLayoutableInspectorCell *__currentlyOpenedCell = nil;
     _textNode = [[ASTextNode alloc] init];
     _textNode.attributedString = [ASLayoutableInspectorCell propertyValueAttributedStringForProperty:property withLayoutable:layoutable];
     
+    //_buttonNode.select = method here
+    
     _textNode2 = [[ASTextNode alloc] init];
     _textNode2.attributedString = [ASLayoutableInspectorCell propertyValueDetailAttributedStringForProperty:property withLayoutable:layoutable];
     

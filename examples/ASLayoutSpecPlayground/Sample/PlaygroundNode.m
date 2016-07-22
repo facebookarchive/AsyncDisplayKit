@@ -17,6 +17,7 @@
 
 @implementation PlaygroundNode
 {
+  NSUInteger          _index;
   ASNetworkImageNode  *_userAvatarImageView;
   ASNetworkImageNode  *_photoImageView;
   ASTextNode          *_userNameLabel;
@@ -28,7 +29,7 @@
 
 #pragma mark - Lifecycle
 
-- (instancetype)init
+- (instancetype)initWithIndex:(NSUInteger)index
 {
   self = [super init];
   
@@ -38,6 +39,8 @@
     self.usesImplicitHierarchyManagement = YES;
     self.shouldVisualizeLayoutSpecs = YES;
     self.shouldCacheLayoutSpec = YES;
+    
+    _index = index;
     
     _userAvatarImageView     = [[ASNetworkImageNode alloc] init];
     _userAvatarImageView.URL = [NSURL URLWithString:@"https://s-media-cache-ak0.pinimg.com/avatars/503h_1458880322_140.jpg"];
@@ -74,6 +77,66 @@
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+    switch (_index) {
+    case 1:
+      return [self layoutSpecThatFitsNavBar:constrainedSize];
+    case 2:
+      return [self layoutSpecThatFitsASDKgram:constrainedSize];
+    default:
+      return [self layoutSpecThatFitsASDKgram:constrainedSize];
+      break;
+  }
+}
+
+- (ASLayoutSpec *)layoutSpecThatFitsNavBar:(ASSizeRange)constrainedSize
+{
+  // username / photo location header vertical stack
+  
+  _userNameLabel.flexShrink         = YES;
+  _photoLocationLabel.flexShrink    = YES;
+
+  ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  headerSubStack.flexShrink         = YES;
+  
+  if (_photoLocationLabel.attributedString) {
+    [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
+  } else {
+    [headerSubStack setChildren:@[_userNameLabel]];
+  }
+  
+  // header stack
+  
+  _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+  _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER; // hack to remove double spaces around spacer
+  
+  UIEdgeInsets avatarInsets          = UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
+  ASInsetLayoutSpec *avatarInset     = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
+  
+  ASLayoutSpec *spacer               = [[ASLayoutSpec alloc] init];
+  spacer.flexGrow                    = YES;
+  spacer.flexShrink                  = YES;  // FIXME: this overrides stuff :) THIS IS A SYSTEMIC ISSUE - can we make layoutSpecThatFits only run once? cache layoutSpec, just use new constrainedSize, don't put properties in layoutSpecThatFits
+  // separate the idea of laying out and rerunning with new constrainedSize
+  
+  ASStackLayoutSpec *headerStack     = [ASStackLayoutSpec horizontalStackLayoutSpec];
+  headerStack.alignItems             = ASStackLayoutAlignItemsCenter;                     // center items vertically in horizontal stack
+  headerStack.justifyContent         = ASStackLayoutJustifyContentStart;                  // justify content to the left side of the header stack
+  headerStack.flexShrink             = YES;
+  headerStack.flexGrow               = YES;
+  
+  [headerStack setChildren:@[avatarInset, headerSubStack, spacer, _photoTimeIntervalSincePostLabel]];
+  
+  // header inset stack
+  
+  UIEdgeInsets insets                = UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER);
+  ASInsetLayoutSpec *headerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:headerStack];
+  headerWithInset.flexShrink         = YES;
+  headerWithInset.flexGrow           = YES;
+  
+  return headerWithInset;
+}
+
+- (ASLayoutSpec *)layoutSpecThatFitsASDKgram:(ASSizeRange)constrainedSize
 {
   // username / photo location header vertical stack
   

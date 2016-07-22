@@ -22,7 +22,7 @@
 
 #pragma mark - Lifecycle
 
-- (instancetype)init
+- (instancetype)initWithIndex:(NSUInteger)index
 {
   self = [super init];
   
@@ -30,7 +30,7 @@
     self.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
     self.usesImplicitHierarchyManagement = YES;
     
-    _playgroundNode = [[PlaygroundNode alloc] init];
+    _playgroundNode = [[PlaygroundNode alloc] initWithIndex:index];
     
     _resizeHandle                        = [[ASImageNode alloc] init];
     _resizeHandle.image                  = [UIImage imageNamed:@"resizeHandle"];

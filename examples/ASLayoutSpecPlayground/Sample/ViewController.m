@@ -10,11 +10,12 @@
 #import "PlaygroundContainerNode.h"
 #import "ASLayoutableInspectorNode.h"
 
-@interface ViewController () <PlaygroundContainerNodeDelegate, ASLayoutableInspectorNodeDelegate>
+@interface ViewController () <ASPagerNodeDataSource, ASLayoutableInspectorNodeDelegate, PlaygroundContainerNodeDelegate>
 @end
 
 @implementation ViewController
 {
+  ASPagerNode *_pagerNode;
   ASSizeRange _sizeRange;
 }
 
@@ -22,17 +23,33 @@
 
 - (instancetype)init
 {
-  PlaygroundContainerNode *containerNode = [[PlaygroundContainerNode alloc] init];
-  self = [super initWithNode:containerNode];
+  _pagerNode = [[ASPagerNode alloc] init];
+  self = [super initWithNode:_pagerNode];
   
   if (self) {
+    _pagerNode.dataSource = self;
     self.navigationItem.title   = @"ASLayoutSpec Playground";
     self.edgesForExtendedLayout = UIRectEdgeNone;
-    containerNode.delegate      = self;
     [ASLayoutableInspectorNode sharedInstance].delegate = self;
   }
   
   return self;
+}
+
+#pragma mark - ASPagerNodeDataSource
+
+- (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode
+{
+  return 2;
+}
+
+- (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index
+{
+  return ^{
+    PlaygroundContainerNode *containerCellNode = [[PlaygroundContainerNode alloc] initWithIndex:index];
+    containerCellNode.delegate = self;
+    return containerCellNode;
+  };
 }
 
 // [ASViewController] Override this method to provide a custom size range to the backing node.
@@ -45,12 +62,22 @@
   return _sizeRange;
 }
 
+- (ASSizeRange)pagerNode:(ASPagerNode *)pagerNode constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  if (CGSizeEqualToSize(_sizeRange.max, CGSizeZero)) {
+    return [super nodeConstrainedSize];
+  }
+  return _sizeRange;
+}
+
 #pragma mark - PlaygroundContainerNodeDelegate
 
 - (void)relayoutWithSize:(ASSizeRange)size
 {
+//  NSLog(@"DELEGATE constrainedSize = %@", NSStringFromCGSize(size.max));
   _sizeRange = size;
   [self.view setNeedsLayout];
+  [_pagerNode reloadData];
 }
 
 #pragma mark - ASLayoutableInspectorNodeDelegate

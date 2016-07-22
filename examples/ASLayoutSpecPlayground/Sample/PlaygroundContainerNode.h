@@ -14,8 +14,10 @@
 
 @end
 
-@interface PlaygroundContainerNode : ASDisplayNode
+@interface PlaygroundContainerNode : ASCellNode
 
 @property (nonatomic, weak) id<PlaygroundContainerNodeDelegate> delegate;
+
+- (instancetype)initWithIndex:(NSUInteger)index;
 
 @end

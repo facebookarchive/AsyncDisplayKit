@@ -17,8 +17,8 @@
 {
   self = [super init];
   if (self) {
-    self.layer.borderWidth = 2;
-    self.layer.borderColor = [[UIColor redColor] CGColor];
+    self.borderWidth = 2;
+    self.borderColor = [[UIColor redColor] CGColor];
     self.layoutSpec = layoutSpec;
     self.layoutSpec.neverShouldVisualize = YES;
     self.usesImplicitHierarchyManagement = YES;
@@ -52,10 +52,10 @@
   _layoutSpec = layoutSpec;                       // FIXME: should copy layoutSpec properities to self?
   
   if ([layoutSpec isKindOfClass:[ASInsetLayoutSpec class]]) {
-    self.layer.borderColor = [[UIColor redColor] CGColor];
+    self.borderColor = [[UIColor redColor] CGColor];
     
   } else if ([layoutSpec isKindOfClass:[ASStackLayoutSpec class]]) {
-    self.layer.borderColor = [[UIColor greenColor] CGColor];
+    self.borderColor = [[UIColor greenColor] CGColor];
 
   }
 }

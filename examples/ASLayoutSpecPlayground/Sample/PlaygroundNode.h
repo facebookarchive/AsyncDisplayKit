@@ -10,4 +10,6 @@
 
 @interface PlaygroundNode : ASDisplayNode
 
+- (instancetype)initWithIndex:(NSUInteger)index;
+
 @end
