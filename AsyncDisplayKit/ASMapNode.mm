@@ -207,7 +207,10 @@
                     [image drawAtPoint:CGPointZero];
                     
                     // Get a standard annotation view pin. Future implementations should use a custom annotation image property.
-                    MKAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+                    __block MKAnnotationView *pin;
+                    dispatch_sync(dispatch_get_main_queue(), ^{
+                      pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+                    });
                     UIImage *pinImage = pin.image;
                     CGSize pinSize = pin.bounds.size;
                     
