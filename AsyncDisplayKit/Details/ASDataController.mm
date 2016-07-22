@@ -131,14 +131,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   }
 }
 
-- (void)layoutLoadedNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind
-{
-  NSAssert(ASDisplayNodeThreadIsMain(), @"Layout of loaded nodes must happen on the main thread.");
-  ASDisplayNodeAssertTrue(nodes.count == contexts.count);
-  
-  [self _layoutNodes:nodes fromContexts:contexts atIndexesOfRange:NSMakeRange(0, nodes.count) ofKind:kind];
-}
-
 /**
  * Measure and layout the given node with the constrained size range.
  */
@@ -160,25 +152,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     // Insert finished nodes into data storage
     [self _insertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   }];
-}
-
-/**
- * Perform measurement and layout of loaded or unloaded nodes based if they will be layed out on main thread or not
- */
-- (void)_layoutNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts atIndexesOfRange:(NSRange)range ofKind:(NSString *)kind
-{
-  ASSERT_ON_EDITING_QUEUE;
-  
-  if (_dataSource == nil) {
-    return;
-  }
-  
-  // Layout nodes based on the given context constrained size
-  for (NSUInteger k = range.location; k < NSMaxRange(range); k++) {
-    ASCellNode *node = nodes[k];
-    ASIndexedNodeContext *context = contexts[k];
-    [self _layoutNode:node withConstrainedSize:context.constrainedSize];
-  }
 }
 
 - (void)_layoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind completion:(ASDataControllerCompletionBlock)completionBlock
@@ -937,12 +910,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   }
   
   return nil;
-}
-
-- (NSArray *)nodesAtIndexPaths:(NSArray *)indexPaths
-{
-  ASDisplayNodeAssertMainThread();
-  return ASFindElementsInMultidimensionalArrayAtIndexPaths((NSMutableArray *)[self completedNodes], [indexPaths sortedArrayUsingSelector:@selector(compare:)]);
 }
 
 /// Returns nodes that can be queried externally. _externalCompletedNodes is used if available, _completedNodes otherwise.
