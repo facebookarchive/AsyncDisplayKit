@@ -6,17 +6,17 @@ permalink: /docs/subclassing-layout.html
 
 ## Where do I put my layout code?
 <br>
-The most important distinction when writing a subclass is whether you are writing an ASViewController or an ASDisplayNode subclass. This sounds obvious, but because some of these differences are subtle, it is important to have this top of mind. 
+The most important distinction when creating a subclass is whether you writing an ASViewController or an ASDisplayNode. This sounds obvious, but because some of these differences are subtle, it is important to keep this top of mind. 
 
 ## ASViewController
 <br>
-An `ASViewController` is a regular UIViewController subclass that has special features to manage nodes. Since it is a UIViewController subclass, **all methods are called on the main thread** (and you should always create an ASViewController on the main thread). 
+An `ASViewController` is a regular UIViewController subclass that has special features to manage nodes. Since it is a UIViewController subclass, all methods are called on the **main thread** (and you should always create an ASViewController on the main thread). 
 
 ###`-init` 
 
-This method is called once, at the very begining of an ASViewController's lifecycle. As with UIKit, it is best practice to **never access `self.view`** or **`self.node.view`** in this method as it will force the view to be created early. Instead, do any view access in `-viewDidLoad`. 
+This method is called once, at the very begining of an ASViewController's lifecycle. As with UIViewController initialization, it is best practice to **never access** `self.view` or `self.node.view` in this method as it will force the view to be created early. Instead, do any view access in -viewDidLoad. 
 
-ASViewController's designated initializer is `initWithNode:`. A typical initializer will look something like the code below. Note how the viewController's node is created before calling super. An ASViewController manages a node similarly to how a UIViewController manages a view. 
+ASViewController's designated initializer is `initWithNode:`. A typical initializer will look something like the code below. Note how the ASViewController's node is created before calling super. An ASViewController manages a node similarly to how a UIViewController manages a view, but the initialization is slightly different. 
 
 ``` 
 - (instancetype)init
@@ -24,6 +24,7 @@ ASViewController's designated initializer is `initWithNode:`. A typical initiali
   _pagerNode = [[ASPagerNode alloc] init];
   self = [super initWithNode:_pagerNode];
   
+  // setup any instance variables or properties here
   if (self) {
     _pagerNode.dataSource = self;
     _pagerNode.delegate = self;
@@ -35,19 +36,25 @@ ASViewController's designated initializer is `initWithNode:`. A typical initiali
        
 ###`-loadView`
 
-We recommend that you **do not use this method** because it is has no particular advantages over -viewDidLoad and has some disadvantages.
+We recommend that you do not use this method because it is has no particular advantages over `-viewDidLoad` and has some disadvantages. However, it is safe to use as long as you do not set the `self.view` property to a different value. The call to [super loadView] will set it to the `node.view` for you.
 
 ###`-viewDidLoad`  
 
-This method is called once in a viewController's lifecycle, **immediately after** `-loadView`. This is the earliest time at which you should access the node's view. It is a great spot to put any **code that should only be run once**, such as adding a gesture recognizer or any intialization/setup code that needs direct access to the view/layer. 
+This method is called once in a ASViewController's lifecycle, immediately after `-loadView`. This is the earliest time at which you should access the node's view. It is a great spot to put any **setup code that should only be run once and requires access to the view/layer**, such as adding a gesture recognizer. 
 
-Layout code is not appropriate to put in this method, because it will not called again in order to react to geometry changes, such as on rotation or when the keyboard is presented. 
+Layout code should never be put in this method, because it will not be called again when geometry changes. Note this is equally true for UIViewController; it is bad practice to put layout code in this method even if you don't currently expect geometry changes. 
 
 ###`-viewWillLayoutSubviews`  
 
-This method is called at the exact same time as a node's `-layout` method and it may be called multiple times in a viewController's lifecycle; it will be called whenever the bounds of the viewController change while visible (including rotation, split screen, keyboard presentation) as well as when there are changes to the hierarchy (children being added, removed, or changed in size). 
+This method is called at the exact same time as a node's `-layout` method and it may be called multiple times in a ASViewController's lifecycle; it will be called whenever the bounds of the ASViewController's node are changed (including rotation, split screen, keyboard presentation) as well as when there are changes to the hierarchy (children being added, removed, or changed in size). 
 
-This is where you should put any layout **code that should be run every time the view's frame changes**.Do not put any layout code in this method that doesn't need to be run more than once or doesn't depend on view size.
+For consistency, it is best practice to put all layout code in this method. Because it is not called very frequently, even code that does not directly depend on the size belongs here.  
+
+###`-viewWillAppear:` / `-viewDidDisappear:`
+
+These methods are called just before the ASViewController's node appears on screen and just after it is onscreen. These methods provide a good opportunity to start or stop animations related to the presentation or dismissal of your controller. This is also a good place to make a log of a user action. 
+
+Although these methods may be called multiple times and geometry information is available, they are not called for all geometry changes and so should not be used for core layout code (beyond setup required for specific animations). 
 
 ## ASDisplayNode
 <br>
@@ -55,7 +62,9 @@ While subclassing nodes is similar to writing a UIView subclass, there are a few
 
 ### `-init`
 
-This method is called on a **background thread** when using nodeBlocks. Most notably, this means you should never initialize any UIKit objects, touch the view or layer of a node (e.g. node.layer.X or node.view.X) or add any gesture recognizers in your initializer. Instead, do these things in `-didLoad`.
+This method is called on a **background thread** when using nodeBlocks. Most notably, this means you should never initialize any UIKit objects, touch the view or layer of a node (e.g. node.layer.X or node.view.X) or add any gesture recognizers in your initializer. Instead, do these things in `-didLoad`. 
+
+You should never need a lock in this method. 
 
 ### `-didLoad`
 
