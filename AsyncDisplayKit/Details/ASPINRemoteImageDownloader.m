@@ -178,10 +178,10 @@
     
     /// If we're targeting the main queue and we're on the main thread, call immediately.
     if (ASDisplayNodeThreadIsMain() && callbackQueue == dispatch_get_main_queue()) {
-      downloadProgress(totalBytes / (CGFloat)completedBytes);
+      downloadProgress(completedBytes / (CGFloat)totalBytes);
     } else {
       dispatch_async(callbackQueue, ^{
-        downloadProgress(totalBytes / (CGFloat)completedBytes);
+        downloadProgress(completedBytes / (CGFloat)totalBytes);
       });
     }
   } completion:^(PINRemoteImageManagerResult * _Nonnull result) {
