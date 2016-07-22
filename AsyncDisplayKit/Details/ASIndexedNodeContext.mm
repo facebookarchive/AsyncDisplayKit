@@ -48,4 +48,13 @@
   return node;
 }
 
++ (NSArray<NSIndexPath *> *)indexPathsFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts
+{
+  NSMutableArray *result = [NSMutableArray arrayWithCapacity:contexts.count];
+  for (ASIndexedNodeContext *ctx in contexts) {
+    [result addObject:ctx.indexPath];
+  }
+  return result;
+}
+
 @end

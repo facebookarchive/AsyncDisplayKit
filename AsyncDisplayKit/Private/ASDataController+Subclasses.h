@@ -53,16 +53,11 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
 
 /**
  * Measure and layout the given nodes in optimized batches, constraining each to a given size in `constrainedSizeForNodeOfKind:atIndexPath:`.
- */
-- (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind completion:(ASDataControllerCompletionBlock)completionBlock;
-
-/**
- * Perform measurement and layout of loaded nodes on the main thread, skipping unloaded nodes.
  *
- * @discussion Once nodes have loaded their views, we can't layout in the background so this is a chance
- * to do so immediately on the main thread.
+ * This method runs synchronously.
+ * @param batchCompletion A handler to be run after each batch is completed. It is executed synchronously on the calling thread.
  */
-- (void)layoutLoadedNodes:(NSArray<ASCellNode *> *)nodes fromContexts:(NSArray<ASIndexedNodeContext *> *)contexts ofKind:(NSString *)kind;
+- (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts batchCompletion:(ASDataControllerCompletionBlock)batchCompletionHandler;
 
 /**
  * Provides the size range for a specific node during the layout process.

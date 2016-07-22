@@ -189,8 +189,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _rangeController.dataSource = self;
   _rangeController.delegate = self;
   
-  _dataController = [[dataControllerClass alloc] init];
-  _dataController.dataSource = self;
+  _dataController = [[dataControllerClass alloc] initWithDataSource:self];
   _dataController.delegate = _rangeController;
   _dataController.environmentDelegate = self;
   
