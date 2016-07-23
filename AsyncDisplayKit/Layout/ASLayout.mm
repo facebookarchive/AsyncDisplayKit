@@ -141,7 +141,7 @@ extern BOOL CGPointIsNull(CGPoint point)
 
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<<ASLayout: %p>, position = %@; size = %@; constrainedSizeRange = %@",
+    return [NSString stringWithFormat:@"<<ASLayout: %p>, position = %@; size = %@; constrainedSizeRange = %@>",
             self, NSStringFromCGPoint(self.position), NSStringFromCGSize(self.size), NSStringFromASSizeRange(self.constrainedSizeRange)];
 }
 
