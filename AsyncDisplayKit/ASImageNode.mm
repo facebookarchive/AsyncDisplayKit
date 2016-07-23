@@ -24,6 +24,10 @@
 
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
+#import "ASEqualityHashHelpers.h"
+#import "ASWeakMap.h"
+
+#include <functional>
 
 struct ASImageNodeDrawParameters {
   BOOL opaque;
@@ -38,10 +42,81 @@ struct ASImageNodeDrawParameters {
   asimagenode_modification_block_t imageModificationBlock;
 };
 
+/**
+ * Contains all data that is needed to generate the content bitmap.
+ */
+@interface ASImageNodeContentsKey : NSObject {}
+
+@property (nonatomic, strong) UIImage *image;
+@property CGSize backingSize;
+@property CGRect imageDrawRect;
+@property BOOL isOpaque;
+@property (nonatomic, strong) UIColor *backgroundColor;
+@property ASDisplayNodeContextModifier preContextBlock;
+@property ASDisplayNodeContextModifier postContextBlock;
+@property asimagenode_modification_block_t imageModificationBlock;
+
+@end
+
+@implementation ASImageNodeContentsKey
+
+- (BOOL)isEqual:(id)object
+{
+  if (self == object) {
+    return YES;
+  }
+
+  // Optimization opportunity: The `isKindOfClass` call here could be avoided by not using the NSObject `isEqual:`
+  // convention and instead using a custom comparison function that assumes all items are heterogeneous.
+  // However, profiling shows that our entire `isKindOfClass` expression is only ~1/40th of the total
+  // overheard of our caching, so it's likely not high-impact.
+  if ([object isKindOfClass:[ASImageNodeContentsKey class]]) {
+    ASImageNodeContentsKey *other = (ASImageNodeContentsKey *)object;
+    return [_image isEqual:other.image]
+      && CGSizeEqualToSize(_backingSize, other.backingSize)
+      && CGRectEqualToRect(_imageDrawRect, other.imageDrawRect)
+      && _isOpaque == other.isOpaque
+      && [_backgroundColor isEqual:other.backgroundColor]
+      && _preContextBlock == other.preContextBlock
+      && _postContextBlock == other.postContextBlock
+      && _imageModificationBlock == other.imageModificationBlock;
+  } else {
+    return NO;
+  }
+}
+
+- (NSUInteger)hash
+{
+  NSUInteger subhashes[] = {
+    // Profiling shows that the work done in UIImage's `hash` is on the order of 0.005ms on an A5 processor
+    // and isn't proportional to the size of the image.
+    [_image hash],
+    
+    // TODO: Hashing the floats in a CGRect or CGSize is tricky.  Equality of floats is
+    // fuzzy, but it's a 100% requirement that two equal values must produce an identical hash value.
+    // Until there's a robust solution for hashing floats, leave all float values out of the hash.
+    // This may lead to a greater number of isEqual comparisons but does not comprimise correctness.
+    //AS::hash<CGRect>()(_backingSize),
+    //AS::hash<CGRect>()(_imageDrawRect),
+
+    AS::hash<BOOL>()(_isOpaque),
+    [_backgroundColor hash],
+    AS::hash<void *>()((void*)_preContextBlock),
+    AS::hash<void *>()((void*)_postContextBlock),
+    AS::hash<void *>()((void*)_imageModificationBlock),
+  };
+  return ASIntegerArrayHash(subhashes, sizeof(subhashes) / sizeof(subhashes[0]));
+}
+
+@end
+
+
 @implementation ASImageNode
 {
 @private
   UIImage *_image;
+  ASWeakMapEntry *_weakCacheEntry;  // Holds a reference that keeps our contents in cache.
+
 
   void (^_displayCompletionBlock)(BOOL canceled);
   
@@ -295,25 +370,85 @@ struct ASImageNodeDrawParameters {
       imageDrawRect.size.width <= 0.0f || imageDrawRect.size.height <= 0.0f) {
     return nil;
   }
-  
+
+    ASImageNodeContentsKey *contentsKey = [[ASImageNodeContentsKey alloc] init];
+    contentsKey.image = image;
+    contentsKey.backingSize = backingSize;
+    contentsKey.imageDrawRect = imageDrawRect;
+    contentsKey.isOpaque = isOpaque;
+    contentsKey.backgroundColor = backgroundColor;
+    contentsKey.preContextBlock = preContextBlock;
+    contentsKey.postContextBlock = postContextBlock;
+    contentsKey.imageModificationBlock = imageModificationBlock;
+
+    if (isCancelled()) {
+        return nil;
+    }
+
+    ASWeakMapEntry<UIImage *> *entry = [self.class contentsForkey:contentsKey isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled];
+    if (entry == nil) {  // If nil, we were cancelled.
+        return nil;
+    }
+    _weakCacheEntry = entry; // Retain so that the entry remains in the weak cache
+    return entry.value;
+}
+
+static ASWeakMap<ASImageNodeContentsKey *, UIImage *> *cache = nil;
+static ASDN::Mutex cacheLock;
+
++ (ASWeakMapEntry *)contentsForkey:(ASImageNodeContentsKey *)key isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
+{
+  {
+    ASDN::MutexLocker l(cacheLock);
+    if (!cache) {
+      cache = [[ASWeakMap alloc] init];
+    }
+    ASWeakMapEntry *entry = [cache entryForKey:key];
+    if (entry != nil) {
+      // cache hit
+      return entry;
+    }
+  }
+
+  // cache miss
+  UIImage *contents = [self createContentsForkey:key isCancelled:isCancelled];
+  if (contents == nil) { // If nil, we were cancelled
+    return nil;
+  }
+
+  {
+    ASDN::MutexLocker l(cacheLock);
+    return [cache setObject:contents forKey:key];
+  }
+}
+
++ (UIImage *)createContentsForkey:(ASImageNodeContentsKey *)key isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled
+{
+  // The following `UIGraphicsBeginImageContextWithOptions` call will sometimes take take longer than 5ms on an
+  // A5 processor for a 400x800 backingSize.
+  // Check for cancellation before we call it.
+  if (isCancelled()) {
+    return nil;
+  }
+
   // Use contentsScale of 1.0 and do the contentsScale handling in boundsSizeInPixels so ASCroppedImageBackingSizeAndDrawRectInBounds
   // will do its rounding on pixel instead of point boundaries
-  UIGraphicsBeginImageContextWithOptions(backingSize, isOpaque, 1.0);
+  UIGraphicsBeginImageContextWithOptions(key.backingSize, key.isOpaque, 1.0);
   
   CGContextRef context = UIGraphicsGetCurrentContext();
-  if (context && preContextBlock) {
-    preContextBlock(context);
+  if (context && key.preContextBlock) {
+    key.preContextBlock(context);
   }
   
   // if view is opaque, fill the context with background color
-  if (isOpaque && backgroundColor) {
-    [backgroundColor setFill];
-    UIRectFill({ .size = backingSize });
+  if (key.isOpaque && key.backgroundColor) {
+    [key.backgroundColor setFill];
+    UIRectFill({ .size = key.backingSize });
   }
   
   // iOS 9 appears to contain a thread safety regression when drawing the same CGImageRef on
   // multiple threads concurrently.  In fact, instead of crashing, it appears to deadlock.
-  // The issue is present in Mac OS X El Capitan and has been seen hanging Pro apps like Adobe Premier,
+  // The issue is present in Mac OS X El Capitan and has been seen hanging Pro apps like Adobe Premiere,
   // as well as iOS games, and a small number of ASDK apps that provide the same image reference
   // to many separate ASImageNodes.  A workaround is to set .displaysAsynchronously = NO for the nodes
   // that may get the same pointer for a given UI asset image, etc.
@@ -323,25 +458,27 @@ struct ASImageNodeDrawParameters {
   // Another option is to have ASDisplayNode+AsyncDisplay coordinate these cases, and share the decoded buffer.
   // Details tracked in https://github.com/facebook/AsyncDisplayKit/issues/1068
   
-  @synchronized(image) {
-    [image drawInRect:imageDrawRect];
+  @synchronized(key.image) {
+    [key.image drawInRect:key.imageDrawRect];
   }
   
-  if (context && postContextBlock) {
-    postContextBlock(context);
+  if (context && key.postContextBlock) {
+    key.postContextBlock(context);
   }
-  
+
+  // The following `UIGraphicsGetImageFromCurrentImageContext` call will commonly take more than 20ms on an
+  // A5 processor.  Check for cancellation before we call it.
   if (isCancelled()) {
     UIGraphicsEndImageContext();
     return nil;
   }
-  
+
   UIImage *result = UIGraphicsGetImageFromCurrentImageContext();
   
   UIGraphicsEndImageContext();
   
-  if (imageModificationBlock != NULL) {
-    result = imageModificationBlock(result);
+  if (key.imageModificationBlock != NULL) {
+    result = key.imageModificationBlock(result);
   }
   
   return result;
@@ -382,6 +519,15 @@ struct ASImageNodeDrawParameters {
   }
 
   [self setNeedsDisplay];
+}
+
+#pragma mark Interface State
+
+- (void)clearContents
+{
+    [super clearContents];
+    
+    _weakCacheEntry = nil;  // release contents from the cache.
 }
 
 #pragma mark - Cropping
