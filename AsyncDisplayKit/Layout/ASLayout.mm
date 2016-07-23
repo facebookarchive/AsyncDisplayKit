@@ -138,6 +138,12 @@ extern BOOL CGPointIsNull(CGPoint point)
                                sublayouts:layout.sublayouts];
 }
 
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<<ASLayout: %p>, position = %@; size = %@; constrainedSize = %@",
+            self, NSStringFromCGPoint(self.position), NSStringFromCGSize(self.size), NSStringFromCGSize(self.constrainedSize)];
+}
+
 #pragma mark - Layout Flattening
 
 - (ASLayout *)filteredNodeLayoutTree
