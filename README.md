@@ -28,7 +28,7 @@ AsyncDisplayKit lets you move image decoding, text sizing and rendering, layout,
 
 ## Learn More
 
-* Read the our [Getting Started guide](http://asyncdisplaykit.org/docs/getting-started.html)
+* Read the our [Getting Started](http://asyncdisplaykit.org/docs/getting-started.html) guide
 * Get the [sample projects](https://github.com/facebook/AsyncDisplayKit/tree/master/examples)
 * Browse the [API reference](http://asyncdisplaykit.org/appledocs.html)
 
