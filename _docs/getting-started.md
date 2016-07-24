@@ -50,4 +50,4 @@ AsyncDisplayKit offers a variety of advanced developer features that cannot be f
 
 If you are new to AsyncDisplayKit, we reccomend that you check out our ASDKgram example app. We've created a handy guide (coming soon!) with step-by-step directions and a follow along example on how to add AsyncDisplayKit to an app. 
 
-If you run into any problems along the way, reach out to us GitHub or the AsyncDisplayKit <a href = "/resources.html#slack">Slack community</a> for help.
+If you run into any problems along the way, reach out to us GitHub or the AsyncDisplayKit <a href = "/docs/resources.html#slack">Slack community</a> for help.
