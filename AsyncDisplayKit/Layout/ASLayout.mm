@@ -154,12 +154,6 @@ static inline NSString * descriptionIndents(NSUInteger indents)
                                sublayouts:layout.sublayouts];
 }
 
-- (NSString *)description
-{
-    return [NSString stringWithFormat:@"<<ASLayout: %p>, position = %@; size = %@; constrainedSizeRange = %@>",
-            self, NSStringFromCGPoint(self.position), NSStringFromCGSize(self.size), NSStringFromASSizeRange(self.constrainedSizeRange)];
-}
-
 #pragma mark - Layout Flattening
 
 - (ASLayout *)filteredNodeLayoutTree
@@ -234,6 +228,12 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 }
 
 #pragma mark - Description
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<<ASLayout: %p>, layoutable = %@, position = %@; size = %@; constrainedSizeRange = %@>",
+            self, self.layoutableObject, NSStringFromCGPoint(self.position), NSStringFromCGSize(self.size), NSStringFromASSizeRange(self.constrainedSizeRange)];
+}
 
 - (NSString *)recursiveDescription
 {
