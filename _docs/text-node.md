@@ -6,7 +6,7 @@ prevPage: button-node.html
 nextPage: editable-text-node.html
 ---
 
-ASTextNode is ASDK's main text node and can be used any time you would normally use a UILabel.  Includes full rich text support and is a subclass of ASControlNode meaning it can be used any time you would normally create a UIButton with just its titleLabel set.
+`ASTextNode` is AsyncDisplayKit's main text node and can be used any time you would normally use a `UILabel`.  It includes full rich text support and is a subclass of `ASControlNode` meaning it can be used any time you would normally create a UIButton with just its titleLabel set.
 
 ### Basic Usage
 ASTextNode's interface should be familiar to anyone who's used a UILabel.   The first difference you may notice, is that text node's only use attributed strings instead of having the option of using a plain string.
