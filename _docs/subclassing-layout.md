@@ -3,9 +3,6 @@ title: Subclassing
 layout: docs
 permalink: /docs/subclassing-layout.html
 ---
-
-## Where do I put my layout code?
-<br>
 The most important distinction when creating a subclass is whether you writing an ASViewController or an ASDisplayNode. This sounds obvious, but because some of these differences are subtle, it is important to keep this top of mind. 
 
 ## ASViewController
