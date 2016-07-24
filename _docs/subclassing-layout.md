@@ -13,7 +13,7 @@ While subclassing nodes is similar to writing a UIView subclass, there are a few
 
 This method is called on a **background thread** when using nodeBlocks. However, because no other method can run until -init is finished, it should never be necessary to have a lock in this method. 
 
-Because it is run on a background thread, this means you should never initialize any UIKit objects, touch the view or layer of a node (e.g. `node.layer.X` or `node.view.X`) or add any gesture recognizers in your initializer. Instead, do these things in `-didLoad`. 
+The most important thing to remember is that your init method must be capable of being called on any queue. Most notably, this means you should never initialize any UIKit objects, touch the view or layer of a node (e.g. `node.layer.X` or `node.view.X`) or add any gesture recognizers in your initializer. Instead, do these things in `-didLoad`. 
 
 ### `-didLoad`
 
@@ -31,13 +31,11 @@ Because it is run on a background thread, you should not set any `node.view` or 
 
 The call to super in this method is where the results of the layoutSpec are applied; Right after the call to super in this method, the layout spec will have been calculated and all subnodes will have been measured and positioned. 
 
+`-layout` is conceptually similar to UIViewController's `-viewWillLayoutSubviews`. This is a good spot to change the hidden property, set view based properties if needed (not layoutable properties) or set background colors. You could put background color setting in -layoutSpecThatFits:, but there may be timing problems. If you happen to be using any UIViews, you can set their frames here. However, you can always create a node wrapper with `-initWithViewBlock:` and then size this on the background thread elsewhere. 
+
 This method is called on the **main thread**. However, if you are using layout Specs, you shouldn't rely on this method too much, as it is much preferable to do layout off the main thread. Less than 1 in 10 subclasses will need this.
 
-This is a good spot to change the hidden property, set view based properties if needed (not layoutable properties) or set background colors. You could pu background color setting in -layoutSpecThatFits:, but there may be timing problems. 
-
--layout is conceptually similar to UIViewController's `-viewWillLayoutSubviews`. If you happen to be using any UIViews, you can set their frames here. However, you can always create a node wrapper with `-initWithViewBlock:` and then size this on the background thread elsewhere. 
-
-One great use of -layout is for the specific case in which you want a subnode to be your exact size. E.g. when you want a collectionNode to take up the full screen. This case is not supported well by layout specs and it is often easiest to set the frame manually with a single line in this method:
+One great use of `-layout` is for the specific case in which you want a subnode to be your exact size. E.g. when you want a collectionNode to take up the full screen. This case is not supported well by layout specs and it is often easiest to set the frame manually with a single line in this method:
 
 ```
 subnode.frame = self.bounds;
