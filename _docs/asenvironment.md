@@ -10,7 +10,7 @@ nextPage: asrunloopqueue.html
 
 Compared to UIKit, this system is very efficient and one of the reasons why nodes are much lighter weight than UIViews. This is achieved by using simple structures to store data rather than creating objects. For example, `UITraitCollection` is an object, but `ASEnvironmentTraitCollection` is just a struct. 
 
-This means that whenever a node needs to query something about its environment, for example its interface state or checking whether it is part of a rasterized hierarchy (whether any parent has .shouldRasterizeDescendents enabled), instead of climbing the entire tree or checking all of their children below them, they can go to one spot and read the value that was propogated to them. 
+This means that whenever a node needs to query something about its environment, for example to check its interface state or whether it is part of a rasterized hierarchy (whether any parent has .shouldRasterizeDescendents enabled), instead of climbing the entire tree or checking all of its children, it can go to one spot and read the value that was propogated to it. 
 
 A key operating principle of ASEnvironment is to update values when new subnodes are added or removed. 
 
