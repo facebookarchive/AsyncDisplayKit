@@ -28,7 +28,7 @@ please open an issue on GitHub.
 //
 ```
 
-#### example project files header style
+#### Example project files header style
 
 ```
 //
