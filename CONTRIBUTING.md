@@ -14,6 +14,7 @@ please open an issue on GitHub.
 
 *ASDK FILES:*
 
+```
 //
 //  ASPagerFlowLayout.h
 //  AsyncDisplayKit
@@ -25,9 +26,11 @@ please open an issue on GitHub.
 //  LICENSE file in the root directory of this source tree. An additional grant
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
+```
 
 *EXAMPLE PROJECT FILES:*
 
+```
 //
 //  PhotoCellNode.m
 //  Sample
@@ -46,6 +49,7 @@ please open an issue on GitHub.
 //   ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //  
+```
 
 ## Contributor License Agreement ("CLA")
 In order to accept your pull request, we need you to submit a CLA. You only need
