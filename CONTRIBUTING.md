@@ -12,7 +12,7 @@ please open an issue on GitHub.
 6. If you haven't already, complete the Contributor License Agreement ("CLA").
 7. Make sure that any new files conform to the correct file header style below
 
-*ASDK FILES:*
+#### ASDK files header style
 
 ```
 //
@@ -28,7 +28,7 @@ please open an issue on GitHub.
 //
 ```
 
-*EXAMPLE PROJECT FILES:*
+#### example project files header style
 
 ```
 //
