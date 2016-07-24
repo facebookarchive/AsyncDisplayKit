@@ -7,7 +7,7 @@ The most important distinction when creating a subclass is whether you writing a
 
 ## ASViewController
 <br>
-An `ASViewController` is a regular UIViewController subclass that has special features to manage nodes. Since it is a UIViewController subclass, all methods are called on the **main thread** (and you should always create an ASViewController on the main thread). 
+An `ASViewController` is a regular `UIViewController` subclass that has special features to manage nodes. Since it is a UIViewController subclass, all methods are called on the **main thread** (and you should always create an ASViewController on the main thread). 
 
 ###`-init` 
 
