@@ -8,7 +8,7 @@ nextPage: asrunloopqueue.html
 
 `ASEnvironment` is an optimized state propagation system that allows the framework to distrubute a variety of important "evironmental" information up and down the node hierarchy. 
 
-Any object that conforms to the `<ASEnvironment>` protocol can propagate specific states defined in an ASEnvironmentState up and/or down the ASEnvironment tree. To define how merges of States should happen, specific merge functions can be provided.
+Any object that conforms to the `<ASEnvironment>` protocol can propagate specific states defined in an `ASEnvironmentState` up and/or down the ASEnvironment tree. To define how merges of States should happen, specific merge functions can be provided.
 
 Compared to UIKit, this system is very efficient and one of the reasons why nodes are much lighter weight than UIViews. This is achieved by using simple structures to store data rather than creating objects. For example, `UITraitCollection` is an object, but `ASEnvironmentTraitCollection` is just a struct. 
 
