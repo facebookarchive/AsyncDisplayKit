@@ -16,4 +16,4 @@ This means that whenever a node needs to query something about its environment, 
 
 A key operating principle of ASEnvironment is to update values when new subnodes are added or removed. 
 
-**ASEnvironment is currently used internally in the framework.** There is currently no public API available.
+**ASEnvironment is currently used internally in the framework. There is no public API available at this time.**
