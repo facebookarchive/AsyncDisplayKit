@@ -34,11 +34,11 @@ AsyncDisplayKit lets you move image decoding, text sizing and rendering, layout,
 
 ## Getting Help
 
-We use Slack for real-time debugging, community updates, and general talk about ASDK. Signup at http://asdk-slack-auto-invite.herokuapp.com or email AsyncDisplayKit(at)gmail.com to get an invite.
+We use Slack for real-time debugging, community updates, and general talk about ASDK. [Signup](http://asdk-slack-auto-invite.herokuapp.com) youself or email AsyncDisplayKit(at)gmail.com to get an invite.
 
 ## Contributing
 
-We welcome any contributions. See the [CONTRIBUTING file](https://github.com/facebook/AsyncDisplayKit/blob/master/CONTRIBUTING.md) for how to get involved.
+We welcome any contributions. See the [CONTRIBUTING](https://github.com/facebook/AsyncDisplayKit/blob/master/CONTRIBUTING.md) file for how to get involved.
 
 ## License
 
