@@ -23,6 +23,21 @@ extern BOOL CGPointIsNull(CGPoint point)
   return isnan(point.x) && isnan(point.y);
 }
 
+/**
+ * Creates an defined number of "    |" indent blocks for the recursive description.
+ */
+static inline NSString * descriptionIndents(NSUInteger indents)
+{
+  NSMutableString *description = [NSMutableString string];
+  for (NSUInteger i = 0; i < indents; i++) {
+    [description appendString:@"    |"];
+  }
+  if (indents > 0) {
+    [description appendString:@" "];
+  }
+  return description;
+}
+
 @interface ASLayout ()
 
 /**
@@ -139,12 +154,6 @@ extern BOOL CGPointIsNull(CGPoint point)
                                sublayouts:layout.sublayouts];
 }
 
-- (NSString *)description
-{
-    return [NSString stringWithFormat:@"<<ASLayout: %p>, position = %@; size = %@; constrainedSizeRange = %@>",
-            self, NSStringFromCGPoint(self.position), NSStringFromCGSize(self.size), NSStringFromASSizeRange(self.constrainedSizeRange)];
-}
-
 #pragma mark - Layout Flattening
 
 - (ASLayout *)filteredNodeLayoutTree
@@ -216,6 +225,31 @@ extern BOOL CGPointIsNull(CGPoint point)
   subnodeFrame.size = adjustedSize;
   
   return subnodeFrame;
+}
+
+#pragma mark - Description
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<<ASLayout: %p>, layoutable = %@, position = %@; size = %@; constrainedSizeRange = %@>",
+            self, self.layoutableObject, NSStringFromCGPoint(self.position), NSStringFromCGSize(self.size), NSStringFromASSizeRange(self.constrainedSizeRange)];
+}
+
+- (NSString *)recursiveDescription
+{
+  return [self _recursiveDescriptionForLayout:self level:0];
+}
+
+- (NSString *)_recursiveDescriptionForLayout:(ASLayout *)layout level:(NSUInteger)level
+{
+  NSMutableString *description = [NSMutableString string];
+  [description appendString:descriptionIndents(level)];
+  [description appendString:[layout description]];
+  for (ASLayout *sublayout in layout.sublayouts) {
+    [description appendString:@"\n"];
+    [description appendString:[self _recursiveDescriptionForLayout:sublayout level:level + 1]];
+  }
+  return description;
 }
 
 @end
