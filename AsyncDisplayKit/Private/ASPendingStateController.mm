@@ -12,7 +12,6 @@
 
 #import "ASPendingStateController.h"
 #import "ASThread.h"
-#import "ASWeakSet.h"
 #import "ASDisplayNodeInternal.h"
 
 @interface ASPendingStateController()
@@ -24,7 +23,7 @@
   } _flags;
 }
 
-@property (nonatomic, strong, readonly) ASWeakSet<ASDisplayNode *> *dirtyNodes;
+@property (nonatomic, strong, readonly) NSHashTable<ASDisplayNode *> *dirtyNodes;
 @end
 
 @implementation ASPendingStateController
@@ -35,7 +34,7 @@
 {
   self = [super init];
   if (self) {
-    _dirtyNodes = [[ASWeakSet alloc] init];
+    _dirtyNodes = [NSHashTable weakObjectsHashTable];
   }
   return self;
 }
@@ -65,8 +64,8 @@
 {
   ASDisplayNodeAssertMainThread();
   _lock.lock();
-    ASWeakSet *dirtyNodes = _dirtyNodes;
-    _dirtyNodes = [[ASWeakSet alloc] init];
+    NSHashTable *dirtyNodes = _dirtyNodes;
+    _dirtyNodes = [NSHashTable weakObjectsHashTable];
     _flags.pendingFlush = NO;
   _lock.unlock();
 

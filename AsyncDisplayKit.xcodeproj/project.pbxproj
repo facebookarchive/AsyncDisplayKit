@@ -405,10 +405,6 @@
 		CC3B20841C3F76D600798563 /* ASPendingStateController.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20811C3F76D600798563 /* ASPendingStateController.h */; };
 		CC3B20851C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
 		CC3B20861C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
-		CC3B208A1C3F7A5400798563 /* ASWeakSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20871C3F7A5400798563 /* ASWeakSet.h */; };
-		CC3B208B1C3F7A5400798563 /* ASWeakSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20881C3F7A5400798563 /* ASWeakSet.m */; };
-		CC3B208C1C3F7A5400798563 /* ASWeakSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20881C3F7A5400798563 /* ASWeakSet.m */; };
-		CC3B208E1C3F7D0A00798563 /* ASWeakSetTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */; };
 		CC3B20901C3F892D00798563 /* ASBridgedPropertiesTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208F1C3F892D00798563 /* ASBridgedPropertiesTests.mm */; };
 		CC4981B31D1A02BE004E13CC /* ASTableViewThrashTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4981B21D1A02BE004E13CC /* ASTableViewThrashTests.m */; };
 		CC4981BD1D1C7F65004E13CC /* NSIndexSet+ASHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4981BB1D1C7F65004E13CC /* NSIndexSet+ASHelpers.m */; };
@@ -593,7 +589,6 @@
 		F7CE6C9E1D2CDB5800BE4C15 /* ASStackLayoutSpecUtilities.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = ACF6ED461B17847A00DA7C62 /* ASStackLayoutSpecUtilities.h */; };
 		F7CE6C9F1D2CDB5800BE4C15 /* ASStackPositionedLayout.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = ACF6ED471B17847A00DA7C62 /* ASStackPositionedLayout.h */; };
 		F7CE6CA01D2CDB5800BE4C15 /* ASStackUnpositionedLayout.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = ACF6ED491B17847A00DA7C62 /* ASStackUnpositionedLayout.h */; };
-		F7CE6CA11D2CDB5800BE4C15 /* ASWeakSet.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CC3B20871C3F7A5400798563 /* ASWeakSet.h */; };
 		F7CE6CA21D2CDB5800BE4C15 /* ASDefaultPlaybackButton.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */; };
 		F7CE6CA31D2CDB5800BE4C15 /* ASLayoutValidation.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 697C0DE11CF38F28001DE0D4 /* ASLayoutValidation.h */; };
 		F7CE6CA41D2CDB5800BE4C15 /* ASLayoutManager.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = B30BF6501C5964B0004FCD53 /* ASLayoutManager.h */; };
@@ -773,7 +768,6 @@
 				F7CE6C9E1D2CDB5800BE4C15 /* ASStackLayoutSpecUtilities.h in CopyFiles */,
 				F7CE6C9F1D2CDB5800BE4C15 /* ASStackPositionedLayout.h in CopyFiles */,
 				F7CE6CA01D2CDB5800BE4C15 /* ASStackUnpositionedLayout.h in CopyFiles */,
-				F7CE6CA11D2CDB5800BE4C15 /* ASWeakSet.h in CopyFiles */,
 				F7CE6CA21D2CDB5800BE4C15 /* ASDefaultPlaybackButton.h in CopyFiles */,
 				F7CE6CA31D2CDB5800BE4C15 /* ASLayoutValidation.h in CopyFiles */,
 				F7CE6CA41D2CDB5800BE4C15 /* ASLayoutManager.h in CopyFiles */,
@@ -1082,9 +1076,6 @@
 		BDC2D162BD55A807C1475DA5 /* Pods-AsyncDisplayKitTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.profile.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.profile.xcconfig"; sourceTree = "<group>"; };
 		CC3B20811C3F76D600798563 /* ASPendingStateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPendingStateController.h; sourceTree = "<group>"; };
 		CC3B20821C3F76D600798563 /* ASPendingStateController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASPendingStateController.mm; sourceTree = "<group>"; };
-		CC3B20871C3F7A5400798563 /* ASWeakSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASWeakSet.h; sourceTree = "<group>"; };
-		CC3B20881C3F7A5400798563 /* ASWeakSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASWeakSet.m; sourceTree = "<group>"; };
-		CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASWeakSetTests.m; sourceTree = "<group>"; };
 		CC3B208F1C3F892D00798563 /* ASBridgedPropertiesTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASBridgedPropertiesTests.mm; sourceTree = "<group>"; };
 		CC4981B21D1A02BE004E13CC /* ASTableViewThrashTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTableViewThrashTests.m; sourceTree = "<group>"; };
 		CC4981BA1D1C7F65004E13CC /* NSIndexSet+ASHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSIndexSet+ASHelpers.h"; sourceTree = "<group>"; };
@@ -1328,7 +1319,6 @@
 				DBC453211C5FD97200B16017 /* ASDisplayNodeImplicitHierarchyTests.m */,
 				DBC452DD1C5C6A6A00B16017 /* ArrayDiffingTests.m */,
 				CC3B208F1C3F892D00798563 /* ASBridgedPropertiesTests.mm */,
-				CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */,
 				057D02C01AC0A66700C7AC3C /* AsyncDisplayKitTestHost */,
 				056D21501ABCEDA1001107EF /* ASSnapshotTestCase.h */,
 				05EA6FE61AC0966E00E35788 /* ASSnapshotTestCase.mm */,
@@ -1513,8 +1503,6 @@
 				ACF6ED481B17847A00DA7C62 /* ASStackPositionedLayout.mm */,
 				ACF6ED491B17847A00DA7C62 /* ASStackUnpositionedLayout.h */,
 				ACF6ED4A1B17847A00DA7C62 /* ASStackUnpositionedLayout.mm */,
-				CC3B20871C3F7A5400798563 /* ASWeakSet.h */,
-				CC3B20881C3F7A5400798563 /* ASWeakSet.m */,
 				DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */,
 				DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */,
 				8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */,
@@ -1777,7 +1765,6 @@
 				34EFC7791B701D3600AD841F /* ASLayoutSpecUtilities.h in Headers */,
 				B350625C1B010F070018CF92 /* ASLog.h in Headers */,
 				0442850E1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */,
-				CC3B208A1C3F7A5400798563 /* ASWeakSet.h in Headers */,
 				DE8BEAC21C2DF3FC00D57C12 /* ASDelegateProxy.h in Headers */,
 				B35062041B010EFD0018CF92 /* ASMultiplexImageNode.h in Headers */,
 				B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */,
@@ -2096,7 +2083,6 @@
 				257754C41BEE458E00737CA5 /* ASTextNodeWordKerner.m in Sources */,
 				058D0A1A195D050800B7D73C /* ASHighlightOverlayLayer.mm in Sources */,
 				058D0A2B195D050800B7D73C /* ASImageNode+CGExtras.m in Sources */,
-				CC3B208B1C3F7A5400798563 /* ASWeakSet.m in Sources */,
 				058D0A16195D050800B7D73C /* ASImageNode.mm in Sources */,
 				430E7C911B4C23F100697A4C /* ASIndexPath.m in Sources */,
 				ACF6ED231B17843500DA7C62 /* ASInsetLayoutSpec.mm in Sources */,
@@ -2171,7 +2157,6 @@
 				ACF6ED5C1B178DC700DA7C62 /* ASCenterLayoutSpecSnapshotTests.mm in Sources */,
 				9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.mm in Sources */,
 				2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */,
-				CC3B208E1C3F7D0A00798563 /* ASWeakSetTests.m in Sources */,
 				F711994E1D20C21100568860 /* ASDisplayNodeExtrasTests.m in Sources */,
 				ACF6ED5D1B178DC700DA7C62 /* ASDimensionTests.mm in Sources */,
 				058D0A38195D057000B7D73C /* ASDisplayLayerTests.m in Sources */,
@@ -2268,7 +2253,6 @@
 				B35061FF1B010EFD0018CF92 /* ASDisplayNodeExtras.mm in Sources */,
 				B35062011B010EFD0018CF92 /* ASEditableTextNode.mm in Sources */,
 				254C6B881BF94F8A003EC431 /* ASTextKitRenderer.mm in Sources */,
-				CC3B208C1C3F7A5400798563 /* ASWeakSet.m in Sources */,
 				B350621C1B010EFD0018CF92 /* ASFlowLayoutController.mm in Sources */,
 				B350621E1B010EFD0018CF92 /* ASHighlightOverlayLayer.mm in Sources */,
 				9CC606651D24DF9E006581A0 /* NSIndexSet+ASHelpers.m in Sources */,
