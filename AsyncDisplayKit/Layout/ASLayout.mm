@@ -10,6 +10,7 @@
 
 #import "ASLayout.h"
 
+#import "ASDimension.h"
 #import "ASInternalHelpers.h"
 #import "ASLayoutSpecUtilities.h"
 
@@ -136,6 +137,12 @@ extern BOOL CGPointIsNull(CGPoint point)
                                      size:layout.size
                                  position:position
                                sublayouts:layout.sublayouts];
+}
+
+- (NSString *)description
+{
+    return [NSString stringWithFormat:@"<<ASLayout: %p>, position = %@; size = %@; constrainedSizeRange = %@>",
+            self, NSStringFromCGPoint(self.position), NSStringFromCGSize(self.size), NSStringFromASSizeRange(self.constrainedSizeRange)];
 }
 
 #pragma mark - Layout Flattening
