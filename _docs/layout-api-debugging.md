@@ -38,10 +38,14 @@ To provide an intrinisc size for these nodes that lack intrinsic sizes (even if 
 
 ## Have I propogated selected `ASLayoutable` properties from an `ASLayoutable` object to its parent?
 <br>
-Upward propogation of `ASLayoutable` properties from a child to a parent layoutSpec is currently disabled. This can be confusing, espcially for nodes in a single child layoutSpec. `ASLayoutable` properties must be manually set on the node as well as the layoutSpec in this example. Two common examples of this that we see include:
+Upward and downward propogation of `ASLayoutable` properties between a child and its parent layoutSpec is currently disabled. This can be confusing, espcially for nodes in a single child layoutSpec. Depending on the desired UI, in certain cases, `ASLayoutable` properties must be manually set on the layout spec rather than its child.  
 
-- A node (with `.flexGrow` enabled) is wrapped in an inset spec. **Solution:** enable .flexGrow on the inset spec as well.
-- A node (with `.flexGrow` enabled) is wrapped in a static layoutSpec, wrapped in a stack layoutSpec. **Solution:** enable .flexGrow on the static layoutSpec as well.
+Make sure this is the layout effect that you actually desire. For layout specs with multiple children, such as a stack, setting flexShrink on the layout spec itself of course has a very different meaning than on one of the children.
+
+Two common examples of this that we see include:
+
+- A node with `.flexGrow` enabled is wrapped in an inset spec. "It" will not flexGrow. **Solution:** enable .flexGrow on the parent inset spec as well.
+- A node with `.flexGrow` enabled is wrapped in a static layoutSpec, wrapped in a stack layoutSpec. **Solution:** enable .flexGrow on the static layoutSpec as well.
 
 ## When do I use `.preferredFrameSize` vs `.sizeRange`?
 <br>
