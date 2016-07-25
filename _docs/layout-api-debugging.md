@@ -12,8 +12,8 @@ Here are some helpful questions to ask yourself when you encounter any issues co
 <br>
 Certain `ASLayoutable` properties will _only_ apply when the layoutable is a child of a _stack_ spec (the child is called an ASStackLayoutable), while other properties _only_ apply when the layoutable is a child of a _static_ spec (the child is called an ASStaticLayoutable). 
 
-- table of `ASStackLayoutables` [properties](http://asyncdisplaykit.org/docs/automatic-layout-containers.html#asstacklayoutable-properties)
-- table of `ASStaticLayoutable` [properties](http://asyncdisplaykit.org/docs/automatic-layout-containers.html#asstaticlayoutable-properties)
+- table of [`ASStackLayoutables` properties](http://asyncdisplaykit.org/docs/automatic-layout-containers.html#asstacklayoutable-properties)
+- table of [`ASStaticLayoutable` properties](http://asyncdisplaykit.org/docs/automatic-layout-containers.html#asstaticlayoutable-properties)
 
 All ASLayoutable properties can be applied to _any_ layoutable (e.g. any node or layout spec), however certain properties will only take effect depending on the type of the parent layout spec they are wrapped in.
 
