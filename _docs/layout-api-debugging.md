@@ -5,6 +5,8 @@ permalink: /docs/layout-api-debugging.html
 prevPage: automatic-layout-containers.html
 nextPage: layout-api-sizing.html
 ---
+
+Here are some helpful questions to ask yourself when you encounter any issues composing layoutSpecs. 
  
 ## Am I the child of a Stack spec or a Static spec?
 <br>
