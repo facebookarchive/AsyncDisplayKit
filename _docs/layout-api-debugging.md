@@ -15,12 +15,17 @@ Certain `ASLayoutable` properties will _only_ apply when the layoutable is a chi
 - table of `ASStackLayoutables` [properties](http://asyncdisplaykit.org/docs/automatic-layout-containers.html#asstacklayoutable-properties)
 - table of `ASStaticLayoutable` [properties](http://asyncdisplaykit.org/docs/automatic-layout-containers.html#asstaticlayoutable-properties)
 
-
 All ASLayoutable properties can be applied to _any_ layoutable (e.g. any node or layout spec), however certain properties will only take effect depending on the type of the parent layout spec they are wrapped in.
+
+## Have I considered where to set `ASLayoutable` properties?
+<br>
+Let's say you have a node (n1) and you wrap it in a layout spec (s1). If you want to wrap the layout spec (s1) in a stack or static spec (s2), you will need to set all of the properties on the spec (s1) and not the node (n1).
+
+A common examples of this confusion involves flex grow and flex shrink. E.g. a node with `.flexGrow` enabled is wrapped in an inset spec. The inset spec will not grow as we expect. **Solution:** enable `.flexGrow` on the inset spec as well.
 
 ## Have I provided sizes for any node that lacks an intrinsic size?
 <br>
-AsyncDisplayKit's layout pass is recursive, starting at the layout spec returned from `-layoutSpecThatFits:` and proceeding down until it reaches the leaf nodes included in any nested layoutSpecs.
+AsyncDisplayKit's layout pass is recursive, starting at the layout spec returned from `-layoutSpecThatFits:` and proceeding down until it reaches the leaf nodes included in any nested layout specs.
 
 Some leaf nodes have a concept of their own intrinsic size, such as ASTextNode or ASImageNode. A text node knows the length of its formatted string and an ASImageNode knows the size of its static image. Other leaf nodes require an intrinsic size to be set.
 
@@ -32,30 +37,19 @@ Nodes that require the developer to provide an intrinsic size:
 
 To provide an intrinisc size for these nodes that lack intrinsic sizes (even if only momentarily), you can set one of the following:
 
-- set `.preferredFrameSize` for children of stack or static specs.
+- set `.preferredFrameSize` on any node.
 - set `.sizeRange` for children of **static** specs only.
 - implement `-calculateSizeThatFits:` for **custom ASDisplayNode subclasses only**.
 
 *_Note that .preferredFrameSize is not considered by ASTextNodes. Also, setting .sizeRange on a node will override the node's intrinisic size provided by -calculateSizeThatFits:_
 
-## Have I propogated selected `ASLayoutable` properties from an `ASLayoutable` object to its parent?
-<br>
-Upward and downward propogation of `ASLayoutable` properties between a child and its parent layoutSpec is currently disabled. This can be confusing, espcially for nodes in a single child layoutSpec. Depending on the desired UI, in certain cases, `ASLayoutable` properties must be manually set on the layout spec rather than its child.  
-
-Make sure this is the layout effect that you actually desire. For layout specs with multiple children, such as a stack, setting flexShrink on the layout spec itself of course has a very different meaning than on one of the children.
-
-Two common examples of this that we see include:
-
-- A node with `.flexGrow` enabled is wrapped in an inset spec. "It" will not flexGrow. **Solution:** enable .flexGrow on the parent inset spec as well.
-- A node with `.flexGrow` enabled is wrapped in a static layoutSpec, wrapped in a stack layoutSpec. **Solution:** enable .flexGrow on the static layoutSpec as well.
-
 ## When do I use `.preferredFrameSize` vs `.sizeRange`?
 <br>
-Set `.preferredFrameSize` to set a size for the child of any layout spec. Note that setting .preferredFrameSize on an `ASTextNode` will silently fail. We are working on fixing this, but in the meantime, you can wrap the ASTextNode in a static spec and provide it a .sizeRange.
+Set `.preferredFrameSize` to set a size for any node. Note that setting .preferredFrameSize on an `ASTextNode` will silently fail. We are working on fixing this, but in the meantime, you can wrap the ASTextNode in a static spec and provide it a .sizeRange.
 
-If your `ASLayoutable` object (any node or layout spec) is the child of a *static* spec, then you may provide it a `.sizeRange`, consisting of a minimum and maximum constrained size. These sizes can be a specific point value or a relative value, like 70%. 
+Set `.sizeRange` to set a size range for any node or layout spec that is the child of a *static* spec consisting. `.sizeRange` is the *only* way to set a size on a layout spec. Again, when using `.sizeRange`, you *must wrap the layoutable in a static layout spec for it to take effect.* 
 
-For details on the `.sizeRange` property's custom value type, check out our [Layout API Sizing guide](http://asyncdisplaykit.org/docs/layout-api-sizing.html). 
+A `.sizeRange` consists of a minimum and maximum constrained size (these sizes can be a specific point value or a relative value, like 70%). For details on the `.sizeRange` property's custom value type, check out our [Layout API Sizing guide](http://asyncdisplaykit.org/docs/layout-api-sizing.html). 
 
 ## `ASRelativeDimension` vs `ASRelativeSize` vs `ASRelativeSizeRange` vs `ASSizeRange`
 <br>
