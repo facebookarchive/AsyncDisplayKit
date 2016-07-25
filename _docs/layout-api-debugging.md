@@ -8,9 +8,9 @@ nextPage: layout-api-sizing.html
 
 Here are some helpful questions to ask yourself when you encounter any issues composing layoutSpecs. 
  
-## Am I the child of a Stack spec or a Static spec?
+## Am I the child of an `ASStackLayoutSpec` or an `ASStaticLayoutSpec`?
 <br>
-Certain `ASLayoutable` properties will _only_ apply when the layoutable is a child of a _stack_ node (also known as ASStackLayoutable), while other properties _only_ apply when the layoutable is a child of a _static_ node (also known as ASStaticLayoutable). 
+Certain `ASLayoutable` properties will _only_ apply when the layoutable is a child of a _stack_ spec (the child is called an ASStackLayoutable), while other properties _only_ apply when the layoutable is a child of a _static_ spec (the child is called an ASStaticLayoutable). 
 
 - table of `ASStackLayoutables` [properties](http://asyncdisplaykit.org/docs/automatic-layout-containers.html#asstacklayoutable-properties)
 - table of `ASStaticLayoutable` [properties](http://asyncdisplaykit.org/docs/automatic-layout-containers.html#asstaticlayoutable-properties)
@@ -20,7 +20,7 @@ All ASLayoutable properties can be applied to _any_ layoutable (e.g. any node or
 
 ## Have I provided sizes for any node that lacks an intrinsic size?
 <br>
-AsyncDisplayKit's layout pass is recursive, starting at the layoutSpec returned from -layoutSpecThatFits: and proceeding down until it reaches the leaf nodes included in any nested layoutSpecs.
+AsyncDisplayKit's layout pass is recursive, starting at the layout spec returned from `-layoutSpecThatFits:` and proceeding down until it reaches the leaf nodes included in any nested layoutSpecs.
 
 Some leaf nodes have a concept of their own intrinsic size, such as ASTextNode or ASImageNode. A text node knows the length of its formatted string and an ASImageNode knows the size of its static image. Other leaf nodes require an intrinsic size to be set.
 
