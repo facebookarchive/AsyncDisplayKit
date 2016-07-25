@@ -2,7 +2,7 @@
 title: Layout API Sizing
 layout: docs
 permalink: /docs/layout-api-sizing.html
-prevPage: automatic-layout-containers.html
+prevPage: layout-api-debugging.html
 nextPage: layout-transition-api.html
 ---
 

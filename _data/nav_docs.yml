@@ -34,6 +34,7 @@
 - title: Layout
   items:
   - automatic-layout-containers
+  - layout-api-debugging
   - layout-api-sizing
   - layout-transition-api
 - title: Conveniences
