@@ -6,7 +6,9 @@ prevPage: scroll-node.html
 nextPage: layout-api-debugging.html 
 ---
 
-AsyncDisplayKit includes a library of `layoutSpec` components that can be composed to declaratively specify a layout. The **child(ren) of a layoutSpec may be a node, a layoutSpec or a combination of the two types.**  In the below image, an ASStackLayoutSpec (vertical) containing a text node and an image node, is wrapped in another ASStackLayoutSpec (horizontal) with another text node. 
+AsyncDisplayKit includes a library of `layoutSpec` components that can be composed to declaratively specify a layout. 
+
+The **child(ren) of a layoutSpec may be a node, a layoutSpec or a combination of the two types.**  In the below image, an ASStackLayoutSpec (vertical) containing a text node and an image node, is wrapped in another ASStackLayoutSpec (horizontal) with another text node. 
 
 <img src="/static/images/layoutable-types.png">
 
