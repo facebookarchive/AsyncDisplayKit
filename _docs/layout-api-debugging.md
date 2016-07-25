@@ -19,7 +19,7 @@ All ASLayoutable properties can be applied to _any_ layoutable (e.g. any node or
 
 ## Have I considered where to set `ASLayoutable` properties?
 <br>
-Let's say you have a node (n1) and you wrap it in a layout spec (s1). If you want to wrap the layout spec (s1) in a stack or static spec (s2), you will need to set all of the properties on the spec (s1) and not the node (n1).
+Let's say you have a node (`n1`) and you wrap it in a layout spec (`s1`). If you want to wrap the layout spec (`s1`) in a stack or static spec (`s2`), you will need to set all of the properties on the spec (`s1`) and not the node (`n1`).
 
 A common examples of this confusion involves flex grow and flex shrink. E.g. a node with `.flexGrow` enabled is wrapped in an inset spec. The inset spec will not grow as we expect. **Solution:** enable `.flexGrow` on the inset spec as well.
 
