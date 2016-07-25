@@ -277,7 +277,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
     for (_ASHierarchySectionChange *change in _reloadSectionChanges) {
       NSIndexSet *newSections = [change.indexSet as_indexesByMapping:^(NSUInteger idx) {
         NSUInteger newSec = [self newSectionForOldSection:idx];
-        ASDisplayNodeAssert(newSec != NSNotFound, @"Request to reload and delete same section %zu", idx);
+        ASDisplayNodeAssert(newSec != NSNotFound, @"Request to reload and delete same section %tu", idx);
         return newSec;
       }];
       
@@ -356,7 +356,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   NSInteger deletedSectionCount = _deletedSections.count;
   // Assert that the new section count is correct.
   if (newSectionCount != oldSectionCount + insertedSectionCount - deletedSectionCount) {
-    ASFailUpdateValidation(@"Invalid number of sections. The number of sections after the update (%zd) must be equal to the number of sections before the update (%zd) plus or minus the number of sections inserted or deleted (%zu inserted, %zu deleted)", newSectionCount, oldSectionCount, insertedSectionCount, deletedSectionCount);
+    ASFailUpdateValidation(@"Invalid number of sections. The number of sections after the update (%zd) must be equal to the number of sections before the update (%zd) plus or minus the number of sections inserted or deleted (%tu inserted, %tu deleted)", newSectionCount, oldSectionCount, insertedSectionCount, deletedSectionCount);
     return;
   }
   
