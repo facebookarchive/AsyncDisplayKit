@@ -642,12 +642,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(__instanceLock__);
   if (! [self shouldMeasureWithSizeRange:constrainedSize]) {
-    return _layout;
+    return _calculatedLayout;
   }
   
   [self cancelLayoutTransitionsInProgress];
 
-  ASLayout *previousLayout = _layout;
+  ASLayout *previousLayout = _calculatedLayout;
   ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
   
   _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
@@ -679,12 +679,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // Only generate a new layout if:
   // - The current layout is dirty
   // - The passed constrained size is different than the layout's constrained size
-  return ([self _hasDirtyLayout] || !ASSizeRangeEqualToSizeRange(constrainedSize, _layout.constrainedSizeRange));
+  return ([self _hasDirtyLayout] || !ASSizeRangeEqualToSizeRange(constrainedSize, _calculatedLayout.constrainedSizeRange));
 }
 
 - (BOOL)_hasDirtyLayout
 {
-  return _layout == nil || _layout.isDirty;
+  return _calculatedLayout == nil || _calculatedLayout.isDirty;
 }
 
 - (ASLayoutableType)layoutableType
@@ -703,14 +703,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(void(^)())completion
 {
-  if (_layout == nil) {
+  if (_calculatedLayout == nil) {
     // constrainedSizeRange returns a struct and is invalid to call on nil.
     // Defaulting to CGSizeZero can cause negative values in client layout code.
     return;
   }
   
   [self invalidateCalculatedLayout];
-  [self transitionLayoutWithSizeRange:_layout.constrainedSizeRange
+  [self transitionLayoutWithSizeRange:_calculatedLayout.constrainedSizeRange
                              animated:animated
                    shouldMeasureAsync:shouldMeasureAsync
                 measurementCompletion:completion];
@@ -772,7 +772,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         return;
       }
       
-      ASLayout *previousLayout = _layout;
+      ASLayout *previousLayout = _calculatedLayout;
       [self setCalculatedLayout:newLayout];
       
       ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
@@ -944,7 +944,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (_placeholderEnabled && [self _displaysAsynchronously] && self.contents == nil) {
     
     // Zero-sized nodes do not require a placeholder.
-    CGSize layoutSize = (_layout ? _layout.size : CGSizeZero);
+    CGSize layoutSize = (_calculatedLayout ? _calculatedLayout.size : CGSizeZero);
     if (CGSizeEqualToSize(layoutSize, CGSizeZero)) {
       return;
     }
@@ -1122,7 +1122,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   __instanceLock__.lock();
   
-  if (_layout == nil) {
+  if (_calculatedLayout == nil) {
     // Can't proceed without a layout as no constrained size would be available
     __instanceLock__.unlock();
     return;
@@ -1140,11 +1140,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
-  [self measureWithSizeRange:_layout.constrainedSizeRange];
+  [self measureWithSizeRange:_calculatedLayout.constrainedSizeRange];
 
   CGRect oldBounds = self.bounds;
   CGSize oldSize = oldBounds.size;
-  CGSize newSize = _layout.size;
+  CGSize newSize = _calculatedLayout.size;
   
   if (! CGSizeEqualToSize(oldSize, newSize)) {
     self.bounds = (CGRect){ oldBounds.origin, newSize };
@@ -2113,30 +2113,30 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (ASLayout *)calculatedLayout
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return _layout;
+  return _calculatedLayout;
 }
 
-- (void)setCalculatedLayout:(ASLayout *)layout
+- (void)setCalculatedLayout:(ASLayout *)calculatedLayout
 {
   ASDN::MutexLocker l(__instanceLock__);
   
-  ASDisplayNodeAssertTrue(layout.layoutableObject == self);
-  ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
-  ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
+  ASDisplayNodeAssertTrue(calculatedLayout.layoutableObject == self);
+  ASDisplayNodeAssertTrue(calculatedLayout.size.width >= 0.0);
+  ASDisplayNodeAssertTrue(calculatedLayout.size.height >= 0.0);
   
-  _layout = layout;
+  _calculatedLayout = calculatedLayout;
 }
 
 - (CGSize)calculatedSize
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return _layout.size;
+  return _calculatedLayout.size;
 }
 
 - (ASSizeRange)constrainedSizeForCalculatedLayout
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return _layout.constrainedSizeRange;
+  return _calculatedLayout.constrainedSizeRange;
 }
 
 - (void)setLayoutSpecBlock:(ASLayoutSpecBlock)layoutSpecBlock
@@ -2193,7 +2193,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
   // This will cause the next call to -measureWithSizeRange: to actually compute a new layout
   // instead of returning the current layout
-  _layout.dirty = YES;
+  _calculatedLayout.dirty = YES;
 }
 
 - (void)__didLoad
@@ -2560,7 +2560,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)_applyLayout:(ASLayout *)layout layoutTransition:(ASLayoutTransition *)layoutTransition
 {
   ASDN::MutexLocker l(__instanceLock__);
-  _layout = layout;
+  _calculatedLayout = layout;
   
   ASDisplayNodeAssertTrue(layout.layoutableObject == self);
   ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
@@ -2597,7 +2597,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)__layoutSublayouts
 {
-  for (ASLayout *subnodeLayout in _layout.sublayouts) {
+  for (ASLayout *subnodeLayout in _calculatedLayout.sublayouts) {
     ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
   }
 }

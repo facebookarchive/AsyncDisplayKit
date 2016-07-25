@@ -116,7 +116,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   CGFloat _contentsScaleForDisplay;
 
   ASEnvironmentState _environmentState;
-  ASLayout *_layout;
+  ASLayout *_calculatedLayout;
 
 
   UIEdgeInsets _hitTestSlop;
