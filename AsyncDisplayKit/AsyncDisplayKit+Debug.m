@@ -13,6 +13,7 @@
 #import "AsyncDisplayKit+Debug.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeExtras.h"
+#import "UIImage+ASConvenience.h"
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASWeakSet.h>
 #import <AsyncDisplayKit/CGRect+ASConvenience.h>
@@ -573,15 +574,14 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 
 #pragma mark _ASRangeDebugBarView
 
-
 @implementation _ASRangeDebugBarView
 {
-  ASImageNode       *_visibleRect;
-  ASImageNode       *_displayRect;
-  ASImageNode       *_fetchDataRect;
   ASTextNode        *_debugText;
   ASTextNode        *_leftDebugText;
   ASTextNode        *_rightDebugText;
+  ASImageNode       *_visibleRect;
+  ASImageNode       *_displayRect;
+  ASImageNode       *_fetchDataRect;
   CGFloat           _visibleRatio;
   CGFloat           _displayRatio;
   CGFloat           _fetchDataRatio;
@@ -594,38 +594,16 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 - (instancetype)initWithRangeController:(ASRangeController *)rangeController
 {
   self = [super initWithFrame:CGRectZero];
- 
   if (self) {
     _firstLayoutOfRects = YES;
     _rangeController    = rangeController;
     _debugText          = [self createDebugTextNode];
     _leftDebugText      = [self createDebugTextNode];
     _rightDebugText     = [self createDebugTextNode];
-  
-    _fetchDataRect = [[ASImageNode alloc] init];
-    _fetchDataRect.image = [_ASRangeDebugBarView resizableRoundedImageWithCornerRadius:3
-                                                                                 scale:[[UIScreen mainScreen] scale]
-                                                                       backgroundColor:nil
-                                                                             fillColor:[[UIColor orangeColor] colorWithAlphaComponent:0.5]
-                                                                           borderColor:[[UIColor blackColor] colorWithAlphaComponent:0.9]];
-    [self addSubview:_fetchDataRect.view];
-    
-    _visibleRect = [[ASImageNode alloc] init];
-    _visibleRect.image = [_ASRangeDebugBarView resizableRoundedImageWithCornerRadius:3
-                                                                               scale:[[UIScreen mainScreen] scale]
-                                                                     backgroundColor:nil
-                                                                           fillColor:[[UIColor greenColor] colorWithAlphaComponent:0.5]
-                                                                         borderColor:[[UIColor blackColor] colorWithAlphaComponent:0.9]];
-    [self addSubview:_visibleRect.view];
-    
-    _displayRect = [[ASImageNode alloc] init];
-    _displayRect.image = [_ASRangeDebugBarView resizableRoundedImageWithCornerRadius:3
-                                                                               scale:[[UIScreen mainScreen] scale]
-                                                                     backgroundColor:nil
-                                                                           fillColor:[[UIColor yellowColor] colorWithAlphaComponent:0.5]
-                                                                         borderColor:[[UIColor blackColor] colorWithAlphaComponent:0.9]];
-    [self addSubview:_displayRect.view];
-    }
+    _fetchDataRect      = [self createRangeNodeWithColor:[UIColor orangeColor]];
+    _displayRect        = [self createRangeNodeWithColor:[UIColor yellowColor]];
+    _visibleRect        = [self createRangeNodeWithColor:[UIColor greenColor]];
+  }
   
   return self;
 }
@@ -706,21 +684,14 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
          leadingFetchDataRatio:(CGFloat)leadingFetchDataRatio
                      direction:(ASScrollDirection)scrollDirection
 {
-  _visibleRatio = visibleRatio;
-  _displayRatio = displayRatio;
-  _leadingDisplayRatio = leadingDisplayRatio;
-  _fetchDataRatio = fetchDataRatio;
+  _visibleRatio          = visibleRatio;
+  _displayRatio          = displayRatio;
+  _leadingDisplayRatio   = leadingDisplayRatio;
+  _fetchDataRatio        = fetchDataRatio;
   _leadingFetchDataRatio = leadingFetchDataRatio;
-  _scrollDirection = scrollDirection;
+  _scrollDirection       = scrollDirection;
   
   [self setNeedsLayout];
-}
-
-- (ASTextNode *)createDebugTextNode
-{
-  ASTextNode *label = [[ASTextNode alloc] init];
-  [self addSubnode:label];
-  return label;
 }
 
 - (void)setBarSubviewOrder
@@ -745,98 +716,64 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   
   switch (_scrollDirection) {
     case ASScrollDirectionLeft:
-      _leftDebugText.hidden = NO;
-      _leftDebugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:@"◀︎" withSize:size];
-      _rightDebugText.hidden = YES;
+      [self setTextNode:_leftDebugText hidden:NO withString:@"◀︎" withSize:size];
+      [self setTextNode:_rightDebugText hidden:YES withString:nil withSize:size];
       break;
     case ASScrollDirectionRight:
-      _leftDebugText.hidden = YES;
-      _rightDebugText.hidden = NO;
-      _rightDebugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:@"▶︎" withSize:size];
+      [self setTextNode:_leftDebugText hidden:YES withString:nil withSize:size];
+      [self setTextNode:_rightDebugText hidden:NO withString:@"▶︎" withSize:size];
       break;
     case ASScrollDirectionUp:
-      _leftDebugText.hidden = NO;
-      _leftDebugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:@"▲" withSize:size];
-      _rightDebugText.hidden = YES;
+      [self setTextNode:_leftDebugText hidden:NO withString:@"▲" withSize:size];
+      [self setTextNode:_rightDebugText hidden:YES withString:nil withSize:size];
       break;
     case ASScrollDirectionDown:
-      _leftDebugText.hidden = YES;
-      _rightDebugText.hidden = NO;
-      _rightDebugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:@"▼" withSize:size];
+      [self setTextNode:_leftDebugText hidden:YES withString:nil withSize:size];
+      [self setTextNode:_rightDebugText hidden:NO withString:@"▼" withSize:size];
       break;
     case ASScrollDirectionNone:
-      _leftDebugText.hidden = YES;
-      _rightDebugText.hidden = YES;
-      break;
     default:
+      [self setTextNode:_leftDebugText hidden:YES withString:nil withSize:size];
+      [self setTextNode:_rightDebugText hidden:YES withString:nil withSize:size];
       break;
   }
+}
+
+- (void)setTextNode:(ASTextNode *)textNode hidden:(BOOL)hidden withString:(NSString *)string withSize:(CGFloat)size
+{
+  textNode.hidden = hidden;
+  textNode.attributedString = string ? [_ASRangeDebugBarView whiteAttributedStringFromString:string withSize:size] : nil;
+}
+
+- (ASTextNode *)createDebugTextNode
+{
+  ASTextNode *label = [[ASTextNode alloc] init];
+  [self addSubnode:label];
+  return label;
+}
+
+#define RANGE_BAR_CORNER_RADIUS 3
+#define RANGE_BAR_BORDER_WIDTH 1
+- (ASDisplayNode *)createRangeNodeWithColor:(UIColor *)color
+{
+    ASImageNode *rangeBarImageNode = [[ASImageNode alloc] init];
+    rangeBarImageNode.image = [UIImage as_resizableRoundedImageWithCornerRadius:RANGE_BAR_CORNER_RADIUS
+                                                                    cornerColor:[UIColor clearColor]
+                                                                      fillColor:[color colorWithAlphaComponent:0.5]
+                                                                    borderColor:[[UIColor blackColor] colorWithAlphaComponent:0.9]
+                                                                    borderWidth:RANGE_BAR_BORDER_WIDTH
+                                                                 roundedCorners:UIRectCornerAllCorners
+                                                                          scale:[[UIScreen mainScreen] scale]];
+    [self addSubnode:rangeBarImageNode];
+  
+    return rangeBarImageNode;
 }
 
 + (NSAttributedString *)whiteAttributedStringFromString:(NSString *)string withSize:(CGFloat)size
 {
   NSDictionary *attributes = @{NSForegroundColorAttributeName : [UIColor whiteColor],
-                               NSFontAttributeName : [UIFont systemFontOfSize:size]};
+                               NSFontAttributeName            : [UIFont systemFontOfSize:size]};
   return [[NSAttributedString alloc] initWithString:string attributes:attributes];
-}
-
-+ (UIImage *)resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
-                                             scale:(CGFloat)scale
-                                   backgroundColor:(UIColor *)backgroundColor
-                                         fillColor:(UIColor *)fillColor
-                                       borderColor:(UIColor *)borderColor
-{
-  static NSCache *__pathCache = nil;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    __pathCache = [[NSCache alloc] init];
-  });
-  
-  CGFloat dimension   = (cornerRadius * 2) + 1;
-  CGRect bounds       = CGRectMake(0, 0, dimension, dimension);
-  
-  NSNumber *pathKey   = [NSNumber numberWithFloat:cornerRadius];
-  UIBezierPath *path  = nil;
-  
-  @synchronized(__pathCache) {
-    path = [__pathCache objectForKey:pathKey];
-    if (!path) {
-      path = [UIBezierPath bezierPathWithRoundedRect:bounds cornerRadius:cornerRadius];
-      [__pathCache setObject:path forKey:pathKey];
-    }
-  }
-  
-  UIGraphicsBeginImageContextWithOptions(bounds.size, backgroundColor != nil, scale);
-  
-  if (backgroundColor) {
-    [backgroundColor setFill];
-    // Copy "blend" mode is extra fast because it disregards any value currently in the buffer and overwrites directly.
-    UIRectFillUsingBlendMode(bounds, kCGBlendModeCopy);
-  }
-  
-  [fillColor setFill];
-  [path fill];
-  
-  if (borderColor) {
-    [borderColor setStroke];
-    
-    CGFloat lineWidth = 1.0 / scale;
-    CGRect strokeRect = CGRectInset(bounds, lineWidth / 2.0, lineWidth / 2.0);
-    
-    // It is rarer to have a stroke path, and our cache key only handles rounded rects for the exact-stretchable
-    // size calculated by cornerRadius, so we won't bother caching this path.  Profiling validates this decision.
-    UIBezierPath *strokePath = [UIBezierPath bezierPathWithRoundedRect:strokeRect cornerRadius:cornerRadius];
-    [strokePath setLineWidth:lineWidth];
-    [strokePath stroke];
-  }
-  
-  UIImage *result = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  
-  UIEdgeInsets capInsets = UIEdgeInsetsMake(cornerRadius, cornerRadius, cornerRadius, cornerRadius);
-  result = [result resizableImageWithCapInsets:capInsets resizingMode:UIImageResizingModeStretch];
-  
-  return result;
 }
 
 @end
