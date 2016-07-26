@@ -20,6 +20,7 @@
 #import "TextStyles.h"
 #import "LikesNode.h"
 #import "CommentsNode.h"
+#import "ASRelativeSize.h"
 
 #define PostNodeDividerColor [UIColor lightGrayColor]
 
@@ -237,14 +238,25 @@
     [mainStackContent addObject:nameStack];
     [mainStackContent addObject:_postNode];
     
-    if (![_post.media isEqualToString:@""]) {
-        CGFloat imageRatio = (_mediaNode.image != nil ? _mediaNode.image.size.height / _mediaNode.image.size.width : 0.5);
-        ASRatioLayoutSpec *imagePlace = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:imageRatio child:_mediaNode];
-        imagePlace.spacingAfter = 3.0;
-        imagePlace.spacingBefore = 3.0;
+    
+    if (![_post.media isEqualToString:@""]){
         
-        [mainStackContent addObject:imagePlace];
-        
+        // 1. Way: Only add the media node if an image is present
+        if (_mediaNode.image != nil) {
+            
+            // 2. Way: Add the media node but set the size based if image is already loaded
+            /*CGSize maxSize = _mediaNode.image != nil ? constrainedSize.max : CGSizeZero;
+            _mediaNode.size = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero),
+                                                      ASRelativeSizeMakeWithCGSize(maxSize));*/
+            
+            
+            CGFloat imageRatio = (_mediaNode.image != nil ? _mediaNode.image.size.height / _mediaNode.image.size.width : 0.5);
+            ASRatioLayoutSpec *imagePlace = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:imageRatio child:_mediaNode];
+            imagePlace.spacingAfter = 3.0;
+            imagePlace.spacingBefore = 3.0;
+            
+            [mainStackContent addObject:imagePlace];
+        }
     }
     [mainStackContent addObject:controlsStack];
     

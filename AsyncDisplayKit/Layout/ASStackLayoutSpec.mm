@@ -118,11 +118,11 @@
   _baselineRelativeArrangement = baselineRelativeArrangement;
 }
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   if (self.children.count == 0) {
     return [ASLayout layoutWithLayoutableObject:self
-                           constrainedSizeRange:constrainedSize
+                                constrainedSize:constrainedSize
                                            size:constrainedSize.min];
   }
   
@@ -162,7 +162,7 @@
   }
   
   return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
+                              constrainedSize:constrainedSize
                                          size:ASSizeRangeClamp(constrainedSize, finalSize)
                                    sublayouts:sublayouts];
 }

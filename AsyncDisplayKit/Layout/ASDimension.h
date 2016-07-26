@@ -12,12 +12,23 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
-/** A dimension relative to constraints to be provided in the future. */
+/**
+ * A dimension relative to constraints to be provided in the future.
+ * A RelativeDimension can be one of three types:
+ *
+ * "Auto" - This indicated "I have no opinion" and may be resolved in whatever way makes most sense given the circumstances.
+ *
+ * "Points" - Just a number. It will always resolve to exactly this amount.
+ *
+ * "Percent" - Multiplied to a provided parent amount to resolve a final amount.
+ */
 typedef NS_ENUM(NSInteger, ASRelativeDimensionType) {
   /** Just a number. It will always resolve to exactly this amount. This is the default type. */
   ASRelativeDimensionTypePoints,
   /** Multiplied to a provided parent amount to resolve a final amount. */
   ASRelativeDimensionTypeFraction,
+  /** This indicated "I have no opinion" and may be resolved in whatever way makes most sense given the circumstances. */
+  ASRelativeDimensionTypeAuto,
 };
 
 typedef struct {
@@ -32,6 +43,7 @@ typedef struct {
 } ASSizeRange;
 
 extern ASRelativeDimension const ASRelativeDimensionUnconstrained;
+extern ASRelativeDimension const ASRelativeDimensionAuto;
 
 #define isValidForLayout(x) ((isnormal(x) || x == 0.0) && x >= 0.0 && x < (CGFLOAT_MAX / 2.0))
 
@@ -52,14 +64,14 @@ extern BOOL ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimension lhs,
 
 extern NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension);
 
-extern CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat parent);
+extern CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSize, CGFloat parent);
 
 #pragma mark - ASSizeRange
 
 extern ASSizeRange ASSizeRangeMake(CGSize min, CGSize max);
 
 /** Creates an ASSizeRange with the provided size as both min and max */
-extern ASSizeRange ASSizeRangeMakeExactSize(CGSize size);
+extern ASSizeRange ASSizeRangeMakeWithExactCGSize(CGSize size);
 
 /** Clamps the provided CGSize between the [min, max] bounds of this ASSizeRange. */
 extern CGSize ASSizeRangeClamp(ASSizeRange sizeRange, CGSize size);
@@ -73,6 +85,12 @@ extern ASSizeRange ASSizeRangeIntersect(ASSizeRange sizeRange, ASSizeRange other
 extern BOOL ASSizeRangeEqualToSizeRange(ASSizeRange lhs, ASSizeRange rhs);
 
 extern NSString *NSStringFromASSizeRange(ASSizeRange sizeRange);
+
+
+#pragma mark - Deprecated
+
+/** Function is deprecated please use ASSizeRangeMakeWithExactCGSize*/
+extern ASSizeRange ASSizeRangeMakeExactSize(CGSize size);
 
 NS_ASSUME_NONNULL_END
 ASDISPLAYNODE_EXTERN_C_END

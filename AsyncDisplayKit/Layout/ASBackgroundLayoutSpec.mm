@@ -39,16 +39,19 @@ static NSUInteger const kBackgroundChildIndex = 1;
 }
 
 /**
- First layout the contents, then fit the background image.
+ * First layout the contents, then fit the background image.
  */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+                restrictedToSizeRange:(ASRelativeSizeRange)size
+                 relativeToParentSize:(CGSize)parentSize
 {
-  ASLayout *contentsLayout = [[self child] measureWithSizeRange:constrainedSize];
+  ASLayout *contentsLayout = [self.child calculateLayoutThatFits:constrainedSize parentSize:parentSize];
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:2];
   if (self.background) {
     // Size background to exactly the same size.
-    ASLayout *backgroundLayout = [self.background measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
+    ASLayout *backgroundLayout = [self.background calculateLayoutThatFits:{contentsLayout.size, contentsLayout.size}
+                                                               parentSize:parentSize];
     backgroundLayout.position = CGPointZero;
     [sublayouts addObject:backgroundLayout];
   }
@@ -56,7 +59,7 @@ static NSUInteger const kBackgroundChildIndex = 1;
   [sublayouts addObject:contentsLayout];
 
   return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
+                              constrainedSize:constrainedSize
                                          size:contentsLayout.size
                                    sublayouts:sublayouts];
 }

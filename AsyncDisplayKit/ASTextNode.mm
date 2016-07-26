@@ -26,6 +26,7 @@
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
+#import "ASDimension.h"
 
 #import "CGRect+ASConvenience.h"
 
@@ -401,7 +402,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   size.width += (_textContainerInset.left + _textContainerInset.right);
   size.height += (_textContainerInset.top + _textContainerInset.bottom);
   
-  return size;
+  return CGSizeMake(fminf(size.width, constrainedSize.width), fminf(size.height, constrainedSize.height));
 }
 
 #pragma mark - Modifying User Text

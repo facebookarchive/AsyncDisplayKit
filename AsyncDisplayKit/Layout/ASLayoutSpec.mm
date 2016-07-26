@@ -11,6 +11,7 @@
 #import "ASLayoutSpec.h"
 
 #import "ASAssert.h"
+#import "ASInternalHelpers.h"
 #import "ASEnvironmentInternal.h"
 
 #import "ASLayout.h"
@@ -24,6 +25,7 @@
 typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASChildMap;
 
 @interface ASLayoutSpec() {
+  ASRelativeSizeRange _size;
   ASEnvironmentState _environmentState;
   ASDN::RecursiveMutex __instanceLock__;
   ASChildMap _children;
@@ -33,9 +35,22 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 @implementation ASLayoutSpec
 
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
-@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis,
+@dynamic size, spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis,
          alignSelf, ascender, descender, sizeRange, layoutPosition, layoutableType;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
+
+#pragma mark - Class
+
++ (void)initialize
+{
+  [super initialize];
+  if (self != [ASLayoutSpec class]) {
+    ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASLayoutSpec class], self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange: method. Instead overwrite calculateLayoutThatFits:", NSStringFromClass(self));
+  }
+}
+
+
+#pragma mark - Lifecycle
 
 - (instancetype)init
 {
@@ -43,6 +58,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
     return nil;
   }
   _isMutable = YES;
+  _size = ASRelativeSizeRangeAuto;
   _environmentState = ASEnvironmentStateMakeDefault();
   return self;
 }
@@ -59,11 +75,39 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 
 #pragma mark - Layout
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (ASRelativeSizeRange)size
 {
-  return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
-                                         size:constrainedSize.min];
+  return _size;
+}
+
+- (void)setSize:(ASRelativeSizeRange)size
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if (ASRelativeSizeRangeEqualToRelativeSizeRange(_size, size) == NO) {
+    _size = size;
+  }
+}
+
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
+{
+  return [self calculateLayoutThatFits:constrainedSize
+                 restrictedToSizeRange:_size
+                  relativeToParentSize:parentSize];
+}
+
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+                restrictedToSizeRange:(ASRelativeSizeRange)size
+                 relativeToParentSize:(CGSize)parentSize
+{
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(ASRelativeSizeRangeResolve(_size, parentSize), constrainedSize);
+  return [self calculateLayoutThatFits:resolvedRange];
+}
+
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+{
+    return [ASLayout layoutWithLayoutableObject:self
+                                constrainedSize:constrainedSize
+                                           size:constrainedSize.min];
 }
 
 - (id<ASLayoutable>)finalLayoutable
@@ -229,6 +273,13 @@ ASEnvironmentLayoutExtensibilityForwarding
 {
   ASDN::MutexLocker l(__instanceLock__);
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
+}
+
+#pragma mark - Deprecated
+
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+{
+  return ASCalculateRootLayout(self, constrainedSize);
 }
 
 @end
