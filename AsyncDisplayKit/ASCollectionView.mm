@@ -1059,11 +1059,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return ASInterfaceStateForDisplayNode(self.collectionNode, self.window);
 }
 
-- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
-{
-  return [_dataController nodesAtIndexPaths:indexPaths];
-}
-
 - (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath
 {
   return [_dataController nodeAtIndexPath:indexPath];

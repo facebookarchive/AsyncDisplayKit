@@ -37,14 +37,6 @@ FOUNDATION_EXPORT BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRan
 
 @optional
 
-- (void)insertNodesAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withSizes:(NSArray<NSValue *> *)nodeSizes;
-
-- (void)deleteNodesAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
-
-- (void)insertSections:(NSArray<NSArray <ASCellNode *>*> *)sections atIndexSet:(NSIndexSet *)indexSet;
-
-- (void)deleteSectionsAtIndexSet:(NSIndexSet *)indexSet;
-
 - (void)setVisibleNodeIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
 
 - (void)setViewportSize:(CGSize)viewportSize;

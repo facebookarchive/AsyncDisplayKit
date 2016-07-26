@@ -145,4 +145,13 @@ extern BOOL CGPointIsNull(CGPoint point);
 
 @end
 
+@interface ASLayout (Debugging)
+
+/**
+ * Recrusively output the description of the layout tree.
+ */
+- (NSString *)recursiveDescription;
+
+@end
+
 NS_ASSUME_NONNULL_END

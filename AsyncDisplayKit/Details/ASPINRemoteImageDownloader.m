@@ -178,10 +178,10 @@
     
     /// If we're targeting the main queue and we're on the main thread, call immediately.
     if (ASDisplayNodeThreadIsMain() && callbackQueue == dispatch_get_main_queue()) {
-      downloadProgress(totalBytes / (CGFloat)completedBytes);
+      downloadProgress(completedBytes / (CGFloat)totalBytes);
     } else {
       dispatch_async(callbackQueue, ^{
-        downloadProgress(totalBytes / (CGFloat)completedBytes);
+        downloadProgress(completedBytes / (CGFloat)totalBytes);
       });
     }
   } completion:^(PINRemoteImageManagerResult * _Nonnull result) {
@@ -214,6 +214,10 @@
 
 - (void)cancelImageDownloadForIdentifier:(id)downloadIdentifier
 {
+  if (!downloadIdentifier) {
+    return;
+  }
+  
   ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
   [[self sharedPINRemoteImageManager] cancelTaskWithUUID:downloadIdentifier];
 }

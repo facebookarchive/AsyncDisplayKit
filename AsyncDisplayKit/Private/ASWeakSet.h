@@ -35,10 +35,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray *)allObjects;
 
 /**
- How many objects are contained in this set.
+ * How many objects are contained in this set.
  
- NOTE: This method is O(N). Consider using the `empty`
- property.
+ * NOTE: This computed property is O(N). Consider using the `empty` property.
  */
 @property (nonatomic, readonly) NSUInteger count;
 

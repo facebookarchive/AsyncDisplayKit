@@ -181,8 +181,6 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
 
-- (NSArray<ASCellNode *> *)nodesAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
-
 /**
  * Direct access to the nodes that have completed calculation and layout
  */
