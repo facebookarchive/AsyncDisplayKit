@@ -447,6 +447,12 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   CGRect displayRect   = CGRectExpandToRangeWithScrollableDirections(boundsRect, displayTuningParameters,     scrollableDirections, scrollDirection);
   CGRect fetchDataRect = CGRectExpandToRangeWithScrollableDirections(boundsRect, fetchDataTuningParameters,   scrollableDirections, scrollDirection);
   
+  ASDirectionalScreenfulBuffer directionalBuffer = { 0, 0 };
+  if (scrollDirection == ASScrollDirectionRight) {
+    directionalBuffer = ASDirectionalScreenfulBufferHorizontal(scrollDirection, displayTuningParameters);
+  } else {
+    directionalBuffer = ASDirectionalScreenfulBufferVertical(scrollDirection, displayTuningParameters);
+  }
   
   // figure out which is biggest and assume that is full bounds
   BOOL displayRangeLargerThanFetch    = NO;
@@ -731,7 +737,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 - (void)setBarDebugLabelsWithSize:(CGFloat)size
 {
   if (!_debugString) {
-    _debugString = NSStringFromClass([[_rangeController dataSource] class]);
+    _debugString = [[_rangeController dataSource] nameForRangeControllerDataSource];
   }
   if (_debugString) {
     _debugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:_debugString withSize:size];

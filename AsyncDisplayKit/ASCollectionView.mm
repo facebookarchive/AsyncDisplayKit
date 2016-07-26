@@ -1064,6 +1064,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return [_dataController nodeAtIndexPath:indexPath];
 }
 
+- (NSString *)nameForRangeControllerDataSource
+{
+  return self.asyncDataSource ? NSStringFromClass([self.asyncDataSource class]) : NSStringFromClass([self class]);
+}
+
 #pragma mark - ASRangeControllerDelegate
 
 - (void)didBeginUpdatesInRangeController:(ASRangeController *)rangeController

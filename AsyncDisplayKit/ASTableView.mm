@@ -913,6 +913,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return ASInterfaceStateForDisplayNode(self.tableNode, self.window);
 }
 
+- (NSString *)nameForRangeControllerDataSource
+{
+  return self.asyncDataSource ? NSStringFromClass([self.asyncDataSource class]) : NSStringFromClass([self class]);
+}
+
 #pragma mark - ASRangeControllerDelegate
 
 - (void)didBeginUpdatesInRangeController:(ASRangeController *)rangeController
