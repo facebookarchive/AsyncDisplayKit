@@ -24,8 +24,7 @@
 
 - (void)beginUpdates
 {
-  // NOTE: This assertion is failing in some apps and will be enabled soon.
-//  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertMainThread();
   if (_changeSetBatchUpdateCounter <= 0) {
     _changeSetBatchUpdateCounter = 0;
     _changeSet = [[_ASHierarchyChangeSet alloc] initWithOldData:[self itemCountsFromDataSource]];
@@ -35,13 +34,11 @@
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
-  // NOTE: This assertion is failing in some apps and will be enabled soon.
-//  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertMainThread();
   _changeSetBatchUpdateCounter--;
   
   // Prevent calling endUpdatesAnimated:completion: in an unbalanced way
-  // NOTE: This assertion is failing in some apps and will be enabled soon.
-//  NSAssert(_changeSetBatchUpdateCounter >= 0, @"endUpdatesAnimated:completion: called without having a balanced beginUpdates call");
+  NSAssert(_changeSetBatchUpdateCounter >= 0, @"endUpdatesAnimated:completion: called without having a balanced beginUpdates call");
   
   if (_changeSetBatchUpdateCounter == 0) {
     if (!self.initialReloadDataHasBeenCalled) {
