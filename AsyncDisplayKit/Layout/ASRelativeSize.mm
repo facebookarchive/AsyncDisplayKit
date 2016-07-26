@@ -11,6 +11,8 @@
 #import "ASRelativeSize.h"
 
 ASRelativeSizeRange const ASRelativeSizeRangeUnconstrained = {};
+ASRelativeSizeRange const ASRelativeSizeRangeAuto = {{ASRelativeDimensionAuto, ASRelativeDimensionAuto},
+                                                     {ASRelativeDimensionAuto, ASRelativeDimensionAuto}};
 
 #pragma mark - ASRelativeSize
 
@@ -31,10 +33,10 @@ ASRelativeSize ASRelativeSizeMakeWithFraction(CGFloat fraction)
                             ASRelativeDimensionMakeWithFraction(fraction));
 }
 
-CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize)
+CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize, CGSize autoSize)
 {
-  return CGSizeMake(ASRelativeDimensionResolve(relativeSize.width, parentSize.width),
-                    ASRelativeDimensionResolve(relativeSize.height, parentSize.height));
+  return CGSizeMake(ASRelativeDimensionResolve(relativeSize.width, autoSize.width, parentSize.width),
+                    ASRelativeDimensionResolve(relativeSize.height, autoSize.height, parentSize.height));
 }
 
 BOOL ASRelativeSizeEqualToRelativeSize(ASRelativeSize lhs, ASRelativeSize rhs)
@@ -55,6 +57,16 @@ NSString *NSStringFromASRelativeSize(ASRelativeSize size)
 ASRelativeSizeRange ASRelativeSizeRangeMake(ASRelativeSize min, ASRelativeSize max)
 {
   ASRelativeSizeRange sizeRange; sizeRange.min = min; sizeRange.max = max; return sizeRange;
+}
+
+ASRelativeSizeRange ASRelativeSizeRangeMakeWithRelativeDimensions(ASRelativeDimension minWidthDimension,
+                                                                  ASRelativeDimension minHeightDimension,
+                                                                  ASRelativeDimension maxWidthDimension,
+                                                                  ASRelativeDimension maxHeightDimension)
+{
+  return ASRelativeSizeRangeMake(ASRelativeSizeMake(minWidthDimension, minHeightDimension),
+                                 ASRelativeSizeMake(maxWidthDimension, maxHeightDimension));
+  
 }
 
 ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeSize(ASRelativeSize exact)
@@ -83,9 +95,8 @@ BOOL ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRange lhs, ASRela
   return ASRelativeSizeEqualToRelativeSize(lhs.min, rhs.min) && ASRelativeSizeEqualToRelativeSize(lhs.max, rhs.max);
 }
 
-ASSizeRange ASRelativeSizeRangeResolve(ASRelativeSizeRange relativeSizeRange,
-                                                CGSize parentSize)
+ASSizeRange ASRelativeSizeRangeResolve(ASRelativeSizeRange relativeSizeRange, CGSize parentSize)
 {
-  return ASSizeRangeMake(ASRelativeSizeResolveSize(relativeSizeRange.min, parentSize),
-                         ASRelativeSizeResolveSize(relativeSizeRange.max, parentSize));
+  return ASSizeRangeMake(ASRelativeSizeResolveSize(relativeSizeRange.min, parentSize, {0, 0}),
+                         ASRelativeSizeResolveSize(relativeSizeRange.max, parentSize, {CGFLOAT_MAX, CGFLOAT_MAX}));
 }

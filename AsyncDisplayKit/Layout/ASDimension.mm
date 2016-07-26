@@ -12,6 +12,7 @@
 #import "ASAssert.h"
 
 ASRelativeDimension const ASRelativeDimensionUnconstrained = {};
+ASRelativeDimension const ASRelativeDimensionAuto = {ASRelativeDimensionTypeAuto, 0};
 
 #pragma mark - ASRelativeDimension
 
@@ -55,16 +56,20 @@ NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension)
       return [NSString stringWithFormat:@"%.0fpt", dimension.value];
     case ASRelativeDimensionTypeFraction:
       return [NSString stringWithFormat:@"%.0f%%", dimension.value * 100.0];
+    case ASRelativeDimensionTypeAuto:
+      return @"Auto";
   }
 }
 
-CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat parent)
+CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSize, CGFloat parent)
 {
   switch (dimension.type) {
     case ASRelativeDimensionTypePoints:
       return dimension.value;
     case ASRelativeDimensionTypeFraction:
       return dimension.value * parent;
+    case ASRelativeDimensionTypeAuto:
+      return autoSize;
   }
 }
 
@@ -83,7 +88,7 @@ ASSizeRange ASSizeRangeMake(CGSize min, CGSize max)
   ASSizeRange sizeRange; sizeRange.min = min; sizeRange.max = max; return sizeRange;
 }
 
-ASSizeRange ASSizeRangeMakeExactSize(CGSize size)
+ASSizeRange ASSizeRangeMakeWithExactCGSize(CGSize size)
 {
   return ASSizeRangeMake(size, size);
 }
@@ -136,4 +141,11 @@ NSString * NSStringFromASSizeRange(ASSizeRange sizeRange)
   return [NSString stringWithFormat:@"<ASSizeRange: min=%@, max=%@>",
           NSStringFromCGSize(sizeRange.min),
           NSStringFromCGSize(sizeRange.max)];
+}
+
+#pragma mark - Deprecated
+
+ASSizeRange ASSizeRangeMakeExactSize(CGSize size)
+{
+  return ASSizeRangeMakeWithExactCGSize(size);
 }

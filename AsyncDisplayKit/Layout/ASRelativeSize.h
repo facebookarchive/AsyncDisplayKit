@@ -31,6 +31,7 @@ typedef struct {
 } ASRelativeSizeRange;
 
 extern ASRelativeSizeRange const ASRelativeSizeRangeUnconstrained;
+extern ASRelativeSizeRange const ASRelativeSizeRangeAuto;
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 NS_ASSUME_NONNULL_BEGIN
@@ -46,7 +47,7 @@ extern ASRelativeSize ASRelativeSizeMakeWithCGSize(CGSize size);
 extern ASRelativeSize ASRelativeSizeMakeWithFraction(CGFloat fraction);
 
 /** Resolve this relative size relative to a parent size. */
-extern CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize);
+extern CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize, CGSize autoSize);
 
 extern BOOL ASRelativeSizeEqualToRelativeSize(ASRelativeSize lhs, ASRelativeSize rhs);
 
@@ -55,6 +56,12 @@ extern NSString *NSStringFromASRelativeSize(ASRelativeSize size);
 #pragma mark - ASRelativeSizeRange
 
 extern ASRelativeSizeRange ASRelativeSizeRangeMake(ASRelativeSize min, ASRelativeSize max);
+
+extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithRelativeDimensions(ASRelativeDimension minWidthDimension,
+                                                                         ASRelativeDimension minHeightDimension,
+                                                                         ASRelativeDimension maxWidthDimension,
+                                                                         ASRelativeDimension maxHeightDimension);
+
 
 #pragma mark Convenience constructors to provide an exact size (min == max).
 extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeSize(ASRelativeSize exact);

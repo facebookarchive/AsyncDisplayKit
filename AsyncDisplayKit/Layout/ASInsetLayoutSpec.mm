@@ -67,7 +67,9 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
  Inset will compute a new constrained size for it's child after applying insets and re-positioning
  the child to respect the inset.
  */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+                restrictedToSizeRange:(ASRelativeSizeRange)size
+                 relativeToParentSize:(CGSize)parentSize
 {
   const CGFloat insetsX = (finiteOrZero(_insets.left) + finiteOrZero(_insets.right));
   const CGFloat insetsY = (finiteOrZero(_insets.top) + finiteOrZero(_insets.bottom));
@@ -91,11 +93,16 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   if (self.child == nil) {
     ASDisplayNodeAssert(NO, @"Inset spec measured without a child. The spec will do nothing.");
     return [ASLayout layoutWithLayoutableObject:self
-                           constrainedSizeRange:constrainedSize
+                                constrainedSize:constrainedSize
                                            size:CGSizeZero];
   }
   
-  ASLayout *sublayout = [self.child measureWithSizeRange:insetConstrainedSize];
+  const CGSize insetParentSize = {
+    MAX(0, parentSize.width - insetsX),
+    MAX(0, parentSize.height - insetsY)
+  };
+  
+  ASLayout *sublayout = [self.child calculateLayoutThatFits:insetConstrainedSize parentSize:insetParentSize];
 
   const CGSize computedSize = ASSizeRangeClamp(constrainedSize, {
     finite(sublayout.size.width + _insets.left + _insets.right, constrainedSize.max.width),
@@ -114,7 +121,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   sublayout.position = CGPointMake(x, y);
   
   return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
+                              constrainedSize:constrainedSize
                                          size:computedSize
                                    sublayouts:@[sublayout]];
 }

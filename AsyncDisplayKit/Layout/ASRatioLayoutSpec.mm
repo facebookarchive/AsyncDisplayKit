@@ -47,16 +47,16 @@
   _ratio = ratio;
 }
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   std::vector<CGSize> sizeOptions;
-  if (!isinf(constrainedSize.max.width)) {
+  if (!isinf(constrainedSize.max.width) && isValidForLayout(constrainedSize.max.width)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
       constrainedSize.max.width,
       ASFloorPixelValue(_ratio * constrainedSize.max.width)
     }));
   }
-  if (!isinf(constrainedSize.max.height)) {
+  if (!isinf(constrainedSize.max.height) && isValidForLayout(constrainedSize.max.width)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
       ASFloorPixelValue(constrainedSize.max.height / _ratio),
       constrainedSize.max.height
@@ -70,10 +70,11 @@
 
   // If there is no max size in *either* dimension, we can't apply the ratio, so just pass our size range through.
   const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeMake(*bestSize, *bestSize);
-  ASLayout *sublayout = [self.child measureWithSizeRange:childRange];
+  const CGSize parentSize = (bestSize == sizeOptions.end()) ? ASLayoutableParentSizeUndefined : *bestSize;
+  ASLayout *sublayout = [self.child calculateLayoutThatFits:childRange parentSize:parentSize];
   sublayout.position = CGPointZero;
   return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
+                              constrainedSize:constrainedSize
                                          size:sublayout.size
                                    sublayouts:@[sublayout]];
 }

@@ -22,12 +22,12 @@
 
 - (void)testSizingBehaviour
 {
-  [self testWithSizeRange:ASSizeRangeMake(CGSizeMake(150, 200), CGSizeMake(FLT_MAX, FLT_MAX))
+  [self testWithSizeRange:ASSizeRangeMake(CGSizeMake(150, 200), CGSizeMake(INFINITY, INFINITY))
                identifier:@"underflowChildren"];
   [self testWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeMake(50, 100))
                identifier:@"overflowChildren"];
   // Expect the spec to wrap its content because children sizes are between constrained size
-  [self testWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeMake(FLT_MAX / 2, FLT_MAX / 2))
+  [self testWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY / 2, INFINITY / 2))
                identifier:@"wrappedChildren"];
 }
 

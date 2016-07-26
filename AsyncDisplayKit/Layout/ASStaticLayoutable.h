@@ -18,11 +18,17 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ASStaticLayoutable
 
 /**
- If specified, the child's size is restricted according to this size. Fractions are resolved relative to the static layout spec.
+ * @abstract If specified, the child's size is restricted according to this size. Fractions are resolved relative to the static layout spec.
+ *
+ * If you define a sizeRange you have to wrap the Layoutable within a ASStaticLayoutSpec otherwise it will not have any effect.
+ *
+ * The default is ASRelativeDimensionUnconstrained, which sets the child's min size to zero and max size to the maximum available space it can consume without overflowing the spec's size.
  */
 @property (nonatomic, assign) ASRelativeSizeRange sizeRange;
 
-/** The position of this object within its parent spec. */
+/**
+ * @abstract The position of this object within its parent spec.
+ */
 @property (nonatomic, assign) CGPoint layoutPosition;
 
 @end

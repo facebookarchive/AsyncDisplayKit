@@ -118,7 +118,7 @@
   _baselineRelativeArrangement = baselineRelativeArrangement;
 }
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   std::vector<id<ASLayoutable>> stackChildren;
   for (id<ASLayoutable> child in self.children) {
@@ -127,7 +127,7 @@
   
   if (stackChildren.empty()) {
     return [ASLayout layoutWithLayoutableObject:self
-                           constrainedSizeRange:constrainedSize
+                                constrainedSize:constrainedSize
                                            size:constrainedSize.min];
   }
   
@@ -162,7 +162,7 @@
   }
   
   return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
+                              constrainedSize:constrainedSize
                                          size:ASSizeRangeClamp(constrainedSize, finalSize)
                                    sublayouts:sublayouts];
 }
