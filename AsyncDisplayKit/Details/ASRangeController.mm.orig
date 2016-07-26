@@ -11,15 +11,13 @@
 #import "ASRangeController.h"
 
 #import "ASAssert.h"
-#import "ASCellNode.h"
+#import "ASWeakSet.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
-#import "ASInternalHelpers.h"
 #import "ASMultiDimensionalArrayUtils.h"
-#import "ASWeakSet.h"
-
+#import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "AsyncDisplayKit+Debug.h"
+#import "ASCellNode.h"
 
 #define AS_RANGECONTROLLER_LOG_UPDATE_FREQ 0
 
@@ -65,10 +63,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(_updateCountDisplayLinkDidFire)];
   [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
 #endif
-  
-  if ([ASRangeController shouldShowRangeDebugOverlay]) {
-    [self addRangeControllerToRangeDebugOverlay];
-  }
   
   return self;
 }
@@ -163,12 +157,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if (dataSource && _layoutController) {
     [self updateIfNeeded];
   }
-  UIResponder *responder = (UIResponder *)dataSource;
-  while (responder && ![responder isKindOfClass:[UIViewController class]]) {
-    responder = [responder nextResponder];
-  }
-  
-//  NSLog(@"%@",  NSStringFromClass([responder class]) );
 }
 
 - (void)_updateVisibleNodeIndexPaths
@@ -345,21 +333,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
         }
       }
     }
-  }
-  
-  if ([ASRangeController shouldShowRangeDebugOverlay]) {
-    ASScrollDirection scrollableDirections = ASScrollDirectionUp | ASScrollDirectionDown;
-//    if ([_dataSource isKindOfClass:NSClassFromString(@"ASCollectionView")]) {
-//      scrollableDirections = (ASScrollDirection)[_dataSource performSelector:@selector(scrollableDirections)];   // FIXME:
-//    }
-    
-    [self updateRangeController:self
-       withScrollableDirections:scrollableDirections
-                scrollDirection:scrollDirection
-                      rangeMode:rangeMode
-        displayTuningParameters:parametersDisplay
-      fetchDataTuningParameters:parametersFetchData
-                 interfaceState:selfInterfaceState];
   }
   
   _rangeIsValid = YES;

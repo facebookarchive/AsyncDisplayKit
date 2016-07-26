@@ -1,0 +1,18 @@
+***************
+*** 15,20 ****
+  #import "ASMultiDimensionalArrayUtils.h"
+  #import "ASInternalHelpers.h"
+  #import "ASDisplayNode+FrameworkPrivate.h"
+  
+  @interface ASRangeController ()
+  {
+--- 15,23 ----
+  #import "ASMultiDimensionalArrayUtils.h"
+  #import "ASInternalHelpers.h"
+  #import "ASDisplayNode+FrameworkPrivate.h"
++ #import "AsyncDisplayKit+Debug.h"
++ #import "ASCollectionView.h"
++ 
+  
+  @interface ASRangeController ()
+  {

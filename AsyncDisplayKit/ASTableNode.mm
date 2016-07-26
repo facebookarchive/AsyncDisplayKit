@@ -16,6 +16,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
+#import "AsyncDisplayKit+Debug.h"
 
 #pragma mark - _ASTablePendingState
 
