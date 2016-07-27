@@ -17,8 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASImageContainerProtocol <NSObject>
 
-- (UIImage *)asdk_image;
-- (NSData *)asdk_animatedImageData;
+- (nullable UIImage *)asdk_image;
+- (nullable NSData *)asdk_animatedImageData;
 
 @end
 
