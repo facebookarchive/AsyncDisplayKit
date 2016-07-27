@@ -10,13 +10,14 @@
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
+#import <tgmath.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_INLINE CGFloat ceilPixelValueForScale(CGFloat f, CGFloat scale)
 {
   // Round up to device pixel (.5 on retina)
-  return ceilf(f * scale) / scale;
+  return ceil(f * scale) / scale;
 }
 
 ASDISPLAYNODE_INLINE CGSize ceilSizeValue(CGSize s)
