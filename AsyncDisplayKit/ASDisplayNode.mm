@@ -2071,7 +2071,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     return _layoutSpecBlock(self, constrainedSize);
   }
   
-  return nil;
+  ASDisplayNodeAssert(NO, @"-[ASDisplayNode layoutSpecThatFits:] should never fall through to return empty value");
+  return [[ASLayoutSpec alloc] init];
 }
 
 - (ASLayout *)calculatedLayout
