@@ -106,10 +106,7 @@
 
 - (void)setParent:(id<ASLayoutable>)parent
 {
-  {
-    ASDN::MutexLocker l(__instanceLock__);
-    _parent = parent;
-  }
+  _parent = parent;
   
   if ([parent supportsUpwardPropagation]) {
     ASEnvironmentStatePropagateUp(parent, self.environmentState.layoutOptionsState);
@@ -118,7 +115,6 @@
 
 - (id<ASLayoutable>)parent
 {
-  ASDN::MutexLocker l(__instanceLock__);
   return _parent;
 }
 
