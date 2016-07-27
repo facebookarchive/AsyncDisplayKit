@@ -48,14 +48,14 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion A great time to update perform selector caches!
  */
-- (void)didChangeCollectionViewDelegate:(id<ASCollectionDelegate>)delegate;
+- (void)didChangeCollectionViewDelegate:(nullable id<ASCollectionDelegate>)delegate;
 
 /**
  * Allow the inspector to respond to dataSource changes.
  *
  * @discussion A great time to update perform selector caches!
  */
-- (void)didChangeCollectionViewDataSource:(id<ASCollectionDataSource>)dataSource;
+- (void)didChangeCollectionViewDataSource:(nullable id<ASCollectionDataSource>)dataSource;
 
 @end
 

@@ -721,9 +721,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
 {
+  CGPoint contentOffset = scrollView.contentOffset;
   _deceleratingVelocity = CGPointMake(
-    scrollView.contentOffset.x - ((targetContentOffset != NULL) ? targetContentOffset->x : 0),
-    scrollView.contentOffset.y - ((targetContentOffset != NULL) ? targetContentOffset->y : 0)
+    contentOffset.x - ((targetContentOffset != NULL) ? targetContentOffset->x : 0),
+    contentOffset.y - ((targetContentOffset != NULL) ? targetContentOffset->y : 0)
   );
 
   if (targetContentOffset != NULL) {
@@ -732,7 +733,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   if (_asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset) {
-    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
+    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:(targetContentOffset ? : &contentOffset)];
   }
 }
 
