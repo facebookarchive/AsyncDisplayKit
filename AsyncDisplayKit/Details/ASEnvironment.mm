@@ -29,6 +29,7 @@ ASEnvironmentTraitCollection _ASEnvironmentTraitCollectionMakeDefault()
 {
   return (ASEnvironmentTraitCollection) {
     // Default values can be defined in here
+    .userInterfaceIdiom = UIUserInterfaceIdiomUnspecified,
     .containerSize = CGSizeZero,
   };
 }
