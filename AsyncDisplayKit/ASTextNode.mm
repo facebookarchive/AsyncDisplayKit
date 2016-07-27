@@ -351,8 +351,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   CGSize size = [self _renderer].size;
   if (_attributedText.length > 0) {
-    self.ascender = [[self class] ascenderWithAttributedString:_attributedString];
-    self.descender = [[_attributedString attribute:NSFontAttributeName atIndex:_attributedString.length - 1 effectiveRange:NULL] descender];
+    self.ascender = [[self class] ascenderWithAttributedString:_attributedText];
+    self.descender = [[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender];
     if (_renderer.currentScaleFactor > 0 && _renderer.currentScaleFactor < 1.0) {
       // while not perfect, this is a good estimate of what the ascender of the scaled font will be.
       self.ascender *= _renderer.currentScaleFactor;
@@ -406,8 +406,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   NSUInteger length = attributedText.length;
   if (length > 0) {
-    self.ascender = [[self class] ascenderWithAttributedString:_attributedString];
-    self.descender = [[_attributedString attribute:NSFontAttributeName atIndex:_attributedString.length - 1 effectiveRange:NULL] descender];
+    self.ascender = [[self class] ascenderWithAttributedString:attributedText];
+    self.descender = [[attributedText attribute:NSFontAttributeName atIndex:attributedText.length - 1 effectiveRange:NULL] descender];
   }
 
   // Tell the display node superclasses that the cached layout is incorrect now
