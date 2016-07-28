@@ -1848,7 +1848,9 @@ static NSInteger incrementIfFound(NSInteger i) {
     }
     
     // now that we have a supernode, propagate its traits to self.
-    ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
+    if (newSupernode != nil) {
+      ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
+    }
   }
 }
 
