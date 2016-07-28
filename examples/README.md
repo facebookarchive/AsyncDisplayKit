@@ -138,12 +138,14 @@ on the completion of unfinished rendering, rather than allow a placeholder state
 become visible.
 
 The internal features are:
--[_ASAsyncTransaction waitUntilComplete]
--[ASDisplayNode recursivelyEnsureDisplay]
+
+- `[_ASAsyncTransaction waitUntilComplete]`
+- `[ASDisplayNode recursivelyEnsureDisplay]`
 
 Also provided are two such implementations:
--[ASCellNode setNeverShowPlaceholders:], which integrates with both Tables and Collections
--[ASViewController setNeverShowPlaceholders:], which should work with Nav and Tab controllers.
+
+- `[ASCellNode setNeverShowPlaceholders:]`, which integrates with both Tables and Collections
+- `[ASViewController setNeverShowPlaceholders:]`, which should work with Nav and Tab controllers.
 
 Lastly, on ASDisplayNode, a new property .shouldBypassEnsureDisplay allows individual node types
 to exempt themselves from blocking the main thread on their display.
