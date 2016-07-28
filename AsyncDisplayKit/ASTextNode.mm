@@ -351,9 +351,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   CGSize size = [self _renderer].size;
   if (_attributedText.length > 0) {
-    CGFloat screenScale = ASScreenScale();
-    self.ascender = round([[_attributedText attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
-    self.descender = round([[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+    self.ascender = [[self class] ascenderWithAttributedString:_attributedText];
+    self.descender = [[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender];
     if (_renderer.currentScaleFactor > 0 && _renderer.currentScaleFactor < 1.0) {
       // while not perfect, this is a good estimate of what the ascender of the scaled font will be.
       self.ascender *= _renderer.currentScaleFactor;
@@ -364,6 +363,21 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 }
 
 #pragma mark - Modifying User Text
+
+// Returns the ascender of the first character in attributedString by also including the line height if specified in paragraph style.
++ (CGFloat)ascenderWithAttributedString:(NSAttributedString *)attributedString 
+{
+  UIFont *font = [attributedString attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL];
+  NSParagraphStyle *paragraphStyle = [attributedString attribute:NSParagraphStyleAttributeName atIndex:0 effectiveRange:NULL];
+  if (!paragraphStyle) {
+    return font.ascender;
+  }
+  CGFloat lineHeight = MAX(font.lineHeight, paragraphStyle.minimumLineHeight);
+  if (paragraphStyle.maximumLineHeight > 0) {
+    lineHeight = MIN(lineHeight, paragraphStyle.maximumLineHeight);
+  }
+  return lineHeight + font.descender;
+}
 
 - (void)setAttributedText:(NSAttributedString *)attributedText
 {
@@ -392,9 +406,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   NSUInteger length = attributedText.length;
   if (length > 0) {
-    CGFloat screenScale = ASScreenScale();
-    self.ascender = round([[attributedText attribute:NSFontAttributeName atIndex:0 effectiveRange:NULL] ascender] * screenScale)/screenScale;
-    self.descender = round([[attributedText attribute:NSFontAttributeName atIndex:length - 1 effectiveRange:NULL] descender] * screenScale)/screenScale;
+    self.ascender = [[self class] ascenderWithAttributedString:attributedText];
+    self.descender = [[attributedText attribute:NSFontAttributeName atIndex:attributedText.length - 1 effectiveRange:NULL] descender];
   }
 
   // Tell the display node superclasses that the cached layout is incorrect now
