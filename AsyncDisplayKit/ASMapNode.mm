@@ -166,6 +166,41 @@
 
 #pragma mark - Snapshotter
 
+static BOOL _hasCreatedPinProperties;
+
++ (MKAnnotationView *)pin
+{
+  static dispatch_once_t onceToken;
+  static MKAnnotationView *__pin = nil;
+  dispatch_once(&onceToken, ^{
+    ASDisplayNodeAssertMainThread();
+    __pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+  });
+  return __pin;
+}
+
++ (UIImage *)pinImage
+{
+  static dispatch_once_t onceToken;
+  static UIImage *__pinImage = nil;
+  dispatch_once(&onceToken, ^{
+    ASDisplayNodeAssertMainThread();
+    __pinImage = self.pin.image;
+  });
+  return __pinImage;
+}
+
++ (CGPoint)pinCenterOffset
+{
+  static dispatch_once_t onceToken;
+  static CGPoint __pinCenterOffset;
+  dispatch_once(&onceToken, ^{
+    ASDisplayNodeAssertMainThread();
+    __pinCenterOffset = self.pin.centerOffset;
+  });
+  return __pinCenterOffset;
+}
+
 - (void)takeSnapshot
 {
   // If our size is zero, we want to avoid calling a default sized snapshot. Set _snapshotAfterLayout to YES
@@ -187,7 +222,8 @@
   }
 
   __weak __typeof__(self) weakSelf = self;
-  [_snapshotter startWithQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
+  dispatch_queue_t snapshotQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+  [_snapshotter startWithQueue:snapshotQueue
              completionHandler:^(MKMapSnapshot *snapshot, NSError *error) {
                  __typeof__(self) strongSelf = weakSelf;
                 if (!strongSelf) {
@@ -201,36 +237,55 @@
                     // Only create a graphics context if we have annotations to draw.
                     // The MKMapSnapshotter is currently not capable of rendering annotations automatically.
                     
-                    CGRect finalImageRect = CGRectMake(0, 0, image.size.width, image.size.height);
+                    __block UIImage *pinImage;
+                    __block CGSize pinSize;
+                    __block CGPoint pinCenterOffset;
                     
-                    UIGraphicsBeginImageContextWithOptions(image.size, YES, image.scale);
-                    [image drawAtPoint:CGPointZero];
+                    void (^drawAnnotationsBlock)(void) = ^{
+                      CGRect finalImageRect = CGRectMake(0, 0, image.size.width, image.size.height);
+                          
+                      UIGraphicsBeginImageContextWithOptions(image.size, YES, image.scale);
+                      [image drawAtPoint:CGPointZero];
+                          
+                      for (id<MKAnnotation> annotation in annotations) {
+                        CGPoint point = [snapshot pointForCoordinate:annotation.coordinate];
+                        if (CGRectContainsPoint(finalImageRect, point)) {
+                          point.x -= pinSize.width / 2.0;
+                          point.y -= pinSize.height / 2.0;
+                          point.x += pinCenterOffset.x;
+                          point.y += pinCenterOffset.y;
+                          [pinImage drawAtPoint:point];
+                        }
+                      }
+                          
+                      UIImage *finalImage = UIGraphicsGetImageFromCurrentImageContext();
+                      UIGraphicsEndImageContext();
+                      strongSelf.image = finalImage;
+                    };
                     
                     // Get a standard annotation view pin. Future implementations should use a custom annotation image property.
-                    __block MKAnnotationView *pin;
-                    dispatch_sync(dispatch_get_main_queue(), ^{
-                      pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
-                    });
-                    UIImage *pinImage = pin.image;
-                    CGSize pinSize = pin.bounds.size;
-                    
-                    for (id<MKAnnotation> annotation in annotations) {
-                      CGPoint point = [snapshot pointForCoordinate:annotation.coordinate];
-                      if (CGRectContainsPoint(finalImageRect, point)) {
-                        CGPoint pinCenterOffset = pin.centerOffset;
-                        point.x -= pinSize.width / 2.0;
-                        point.y -= pinSize.height / 2.0;
-                        point.x += pinCenterOffset.x;
-                        point.y += pinCenterOffset.y;
-                        [pinImage drawAtPoint:point];
-                      }
+                    if (_hasCreatedPinProperties)
+                    {
+                      pinImage = [ASMapNode pinImage];
+                      pinSize = pinImage.size;
+                      pinCenterOffset = [ASMapNode pinCenterOffset];
+                      drawAnnotationsBlock();
                     }
-                    
-                    image = UIGraphicsGetImageFromCurrentImageContext();
-                    UIGraphicsEndImageContext();
+                    else
+                    {
+                      dispatch_async(dispatch_get_main_queue(), ^{
+                        pinImage = [ASMapNode pinImage];
+                        pinSize = pinImage.size;
+                        pinCenterOffset = [ASMapNode pinCenterOffset];
+                        _hasCreatedPinProperties = true;
+                        
+                        dispatch_async(snapshotQueue, drawAnnotationsBlock);
+                      });
+                    }
                   }
-                  
-                  strongSelf.image = image;
+                  else {
+                    strongSelf.image = image;
+                  }
                 }
   }];
 }
@@ -296,16 +351,19 @@
   ASDN::MutexLocker l(__instanceLock__);
   _annotations = annotations;
   ASMapNodeShowAnnotationsOptions showAnnotationsOptions = self.showAnnotationsOptions;
+  BOOL showZoomed = showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed;
   if (self.isLiveMap) {
-    [_mapView removeAnnotations:_mapView.annotations];
-    [_mapView addAnnotations:annotations];
+    dispatch_async(dispatch_get_main_queue(), ^{
+      [_mapView removeAnnotations:_mapView.annotations];
+      [_mapView addAnnotations:annotations];
 
-    if (showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
-      BOOL const animated = showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsAnimated;
-      [_mapView showAnnotations:_mapView.annotations animated:animated];
-    }
+      if (showZoomed) {
+        BOOL const animated = showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsAnimated;
+        [_mapView showAnnotations:_mapView.annotations animated:animated];
+      }
+    });
   } else {
-    if (showAnnotationsOptions & ASMapNodeShowAnnotationsOptionsZoomed) {
+    if (showZoomed) {
       self.region = [self regionToFitAnnotations:annotations];
     }
     else {
