@@ -43,7 +43,7 @@
   node.displaysAsynchronously = flag;
 
   for (ASDisplayNode *subnode in node.subnodes) {
-    subnode.displaysAsynchronously = flag;
+    [self _recursivelySetDisplaysAsynchronously:flag forNode:subnode];
   }
 }
 

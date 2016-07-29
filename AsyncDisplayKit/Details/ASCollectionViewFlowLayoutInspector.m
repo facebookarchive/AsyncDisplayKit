@@ -166,7 +166,7 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
   if (_layout.scrollDirection == UICollectionViewScrollDirectionVertical) {
     constrainedSize = CGSizeMake(CGRectGetWidth(collectionView.bounds), supplementarySize.height);
   } else {
-    constrainedSize = CGSizeMake(supplementarySize.height, CGRectGetHeight(collectionView.bounds));
+    constrainedSize = CGSizeMake(supplementarySize.width, CGRectGetHeight(collectionView.bounds));
   }
   return ASSizeRangeMake(CGSizeZero, constrainedSize);
 }

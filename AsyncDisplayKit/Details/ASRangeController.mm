@@ -14,6 +14,7 @@
 #import "ASCellNode.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASMultidimensionalArrayUtils.h"
 #import "ASInternalHelpers.h"
 #import "ASMultiDimensionalArrayUtils.h"
 #import "ASWeakSet.h"

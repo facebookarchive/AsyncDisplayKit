@@ -1848,7 +1848,9 @@ static NSInteger incrementIfFound(NSInteger i) {
     }
     
     // now that we have a supernode, propagate its traits to self.
-    ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
+    if (newSupernode != nil) {
+      ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
+    }
   }
 }
 
@@ -2071,7 +2073,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     return _layoutSpecBlock(self, constrainedSize);
   }
   
-  return nil;
+  ASDisplayNodeAssert(NO, @"-[ASDisplayNode layoutSpecThatFits:] should never fall through to return empty value");
+  return [[ASLayoutSpec alloc] init];
 }
 
 - (ASLayout *)calculatedLayout
