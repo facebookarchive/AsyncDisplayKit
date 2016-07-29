@@ -85,45 +85,34 @@
 - (void)insertSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  if ([self batchUpdating]) {
-    [_changeSet insertSections:sections animationOptions:animationOptions];
-  } else {
-    [super insertSections:sections withAnimationOptions:animationOptions];
-  }
+  [self beginUpdates];
+  [_changeSet insertSections:sections animationOptions:animationOptions];
+  [self endUpdates];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  if ([self batchUpdating]) {
-    [_changeSet deleteSections:sections animationOptions:animationOptions];
-  } else {
-    [super deleteSections:sections withAnimationOptions:animationOptions];
-  }
+  [self beginUpdates];
+  [_changeSet deleteSections:sections animationOptions:animationOptions];
+  [self endUpdates];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  if ([self batchUpdating]) {
-    [_changeSet reloadSections:sections animationOptions:animationOptions];
-  } else {
-    [self beginUpdates];
-    [super deleteSections:sections withAnimationOptions:animationOptions];
-    [super insertSections:sections withAnimationOptions:animationOptions];
-    [self endUpdates];
-  }
+  [self beginUpdates];
+  [_changeSet reloadSections:sections animationOptions:animationOptions];
+  [self endUpdates];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  if ([self batchUpdating]) {
-    [_changeSet deleteSections:[NSIndexSet indexSetWithIndex:section] animationOptions:animationOptions];
-    [_changeSet insertSections:[NSIndexSet indexSetWithIndex:newSection] animationOptions:animationOptions];
-  } else {
-    [super moveSection:section toSection:newSection withAnimationOptions:animationOptions];
-  }
+  [self beginUpdates];
+  [_changeSet deleteSections:[NSIndexSet indexSetWithIndex:section] animationOptions:animationOptions];
+  [_changeSet insertSections:[NSIndexSet indexSetWithIndex:newSection] animationOptions:animationOptions];
+  [self endUpdates];
 }
 
 #pragma mark - Row Editing (External API)
@@ -131,45 +120,34 @@
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  if ([self batchUpdating]) {
-    [_changeSet insertItems:indexPaths animationOptions:animationOptions];
-  } else {
-    [super insertRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-  }
+  [self beginUpdates];
+  [_changeSet insertItems:indexPaths animationOptions:animationOptions];
+  [self endUpdates];
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  if ([self batchUpdating]) {
-    [_changeSet deleteItems:indexPaths animationOptions:animationOptions];
-  } else {
-    [super deleteRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-  }
+  [self beginUpdates];
+  [_changeSet deleteItems:indexPaths animationOptions:animationOptions];
+  [self endUpdates];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  if ([self batchUpdating]) {
-    [_changeSet reloadItems:indexPaths animationOptions:animationOptions];
-  } else {
-    [self beginUpdates];
-    [super deleteRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-    [super insertRowsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-    [self endUpdates];
-  }
+  [self beginUpdates];
+  [_changeSet reloadItems:indexPaths animationOptions:animationOptions];
+  [self endUpdates];
 }
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
-  if ([self batchUpdating]) {
-    [_changeSet deleteItems:@[indexPath] animationOptions:animationOptions];
-    [_changeSet insertItems:@[newIndexPath] animationOptions:animationOptions];
-  } else {
-    [super moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:animationOptions];
-  }
+  [self beginUpdates];
+  [_changeSet deleteItems:@[indexPath] animationOptions:animationOptions];
+  [_changeSet insertItems:@[newIndexPath] animationOptions:animationOptions];
+  [self endUpdates];
 }
 
 @end
