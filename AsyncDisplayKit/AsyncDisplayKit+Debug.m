@@ -228,12 +228,6 @@ static BOOL __enableHitTestDebug = NO;
 @property (nonatomic, assign) BOOL destroyOnLayout;
 @property (nonatomic, strong) NSString *debugString;
 
-+ (UIImage *)resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
-                                             scale:(CGFloat)scale
-                                   backgroundColor:(UIColor *)backgroundColor
-                                         fillColor:(UIColor *)fillColor
-                                       borderColor:(UIColor *)borderColor;
-
 - (instancetype)initWithRangeController:(ASRangeController *)rangeController;
 
 - (void)updateWithVisibleRatio:(CGFloat)visibleRatio
@@ -302,13 +296,19 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   BOOL           _animating;
 }
 
++ (UIWindow *)keyWindow
+{
+  // hack to work around app extensions not having UIApplication...not sure of a better way to do this?
+  return [[NSClassFromString(@"UIApplication") sharedApplication] keyWindow];
+}
+
 + (instancetype)sharedInstance
 {
   static _ASRangeDebugOverlayView *__rangeDebugOverlay = nil;
   
   if (!__rangeDebugOverlay && [ASRangeController shouldShowRangeDebugOverlay]) {
     __rangeDebugOverlay = [[self alloc] initWithFrame:CGRectZero];
-    [[[NSClassFromString(@"UIApplication") sharedApplication] keyWindow] addSubview:__rangeDebugOverlay];
+    [[self keyWindow] addSubview:__rangeDebugOverlay];
   }
   
   return __rangeDebugOverlay;
@@ -326,7 +326,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     self.layer.zPosition = 1000;
     self.clipsToBounds = YES;
     
-    CGSize windowSize = [[[NSClassFromString(@"UIApplication") sharedApplication] keyWindow] bounds].size;
+    CGSize windowSize = [[[self class] keyWindow] bounds].size;
     self.frame  = CGRectMake(windowSize.width - (windowSize.width / OVERLAY_SCALE) - OVERLAY_INSET, windowSize.height - OVERLAY_INSET,
                                                  windowSize.width / OVERLAY_SCALE, 0.0);
     
@@ -448,13 +448,6 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   CGRect displayRect   = CGRectExpandToRangeWithScrollableDirections(boundsRect, displayTuningParameters,     scrollableDirections, scrollDirection);
   CGRect fetchDataRect = CGRectExpandToRangeWithScrollableDirections(boundsRect, fetchDataTuningParameters,   scrollableDirections, scrollDirection);
   
-  ASDirectionalScreenfulBuffer directionalBuffer = { 0, 0 };
-  if (scrollDirection == ASScrollDirectionRight) {
-    directionalBuffer = ASDirectionalScreenfulBufferHorizontal(scrollDirection, displayTuningParameters);
-  } else {
-    directionalBuffer = ASDirectionalScreenfulBufferVertical(scrollDirection, displayTuningParameters);
-  }
-  
   // figure out which is biggest and assume that is full bounds
   BOOL displayRangeLargerThanFetch    = NO;
   CGFloat visibleRatio                = 0;
@@ -522,7 +515,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   _ASRangeDebugBarView *rangeControllerBarView = nil;
   
   for (_ASRangeDebugBarView *rangeView in [[_rangeControllerViews reverseObjectEnumerator] allObjects]) {
-    // remove barView if it's rangeController has been deleted
+    // remove barView if its rangeController has been deleted
     if (!rangeView.rangeController) {
       rangeView.destroyOnLayout = YES;
       [self setNeedsLayout];
@@ -714,35 +707,16 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     _debugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:_debugString withSize:size];
   }
   
-  switch (_scrollDirection) {
-    case ASScrollDirectionLeft:
-      [self setTextNode:_leftDebugText hidden:NO withString:@"◀︎" withSize:size];
-      [self setTextNode:_rightDebugText hidden:YES withString:nil withSize:size];
-      break;
-    case ASScrollDirectionRight:
-      [self setTextNode:_leftDebugText hidden:YES withString:nil withSize:size];
-      [self setTextNode:_rightDebugText hidden:NO withString:@"▶︎" withSize:size];
-      break;
-    case ASScrollDirectionUp:
-      [self setTextNode:_leftDebugText hidden:NO withString:@"▲" withSize:size];
-      [self setTextNode:_rightDebugText hidden:YES withString:nil withSize:size];
-      break;
-    case ASScrollDirectionDown:
-      [self setTextNode:_leftDebugText hidden:YES withString:nil withSize:size];
-      [self setTextNode:_rightDebugText hidden:NO withString:@"▼" withSize:size];
-      break;
-    case ASScrollDirectionNone:
-    default:
-      [self setTextNode:_leftDebugText hidden:YES withString:nil withSize:size];
-      [self setTextNode:_rightDebugText hidden:YES withString:nil withSize:size];
-      break;
+  if (ASScrollDirectionContainsVerticalDirection(_scrollDirection)) {
+    _leftDebugText.attributedText = [_ASRangeDebugBarView whiteAttributedStringFromString:@"▲" withSize:size];
+    _rightDebugText.attributedText = [_ASRangeDebugBarView whiteAttributedStringFromString:@"▼" withSize:size];
+  } else if (ASScrollDirectionContainsHorizontalDirection(_scrollDirection)) {
+    _leftDebugText.attributedText = [_ASRangeDebugBarView whiteAttributedStringFromString:@"◀︎" withSize:size];
+    _rightDebugText.attributedText = [_ASRangeDebugBarView whiteAttributedStringFromString:@"▶︎" withSize:size];
   }
-}
-
-- (void)setTextNode:(ASTextNode *)textNode hidden:(BOOL)hidden withString:(NSString *)string withSize:(CGFloat)size
-{
-  textNode.hidden = hidden;
-  textNode.attributedString = string ? [_ASRangeDebugBarView whiteAttributedStringFromString:string withSize:size] : nil;
+  
+  _leftDebugText.hidden = (_scrollDirection != ASScrollDirectionLeft && _scrollDirection != ASScrollDirectionDown);
+  _rightDebugText.hidden = (_scrollDirection != ASScrollDirectionRight && _scrollDirection != ASScrollDirectionUp);
 }
 
 - (ASTextNode *)createDebugTextNode

@@ -349,9 +349,9 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   if ([ASRangeController shouldShowRangeDebugOverlay]) {
     ASScrollDirection scrollableDirections = ASScrollDirectionUp | ASScrollDirectionDown;
-//    if ([_dataSource isKindOfClass:NSClassFromString(@"ASCollectionView")]) {
-//      scrollableDirections = (ASScrollDirection)[_dataSource performSelector:@selector(scrollableDirections)];   // FIXME:
-//    }
+    if ([_dataSource isKindOfClass:NSClassFromString(@"ASCollectionView")]) {
+      scrollableDirections = (ASScrollDirection)[_dataSource performSelector:@selector(scrollableDirections)];   // FIXME:
+    }
     
     [self updateRangeController:self
        withScrollableDirections:scrollableDirections
