@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASLayoutSpec.h"
+#import "ASLayoutSpec+Private.h"
 
 #import "ASAssert.h"
 #import "ASEnvironmentInternal.h"
@@ -17,16 +17,12 @@
 #import "ASThread.h"
 #import "ASTraitCollection.h"
 
-#import <objc/runtime.h>
-#import <map>
 #import <vector>
-
-typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASChildMap;
 
 @interface ASLayoutSpec() {
   ASEnvironmentState _environmentState;
   ASDN::RecursiveMutex __instanceLock__;
-  ASChildMap _children;
+  ASChildrenMap _childrenMap;
 }
 @end
 
@@ -35,6 +31,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis,
          alignSelf, ascender, descender, sizeRange, layoutPosition, layoutableType;
+@synthesize parent = _parent;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 
 - (instancetype)init
@@ -105,9 +102,10 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   return child;
 }
 
+#pragma mark - Parent
+
 - (void)setParent:(id<ASLayoutable>)parent
 {
-  // FIXME: Locking should be evaluated here.  _parent is not widely used yet, though.
   _parent = parent;
   
   if ([parent supportsUpwardPropagation]) {
@@ -115,17 +113,24 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   }
 }
 
+- (id<ASLayoutable>)parent
+{
+  return _parent;
+}
+
+#pragma mark - Children
+
 - (void)setChild:(id<ASLayoutable>)child
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   if (child) {
     id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
     if (finalLayoutable) {
-      _children[0] = finalLayoutable;
+      _childrenMap[0] = finalLayoutable;
       [self propagateUpLayoutable:finalLayoutable];
     }
   } else {
-    _children.erase(0);
+    _childrenMap.erase(0);
   }
 }
 
@@ -134,9 +139,9 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   if (child) {
     id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-    _children[index] = finalLayoutable;
+    _childrenMap[index] = finalLayoutable;
   } else {
-    _children.erase(index);
+    _childrenMap.erase(index);
   }
   // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
@@ -147,35 +152,67 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
-  _children.clear();
+  _childrenMap.clear();
   NSUInteger i = 0;
   for (id<ASLayoutable> child in children) {
-    _children[i] = [self layoutableToAddFromLayoutable:child];
+    _childrenMap[i] = [self layoutableToAddFromLayoutable:child];
     i += 1;
   }
 }
 
 - (id<ASLayoutable>)childForIndex:(NSUInteger)index
 {
-  if (index < _children.size()) {
-    return _children[index];
+  if (index < _childrenMap.size()) {
+    return _childrenMap[index];
   }
   return nil;
 }
 
 - (id<ASLayoutable>)child
 {
-  return _children[0];
+  return _childrenMap[0];
 }
 
 - (NSArray *)children
 {
+  // If used inside ASDK, the childrenMap property should be preferred over the children array to prevent unecessary
+  // boxing
   std::vector<ASLayout *> children;
-  for (ASChildMap::iterator it = _children.begin(); it != _children.end(); ++it ) {
-    children.push_back(it->second);
+  for (auto const &entry : _childrenMap) {
+    children.push_back(entry.second);
+  }
+
+  return [NSArray arrayWithObjects:&children[0] count:children.size()];
+}
+
+#pragma mark - NSFastEnumeration
+
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state
+                                  objects:(id __unsafe_unretained [])stackbuf
+                                    count:(NSUInteger)stackbufLength
+{
+  NSUInteger count = 0;
+  unsigned long countOfItemsAlreadyEnumerated = state->state;
+  
+  if (countOfItemsAlreadyEnumerated == 0) {
+    state->mutationsPtr = &state->extra[0];
+  }
+
+  if (countOfItemsAlreadyEnumerated < _childrenMap.size()) {
+    state->itemsPtr = stackbuf;
+        
+    while((countOfItemsAlreadyEnumerated < _childrenMap.size()) && (count < stackbufLength)) {
+      stackbuf[count] = _childrenMap[countOfItemsAlreadyEnumerated];
+      countOfItemsAlreadyEnumerated++;
+      count++;
+    }
+  } else {
+    count = 0;
   }
   
-  return [NSArray arrayWithObjects:&children[0] count:children.size()];
+  state->state = countOfItemsAlreadyEnumerated;
+
+  return count;
 }
 
 #pragma mark - ASEnvironment
@@ -229,6 +266,15 @@ ASEnvironmentLayoutExtensibilityForwarding
 {
   ASDN::MutexLocker l(__instanceLock__);
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
+}
+
+@end
+
+@implementation ASLayoutSpec (Private)
+
+- (ASChildrenMap)childrenMap
+{
+  return _childrenMap;
 }
 
 @end
