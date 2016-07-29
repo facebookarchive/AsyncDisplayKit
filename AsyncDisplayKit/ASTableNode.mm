@@ -126,6 +126,12 @@
   [self.view clearFetchedData];
 }
 
+- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
+{
+  [super interfaceStateDidChange:newState fromState:oldState];
+  [ASRangeController layoutDebugOverlayIfNeeded];
+}
+
 #if ASRangeControllerLoggingEnabled
 - (void)visibleStateDidChange:(BOOL)isVisible
 {

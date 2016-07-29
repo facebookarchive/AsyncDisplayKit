@@ -164,12 +164,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if (dataSource && _layoutController) {
     [self updateIfNeeded];
   }
-  UIResponder *responder = (UIResponder *)dataSource;
-  while (responder && ![responder isKindOfClass:[UIViewController class]]) {
-    responder = [responder nextResponder];
-  }
-  
-//  NSLog(@"%@",  NSStringFromClass([responder class]) );
 }
 
 - (void)_updateVisibleNodeIndexPaths
