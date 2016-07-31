@@ -627,7 +627,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(__instanceLock__);
   if (! [self shouldMeasureWithSizeRange:constrainedSize]) {
-    return _layout;
+    ASDisplayNodeAssertNotNil(_layout, @"-[ASDisplayNode measureWithSizeRange:] _layout should not be nil! %@", self);
+    return _layout ? : [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:CGSizeZero];
   }
   
   [self cancelLayoutTransitionsInProgress];
@@ -651,6 +652,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [self _completeLayoutCalculation];
   }
 
+  ASDisplayNodeAssertNotNil(newLayout, @"-[ASDisplayNode measureWithSizeRange:] newLayout should not be nil! %@", self);
   return newLayout;
 }
 
@@ -1954,6 +1956,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     
     layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
+    ASDisplayNodeAssertNotNil(layout, @"[ASLayoutSpec measureWithSizeRange:] should never return nil! %@, %@", self, layoutSpec);
+      
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
     BOOL isFinalLayoutable = (layout.layoutableObject != self);
     if (isFinalLayoutable) {
