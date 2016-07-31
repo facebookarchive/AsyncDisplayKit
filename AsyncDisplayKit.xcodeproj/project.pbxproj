@@ -434,6 +434,7 @@
 		DE4843DB1C93EAB100A1F33B /* ASLayoutTransition.mm in Sources */ = {isa = PBXBuildFile; fileRef = E52405B21C8FEF03004DC8E7 /* ASLayoutTransition.mm */; };
 		DE4843DC1C93EAC100A1F33B /* ASLayoutTransition.h in Headers */ = {isa = PBXBuildFile; fileRef = E52405B41C8FEF16004DC8E7 /* ASLayoutTransition.h */; };
 		DE6EA3231C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */; };
+		DE72E2AC1D4D90E000DDB258 /* ASLayoutSpec+Private.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 69F6058C1D3DA27E00C8CA38 /* ASLayoutSpec+Private.h */; };
 		DE84918D1C8FFF2B003D89E9 /* ASRunLoopQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DE84918E1C8FFF9F003D89E9 /* ASRunLoopQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = 81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */; };
 		DE8BEAC21C2DF3FC00D57C12 /* ASDelegateProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE8BEABF1C2DF3FC00D57C12 /* ASDelegateProxy.h */; };
@@ -494,7 +495,6 @@
 		F7CE6C391D2CDB3E00BE4C15 /* ASBasicImageDownloader.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 054963471A1EA066000F8E56 /* ASBasicImageDownloader.h */; };
 		F7CE6C3A1D2CDB3E00BE4C15 /* ASBatchContext.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 299DA1A71A828D2900162D41 /* ASBatchContext.h */; };
 		F7CE6C3B1D2CDB3E00BE4C15 /* ASCollectionViewFlowLayoutInspector.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 251B8EF41BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.h */; };
-		F7CE6C3C1D2CDB3E00BE4C15 /* ASCollectionViewFlowLayoutInspector.m in CopyFiles */ = {isa = PBXBuildFile; fileRef = 251B8EF51BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m */; };
 		F7CE6C3D1D2CDB3E00BE4C15 /* ASCollectionViewLayoutController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 205F0E1B1B373A2C007741D0 /* ASCollectionViewLayoutController.h */; };
 		F7CE6C3E1D2CDB3E00BE4C15 /* ASDealloc2MainObject.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 05A6D05819D0EB64002DD95E /* ASDealloc2MainObject.h */; };
 		F7CE6C3F1D2CDB3E00BE4C15 /* ASEnvironment.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 698548611CA9E025008A345F /* ASEnvironment.h */; };
@@ -570,17 +570,11 @@
 		F7CE6C851D2CDB5800BE4C15 /* NSIndexSet+ASHelpers.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CC4981BA1D1C7F65004E13CC /* NSIndexSet+ASHelpers.h */; };
 		F7CE6C861D2CDB5800BE4C15 /* _ASDisplayViewAccessiblity.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 69CB62A91CB8165900024920 /* _ASDisplayViewAccessiblity.h */; };
 		F7CE6C871D2CDB5800BE4C15 /* ASDataController+Subclasses.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 251B8EF61BBB3D690087C538 /* ASDataController+Subclasses.h */; };
-		F7CE6C881D2CDB5800BE4C15 /* ASIndexPath.m in CopyFiles */ = {isa = PBXBuildFile; fileRef = 430E7C8E1B4C23F100697A4C /* ASIndexPath.m */; };
-		F7CE6C891D2CDB5800BE4C15 /* ASRunLoopQueue.mm in CopyFiles */ = {isa = PBXBuildFile; fileRef = 81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */; };
-		F7CE6C8A1D2CDB5800BE4C15 /* ASWeakProxy.m in CopyFiles */ = {isa = PBXBuildFile; fileRef = 68B8A4E01CBDB958007E4543 /* ASWeakProxy.m */; };
 		F7CE6C8B1D2CDB5800BE4C15 /* ASCollectionDataController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 251B8EF21BBB3D690087C538 /* ASCollectionDataController.h */; };
 		F7CE6C8C1D2CDB5800BE4C15 /* _ASCoreAnimationExtras.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 058D0A03195D050800B7D73C /* _ASCoreAnimationExtras.h */; };
 		F7CE6C8D1D2CDB5800BE4C15 /* _ASHierarchyChangeSet.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = AC026B6D1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h */; };
-		F7CE6C8E1D2CDB5800BE4C15 /* _ASPendingState.mm in CopyFiles */ = {isa = PBXBuildFile; fileRef = 058D0A06195D050800B7D73C /* _ASPendingState.mm */; };
 		F7CE6C8F1D2CDB5800BE4C15 /* _ASScopeTimer.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 058D0A07195D050800B7D73C /* _ASScopeTimer.h */; };
 		F7CE6C901D2CDB5800BE4C15 /* _ASTransitionContext.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = DB55C25F1C6408D6004EDCF5 /* _ASTransitionContext.h */; };
-		F7CE6C911D2CDB5800BE4C15 /* _ASTransitionContext.m in CopyFiles */ = {isa = PBXBuildFile; fileRef = DB55C2601C6408D6004EDCF5 /* _ASTransitionContext.m */; };
-		F7CE6C921D2CDB5800BE4C15 /* ASBatchFetching.m in CopyFiles */ = {isa = PBXBuildFile; fileRef = 044285061BAA63FE00D16268 /* ASBatchFetching.m */; };
 		F7CE6C941D2CDB5800BE4C15 /* ASDisplayNodeInternal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 058D0A0C195D050800B7D73C /* ASDisplayNodeInternal.h */; };
 		F7CE6C951D2CDB5800BE4C15 /* ASLayoutTransition.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = E52405B41C8FEF16004DC8E7 /* ASLayoutTransition.h */; };
 		F7CE6C961D2CDB5800BE4C15 /* ASEnvironmentInternal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 69E100691CA89CB600D88C1B /* ASEnvironmentInternal.h */; };
@@ -675,7 +669,6 @@
 				F7CE6C391D2CDB3E00BE4C15 /* ASBasicImageDownloader.h in CopyFiles */,
 				F7CE6C3A1D2CDB3E00BE4C15 /* ASBatchContext.h in CopyFiles */,
 				F7CE6C3B1D2CDB3E00BE4C15 /* ASCollectionViewFlowLayoutInspector.h in CopyFiles */,
-				F7CE6C3C1D2CDB3E00BE4C15 /* ASCollectionViewFlowLayoutInspector.m in CopyFiles */,
 				F7CE6C3D1D2CDB3E00BE4C15 /* ASCollectionViewLayoutController.h in CopyFiles */,
 				F7CE6C3E1D2CDB3E00BE4C15 /* ASDealloc2MainObject.h in CopyFiles */,
 				F7CE6C3F1D2CDB3E00BE4C15 /* ASEnvironment.h in CopyFiles */,
@@ -712,6 +705,7 @@
 				F7CE6C611D2CDB3E00BE4C15 /* ASLayoutable.h in CopyFiles */,
 				F7CE6C621D2CDB3E00BE4C15 /* ASLayoutablePrivate.h in CopyFiles */,
 				F7CE6C631D2CDB3E00BE4C15 /* ASLayoutSpec.h in CopyFiles */,
+				DE72E2AC1D4D90E000DDB258 /* ASLayoutSpec+Private.h in CopyFiles */,
 				F7CE6C641D2CDB3E00BE4C15 /* ASOverlayLayoutSpec.h in CopyFiles */,
 				F7CE6C651D2CDB3E00BE4C15 /* ASRatioLayoutSpec.h in CopyFiles */,
 				F7CE6C661D2CDB3E00BE4C15 /* ASRelativeLayoutSpec.h in CopyFiles */,
@@ -748,20 +742,14 @@
 				F7CE6C851D2CDB5800BE4C15 /* NSIndexSet+ASHelpers.h in CopyFiles */,
 				F7CE6C861D2CDB5800BE4C15 /* _ASDisplayViewAccessiblity.h in CopyFiles */,
 				F7CE6C871D2CDB5800BE4C15 /* ASDataController+Subclasses.h in CopyFiles */,
-				F7CE6C881D2CDB5800BE4C15 /* ASIndexPath.m in CopyFiles */,
 				F7CE6C451D2CDB3E00BE4C15 /* ASPINRemoteImageDownloader.h in CopyFiles */,
-				F7CE6C891D2CDB5800BE4C15 /* ASRunLoopQueue.mm in CopyFiles */,
-				F7CE6C8A1D2CDB5800BE4C15 /* ASWeakProxy.m in CopyFiles */,
 				F7CE6C8B1D2CDB5800BE4C15 /* ASCollectionDataController.h in CopyFiles */,
 				F7CE6C591D2CDB3E00BE4C15 /* UIView+ASConvenience.h in CopyFiles */,
 				F7CE6C5A1D2CDB3E00BE4C15 /* ASTraitCollection.h in CopyFiles */,
 				F7CE6C8C1D2CDB5800BE4C15 /* _ASCoreAnimationExtras.h in CopyFiles */,
 				F7CE6C8D1D2CDB5800BE4C15 /* _ASHierarchyChangeSet.h in CopyFiles */,
-				F7CE6C8E1D2CDB5800BE4C15 /* _ASPendingState.mm in CopyFiles */,
 				F7CE6C8F1D2CDB5800BE4C15 /* _ASScopeTimer.h in CopyFiles */,
 				F7CE6C901D2CDB5800BE4C15 /* _ASTransitionContext.h in CopyFiles */,
-				F7CE6C911D2CDB5800BE4C15 /* _ASTransitionContext.m in CopyFiles */,
-				F7CE6C921D2CDB5800BE4C15 /* ASBatchFetching.m in CopyFiles */,
 				F7CE6C941D2CDB5800BE4C15 /* ASDisplayNodeInternal.h in CopyFiles */,
 				F7CE6C951D2CDB5800BE4C15 /* ASLayoutTransition.h in CopyFiles */,
 				F7CE6C961D2CDB5800BE4C15 /* ASEnvironmentInternal.h in CopyFiles */,
@@ -1500,7 +1488,7 @@
 				058D0A0D195D050800B7D73C /* ASImageNode+CGExtras.h */,
 				058D0A0E195D050800B7D73C /* ASImageNode+CGExtras.m */,
 				ACF6ED431B17847A00DA7C62 /* ASInternalHelpers.h */,
-				ACF6ED441B17847A00DA7C62 /* ASInternalHelpers.mm */,
+				ACF6ED441B17847A00DA7C62 /* ASInternalHelpers.m */,
 				69F6058C1D3DA27E00C8CA38 /* ASLayoutSpec+Private.h */,
 				ACF6ED451B17847A00DA7C62 /* ASLayoutSpecUtilities.h */,
 				E52405B41C8FEF16004DC8E7 /* ASLayoutTransition.h */,
