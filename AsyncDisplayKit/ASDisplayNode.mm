@@ -643,11 +643,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDN::MutexLocker l(__instanceLock__);
   if (! [self shouldMeasureWithSizeRange:constrainedSize]) {
     ASDisplayNodeAssertNotNil(_calculatedLayout, @"-[ASDisplayNode measureWithSizeRange:] _layout should not be nil! %@", self);
-    if (_calculatedLayout != nil) {
-      return _calculatedLayout;
-    } else {
-      return [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:CGSizeZero];
-    }
+    return _calculatedLayout ? : [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:CGSizeZero];
   }
   
   [self cancelLayoutTransitionsInProgress];
