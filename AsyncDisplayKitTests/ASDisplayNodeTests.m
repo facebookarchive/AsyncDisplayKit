@@ -1723,6 +1723,24 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertEqual(1, view.subviews.count, @"View should have 1 subview");
 }
 
+- (void)testFastEnumeration
+{
+  ASDisplayNode *parent = [[ASDisplayNode alloc] init];
+  
+  NSMutableArray *children = [NSMutableArray array];
+  for (int i = 0; i < 100; i++) {
+    ASDisplayNode *child = [[[ASDisplayNode alloc] init] autorelease];
+    [children addObject:child];
+    [parent addSubnode:child];
+  }
+  
+  NSInteger i = 0;
+  for (ASDisplayNode *child in parent) {
+    XCTAssertEqualObjects(child, children[i]);
+    i++;
+  }
+}
+
 - (void)checkBackgroundColorOpaqueRelationshipWithViewLoaded:(BOOL)loaded layerBacked:(BOOL)isLayerBacked
 {
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
