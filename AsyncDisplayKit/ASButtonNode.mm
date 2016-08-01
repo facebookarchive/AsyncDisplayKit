@@ -14,7 +14,6 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
-#import "ASDisplayNode+Beta.h"
 #import "ASStaticLayoutSpec.h"
 
 @interface ASButtonNode ()

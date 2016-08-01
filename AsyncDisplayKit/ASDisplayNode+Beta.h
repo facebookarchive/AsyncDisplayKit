@@ -61,15 +61,6 @@ ASDISPLAYNODE_EXTERN_C_END
 /** @name Layout Transitioning */
 
 /**
- * @abstract A boolean that shows whether the node automatically inserts and removes nodes based on the presence or
- * absence of the node and its subnodes is completely determined in its layoutSpecThatFits: method.
- *
- * @discussion If flag is YES the node no longer require addSubnode: or removeFromSupernode method calls. The presence
- * or absence of subnodes is completely determined in its layoutSpecThatFits: method.
- */
-@property (nonatomic) BOOL automaticHierarchy;
-
-/**
  * @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.
  */
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context;
@@ -143,20 +134,6 @@ ASDISPLAYNODE_EXTERN_C_END
  * enabling .neverShowPlaceholders on ASCellNodes so that the navigation operation is blocked on redisplay completing, etc.
  */
 + (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode;
-
-
-#pragma mark - Deprecated
-
-/**
- * @abstract A boolean that shows whether the node automatically inserts and removes nodes based on the presence or
- * absence of the node and its subnodes is completely determined in its layoutSpecThatFits: method.
- *
- * @discussion If flag is YES the node no longer require addSubnode: or removeFromSupernode method calls. The presence
- * or absence of subnodes is completely determined in its layoutSpecThatFits: method.
- *
- * @deprecated Deprecated in version 2.0: Use automaticHierarchy
- */
-@property (nonatomic, assign) BOOL usesImplicitHierarchyManagement __deprecated;
 
 @end
 

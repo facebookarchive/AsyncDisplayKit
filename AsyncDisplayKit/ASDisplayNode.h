@@ -747,8 +747,24 @@ NS_ASSUME_NONNULL_END
 @end
 
 /*
- ASDisplayNode participates in ASAsyncTransactions, so you can determine when your subnodes are done rendering.
- See: -(void)asyncdisplaykit_asyncTransactionContainerStateDidChange in ASDisplayNodeSubclass.h
+ * ASDisplayNode support for automatic hierarchy management.
+ */
+@interface ASDisplayNode (AutomaticHierarchyManagement)
+
+/**
+ * @abstract A boolean that shows whether the node automatically inserts and removes nodes based on the presence or
+ * absence of the node and its subnodes is completely determined in its layoutSpecThatFits: method.
+ *
+ * @discussion If flag is YES the node no longer require addSubnode: or removeFromSupernode method calls. The presence
+ * or absence of subnodes is completely determined in its layoutSpecThatFits: method.
+ */
+@property (nonatomic, assign) BOOL automaticHierarchy;
+
+@end
+
+/*
+ * ASDisplayNode participates in ASAsyncTransactions, so you can determine when your subnodes are done rendering.
+ * See: -(void)asyncdisplaykit_asyncTransactionContainerStateDidChange in ASDisplayNodeSubclass.h
  */
 @interface ASDisplayNode (ASDisplayNodeAsyncTransactionContainer) <ASDisplayNodeAsyncTransactionContainer>
 @end
@@ -763,7 +779,9 @@ NS_ASSUME_NONNULL_END
 - (void)addSubnode:(nonnull ASDisplayNode *)node;
 @end
 
-/** CALayer(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to a CALayer. */
+/*
+ * CALayer(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to a CALayer.
+ */
 @interface CALayer (AsyncDisplayKit)
 /**
  * Convenience method, equivalent to [layer addSublayer:node.layer].
@@ -775,6 +793,17 @@ NS_ASSUME_NONNULL_END
 
 
 @interface ASDisplayNode (Deprecated)
+
+/**
+ * @abstract A boolean that shows whether the node automatically inserts and removes nodes based on the presence or
+ * absence of the node and its subnodes is completely determined in its layoutSpecThatFits: method.
+ *
+ * @discussion If flag is YES the node no longer require addSubnode: or removeFromSupernode method calls. The presence
+ * or absence of subnodes is completely determined in its layoutSpecThatFits: method.
+ *
+ * @deprecated Deprecated in version 2.0: Use automaticHierarchy
+ */
+@property (nonatomic, assign) BOOL usesImplicitHierarchyManagement ASDISPLAYNODE_DEPRECATED;
 
 - (void)reclaimMemory ASDISPLAYNODE_DEPRECATED;
 - (void)recursivelyReclaimMemory ASDISPLAYNODE_DEPRECATED;
