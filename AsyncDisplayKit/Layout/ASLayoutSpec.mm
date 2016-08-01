@@ -23,6 +23,7 @@
   ASEnvironmentState _environmentState;
   ASDN::RecursiveMutex __instanceLock__;
   ASChildrenMap _childrenMap;
+  unsigned long _mutations;
 }
 @end
 
@@ -41,6 +42,7 @@
   }
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
+  _mutations = 0;
   return self;
 }
 
@@ -122,16 +124,7 @@
 
 - (void)setChild:(id<ASLayoutable>)child
 {
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  if (child) {
-    id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-    if (finalLayoutable) {
-      _childrenMap[0] = finalLayoutable;
-      [self propagateUpLayoutable:finalLayoutable];
-    }
-  } else {
-    _childrenMap.erase(0);
-  }
+  [self setChild:child forIndex:0];
 }
 
 - (void)setChild:(id<ASLayoutable>)child forIndex:(NSUInteger)index
@@ -139,11 +132,16 @@
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   if (child) {
     id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-    _childrenMap[index] = finalLayoutable;
+    if (finalLayoutable) {
+      _childrenMap[index] = finalLayoutable;
+      [self propagateUpLayoutable:finalLayoutable];
+    }
   } else {
     _childrenMap.erase(index);
   }
-  // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
+  _mutations++;
+  
+  // TODO: Should we propagate up the layoutable as it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
   // [self propagateUpLayoutable:finalLayoutable];
 }
@@ -157,6 +155,8 @@
   for (id<ASLayoutable> child in children) {
     _childrenMap[i] = [self layoutableToAddFromLayoutable:child];
     i += 1;
+    
+    _mutations++;
   }
 }
 
@@ -175,8 +175,8 @@
 
 - (NSArray *)children
 {
-  // If used inside ASDK, the childrenMap property should be preferred over the children array to prevent unecessary
-  // boxing
+  // If used inside ASDK, the childrenMap property should be preferred over the children array to prevent
+  // unecessary boxing
   std::vector<ASLayout *> children;
   for (auto const &entry : _childrenMap) {
     children.push_back(entry.second);
@@ -195,14 +195,16 @@
   unsigned long countOfItemsAlreadyEnumerated = state->state;
   
   if (countOfItemsAlreadyEnumerated == 0) {
-    state->mutationsPtr = &state->extra[0];
+    state->mutationsPtr = &_mutations;
   }
 
   if (countOfItemsAlreadyEnumerated < _childrenMap.size()) {
     state->itemsPtr = stackbuf;
         
     while((countOfItemsAlreadyEnumerated < _childrenMap.size()) && (count < stackbufLength)) {
-      stackbuf[count] = _childrenMap[countOfItemsAlreadyEnumerated];
+      // Hold on for the object while enumerating
+      __autoreleasing id child = _childrenMap[countOfItemsAlreadyEnumerated];
+      stackbuf[count] = child;
       countOfItemsAlreadyEnumerated++;
       count++;
     }
