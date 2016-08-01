@@ -18,7 +18,6 @@
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASDisplayNode+Beta.h"
 #import "ASInternalHelpers.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "ASRangeController.h"
