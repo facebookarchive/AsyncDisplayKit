@@ -42,6 +42,23 @@
   ASSnapshotVerifyNode(node, identifier);
 }
 
+- (void)testFastEnumeration
+{
+  ASLayoutSpec *layoutSpec = [[ASLayoutSpec alloc] init];
+
+  NSMutableArray *children = [NSMutableArray array];
+  for (int i = 0; i < 100; i++) {
+    [children addObject:[[ASDisplayNode alloc] init]];
+  }
+  layoutSpec.children = children;
+  
+  NSInteger i = 0;
+  for (ASDisplayNode *child in layoutSpec) {
+    XCTAssertEqualObjects(child, children[i]);
+    i++;
+  }
+}
+
 @end
 
 @implementation ASTestNode
