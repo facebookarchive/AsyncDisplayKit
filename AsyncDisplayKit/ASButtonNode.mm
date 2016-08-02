@@ -55,7 +55,7 @@
 - (instancetype)init
 {
   if (self = [super init]) {
-    self.automaticHierarchy = YES;
+    self.automaticallyManagesSubnodes = YES;
     
     _contentSpacing = 8.0;
     _laysOutHorizontally = YES;

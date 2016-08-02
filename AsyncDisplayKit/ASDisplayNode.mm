@@ -689,16 +689,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Automatic Hierarchy
 
-- (BOOL)automaticHierarchy
+- (BOOL)automaticallyManagesSubnodes
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return _automaticHierarchy;
+  return _automaticallyManagesSubnodes;
 }
 
-- (void)setAutomaticHierarchy:(BOOL)automaticHierachy
+- (void)setAutomaticallyManagesSubnodes:(BOOL)automaticallyManagesSubnodes
 {
   ASDN::MutexLocker l(__instanceLock__);
-  _automaticHierarchy = automaticHierachy;
+  _automaticallyManagesSubnodes = automaticallyManagesSubnodes;
 }
 
 #pragma mark - Layout Transition
@@ -753,11 +753,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       ASLayoutableSetCurrentContext(ASLayoutableContextMake(transitionID, NO));
 
       ASDN::MutexLocker l(__instanceLock__);
-      BOOL automaticHierarchyWasDisabled = (self.automaticHierarchy == NO);
-      self.automaticHierarchy = YES; // Temporary flag for 1.9.x
+      BOOL automaticallyManagesSubnodesDisabled = (self.automaticallyManagesSubnodes == NO);
+      self.automaticallyManagesSubnodes = YES; // Temporary flag for 1.9.x
       newLayout = [self calculateLayoutThatFits:constrainedSize];
-      if (automaticHierarchyWasDisabled) {
-        self.automaticHierarchy = NO; // Temporary flag for 1.9.x
+      if (automaticallyManagesSubnodesDisabled) {
+        self.automaticallyManagesSubnodes = NO; // Temporary flag for 1.9.x
       }
       
       ASLayoutableClearCurrentContext();
@@ -911,7 +911,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)_completeLayoutTransition:(ASLayoutTransition *)layoutTransition
 {
   // Layout transition is not supported for nodes that are not have automatic hierarchy management enabled
-  if (layoutTransition == nil || self.automaticHierarchy == NO) {
+  if (layoutTransition == nil || self.automaticallyManagesSubnodes == NO) {
     return;
   }
 
@@ -2592,7 +2592,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
   
-  if (layoutTransition == nil || self.automaticHierarchy == NO) {
+  if (layoutTransition == nil || self.automaticallyManagesSubnodes == NO) {
     return;
   }
 
@@ -3167,12 +3167,12 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (BOOL)usesImplicitHierarchyManagement
 {
-  return self.automaticHierarchy;
+  return self.automaticallyManagesSubnodes;
 }
 
 - (void)setUsesImplicitHierarchyManagement:(BOOL)enabled
 {
-  self.automaticHierarchy = enabled;
+  self.automaticallyManagesSubnodes = enabled;
 }
 
 

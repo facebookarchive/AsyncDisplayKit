@@ -50,10 +50,10 @@
 - (void)testFeatureFlag
 {
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
-  XCTAssertFalse(node.automaticHierarchy);
+  XCTAssertFalse(node.automaticallyManagesSubnodes);
   
-  node.automaticHierarchy = YES;
-  XCTAssertTrue(node.automaticHierarchy);
+  node.automaticallyManagesSubnodes = YES;
+  XCTAssertTrue(node.automaticallyManagesSubnodes);
 }
 
 - (void)testInitialNodeInsertionWithOrdering
@@ -65,7 +65,7 @@
   ASDisplayNode *node5 = [[ASDisplayNode alloc] init];
 
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
-  node.automaticHierarchy = YES;
+  node.automaticallyManagesSubnodes = YES;
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASStaticLayoutSpec *staticLayout = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node4]];
     
@@ -92,7 +92,7 @@
   ASDisplayNode *node3 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
-  node.automaticHierarchy = YES;
+  node.automaticallyManagesSubnodes = YES;
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize){
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
     if ([strongNode.layoutState isEqualToNumber:@1]) {
@@ -123,7 +123,7 @@
   ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
-  node.automaticHierarchy = YES;
+  node.automaticallyManagesSubnodes = YES;
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
     if ([strongNode.layoutState isEqualToNumber:@1]) {
@@ -167,7 +167,7 @@
   ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
-  node.automaticHierarchy = YES;
+  node.automaticallyManagesSubnodes = YES;
   
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;

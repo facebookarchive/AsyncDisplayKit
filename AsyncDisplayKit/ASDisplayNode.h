@@ -758,7 +758,7 @@ NS_ASSUME_NONNULL_END
  * @discussion If flag is YES the node no longer require addSubnode: or removeFromSupernode method calls. The presence
  * or absence of subnodes is completely determined in its layoutSpecThatFits: method.
  */
-@property (nonatomic, assign) BOOL automaticHierarchy;
+@property (nonatomic, assign) BOOL automaticallyManagesSubnodes;
 
 @end
 
