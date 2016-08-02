@@ -267,6 +267,7 @@ static NSString * const kStatus = @"status";
 
     AVAssetImageGenerator *previewImageGenerator = [AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
     previewImageGenerator.appliesPreferredTrackTransform = YES;
+    previewImageGenerator.videoComposition = _videoComposition;
 
     [previewImageGenerator generateCGImagesAsynchronouslyForTimes:@[[NSValue valueWithCMTime:imageTime]]
                                                 completionHandler:^(CMTime requestedTime, CGImageRef image, CMTime actualTime, AVAssetImageGeneratorResult result, NSError *error) {
