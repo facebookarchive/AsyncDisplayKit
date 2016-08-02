@@ -44,7 +44,7 @@ void ASEnvironmentPerformBlockOnObjectAndChildren(id<ASEnvironment> object, void
     
     block(object);
     
-    for (id<ASEnvironment> child in [object children]) {
+    for (id<ASEnvironment> child in object) {
       queue.push(child);
     }
   }

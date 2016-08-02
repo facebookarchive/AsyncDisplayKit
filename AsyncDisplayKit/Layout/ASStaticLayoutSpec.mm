@@ -10,6 +10,7 @@
 
 #import "ASStaticLayoutSpec.h"
 
+#import "ASLayoutSpec+Private.h"
 #import "ASLayoutSpecUtilities.h"
 #import "ASLayout.h"
 
@@ -38,10 +39,8 @@
 {
   CGSize maxConstrainedSize = CGSizeMake(constrainedSize.max.width, constrainedSize.max.height);
   
-  NSArray *children = self.children;
-  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:children.count];
-
-  for (id<ASLayoutable> child in children) {
+  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:self.childrenMap.size()];
+  for (id<ASLayoutable> child in self) {
     CGPoint layoutPosition = child.layoutPosition;
     CGSize autoMaxSize = CGSizeMake(maxConstrainedSize.width  - layoutPosition.x,
                                     maxConstrainedSize.height - layoutPosition.y);

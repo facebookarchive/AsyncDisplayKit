@@ -13,6 +13,7 @@
 
 #import "ASInternalHelpers.h"
 
+#import "ASLayoutSpec+Private.h"
 #import "ASLayoutSpecUtilities.h"
 #import "ASStackBaselinePositionedLayout.h"
 #import "ASThread.h"
@@ -58,7 +59,7 @@
   _alignItems = alignItems;
   _justifyContent = justifyContent;
   
-  [self setChildren:children];
+  self.children = children;
   return self;
 }
 
@@ -120,7 +121,9 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  if (self.children.count == 0) {
+  auto const &children = self.childrenMap;
+  
+  if (children.size() == 0) {
     return [ASLayout layoutWithLayoutableObject:self
                            constrainedSizeRange:constrainedSize
                                            size:constrainedSize.min];
@@ -129,9 +132,9 @@
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
   BOOL needsBaselinePass = _baselineRelativeArrangement || _alignItems == ASStackLayoutAlignItemsBaselineFirst || _alignItems == ASStackLayoutAlignItemsBaselineLast;
   
-  std::vector<id<ASLayoutable>> stackChildren = std::vector<id<ASLayoutable>>();
-  for (id<ASLayoutable> child in self.children) {
-    stackChildren.push_back(child);
+  std::vector<id<ASLayoutable>> stackChildren;
+  for (auto const &entry : children) {
+    stackChildren.push_back(entry.second);
   }
   
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
@@ -143,14 +146,18 @@
   // regardless of whether or not this stack aligns to baseline, we should let ASStackBaselinePositionedLayout::compute find the max ascender
   // and min descender in case this spec is a child in another spec that wants to align to a baseline.
   const auto baselinePositionedLayout = ASStackBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
-  if (self.direction == ASStackLayoutDirectionVertical) {
+  {
     ASDN::MutexLocker l(__instanceLock__);
-    self.ascender = [[self.children firstObject] ascender];
-    self.descender = [[self.children lastObject] descender];
-  } else {
-    ASDN::MutexLocker l(__instanceLock__);
-    self.ascender = baselinePositionedLayout.ascender;
-    self.descender = baselinePositionedLayout.descender;
+    if (self.direction == ASStackLayoutDirectionVertical) {
+      if (stackChildren.size() > 0) {
+        self.ascender = stackChildren.front().ascender;
+        self.descender = stackChildren.back().descender;
+      }
+
+    } else {
+      self.ascender = baselinePositionedLayout.ascender;
+      self.descender = baselinePositionedLayout.descender;
+    }
   }
   
   if (needsBaselinePass) {

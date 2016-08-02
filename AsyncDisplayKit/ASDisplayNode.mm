@@ -1877,17 +1877,34 @@ static NSInteger incrementIfFound(NSInteger i) {
     }
     if (newSupernode) {
       [self enterHierarchyState:stateToEnterOrExit];
+      
+      // If a node was added to a supernode, the supernode could be in a layout pending state. All of the hierarchy state
+      // properties related to the transition need to be copied over as well as propagated down the subtree.
+      // This is especially important as with Implicit Hierarchy Management adding subnodes can happen while a transition
+      // is in fly
+      if (ASHierarchyStateIncludesLayoutPending(stateToEnterOrExit)) {
+        int32_t pendingTransitionId = newSupernode.pendingTransitionID;
+        if (pendingTransitionId != ASLayoutableContextInvalidTransitionID) {
+          {
+            ASDN::MutexLocker l(__instanceLock__);
+            _pendingTransitionID = pendingTransitionId;
+            
+            // Propagate down the new pending transition id
+            ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
+              node.pendingTransitionID = _pendingTransitionID;
+            });
+          }
+        }
+      }
+      
+      // Now that we have a supernode, propagate its traits to self.
+      ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
     } else {
       // If a node will be removed from the supernode it should go out from the layout pending state to remove all
       // layout pending state related properties on the node
       stateToEnterOrExit |= ASHierarchyStateLayoutPending;
       
       [self exitHierarchyState:stateToEnterOrExit];
-    }
-    
-    // now that we have a supernode, propagate its traits to self.
-    if (newSupernode != nil) {
-      ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
     }
   }
 }
@@ -2159,6 +2176,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(__instanceLock__);
   ASDisplayNodeAssertTrue(_pendingTransitionID < pendingTransitionID);
   _pendingTransitionID = pendingTransitionID;
+}
+  
+- (int32_t)pendingTransitionID
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _pendingTransitionID;
 }
 
 - (void)setPreferredFrameSize:(CGSize)preferredFrameSize
@@ -2956,6 +2979,15 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
     _environmentState.environmentTraitCollection = environmentTraitCollection;
     [self asyncTraitCollectionDidChange];
   }
+}
+
+#pragma mark - NSFastEnumeration
+
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state
+                                  objects:(id __unsafe_unretained [])stackbuf
+                                    count:(NSUInteger)stackbufLength
+{
+  return [self.children countByEnumeratingWithState:state objects:stackbuf count:stackbufLength];
 }
 
 ASEnvironmentLayoutOptionsForwarding
