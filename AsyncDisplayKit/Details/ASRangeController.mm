@@ -342,10 +342,14 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     }
   }
   
+  // TODO: This code is for debugging only, but would be great to clean up with a delegate method implementation.
   if ([ASRangeController shouldShowRangeDebugOverlay]) {
     ASScrollDirection scrollableDirections = ASScrollDirectionUp | ASScrollDirectionDown;
     if ([_dataSource isKindOfClass:NSClassFromString(@"ASCollectionView")]) {
-      scrollableDirections = (ASScrollDirection)[_dataSource performSelector:@selector(scrollableDirections)];   // FIXME:
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+      scrollableDirections = (ASScrollDirection)[_dataSource performSelector:@selector(scrollableDirections)];
+#pragma clang diagnostic pop
     }
     
     [self updateRangeController:self

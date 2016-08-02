@@ -13,9 +13,9 @@
 #import "AsyncDisplayKit+Debug.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeExtras.h"
+#import "ASWeakSet.h"
 #import "UIImage+ASConvenience.h"
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
-#import <AsyncDisplayKit/ASWeakSet.h>
 #import <AsyncDisplayKit/CGRect+ASConvenience.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASTextNode.h>
@@ -728,7 +728,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 
 #define RANGE_BAR_CORNER_RADIUS 3
 #define RANGE_BAR_BORDER_WIDTH 1
-- (ASDisplayNode *)createRangeNodeWithColor:(UIColor *)color
+- (ASImageNode *)createRangeNodeWithColor:(UIColor *)color
 {
     ASImageNode *rangeBarImageNode = [[ASImageNode alloc] init];
     rangeBarImageNode.image = [UIImage as_resizableRoundedImageWithCornerRadius:RANGE_BAR_CORNER_RADIUS
