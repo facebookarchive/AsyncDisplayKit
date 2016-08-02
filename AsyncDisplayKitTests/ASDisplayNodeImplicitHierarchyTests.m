@@ -199,7 +199,7 @@
   
   node.layoutState = @2;
   [node invalidateCalculatedLayout];
-  [node transitionLayoutWithAnimation:YES shouldMeasureAsync:YES measurementCompletion:^{
+  [node transitionLayoutAnimated:YES measurementCompletion:^{
     // Push this to the next runloop to let async insertion / removing of nodes finished before checking
     dispatch_async(dispatch_get_main_queue(), ^{
       XCTAssertEqual(node.subnodes[0], node2);
