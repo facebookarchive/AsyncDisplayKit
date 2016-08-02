@@ -305,8 +305,13 @@ static NSString * const kStatus = @"status";
       }
     }
   } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
-    self.playerState = ASVideoNodePlayerStatePlaybackLikelyToKeepUpButNotPlaying;
-    if (_shouldBePlaying && (_shouldAggressivelyRecoverFromStall || [change[NSKeyValueChangeNewKey] boolValue]) && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+    BOOL likelyToKeepUp = [change[NSKeyValueChangeNewKey] boolValue];
+    if (likelyToKeepUp) {
+      self.playerState = ASVideoNodePlayerStatePlaybackLikelyToKeepUpButNotPlaying;
+    } else {
+      self.playerState = ASVideoNodePlayerStateLoading;
+    }
+    if (_shouldBePlaying && (_shouldAggressivelyRecoverFromStall || likelyToKeepUp) && ASInterfaceStateIncludesVisible(self.interfaceState)) {
       if (self.playerState == ASVideoNodePlayerStateLoading && _delegateFlags.delegateVideoNodeDidRecoverFromStall) {
         [_delegate videoNodeDidRecoverFromStall:self];
       }
@@ -346,14 +351,11 @@ static NSString * const kStatus = @"status";
   ASDN::MutexLocker l(__instanceLock__);
   AVAsset *asset = self.asset;
   // Return immediately if the asset is nil;
-  if (asset == nil || self.playerState == ASVideoNodePlayerStateInitialLoading) {
+  if (asset == nil || self.playerState != ASVideoNodePlayerStateUnknown) {
       return;
   }
 
-  // FIXME: Nothing appears to prevent this method from sending the delegate notification / calling load on the asset
-  // multiple times, even after the asset is fully loaded and ready to play.  There should probably be a playerState
-  // for NotLoaded or such, besides Unknown, so this can be easily checked before proceeding.
-  self.playerState = ASVideoNodePlayerStateInitialLoading;
+  self.playerState = ASVideoNodePlayerStateLoading;
   if (_delegateFlags.delegateVideoNodeDidStartInitialLoading) {
       [_delegate videoNodeDidStartInitialLoading:self];
   }
@@ -397,6 +399,7 @@ static NSString * const kStatus = @"status";
 
     self.player = nil;
     self.currentItem = nil;
+    self.playerState = ASVideoNodePlayerStateUnknown;
   }
 }
 
@@ -605,10 +608,12 @@ static NSString * const kStatus = @"status";
   [_player play];
   _shouldBePlaying = YES;
 
-  if (![self ready]) {
-    self.playerState = ASVideoNodePlayerStateLoading;
-  } else {
-    self.playerState = ASVideoNodePlayerStatePlaying;
+  if (self.playerState != ASVideoNodePlayerStateUnknown) {
+    if (![self ready]) {
+      self.playerState = ASVideoNodePlayerStateLoading;
+    } else {
+      self.playerState = ASVideoNodePlayerStatePlaying;
+    }
   }
 }
 
@@ -623,9 +628,12 @@ static NSString * const kStatus = @"status";
   if (![self isStateChangeValid:ASVideoNodePlayerStatePaused]) {
     return;
   }
-  self.playerState = ASVideoNodePlayerStatePaused;
   [_player pause];
   _shouldBePlaying = NO;
+
+  if (self.playerState == ASVideoNodePlayerStatePlaying) {
+    self.playerState = ASVideoNodePlayerStatePaused;
+  }
 }
 
 - (BOOL)isPlaying
