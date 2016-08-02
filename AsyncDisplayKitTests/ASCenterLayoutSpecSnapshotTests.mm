@@ -14,7 +14,7 @@
 #import "ASCenterLayoutSpec.h"
 #import "ASStackLayoutSpec.h"
 
-static const ASSizeRange kSize = {{100, 120}, {320, 160}};
+static const ASSizeRange kSize = ASSizeRangeMake({100, 120}, {320, 160});
 
 @interface ASCenterLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end

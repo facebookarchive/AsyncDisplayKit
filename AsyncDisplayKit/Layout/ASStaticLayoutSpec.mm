@@ -36,7 +36,9 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  CGSize maxConstrainedSize = CGSizeMake(constrainedSize.max.width, constrainedSize.max.height);
+  ASSizeRangeAssertPoints(constrainedSize);
+  
+  CGSize maxConstrainedSize = CGSizeFromASRelativeSize(constrainedSize.max);
   
   NSArray *children = self.children;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:children.count];
@@ -46,17 +48,17 @@
     CGSize autoMaxSize = CGSizeMake(maxConstrainedSize.width  - layoutPosition.x,
                                     maxConstrainedSize.height - layoutPosition.y);
     
-    ASRelativeSizeRange childSizeRange = child.sizeRange;
-    BOOL childIsUnconstrained = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, childSizeRange);
+    ASSizeRange childSizeRange = child.sizeRange;
+    BOOL childIsUnconstrained = ASSizeRangeEqualToSizeRange(ASSizeRangeUnconstrained, childSizeRange);
     ASSizeRange childConstraint = childIsUnconstrained ? ASSizeRangeMake({0, 0}, autoMaxSize)
-                                                       : ASRelativeSizeRangeResolve(childSizeRange, maxConstrainedSize);
+                                                       : ASSizeRangeResolve(childSizeRange, maxConstrainedSize);
     
     ASLayout *sublayout = [child measureWithSizeRange:childConstraint];
     sublayout.position = layoutPosition;
     [sublayouts addObject:sublayout];
   }
   
-  CGSize size = CGSizeMake(constrainedSize.min.width, constrainedSize.min.height);
+  CGSize size = CGSizeFromASRelativeSize(constrainedSize.min);
 
   for (ASLayout *sublayout in sublayouts) {
     CGPoint sublayoutPosition = sublayout.position;

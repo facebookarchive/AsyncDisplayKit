@@ -55,8 +55,8 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
                                      return compareCrossDimension(style.direction, a.layout.size, b.layout.size);
                                    });
   const auto largestChildCrossSize = it == unpositionedLayout.items.end() ? 0 : crossDimension(style.direction, it->layout.size);
-  const auto minCrossSize = crossDimension(style.direction, constrainedSize.min);
-  const auto maxCrossSize = crossDimension(style.direction, constrainedSize.max);
+  const auto minCrossSize = crossDimension(style.direction, CGSizeFromASRelativeSize(constrainedSize.min));
+  const auto maxCrossSize = crossDimension(style.direction, CGSizeFromASRelativeSize(constrainedSize.max));
   const CGFloat crossSize = MIN(MAX(minCrossSize, largestChildCrossSize), maxCrossSize);
   
   CGPoint p = directionPoint(style.direction, firstChildOffset, 0);

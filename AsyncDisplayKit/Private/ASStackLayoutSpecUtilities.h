@@ -49,7 +49,7 @@ inline ASSizeRange directionSizeRange(const ASStackLayoutDirection direction,
                                       const CGFloat crossMin,
                                       const CGFloat crossMax)
 {
-  return {directionSize(direction, stackMin, crossMin), directionSize(direction, stackMax, crossMax)};
+  return ASSizeRangeMake(directionSize(direction, stackMin, crossMin), directionSize(direction, stackMax, crossMax));
 }
 
 inline ASStackLayoutAlignItems alignment(ASStackLayoutAlignSelf childAlignment, ASStackLayoutAlignItems stackAlignment)

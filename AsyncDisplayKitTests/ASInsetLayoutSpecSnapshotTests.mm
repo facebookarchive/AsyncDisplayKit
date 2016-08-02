@@ -58,7 +58,7 @@ static NSString *nameForInsets(UIEdgeInsets insets)
      backgroundLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:foregroundNode]
      background:backgroundNode];
     
-    static ASSizeRange kVariableSize = {{0, 0}, {300, 300}};
+    static ASSizeRange kVariableSize = ASSizeRangeMake({0, 0}, {300, 300});
     [self testLayoutSpec:layoutSpec
                sizeRange:kVariableSize
                 subnodes:@[backgroundNode, foregroundNode]
@@ -79,7 +79,7 @@ static NSString *nameForInsets(UIEdgeInsets insets)
      backgroundLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:foregroundNode]
      background:backgroundNode];
 
-    static ASSizeRange kFixedSize = {{300, 300}, {300, 300}};
+    static ASSizeRange kFixedSize = ASSizeRangeMake({300, 300}, {300, 300});
     [self testLayoutSpec:layoutSpec
                sizeRange:kFixedSize
                 subnodes:@[backgroundNode, foregroundNode]
@@ -101,7 +101,7 @@ static NSString *nameForInsets(UIEdgeInsets insets)
      backgroundLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:foregroundNode]
      background:backgroundNode];
 
-    static ASSizeRange kFixedSize = {{300, 300}, {300, 300}};
+    static ASSizeRange kFixedSize = ASSizeRangeMake({300, 300}, {300, 300});
     [self testLayoutSpec:layoutSpec
                sizeRange:kFixedSize
                 subnodes:@[backgroundNode, foregroundNode]

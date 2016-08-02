@@ -72,8 +72,8 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
     Class stackContainerClass = [ASStaticLayoutSpec class];
     
     // Check for default sizeRange and layoutPosition
-    ASRelativeSizeRange sizeRange = sublayoutLayoutable.sizeRange;
-    ASRelativeSizeRange zeroSizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeZero);
+    ASSizeRange sizeRange = sublayoutLayoutable.sizeRange;
+    ASSizeRange zeroSizeRange = ASSizeRangeMake(CGSizeZero);
     
     // Currently setting the preferredFrameSize also updates the sizeRange. Create a size range based on the
     // preferredFrameSize and check it if it's the same as the current sizeRange to be sure it was not changed manually
@@ -81,10 +81,10 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
     if ([sublayoutLayoutable respondsToSelector:@selector(preferredFrameSize)]) {
       preferredFrameSize = [((ASDisplayNode *)sublayoutLayoutable) preferredFrameSize];
     }
-    ASRelativeSizeRange preferredFrameSizeRange = ASRelativeSizeRangeMakeWithExactCGSize(preferredFrameSize);
+    ASSizeRange preferredFrameSizeRange = ASSizeRangeMake(preferredFrameSize);
     
-    if (ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, zeroSizeRange) == NO &&
-        ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, preferredFrameSizeRange) == NO) {
+    if (ASSizeRangeEqualToSizeRange(sizeRange, zeroSizeRange) == NO &&
+        ASSizeRangeEqualToSizeRange(sizeRange, preferredFrameSizeRange) == NO) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(sizeRange), sublayoutLayoutable, stackContainerClass);
     } else if (!CGPointEqualToPoint(sublayoutLayoutable.layoutPosition, CGPointZero)) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(layoutPosition), sublayoutLayoutable, stackContainerClass);
@@ -126,7 +126,7 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexGrow), sublayoutLayoutable, stackContainerClass);
     } else if (sublayoutLayoutable.flexShrink == YES) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexShrink), sublayoutLayoutable, stackContainerClass);
-    } else if (!ASRelativeDimensionEqualToRelativeDimension(sublayoutLayoutable.flexBasis, ASRelativeDimensionUnconstrained) ) {
+    } else if (!ASDimensionEqualToDimension(sublayoutLayoutable.flexBasis, ASDimensionUnconstrained) ) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexBasis), sublayoutLayoutable, stackContainerClass);
     } else if (sublayoutLayoutable.alignSelf != ASStackLayoutAlignSelfAuto) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(alignSelf), sublayoutLayoutable, stackContainerClass);

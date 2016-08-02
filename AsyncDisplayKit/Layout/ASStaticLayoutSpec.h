@@ -9,7 +9,7 @@
 //
 
 #import <AsyncDisplayKit/ASLayoutSpec.h>
-#import <AsyncDisplayKit/ASRelativeSize.h>
+#import <AsyncDisplayKit/ASDimension.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

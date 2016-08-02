@@ -12,7 +12,7 @@
 
 #import "ASRatioLayoutSpec.h"
 
-static const ASSizeRange kFixedSize = {{0, 0}, {100, 100}};
+static const ASSizeRange kFixedSize = ASSizeRangeMake({0, 0}, {100, 100});
 
 @interface ASRatioLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end

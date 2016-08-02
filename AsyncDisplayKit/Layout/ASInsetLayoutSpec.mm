@@ -69,24 +69,26 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  ASSizeRangeAssertPoints(constrainedSize);
+  
   const CGFloat insetsX = (finiteOrZero(_insets.left) + finiteOrZero(_insets.right));
   const CGFloat insetsY = (finiteOrZero(_insets.top) + finiteOrZero(_insets.bottom));
 
   // if either x-axis inset is infinite, let child be intrinsic width
-  const CGFloat minWidth = (isinf(_insets.left) || isinf(_insets.right)) ? 0 : constrainedSize.min.width;
+  const CGFloat minWidth = (isinf(_insets.left) || isinf(_insets.right)) ? 0 : ASDimensionGetPoints(constrainedSize.min.width);
   // if either y-axis inset is infinite, let child be intrinsic height
-  const CGFloat minHeight = (isinf(_insets.top) || isinf(_insets.bottom)) ? 0 : constrainedSize.min.height;
+  const CGFloat minHeight = (isinf(_insets.top) || isinf(_insets.bottom)) ? 0 : ASDimensionGetPoints(constrainedSize.min.height);
 
-  const ASSizeRange insetConstrainedSize = {
-    {
+  const ASSizeRange insetConstrainedSize = ASSizeRangeMake(
+    CGSizeMake(
       MAX(0, minWidth - insetsX),
-      MAX(0, minHeight - insetsY),
-    },
-    {
-      MAX(0, constrainedSize.max.width - insetsX),
-      MAX(0, constrainedSize.max.height - insetsY),
-    }
-  };
+      MAX(0, minHeight - insetsY)
+    ),
+    CGSizeMake(
+      MAX(0, ASDimensionGetPoints(constrainedSize.max.width) - insetsX),
+      MAX(0, ASDimensionGetPoints(constrainedSize.max.height) - insetsY)
+    )
+  );
   
   if (self.child == nil) {
     ASDisplayNodeAssert(NO, @"Inset spec measured without a child. The spec will do nothing.");
@@ -98,18 +100,18 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   ASLayout *sublayout = [self.child measureWithSizeRange:insetConstrainedSize];
 
   const CGSize computedSize = ASSizeRangeClamp(constrainedSize, {
-    finite(sublayout.size.width + _insets.left + _insets.right, constrainedSize.max.width),
-    finite(sublayout.size.height + _insets.top + _insets.bottom, constrainedSize.max.height),
+    finite(sublayout.size.width + _insets.left + _insets.right, ASDimensionGetPoints(constrainedSize.max.width)),
+    finite(sublayout.size.height + _insets.top + _insets.bottom, ASDimensionGetPoints(constrainedSize.max.height)),
   });
 
-  const CGFloat x = finite(_insets.left, constrainedSize.max.width -
+  const CGFloat x = finite(_insets.left, ASDimensionGetPoints(constrainedSize.max.width) -
                            (finite(_insets.right,
-                                   centerInset(constrainedSize.max.width, sublayout.size.width)) + sublayout.size.width));
+                                   centerInset(ASDimensionGetPoints(constrainedSize.max.width), sublayout.size.width)) + sublayout.size.width));
 
   const CGFloat y = finite(_insets.top,
-                           constrainedSize.max.height -
+                           ASDimensionGetPoints(constrainedSize.max.height) -
                            (finite(_insets.bottom,
-                                   centerInset(constrainedSize.max.height, sublayout.size.height)) + sublayout.size.height));
+                                   centerInset(ASDimensionGetPoints(constrainedSize.max.height), sublayout.size.height)) + sublayout.size.height));
   
   sublayout.position = CGPointMake(x, y);
   

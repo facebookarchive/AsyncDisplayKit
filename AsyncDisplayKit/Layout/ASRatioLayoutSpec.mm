@@ -14,6 +14,7 @@
 #import <tgmath.h>
 #import <vector>
 
+#import "ASDimension.h"
 #import "ASAssert.h"
 
 #import "ASInternalHelpers.h"
@@ -49,17 +50,19 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  ASSizeRangeAssertPoints(constrainedSize);
+  
   std::vector<CGSize> sizeOptions;
-  if (!isinf(constrainedSize.max.width)) {
+  if (!isinf(ASDimensionGetPoints(constrainedSize.max.width))) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
-      constrainedSize.max.width,
-      ASFloorPixelValue(_ratio * constrainedSize.max.width)
+      ASDimensionGetPoints(constrainedSize.max.width),
+      ASFloorPixelValue(_ratio * ASDimensionGetPoints(constrainedSize.max.width))
     }));
   }
-  if (!isinf(constrainedSize.max.height)) {
+  if (!isinf(ASDimensionGetPoints(constrainedSize.max.height))) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
-      ASFloorPixelValue(constrainedSize.max.height / _ratio),
-      constrainedSize.max.height
+      ASFloorPixelValue(ASDimensionGetPoints(constrainedSize.max.height) / _ratio),
+      ASDimensionGetPoints(constrainedSize.max.height)
     }));
   }
 

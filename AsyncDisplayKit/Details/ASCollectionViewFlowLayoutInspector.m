@@ -61,11 +61,14 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
+  ASSizeRange sizeRange;
   if (_delegateFlags.implementsConstrainedSizeForNodeAtIndexPath) {
-    return [collectionView.asyncDelegate collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
+    sizeRange = [collectionView.asyncDelegate collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
+  } else {
+    sizeRange = NodeConstrainedSizeForScrollDirection(collectionView);
   }
-  
-  return NodeConstrainedSizeForScrollDirection(collectionView);
+  ASSizeRangeAssertPoints(sizeRange);
+  return sizeRange;
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -148,7 +151,9 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   if (_delegateFlags.implementsConstrainedSizeForNodeAtIndexPath) {
-    return [collectionView.asyncDelegate collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
+    ASSizeRange sizeRange = [collectionView.asyncDelegate collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
+    ASSizeRangeAssertPoints(sizeRange);
+    return sizeRange;
   }
   
   CGSize itemSize = _layout.itemSize;

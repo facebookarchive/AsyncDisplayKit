@@ -144,7 +144,7 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
     if (parentLayoutOptionsState.flexGrow == defaultState.flexGrow) {
       parentLayoutOptionsState.flexGrow = layoutOptionsState.flexGrow;
     }
-    if (ASRelativeDimensionEqualToRelativeDimension(parentLayoutOptionsState.flexBasis, defaultState.flexBasis)) {
+    if (ASDimensionEqualToDimension(parentLayoutOptionsState.flexBasis, defaultState.flexBasis)) {
       parentLayoutOptionsState.flexBasis = layoutOptionsState.flexBasis;
     }
     if (parentLayoutOptionsState.alignSelf == defaultState.alignSelf) {
@@ -154,7 +154,7 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
       parentLayoutOptionsState.ascender = layoutOptionsState.ascender;
     }
     
-    if (ASRelativeSizeRangeEqualToRelativeSizeRange(parentLayoutOptionsState.sizeRange, defaultState.sizeRange)) {
+    if (ASSizeRangeEqualToSizeRange(parentLayoutOptionsState.sizeRange, defaultState.sizeRange)) {
       // For now it is unclear if we should be up-propagating sizeRange or layoutPosition.
       // parentLayoutOptionsState.sizeRange = layoutOptionsState.sizeRange;
     }

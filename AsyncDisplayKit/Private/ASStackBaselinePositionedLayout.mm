@@ -150,8 +150,8 @@ ASStackBaselinePositionedLayout ASStackBaselinePositionedLayout::compute(const A
                                      return maxDimensionForLayout(a, style) < maxDimensionForLayout(b, style);
                                    });
   const auto largestChildCrossSize = it == stackedChildren.end() ? 0 : maxDimensionForLayout(*it, style);
-  const auto minCrossSize = crossDimension(style.direction, constrainedSize.min);
-  const auto maxCrossSize = crossDimension(style.direction, constrainedSize.max);
+  const auto minCrossSize = crossDimension(style.direction, CGSizeFromASRelativeSize(constrainedSize.min));
+  const auto maxCrossSize = crossDimension(style.direction, CGSizeFromASRelativeSize(constrainedSize.max));
   const CGFloat crossSize = MIN(MAX(minCrossSize, largestChildCrossSize), maxCrossSize);
   
   /*

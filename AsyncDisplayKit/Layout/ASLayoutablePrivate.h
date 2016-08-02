@@ -132,12 +132,12 @@ extern void ASLayoutableClearCurrentContext();
   [self propagateUpLayoutOptionsState];\
 }\
 \
-- (ASRelativeDimension)flexBasis\
+- (ASDimension)flexBasis\
 {\
   return _environmentState.layoutOptionsState.flexBasis;\
 }\
 \
-- (void)setFlexBasis:(ASRelativeDimension)flexBasis\
+- (void)setFlexBasis:(ASDimension)flexBasis\
 {\
   _environmentState.layoutOptionsState.flexBasis = flexBasis;\
   [self propagateUpLayoutOptionsState];\
@@ -176,12 +176,12 @@ extern void ASLayoutableClearCurrentContext();
   [self propagateUpLayoutOptionsState];\
 }\
 \
-- (ASRelativeSizeRange)sizeRange\
+- (ASSizeRange)sizeRange\
 {\
   return _environmentState.layoutOptionsState.sizeRange;\
 }\
 \
-- (void)setSizeRange:(ASRelativeSizeRange)sizeRange\
+- (void)setSizeRange:(ASSizeRange)sizeRange\
 {\
   _environmentState.layoutOptionsState.sizeRange = sizeRange;\
   [self propagateUpLayoutOptionsState];\

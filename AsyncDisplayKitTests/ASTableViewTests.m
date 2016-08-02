@@ -148,7 +148,7 @@
 
 - (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  return ASSizeRangeMakeExactSize(CGSizeMake(10, 42));
+  return ASSizeRangeMake(CGSizeMake(10, 42));
 }
 
 @end
@@ -373,10 +373,10 @@
         ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
         if ([visibleNodes containsObject:node]) {
           XCTAssertEqual(node.numberOfLayoutsOnMainThread, 1);
-          XCTAssertLessThan(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
+          XCTAssertLessThan(ASDimensionGetPoints(node.constrainedSizeForCalculatedLayout.max.width), tableViewSize.width);
         } else {
           XCTAssertEqual(node.numberOfLayoutsOnMainThread, 0);
-          XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
+          XCTAssertEqual(ASDimensionGetPoints(node.constrainedSizeForCalculatedLayout.max.width), tableViewSize.width);
         }
       }
     }
@@ -401,7 +401,7 @@
         ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
         BOOL visible = [visibleNodes containsObject:node];
         XCTAssertEqual(node.numberOfLayoutsOnMainThread, visible ? 2: 0);
-        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
+        XCTAssertEqual(ASDimensionGetPoints(node.constrainedSizeForCalculatedLayout.max.width), tableViewSize.width);
       }
     }
     [relayoutAfterDisablingEditingExpectation fulfill];
@@ -435,7 +435,7 @@
   [tableView endUpdatesAnimated:YES completion:^(BOOL completed) {
     ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:lastRowIndexPath];
     XCTAssertEqual(node.numberOfLayoutsOnMainThread, 1);
-    XCTAssertLessThan(node.constrainedSizeForCalculatedLayout.max.width, tableViewSize.width);
+    XCTAssertLessThan(ASDimensionGetPoints(node.constrainedSizeForCalculatedLayout.max.width), tableViewSize.width);
     [relayoutExpectation fulfill];
   }];
   [self waitForExpectationsWithTimeout:5 handler:^(NSError *error) {
@@ -476,7 +476,7 @@
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
         ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
         XCTAssertEqual(node.numberOfLayoutsOnMainThread, 0);
-        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, tableView.frame.size.width);
+        XCTAssertEqual(ASDimensionGetPoints(node.constrainedSizeForCalculatedLayout.max.width), tableView.frame.size.width);
       }
     }
     [reloadDataExpectation fulfill];
@@ -507,7 +507,7 @@
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
         ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
         XCTAssertLessThanOrEqual(node.numberOfLayoutsOnMainThread, 1);
-        XCTAssertEqual(node.constrainedSizeForCalculatedLayout.max.width, newSize.width);
+        XCTAssertEqual(ASDimensionGetPoints(node.constrainedSizeForCalculatedLayout.max.width), newSize.width);
       }
     }
     [nodesMeasuredUsingNewConstrainedSizeExpectation fulfill];

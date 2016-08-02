@@ -129,11 +129,14 @@
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
+  ASSizeRange sizeRange;
   if (_pagerDelegateImplementsConstrainedSizeForNode) {
-    return [_pagerDelegate pagerNode:self constrainedSizeForNodeAtIndexPath:indexPath];
+    sizeRange = [_pagerDelegate pagerNode:self constrainedSizeForNodeAtIndexPath:indexPath];
+  } else {
+    sizeRange = ASSizeRangeMake(CGSizeZero, self.view.bounds.size);
   }
-
-  return ASSizeRangeMake(CGSizeZero, self.view.bounds.size);
+  ASSizeRangeAssertPoints(sizeRange);
+  return sizeRange;
 }
 
 #pragma mark - Data Source Proxy

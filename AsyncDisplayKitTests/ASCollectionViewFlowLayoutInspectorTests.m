@@ -115,7 +115,7 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
-  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+  XCTAssert(CGSizeEqualToSize(CGSizeFromASRelativeSize(size.min), CGSizeFromASRelativeSize(sizeCompare.min)) && CGSizeEqualToSize(CGSizeFromASRelativeSize(size.max), CGSizeFromASRelativeSize(sizeCompare.max)), @"should have a size constrained by the values returned in the delegate implementation");
   
   collectionView.asyncDataSource = nil;
   collectionView.asyncDelegate = nil;
@@ -137,7 +137,7 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
-  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+  XCTAssert(ASRelativeSizeEqualToRelativeSize(size.min, sizeCompare.min) && ASRelativeSizeEqualToRelativeSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
   
   collectionView.asyncDataSource = nil;
   collectionView.asyncDelegate = nil;
@@ -160,7 +160,7 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
-  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+  XCTAssert(ASRelativeSizeEqualToRelativeSize(size.min, sizeCompare.min) && ASRelativeSizeEqualToRelativeSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
   
   collectionView.asyncDataSource = nil;
   collectionView.asyncDelegate = nil;
@@ -181,7 +181,7 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(collectionView.bounds.size.width, 125.0));
-  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+  XCTAssert(ASRelativeSizeEqualToRelativeSize(size.min, sizeCompare.min) && ASRelativeSizeEqualToRelativeSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
   
   collectionView.asyncDataSource = nil;
   collectionView.asyncDelegate = nil;
@@ -205,7 +205,7 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.height));
-  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+  XCTAssert(ASRelativeSizeEqualToRelativeSize(size.min, sizeCompare.min) && ASRelativeSizeEqualToRelativeSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
   
   collectionView.asyncDataSource = nil;
   collectionView.asyncDelegate = nil;
@@ -227,7 +227,7 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.height));
-  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
+  XCTAssert(ASRelativeSizeEqualToRelativeSize(size.min, sizeCompare.min) && ASRelativeSizeEqualToRelativeSize(size.max, sizeCompare.max), @"should have a size constrained by the values returned in the delegate implementation");
   
   collectionView.asyncDataSource = nil;
   collectionView.asyncDelegate = nil;
@@ -250,7 +250,7 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.width));
-  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+  XCTAssert(ASRelativeSizeEqualToRelativeSize(size.min, sizeCompare.min) && ASRelativeSizeEqualToRelativeSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
   
   collectionView.asyncDataSource = nil;
   collectionView.asyncDelegate = nil;
@@ -271,7 +271,7 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeMake(125.0, collectionView.bounds.size.height));
-  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
+  XCTAssert(ASRelativeSizeEqualToRelativeSize(size.min, sizeCompare.min) && ASRelativeSizeEqualToRelativeSize(size.max, sizeCompare.max), @"should have a size constrained by the size set on the layout");
   
   collectionView.asyncDataSource = nil;
   collectionView.asyncDelegate = nil;
@@ -288,7 +288,7 @@
   ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
   ASSizeRange size = [inspector collectionView:collectionView constrainedSizeForSupplementaryNodeOfKind:UICollectionElementKindSectionFooter atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   ASSizeRange sizeCompare = ASSizeRangeMake(CGSizeZero, CGSizeZero);
-  XCTAssert(CGSizeEqualToSize(size.min, sizeCompare.min) && CGSizeEqualToSize(size.max, sizeCompare.max), @"should have a zero size");
+  XCTAssert(ASRelativeSizeEqualToRelativeSize(size.min, sizeCompare.min) && ASRelativeSizeEqualToRelativeSize(size.max, sizeCompare.max), @"should have a zero size");
   
   collectionView.asyncDataSource = nil;
   collectionView.asyncDelegate = nil;

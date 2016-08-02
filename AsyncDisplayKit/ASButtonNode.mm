@@ -461,6 +461,8 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
+  ASSizeRangeAssertPoints(constrainedSize);
+  
   UIEdgeInsets contentEdgeInsets;
   ASLayoutSpec *spec;
   ASStackLayoutSpec *stack = [[ASStackLayoutSpec alloc] init];
@@ -492,7 +494,7 @@
   }
   
   if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
-    stack.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(self.preferredFrameSize);
+    stack.sizeRange = ASSizeRangeMake(self.preferredFrameSize);
     spec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack]];
   }
   

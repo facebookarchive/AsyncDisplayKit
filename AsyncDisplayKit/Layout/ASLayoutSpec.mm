@@ -61,9 +61,11 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  ASSizeRangeAssertPoints(constrainedSize);
+  
   return [ASLayout layoutWithLayoutableObject:self
                          constrainedSizeRange:constrainedSize
-                                         size:constrainedSize.min];
+                                         size:CGSizeFromASRelativeSize(constrainedSize.min)];
 }
 
 - (id<ASLayoutable>)finalLayoutable

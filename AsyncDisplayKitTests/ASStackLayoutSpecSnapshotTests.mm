@@ -118,7 +118,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
 - (void)testUnderflowBehaviors
 {
   // width 300px; height 0-300px
-  static ASSizeRange kSize = {{300, 0}, {300, 300}};
+  static ASSizeRange kSize = ASSizeRangeMake({300, 0}, {300, 300});
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentStart flex:NO sizeRange:kSize identifier:@"justifyStart"];
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentCenter flex:NO sizeRange:kSize identifier:@"justifyCenter"];
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentEnd flex:NO sizeRange:kSize identifier:@"justifyEnd"];
@@ -130,7 +130,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
 - (void)testOverflowBehaviors
 {
   // width 110px; height 0-300px
-  static ASSizeRange kSize = {{110, 0}, {110, 300}};
+  static ASSizeRange kSize = ASSizeRangeMake({110, 0}, {110, 300});
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentStart flex:NO sizeRange:kSize identifier:@"justifyStart"];
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentCenter flex:NO sizeRange:kSize identifier:@"justifyCenter"];
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentEnd flex:NO sizeRange:kSize identifier:@"justifyEnd"];
@@ -149,7 +149,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASDisplayNode *)subnodes[1]).flexShrink = YES;
   
   // Width is 75px--that's less than the sum of the widths of the children, which is 100px.
-  static ASSizeRange kSize = {{75, 0}, {75, 150}};
+  static ASSizeRange kSize = ASSizeRangeMake({75, 0}, {75, 150});
   [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
 }
 
@@ -161,11 +161,11 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).staticSize = {150, 150};
 
   // width 300px; height 0-150px.
-  static ASSizeRange kUnderflowSize = {{300, 0}, {300, 150}};
+  static ASSizeRange kUnderflowSize = ASSizeRangeMake({300, 0}, {300, 150});
   [self testStackLayoutSpecWithStyle:style sizeRange:kUnderflowSize subnodes:subnodes identifier:@"underflow"];
   
   // width 200px; height 0-150px.
-  static ASSizeRange kOverflowSize = {{200, 0}, {200, 150}};
+  static ASSizeRange kOverflowSize = ASSizeRangeMake({200, 0}, {200, 150});
   [self testStackLayoutSpecWithStyle:style sizeRange:kOverflowSize subnodes:subnodes identifier:@"overflow"];
 }
 
@@ -179,11 +179,11 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {150, 50};
   
   // width 0-300px; height 300px
-  static ASSizeRange kVariableHeight = {{0, 300}, {300, 300}};
+  static ASSizeRange kVariableHeight = ASSizeRangeMake({0, 300}, {300, 300});
   [self testStackLayoutSpecWithStyle:style sizeRange:kVariableHeight subnodes:subnodes identifier:@"variableHeight"];
   
   // width 300px; height 300px
-  static ASSizeRange kFixedHeight = {{300, 300}, {300, 300}};
+  static ASSizeRange kFixedHeight = ASSizeRangeMake({300, 300}, {300, 300});
   [self testStackLayoutSpecWithStyle:style sizeRange:kFixedHeight subnodes:subnodes identifier:@"fixedHeight"];
 }
 
@@ -200,7 +200,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {150, 50};
 
   // width 0-300px; height 300px
-  static ASSizeRange kVariableHeight = {{0, 300}, {300, 300}};
+  static ASSizeRange kVariableHeight = ASSizeRangeMake({0, 300}, {300, 300});
   [self testStackLayoutSpecWithStyle:style sizeRange:kVariableHeight subnodes:subnodes identifier:@"variableHeight"];
 }
 
@@ -221,14 +221,14 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
     background:backgroundNode]];
   
   // width 300px; height 0-300px
-  static ASSizeRange kVariableHeight = {{300, 0}, {300, 300}};
+  static ASSizeRange kVariableHeight = ASSizeRangeMake({300, 0}, {300, 300});
   [self testLayoutSpec:layoutSpec sizeRange:kVariableHeight subnodes:@[backgroundNode] identifier:@"variableHeight"];
 }
 
 - (void)testChildSpacing
 {
   // width 0-INF; height 0-INF
-  static ASSizeRange kAnySize = {{0, 0}, {INFINITY, INFINITY}};
+  static ASSizeRange kAnySize = ASSizeRangeMake({0, 0}, {INFINITY, INFINITY});
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionVertical};
 
   NSArray *subnodes = defaultSubnodes();
@@ -273,7 +273,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
 
   // width 0-300px; height 300px
-  static ASSizeRange kVariableHeight = {{0, 300}, {300, 300}};
+  static ASSizeRange kVariableHeight = ASSizeRangeMake({0, 300}, {300, 300});
   [self testStackLayoutSpecWithStyle:style sizeRange:kVariableHeight subnodes:subnodes identifier:@"variableHeight"];
 }
 
@@ -288,7 +288,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   child.staticSize = {50, 50};
   
   // width 300px; height 0-INF
-  static ASSizeRange kVariableHeight = {{300, 0}, {300, INFINITY}};
+  static ASSizeRange kVariableHeight = ASSizeRangeMake({300, 0}, {300, INFINITY});
   [self testStackLayoutSpecWithStyle:style sizeRange:kVariableHeight subnodes:@[child] identifier:nil];
 }
 
@@ -303,21 +303,21 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   child.staticSize = {50, 50};
   
   // width 300px; height 0-INF
-  static ASSizeRange kVariableHeight = {{300, 0}, {300, INFINITY}};
+  static ASSizeRange kVariableHeight = ASSizeRangeMake({300, 0}, {300, INFINITY});
   [self testStackLayoutSpecWithStyle:style sizeRange:kVariableHeight subnodes:@[child] identifier:nil];
 }
 
 - (void)testJustifiedSpaceBetweenWithRemainingSpace
 {
   // width 301px; height 0-300px; 1px remaining
-  static ASSizeRange kSize = {{301, 0}, {301, 300}};
+  static ASSizeRange kSize = ASSizeRangeMake({301, 0}, {301, 300});
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentSpaceBetween flex:NO sizeRange:kSize identifier:nil];
 }
 
 - (void)testJustifiedSpaceAroundWithRemainingSpace
 {
   // width 305px; height 0-300px; 5px remaining
-  static ASSizeRange kSize = {{305, 0}, {305, 300}};
+  static ASSizeRange kSize = ASSizeRangeMake({305, 0}, {305, 300});
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentSpaceAround flex:NO sizeRange:kSize identifier:nil];
 }
 
@@ -330,11 +330,11 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   subnode2.staticSize = {50, 50};
   
   ASRatioLayoutSpec *child1 = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.5 child:subnode1];
-  child1.flexBasis = ASRelativeDimensionMakeWithFraction(1);
+  child1.flexBasis = ASDimensionMakeWithFraction(1);
   child1.flexGrow = YES;
   child1.flexShrink = YES;
   
-  static ASSizeRange kFixedWidth = {{150, 0}, {150, INFINITY}};
+  static ASSizeRange kFixedWidth = ASSizeRangeMake({150, 0}, {150, INFINITY});
   [self testStackLayoutSpecWithStyle:style children:@[child1, subnode2] sizeRange:kFixedWidth subnodes:@[subnode1, subnode2] identifier:nil];
 }
 
@@ -354,7 +354,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   subnode2.flexShrink = YES;
 
   NSArray *subnodes = @[subnode1, subnode2];
-  static ASSizeRange kFixedWidth = {{150, 0}, {150, 100}};
+  static ASSizeRange kFixedWidth = ASSizeRangeMake({150, 0}, {150, 100});
   [self testStackLayoutSpecWithStyle:style sizeRange:kFixedWidth subnodes:subnodes identifier:nil];
 }
 
@@ -370,7 +370,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   subnode2.alignSelf = ASStackLayoutAlignSelfCenter;
 
   NSArray *subnodes = @[subnode1, subnode2];
-  static ASSizeRange kFixedWidth = {{150, 0}, {150, INFINITY}};
+  static ASSizeRange kFixedWidth = ASSizeRangeMake({150, 0}, {150, INFINITY});
   [self testStackLayoutSpecWithStyle:style sizeRange:kFixedWidth subnodes:subnodes identifier:nil];
 }
 
@@ -391,7 +391,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 20;
   ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
 
-  static ASSizeRange kExactSize = {{300, 300}, {300, 300}};
+  static ASSizeRange kExactSize = ASSizeRangeMake({300, 300}, {300, 300});
   [self testStackLayoutSpecWithStyle:style sizeRange:kExactSize subnodes:subnodes identifier:nil];
 }
 
@@ -412,7 +412,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 20;
   ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
 
-  static ASSizeRange kExactSize = {{300, 300}, {300, 300}};
+  static ASSizeRange kExactSize = ASSizeRangeMake({300, 300}, {300, 300});
   [self testStackLayoutSpecWithStyle:style sizeRange:kExactSize subnodes:subnodes identifier:nil];
 }
 
@@ -433,7 +433,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 20;
   ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
 
-  static ASSizeRange kExactSize = {{300, 300}, {300, 300}};
+  static ASSizeRange kExactSize = ASSizeRangeMake({300, 300}, {300, 300});
   [self testStackLayoutSpecWithStyle:style sizeRange:kExactSize subnodes:subnodes identifier:nil];
 }
 
@@ -454,7 +454,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 20;
   ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
 
-  static ASSizeRange kVariableSize = {{200, 200}, {300, 300}};
+  static ASSizeRange kVariableSize = ASSizeRangeMake({200, 200}, {300, 300});
   // all children should be 200px wide
   [self testStackLayoutSpecWithStyle:style sizeRange:kVariableSize subnodes:subnodes identifier:nil];
 }
@@ -476,14 +476,14 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[1]).spacingBefore = 20;
   ((ASStaticSizeDisplayNode *)subnodes[2]).spacingBefore = 30;
 
-  static ASSizeRange kVariableSize = {{50, 50}, {300, 300}};
+  static ASSizeRange kVariableSize = ASSizeRangeMake({50, 50}, {300, 300});
   // all children should be 150px wide
   [self testStackLayoutSpecWithStyle:style sizeRange:kVariableSize subnodes:subnodes identifier:nil];
 }
 
 - (void)testEmptyStack
 {
-  static ASSizeRange kVariableSize = {{50, 50}, {300, 300}};
+  static ASSizeRange kVariableSize = ASSizeRangeMake({50, 50}, {300, 300});
   [self testStackLayoutSpecWithStyle:{} sizeRange:kVariableSize subnodes:@[] identifier:nil];
 }
 
@@ -496,15 +496,15 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
 
   for (ASStaticSizeDisplayNode *subnode in subnodes) {
     subnode.flexGrow = YES;
-    subnode.flexBasis = ASRelativeDimensionMakeWithPoints(10);
+    subnode.flexBasis = ASDimensionMakeWithPoints(10);
   }
 
   // width 300px; height 0-150px.
-  static ASSizeRange kUnderflowSize = {{300, 0}, {300, 150}};
+  static ASSizeRange kUnderflowSize = ASSizeRangeMake({300, 0}, {300, 150});
   [self testStackLayoutSpecWithStyle:style sizeRange:kUnderflowSize subnodes:subnodes identifier:@"underflow"];
 
   // width 200px; height 0-150px.
-  static ASSizeRange kOverflowSize = {{200, 0}, {200, 150}};
+  static ASSizeRange kOverflowSize = ASSizeRangeMake({200, 0}, {200, 150});
   [self testStackLayoutSpecWithStyle:style sizeRange:kOverflowSize subnodes:subnodes identifier:@"overflow"];
 }
 
@@ -520,9 +520,9 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
 
   // This should override the intrinsic size of 50pts and instead compute to 50% = 100pts.
   // The result should be that the red box is twice as wide as the blue and gree boxes after flexing.
-  ((ASStaticSizeDisplayNode *)subnodes[0]).flexBasis = ASRelativeDimensionMakeWithFraction(0.5);
+  ((ASStaticSizeDisplayNode *)subnodes[0]).flexBasis = ASDimensionMakeWithFraction(0.5);
 
-  static ASSizeRange kSize = {{200, 0}, {200, INFINITY}};
+  static ASSizeRange kSize = ASSizeRangeMake({200, 0}, {200, INFINITY});
   [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
 }
 
@@ -536,10 +536,10 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   ((ASStaticSizeDisplayNode *)subnodes[2]).staticSize = {50, 50};
 
   for (ASStaticSizeDisplayNode *subnode in subnodes) {
-    subnode.flexBasis = ASRelativeDimensionMakeWithPoints(20);
+    subnode.flexBasis = ASDimensionMakeWithPoints(20);
   }
   
-  static ASSizeRange kSize = {{300, 0}, {300, 150}};
+  static ASSizeRange kSize = ASSizeRangeMake({300, 0}, {300, 150});
   [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
 }
 
@@ -569,7 +569,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
     ]
    background:subnodes[0]];
 
-  static ASSizeRange kSize = {{300, 0}, {300, INFINITY}};
+  static ASSizeRange kSize = ASSizeRangeMake({300, 0}, {300, INFINITY});
   [self testLayoutSpec:layoutSpec sizeRange:kSize subnodes:subnodes identifier:nil];
 }
 
@@ -593,7 +593,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   // In the W3 flexbox standard, flexible children are shrunk proportionate to their original sizes,
   // resulting in widths of 180px, 100px, and 120px.
   // This test verifies the current behavior--the snapshot contains widths 300px, 100px, and 50px.
-  static ASSizeRange kSize = {{400, 0}, {400, 150}};
+  static ASSizeRange kSize = ASSizeRangeMake({400, 0}, {400, 150});
   [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
 }
 

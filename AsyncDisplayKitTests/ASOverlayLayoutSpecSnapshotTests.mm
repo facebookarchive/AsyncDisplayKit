@@ -13,7 +13,7 @@
 #import "ASOverlayLayoutSpec.h"
 #import "ASCenterLayoutSpec.h"
 
-static const ASSizeRange kSize = {{320, 320}, {320, 320}};
+static const ASSizeRange kSize = ASSizeRangeMake({320, 320}, {320, 320});
 
 @interface ASOverlayLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end

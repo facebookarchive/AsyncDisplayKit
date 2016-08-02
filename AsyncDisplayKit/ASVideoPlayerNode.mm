@@ -690,9 +690,11 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 }
 
 #pragma mark - Layout
-- (ASLayoutSpec*)layoutSpecThatFits:(ASSizeRange)constrainedSize
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  CGSize maxSize = constrainedSize.max;
+  ASSizeRangeAssertPoints(constrainedSize);
+  
+  CGSize maxSize = CGSizeFromASRelativeSize(constrainedSize.max);
   if (!CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero)) {
     maxSize = self.preferredFrameSize;
   }
@@ -716,12 +718,12 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   if (_spinnerNode) {
     ASCenterLayoutSpec *centerLayoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_spinnerNode];
-    centerLayoutSpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
+    centerLayoutSpec.sizeRange = ASSizeRangeMake(maxSize);
     [children addObject:centerLayoutSpec];
   }
 
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
-  overlaySpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
+  overlaySpec.sizeRange = ASSizeRangeMake(maxSize);
 
   [children addObject:overlaySpec];
 

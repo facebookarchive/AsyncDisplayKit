@@ -140,8 +140,6 @@
 		34EFC7621B701CA400AD841F /* ASBackgroundLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED021B17843500DA7C62 /* ASBackgroundLayoutSpec.mm */; };
 		34EFC7631B701CBF00AD841F /* ASCenterLayoutSpec.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED031B17843500DA7C62 /* ASCenterLayoutSpec.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		34EFC7641B701CC600AD841F /* ASCenterLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED041B17843500DA7C62 /* ASCenterLayoutSpec.mm */; };
-		34EFC7651B701CCC00AD841F /* ASRelativeSize.h in Headers */ = {isa = PBXBuildFile; fileRef = AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		34EFC7661B701CD200AD841F /* ASRelativeSize.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */; };
 		34EFC7671B701CD900AD841F /* ASLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED0B1B17843500DA7C62 /* ASLayout.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		34EFC7681B701CDE00AD841F /* ASLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED0C1B17843500DA7C62 /* ASLayout.mm */; };
 		34EFC7691B701CE100AD841F /* ASLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED111B17843500DA7C62 /* ASLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -290,7 +288,6 @@
 		AC026B721BD57DBF00BBC17E /* _ASHierarchyChangeSet.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC026B6E1BD57DBF00BBC17E /* _ASHierarchyChangeSet.mm */; };
 		AC3C4A521A1139C100143C57 /* ASCollectionView.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC3C4A501A1139C100143C57 /* ASCollectionView.mm */; };
 		AC47D9421B3B891B00AAEE9D /* ASCellNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC6456071B0A335000CF11B8 /* ASCellNode.mm */; };
-		AC47D9461B3BB41900AAEE9D /* ASRelativeSize.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */; };
 		AC6456091B0A335000CF11B8 /* ASCellNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC6456071B0A335000CF11B8 /* ASCellNode.mm */; };
 		AC7A2C181BDE11DF0093FE1A /* ASTableViewInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = AC7A2C161BDE11DF0093FE1A /* ASTableViewInternal.h */; };
 		ACF6ED1B1B17843500DA7C62 /* ASBackgroundLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED021B17843500DA7C62 /* ASBackgroundLayoutSpec.mm */; };
@@ -541,7 +538,6 @@
 		F7CE6C641D2CDB3E00BE4C15 /* ASOverlayLayoutSpec.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = ACF6ED121B17843500DA7C62 /* ASOverlayLayoutSpec.h */; };
 		F7CE6C651D2CDB3E00BE4C15 /* ASRatioLayoutSpec.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = ACF6ED141B17843500DA7C62 /* ASRatioLayoutSpec.h */; };
 		F7CE6C661D2CDB3E00BE4C15 /* ASRelativeLayoutSpec.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7A06A7391C35F08800FE8DAA /* ASRelativeLayoutSpec.h */; };
-		F7CE6C671D2CDB3E00BE4C15 /* ASRelativeSize.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */; };
 		F7CE6C681D2CDB3E00BE4C15 /* ASStackLayoutable.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */; };
 		F7CE6C691D2CDB3E00BE4C15 /* ASStackLayoutDefines.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */; };
 		F7CE6C6A1D2CDB3E00BE4C15 /* ASStackLayoutSpec.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = ACF6ED161B17843500DA7C62 /* ASStackLayoutSpec.h */; };
@@ -712,7 +708,6 @@
 				F7CE6C641D2CDB3E00BE4C15 /* ASOverlayLayoutSpec.h in CopyFiles */,
 				F7CE6C651D2CDB3E00BE4C15 /* ASRatioLayoutSpec.h in CopyFiles */,
 				F7CE6C661D2CDB3E00BE4C15 /* ASRelativeLayoutSpec.h in CopyFiles */,
-				F7CE6C671D2CDB3E00BE4C15 /* ASRelativeSize.h in CopyFiles */,
 				F7CE6C681D2CDB3E00BE4C15 /* ASStackLayoutable.h in CopyFiles */,
 				F7CE6C691D2CDB3E00BE4C15 /* ASStackLayoutDefines.h in CopyFiles */,
 				F7CE6C6A1D2CDB3E00BE4C15 /* ASStackLayoutSpec.h in CopyFiles */,
@@ -1021,8 +1016,6 @@
 		AC3C4A4F1A1139C100143C57 /* ASCollectionView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ASCollectionView.h; sourceTree = "<group>"; };
 		AC3C4A501A1139C100143C57 /* ASCollectionView.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = ASCollectionView.mm; sourceTree = "<group>"; };
 		AC3C4A531A113EEC00143C57 /* ASCollectionViewProtocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionViewProtocols.h; sourceTree = "<group>"; };
-		AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASRelativeSize.h; path = AsyncDisplayKit/Layout/ASRelativeSize.h; sourceTree = "<group>"; };
-		AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASRelativeSize.mm; path = AsyncDisplayKit/Layout/ASRelativeSize.mm; sourceTree = "<group>"; };
 		AC6456071B0A335000CF11B8 /* ASCellNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASCellNode.mm; sourceTree = "<group>"; };
 		AC7A2C161BDE11DF0093FE1A /* ASTableViewInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASTableViewInternal.h; sourceTree = "<group>"; };
 		ACC945A81BA9E7A0005E1FB8 /* ASViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASViewController.h; sourceTree = "<group>"; };
@@ -1631,8 +1624,6 @@
 				ACF6ED151B17843500DA7C62 /* ASRatioLayoutSpec.mm */,
 				7A06A7391C35F08800FE8DAA /* ASRelativeLayoutSpec.h */,
 				7A06A7381C35F08800FE8DAA /* ASRelativeLayoutSpec.mm */,
-				AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */,
-				AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */,
 				9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */,
 				AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */,
 				ACF6ED161B17843500DA7C62 /* ASStackLayoutSpec.h */,
@@ -1791,7 +1782,6 @@
 				34EFC76C1B701CED00AD841F /* ASOverlayLayoutSpec.h in Headers */,
 				B35062261B010EFD0018CF92 /* ASRangeController.h in Headers */,
 				34EFC76E1B701CF400AD841F /* ASRatioLayoutSpec.h in Headers */,
-				34EFC7651B701CCC00AD841F /* ASRelativeSize.h in Headers */,
 				254C6B741BF94DF4003EC431 /* ASTextNodeWordKerner.h in Headers */,
 				DB55C2671C641AE4004EDCF5 /* ASContextTransitioning.h in Headers */,
 				68B0277B1C1A79D60041016B /* ASDisplayNode+Beta.h in Headers */,
@@ -2129,7 +2119,6 @@
 				044285091BAA63FE00D16268 /* ASBatchFetching.m in Sources */,
 				257754AE1BEE44CD00737CA5 /* ASTextKitRenderer+Positioning.mm in Sources */,
 				ACF6ED2E1B17843500DA7C62 /* ASRatioLayoutSpec.mm in Sources */,
-				AC47D9461B3BB41900AAEE9D /* ASRelativeSize.mm in Sources */,
 				205F0E121B371BD7007741D0 /* ASScrollDirection.m in Sources */,
 				9C8898BB1C738B9800D6B02E /* ASTextKitFontSizeAdjuster.mm in Sources */,
 				D785F6631A74327E00291744 /* ASScrollNode.m in Sources */,
@@ -2303,7 +2292,6 @@
 				68FC85E61CE29B9400EDD713 /* ASNavigationController.m in Sources */,
 				34EFC76F1B701CF700AD841F /* ASRatioLayoutSpec.mm in Sources */,
 				254C6B8B1BF94F8A003EC431 /* ASTextKitShadower.mm in Sources */,
-				34EFC7661B701CD200AD841F /* ASRelativeSize.mm in Sources */,
 				254C6B851BF94F8A003EC431 /* ASTextKitAttributes.mm in Sources */,
 				509E68601B3AED8E009B9150 /* ASScrollDirection.m in Sources */,
 				B35062091B010EFD0018CF92 /* ASScrollNode.m in Sources */,

@@ -153,6 +153,8 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
  */
 - (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
 {
+  ASSizeRangeAssertPoints(constrainedSize);
+  
   CGRect frame = CGRectZero;
   frame.size = [node measureWithSizeRange:constrainedSize].size;
   node.frame = frame;
@@ -217,7 +219,9 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 - (ASSizeRange)constrainedSizeForNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  return [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
+  ASSizeRange sizeRange = [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
+  ASSizeRangeAssertPoints(sizeRange);
+  return sizeRange;
 }
 
 #pragma mark - External Data Querying + Editing

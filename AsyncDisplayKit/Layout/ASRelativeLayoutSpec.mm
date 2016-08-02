@@ -54,10 +54,9 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  CGSize size = {
-    constrainedSize.max.width,
-    constrainedSize.max.height
-  };
+  ASSizeRangeAssertPoints(constrainedSize);
+  
+  CGSize size = CGSizeFromASRelativeSize(constrainedSize.max);
   
   BOOL reduceWidth = (_horizontalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||
   (_horizontalPosition & ASRelativeLayoutSpecPositionEnd) != 0;
@@ -67,10 +66,11 @@
   
   // Layout the child
   const CGSize minChildSize = {
-    reduceWidth ? 0 : constrainedSize.min.width,
-    reduceHeight ? 0 : constrainedSize.min.height,
+    reduceWidth ? 0 : ASDimensionGetPoints(constrainedSize.min.width),
+    reduceHeight ? 0 : ASDimensionGetPoints(constrainedSize.min.height),
   };
-  ASLayout *sublayout = [self.child measureWithSizeRange:ASSizeRangeMake(minChildSize, constrainedSize.max)];
+  const CGSize maxChildSize = CGSizeFromASRelativeSize(constrainedSize.max);
+  ASLayout *sublayout = [self.child measureWithSizeRange:ASSizeRangeMake(minChildSize, maxChildSize)];
   
   // If we have an undetermined height or width, use the child size to define the layout
   // size

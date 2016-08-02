@@ -263,11 +263,14 @@
 
 - (ASSizeRange)constrainedSizeForNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
+  ASSizeRange sizeRange;
   if ([kind isEqualToString:ASDataControllerRowNodeKind]) {
-    return [super constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+    sizeRange = [super constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
   } else {
-    return [self.collectionDataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+    sizeRange = [self.collectionDataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
   }
+  ASSizeRangeAssertPoints(sizeRange);
+  return sizeRange;
 }
 
 #pragma mark - External supplementary store querying
