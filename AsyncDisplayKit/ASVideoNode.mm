@@ -37,6 +37,7 @@ static void *ASVideoNodeContext = &ASVideoNodeContext;
 static NSString * const kPlaybackLikelyToKeepUpKey = @"playbackLikelyToKeepUp";
 static NSString * const kplaybackBufferEmpty = @"playbackBufferEmpty";
 static NSString * const kStatus = @"status";
+static NSString * const kRate = @"rate";
 
 @interface ASVideoNode ()
 {
@@ -208,6 +209,25 @@ static NSString * const kStatus = @"status";
   [notificationCenter removeObserver:self name:AVPlayerItemNewErrorLogEntryNotification object:playerItem];
 }
 
+- (void)addPlayerObservers:(AVPlayer *)player
+{
+  if (player == nil) {
+    return;
+  }
+
+  [player addObserver:self forKeyPath:kRate options:NSKeyValueObservingOptionNew context:ASVideoNodeContext];
+}
+
+- (void) removePlayerObservers:(AVPlayer *)player
+{
+  @try {
+    [player removeObserver:self forKeyPath:kRate context:ASVideoNodeContext];
+  }
+  @catch (NSException * __unused exception) {
+    NSLog(@"Unnecessary KVO removal");
+  }
+}
+
 - (void)layout
 {
   [super layout];
@@ -292,34 +312,47 @@ static NSString * const kStatus = @"status";
 {
   ASDN::MutexLocker l(__instanceLock__);
 
-  if (object != _currentPlayerItem) {
-    return;
-  }
-
-  if ([keyPath isEqualToString:kStatus]) {
-    if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
-      self.playerState = ASVideoNodePlayerStateReadyToPlay;
-      // If we don't yet have a placeholder image update it now that we should have data available for it
-      if (self.image == nil && self.URL == nil) {
-        [self generatePlaceholderImage];
+  if (object == _currentPlayerItem) {
+    if ([keyPath isEqualToString:kStatus]) {
+      if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
+        if (self.playerState != ASVideoNodePlayerStatePlaying) {
+          self.playerState = ASVideoNodePlayerStateReadyToPlay;
+        }
+        // If we don't yet have a placeholder image update it now that we should have data available for it
+        if (self.image == nil && self.URL == nil) {
+          [self generatePlaceholderImage];
+        }
+      }
+    } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
+      BOOL likelyToKeepUp = [change[NSKeyValueChangeNewKey] boolValue];
+      if (likelyToKeepUp && self.playerState == ASVideoNodePlayerStatePlaying) {
+        return;
+      }
+      if (!likelyToKeepUp) {
+        self.playerState = ASVideoNodePlayerStateLoading;
+      } else if (self.playerState != ASVideoNodePlayerStateFinished) {
+        self.playerState = ASVideoNodePlayerStatePlaybackLikelyToKeepUpButNotPlaying;
+      }
+      if (_shouldBePlaying && (_shouldAggressivelyRecoverFromStall || likelyToKeepUp) && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+        if (self.playerState == ASVideoNodePlayerStateLoading && _delegateFlags.delegateVideoNodeDidRecoverFromStall) {
+          [_delegate videoNodeDidRecoverFromStall:self];
+        }
+        [self play]; // autoresume after buffer catches up
+      }
+    } else if ([keyPath isEqualToString:kplaybackBufferEmpty]) {
+      if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+        self.playerState = ASVideoNodePlayerStateLoading;
       }
     }
-  } else if ([keyPath isEqualToString:kPlaybackLikelyToKeepUpKey]) {
-    BOOL likelyToKeepUp = [change[NSKeyValueChangeNewKey] boolValue];
-    if (likelyToKeepUp) {
-      self.playerState = ASVideoNodePlayerStatePlaybackLikelyToKeepUpButNotPlaying;
-    } else {
-      self.playerState = ASVideoNodePlayerStateLoading;
-    }
-    if (_shouldBePlaying && (_shouldAggressivelyRecoverFromStall || likelyToKeepUp) && ASInterfaceStateIncludesVisible(self.interfaceState)) {
-      if (self.playerState == ASVideoNodePlayerStateLoading && _delegateFlags.delegateVideoNodeDidRecoverFromStall) {
-        [_delegate videoNodeDidRecoverFromStall:self];
+  } else if (object == _player) {
+    if ([keyPath isEqualToString:kRate]) {
+      if ([change[NSKeyValueChangeNewKey] floatValue] == 0.0) {
+        if (self.playerState == ASVideoNodePlayerStatePlaying) {
+          self.playerState = ASVideoNodePlayerStatePaused;
+        }
+      } else {
+        self.playerState = ASVideoNodePlayerStatePlaying;
       }
-      [self play]; // autoresume after buffer catches up
-    }
-  } else if ([keyPath isEqualToString:kplaybackBufferEmpty]) {
-    if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
-      self.playerState = ASVideoNodePlayerStateLoading;
     }
   }
 }
@@ -607,14 +640,6 @@ static NSString * const kStatus = @"status";
   
   [_player play];
   _shouldBePlaying = YES;
-
-  if (self.playerState != ASVideoNodePlayerStateUnknown) {
-    if (![self ready]) {
-      self.playerState = ASVideoNodePlayerStateLoading;
-    } else {
-      self.playerState = ASVideoNodePlayerStatePlaying;
-    }
-  }
 }
 
 - (BOOL)ready
@@ -630,10 +655,6 @@ static NSString * const kStatus = @"status";
   }
   [_player pause];
   _shouldBePlaying = NO;
-
-  if (self.playerState == ASVideoNodePlayerStatePlaying) {
-    self.playerState = ASVideoNodePlayerStatePaused;
-  }
 }
 
 - (BOOL)isPlaying
@@ -740,9 +761,16 @@ static NSString * const kStatus = @"status";
 - (void)setPlayer:(AVPlayer *)player
 {
   ASDN::MutexLocker l(__instanceLock__);
+
+  [self removePlayerObservers:_player];
+
   _player = player;
   player.muted = _muted;
   ((AVPlayerLayer *)_playerNode.layer).player = player;
+
+  if (player != nil) {
+    [self addPlayerObservers:player];
+  }
 }
 
 - (BOOL)shouldBePlaying
@@ -764,6 +792,7 @@ static NSString * const kStatus = @"status";
   [_player removeTimeObserver:_timeObserver];
   _timeObserver = nil;
   [self removePlayerItemObservers:_currentPlayerItem];
+  [self removePlayerObservers:_player];
 }
 
 @end
