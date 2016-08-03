@@ -551,6 +551,12 @@ static NSString * const kRate = @"rate";
   return _player;
 }
 
+- (AVPlayerLayer *)playerLayer
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return (AVPlayerLayer *)_playerNode.layer;
+}
+
 - (id<ASVideoNodeDelegate>)delegate{
   return _delegate;
 }
