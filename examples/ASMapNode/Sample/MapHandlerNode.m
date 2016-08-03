@@ -95,10 +95,16 @@
   // avoiding retain cycles
   __weak MapHandlerNode *weakSelf = self;
   
-  self.mapNode.annotationViewInStaticMap = ^MKAnnotationView *(id<MKAnnotation> annotation){
+  self.mapNode.imageForStaticMapAnnotationBlock = ^UIImage *(id<MKAnnotation> annotation, CGPoint *centerOffset){
     MapHandlerNode *grabbedSelf = weakSelf;
     if (grabbedSelf) {
-      return [grabbedSelf annotationViewForAnnotation:annotation];
+      MKAnnotationView *av = [grabbedSelf annotationViewForAnnotation:annotation];
+      *centerOffset = av.centerOffset;
+      UIGraphicsBeginImageContextWithOptions(av.bounds.size, av.opaque, 0.0);
+      [av.layer renderInContext:UIGraphicsGetCurrentContext()];
+      UIImage *pinImage = UIGraphicsGetImageFromCurrentImageContext();
+      UIGraphicsEndImageContext();
+      return pinImage;
     }
     return nil;
   };
