@@ -44,6 +44,10 @@ if [ "$MODE" = "examples" ]; then
 
         if [ -f "${example}/Podfile" ]; then
           echo "Using CocoaPods"
+          if [ -f "${example}/Podfile.lock" ]; then
+              rm "$example/Podfile.lock"
+          fi
+          rm -rf "$example/Pods"
           pod install --project-directory=$example
           
           set -o pipefail && xcodebuild \
