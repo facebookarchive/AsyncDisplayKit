@@ -226,6 +226,10 @@
 		8021EC1E1D2B00B100799119 /* UIImage+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */; };
 		8021EC1F1D2B00B100799119 /* UIImage+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */; };
 		81EE38501C8E94F000456208 /* ASRunLoopQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = 81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */; };
+		83A7D95A1D44542100BF333E /* ASWeakMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 83A7D9591D44542100BF333E /* ASWeakMap.m */; };
+		83A7D95B1D44547700BF333E /* ASWeakMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 83A7D9591D44542100BF333E /* ASWeakMap.m */; };
+		83A7D95C1D44548100BF333E /* ASWeakMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 83A7D9581D44542100BF333E /* ASWeakMap.h */; };
+		83A7D95E1D446A6E00BF333E /* ASWeakMapTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 83A7D95D1D446A6E00BF333E /* ASWeakMapTests.m */; };
 		8B0768B41CE752EC002E1453 /* ASDefaultPlaybackButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 8B0768B21CE752EC002E1453 /* ASDefaultPlaybackButton.m */; };
 		8BBBAB8C1CEBAF1700107FC6 /* ASDefaultPlaybackButton.h in Headers */ = {isa = PBXBuildFile; fileRef = 8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */; };
 		8BBBAB8D1CEBAF1E00107FC6 /* ASDefaultPlaybackButton.m in Sources */ = {isa = PBXBuildFile; fileRef = 8B0768B21CE752EC002E1453 /* ASDefaultPlaybackButton.m */; };
@@ -975,6 +979,9 @@
 		8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ASConvenience.m"; sourceTree = "<group>"; };
 		81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASRunLoopQueue.h; path = ../ASRunLoopQueue.h; sourceTree = "<group>"; };
 		81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASRunLoopQueue.mm; path = ../ASRunLoopQueue.mm; sourceTree = "<group>"; };
+		83A7D9581D44542100BF333E /* ASWeakMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASWeakMap.h; sourceTree = "<group>"; };
+		83A7D9591D44542100BF333E /* ASWeakMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASWeakMap.m; sourceTree = "<group>"; };
+		83A7D95D1D446A6E00BF333E /* ASWeakMapTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASWeakMapTests.m; sourceTree = "<group>"; };
 		8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDefaultPlaybackButton.h; sourceTree = "<group>"; };
 		8B0768B21CE752EC002E1453 /* ASDefaultPlaybackButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDefaultPlaybackButton.m; sourceTree = "<group>"; };
 		8BDA5FC31CDBDDE1007D13B2 /* ASVideoPlayerNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASVideoPlayerNode.h; sourceTree = "<group>"; };
@@ -1313,6 +1320,7 @@
 		058D09C5195D04C000B7D73C /* AsyncDisplayKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				83A7D95D1D446A6E00BF333E /* ASWeakMapTests.m */,
 				DBC453211C5FD97200B16017 /* ASDisplayNodeImplicitHierarchyTests.m */,
 				DBC452DD1C5C6A6A00B16017 /* ArrayDiffingTests.m */,
 				CC3B208F1C3F892D00798563 /* ASBridgedPropertiesTests.mm */,
@@ -1501,6 +1509,8 @@
 				ACF6ED481B17847A00DA7C62 /* ASStackPositionedLayout.mm */,
 				ACF6ED491B17847A00DA7C62 /* ASStackUnpositionedLayout.h */,
 				ACF6ED4A1B17847A00DA7C62 /* ASStackUnpositionedLayout.mm */,
+				83A7D9581D44542100BF333E /* ASWeakMap.h */,
+				83A7D9591D44542100BF333E /* ASWeakMap.m */,
 				CC3B20871C3F7A5400798563 /* ASWeakSet.h */,
 				CC3B20881C3F7A5400798563 /* ASWeakSet.m */,
 				DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */,
@@ -1782,6 +1792,7 @@
 				DB55C2671C641AE4004EDCF5 /* ASContextTransitioning.h in Headers */,
 				68B0277B1C1A79D60041016B /* ASDisplayNode+Beta.h in Headers */,
 				CCF18FF41D2575E300DF5895 /* NSIndexSet+ASHelpers.h in Headers */,
+				83A7D95C1D44548100BF333E /* ASWeakMap.h in Headers */,
 				B350622D1B010EFD0018CF92 /* ASScrollDirection.h in Headers */,
 				254C6B751BF94DF4003EC431 /* ASTextKitComponents.h in Headers */,
 				B35062081B010EFD0018CF92 /* ASScrollNode.h in Headers */,
@@ -2128,6 +2139,7 @@
 				697C0DE51CF38F28001DE0D4 /* ASLayoutValidation.mm in Sources */,
 				ACF6ED501B17847A00DA7C62 /* ASStackPositionedLayout.mm in Sources */,
 				ACF6ED521B17847A00DA7C62 /* ASStackUnpositionedLayout.mm in Sources */,
+				83A7D95A1D44542100BF333E /* ASWeakMap.m in Sources */,
 				257754A61BEE44CD00737CA5 /* ASTextKitAttributes.mm in Sources */,
 				81EE38501C8E94F000456208 /* ASRunLoopQueue.mm in Sources */,
 				9C70F2041CDA4EFA007D6C76 /* ASTraitCollection.m in Sources */,
@@ -2168,6 +2180,7 @@
 				058D0A3A195D057000B7D73C /* ASDisplayNodeTests.m in Sources */,
 				CC4981B31D1A02BE004E13CC /* ASTableViewThrashTests.m in Sources */,
 				058D0A3B195D057000B7D73C /* ASDisplayNodeTestsHelper.m in Sources */,
+				83A7D95E1D446A6E00BF333E /* ASWeakMapTests.m in Sources */,
 				056D21551ABCEF50001107EF /* ASImageNodeSnapshotTests.m in Sources */,
 				AC026B581BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m in Sources */,
 				ACF6ED5E1B178DC700DA7C62 /* ASInsetLayoutSpecSnapshotTests.mm in Sources */,
@@ -2296,6 +2309,7 @@
 				7AB338661C55B3420055FDE8 /* ASRelativeLayoutSpec.mm in Sources */,
 				697C0DE61CF38F28001DE0D4 /* ASLayoutValidation.mm in Sources */,
 				9C70F2051CDA4F06007D6C76 /* ASTraitCollection.m in Sources */,
+				83A7D95B1D44547700BF333E /* ASWeakMap.m in Sources */,
 				34EFC7781B701D3100AD841F /* ASStackUnpositionedLayout.mm in Sources */,
 				DE84918E1C8FFF9F003D89E9 /* ASRunLoopQueue.mm in Sources */,
 				68FC85E51CE29B7E00EDD713 /* ASTabBarController.m in Sources */,
