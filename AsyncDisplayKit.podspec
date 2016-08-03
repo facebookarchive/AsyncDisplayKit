@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = 'AsyncDisplayKit'
-  spec.version      = '1.9.90'
+  spec.version      = '2.0-beta.1'
   spec.license      =  { :type => 'BSD' }
   spec.homepage     = 'http://asyncdisplaykit.org'
   spec.authors      = { 'Scott Goodson' => 'scottgoodson@gmail.com', 'Ryan Nystrom' => 'rnystrom@fb.com' }
@@ -59,7 +59,7 @@ Pod::Spec.new do |spec|
   
   spec.subspec 'PINRemoteImage' do |pin|
       pin.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) PIN_REMOTE_IMAGE=1' }
-      pin.dependency 'PINRemoteImage/iOS', '>= 3.0.0-beta.2'
+      pin.dependency 'PINRemoteImage/iOS', '>= 3.0.0-beta.3'
       pin.dependency 'AsyncDisplayKit/Core'
   end
   
