@@ -38,12 +38,18 @@ fi
 
 if [ "$MODE" = "examples" ]; then
     echo "Verifying that all AsyncDisplayKit examples compile."
+    #Update cocoapods repo
+    pod repo update master
 
     for example in examples/*/; do
         echo "Building (examples) $example."
 
         if [ -f "${example}/Podfile" ]; then
           echo "Using CocoaPods"
+          if [ -f "${example}/Podfile.lock" ]; then
+              rm "$example/Podfile.lock"
+          fi
+          rm -rf "$example/Pods"
           pod install --project-directory=$example
           
           set -o pipefail && xcodebuild \
@@ -78,12 +84,18 @@ fi
 
 if [ "$MODE" = "examples-pt1" ]; then
     echo "Verifying that all AsyncDisplayKit examples compile."
+    #Update cocoapods repo
+    pod repo update master
 
     for example in $((find ./examples -type d -maxdepth 1 \( ! -iname ".*" \)) | head -6 | head); do
         echo "Building (examples-pt1) $example."
 
         if [ -f "${example}/Podfile" ]; then
           echo "Using CocoaPods"
+          if [ -f "${example}/Podfile.lock" ]; then
+              rm "$example/Podfile.lock"
+          fi
+          rm -rf "$example/Pods"
           pod install --project-directory=$example
           
           set -o pipefail && xcodebuild \
@@ -118,12 +130,18 @@ fi
 
 if [ "$MODE" = "examples-pt2" ]; then
     echo "Verifying that all AsyncDisplayKit examples compile."
+    #Update cocoapods repo
+    pod repo update master
 
     for example in $((find ./examples -type d -maxdepth 1 \( ! -iname ".*" \)) | head -12 | tail -6 | head); do
         echo "Building $example (examples-pt2)."
 
         if [ -f "${example}/Podfile" ]; then
           echo "Using CocoaPods"
+          if [ -f "${example}/Podfile.lock" ]; then
+              rm "$example/Podfile.lock"
+          fi
+          rm -rf "$example/Pods"
           pod install --project-directory=$example
           
           set -o pipefail && xcodebuild \
@@ -158,12 +176,18 @@ fi
 
 if [ "$MODE" = "examples-pt3" ]; then
     echo "Verifying that all AsyncDisplayKit examples compile."
+    #Update cocoapods repo
+    pod repo update master
 
     for example in $((find ./examples -type d -maxdepth 1 \( ! -iname ".*" \)) | head -7 | head); do
         echo "Building $example (examples-pt3)."
 
         if [ -f "${example}/Podfile" ]; then
           echo "Using CocoaPods"
+          if [ -f "${example}/Podfile.lock" ]; then
+              rm "$example/Podfile.lock"
+          fi
+          rm -rf "$example/Pods"
           pod install --project-directory=$example
           
           set -o pipefail && xcodebuild \
