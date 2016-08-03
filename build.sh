@@ -38,6 +38,8 @@ fi
 
 if [ "$MODE" = "examples" ]; then
     echo "Verifying that all AsyncDisplayKit examples compile."
+    #Update cocoapods repo
+    pod repo update master
 
     for example in examples/*/; do
         echo "Building (examples) $example."
