@@ -452,6 +452,30 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [_dataController waitUntilAllUpdatesAreCommitted];
 }
 
+- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
+{
+  ASDisplayNodeAssertMainThread();
+
+  [self waitUntilAllUpdatesAreCommitted];
+  [super scrollToRowAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+}
+
+- (void)scrollToNearestSelectedRowAtScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
+{
+  ASDisplayNodeAssertMainThread();
+  
+  [self waitUntilAllUpdatesAreCommitted];
+  [super scrollToNearestSelectedRowAtScrollPosition:scrollPosition animated:animated];
+}
+
+- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition
+{
+  ASDisplayNodeAssertMainThread();
+  
+  [self waitUntilAllUpdatesAreCommitted];
+  [super selectRowAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+}
+
 - (void)layoutSubviews
 {
   if (_nodesConstrainedWidth != self.bounds.size.width) {
