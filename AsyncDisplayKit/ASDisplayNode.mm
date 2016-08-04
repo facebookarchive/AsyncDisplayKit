@@ -178,13 +178,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return overrides;
 }
 
-  // At most a layoutSpecBlock or one of the three layout methods is overridden
+  // At most one of the three layout methods needs to be overridden
 #define __ASDisplayNodeCheckForLayoutMethodOverrides \
-    ASDisplayNodeAssert(_layoutSpecBlock != NULL || \
-    (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateSizeThatFits:)) ? 1 : 0) \
+    ASDisplayNodeAssert((ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateSizeThatFits:)) ? 1 : 0) \
     + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(layoutSpecThatFits:)) ? 1 : 0) \
     + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateLayoutThatFits:)) ? 1 : 0) <= 1, \
-    @"Subclass %@ must at least provide a layoutSpecBlock or override at most one of the three layout methods: calculateLayoutThatFits, layoutSpecThatFits or calculateSizeThatFits", NSStringFromClass(self.class))
+    @"Subclass %@ must override at most one of the three layout methods: calculateLayoutThatFits:, layoutSpecThatFits: or calculateSizeThatFits:", NSStringFromClass(self.class))
 
 + (void)initialize
 {
@@ -2179,7 +2178,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   __ASDisplayNodeCheckForLayoutMethodOverrides;
 
   ASDN::MutexLocker l(__instanceLock__);
-  if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
+  if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits)) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
     
     ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
@@ -2227,10 +2226,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
   ASDN::MutexLocker l(__instanceLock__);
   
-  if (_layoutSpecBlock != NULL) {
-    return _layoutSpecBlock(self, constrainedSize);
-  }
-  
   ASDisplayNodeAssert(NO, @"-[ASDisplayNode layoutSpecThatFits:] should never fall through to return empty value");
   return [[ASLayoutSpec alloc] init];
 }
@@ -2262,14 +2257,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _calculatedLayout.constrainedSizeRange;
-}
-
-- (void)setLayoutSpecBlock:(ASLayoutSpecBlock)layoutSpecBlock
-{
-  // For now there should never be a overwrite of layoutSpecThatFits: and a layoutSpecThatFitsBlock: be provided
-  ASDisplayNodeAssert(!(_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits), @"Overwriting layoutSpecThatFits: and providing a layoutSpecBlock block is currently not supported");
-  
-  _layoutSpecBlock = layoutSpecBlock;
 }
 
 - (void)setPendingTransitionID:(int32_t)pendingTransitionID
