@@ -74,4 +74,12 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
 
 @end
 
+@interface ASViewController (Unavailable)
+
+- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil AS_UNAVAILABLE("ASViewController requires using -initWithNode:");
+
+- (instancetype)initWithCoder:(NSCoder *)aDecoder AS_UNAVAILABLE("ASViewController requires using -initWithNode:");
+
+@end
+
 NS_ASSUME_NONNULL_END

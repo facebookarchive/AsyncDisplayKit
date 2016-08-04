@@ -127,6 +127,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface ASEditableTextNode (Unavailable)
+
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+
+@end
+
 #pragma mark -
 /**
  * The methods declared by the ASEditableTextNodeDelegate protocol allow the adopting delegate to 

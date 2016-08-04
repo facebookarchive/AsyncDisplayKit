@@ -124,6 +124,16 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 
 @end
 
+@interface ASCellNode (Unavailable)
+
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+
+- (void)setLayerBacked:(BOOL)layerBacked AS_UNAVAILABLE("ASCellNode does not support layer-backing");
+
+@end
+
 
 /**
  * Simple label-style cell node.  Read its source for an example of custom <ASCellNode>s.

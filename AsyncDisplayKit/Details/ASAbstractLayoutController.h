@@ -17,4 +17,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface ASAbstractLayoutController (Unavailable)
+
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType __unavailable;
+
+@end
+
 NS_ASSUME_NONNULL_END
