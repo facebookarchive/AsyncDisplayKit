@@ -87,7 +87,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASCollectionDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
   ASCollectionViewProxy *_proxyDataSource;
   ASCollectionViewProxy *_proxyDelegate;
   
@@ -232,9 +232,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
   
-  _dataController = [[ASCollectionDataController alloc] init];
+  _dataController = [[ASCollectionDataController alloc] initWithDataSource:self];
   _dataController.delegate = _rangeController;
-  _dataController.dataSource = self;
   _dataController.environmentDelegate = self;
   
   _batchContext = [[ASBatchContext alloc] init];
