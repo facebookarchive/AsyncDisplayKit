@@ -789,9 +789,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       }
       
       // Setup pending layout transition for animation
-      _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                            pendingLayout:newLayout
-                                                           previousLayout:previousLayout];
+      // The pending layout transition needs to stay alive at least until applySubnodeInsertions did finish execute as
+      // it can happen that with Implicit Hierarchy Management new nodes gonna be added that internally call setNeedsLayout
+      // what will invalidate and deallocate the transition in the middle of inserting nodes 
+      NS_VALID_UNTIL_END_OF_SCOPE ASLayoutTransition *pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self pendingLayout:newLayout previousLayout:previousLayout];
+      _pendingLayoutTransition = pendingLayoutTransition;
+      
       // Setup context for pending layout transition. we need to hold a strong reference to the context
       _pendingLayoutTransitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
                                                                          layoutDelegate:_pendingLayoutTransition
