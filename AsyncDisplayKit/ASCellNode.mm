@@ -104,24 +104,6 @@
   _viewControllerNode.frame = self.bounds;
 }
 
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
-{
-  ASDisplayNodeAssertNotSupported();
-  return nil;
-}
-
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
-{
-  ASDisplayNodeAssertNotSupported();
-  return nil;
-}
-
-- (void)setLayerBacked:(BOOL)layerBacked
-{
-  // ASRangeController expects ASCellNodes to be view-backed.  (Layer-backing is supported on ASCellNode subnodes.)
-  ASDisplayNodeAssert(!layerBacked, @"ASCellNode does not support layer-backing.");
-}
-
 - (void)__setNeedsLayout
 {
   CGSize oldSize = self.calculatedSize;

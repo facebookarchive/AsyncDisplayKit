@@ -272,6 +272,14 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 
 @end
 
+@interface ASTextNode (Unavailable)
+
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+
+@end
+
 /**
  * @abstract Text node deprecated properties
  */

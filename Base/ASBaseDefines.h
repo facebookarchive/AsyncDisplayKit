@@ -143,3 +143,11 @@
 #define ASDISPLAYNODE_REQUIRES_SUPER
 #endif
 #endif
+
+#ifndef AS_UNAVAILABLE
+#if __has_attribute(unavailable)
+#define AS_UNAVAILABLE(message) __attribute__((unavailable(message)))
+#else
+#define AS_UNAVAILABLE(message)
+#endif
+#endif

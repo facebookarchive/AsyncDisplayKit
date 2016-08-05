@@ -154,4 +154,10 @@ extern BOOL CGPointIsNull(CGPoint point);
 
 @end
 
+@interface ASLayout (Unavailable)
+
+- (instancetype)init __unavailable;
+
+@end
+
 NS_ASSUME_NONNULL_END
