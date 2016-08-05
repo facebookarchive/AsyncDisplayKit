@@ -83,6 +83,10 @@
   if (AS_AT_LEAST_IOS8) {
     ASEnvironmentTraitCollection traitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
     [self progagateNewEnvironmentTraitCollection:traitCollection];
+  } else {
+    ASEnvironmentTraitCollection traitCollection = ASEnvironmentTraitCollectionMakeDefault();
+    traitCollection.containerSize = self.view.bounds.size;
+    [self progagateNewEnvironmentTraitCollection:traitCollection];
   }
 }
 
@@ -323,6 +327,15 @@ ASVisibilityDepthImplementation;
   
   ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForWindowSize:size];
   [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
+}
+
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
+{
+  [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
+  
+  ASEnvironmentTraitCollection traitCollection = self.node.environmentTraitCollection;
+  traitCollection.containerSize = self.view.bounds.size;
+  [self progagateNewEnvironmentTraitCollection:traitCollection];
 }
 
 @end
