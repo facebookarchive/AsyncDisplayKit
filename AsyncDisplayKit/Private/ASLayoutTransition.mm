@@ -71,10 +71,10 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 - (BOOL)isSynchronous
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return !ASLayoutCanTransitionAsynchronous(_pendingLayout);
+  return ASLayoutCanTransitionAsynchronous(_pendingLayout);
 }
 
-- (void)commitTransition
+- (void)startTransition
 {
   [self applySubnodeInsertions];
   [self applySubnodeRemovals];

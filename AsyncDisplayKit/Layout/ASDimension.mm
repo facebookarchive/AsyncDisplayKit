@@ -28,7 +28,6 @@ ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloa
 
 ASRelativeDimension ASRelativeDimensionMakeWithPoints(CGFloat points)
 {
-  ASDisplayNodeCAssertPositiveReal(@"Points", points);
   return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, points);
 }
 

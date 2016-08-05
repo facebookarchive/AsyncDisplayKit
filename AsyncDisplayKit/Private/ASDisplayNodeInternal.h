@@ -116,14 +116,14 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   CGFloat _contentsScaleForDisplay;
 
   ASEnvironmentState _environmentState;
-  ASLayout *_calculatedLayout;
+  ASLayout *_layout;
 
 
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
   
   // Main thread only
-  _ASTransitionContext *_pendingLayoutTransitionContext;
+  _ASTransitionContext *_transitionContext;
   BOOL _usesImplicitHierarchyManagement;
 
   int32_t _pendingTransitionID;
