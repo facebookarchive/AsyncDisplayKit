@@ -190,7 +190,6 @@
 {
   if (photo.commentFeed.numberOfItemsInFeed > 0) {
     [_photoCommentsView updateWithCommentFeedModel:photo.commentFeed];
-    
     [self setNeedsLayout];
   }
 }

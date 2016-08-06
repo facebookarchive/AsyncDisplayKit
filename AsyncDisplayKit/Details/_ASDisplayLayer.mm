@@ -122,6 +122,12 @@
   ASDisplayNodeAssertMainThread();
   [super setNeedsLayout];
 }
+
+- (void)layoutIfNeeded
+{
+  ASDisplayNodeAssertMainThread();
+  [super layoutIfNeeded];
+}
 #endif
 
 - (void)layoutSublayers

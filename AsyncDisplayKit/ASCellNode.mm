@@ -106,13 +106,10 @@
 
 - (void)__setNeedsLayout
 {
-  CGSize oldSize = self.calculatedSize;
   [super __setNeedsLayout];
   
-  //Adding this lock because lock used to be held when this method was called. Not sure if it's necessary for
-  //didRelayoutFromOldSize:toNewSize:
   ASDN::MutexLocker l(__instanceLock__);
-  [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
+  [self didRelayoutFromOldSize:CGSizeZero toNewSize:self.calculatedSize];
 }
 
 - (void)transitionLayoutAnimated:(BOOL)animated
@@ -167,6 +164,7 @@
   if (_interactionDelegate != nil) {
     ASPerformBlockOnMainThread(^{
       BOOL sizeChanged = !CGSizeEqualToSize(oldSize, newSize);
+      sizeChanged = YES;
       [_interactionDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }

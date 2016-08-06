@@ -36,7 +36,6 @@
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  [_imageNode measure:constrainedSize];
   return constrainedSize;
 }
 
@@ -44,7 +43,7 @@
 {
   [super layout];
   
-  _imageNode.frame = CGRectMake(0, 0, _imageNode.calculatedSize.width, _imageNode.calculatedSize.height);
+  _imageNode.frame = CGRectMake(0, 0, self.bounds.size.width, self.bounds.size.height);
 }
 
 @end

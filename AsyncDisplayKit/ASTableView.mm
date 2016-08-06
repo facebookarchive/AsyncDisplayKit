@@ -23,6 +23,7 @@
 #import "_ASDisplayLayer.h"
 #import "ASTableNode.h"
 #import "ASEqualityHelpers.h"
+#import "ASWeakSet.h"
 
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
@@ -50,6 +51,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)layoutSubviews
 {
   [super layoutSubviews];
+  
   [_delegate didLayoutSubviewsOfTableViewCell:self];
 }
 
@@ -112,6 +114,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   CGFloat _contentOffsetAdjustment;
   
   CGPoint _deceleratingVelocity;
+  
+  ASWeakSet *_dirtyNodes;
   
   /**
    * Our layer, retained. Under iOS < 9, when table views are removed from the hierarchy,
@@ -196,6 +200,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   _leadingScreensForBatching = 2.0;
   _batchContext = [[ASBatchContext alloc] init];
+  
+  _dirtyNodes = [[ASWeakSet alloc] init];
 
   _automaticallyAdjustsContentOffset = NO;
   
@@ -1120,7 +1126,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return configuredNodeBlock;
 }
 
-- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)  indexPath
 {
   ASSizeRange constrainedSize = kInvalidSizeRange;
   if (_asyncDelegateFlags.asyncDelegateTableViewConstrainedSizeForRowAtIndexPath) {
@@ -1168,16 +1174,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return;
   }
   
-  CGFloat contentViewWidth = tableViewCell.contentView.bounds.size.width;
-  ASSizeRange constrainedSize = node.constrainedSizeForCalculatedLayout;
-  
   // Table view cells should always fill its content view width.
   // Normally the content view width equals to the constrained size width (which equals to the table view width).
   // If there is a mismatch between these values, for example after the table view entered or left editing mode,
   // content view width is preferred and used to re-measure the cell node.
-  if (contentViewWidth != constrainedSize.max.width) {
-    constrainedSize.min.width = contentViewWidth;
-    constrainedSize.max.width = contentViewWidth;
+  if ([_dirtyNodes containsObject:node]) {
+    [_dirtyNodes removeObject:node];
 
     // Re-measurement is done on main to ensure thread affinity. In the worst case, this is as fast as UIKit's implementation.
     //
@@ -1185,6 +1187,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     // is the same for all cells (because there is no easy way to get that individual value before the node being assigned to a _ASTableViewCell).
     // Also, in many cases, some nodes may not need to be re-measured at all, such as when user enters and then immediately leaves editing mode.
     // To avoid premature optimization and making such assumption, as well as to keep ASTableView simple, re-measurement is strictly done on main.
+    ASSizeRange constrainedSize = ASSizeRangeMake(CGSizeMake(contentViewWidth, 0), CGSizeMake(contentViewWidth, CGFLOAT_MAX));
+
     [self beginUpdates];
     CGSize calculatedSize = [[node measureWithSizeRange:constrainedSize] size];
     node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
@@ -1218,6 +1222,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   ASDisplayNodeAssertMainThread();
 
+  // Mark the node as dirty
+  [_dirtyNodes addObject:node];
+  
   if (!sizeChanged || _queuedNodeHeightUpdate) {
     return;
   }
