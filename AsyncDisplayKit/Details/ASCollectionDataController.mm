@@ -31,11 +31,14 @@
   NSMutableDictionary<NSString *, NSMutableArray<ASIndexedNodeContext *> *> *_pendingContexts;
 }
 
-- (instancetype)init
+- (instancetype)initWithDataSource:(id<ASCollectionDataControllerSource>)dataSource
 {
-  self = [super init];
+  self = [super initWithDataSource:dataSource];
   if (self != nil) {
     _pendingContexts = [NSMutableDictionary dictionary];
+    _dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath = [dataSource respondsToSelector:@selector(dataController:supplementaryNodeBlockOfKind:atIndexPath:)];
+
+    ASDisplayNodeAssertTrue(_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath || [dataSource respondsToSelector:@selector(dataController:supplementaryNodeOfKind:atIndexPath:)]);
   }
   return self;
 }
@@ -69,7 +72,7 @@
     }
     [self insertSections:sections ofKind:kind atIndexSet:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)] completion:nil];
     
-    [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
+    [self batchLayoutNodesFromContexts:contexts batchCompletion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
   }];
@@ -95,7 +98,7 @@
     }
     
     [self insertSections:sectionArray ofKind:kind atIndexSet:sections completion:nil];
-    [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
+    [self batchLayoutNodesFromContexts:contexts batchCompletion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
   }];
@@ -145,7 +148,7 @@
 - (void)willInsertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
   [_pendingContexts enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, NSMutableArray<ASIndexedNodeContext *> * _Nonnull contexts, BOOL * _Nonnull stop) {
-    [self batchLayoutNodesFromContexts:contexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
+    [self batchLayoutNodesFromContexts:contexts batchCompletion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
   }];
@@ -178,7 +181,7 @@
       }
     }
     
-    [self batchLayoutNodesFromContexts:reinsertedContexts ofKind:kind completion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
+    [self batchLayoutNodesFromContexts:reinsertedContexts batchCompletion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
     }];
   }
@@ -240,20 +243,20 @@
 
 - (void)_populateSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts environmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
-      ASCellNodeBlock supplementaryCellBlock;
-      if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
-        supplementaryCellBlock = [self.collectionDataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
-      } else {
-        ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
-        supplementaryCellBlock = ^{ return supplementaryNode; };
-      }
-      
-      ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
-      ASIndexedNodeContext *context = [[ASIndexedNodeContext alloc] initWithNodeBlock:supplementaryCellBlock
-                                                                            indexPath:indexPath
-                                                                        constrainedSize:constrainedSize
-                                                           environmentTraitCollection:environmentTraitCollection];
-      [contexts addObject:context];
+  ASCellNodeBlock supplementaryCellBlock;
+  if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
+    supplementaryCellBlock = [self.collectionDataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
+  } else {
+    ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
+    supplementaryCellBlock = ^{ return supplementaryNode; };
+  }
+  
+  ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+  ASIndexedNodeContext *context = [[ASIndexedNodeContext alloc] initWithNodeBlock:supplementaryCellBlock
+                                                                        indexPath:indexPath
+                                                                    constrainedSize:constrainedSize
+                                                       environmentTraitCollection:environmentTraitCollection];
+  [contexts addObject:context];
 }
 
 #pragma mark - Sizing query
@@ -294,14 +297,6 @@
 - (id<ASCollectionDataControllerSource>)collectionDataSource
 {
   return (id<ASCollectionDataControllerSource>)self.dataSource;
-}
-
-- (void)setDataSource:(id<ASDataControllerSource>)dataSource
-{
-  [super setDataSource:dataSource];
-  _dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath = [self.collectionDataSource respondsToSelector:@selector(dataController:supplementaryNodeBlockOfKind:atIndexPath:)];
-
-  ASDisplayNodeAssertTrue(_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath || [self.collectionDataSource respondsToSelector:@selector(dataController:supplementaryNodeOfKind:atIndexPath:)]);
 }
 
 @end

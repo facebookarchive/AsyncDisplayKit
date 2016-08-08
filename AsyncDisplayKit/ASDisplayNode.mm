@@ -642,30 +642,25 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(__instanceLock__);
   if (! [self shouldMeasureWithSizeRange:constrainedSize]) {
-    return _layout;
+    ASDisplayNodeAssertNotNil(_calculatedLayout, @"-[ASDisplayNode measureWithSizeRange:] _layout should not be nil! %@", self);
+    return _calculatedLayout ? : [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:CGSizeZero];
   }
   
   [self cancelLayoutTransitionsInProgress];
 
-  ASLayout *previousLayout = _layout;
+  ASLayout *previousLayout = _calculatedLayout;
   ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize];
   
-  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
-    _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                          pendingLayout:newLayout
-                                                         previousLayout:previousLayout];
-  } else {
-    ASLayoutTransition *layoutTransition = nil;
-    if (self.usesImplicitHierarchyManagement) {
-      layoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                    pendingLayout:newLayout
-                                                   previousLayout:previousLayout];
-    }
-    
-    [self _applyLayout:newLayout layoutTransition:layoutTransition];
-    [self _completeLayoutCalculation];
+  _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
+                                                        pendingLayout:newLayout
+                                                       previousLayout:previousLayout];
+  
+  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState) == NO) {
+    // Complete the pending layout transition immediately
+    [self _completePendingLayoutTransition];
   }
-
+  
+  ASDisplayNodeAssertNotNil(newLayout, @"-[ASDisplayNode measureWithSizeRange:] newLayout should not be nil! %@", self);
   return newLayout;
 }
 
@@ -686,12 +681,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // Only generate a new layout if:
   // - The current layout is dirty
   // - The passed constrained size is different than the layout's constrained size
-  return ([self _hasDirtyLayout] || !ASSizeRangeEqualToSizeRange(constrainedSize, _layout.constrainedSizeRange));
+  return ([self _hasDirtyLayout] || !ASSizeRangeEqualToSizeRange(constrainedSize, _calculatedLayout.constrainedSizeRange));
 }
 
 - (BOOL)_hasDirtyLayout
 {
-  return _layout == nil || _layout.isDirty;
+  return _calculatedLayout == nil || _calculatedLayout.isDirty;
 }
 
 - (ASLayoutableType)layoutableType
@@ -710,13 +705,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(void(^)())completion
 {
-  if (_layout == nil) {
+  if (_calculatedLayout == nil) {
     // constrainedSizeRange returns a struct and is invalid to call on nil.
     // Defaulting to CGSizeZero can cause negative values in client layout code.
     return;
   }
+  
   [self invalidateCalculatedLayout];
-  [self transitionLayoutWithSizeRange:_layout.constrainedSizeRange
+  [self transitionLayoutWithSizeRange:_calculatedLayout.constrainedSizeRange
                              animated:animated
                    shouldMeasureAsync:shouldMeasureAsync
                 measurementCompletion:completion];
@@ -778,12 +774,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         return;
       }
       
-      ASLayout *previousLayout = _layout;
-      [self _applyLayout:newLayout layoutTransition:nil];
+      ASLayout *previousLayout = _calculatedLayout;
+      [self setCalculatedLayout:newLayout];
       
       ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
-        [node _applyPendingLayoutContext];
-        [node _completeLayoutCalculation];
+        [node _completePendingLayoutTransition];
         node.hierarchyState &= (~ASHierarchyStateLayoutPending);
       });
         
@@ -793,46 +788,27 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         completion();
       }
       
-      _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                            pendingLayout:newLayout
-                                                          previousLayout:previousLayout];
+      // Setup pending layout transition for animation
+      // The pending layout transition needs to stay alive at least until applySubnodeInsertions did finish execute as
+      // it can happen that with Implicit Hierarchy Management new nodes gonna be added that internally call setNeedsLayout
+      // what will invalidate and deallocate the transition in the middle of inserting nodes 
+      NS_VALID_UNTIL_END_OF_SCOPE ASLayoutTransition *pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self pendingLayout:newLayout previousLayout:previousLayout];
+      _pendingLayoutTransition = pendingLayoutTransition;
+      
+      // Setup context for pending layout transition. we need to hold a strong reference to the context
+      _pendingLayoutTransitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
+                                                                         layoutDelegate:_pendingLayoutTransition
+                                                                     completionDelegate:self];
+      
+      // Apply the subnode insertion immediately to be able to animate the nodes
       [_pendingLayoutTransition applySubnodeInsertions];
-
-      _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
-                                                            layoutDelegate:_pendingLayoutTransition
-                                                        completionDelegate:self];
-      [self animateLayoutTransition:_transitionContext];
+      
+      // Kick off animating the layout transition
+      [self animateLayoutTransition:_pendingLayoutTransitionContext];
     });
   };
 
   ASPerformBlockOnBackgroundThread(transitionBlock);
-}
-
-- (void)_completeLayoutCalculation
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  [self calculatedLayoutDidChange];
-
-  // We generate placeholders at measureWithSizeRange: time so that a node is guaranteed to have a placeholder ready to go.
-  // This is also because measurement is usually asynchronous, but placeholders need to be set up synchronously.
-  // First measurement is guaranteed to be before the node is onscreen, so we can create the image async. but still have it appear sync.
-  if (_placeholderEnabled && [self _displaysAsynchronously] && self.contents == nil) {
-    
-    // Zero-sized nodes do not require a placeholder.
-    CGSize layoutSize = (_layout ? _layout.size : CGSizeZero);
-    if (CGSizeEqualToSize(layoutSize, CGSizeZero)) {
-      return;
-    }
-
-    if (!_placeholderImage) {
-      _placeholderImage = [self placeholderImage];
-    }
-  }
-}
-
-- (void)calculatedLayoutDidChange
-{
-  // subclass override
 }
 
 - (void)cancelLayoutTransitionsInProgress
@@ -888,25 +864,108 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return (!_transitionInProgress || _transitionID != transitionID);
 }
 
+#pragma mark - Layout Transition API / ASDisplayNode (Beta)
+
+/*
+ * Hook for subclasse to perform an animation based on the given ASContextTransitioning. By default this just layouts
+ * applies all subnodes without animation and calls completes the transition on the context.
+ */
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
 {
-  [self __layoutSubnodes];
+  [self __layoutSublayouts];
   [context completeTransition:YES];
 }
 
+/*
+ * Hook for subclasses to clean up nodes after the transition happened. Furthermore this can be used from subclasses
+ * to manually perform deletions.
+ */
 - (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context
 {
   [_pendingLayoutTransition applySubnodeRemovals];
-  [self _completeLayoutCalculation];
-  _pendingLayoutTransition = nil;
 }
 
 #pragma mark - _ASTransitionContextCompletionDelegate
 
+/*
+ * After completeTransition: is called on the ASContextTransitioning object in animateLayoutTransition: this
+ * delegate method will be called that start the completion process of the 
+ */
 - (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete
 {
   [self didCompleteLayoutTransition:context];
-  _transitionContext = nil;
+  _pendingLayoutTransitionContext = nil;
+
+  [self _pendingLayoutTransitionDidComplete];
+}
+
+#pragma mark - Layout
+
+/*
+ * Completes the pending layout transition immediately without going through the the Layout Transition Animation API
+ */
+- (void)_completePendingLayoutTransition
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if (_pendingLayoutTransition) {
+    [self setCalculatedLayout:_pendingLayoutTransition.pendingLayout];
+    [self _completeLayoutTransition:_pendingLayoutTransition];
+  }
+  [self _pendingLayoutTransitionDidComplete];
+}
+
+/*
+ * Can be directly called to commit the given layout transition immediately to complete without calling through to the
+ * Layout Transition Animation API
+ */
+- (void)_completeLayoutTransition:(ASLayoutTransition *)layoutTransition
+{
+  // Layout transition is not supported for non implicit hierarchy managed nodes yet
+  if (layoutTransition == nil || self.usesImplicitHierarchyManagement == NO) {
+    return;
+  }
+
+  // Trampoline to the main thread if necessary
+  if (ASDisplayNodeThreadIsMain() || layoutTransition.isSynchronous == NO) {
+    [layoutTransition commitTransition];
+  } else {
+    // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
+    ASPerformBlockOnMainThread(^{
+      [layoutTransition commitTransition];
+    });
+  }
+}
+
+- (void)_pendingLayoutTransitionDidComplete
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  // Subclass hook
+  [self calculatedLayoutDidChange];
+
+  // We generate placeholders at measureWithSizeRange: time so that a node is guaranteed to have a placeholder ready to go.
+  // This is also because measurement is usually asynchronous, but placeholders need to be set up synchronously.
+  // First measurement is guaranteed to be before the node is onscreen, so we can create the image async. but still have it appear sync.
+  if (_placeholderEnabled && [self _displaysAsynchronously] && self.contents == nil) {
+    
+    // Zero-sized nodes do not require a placeholder.
+    CGSize layoutSize = (_calculatedLayout ? _calculatedLayout.size : CGSizeZero);
+    if (CGSizeEqualToSize(layoutSize, CGSizeZero)) {
+      return;
+    }
+
+    if (!_placeholderImage) {
+      _placeholderImage = [self placeholderImage];
+    }
+  }
+  
+  // Cleanup pending layout transition
+  _pendingLayoutTransition = nil;
+}
+
+- (void)calculatedLayoutDidChange
+{
+  // subclass override
 }
 
 #pragma mark - Asynchronous display
@@ -1068,7 +1127,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   __instanceLock__.lock();
   
-  if (_layout == nil) {
+  if (_calculatedLayout == nil) {
     // Can't proceed without a layout as no constrained size would be available
     __instanceLock__.unlock();
     return;
@@ -1086,11 +1145,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
-  [self measureWithSizeRange:_layout.constrainedSizeRange];
+  [self measureWithSizeRange:_calculatedLayout.constrainedSizeRange];
 
   CGRect oldBounds = self.bounds;
   CGSize oldSize = oldBounds.size;
-  CGSize newSize = _layout.size;
+  CGSize newSize = _calculatedLayout.size;
   
   if (! CGSizeEqualToSize(oldSize, newSize)) {
     self.bounds = (CGRect){ oldBounds.origin, newSize };
@@ -1165,24 +1224,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     } else {
       [self measureWithSizeRange:ASSizeRangeMake(bounds.size, bounds.size)];
     }
-  }
-}
-
-- (void)layout
-{
-  ASDisplayNodeAssertMainThread();
-  
-  if ([self _hasDirtyLayout]) {
-    return;
-  }
-  
-  [self __layoutSubnodes];
-}
-
-- (void)__layoutSubnodes
-{
-  for (ASLayout *subnodeLayout in _layout.sublayouts) {
-    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
   }
 }
 
@@ -1839,6 +1880,28 @@ static NSInteger incrementIfFound(NSInteger i) {
     }
     if (newSupernode) {
       [self enterHierarchyState:stateToEnterOrExit];
+      
+      // If a node was added to a supernode, the supernode could be in a layout pending state. All of the hierarchy state
+      // properties related to the transition need to be copied over as well as propagated down the subtree.
+      // This is especially important as with Implicit Hierarchy Management adding subnodes can happen while a transition
+      // is in fly
+      if (ASHierarchyStateIncludesLayoutPending(stateToEnterOrExit)) {
+        int32_t pendingTransitionId = newSupernode.pendingTransitionID;
+        if (pendingTransitionId != ASLayoutableContextInvalidTransitionID) {
+          {
+            ASDN::MutexLocker l(__instanceLock__);
+            _pendingTransitionID = pendingTransitionId;
+            
+            // Propagate down the new pending transition id
+            ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
+              node.pendingTransitionID = _pendingTransitionID;
+            });
+          }
+        }
+      }
+      
+      // Now that we have a supernode, propagate its traits to self.
+      ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
     } else {
       // If a node will be removed from the supernode it should go out from the layout pending state to remove all
       // layout pending state related properties on the node
@@ -1846,9 +1909,6 @@ static NSInteger incrementIfFound(NSInteger i) {
       
       [self exitHierarchyState:stateToEnterOrExit];
     }
-    
-    // now that we have a supernode, propagate its traits to self.
-    ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
   }
 }
 
@@ -2026,6 +2086,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(__instanceLock__);
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
     ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    
+    ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
+
     layoutSpec.parent = self; // This causes upward propogation of any non-default layoutable values.
     
     // manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
@@ -2033,6 +2096,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     
     layoutSpec.isMutable = NO;
     ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
+    ASDisplayNodeAssertNotNil(layout, @"[ASLayoutSpec measureWithSizeRange:] should never return nil! %@, %@", self, layoutSpec);
+      
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
     BOOL isFinalLayoutable = (layout.layoutableObject != self);
     if (isFinalLayoutable) {
@@ -2071,25 +2136,37 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     return _layoutSpecBlock(self, constrainedSize);
   }
   
-  return nil;
+  ASDisplayNodeAssert(NO, @"-[ASDisplayNode layoutSpecThatFits:] should never fall through to return empty value");
+  return [[ASLayoutSpec alloc] init];
 }
 
 - (ASLayout *)calculatedLayout
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return _layout;
+  return _calculatedLayout;
+}
+
+- (void)setCalculatedLayout:(ASLayout *)calculatedLayout
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  ASDisplayNodeAssertTrue(calculatedLayout.layoutableObject == self);
+  ASDisplayNodeAssertTrue(calculatedLayout.size.width >= 0.0);
+  ASDisplayNodeAssertTrue(calculatedLayout.size.height >= 0.0);
+  
+  _calculatedLayout = calculatedLayout;
 }
 
 - (CGSize)calculatedSize
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return _layout.size;
+  return _calculatedLayout.size;
 }
 
 - (ASSizeRange)constrainedSizeForCalculatedLayout
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return _layout.constrainedSizeRange;
+  return _calculatedLayout.constrainedSizeRange;
 }
 
 - (void)setLayoutSpecBlock:(ASLayoutSpecBlock)layoutSpecBlock
@@ -2105,6 +2182,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(__instanceLock__);
   ASDisplayNodeAssertTrue(_pendingTransitionID < pendingTransitionID);
   _pendingTransitionID = pendingTransitionID;
+}
+  
+- (int32_t)pendingTransitionID
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _pendingTransitionID;
 }
 
 - (void)setPreferredFrameSize:(CGSize)preferredFrameSize
@@ -2146,7 +2229,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
   // This will cause the next call to -measureWithSizeRange: to actually compute a new layout
   // instead of returning the current layout
-  _layout.dirty = YES;
+  _calculatedLayout.dirty = YES;
 }
 
 - (void)__didLoad
@@ -2513,7 +2596,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)_applyLayout:(ASLayout *)layout layoutTransition:(ASLayoutTransition *)layoutTransition
 {
   ASDN::MutexLocker l(__instanceLock__);
-  _layout = layout;
+  _calculatedLayout = layout;
   
   ASDisplayNodeAssertTrue(layout.layoutableObject == self);
   ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
@@ -2528,14 +2611,34 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
     // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
     ASPerformBlockOnMainThread(^{
-      [layoutTransition startTransition];
+      [layoutTransition commitTransition];
     });
     
     return;
   }
   
-  [layoutTransition startTransition];
+  [layoutTransition commitTransition];
 }
+
+- (void)layout
+{
+  ASDisplayNodeAssertMainThread();
+
+  if ([self _hasDirtyLayout]) {
+    return;
+  }
+  
+  [self __layoutSublayouts];
+}
+
+- (void)__layoutSublayouts
+{
+  for (ASLayout *subnodeLayout in _calculatedLayout.sublayouts) {
+    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
+  }
+}
+
+#pragma mark - Display
 
 - (void)displayWillStart
 {

@@ -130,8 +130,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController;
 
-- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths;
-
 - (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath;
 
 - (NSArray<NSArray <ASCellNode *> *> *)completedNodes;

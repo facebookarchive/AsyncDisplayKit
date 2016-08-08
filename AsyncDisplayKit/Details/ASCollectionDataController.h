@@ -40,6 +40,8 @@
 
 @interface ASCollectionDataController : ASChangeSetDataController
 
+- (instancetype)initWithDataSource:(id<ASCollectionDataControllerSource>)dataSource NS_DESIGNATED_INITIALIZER;
+
 - (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
 @end

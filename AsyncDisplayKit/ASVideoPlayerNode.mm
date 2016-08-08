@@ -24,6 +24,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateNeededDefaultControls:1;
     unsigned int delegateCustomControls:1;
     unsigned int delegateSpinnerTintColor:1;
+    unsigned int delegateSpinnerStyle:1;
     unsigned int delegatePlaybackButtonTint:1;
     unsigned int delegateScrubberMaximumTrackTintColor:1;
     unsigned int delegateScrubberMinimumTrackTintColor:1;
@@ -591,6 +592,10 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
         spinnnerView.color = _defaultControlsColor;
       }
       
+      if (_delegateFlags.delegateSpinnerStyle) {
+        spinnnerView.activityIndicatorViewStyle = [_delegate videoPlayerNodeSpinnerStyle:strongSelf];
+      }
+      
       return spinnnerView;
     }];
     _spinnerNode.preferredFrameSize = CGSizeMake(44.0, 44.0);
@@ -772,6 +777,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateNeededDefaultControls = [_delegate respondsToSelector:@selector(videoPlayerNodeNeededDefaultControls:)];
     _delegateFlags.delegateCustomControls = [_delegate respondsToSelector:@selector(videoPlayerNodeCustomControls:)];
     _delegateFlags.delegateSpinnerTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeSpinnerTint:)];
+    _delegateFlags.delegateSpinnerStyle = [_delegate respondsToSelector:@selector(videoPlayerNodeSpinnerStyle:)];
     _delegateFlags.delegateScrubberMaximumTrackTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberMaximumTrackTint:)];
     _delegateFlags.delegateScrubberMinimumTrackTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberMinimumTrackTint:)];
     _delegateFlags.delegateScrubberThumbTintColor = [_delegate respondsToSelector:@selector(videoPlayerNodeScrubberThumbTint:)];

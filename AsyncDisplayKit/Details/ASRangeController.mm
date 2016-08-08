@@ -14,7 +14,7 @@
 #import "ASWeakSet.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
-#import "ASMultiDimensionalArrayUtils.h"
+#import "ASMultidimensionalArrayUtils.h"
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASCellNode.h"
@@ -26,6 +26,7 @@
   BOOL _rangeIsValid;
   BOOL _needsRangeUpdate;
   BOOL _layoutControllerImplementsSetVisibleIndexPaths;
+  BOOL _layoutControllerImplementsSetViewportSize;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
   ASLayoutRangeMode _currentRangeMode;
   BOOL _didUpdateCurrentRange;
@@ -143,7 +144,8 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 - (void)setLayoutController:(id<ASLayoutController>)layoutController
 {
   _layoutController = layoutController;
-  _layoutControllerImplementsSetVisibleIndexPaths = [_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)];
+  _layoutControllerImplementsSetVisibleIndexPaths = [layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)];
+  _layoutControllerImplementsSetViewportSize = [layoutController respondsToSelector:@selector(setViewportSize:)];
   if (layoutController && _dataSource) {
     [self updateIfNeeded];
   }
@@ -181,7 +183,9 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   }
   
   ASScrollDirection scrollDirection = [_dataSource scrollDirectionForRangeController:self];
-  [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
+  if (_layoutControllerImplementsSetViewportSize) {
+    [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
+  }
   
   // the layout controller needs to know what the current visible indices are to calculate range offsets
   if (_layoutControllerImplementsSetVisibleIndexPaths) {
@@ -411,50 +415,44 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 - (void)dataControllerBeginUpdates:(ASDataController *)dataController
 {
-  ASPerformBlockOnMainThread(^{
-    [_delegate didBeginUpdatesInRangeController:self];
-  });
+  ASDisplayNodeAssertMainThread();
+  [_delegate didBeginUpdatesInRangeController:self];
 }
 
 - (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
-  ASPerformBlockOnMainThread(^{
-    [_delegate rangeController:self didEndUpdatesAnimated:animated completion:completion];
-  });
+  ASDisplayNodeAssertMainThread();
+  [_delegate rangeController:self didEndUpdatesAnimated:animated completion:completion];
 }
 
 - (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssert(nodes.count == indexPaths.count, @"Invalid index path");
-  ASPerformBlockOnMainThread(^{
-    _rangeIsValid = NO;
-    [_delegate rangeController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
-  });
+  ASDisplayNodeAssertMainThread();
+  _rangeIsValid = NO;
+  [_delegate rangeController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
 }
 
 - (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  ASPerformBlockOnMainThread(^{
-    _rangeIsValid = NO;
-    [_delegate rangeController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
-  });
+  ASDisplayNodeAssertMainThread();
+  _rangeIsValid = NO;
+  [_delegate rangeController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
 }
 
 - (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssert(sections.count == indexSet.count, @"Invalid sections");
-  ASPerformBlockOnMainThread(^{
-    _rangeIsValid = NO;
-    [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-  });
+  ASDisplayNodeAssertMainThread();
+  _rangeIsValid = NO;
+  [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
 }
 
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  ASPerformBlockOnMainThread(^{
-    _rangeIsValid = NO;
-    [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-  });
+  ASDisplayNodeAssertMainThread();
+  _rangeIsValid = NO;
+  [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
 }
 
 #pragma mark - Memory Management

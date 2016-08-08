@@ -87,7 +87,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASCollectionDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
   ASCollectionViewProxy *_proxyDataSource;
   ASCollectionViewProxy *_proxyDelegate;
   
@@ -232,9 +232,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
   
-  _dataController = [[ASCollectionDataController alloc] init];
+  _dataController = [[ASCollectionDataController alloc] initWithDataSource:self];
   _dataController.delegate = _rangeController;
-  _dataController.dataSource = self;
   _dataController.environmentDelegate = self;
   
   _batchContext = [[ASBatchContext alloc] init];
@@ -506,6 +505,22 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return visibleNodes;
 }
 
+- (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated
+{
+  ASDisplayNodeAssertMainThread();
+
+  [self waitUntilAllUpdatesAreCommitted];
+  [super scrollToItemAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+}
+
+- (void)selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
+{
+  ASDisplayNodeAssertMainThread();
+
+  [self waitUntilAllUpdatesAreCommitted];
+  [super selectItemAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+}
+
 #pragma mark Internal
 
 /**
@@ -721,9 +736,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
 {
+  CGPoint contentOffset = scrollView.contentOffset;
   _deceleratingVelocity = CGPointMake(
-    scrollView.contentOffset.x - ((targetContentOffset != NULL) ? targetContentOffset->x : 0),
-    scrollView.contentOffset.y - ((targetContentOffset != NULL) ? targetContentOffset->y : 0)
+    contentOffset.x - ((targetContentOffset != NULL) ? targetContentOffset->x : 0),
+    contentOffset.y - ((targetContentOffset != NULL) ? targetContentOffset->y : 0)
   );
 
   if (targetContentOffset != NULL) {
@@ -732,7 +748,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   if (_asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset) {
-    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
+    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:(targetContentOffset ? : &contentOffset)];
   }
 }
 
@@ -1057,11 +1073,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
 {
   return ASInterfaceStateForDisplayNode(self.collectionNode, self.window);
-}
-
-- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
-{
-  return [_dataController nodesAtIndexPaths:indexPaths];
 }
 
 - (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath

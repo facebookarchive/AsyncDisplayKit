@@ -147,6 +147,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)videoNode:(ASVideoNode *)videoNode didPlayToSecond:(NSTimeInterval)second __deprecated;
 
 @end
+
+@interface ASVideoNode (Unavailable)
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+
+@end
+
 NS_ASSUME_NONNULL_END
 #endif
 

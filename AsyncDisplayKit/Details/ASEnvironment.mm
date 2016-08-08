@@ -11,24 +11,25 @@
 #import "ASEnvironmentInternal.h"
 #import "ASAvailability.h"
 
-ASEnvironmentLayoutOptionsState _ASEnvironmentLayoutOptionsStateMakeDefault()
+ASEnvironmentLayoutOptionsState ASEnvironmentLayoutOptionsStateMakeDefault()
 {
   return (ASEnvironmentLayoutOptionsState) {
     // Default values can be defined in here
   };
 }
 
-ASEnvironmentHierarchyState _ASEnvironmentHierarchyStateMakeDefault()
+ASEnvironmentHierarchyState ASEnvironmentHierarchyStateMakeDefault()
 {
   return (ASEnvironmentHierarchyState) {
     // Default values can be defined in here
   };
 }
 
-ASEnvironmentTraitCollection _ASEnvironmentTraitCollectionMakeDefault()
+ASEnvironmentTraitCollection ASEnvironmentTraitCollectionMakeDefault()
 {
   return (ASEnvironmentTraitCollection) {
     // Default values can be defined in here
+    .userInterfaceIdiom = UIUserInterfaceIdiomUnspecified,
     .containerSize = CGSizeZero,
   };
 }
@@ -62,9 +63,9 @@ BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnviron
 ASEnvironmentState ASEnvironmentStateMakeDefault()
 {
   return (ASEnvironmentState) {
-    .layoutOptionsState = _ASEnvironmentLayoutOptionsStateMakeDefault(),
-    .hierarchyState = _ASEnvironmentHierarchyStateMakeDefault(),
-    .environmentTraitCollection = _ASEnvironmentTraitCollectionMakeDefault()
+    .layoutOptionsState = ASEnvironmentLayoutOptionsStateMakeDefault(),
+    .hierarchyState = ASEnvironmentHierarchyStateMakeDefault(),
+    .environmentTraitCollection = ASEnvironmentTraitCollectionMakeDefault()
   };
 }
 

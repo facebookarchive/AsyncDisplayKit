@@ -45,42 +45,6 @@
   return [[[UIImage alloc] initWithContentsOfFile:[self _testImageURL].path] autorelease];
 }
 
-static BOOL ASInvokeConditionBlockWithBarriers(BOOL (^block)()) {
-  // In case the block does multiple comparisons, ensure it has a consistent view of memory by issuing read-write
-  // barriers on either side of the block.
-  OSMemoryBarrier();
-  BOOL result = block();
-  OSMemoryBarrier();
-  return result;
-}
-
-static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
-{
-  // Time out after 30 seconds.
-  CFTimeInterval timeoutDate = CACurrentMediaTime() + 30.0f;
-  BOOL passed = NO;
-
-  while (true) {
-    passed = ASInvokeConditionBlockWithBarriers(block);
-
-    if (passed) {
-      break;
-    }
-
-    CFTimeInterval now = CACurrentMediaTime();
-    if (now > timeoutDate) {
-      break;
-    }
-
-    // Run 1000 times a second until the poll timeout or until timeoutDate, whichever is first.
-    CFTimeInterval runLoopTimeout = MIN(0.001, timeoutDate - now);
-    CFRunLoopRunInMode(kCFRunLoopDefaultMode, runLoopTimeout, true);
-  }
-
-  return passed;
-}
-
-
 #pragma mark -
 #pragma mark Unit tests.
 
@@ -360,14 +324,11 @@ static BOOL ASRunRunLoopUntilBlockIsTrue(BOOL (^block)())
   [imageNode reloadImageIdentifierSources];
 
   // Wait until the image is loaded.
-  ASRunRunLoopUntilBlockIsTrue(^BOOL{
-    return [(id)imageNode.loadedImageIdentifier isEqual:imageIdentifier];
-  });
+  [self expectationForPredicate:[NSPredicate predicateWithFormat:@"loadedImageIdentifier = %@", imageIdentifier] evaluatedWithObject:imageNode handler:nil];
+  [self waitForExpectationsWithTimeout:30 handler:nil];
 
   // Verify the delegation.
   [mockDelegate verify];
-  // Also verify that it's acutally loaded (could be false if we timed out above).
-  XCTAssertEqualObjects(imageNode.loadedImageIdentifier, imageIdentifier, @"Failed to load image");
   
   [imageNode release];
 }

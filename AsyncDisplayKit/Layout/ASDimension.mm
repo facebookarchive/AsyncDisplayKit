@@ -17,17 +17,24 @@ ASRelativeDimension const ASRelativeDimensionUnconstrained = {};
 
 ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value)
 {
-  if (type == ASRelativeDimensionTypePoints) { ASDisplayNodeCAssertPositiveReal(@"Points", value); }
+  if (type == ASRelativeDimensionTypePoints) {
+    ASDisplayNodeCAssertPositiveReal(@"Points", value);
+  } else if (type == ASRelativeDimensionTypePercent) {
+    // TODO: Enable this assertion for 2.0.  Check that there is no use case for using a larger value, e.g. to layout for a clipsToBounds = NO element.
+    // ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASRelativeDimension percent value (%f) must be between 0 and 1.", value);
+  }
   ASRelativeDimension dimension; dimension.type = type; dimension.value = value; return dimension;
 }
 
 ASRelativeDimension ASRelativeDimensionMakeWithPoints(CGFloat points)
 {
+  ASDisplayNodeCAssertPositiveReal(@"Points", points);
   return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, points);
 }
 
 ASRelativeDimension ASRelativeDimensionMakeWithPercent(CGFloat percent)
 {
+  // ASDisplayNodeCAssert( 0 <= percent && percent <= 1.0, @"ASRelativeDimension percent value (%f) must be between 0 and 1.", percent);
   return ASRelativeDimensionMake(ASRelativeDimensionTypePercent, percent);
 }
 

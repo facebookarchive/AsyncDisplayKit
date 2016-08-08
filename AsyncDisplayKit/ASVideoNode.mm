@@ -105,12 +105,6 @@ static NSString * const kStatus = @"status";
   return self;
 }
 
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
-{
-  ASDisplayNodeAssertNotSupported();
-  return nil;
-}
-
 - (ASDisplayNode *)constructPlayerNode
 {
   ASVideoNode * __weak weakSelf = self;

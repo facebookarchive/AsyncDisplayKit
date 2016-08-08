@@ -154,6 +154,13 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
 
 @end
 
+@interface ASImageNode (Unavailable)
+
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+
+@end
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 

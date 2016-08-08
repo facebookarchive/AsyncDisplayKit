@@ -189,8 +189,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _rangeController.dataSource = self;
   _rangeController.delegate = self;
   
-  _dataController = [[dataControllerClass alloc] init];
-  _dataController.dataSource = self;
+  _dataController = [[dataControllerClass alloc] initWithDataSource:self];
   _dataController.delegate = _rangeController;
   _dataController.environmentDelegate = self;
   
@@ -452,6 +451,30 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [_dataController waitUntilAllUpdatesAreCommitted];
 }
 
+- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
+{
+  ASDisplayNodeAssertMainThread();
+
+  [self waitUntilAllUpdatesAreCommitted];
+  [super scrollToRowAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+}
+
+- (void)scrollToNearestSelectedRowAtScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
+{
+  ASDisplayNodeAssertMainThread();
+  
+  [self waitUntilAllUpdatesAreCommitted];
+  [super scrollToNearestSelectedRowAtScrollPosition:scrollPosition animated:animated];
+}
+
+- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition
+{
+  ASDisplayNodeAssertMainThread();
+  
+  [self waitUntilAllUpdatesAreCommitted];
+  [super selectRowAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+}
+
 - (void)layoutSubviews
 {
   if (_nodesConstrainedWidth != self.bounds.size.width) {
@@ -704,18 +727,19 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)scrollViewWillEndDragging:(UIScrollView *)scrollView withVelocity:(CGPoint)velocity targetContentOffset:(inout CGPoint *)targetContentOffset
 {
+  CGPoint contentOffset = scrollView.contentOffset;
   _deceleratingVelocity = CGPointMake(
-    scrollView.contentOffset.x - ((targetContentOffset != NULL) ? targetContentOffset->x : 0),
-    scrollView.contentOffset.y - ((targetContentOffset != NULL) ? targetContentOffset->y : 0)
+    contentOffset.x - ((targetContentOffset != NULL) ? targetContentOffset->x : 0),
+    contentOffset.y - ((targetContentOffset != NULL) ? targetContentOffset->y : 0)
   );
 
   if (targetContentOffset != NULL) {
     ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
     [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollDirection] contentOffset:*targetContentOffset];
   }
-
+  
   if (_asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset) {
-    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:targetContentOffset];
+    [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:(targetContentOffset ? : &contentOffset)];
   }
 }
 
@@ -895,11 +919,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (ASScrollDirection)scrollDirectionForRangeController:(ASRangeController *)rangeController
 {
   return self.scrollDirection;
-}
-
-- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths
-{
-  return [_dataController nodesAtIndexPaths:indexPaths];
 }
 
 - (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath

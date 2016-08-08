@@ -13,6 +13,7 @@
 #import <objc/runtime.h>
 
 #import "ASThread.h"
+#import <tgmath.h>
 
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector)
 {
@@ -80,17 +81,20 @@ CGFloat ASScreenScale()
 
 CGFloat ASFloorPixelValue(CGFloat f)
 {
-  return floorf(f * ASScreenScale()) / ASScreenScale();
+  CGFloat scale = ASScreenScale();
+  return floor(f * scale) / scale;
 }
 
 CGFloat ASCeilPixelValue(CGFloat f)
 {
-  return ceilf(f * ASScreenScale()) / ASScreenScale();
+  CGFloat scale = ASScreenScale();
+  return ceil(f * scale) / scale;
 }
 
 CGFloat ASRoundPixelValue(CGFloat f)
 {
-  return roundf(f * ASScreenScale()) / ASScreenScale();
+  CGFloat scale = ASScreenScale();
+  return round(f * scale) / scale;
 }
 
 @implementation NSIndexPath (ASInverseComparison)
