@@ -172,7 +172,7 @@ There are two main confusions that developers have when using layoutSpecs
 Upward propogation of ASLayoutable properties is currently disabled. Thus, in certain situations, the `.flexGrow` property must be manually applied to the containers. Two common examples of this that we see include:
 
 <ul>
-  <li>a node (with flexGrow enabled) is wrapped in a static layoutSpec, wrapped in a stack layoutSpec. <b>solution</b>: enable flexGrow on the static layotuSpec as well.<li>
+  <li>a node (with flexGrow enabled) is wrapped in a static layoutSpec, wrapped in a stack layoutSpec. <b>solution</b>: enable flexGrow on the static layotuSpec as well.</li>
   <li>a node (with flexGrow enabled) is wrapped in an inset spec. <b>solution</b>: enable flexGrow on the inset spec as well.</li>
 </ul>
 
