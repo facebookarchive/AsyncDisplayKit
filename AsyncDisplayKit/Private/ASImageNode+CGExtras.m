@@ -20,7 +20,7 @@ static CGSize _ASSizeFillWithAspectRatio(CGFloat sizeToScaleAspectRatio, CGSize 
   if (sizeToScaleAspectRatio > destinationAspectRatio) {
     return CGSizeMake(destinationSize.height * sizeToScaleAspectRatio, destinationSize.height);
   } else {
-    return CGSizeMake(destinationSize.width, floorf(destinationSize.width / sizeToScaleAspectRatio));
+    return CGSizeMake(destinationSize.width, roundf(destinationSize.width / sizeToScaleAspectRatio));
   }
 }
 
