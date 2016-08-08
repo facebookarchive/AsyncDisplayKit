@@ -37,7 +37,7 @@ To describe movement **through the corner,** imagine a small rounded-corner scro
 
 <img src="/static/images/corner-rounding-movement.png" width="60%" height="60%">
 
-The above image shows movement underneath the corner highlighted in blue and movement thruogh the corner highlighted in orange. 
+The above image shows movement underneath the corner highlighted in blue and movement through the corner highlighted in orange. 
 
 <div class = "note">
 Note: There can be movement <i>inside</i> of the rounded-corner object, without moving <i>through</i> the corner.  The following image shows content, highlighted in green, inset from the edge with a margin equal to the size of the corner radius.  When the content scrolls, it will <i>not</i> move through the corners.
