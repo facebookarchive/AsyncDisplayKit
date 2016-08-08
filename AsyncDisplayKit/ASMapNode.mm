@@ -222,7 +222,7 @@
                     
                     // Get a standard annotation view pin if there is no custom annotation block.
                     if (!strongSelf.imageForStaticMapAnnotationBlock) {
-                      pinImage = [self defaultPinImageWithCenterOffset:&pinCenterOffset];
+                      pinImage = [strongSelf.class defaultPinImageWithCenterOffset:&pinCenterOffset];
                     }
                     
                     for (id<MKAnnotation> annotation in annotations) {
@@ -231,7 +231,7 @@
                         pinImage = strongSelf.imageForStaticMapAnnotationBlock(annotation, &pinCenterOffset);
                         if (!pinImage) {
                           // just for case block returned nil, which can happen
-                          pinImage = [self defaultPinImageWithCenterOffset:&pinCenterOffset];
+                          pinImage = [strongSelf.class defaultPinImageWithCenterOffset:&pinCenterOffset];
                         }
                       }
                       
@@ -255,9 +255,13 @@
   }];
 }
 
-- (UIImage *)defaultPinImageWithCenterOffset:(CGPoint *)centerOffset
++ (UIImage *)defaultPinImageWithCenterOffset:(CGPoint *)centerOffset
 {
-  MKAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+  static MKAnnotationView *pin;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+  });
   *centerOffset = pin.centerOffset;
   return pin.image;
 }

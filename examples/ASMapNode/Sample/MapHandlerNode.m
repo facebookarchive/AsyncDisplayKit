@@ -98,13 +98,10 @@
   self.mapNode.imageForStaticMapAnnotationBlock = ^UIImage *(id<MKAnnotation> annotation, CGPoint *centerOffset){
     MapHandlerNode *grabbedSelf = weakSelf;
     if (grabbedSelf) {
-      MKAnnotationView *av = [grabbedSelf annotationViewForAnnotation:annotation];
-      *centerOffset = av.centerOffset;
-      UIGraphicsBeginImageContextWithOptions(av.bounds.size, av.opaque, 0.0);
-      [av.layer renderInContext:UIGraphicsGetCurrentContext()];
-      UIImage *pinImage = UIGraphicsGetImageFromCurrentImageContext();
-      UIGraphicsEndImageContext();
-      return pinImage;
+      if ([annotation isKindOfClass:[CustomMapAnnotation class]]) {
+        MKAnnotationView *av = [grabbedSelf annotationViewForAnnotation:annotation];
+        return av.image;
+      }
     }
     return nil;
   };
@@ -284,7 +281,7 @@
   MKAnnotationView *av;
   if ([annotation isKindOfClass:[CustomMapAnnotation class]]) {
     av = [[MKAnnotationView alloc] init];
-    av.center = CGPointMake(21, 21);
+    av.centerOffset = CGPointMake(21, 21);
     av.image = [(CustomMapAnnotation *)annotation image];
   } else {
     av = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
