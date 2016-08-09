@@ -35,6 +35,11 @@ extern NSString * const ASTransitionContextToLayoutKey;
 - (ASSizeRange)constrainedSizeForKey:(NSString *)key;
 
 /**
+ * @abstract The node that acts as the supernode for the nodes involved in the transition
+ */
+- (ASDisplayNode *)containerNode;
+
+/**
  * @abstract Retrieve the subnodes from either the "from" or "to" layout
  */
 - (NSArray<ASDisplayNode *> *)subnodesForKey:(NSString *)key;
@@ -68,5 +73,32 @@ extern NSString * const ASTransitionContextToLayoutKey;
 - (void)completeTransition:(BOOL)didComplete;
 
 @end
+
+
+#pragma mark - ASLayoutTransitionCoordinator
+
+@protocol ASLayoutTransitionCoordinator <NSObject>
+
+- (void)animateLayoutTransition:(id<ASContextTransitioning>)context;
+
+@optional
+- (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context;
+
+@end
+
+@interface ASDefaultLayoutTransitionCoordinator : NSObject<ASLayoutTransitionCoordinator>
+
+@end
+
+@interface ASFadeInOutLayoutTransitionCoordinator : NSObject<ASLayoutTransitionCoordinator>
+
+/**
+ * @abstract The amount of time it takes to complete the animation
+ */
+@property (nonatomic, assign) NSTimeInterval animationDuration;
+
+@end
+
+
 
 NS_ASSUME_NONNULL_END

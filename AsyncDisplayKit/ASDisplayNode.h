@@ -20,6 +20,7 @@
 #define ASDisplayNodeLoggingEnabled 0
 
 @class ASDisplayNode;
+@protocol ASLayoutTransitionCoordinator;
 
 /**
  * UIView creation block. Used to create the backing view of a new display node.
@@ -597,6 +598,10 @@ NS_ASSUME_NONNULL_BEGIN
  * @return The converted rectangle.
  */
 - (CGRect)convertRect:(CGRect)rect fromNode:(nullable ASDisplayNode *)node;
+
+// TODO: Move this into ASDisplayNode (LayoutTransitioning)
+
+@property (strong, nonatomic) id<ASLayoutTransitionCoordinator> layoutTransitionCoordinator;
 
 @end
 

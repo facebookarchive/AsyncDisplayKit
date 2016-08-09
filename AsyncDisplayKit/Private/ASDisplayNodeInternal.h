@@ -196,6 +196,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)__setNeedsDisplay;
 
 - (void)__layout;
+- (void)__layoutSublayouts;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 
 // Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
