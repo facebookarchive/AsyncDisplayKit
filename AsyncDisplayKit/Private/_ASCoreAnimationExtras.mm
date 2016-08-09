@@ -32,8 +32,8 @@ extern void ASDisplayNodeSetupLayerContentsWithResizableImage(CALayer *layer, UI
     UIEdgeInsets insets = [image capInsets];
 
     // These are lifted from what UIImageView does by experimentation. Without these exact values, the stretching is slightly off.
-    const float halfPixelFudge = 0.49f;
-    const float otherPixelFudge = 0.02f;
+    const CGFloat halfPixelFudge = 0.49f;
+    const CGFloat otherPixelFudge = 0.02f;
     // Convert to unit coordinates for the contentsCenter property.
     CGRect contentsCenter = CGRectMake(0.0f, 0.0f, 1.0f, 1.0f);
     if (insets.left > 0 || insets.right > 0) {

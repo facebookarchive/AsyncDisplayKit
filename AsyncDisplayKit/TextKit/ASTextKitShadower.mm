@@ -10,6 +10,8 @@
 
 #import "ASTextKitShadower.h"
 
+#import <tgmath.h>
+
 static inline CGSize _insetSize(CGSize size, UIEdgeInsets insets)
 {
   return UIEdgeInsetsInsetRect({.size = size}, insets).size;
@@ -87,11 +89,11 @@ static inline UIEdgeInsets _invertInsets(UIEdgeInsets insets)
 
     // min values are expected to be negative for most typical shadowOffset and
     // blurRadius settings:
-    shadowPadding.top = fminf(0.0f, _shadowOffset.height - _shadowRadius);
-    shadowPadding.left = fminf(0.0f, _shadowOffset.width - _shadowRadius);
+    shadowPadding.top = std::fmin(0.0f, _shadowOffset.height - _shadowRadius);
+    shadowPadding.left = std::fmin(0.0f, _shadowOffset.width - _shadowRadius);
 
-    shadowPadding.bottom = fminf(0.0f, -_shadowOffset.height - _shadowRadius);
-    shadowPadding.right = fminf(0.0f, -_shadowOffset.width - _shadowRadius);
+    shadowPadding.bottom = std::fmin(0.0f, -_shadowOffset.height - _shadowRadius);
+    shadowPadding.right = std::fmin(0.0f, -_shadowOffset.width - _shadowRadius);
 
     _calculatedShadowPadding = shadowPadding;
   }

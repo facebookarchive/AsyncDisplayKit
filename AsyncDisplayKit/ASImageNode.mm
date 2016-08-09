@@ -10,6 +10,8 @@
 
 #import "ASImageNode.h"
 
+#import <tgmath.h>
+
 #import "_ASDisplayLayer.h"
 #import "ASAssert.h"
 #import "ASDisplayNode+Subclasses.h"
@@ -313,7 +315,7 @@ struct ASImageNodeDrawParameters {
   
   CGSize imageSize = image.size;
   CGSize imageSizeInPixels = CGSizeMake(imageSize.width * image.scale, imageSize.height * image.scale);
-  CGSize boundsSizeInPixels = CGSizeMake(floorf(bounds.size.width * contentsScale), floorf(bounds.size.height * contentsScale));
+  CGSize boundsSizeInPixels = CGSizeMake(std::floor(bounds.size.width * contentsScale), std::floor(bounds.size.height * contentsScale));
   
   if (_debugLabelNode) {
     CGFloat pixelCountRatio            = (imageSizeInPixels.width * imageSizeInPixels.height) / (boundsSizeInPixels.width * boundsSizeInPixels.height);

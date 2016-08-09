@@ -12,6 +12,7 @@
 #import "ASTextNode+Beta.h"
 
 #include <mutex>
+#import <tgmath.h>
 
 #import "_ASDisplayLayer.h"
 #import "ASDisplayNode+Subclasses.h"
@@ -524,7 +525,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   [renderer enumerateTextIndexesAtPosition:point usingBlock:^(NSUInteger characterIndex, CGRect glyphBoundingRect, BOOL *stop) {
     CGPoint glyphLocation = CGPointMake(CGRectGetMidX(glyphBoundingRect), CGRectGetMidY(glyphBoundingRect));
-    CGFloat currentDistance = sqrtf(powf(point.x - glyphLocation.x, 2.f) + powf(point.y - glyphLocation.y, 2.f));
+    CGFloat currentDistance = std::sqrt(std::pow(point.x - glyphLocation.x, 2.f) + std::pow(point.y - glyphLocation.y, 2.f));
     if (currentDistance >= minimumGlyphDistance) {
       // If the distance computed from the touch to the glyph location is
       // not the minimum among the located link attributes, we can just skip
