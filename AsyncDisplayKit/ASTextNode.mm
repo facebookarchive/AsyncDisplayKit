@@ -44,6 +44,7 @@ struct ASTextNodeDrawParameter {
 @implementation ASTextNode {
   CGSize _shadowOffset;
   CGColorRef _shadowColor;
+  UIColor *_cachedShadowUIColor;
   CGFloat _shadowOpacity;
   CGFloat _shadowRadius;
 
@@ -244,6 +245,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .pointSizeScaleFactors = self.pointSizeScaleFactors,
     .layoutManagerCreationBlock = self.layoutManagerCreationBlock,
     .textStorageCreationBlock = self.textStorageCreationBlock,
+    .shadowOffset = _shadowOffset,
+    .shadowColor = _cachedShadowUIColor,
+    .shadowOpacity = _shadowOpacity,
+    .shadowRadius = _shadowRadius
   };
 }
 
@@ -1055,7 +1060,11 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
     if (shadowColor != NULL) {
       CGColorRetain(shadowColor);
     }
+    if (_shadowColor != NULL) {
+      CGColorRelease(_shadowColor);
+    }
     _shadowColor = shadowColor;
+    _cachedShadowUIColor = [UIColor colorWithCGColor:shadowColor];
     [self _invalidateRenderer];
     [self setNeedsDisplay];
   }
