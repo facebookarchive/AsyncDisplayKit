@@ -164,7 +164,7 @@ static const CGFloat ASTextKitRendererTextCapHeightPadding = 1.3;
 
   [self enumerateTextIndexesAtPosition:position usingBlock:^(NSUInteger characterIndex, CGRect glyphBoundingRect, BOOL *stop) {
     CGPoint glyphLocation = CGPointMake(CGRectGetMidX(glyphBoundingRect), CGRectGetMidY(glyphBoundingRect));
-    CGFloat currentDistance = sqrt(pow(position.x - glyphLocation.x, 2.f) + pow(position.y - glyphLocation.y, 2.f));
+    CGFloat currentDistance = std::sqrt(std::pow(position.x - glyphLocation.x, 2.f) + std::pow(position.y - glyphLocation.y, 2.f));
     if (currentDistance < minimumGlyphDistance) {
       minimumGlyphDistance = currentDistance;
       minimumGlyphCharacterIndex = characterIndex;

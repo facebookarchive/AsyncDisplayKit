@@ -11,6 +11,7 @@
 #import <QuartzCore/QuartzCore.h>
 
 #import <XCTest/XCTest.h>
+#import <tgmath.h>
 
 #import "_ASDisplayLayer.h"
 #import "_ASDisplayView.h"

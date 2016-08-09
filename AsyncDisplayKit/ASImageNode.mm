@@ -315,7 +315,7 @@ struct ASImageNodeDrawParameters {
   
   CGSize imageSize = image.size;
   CGSize imageSizeInPixels = CGSizeMake(imageSize.width * image.scale, imageSize.height * image.scale);
-  CGSize boundsSizeInPixels = CGSizeMake(floor(bounds.size.width * contentsScale), floor(bounds.size.height * contentsScale));
+  CGSize boundsSizeInPixels = CGSizeMake(std::floor(bounds.size.width * contentsScale), std::floor(bounds.size.height * contentsScale));
   
   if (_debugLabelNode) {
     CGFloat pixelCountRatio            = (imageSizeInPixels.width * imageSizeInPixels.height) / (boundsSizeInPixels.width * boundsSizeInPixels.height);
