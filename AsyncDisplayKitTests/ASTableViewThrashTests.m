@@ -263,7 +263,7 @@ static volatile int32_t ASThrashTestSectionNextID = 1;
 }
 
 /// `insertMode` means that for each index selected, the max goes up by one.
-+ (NSMutableIndexSet *)randomIndexesLessThan:(NSInteger)max probability:(CGFloat)probability insertMode:(BOOL)insertMode {
++ (NSMutableIndexSet *)randomIndexesLessThan:(NSInteger)max probability:(float)probability insertMode:(BOOL)insertMode {
   NSMutableIndexSet *indexes = [[NSMutableIndexSet alloc] init];
   u_int32_t cutoff = probability * 100;
   for (NSInteger i = 0; i < max; i++) {
