@@ -11,7 +11,7 @@
 #import "ASEditableTextNode.h"
 
 #import <objc/message.h>
-#import <tgmath.h>
+#import <cmath>
 
 #import "ASDisplayNode+Subclasses.h"
 #import "ASEqualityHelpers.h"
@@ -239,9 +239,9 @@
 {
   ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
   CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
-  CGFloat width = ceil(textSize.width + _textContainerInset.left + _textContainerInset.right);
-  CGFloat height = ceil(textSize.height + _textContainerInset.top + _textContainerInset.bottom);
-  return CGSizeMake(fmin(width, constrainedSize.width), fmin(height, constrainedSize.height));
+  CGFloat width = std::ceil(textSize.width + _textContainerInset.left + _textContainerInset.right);
+  CGFloat height = std::ceil(textSize.height + _textContainerInset.top + _textContainerInset.bottom);
+  return CGSizeMake(std::fmin(width, constrainedSize.width), std::fmin(height, constrainedSize.height));
 }
 
 - (void)layout

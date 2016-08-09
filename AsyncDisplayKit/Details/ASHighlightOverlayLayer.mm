@@ -87,7 +87,7 @@ static const UIEdgeInsets padding = {2, 4, 1.5, 4};
     if (targetLayer != nil) {
       rect = [self convertRect:rect fromLayer:targetLayer];
     }
-    rect = CGRectMake(round(rect.origin.x), round(rect.origin.y), round(rect.size.width), round(rect.size.height));
+    rect = CGRectMake(std::round(rect.origin.x), std::round(rect.origin.y), std::round(rect.size.width), std::round(rect.size.height));
 
     CGFloat minX = rect.origin.x - padding.left;
     CGFloat maxX = CGRectGetMaxX(rect) + padding.right;

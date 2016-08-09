@@ -9,6 +9,7 @@
 //
 
 #import "ASAsciiArtBoxCreator.h"
+
 #import <tgmath.h>
 
 static const NSUInteger kDebugBoxPadding = 2;
