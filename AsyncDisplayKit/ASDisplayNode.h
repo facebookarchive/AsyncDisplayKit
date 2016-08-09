@@ -615,7 +615,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-NS_ASSUME_NONNULL_END
+
 /**
  * ## UIView bridge
  *
@@ -781,3 +781,5 @@ NS_ASSUME_NONNULL_END
 @property (nonatomic, assign) BOOL placeholderFadesOut ASDISPLAYNODE_DEPRECATED;
 
 @end
+
+NS_ASSUME_NONNULL_END
