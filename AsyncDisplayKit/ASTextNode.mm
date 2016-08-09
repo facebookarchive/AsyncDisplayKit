@@ -1048,6 +1048,9 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
     if (shadowColor != NULL) {
       CGColorRetain(shadowColor);
     }
+    if (_shadowColor != NULL) {
+      CGColorRelease(_shadowColor);
+    }
     _shadowColor = shadowColor;
     _cachedShadowUIColor = [UIColor colorWithCGColor:shadowColor];
     [self _invalidateRenderer];
