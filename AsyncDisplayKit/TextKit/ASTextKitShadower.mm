@@ -89,11 +89,11 @@ static inline UIEdgeInsets _invertInsets(UIEdgeInsets insets)
 
     // min values are expected to be negative for most typical shadowOffset and
     // blurRadius settings:
-    shadowPadding.top = std::min(0.0f, _shadowOffset.height - _shadowRadius);
-    shadowPadding.left = std::min(0.0f, _shadowOffset.width - _shadowRadius);
+    shadowPadding.top = std::fmin(0.0f, _shadowOffset.height - _shadowRadius);
+    shadowPadding.left = std::fmin(0.0f, _shadowOffset.width - _shadowRadius);
 
-    shadowPadding.bottom = std::min(0.0f, -_shadowOffset.height - _shadowRadius);
-    shadowPadding.right = std::min(0.0f, -_shadowOffset.width - _shadowRadius);
+    shadowPadding.bottom = std::fmin(0.0f, -_shadowOffset.height - _shadowRadius);
+    shadowPadding.right = std::fmin(0.0f, -_shadowOffset.width - _shadowRadius);
 
     _calculatedShadowPadding = shadowPadding;
   }

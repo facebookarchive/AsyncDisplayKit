@@ -323,16 +323,16 @@
   CLLocationCoordinate2D bottomRightCoord = CLLocationCoordinate2DMake(90, -180);
 
   for (id<MKAnnotation> annotation in annotations) {
-    topLeftCoord = CLLocationCoordinate2DMake(std::max(topLeftCoord.latitude, annotation.coordinate.latitude),
-                                              std::min(topLeftCoord.longitude, annotation.coordinate.longitude));
-    bottomRightCoord = CLLocationCoordinate2DMake(std::min(bottomRightCoord.latitude, annotation.coordinate.latitude),
-                                                  std::max(bottomRightCoord.longitude, annotation.coordinate.longitude));
+    topLeftCoord = CLLocationCoordinate2DMake(std::fmax(topLeftCoord.latitude, annotation.coordinate.latitude),
+                                              std::fmin(topLeftCoord.longitude, annotation.coordinate.longitude));
+    bottomRightCoord = CLLocationCoordinate2DMake(std::fmin(bottomRightCoord.latitude, annotation.coordinate.latitude),
+                                                  std::fmax(bottomRightCoord.longitude, annotation.coordinate.longitude));
   }
 
   MKCoordinateRegion region = MKCoordinateRegionMake(CLLocationCoordinate2DMake(topLeftCoord.latitude - (topLeftCoord.latitude - bottomRightCoord.latitude) * 0.5,
                                                                                 topLeftCoord.longitude + (bottomRightCoord.longitude - topLeftCoord.longitude) * 0.5),
-                                                     MKCoordinateSpanMake(std::abs(topLeftCoord.latitude - bottomRightCoord.latitude) * 2,
-                                                                          std::abs(bottomRightCoord.longitude - topLeftCoord.longitude) * 2));
+                                                     MKCoordinateSpanMake(std::fabs(topLeftCoord.latitude - bottomRightCoord.latitude) * 2,
+                                                                          std::fabs(bottomRightCoord.longitude - topLeftCoord.longitude) * 2));
 
   return region;
 }

@@ -241,7 +241,7 @@
   CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
   CGFloat width = std::ceil(textSize.width + _textContainerInset.left + _textContainerInset.right);
   CGFloat height = std::ceil(textSize.height + _textContainerInset.top + _textContainerInset.bottom);
-  return CGSizeMake(std::min(width, constrainedSize.width), std::min(height, constrainedSize.height));
+  return CGSizeMake(std::fmin(width, constrainedSize.width), std::fmin(height, constrainedSize.height));
 }
 
 - (void)layout

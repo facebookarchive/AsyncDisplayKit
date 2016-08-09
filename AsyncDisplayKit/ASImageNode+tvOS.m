@@ -103,7 +103,7 @@
       if (yaw > 0) {
         yaw = -yaw;
       } else {
-        yaw = abs(yaw);
+        yaw = fabs(yaw);
       }
     }
     
