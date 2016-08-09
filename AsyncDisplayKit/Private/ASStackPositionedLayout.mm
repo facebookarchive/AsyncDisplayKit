@@ -10,6 +10,8 @@
 
 #import "ASStackPositionedLayout.h"
 
+#import <tgmath.h>
+
 #import "ASInternalHelpers.h"
 #import "ASLayoutSpecUtilities.h"
 
@@ -105,16 +107,16 @@ ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnposition
     case ASStackLayoutJustifyContentStart:
       return stackedLayout(style, 0, unpositionedLayout, constrainedSize);
     case ASStackLayoutJustifyContentCenter:
-      return stackedLayout(style, floorf(violation / 2), unpositionedLayout, constrainedSize);
+      return stackedLayout(style, floor(violation / 2), unpositionedLayout, constrainedSize);
     case ASStackLayoutJustifyContentEnd:
       return stackedLayout(style, violation, unpositionedLayout, constrainedSize);
     case ASStackLayoutJustifyContentSpaceBetween: {
       const auto numOfSpacings = numOfItems - 1;
-      return stackedLayout(style, 0, floorf(violation / numOfSpacings), fmodf(violation, numOfSpacings), unpositionedLayout, constrainedSize);
+      return stackedLayout(style, 0, floor(violation / numOfSpacings), fmod(violation, numOfSpacings), unpositionedLayout, constrainedSize);
     }
     case ASStackLayoutJustifyContentSpaceAround: {
       // Spacing between items are twice the spacing on the edges
-      CGFloat spacingUnit = floorf(violation / (numOfItems * 2));
+      CGFloat spacingUnit = floor(violation / (numOfItems * 2));
       return stackedLayout(style, spacingUnit, spacingUnit * 2, 0, unpositionedLayout, constrainedSize);
     }
   }

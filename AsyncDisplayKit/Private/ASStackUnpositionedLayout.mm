@@ -10,6 +10,7 @@
 
 #import "ASStackUnpositionedLayout.h"
 
+#import <tgmath.h>
 #import <numeric>
 
 #import "ASLayoutSpecUtilities.h"
@@ -263,7 +264,7 @@ static void flexChildrenAlongStackDimension(std::vector<ASStackUnpositionedItem>
   }
 
   // Each flexible child along the direction of the violation is expanded or contracted equally
-  const CGFloat violationPerFlexChild = floorf(violation / flexibleChildren);
+  const CGFloat violationPerFlexChild = floor(violation / flexibleChildren);
   // If the floor operation above left a remainder we may have a remainder after deducting the adjustments from all the
   // contributions of the flexible children.
   const CGFloat violationRemainder = violation - (violationPerFlexChild * flexibleChildren);
