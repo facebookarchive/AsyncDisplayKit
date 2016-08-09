@@ -20,6 +20,7 @@ NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransi
 
 @interface _ASTransitionContext ()
 
+@property (weak, nonatomic) ASDisplayNode *containerNode;
 @property (weak, nonatomic) id<_ASTransitionContextLayoutDelegate> layoutDelegate;
 @property (weak, nonatomic) id<_ASTransitionContextCompletionDelegate> completionDelegate;
 
@@ -70,6 +71,11 @@ NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransi
     }
   }
   return CGRectZero;
+}
+
+- (ASDisplayNode *)containerNode
+{
+    return [self.layoutDelegate containerNode];
 }
 
 - (NSArray<ASDisplayNode *> *)subnodesForKey:(NSString *)key

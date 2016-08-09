@@ -863,14 +863,23 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Layout Transition API / ASDisplayNode (Beta)
 
+- (id<ASLayoutTransitionCoordinator>)layoutTransitionCoordinator
+{
+  // If no layout transition coordinator was given use a default one
+  if (!_layoutTransitionCoordinator) {
+    _layoutTransitionCoordinator = [ASDefaultLayoutTransitionCoordinator new];
+  }
+  
+  return _layoutTransitionCoordinator;
+}
+
 /*
  * Hook for subclasse to perform an animation based on the given ASContextTransitioning. By default this just layouts
  * applies all subnodes without animation and calls completes the transition on the context.
  */
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
 {
-  [self __layoutSublayouts];
-  [context completeTransition:YES];
+  [self.layoutTransitionCoordinator animateLayoutTransition:context];
 }
 
 /*
@@ -879,7 +888,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
  */
 - (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context
 {
-  [_pendingLayoutTransition applySubnodeRemovals];
+  if (_layoutTransitionCoordinator != nil && [_layoutTransitionCoordinator respondsToSelector:@selector(didCompleteLayoutTransition:)])
+  {
+    [_layoutTransitionCoordinator didCompleteLayoutTransition:context];
+  } else {
+    [_pendingLayoutTransition applySubnodeRemovals];
+  }
 }
 
 #pragma mark - _ASTransitionContextCompletionDelegate

@@ -19,6 +19,8 @@
 
 @protocol _ASTransitionContextLayoutDelegate <NSObject>
 
+- (ASDisplayNode *)containerNode;
+
 - (NSArray<ASDisplayNode *> *)currentSubnodesWithTransitionContext:(_ASTransitionContext *)context;
 
 - (NSArray<ASDisplayNode *> *)insertedSubnodesWithTransitionContext:(_ASTransitionContext *)context;

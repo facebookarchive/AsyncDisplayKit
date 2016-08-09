@@ -136,6 +136,11 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 
 #pragma mark - _ASTransitionContextDelegate
 
+- (ASDisplayNode *)containerNode
+{
+    return self.node;
+}
+
 - (NSArray<ASDisplayNode *> *)currentSubnodesWithTransitionContext:(_ASTransitionContext *)context
 {
   ASDN::MutexSharedLocker l(__instanceLock__);
@@ -227,6 +232,105 @@ static inline void findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
   }
   *storedNodes = nodes;
   *storedPositions = positions;
+}
+
+@end
+
+@implementation ASDefaultLayoutTransitionCoordinator
+
+- (void)animateLayoutTransition:(id<ASContextTransitioning>)context
+{
+  ASDisplayNode *node = [context containerNode];
+  NSAssert(node.isNodeLoaded == YES, @"Invalid node state");
+    
+  [node __layoutSublayouts];
+  [context completeTransition:YES];
+}
+
+@end
+
+@implementation ASFadeInOutLayoutTransitionCoordinator : NSObject
+
+- (instancetype)init
+{
+  self = [super init];
+  if (self) {
+    _animationDuration = 0.2;
+  }
+  return self;
+}
+
+- (void)animateLayoutTransition:(id<ASContextTransitioning>)context
+{
+  ASDisplayNode *node = [context containerNode];
+  NSAssert(node.isNodeLoaded == YES, @"Invalid node state");
+  NSAssert([context isAnimated] == YES, @"Can't animate a non-animatable context");
+  
+  NSArray<ASDisplayNode *> *removedSubnodes = [context removedSubnodes];
+  NSMutableArray<UIView *> *removedViews = [NSMutableArray array];
+  NSMutableArray<ASDisplayNode *> *insertedSubnodes = [[context insertedSubnodes] mutableCopy];
+  NSMutableArray<ASDisplayNode *> *movedSubnodes = [NSMutableArray array];
+  
+  for (ASDisplayNode *subnode in [context subnodesForKey:ASTransitionContextToLayoutKey]) {
+    if ([insertedSubnodes containsObject:subnode] == NO) {
+      // This is an existing subnode, check if it is resized, moved or both
+      CGRect fromFrame = [context initialFrameForNode:subnode];
+      CGRect toFrame = [context finalFrameForNode:subnode];
+      if (CGSizeEqualToSize(fromFrame.size, toFrame.size) == NO) {
+        // To crossfade resized subnodes, show a snapshot of it on top.
+        // The node itself can then be treated as a newly-inserted one.
+        UIView *snapshotView = [subnode.view snapshotViewAfterScreenUpdates:YES];
+        snapshotView.frame = [context initialFrameForNode:subnode];
+        snapshotView.alpha = 1;
+        
+        [node.view insertSubview:snapshotView aboveSubview:subnode.view];
+        [removedViews addObject:snapshotView];
+        
+        [insertedSubnodes addObject:subnode];
+      }
+      if (CGPointEqualToPoint(fromFrame.origin, toFrame.origin) == NO) {
+        [movedSubnodes addObject:subnode];
+      }
+    }
+  }
+  
+  for (ASDisplayNode *insertedSubnode in insertedSubnodes) {
+    insertedSubnode.frame = [context finalFrameForNode:insertedSubnode];
+    insertedSubnode.alpha = 0;
+  }
+  
+  [UIView animateWithDuration:self.animationDuration animations:^{
+    // Fade removed subnodes and views out
+    for (ASDisplayNode *removedSubnode in removedSubnodes) {
+      removedSubnode.alpha = 0;
+    }
+    for (UIView *removedView in removedViews) {
+      removedView.alpha = 0;
+    }
+    
+    // Fade inserted subnodes in
+    for (ASDisplayNode *insertedSubnode in insertedSubnodes) {
+      insertedSubnode.alpha = 1;
+    }
+    
+    // Update frame of self and moved subnodes
+    CGSize fromSize = [context layoutForKey:ASTransitionContextFromLayoutKey].size;
+    CGSize toSize = [context layoutForKey:ASTransitionContextToLayoutKey].size;
+    BOOL isResized = (CGSizeEqualToSize(fromSize, toSize) == NO);
+    if (isResized == YES) {
+      CGPoint position = node.frame.origin;
+      node.frame = CGRectMake(position.x, position.y, toSize.width, toSize.height);
+    }
+    for (ASDisplayNode *movedSubnode in movedSubnodes) {
+      movedSubnode.frame = [context finalFrameForNode:movedSubnode];
+    }
+  } completion:^(BOOL finished) {
+    for (UIView *removedView in removedViews) {
+      [removedView removeFromSuperview];
+    }
+    // Subnode removals are automatically performed
+    [context completeTransition:finished];
+  }];
 }
 
 @end

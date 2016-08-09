@@ -16,6 +16,8 @@
 @class ASDisplayNode;
 @class ASLayout;
 
+#pragma mark - ASLayoutTransition
+
 @interface ASLayoutTransition : NSObject <_ASTransitionContextLayoutDelegate>
 
 /**
