@@ -795,9 +795,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         completion();
       }
       
+
+      // Setup pending layout transition for animation
       _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                             pendingLayout:newLayout
                                                           previousLayout:previousLayout];
+      
+      // Apply the subnode insertion immediately to be able to animate the nodes
       [_pendingLayoutTransition applySubnodeInsertions];
 
       _transitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
