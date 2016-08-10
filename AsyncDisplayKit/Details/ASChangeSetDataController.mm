@@ -84,6 +84,18 @@
   return batchUpdating;
 }
 
+- (void)waitUntilAllUpdatesAreCommitted
+{
+  ASDisplayNodeAssertMainThread();
+  if (self.batchUpdating) {
+    // This assertion will be enabled soon.
+//    ASDisplayNodeFailAssert(@"Should not call %@ during batch update", NSStringFromSelector(_cmd));
+    return;
+  }
+
+  [super waitUntilAllUpdatesAreCommitted];
+}
+
 #pragma mark - Section Editing (External API)
 
 - (void)insertSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
