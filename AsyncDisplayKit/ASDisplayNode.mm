@@ -76,6 +76,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 @synthesize threadSafeBounds = _threadSafeBounds;
+@synthesize layoutTransitionDuration = _layoutTransitionDuration;
 
 static BOOL usesImplicitHierarchyManagement = NO;
 
@@ -290,6 +291,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _preferredFrameSize = CGSizeZero;
   
   _environmentState = ASEnvironmentStateMakeDefault();
+  
+  _layoutTransitionDuration = 0.2;
   
   _flags.canClearContentsOfLayer = YES;
   _flags.canCallNeedsDisplayOfLayer = NO;
@@ -857,14 +860,93 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark Layout Transition API
 
+- (void)setLayoutTransitionDuration:(NSTimeInterval)layoutTransitionDuration
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _layoutTransitionDuration = layoutTransitionDuration;
+}
+
+- (NSTimeInterval)layoutTransitionDuration
+{
+  return _layoutTransitionDuration;
+}
+
 /*
  * Hook for subclasse to perform an animation based on the given ASContextTransitioning. By default this just layouts
  * applies all subnodes without animation and calls completes the transition on the context.
  */
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
 {
-  [self __layoutSublayouts];
-  [context completeTransition:YES];
+  ASDisplayNode *node = self;
+
+  NSAssert(node.isNodeLoaded == YES, @"Invalid node state");
+  NSAssert([context isAnimated] == YES, @"Can't animate a non-animatable context");
+  
+  NSArray<ASDisplayNode *> *removedSubnodes = [context removedSubnodes];
+  NSMutableArray<UIView *> *removedViews = [NSMutableArray array];
+  NSMutableArray<ASDisplayNode *> *insertedSubnodes = [[context insertedSubnodes] mutableCopy];
+  NSMutableArray<ASDisplayNode *> *movedSubnodes = [NSMutableArray array];
+  
+  for (ASDisplayNode *subnode in [context subnodesForKey:ASTransitionContextToLayoutKey]) {
+    if ([insertedSubnodes containsObject:subnode] == NO) {
+      // This is an existing subnode, check if it is resized, moved or both
+      CGRect fromFrame = [context initialFrameForNode:subnode];
+      CGRect toFrame = [context finalFrameForNode:subnode];
+      if (CGSizeEqualToSize(fromFrame.size, toFrame.size) == NO) {
+        // To crossfade resized subnodes, show a snapshot of it on top.
+        // The node itself can then be treated as a newly-inserted one.
+        UIView *snapshotView = [subnode.view snapshotViewAfterScreenUpdates:YES];
+        snapshotView.frame = [context initialFrameForNode:subnode];
+        snapshotView.alpha = 1;
+        
+        [node.view insertSubview:snapshotView aboveSubview:subnode.view];
+        [removedViews addObject:snapshotView];
+        
+        [insertedSubnodes addObject:subnode];
+      }
+      if (CGPointEqualToPoint(fromFrame.origin, toFrame.origin) == NO) {
+        [movedSubnodes addObject:subnode];
+      }
+    }
+  }
+  
+  for (ASDisplayNode *insertedSubnode in insertedSubnodes) {
+    insertedSubnode.frame = [context finalFrameForNode:insertedSubnode];
+    insertedSubnode.alpha = 0;
+  }
+  
+  [UIView animateWithDuration:self.layoutTransitionDuration animations:^{
+    // Fade removed subnodes and views out
+    for (ASDisplayNode *removedSubnode in removedSubnodes) {
+      removedSubnode.alpha = 0;
+    }
+    for (UIView *removedView in removedViews) {
+      removedView.alpha = 0;
+    }
+    
+    // Fade inserted subnodes in
+    for (ASDisplayNode *insertedSubnode in insertedSubnodes) {
+      insertedSubnode.alpha = 1;
+    }
+    
+    // Update frame of self and moved subnodes
+    CGSize fromSize = [context layoutForKey:ASTransitionContextFromLayoutKey].size;
+    CGSize toSize = [context layoutForKey:ASTransitionContextToLayoutKey].size;
+    BOOL isResized = (CGSizeEqualToSize(fromSize, toSize) == NO);
+    if (isResized == YES) {
+      CGPoint position = node.frame.origin;
+      node.frame = CGRectMake(position.x, position.y, toSize.width, toSize.height);
+    }
+    for (ASDisplayNode *movedSubnode in movedSubnodes) {
+      movedSubnode.frame = [context finalFrameForNode:movedSubnode];
+    }
+  } completion:^(BOOL finished) {
+    for (UIView *removedView in removedViews) {
+      [removedView removeFromSuperview];
+    }
+    // Subnode removals are automatically performed
+    [context completeTransition:finished];
+  }];
 }
 
 /*
