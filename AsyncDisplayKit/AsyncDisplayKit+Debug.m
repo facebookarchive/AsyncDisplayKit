@@ -715,8 +715,8 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     _rightDebugText.attributedText = [_ASRangeDebugBarView whiteAttributedStringFromString:@"▶︎" withSize:size];
   }
   
-  _leftDebugText.hidden = (_scrollDirection != ASScrollDirectionLeft && _scrollDirection != ASScrollDirectionDown);
-  _rightDebugText.hidden = (_scrollDirection != ASScrollDirectionRight && _scrollDirection != ASScrollDirectionUp);
+  _leftDebugText.hidden = (_scrollDirection != ASScrollDirectionLeft && _scrollDirection != ASScrollDirectionUp);
+  _rightDebugText.hidden = (_scrollDirection != ASScrollDirectionRight && _scrollDirection != ASScrollDirectionDown);
 }
 
 - (ASTextNode *)createDebugTextNode
