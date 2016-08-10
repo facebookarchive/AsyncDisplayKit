@@ -75,7 +75,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 - (BOOL)isSynchronous
 {
   ASDN::MutexSharedLocker l(__instanceLock__);
-  return !ASLayoutCanTransitionAsynchronous(_pendingLayout);
+  return ASLayoutCanTransitionAsynchronous(_pendingLayout);
 }
 
 - (void)startTransition
