@@ -47,28 +47,13 @@
 
 @implementation ASDisplayNodeImplicitHierarchyTests
 
-- (void)setUp {
-  [super setUp];
-  [ASDisplayNode setUsesImplicitHierarchyManagement:YES];
-}
-
-- (void)tearDown {
-  [ASDisplayNode setUsesImplicitHierarchyManagement:NO];
-  [super tearDown];
-}
-
 - (void)testFeatureFlag
 {
-  XCTAssert([ASDisplayNode usesImplicitHierarchyManagement]);
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
-  XCTAssert(node.usesImplicitHierarchyManagement);
-
-  [ASDisplayNode setUsesImplicitHierarchyManagement:NO];
-  XCTAssertFalse([ASDisplayNode usesImplicitHierarchyManagement]);
-  XCTAssertFalse(node.usesImplicitHierarchyManagement);
-
-  node.usesImplicitHierarchyManagement = YES;
-  XCTAssert(node.usesImplicitHierarchyManagement);
+  XCTAssertFalse(node.automaticallyManagesSubnodes);
+  
+  node.automaticallyManagesSubnodes = YES;
+  XCTAssertTrue(node.automaticallyManagesSubnodes);
 }
 
 - (void)testInitialNodeInsertionWithOrdering
@@ -80,6 +65,7 @@
   ASDisplayNode *node5 = [[ASDisplayNode alloc] init];
 
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+  node.automaticallyManagesSubnodes = YES;
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASStaticLayoutSpec *staticLayout = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node4]];
     
@@ -106,6 +92,7 @@
   ASDisplayNode *node3 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+  node.automaticallyManagesSubnodes = YES;
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize){
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
     if ([strongNode.layoutState isEqualToNumber:@1]) {
@@ -136,6 +123,7 @@
   ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+  node.automaticallyManagesSubnodes = YES;
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
     if ([strongNode.layoutState isEqualToNumber:@1]) {
@@ -179,6 +167,7 @@
   ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+  node.automaticallyManagesSubnodes = YES;
   
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
