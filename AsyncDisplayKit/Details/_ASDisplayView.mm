@@ -31,6 +31,7 @@
   NSArray *_accessibleElements;
 }
 
+@synthesize accessibleElements = _accessibleElements;
 @synthesize asyncdisplaykit_node = _node;
 
 + (Class)layerClass

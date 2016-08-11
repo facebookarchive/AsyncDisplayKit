@@ -1554,6 +1554,7 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
         // If we can use view API, do. Due to an apple bug, -insertSubview:atIndex: actually wants a LAYER index, which we pass in
         if (canUseViewAPI && sublayerIndex != NSNotFound) {
           [_view insertSubview:subnode.view atIndex:sublayerIndex];
+          [(_ASDisplayView *)_view setAccessibleElements:nil];
         } else if (sublayerIndex != NSNotFound) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wconversion"
@@ -1732,6 +1733,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   BOOL canUseViewAPI = !self.isLayerBacked && !subnode.isLayerBacked;
   if (canUseViewAPI) {
     [_view addSubview:subnode.view];
+    [(_ASDisplayView *)_view setAccessibleElements:nil];
   } else {
     // Disallow subviews in a layer-backed node
     ASDisplayNodeAssert(subnode.isLayerBacked, @"Cannot add a subview to a layer-backed node; only sublayers permitted.");
@@ -1787,6 +1789,7 @@ static NSInteger incrementIfFound(NSInteger i) {
         [layer removeFromSuperlayer];
       } else {
         [view removeFromSuperview];
+        [(_ASDisplayView *)_view setAccessibleElements:nil];
       }
     });
   }
@@ -3247,6 +3250,7 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
       [selfNode addSubnode:subnode];
     } else {
       [self addSubview:subnode.view];
+      [(_ASDisplayView *)self setAccessibleElements:nil];
     }
   }
 }
