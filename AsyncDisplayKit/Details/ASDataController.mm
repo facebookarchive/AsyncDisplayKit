@@ -388,8 +388,9 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 - (void)_reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions synchronously:(BOOL)synchronously completion:(void (^)())completion
 {
-  _initialReloadDataHasBeenCalled = YES;
   ASDisplayNodeAssertMainThread();
+
+  _initialReloadDataHasBeenCalled = YES;
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
 
   [self invalidateDataSourceItemCounts];
@@ -504,7 +505,9 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 - (void)beginUpdates
 {
   ASDisplayNodeAssertMainThread();
-  // TODO: -waitUntilAllUpdatesAreCommitted
+  // TODO: make this -waitUntilAllUpdatesAreCommitted?
+  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
+
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     [_mainSerialQueue performBlockOnMainThread:^{
       // Deep copy _completedNodes to _externalCompletedNodes.
@@ -687,10 +690,11 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  ASDisplayNodeAssertMainThread();
   if (!_initialReloadDataHasBeenCalled) {
     return;
   }
-  ASDisplayNodeAssertMainThread();
+
   LOG(@"Edit Command - insertRows: %@", indexPaths);
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
 
@@ -722,10 +726,12 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  ASDisplayNodeAssertMainThread();
+
   if (!_initialReloadDataHasBeenCalled) {
     return;
   }
-  ASDisplayNodeAssertMainThread();
+
   LOG(@"Edit Command - deleteRows: %@", indexPaths);
 
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
@@ -751,10 +757,11 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 - (void)relayoutAllNodes
 {
+  ASDisplayNodeAssertMainThread();
   if (!_initialReloadDataHasBeenCalled) {
     return;
   }
-  ASDisplayNodeAssertMainThread();
+
   LOG(@"Edit Command - relayoutRows");
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
 
@@ -794,10 +801,11 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
+  ASDisplayNodeAssertMainThread();
   if (!_initialReloadDataHasBeenCalled) {
     return;
   }
-  ASDisplayNodeAssertMainThread();
+
   LOG(@"Edit Command - moveRow: %@ > %@", indexPath, newIndexPath);
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
