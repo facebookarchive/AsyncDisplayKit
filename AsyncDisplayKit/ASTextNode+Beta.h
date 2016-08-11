@@ -31,6 +31,14 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nullable, nonatomic, copy) NSTextStorage * (^textStorageCreationBlock)(NSAttributedString *_Nullable attributedString);
 
+/**
+ @abstract Text margins for text laid out in the text node.
+ @discussion defaults to UIEdgeInsetsZero.
+ This property can be useful for handling text which does not fit within the view by default. An example: like UILabel,
+ ASTextNode will clip the left and right of the string "judar" if it's rendered in an italicised font.
+ */
+@property (nonatomic, assign) UIEdgeInsets textContainerInset;
+
 @end
 
 NS_ASSUME_NONNULL_END
