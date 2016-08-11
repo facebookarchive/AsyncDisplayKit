@@ -25,10 +25,10 @@ ASRelativeSize ASRelativeSizeMakeWithCGSize(CGSize size)
                             ASRelativeDimensionMakeWithPoints(size.height));
 }
 
-ASRelativeSize ASRelativeSizeMakeWithPercent(CGFloat percent)
+ASRelativeSize ASRelativeSizeMakeWithFraction(CGFloat fraction)
 {
-  return ASRelativeSizeMake(ASRelativeDimensionMakeWithPercent(percent),
-                            ASRelativeDimensionMakeWithPercent(percent));
+  return ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(fraction),
+                            ASRelativeDimensionMakeWithFraction(fraction));
 }
 
 CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize)
@@ -67,9 +67,9 @@ ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactCGSize(CGSize exact)
   return ASRelativeSizeRangeMakeWithExactRelativeSize(ASRelativeSizeMakeWithCGSize(exact));
 }
 
-ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactPercent(CGFloat percent)
+ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactFraction(CGFloat fraction)
 {
-  return ASRelativeSizeRangeMakeWithExactRelativeSize(ASRelativeSizeMakeWithPercent(percent));
+  return ASRelativeSizeRangeMakeWithExactRelativeSize(ASRelativeSizeMakeWithFraction(fraction));
 }
 
 ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeDimensions(ASRelativeDimension exactWidth,

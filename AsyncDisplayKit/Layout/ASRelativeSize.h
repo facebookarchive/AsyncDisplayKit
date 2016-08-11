@@ -39,11 +39,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 extern ASRelativeSize ASRelativeSizeMake(ASRelativeDimension width, ASRelativeDimension height);
 
-/** Convenience constructor to provide size in Points. */
+/** Convenience constructor to provide size in points. */
 extern ASRelativeSize ASRelativeSizeMakeWithCGSize(CGSize size);
 
-/** Convenience constructor to provide size in Percentage. */
-extern ASRelativeSize ASRelativeSizeMakeWithPercent(CGFloat percent);
+/** Convenience constructor to provide size as a fraction. */
+extern ASRelativeSize ASRelativeSizeMakeWithFraction(CGFloat fraction);
 
 /** Resolve this relative size relative to a parent size. */
 extern CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize);
@@ -61,7 +61,7 @@ extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeSize(ASRelati
 
 extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactCGSize(CGSize exact);
 
-extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactPercent(CGFloat percent);
+extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactFraction(CGFloat fraction);
 
 extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeDimensions(ASRelativeDimension exactWidth,
                                                                               ASRelativeDimension exactHeight);

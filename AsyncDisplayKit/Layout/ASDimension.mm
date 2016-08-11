@@ -19,9 +19,9 @@ ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloa
 {
   if (type == ASRelativeDimensionTypePoints) {
     ASDisplayNodeCAssertPositiveReal(@"Points", value);
-  } else if (type == ASRelativeDimensionTypePercent) {
+  } else if (type == ASRelativeDimensionTypeFraction) {
     // TODO: Enable this assertion for 2.0.  Check that there is no use case for using a larger value, e.g. to layout for a clipsToBounds = NO element.
-    // ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASRelativeDimension percent value (%f) must be between 0 and 1.", value);
+    // ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASRelativeDimension fraction value (%f) must be between 0 and 1.", value);
   }
   ASRelativeDimension dimension; dimension.type = type; dimension.value = value; return dimension;
 }
