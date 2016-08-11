@@ -40,11 +40,12 @@ NS_ASSUME_NONNULL_BEGIN
  * only require a single child.
  *
  * For layout specs that require a known number of children (ASBackgroundLayoutSpec, for example)
- * a subclass should use this method to set the "primary" child. This is actually the same as calling 
- * setChild:forIdentifier:0. All other children should be set by defining convenience methods
- * that call setChild:forIdentifier behind the scenes.
+ * a subclass should use this method to set the "primary" child. It can then use setChild:forIdentifier:
+ * to set any other required children. Ideally a subclass would hide this from the user, and use the
+ * setChild:forIdentifier: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
+ * property that behind the scenes is calling setChild:forIdentifier:.
  */
-- (void)setChild:(id<ASLayoutable>)child;
+@property (nullable, strong, nonatomic) id<ASLayoutable> child;
 
 /**
  * Adds a child with the given identifier to this layout spec.
@@ -76,21 +77,7 @@ NS_ASSUME_NONNULL_BEGIN
  * For good measure, in these layout specs it probably makes sense to define
  * setChild: and setChild:forIdentifier: methods to do something appropriate or to assert.
  */
-- (void)setChildren:(NSArray<id<ASLayoutable>> *)children;
-
-/**
- * Get child methods
- *
- * There is a corresponding "getChild" method for the above "setChild" methods.  If a subclass
- * has extra layoutable children, it is recommended to make a corresponding get method for that
- * child. For example, the ASBackgroundLayoutSpec responds to backgroundChild.
- * 
- * If a get method is called on a spec that doesn't make sense, then the standard is to assert.
- * For example, calling children on an ASInsetLayoutSpec will assert.
- */
-
-/** Returns the child added to this layout spec using the default identifier. */
-- (nullable id<ASLayoutable>)child;
+@property (nullable, strong, nonatomic) NSArray<id<ASLayoutable>> *children;
 
 /**
  * Returns the child added to this layout spec using the given index.
@@ -98,11 +85,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @param index An identifier associated withe the child.
  */
 - (nullable id<ASLayoutable>)childForIndex:(NSUInteger)index;
-
-/**
- * Returns all children added to this layout spec.
- */
-- (nullable NSArray<id<ASLayoutable>> *)children;
 
 @end
 
