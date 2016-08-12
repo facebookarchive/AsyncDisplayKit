@@ -16,6 +16,8 @@
 @class ASPagerNode;
 @class ASPagerFlowLayout;
 
+NS_ASSUME_NONNULL_BEGIN
+
 #define ASPagerNodeDataSource ASPagerDataSource
 @protocol ASPagerDataSource <NSObject>
 
@@ -84,13 +86,15 @@
 /**
  * Data Source is required, and uses a different protocol from ASCollectionNode.
  */
-@property (nonatomic, weak) id <ASPagerDataSource> dataSource;
+- (void)setDataSource:(nullable id <ASPagerDataSource>)dataSource;
+- (nullable id <ASPagerDataSource>)dataSource;
 
 /**
  * Delegate is optional, and uses the same protocol as ASCollectionNode.
  * This includes UIScrollViewDelegate as well as most methods from UICollectionViewDelegate, like willDisplay...
  */
-@property (nonatomic, weak) id <ASPagerDelegate> delegate;
+- (void)setDelegate:(nullable id <ASPagerDelegate>)delegate;
+- (nullable id <ASPagerDelegate>)delegate;
 
 /**
  * The underlying ASCollectionView object.
@@ -113,3 +117,5 @@
 - (ASCellNode *)nodeForPageAtIndex:(NSInteger)index;
 
 @end
+
+NS_ASSUME_NONNULL_END
