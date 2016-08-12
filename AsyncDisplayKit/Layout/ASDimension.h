@@ -17,7 +17,7 @@ typedef NS_ENUM(NSInteger, ASRelativeDimensionType) {
   /** Just a number. It will always resolve to exactly this amount. This is the default type. */
   ASRelativeDimensionTypePoints,
   /** Multiplied to a provided parent amount to resolve a final amount. */
-  ASRelativeDimensionTypePercent,
+  ASRelativeDimensionTypeFraction,
 };
 
 typedef struct {
@@ -44,7 +44,7 @@ extern ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type,
 
 extern ASRelativeDimension ASRelativeDimensionMakeWithPoints(CGFloat points);
 
-extern ASRelativeDimension ASRelativeDimensionMakeWithPercent(CGFloat percent);
+extern ASRelativeDimension ASRelativeDimensionMakeWithFraction(CGFloat fraction);
 
 extern ASRelativeDimension ASRelativeDimensionCopy(ASRelativeDimension aDimension);
 

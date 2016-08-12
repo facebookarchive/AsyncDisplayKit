@@ -330,7 +330,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   subnode2.staticSize = {50, 50};
   
   ASRatioLayoutSpec *child1 = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.5 child:subnode1];
-  child1.flexBasis = ASRelativeDimensionMakeWithPercent(1);
+  child1.flexBasis = ASRelativeDimensionMakeWithFraction(1);
   child1.flexGrow = YES;
   child1.flexShrink = YES;
   
@@ -508,7 +508,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   [self testStackLayoutSpecWithStyle:style sizeRange:kOverflowSize subnodes:subnodes identifier:@"overflow"];
 }
 
-- (void)testPercentageFlexBasisResolvesAgainstParentSize
+- (void)testFractionalFlexBasisResolvesAgainstParentSize
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
 
@@ -520,7 +520,7 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
 
   // This should override the intrinsic size of 50pts and instead compute to 50% = 100pts.
   // The result should be that the red box is twice as wide as the blue and gree boxes after flexing.
-  ((ASStaticSizeDisplayNode *)subnodes[0]).flexBasis = ASRelativeDimensionMakeWithPercent(0.5);
+  ((ASStaticSizeDisplayNode *)subnodes[0]).flexBasis = ASRelativeDimensionMakeWithFraction(0.5);
 
   static ASSizeRange kSize = {{200, 0}, {200, INFINITY}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];

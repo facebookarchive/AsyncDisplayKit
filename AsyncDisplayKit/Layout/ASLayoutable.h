@@ -117,7 +117,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - ASStaticLayoutable
 /**
- If specified, the child's size is restricted according to this size. Percentages are resolved relative to the static layout spec.
+ If specified, the child's size is restricted according to this size. Fractions are resolved relative to the static layout spec.
  */
 @property (nonatomic, assign) ASRelativeSizeRange sizeRange;
 

@@ -19,9 +19,9 @@ ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloa
 {
   if (type == ASRelativeDimensionTypePoints) {
     ASDisplayNodeCAssertPositiveReal(@"Points", value);
-  } else if (type == ASRelativeDimensionTypePercent) {
+  } else if (type == ASRelativeDimensionTypeFraction) {
     // TODO: Enable this assertion for 2.0.  Check that there is no use case for using a larger value, e.g. to layout for a clipsToBounds = NO element.
-    // ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASRelativeDimension percent value (%f) must be between 0 and 1.", value);
+    // ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASRelativeDimension fraction value (%f) must be between 0 and 1.", value);
   }
   ASRelativeDimension dimension; dimension.type = type; dimension.value = value; return dimension;
 }
@@ -32,10 +32,10 @@ ASRelativeDimension ASRelativeDimensionMakeWithPoints(CGFloat points)
   return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, points);
 }
 
-ASRelativeDimension ASRelativeDimensionMakeWithPercent(CGFloat percent)
+ASRelativeDimension ASRelativeDimensionMakeWithFraction(CGFloat fraction)
 {
-  // ASDisplayNodeCAssert( 0 <= percent && percent <= 1.0, @"ASRelativeDimension percent value (%f) must be between 0 and 1.", percent);
-  return ASRelativeDimensionMake(ASRelativeDimensionTypePercent, percent);
+  // ASDisplayNodeCAssert( 0 <= fraction && fraction <= 1.0, @"ASRelativeDimension fraction value (%f) must be between 0 and 1.", fraction);
+  return ASRelativeDimensionMake(ASRelativeDimensionTypeFraction, fraction);
 }
 
 ASRelativeDimension ASRelativeDimensionCopy(ASRelativeDimension aDimension)
@@ -53,7 +53,7 @@ NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension)
   switch (dimension.type) {
     case ASRelativeDimensionTypePoints:
       return [NSString stringWithFormat:@"%.0fpt", dimension.value];
-    case ASRelativeDimensionTypePercent:
+    case ASRelativeDimensionTypeFraction:
       return [NSString stringWithFormat:@"%.0f%%", dimension.value * 100.0];
   }
 }
@@ -63,7 +63,7 @@ CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat parent
   switch (dimension.type) {
     case ASRelativeDimensionTypePoints:
       return dimension.value;
-    case ASRelativeDimensionTypePercent:
+    case ASRelativeDimensionTypeFraction:
       return dimension.value * parent;
   }
 }
