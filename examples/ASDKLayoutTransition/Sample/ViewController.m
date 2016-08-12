@@ -89,7 +89,7 @@
 {
   self.enabled = !self.enabled;
   
-  [self transitionLayoutWithAnimation:YES shouldMeasureAsync:YES measurementCompletion:nil];
+  [self transitionLayoutAnimated:YES measurementCompletion:nil];
 }
 
 

@@ -599,12 +599,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (CGRect)convertRect:(CGRect)rect fromNode:(nullable ASDisplayNode *)node;
 
-// TODO: Move this into ASDisplayNode (LayoutTransitioning) after #2023 was merged
-/**
- * @abstract The amount of time it takes to complete the animation. Default is 0.2.
- */
-@property (nonatomic, assign) NSTimeInterval layoutTransitionDuration;
-
 @end
 
 /**
@@ -754,6 +748,11 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface ASDisplayNode (LayoutTransitioning)
+
+/**
+ * @abstract The amount of time it takes to complete the animation. Default is 0.2.
+ */
+@property (nonatomic, assign) NSTimeInterval layoutTransitionDuration;
 
 /**
  * @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.

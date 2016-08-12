@@ -76,7 +76,6 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 @synthesize threadSafeBounds = _threadSafeBounds;
-@synthesize layoutTransitionDuration = _layoutTransitionDuration;
 
 static BOOL usesImplicitHierarchyManagement = NO;
 
