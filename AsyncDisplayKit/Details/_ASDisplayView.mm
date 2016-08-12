@@ -127,7 +127,6 @@
       [newSuperview.asyncdisplaykit_node addSubnode:_node];
     }
   }
-
 }
 
 - (void)didMoveToSuperview
@@ -168,6 +167,20 @@
       [_node removeFromSupernode];
     }
   }
+}
+
+- (void)addSubview:(UIView *)view
+{
+  [super addSubview:view];
+  
+  [self setAccessibleElements:nil];
+}
+
+- (void)willRemoveSubview:(UIView *)subview
+{
+  [super willRemoveSubview:subview];
+  
+  [self setAccessibleElements:nil];
 }
 
 - (void)setNeedsDisplay
