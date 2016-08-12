@@ -90,7 +90,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable id <ASPagerDataSource>)dataSource;
 
 /**
- * Delegate is optional, and uses the same protocol as ASCollectionNode.
+ * Delegate is optional.
  * This includes UIScrollViewDelegate as well as most methods from UICollectionViewDelegate, like willDisplay...
  */
 - (void)setDelegate:(nullable id <ASPagerDelegate>)delegate;
