@@ -220,8 +220,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
       constrainedSize = _constrainedSize;
     } else {
       constrainedSize = bounds.size;
-      constrainedSize.width -= _textContainerInset.left + _textContainerInset.right;
-      constrainedSize.height -= _textContainerInset.top + _textContainerInset.bottom;
+      constrainedSize.width -= (_textContainerInset.left + _textContainerInset.right);
+      constrainedSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
     }
     
     _renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:[self _rendererAttributes]
@@ -354,9 +354,9 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   if (layout != nil) {
     ASDN::MutexLocker l(__instanceLock__);
     CGSize layoutSize = layout.size;
-    //textContainerInset
-    layoutSize.width -= _textContainerInset.left + _textContainerInset.right;
-    layoutSize.height -= _textContainerInset.top + _textContainerInset.bottom;
+    //Apply textContainerInset
+    layoutSize.width -= (_textContainerInset.left + _textContainerInset.right);
+    layoutSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
     
     if (CGSizeEqualToSize(_constrainedSize, layoutSize) == NO) {
       _constrainedSize = layoutSize;
@@ -373,8 +373,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   ASDN::MutexLocker l(__instanceLock__);
   
   //remove textContainerInset
-  constrainedSize.width -= _textContainerInset.left + _textContainerInset.right;
-  constrainedSize.height -= _textContainerInset.top + _textContainerInset.bottom;
+  constrainedSize.width -= (_textContainerInset.left + _textContainerInset.right);
+  constrainedSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
   
   _constrainedSize = constrainedSize;
   
@@ -396,8 +396,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
   
   //add textContainerInset
-  size.width += _textContainerInset.left + _textContainerInset.right;
-  size.height += _textContainerInset.top + _textContainerInset.bottom;
+  size.width += (_textContainerInset.left + _textContainerInset.right);
+  size.height += (_textContainerInset.top + _textContainerInset.bottom);
   
   return size;
 }
