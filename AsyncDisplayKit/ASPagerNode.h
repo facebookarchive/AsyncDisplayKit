@@ -52,6 +52,12 @@
  */
 - (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index;
 
+@end
+
+@protocol ASPagerDelegate <ASCollectionDelegate>
+
+@optional
+
 /**
  * Provides the constrained size range for measuring the node at the index path.
  *
@@ -60,10 +66,6 @@
  * @returns A constrained size range for layout the node at this index path.
  */
 - (ASSizeRange)pagerNode:(ASPagerNode *)pagerNode constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
-
-@end
-
-@protocol ASPagerDelegate <ASCollectionDelegate>
 
 @end
 
@@ -82,8 +84,7 @@
 /**
  * Data Source is required, and uses a different protocol from ASCollectionNode.
  */
-- (void)setDataSource:(id <ASPagerDataSource>)dataSource;
-- (id <ASPagerDataSource>)dataSource;
+@property (nonatomic, weak) id <ASPagerDataSource> dataSource;
 
 /**
  * Delegate is optional, and uses the same protocol as ASCollectionNode.

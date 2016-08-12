@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ASCollectionViewLayoutInspecting <NSObject>
 
 /**
- * Asks the inspector to provide a constarained size range for the given collection view node.
+ * Asks the inspector to provide a constrained size range for the given collection view node.
  */
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
 
