@@ -83,7 +83,7 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
  *
  * @discussion This value defines a rectangle that is to be featured by the
  * receiver. The rectangle is specified as a "unit rectangle," using
- * percentages of the source image's width and height, e.g. CGRectMake(0.5, 0,
+ * fractions of the source image's width and height, e.g. CGRectMake(0.5, 0,
  * 0.5, 1.0) will feature the full right half a photo. If the cropRect is
  * empty, the content mode of the receiver will be used to determine its
  * dimensions, and only the cropRect's origin will be used for positioning. The
