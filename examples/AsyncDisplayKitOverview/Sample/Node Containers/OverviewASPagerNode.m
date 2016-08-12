@@ -47,7 +47,7 @@ static UIColor *OverViewASPagerNodeRandomColor() {
 
 #pragma mark - OverviewASPagerNode
 
-@interface OverviewASPagerNode () <ASPagerNodeDataSource>
+@interface OverviewASPagerNode () <ASPagerDataSource, ASPagerDelegate>
 @property (nonatomic, strong) ASPagerNode *node;
 @property (nonatomic, copy) NSArray *data;
 @end
@@ -61,6 +61,7 @@ static UIColor *OverViewASPagerNodeRandomColor() {
     
     _node = [ASPagerNode new];
     _node.dataSource = self;
+    _node.delegate = self;
     [self addSubnode:_node];
     
     return self;

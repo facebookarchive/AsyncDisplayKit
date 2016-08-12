@@ -151,11 +151,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   } _asyncDelegateFlags;
   
   struct {
-    unsigned int asyncDataSourceConstrainedSizeForNode:1;
     unsigned int asyncDataSourceNodeForItemAtIndexPath:1;
     unsigned int asyncDataSourceNodeBlockForItemAtIndexPath:1;
     unsigned int asyncDataSourceNumberOfSectionsInCollectionView:1;
-    unsigned int asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath:1;
   } _asyncDataSourceFlags;
   
   struct {
@@ -354,11 +352,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     
-    _asyncDataSourceFlags.asyncDataSourceConstrainedSizeForNode = [_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForItemAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInCollectionView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
-    _asyncDataSourceFlags.asyncDataSourceCollectionViewConstrainedSizeForNodeAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
 
     // Data-source must implement collectionView:nodeForItemAtIndexPath: or collectionView:nodeBlockForItemAtIndexPath:
     ASDisplayNodeAssertTrue(_asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath || _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath);
