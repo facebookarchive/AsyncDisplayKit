@@ -22,3 +22,10 @@
 // Replace _editingNodes and _completedNodes with:
 NSMutableArray<ASSectionInfo *> *_editingSections;
 NSMutableArray<ASSectionInfo *> *_completedSections;
+
+// Modify _reloadDataWithAnimationOptions and insertSections:withAnimationOptions:.
+// In those methods we use _populateFromDataSourceWithSectionIndexSet to get the node blocks.
+// Now we will also need to get/create the section infos, just before we get the node blocks.
+
+// In essence, wherever we use an NSMutableArray of nodes to represent a section, we now
+// will use an ASSectionInfo instead.

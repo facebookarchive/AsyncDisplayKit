@@ -18,6 +18,6 @@
 // Autoincrementing value, set by collection view immediately after retrieval.
 @property NSInteger sectionID;
 
-@property NSMutableDictionary<NSString *, NSArray<ASCellNode *> *> *editingNodesByKind;
-@property NSMutableDictionary<NSString *, NSArray<ASCellNode *> *> *completedNodesByKind;
+@property NSMutableDictionary<NSString *, NSMutableArray<ASCellNode *> *> *editingNodesByKind;
+@property NSMutableDictionary<NSString *, NSMutableArray<ASCellNode *> *> *completedNodesByKind;
 @end
