@@ -1,3 +1,14 @@
+# Overview
+
+There is an established pattern where UICollectionViewLayout talks directly to the collection view's delegate to get additional layout info e.g. the size of a header in a given section.
+
+This pattern is established by Apple's flow layout, and it is used by Pinterest and I'm sure others. It is dangerous when used with ASDK because we update asynchronously, so
+for instance if you delete a section from your data source, the layout won't find out until later and in the meantime it may ask the delegate about a section that doesn't exist!
+
+The solution is to capture this kind of information from the data source immediately when a section is inserted, and make it available to the layout as we update the UICollectionView so that everyone is on the same page.
+
+Enter: ASSectionInfo
+
 ## Usage During Layout
 
 The collection view will make these section infos available in the same way that finished nodes are currently available.

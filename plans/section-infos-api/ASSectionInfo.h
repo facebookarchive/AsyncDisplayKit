@@ -5,6 +5,8 @@
  * a subclass of this, and it can be retrieved by calling sectionInfoAtIndex:
 */
 @interface ASSectionInfo : NSObject
+
+@property (weak, nullable, readonly) ASCollectionView *collectionView;
 @property (nullable) NSString *debugName;
 
 /**
