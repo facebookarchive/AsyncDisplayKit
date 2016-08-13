@@ -813,9 +813,9 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /*
- * ASDisplayNode support for automatic hierarchy management.
+ * ASDisplayNode support for automatic subnode management.
  */
-@interface ASDisplayNode (AutomaticHierarchyManagement)
+@interface ASDisplayNode (AutomaticSubnodeManagement)
 
 /**
  * @abstract A boolean that shows whether the node automatically inserts and removes nodes based on the presence or
@@ -915,7 +915,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion If flag is YES the node no longer require addSubnode: or removeFromSupernode method calls. The presence
  * or absence of subnodes is completely determined in its layoutSpecThatFits: method.
  *
- * @deprecated Deprecated in version 2.0: Use automaticHierarchy
+ * @deprecated Deprecated in version 2.0: Use automaticallyManagesSubnodes
  */
 @property (nonatomic, assign) BOOL usesImplicitHierarchyManagement ASDISPLAYNODE_DEPRECATED;
 

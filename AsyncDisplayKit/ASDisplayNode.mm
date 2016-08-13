@@ -1009,7 +1009,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
  */
 - (void)_completeLayoutTransition:(ASLayoutTransition *)layoutTransition
 {
-  // Layout transition is not supported for nodes that are not have automatic hierarchy management enabled
+  // Layout transition is not supported for nodes that are not have automatic subnode management enabled
   if (layoutTransition == nil || self.automaticallyManagesSubnodes == NO) {
     return;
   }
@@ -1176,7 +1176,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDN::MutexLocker l(__instanceLock__);
 
   // FIXME: Ideally we'd call this as soon as the node receives -setNeedsLayout
-  // but automatic hierarchy management would require us to modify the node tree
+  // but automatic subnode management would require us to modify the node tree
   // in the background on a loaded node, which isn't currently supported.
   if (_pendingViewState.hasSetNeedsLayout) {
     [self __setNeedsLayout];
@@ -1972,7 +1972,7 @@ static NSInteger incrementIfFound(NSInteger i) {
       
       // If a node was added to a supernode, the supernode could be in a layout pending state. All of the hierarchy state
       // properties related to the transition need to be copied over as well as propagated down the subtree.
-      // This is especially important as with automatic hierarchy management, adding subnodes can happen while a transition
+      // This is especially important as with automatic subnode management, adding subnodes can happen while a transition
       // is in fly
       if (ASHierarchyStateIncludesLayoutPending(stateToEnterOrExit)) {
         int32_t pendingTransitionId = newSupernode.pendingTransitionID;
