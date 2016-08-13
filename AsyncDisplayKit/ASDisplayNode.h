@@ -755,6 +755,18 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) NSTimeInterval defaultLayoutTransitionDuration;
 
 /**
+ * @abstract The amount of time (measured in seconds) to wait before beginning the default transition animation.
+ *           Default is 0.0.
+ */
+@property (nonatomic, assign) NSTimeInterval defaultLayoutTransitionDelay;
+
+/**
+ * @abstract A mask of options indicating how you want to perform the default transition animations.
+ *           For a list of valid constants, see UIViewAnimationOptions.
+ */
+@property (nonatomic, assign) UIViewAnimationOptions defaultLayoutTransitionOptions;
+
+/**
  * @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.
  */
 - (void)animateLayoutTransition:(nonnull id<ASContextTransitioning>)context;

@@ -292,6 +292,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _environmentState = ASEnvironmentStateMakeDefault();
   
   _defaultLayoutTransitionDuration = 0.2;
+  _defaultLayoutTransitionDelay = 0.0;
+  _defaultLayoutTransitionOptions = NULL;
   
   _flags.canClearContentsOfLayer = YES;
   _flags.canCallNeedsDisplayOfLayer = NO;
@@ -871,9 +873,33 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _defaultLayoutTransitionDuration;
 }
 
+- (void)setDefaultLayoutTransitionDelay:(NSTimeInterval)defaultLayoutTransitionDelay
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _defaultLayoutTransitionDelay = defaultLayoutTransitionDelay;
+}
+
+- (NSTimeInterval)defaultLayoutTransitionDelay
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _defaultLayoutTransitionDelay;
+}
+
+- (void)setDefaultLayoutTransitionOptions:(UIViewAnimationOptions)defaultLayoutTransitionOptions
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _defaultLayoutTransitionOptions = defaultLayoutTransitionOptions;
+}
+
+- (UIViewAnimationOptions)defaultLayoutTransitionOptions
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _defaultLayoutTransitionOptions;
+}
+
 /*
- * Hook for subclasse to perform an animation based on the given ASContextTransitioning. By default this just layouts
- * applies all subnodes without animation and calls completes the transition on the context.
+ * Hook for subclasse to perform an animation based on the given ASContextTransitioning. By default a fade in and out
+ * animation is provided. 
  */
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
 {
@@ -914,8 +940,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     insertedSubnode.frame = [context finalFrameForNode:insertedSubnode];
     insertedSubnode.alpha = 0;
   }
-  
-  [UIView animateWithDuration:self.defaultLayoutTransitionDuration animations:^{
+
+  [UIView animateWithDuration:self.defaultLayoutTransitionDuration delay:self.defaultLayoutTransitionDelay options:self.defaultLayoutTransitionOptions animations:^{
     // Fade removed subnodes and views out
     for (ASDisplayNode *removedSubnode in removedSubnodes) {
       removedSubnode.alpha = 0;
