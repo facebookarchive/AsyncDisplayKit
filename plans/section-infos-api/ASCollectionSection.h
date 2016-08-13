@@ -4,22 +4,22 @@
  * Data sources may override -collectionView:infoForSectionAtIndex: to create and return
  * a subclass of this, and it can be retrieved by calling sectionInfoAtIndex:
 */
-@interface ASSectionInfo : NSObject
+@interface ASCollectionSection : NSObject
 
-@property (weak, nullable, readonly) ASCollectionView *collectionView;
-@property (nullable) NSString *debugName;
-
-/**
- * We could add -nodes, -numberOfItems etc here later. For now we should make
- * this object pretty opaque.
- */
-
-@end
-
-@interface ASSectionInfo (Private)
 // Autoincrementing value, set by collection view immediately after retrieval.
 @property NSInteger sectionID;
 
 @property NSMutableDictionary<NSString *, NSMutableArray<ASCellNode *> *> *editingNodesByKind;
 @property NSMutableDictionary<NSString *, NSMutableArray<ASCellNode *> *> *completedNodesByKind;
+
+@property (strong, nullable) id<ASSectionUserInfo> userInfo;
+
+@end
+
+@protocol ASSectionUserInfo
+// This will be set once, immediately after the object is returned by the data source.
+@property (weak, nonatomic, nullable) ASCollectionView *collectionView;
+
+// Could be optional, but need to cache -respondsToSelector: dynamically.
+@property (nullable, readonly, copy) NSString *sectionName;
 @end

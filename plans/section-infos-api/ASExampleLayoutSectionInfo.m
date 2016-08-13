@@ -1,7 +1,11 @@
 /**
- * An example of what a section info subclass might look like.
+ * An example of what a section info class might look like.
  */
-@interface ASExampleLayoutSectionInfo : ASSectionInfo
+@interface ASExampleLayoutSectionInfo : NSObject <ASSectionUserInfo>
+
+@property (nonatomic, weak, nullable) ASCollectionView *collectionView;
+@property (nullable, copy) NSString *sectionName;
+
 @property CGSize cellSpacing;
 @property NSInteger numberOfColumns;
 @property CGFloat columnWidth;

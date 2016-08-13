@@ -7,7 +7,7 @@ for instance if you delete a section from your data source, the layout won't fin
 
 The solution is to capture this kind of information from the data source immediately when a section is inserted, and make it available to the layout as we update the UICollectionView so that everyone is on the same page.
 
-Enter: ASSectionInfo
+Enter: ASSectionUserInfo
 
 ## Usage During Layout
 
