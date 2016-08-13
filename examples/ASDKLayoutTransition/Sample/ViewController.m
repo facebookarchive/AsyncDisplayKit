@@ -43,7 +43,7 @@
   self.usesImplicitHierarchyManagement = YES;
   
   // Define the layout transition duration for the default transition
-  self.layoutTransitionDuration = 1.0;
+  self.defaultLayoutTransitionDuration = 1.0;
   
   _enabled = NO;
   
@@ -140,7 +140,7 @@
   fromNodeFrame.origin.x += (self.enabled ? -fromNodeFrame.size.width : fromNodeFrame.size.width);
   
   // We will use the same transition duration as the default transition
-  [UIView animateWithDuration:self.layoutTransitionDuration animations:^{
+  [UIView animateWithDuration:self.defaultLayoutTransitionDuration animations:^{
     toNode.frame = [context finalFrameForNode:toNode];
     toNode.alpha = 1.0;
     

@@ -291,7 +291,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   _environmentState = ASEnvironmentStateMakeDefault();
   
-  _layoutTransitionDuration = 0.2;
+  _defaultLayoutTransitionDuration = 0.2;
   
   _flags.canClearContentsOfLayer = YES;
   _flags.canCallNeedsDisplayOfLayer = NO;
@@ -859,15 +859,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark Layout Transition API
 
-- (void)setLayoutTransitionDuration:(NSTimeInterval)layoutTransitionDuration
+- (void)setDefaultLayoutTransitionDuration:(NSTimeInterval)defaultLayoutTransitionDuration
 {
   ASDN::MutexLocker l(__instanceLock__);
-  _layoutTransitionDuration = layoutTransitionDuration;
+  _defaultLayoutTransitionDuration = defaultLayoutTransitionDuration;
 }
 
-- (NSTimeInterval)layoutTransitionDuration
+- (NSTimeInterval)defaultLayoutTransitionDuration
 {
-  return _layoutTransitionDuration;
+  ASDN::MutexLocker l(__instanceLock__);
+  return _defaultLayoutTransitionDuration;
 }
 
 /*
@@ -914,7 +915,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     insertedSubnode.alpha = 0;
   }
   
-  [UIView animateWithDuration:self.layoutTransitionDuration animations:^{
+  [UIView animateWithDuration:self.defaultLayoutTransitionDuration animations:^{
     // Fade removed subnodes and views out
     for (ASDisplayNode *removedSubnode in removedSubnodes) {
       removedSubnode.alpha = 0;

@@ -750,9 +750,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASDisplayNode (LayoutTransitioning)
 
 /**
- * @abstract The amount of time it takes to complete the animation. Default is 0.2.
+ * @abstract The amount of time it takes to complete the default transition animation. Default is 0.2.
  */
-@property (nonatomic, assign) NSTimeInterval layoutTransitionDuration;
+@property (nonatomic, assign) NSTimeInterval defaultLayoutTransitionDuration;
 
 /**
  * @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.
