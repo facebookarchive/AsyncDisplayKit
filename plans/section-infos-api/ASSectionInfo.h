@@ -5,7 +5,7 @@
  * a subclass of this, and it can be retrieved by calling section
 */
 @interface ASSectionInfo : NSObject
-@property nullable NSString *debugName;
+@property (nullable) NSString *debugName;
 
 /**
  * We could add -nodes, -numberOfItems etc here later. For now we should make
