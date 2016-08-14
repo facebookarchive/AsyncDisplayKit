@@ -14,25 +14,29 @@
 
 #pragma mark - UIAccessibilityElement
 
-// Sort accessiblity elements by x and y origin. First sort the elements by y and than by x value.
-static NSArray *SortAccessibilityElements(NSArray *accessibleElements) {
-  return [accessibleElements sortedArrayUsingComparator:^NSComparisonResult(UIAccessibilityElement *a, UIAccessibilityElement *b) {
-    CGPoint originA = a.accessibilityFrame.origin;
-    CGPoint originB = b.accessibilityFrame.origin;
-    if (originA.y == originB.y) {
-      if (originA.x == originB.x) {
-        return NSOrderedSame;
-      } else if (originA.x < originB.x) {
-        return NSOrderedAscending;
-      } else {
-        return NSOrderedDescending;
-      }
-    } else if (originA.y < originB.y) {
-      return NSOrderedAscending;
-    } else {
-      return NSOrderedDescending;
-    }
-  }];
+typedef NSComparisonResult (^SortAccessibilityElementsComparator)(UIAccessibilityElement *, UIAccessibilityElement *);
+
+/// Sort accessiblity elements first by y and than by x origin.
+static void SortAccessibilityElements(NSMutableArray *elements)
+{
+  ASDisplayNodeCAssertNotNil(elements, @"Should pass in a NSMutableArray");
+  
+  static SortAccessibilityElementsComparator comparator = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+      comparator = ^NSComparisonResult(UIAccessibilityElement *a, UIAccessibilityElement *b) {
+        CGPoint originA = a.accessibilityFrame.origin;
+        CGPoint originB = b.accessibilityFrame.origin;
+        if (originA.y == originB.y) {
+          if (originA.x == originB.x) {
+            return NSOrderedSame;
+          }
+          return (originA.x < originB.x) ? NSOrderedAscending : NSOrderedDescending;
+        }
+        return (originA.y < originB.y) ? NSOrderedAscending : NSOrderedDescending;
+      };
+  });
+  [elements sortUsingComparator:comparator];
 }
 
 @implementation UIAccessibilityElement (_ASDisplayView)
@@ -53,36 +57,39 @@ static NSArray *SortAccessibilityElements(NSArray *accessibleElements) {
 
 #pragma mark - _ASDisplayView / UIAccessibilityContainer
 
-static NSArray *ASCollectUIAccessibilityElementsForNode(ASDisplayNode *viewNode, ASDisplayNode *subnode, id container)
+/// Collect all subnodes for the given node by walking down the subnode tree and calculates the screen coordinates based on the containerNode and container
+static void CollectUIAccessibilityElementsForNode(ASDisplayNode *node, ASDisplayNode *containerNode, id container, NSMutableArray *elements)
 {
-  NSMutableArray *accessibleElements = [NSMutableArray array];
-  ASDisplayNodePerformBlockOnEveryNodeBFS(subnode, ^(ASDisplayNode * _Nonnull currentNode) {
+  ASDisplayNodeCAssertNotNil(elements, @"Should pass in a NSMutableArray");
+  
+  ASDisplayNodePerformBlockOnEveryNodeBFS(node, ^(ASDisplayNode * _Nonnull currentNode) {
     // For every subnode that is layer backed or it's supernode has shouldRasterizeDescendants enabled
     // we have to create a UIAccessibilityElement as no view for this node exists
-    if (currentNode != viewNode && currentNode.isAccessibilityElement) {
+    if (currentNode != containerNode && currentNode.isAccessibilityElement) {
       UIAccessibilityElement *accessibilityElement = [UIAccessibilityElement accessibilityElementWithContainer:container node:currentNode];
       // As the node hierarchy is flattened it's necessary to convert the frame for each subnode in the tree to the
       // coordinate system of the supernode
-      CGRect frame = [viewNode convertRect:currentNode.bounds fromNode:currentNode];
+      CGRect frame = [containerNode convertRect:currentNode.bounds fromNode:currentNode];
       accessibilityElement.accessibilityFrame = UIAccessibilityConvertFrameToScreenCoordinates(frame, container);
-      [accessibleElements addObject:accessibilityElement];
+      [elements addObject:accessibilityElement];
     }
   });
-  
-  return [accessibleElements copy];
 }
 
-static NSArray *CollectAccessibilityElementsForViewAndNode(_ASDisplayView *view, ASDisplayNode *viewNode)
+/// Collect all accessibliity elements for a given view and view node
+static void CollectAccessibilityElementsForView(_ASDisplayView *view, NSMutableArray *elements)
 {
+  ASDisplayNodeCAssertNotNil(elements, @"Should pass in a NSMutableArray");
+  
+  ASDisplayNode *node = view.asyncdisplaykit_node;
+  
   // Handle rasterize case
-  if (viewNode.shouldRasterizeDescendants) {
-    return ASCollectUIAccessibilityElementsForNode(viewNode, viewNode, view);
+  if (node.shouldRasterizeDescendants) {
+    CollectUIAccessibilityElementsForNode(node, node, view, elements);
+    return;
   }
   
-  // Handle not rasterize case
-  NSMutableArray *elements = [NSMutableArray array];
-  
-  for (ASDisplayNode *subnode in viewNode.subnodes) {
+  for (ASDisplayNode *subnode in node.subnodes) {
     if (subnode.isAccessibilityElement) {
       
       // An accessiblityElement can either be a UIView or a UIAccessibilityElement
@@ -91,7 +98,7 @@ static NSArray *CollectAccessibilityElementsForViewAndNode(_ASDisplayView *view,
         // No view for layer backed nodes exist. It's necessary to create a UIAccessibilityElement that represents this node
         accessiblityElement = [UIAccessibilityElement accessibilityElementWithContainer:view node:subnode];
         
-        CGRect frame = [viewNode convertRect:subnode.bounds fromNode:subnode];
+        CGRect frame = [node convertRect:subnode.bounds fromNode:subnode];
         [accessiblityElement setAccessibilityFrame:UIAccessibilityConvertFrameToScreenCoordinates(frame, view)];
         [elements addObject:accessiblityElement];
       } else {
@@ -103,14 +110,12 @@ static NSArray *CollectAccessibilityElementsForViewAndNode(_ASDisplayView *view,
       
     } else if (subnode.isLayerBacked) {
       // Go down the hierarchy of the layer backed subnode and collect all of the UIAccessibilityElement
-      [elements addObjectsFromArray:ASCollectUIAccessibilityElementsForNode(viewNode, subnode, view)];
+      CollectUIAccessibilityElementsForNode(subnode, node, view, elements);
     } else if ([subnode accessibilityElementCount] > 0) {
-      // Add UIAccessibilityContainer
+      // UIView is itself a UIAccessibilityContainer just add it
       [elements addObject:subnode.view];
     }
   }
-    
-  return [elements copy];
 }
 
 @interface _ASDisplayView () {
@@ -141,8 +146,12 @@ static NSArray *CollectAccessibilityElementsForViewAndNode(_ASDisplayView *view,
     return _accessibleElements;
   }
   
-  _accessibleElements = SortAccessibilityElements(CollectAccessibilityElementsForViewAndNode(self, viewNode));
   _lastAccessibleElementsFrame = screenFrame;
+  
+  NSMutableArray *accessibleElements = [NSMutableArray array];
+  CollectAccessibilityElementsForView(self, accessibleElements);
+  SortAccessibilityElements(accessibleElements);
+  _accessibleElements = accessibleElements;
   
   return _accessibleElements;
 }
