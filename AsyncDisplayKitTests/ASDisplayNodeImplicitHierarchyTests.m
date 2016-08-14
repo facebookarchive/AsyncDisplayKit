@@ -190,6 +190,8 @@
   };
  
   // Intentionally trigger view creation
+  [node view];
+  [node1 view];
   [node2 view];
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Fix IHM layout transition also if one node is already loaded"];
