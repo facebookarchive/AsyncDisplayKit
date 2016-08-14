@@ -293,7 +293,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   _defaultLayoutTransitionDuration = 0.2;
   _defaultLayoutTransitionDelay = 0.0;
-  _defaultLayoutTransitionOptions = NULL;
+  _defaultLayoutTransitionOptions = UIViewAnimationOptionBeginFromCurrentState;
   
   _flags.canClearContentsOfLayer = YES;
   _flags.canCallNeedsDisplayOfLayer = NO;
