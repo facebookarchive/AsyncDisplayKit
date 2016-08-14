@@ -1,8 +1,10 @@
 /**
- * Information about a section of items in a collection or table.
+ * Information about a section of items in a collection.
  *
- * Data sources may override -collectionView:infoForSectionAtIndex: to create and return
- * a subclass of this, and it can be retrieved by calling sectionInfoAtIndex:
+ * This class is private to ASDK.
+ * Data sources may override -collectionView:infoForSectionAtIndex: to provide the
+ * "userInfo" object when the section is initially inserted. ASCollectionView
+ * vends the user info object publicly via "infoForSectionAtIndex:".
 */
 @interface ASCollectionSection : NSObject
 
