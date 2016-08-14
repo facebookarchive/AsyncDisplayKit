@@ -9,7 +9,7 @@ The solution is to capture this kind of information from the data source immedia
 
 Enter: ASSectionUserInfo
 
-Internally, we use a private object ASCollectionSection to represent one version of a section of items and supplementaries. If the user wants, they can provide us with an id<ASSectionUserInfo> to accompany the section, which will be read synchronously when the section is inserted.
+Internally, we use a private object ASCollectionSection to represent one version of a section of items and supplementaries. If the user wants, they can provide us with an ASSectionUserInfo object to accompany the section, which will be read synchronously when the section is inserted.
 
 ## Usage During Layout
 
