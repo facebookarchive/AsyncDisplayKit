@@ -157,7 +157,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   CGRect frame = CGRectZero;
   frame.size = [node measureWithSizeRange:constrainedSize].size;
   node.frame = frame;
-  //[node setNeedsLayout];
 }
 
 /**

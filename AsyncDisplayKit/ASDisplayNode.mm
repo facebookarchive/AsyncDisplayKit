@@ -674,7 +674,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // Check if a new layout need's to be calculated or the pending layout can be used
   ASLayout *previousLayout = _calculatedLayout;
   ASLayout *newLayout = nil;
-  if (![self _isLayoutDirty:_pendingLayout] && CGSizeEqualToSize(self.threadSafeBounds.size, _pendingLayout.size)) {
+  if ([self _isLayoutDirty:_pendingLayout] == NO && CGSizeEqualToSize(self.threadSafeBounds.size, _pendingLayout.size)) {
     newLayout = _pendingLayout;
   } else {
     newLayout = [self measureWithSizeRange:constrainedSize];

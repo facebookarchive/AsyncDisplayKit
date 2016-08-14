@@ -1218,17 +1218,25 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
+- (void)nodeDidRelayout:(ASCellNode *)node
+{
+  [self nodeDidRelayout:node sizeChanged:YES];
+}
+
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();
-
-  // Mark the node as dirty
-  [_dirtyNodes addObject:node];
   
-  if (!sizeChanged || _queuedNodeHeightUpdate) {
+  if (!sizeChanged) {
     return;
   }
-
+  
+  [_dirtyNodes addObject:node];
+  
+  if (_queuedNodeHeightUpdate) {
+    return;
+  }
+  
   _queuedNodeHeightUpdate = YES;
   [self performSelector:@selector(requeryNodeHeights)
              withObject:nil
@@ -1236,7 +1244,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
                 inModes:@[ NSRunLoopCommonModes ]];
 }
 
-// Cause UITableView to requery for the new height of this node
+// Cause UITableView to requery for the new height of all _dirtyNodes
 - (void)requeryNodeHeights
 {
   _queuedNodeHeightUpdate = NO;

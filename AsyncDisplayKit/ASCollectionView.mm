@@ -1209,6 +1209,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
+- (void)nodeDidRelayout:(ASCellNode *)node
+{
+  [self nodeDidRelayout:node sizeChanged:YES];
+}
+
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();

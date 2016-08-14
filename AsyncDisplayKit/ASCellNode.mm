@@ -104,12 +104,12 @@
   _viewControllerNode.frame = self.bounds;
 }
 
-- (void)__setNeedsLayout
+- (void)__layout
 {
-  [super __setNeedsLayout];
+  [super __layout];
   
   ASDN::MutexLocker l(__instanceLock__);
-  [self didRelayoutFromOldSize:CGSizeZero toNewSize:self.calculatedSize];
+  [self didRelayout];
 }
 
 - (void)transitionLayoutAnimated:(BOOL)animated
@@ -159,12 +159,21 @@
   [self transitionLayoutWithSizeRange:constrainedSize animated:animated measurementCompletion:completion];
 }
 
+- (void)didRelayout
+{
+  [self didRelayoutSizeChanged:YES];
+}
+
 - (void)didRelayoutFromOldSize:(CGSize)oldSize toNewSize:(CGSize)newSize
+{
+  BOOL sizeChanged = !CGSizeEqualToSize(oldSize, newSize);
+  [self didRelayoutSizeChanged:sizeChanged];
+}
+
+- (void)didRelayoutSizeChanged:(BOOL)sizeChanged
 {
   if (_interactionDelegate != nil) {
     ASPerformBlockOnMainThread(^{
-      BOOL sizeChanged = !CGSizeEqualToSize(oldSize, newSize);
-      sizeChanged = YES;
       [_interactionDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }

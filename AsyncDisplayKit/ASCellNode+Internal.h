@@ -25,6 +25,7 @@
  * @param node A node informing the delegate about the relayout.
  * @param sizeChanged `YES` if the node's `calculatedSize` changed during the relayout, `NO` otherwise.
  */
+- (void)nodeDidRelayout:(ASCellNode *)node;
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
 
 /*
