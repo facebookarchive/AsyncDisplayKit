@@ -8,7 +8,7 @@
 */
 @interface ASCollectionSection : NSObject
 
-// Autoincrementing value, set by collection view immediately after retrieval.
+// Autoincrementing value, set by collection view immediately after creation.
 @property NSInteger sectionID;
 
 @property NSMutableDictionary<NSString *, NSMutableArray<ASCellNode *> *> *editingNodesByKind;
