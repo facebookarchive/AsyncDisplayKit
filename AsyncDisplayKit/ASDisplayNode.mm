@@ -1554,7 +1554,6 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
         // If we can use view API, do. Due to an apple bug, -insertSubview:atIndex: actually wants a LAYER index, which we pass in
         if (canUseViewAPI && sublayerIndex != NSNotFound) {
           [_view insertSubview:subnode.view atIndex:sublayerIndex];
-          [(_ASDisplayView *)_view setAccessibleElements:nil];
         } else if (sublayerIndex != NSNotFound) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wconversion"
