@@ -634,14 +634,19 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _flags.layerBacked;
 }
 
-#pragma mark - Layout measurement calculation
+#pragma mark - Measurement pass
+
+- (CGSize)sizeThatThatFits:(CGSize)constrainedSize
+{
+    return [self measure:constrainedSize];
+}
 
 - (CGSize)measure:(CGSize)constrainedSize
 {
   return [self measureWithSizeRange:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
 }
 
-/// Calculates and creates a pending layout based on the given constrained size
+/// Calculates and creates a layout based on the given constrained size and caches it as pending layout
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   ASDN::MutexLocker l(__instanceLock__);
@@ -653,7 +658,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _pendingLayout;
 }
 
-/// Calculates and creates a layout and set it as the calculated layout with the given constrained size
+/// Calculates an ASLayout based on the given constrained size that represents the current state of the node and will set it as calculated layout
 - (ASLayout *)measureAndCacheLayoutWithSizeRange:(ASSizeRange)constrainedSize
 {
   ASDN::MutexLocker l(__instanceLock__);
@@ -675,12 +680,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     newLayout = [self measureWithSizeRange:constrainedSize];
   }
   
+  // Create layout transition that represent the current transition
   _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                         pendingLayout:newLayout
                                                        previousLayout:previousLayout];
   
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState) == NO) {
-    // Complete the pending layout transition immediately
+    // Complete the pending layout transition immediately if not in a pending layout state
     [self _completePendingLayoutTransition];
   }
   
@@ -693,7 +699,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDN::MutexLocker l(__instanceLock__);
   
   // Only generate a new layout if:
-  // - The current layout is dirty
+  // - No layout is given
+  // - Given layout is dirty
   // - The passed constrained size is different than the layout's constrained size
   return (layout == nil || layout.isDirty || !ASSizeRangeEqualToSizeRange(constrainedSize, layout.constrainedSizeRange));
 }
@@ -1016,7 +1023,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self _pendingLayoutTransitionDidComplete];
 }
 
-#pragma mark - Layout
+#pragma mark - Pending Layout
 
 /*
  * Completes the pending layout transition immediately without going through the the Layout Transition Animation API
@@ -1251,6 +1258,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 }
 
+#pragma mark - Layout Pass
+
 //Calling this with the lock held can lead to deadlocks. Always call *unlocked*
 - (void)__setNeedsLayout
 {
@@ -1284,6 +1293,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)__layout
 {
   ASDisplayNodeAssertMainThread();
+
   ASDN::MutexLocker l(__instanceLock__);
   CGRect bounds = self.threadSafeBounds;
 
@@ -1323,8 +1333,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self __layoutSublayouts];
 }
 
+/// Helper method to layout all subnodes based on sublayouts
 - (void)__layoutSublayouts
 {
+  ASDN::MutexLocker l(__instanceLock__);
+
   for (ASLayout *subnodeLayout in _calculatedLayout.sublayouts) {
     ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
   }
@@ -1334,6 +1347,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   // Hook for subclasses
 }
+
+#pragma mark - Converting Coordinate Values
 
 - (CATransform3D)_transformToAncestor:(ASDisplayNode *)ancestor
 {
