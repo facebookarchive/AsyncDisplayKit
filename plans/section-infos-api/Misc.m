@@ -25,7 +25,7 @@ NSMutableArray<ASCollectionSection *> *_completedSections;
 
 // Modify _reloadDataWithAnimationOptions and insertSections:withAnimationOptions:.
 // In those methods we use _populateFromDataSourceWithSectionIndexSet to get the node blocks.
-// Now we will also need to get/create the section infos, just before we get the node blocks.
+// Now we will also need to create the ASCollectionSections and ask for UserInfos, just before we get the node blocks.
 
 // In essence, wherever we use an NSMutableArray of nodes to represent a section, we now
 // will use an ASCollectionSection instead.
