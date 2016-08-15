@@ -903,7 +903,7 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
   // FIXME: Replace this implementation with reusable CALayers that have .backgroundColor set.
   // This would completely eliminate the memory and performance cost of the backing store.
   CGSize size = self.calculatedSize;
-  if (size.width * size.height < FLT_EPSILON) {
+  if ((size.width * size.height) < FLT_EPSILON) {
     return nil;
   }
   
