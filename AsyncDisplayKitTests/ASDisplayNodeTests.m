@@ -19,6 +19,7 @@
 #import "ASDisplayNodeTestsHelper.h"
 #import "UIView+ASConvenience.h"
 #import "ASCellNode.h"
+#import "ASImageNode.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[[ASDisplayNode alloc] init] autorelease]; n.name = @#n
@@ -1989,6 +1990,23 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
 
   XCTAssert([node loadStateChangedToNO]);
+}
+
+
+- (void)testThatNodeGetsRenderedIfItGoesFromZeroSizeToRealSize
+{
+  NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"logo-square"
+                                                                    ofType:@"png" inDirectory:@"TestResources"];
+  UIImage *image = [UIImage imageWithContentsOfFile:path];
+  ASImageNode *node = [[[ASImageNode alloc] init] autorelease];
+  node.image = image;
+  XCTAssert(CGSizeEqualToSize(node.bounds.size, node.bounds.size));
+  [node recursivelyEnsureDisplaySynchronously:YES];
+  XCTAssertNil(node.contents);
+  node.bounds = CGRectMake(0, 0, 100, 100);
+  [node recursivelyEnsureDisplaySynchronously:YES];
+
+  XCTAssertNotNil(node.contents);
 }
 
 @end
