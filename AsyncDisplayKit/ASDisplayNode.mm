@@ -77,18 +77,6 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 @synthesize threadSafeBounds = _threadSafeBounds;
 
-static BOOL usesImplicitHierarchyManagement = NO;
-
-+ (BOOL)usesImplicitHierarchyManagement
-{
-  return usesImplicitHierarchyManagement;
-}
-
-+ (void)setUsesImplicitHierarchyManagement:(BOOL)enabled
-{
-  usesImplicitHierarchyManagement = enabled;
-}
-
 static BOOL suppressesInvalidCollectionUpdateExceptions = YES;
 
 + (BOOL)suppressesInvalidCollectionUpdateExceptions
@@ -703,6 +691,20 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return !self.isNodeLoaded;
 }
 
+#pragma mark - Automatic Hierarchy
+
+- (BOOL)automaticallyManagesSubnodes
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _automaticallyManagesSubnodes;
+}
+
+- (void)setAutomaticallyManagesSubnodes:(BOOL)automaticallyManagesSubnodes
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _automaticallyManagesSubnodes = automaticallyManagesSubnodes;
+}
+
 #pragma mark - Layout Transition
 
 - (void)transitionLayoutAnimated:(BOOL)animated measurementCompletion:(void (^)())completion
@@ -751,11 +753,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       ASLayoutableSetCurrentContext(ASLayoutableContextMake(transitionID, NO));
 
       ASDN::MutexLocker l(__instanceLock__);
-      BOOL disableImplicitHierarchyManagement = self.usesImplicitHierarchyManagement == NO;
-      self.usesImplicitHierarchyManagement = YES; // Temporary flag for 1.9.x
+      BOOL automaticallyManagesSubnodesDisabled = (self.automaticallyManagesSubnodes == NO);
+      self.automaticallyManagesSubnodes = YES; // Temporary flag for 1.9.x
       newLayout = [self calculateLayoutThatFits:constrainedSize];
-      if (disableImplicitHierarchyManagement) {
-        self.usesImplicitHierarchyManagement = NO; // Temporary flag for 1.9.x
+      if (automaticallyManagesSubnodesDisabled) {
+        self.automaticallyManagesSubnodes = NO; // Temporary flag for 1.9.x
       }
       
       ASLayoutableClearCurrentContext();
@@ -818,18 +820,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       node.hierarchyState &= (~ASHierarchyStateLayoutPending);
     });
   }
-}
-
-- (BOOL)usesImplicitHierarchyManagement
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _usesImplicitHierarchyManagement ? : [[self class] usesImplicitHierarchyManagement];
-}
-
-- (void)setUsesImplicitHierarchyManagement:(BOOL)value
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _usesImplicitHierarchyManagement = value;
 }
 
 - (BOOL)_isTransitionInProgress
@@ -1019,8 +1009,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
  */
 - (void)_completeLayoutTransition:(ASLayoutTransition *)layoutTransition
 {
-  // Layout transition is not supported for non implicit hierarchy managed nodes yet
-  if (layoutTransition == nil || self.usesImplicitHierarchyManagement == NO) {
+  // Layout transition is not supported for nodes that are not have automatic subnode management enabled
+  if (layoutTransition == nil || self.automaticallyManagesSubnodes == NO) {
     return;
   }
 
@@ -1186,7 +1176,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDN::MutexLocker l(__instanceLock__);
 
   // FIXME: Ideally we'd call this as soon as the node receives -setNeedsLayout
-  // but implicit hierarchy management would require us to modify the node tree
+  // but automatic subnode management would require us to modify the node tree
   // in the background on a loaded node, which isn't currently supported.
   if (_pendingViewState.hasSetNeedsLayout) {
     [self __setNeedsLayout];
@@ -1982,7 +1972,7 @@ static NSInteger incrementIfFound(NSInteger i) {
       
       // If a node was added to a supernode, the supernode could be in a layout pending state. All of the hierarchy state
       // properties related to the transition need to be copied over as well as propagated down the subtree.
-      // This is especially important as with Implicit Hierarchy Management adding subnodes can happen while a transition
+      // This is especially important as with automatic subnode management, adding subnodes can happen while a transition
       // is in fly
       if (ASHierarchyStateIncludesLayoutPending(stateToEnterOrExit)) {
         int32_t pendingTransitionId = newSupernode.pendingTransitionID;
@@ -2701,7 +2691,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
   
-  if (layoutTransition == nil || self.usesImplicitHierarchyManagement == NO) {
+  if (layoutTransition == nil || self.automaticallyManagesSubnodes == NO) {
     return;
   }
 
@@ -3292,6 +3282,16 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 - (void)cancelLayoutTransitionsInProgress
 {
   [self cancelLayoutTransition];
+}
+
+- (BOOL)usesImplicitHierarchyManagement
+{
+  return self.automaticallyManagesSubnodes;
+}
+
+- (void)setUsesImplicitHierarchyManagement:(BOOL)enabled
+{
+  self.automaticallyManagesSubnodes = enabled;
 }
 
 - (void)setPlaceholderFadesOut:(BOOL)placeholderFadesOut

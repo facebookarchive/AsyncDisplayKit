@@ -20,9 +20,6 @@ ASDISPLAYNODE_EXTERN_C_END
 
 @interface ASDisplayNode (Beta)
 
-+ (BOOL)usesImplicitHierarchyManagement;
-+ (void)setUsesImplicitHierarchyManagement:(BOOL)enabled;
-
 /**
  * ASTableView and ASCollectionView now throw exceptions on invalid updates
  * like their UIKit counterparts. If YES, these classes will log messages
@@ -62,8 +59,6 @@ ASDISPLAYNODE_EXTERN_C_END
 @property (nonatomic, copy, nullable) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
 
 /** @name Layout Transitioning */
-
-@property (nonatomic) BOOL usesImplicitHierarchyManagement;
 
 /**
  * @abstract Currently used by ASNetworkImageNode and ASMultiplexImageNode to allow their placeholders to stay if they are loading an image from the network.

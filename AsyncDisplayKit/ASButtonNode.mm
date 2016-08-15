@@ -14,7 +14,6 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
-#import "ASDisplayNode+Beta.h"
 #import "ASStaticLayoutSpec.h"
 
 @interface ASButtonNode ()
@@ -56,7 +55,7 @@
 - (instancetype)init
 {
   if (self = [super init]) {
-    self.usesImplicitHierarchyManagement = YES;
+    self.automaticallyManagesSubnodes = YES;
     
     _contentSpacing = 8.0;
     _laysOutHorizontally = YES;
