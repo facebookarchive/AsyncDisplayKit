@@ -124,7 +124,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   
   // Main thread only
   _ASTransitionContext *_pendingLayoutTransitionContext;
-  BOOL _usesImplicitHierarchyManagement;
+  BOOL _automaticallyManagesSubnodes;
+  NSTimeInterval _defaultLayoutTransitionDuration;
+  NSTimeInterval _defaultLayoutTransitionDelay;
+  UIViewAnimationOptions _defaultLayoutTransitionOptions;
 
   int32_t _pendingTransitionID;
   ASLayoutTransition *_pendingLayoutTransition;

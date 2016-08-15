@@ -12,7 +12,7 @@
 #import <AsyncDisplayKit/ASButtonNode.h>
 #import <AsyncDisplayKit/ASNetworkImageNode.h>
 
-@class AVAsset, AVPlayer, AVPlayerItem, AVVideoComposition, AVAudioMix;
+@class AVAsset, AVPlayer, AVPlayerLayer, AVPlayerItem, AVVideoComposition, AVAudioMix;
 @protocol ASVideoNodeDelegate;
 
 typedef enum {
@@ -51,6 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, strong, readwrite) AVAudioMix *audioMix;
 
 @property (nullable, nonatomic, strong, readonly) AVPlayer *player;
+@property (nullable, nonatomic, strong, readonly) AVPlayerLayer *playerLayer;
 @property (nullable, nonatomic, strong, readonly) AVPlayerItem *currentItem;
 
 

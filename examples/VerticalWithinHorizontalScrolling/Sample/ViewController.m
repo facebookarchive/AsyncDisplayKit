@@ -40,6 +40,8 @@
   _pagerNode.dataSource = self;
   _pagerNode.delegate = self;
   
+  [ASRangeController setShouldShowRangeDebugOverlay:YES];
+  
   // Could implement ASCollectionDelegate if we wanted extra callbacks, like from UIScrollView.
   //_pagerNode.delegate = self;
   

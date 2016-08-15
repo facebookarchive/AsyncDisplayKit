@@ -134,6 +134,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSArray<NSArray <ASCellNode *> *> *)completedNodes;
 
+- (NSString *)nameForRangeControllerDataSource;
+
 @end
 
 /**

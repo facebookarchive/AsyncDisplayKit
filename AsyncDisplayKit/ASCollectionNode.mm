@@ -17,6 +17,7 @@
 #import "ASEnvironmentInternal.h"
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
+#import "AsyncDisplayKit+Debug.h"
 
 #pragma mark - _ASCollectionPendingState
 
@@ -169,6 +170,12 @@
 {
   [super clearFetchedData];
   [self.view clearFetchedData];
+}
+
+- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
+{
+  [super interfaceStateDidChange:newState fromState:oldState];
+  [ASRangeController layoutDebugOverlayIfNeeded];
 }
 
 #if ASRangeControllerLoggingEnabled

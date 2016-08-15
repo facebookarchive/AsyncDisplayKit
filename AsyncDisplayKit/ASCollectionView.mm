@@ -18,7 +18,6 @@
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASDisplayNode+Beta.h"
 #import "ASInternalHelpers.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 #import "ASRangeController.h"
@@ -1074,6 +1073,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath
 {
   return [_dataController nodeAtIndexPath:indexPath];
+}
+
+- (NSString *)nameForRangeControllerDataSource
+{
+  return self.asyncDataSource ? NSStringFromClass([self.asyncDataSource class]) : NSStringFromClass([self class]);
 }
 
 #pragma mark - ASRangeControllerDelegate

@@ -11,13 +11,16 @@
 #import "ASRangeController.h"
 
 #import "ASAssert.h"
-#import "ASWeakSet.h"
+#import "ASCellNode.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASMultidimensionalArrayUtils.h"
 #import "ASInternalHelpers.h"
+#import "ASMultiDimensionalArrayUtils.h"
+#import "ASWeakSet.h"
+
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASCellNode.h"
+#import "AsyncDisplayKit+Debug.h"
 
 #define AS_RANGECONTROLLER_LOG_UPDATE_FREQ 0
 
@@ -63,6 +66,10 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(_updateCountDisplayLinkDidFire)];
   [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
 #endif
+  
+  if ([ASRangeController shouldShowRangeDebugOverlay]) {
+    [self addRangeControllerToRangeDebugOverlay];
+  }
   
   return self;
 }
@@ -333,6 +340,25 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
         }
       }
     }
+  }
+  
+  // TODO: This code is for debugging only, but would be great to clean up with a delegate method implementation.
+  if ([ASRangeController shouldShowRangeDebugOverlay]) {
+    ASScrollDirection scrollableDirections = ASScrollDirectionUp | ASScrollDirectionDown;
+    if ([_dataSource isKindOfClass:NSClassFromString(@"ASCollectionView")]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+      scrollableDirections = (ASScrollDirection)[_dataSource performSelector:@selector(scrollableDirections)];
+#pragma clang diagnostic pop
+    }
+    
+    [self updateRangeController:self
+       withScrollableDirections:scrollableDirections
+                scrollDirection:scrollDirection
+                      rangeMode:rangeMode
+        displayTuningParameters:parametersDisplay
+      fetchDataTuningParameters:parametersFetchData
+                 interfaceState:selfInterfaceState];
   }
   
   _rangeIsValid = YES;

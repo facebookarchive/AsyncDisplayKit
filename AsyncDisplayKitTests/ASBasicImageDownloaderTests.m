@@ -45,7 +45,7 @@
                         }];
 #pragma clang diagnostic pop
 
-  [self waitForExpectationsWithTimeout:3 handler:nil];
+  [self waitForExpectationsWithTimeout:30 handler:nil];
 }
 
 @end

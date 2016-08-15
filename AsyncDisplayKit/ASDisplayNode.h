@@ -750,6 +750,23 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASDisplayNode (LayoutTransitioning)
 
 /**
+ * @abstract The amount of time it takes to complete the default transition animation. Default is 0.2.
+ */
+@property (nonatomic, assign) NSTimeInterval defaultLayoutTransitionDuration;
+
+/**
+ * @abstract The amount of time (measured in seconds) to wait before beginning the default transition animation.
+ *           Default is 0.0.
+ */
+@property (nonatomic, assign) NSTimeInterval defaultLayoutTransitionDelay;
+
+/**
+ * @abstract A mask of options indicating how you want to perform the default transition animations.
+ *           For a list of valid constants, see UIViewAnimationOptions.
+ */
+@property (nonatomic, assign) UIViewAnimationOptions defaultLayoutTransitionOptions;
+
+/**
  * @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.
  */
 - (void)animateLayoutTransition:(nonnull id<ASContextTransitioning>)context;
@@ -796,8 +813,24 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /*
- ASDisplayNode participates in ASAsyncTransactions, so you can determine when your subnodes are done rendering.
- See: -(void)asyncdisplaykit_asyncTransactionContainerStateDidChange in ASDisplayNodeSubclass.h
+ * ASDisplayNode support for automatic subnode management.
+ */
+@interface ASDisplayNode (AutomaticSubnodeManagement)
+
+/**
+ * @abstract A boolean that shows whether the node automatically inserts and removes nodes based on the presence or
+ * absence of the node and its subnodes is completely determined in its layoutSpecThatFits: method.
+ *
+ * @discussion If flag is YES the node no longer require addSubnode: or removeFromSupernode method calls. The presence
+ * or absence of subnodes is completely determined in its layoutSpecThatFits: method.
+ */
+@property (nonatomic, assign) BOOL automaticallyManagesSubnodes;
+
+@end
+
+/*
+ * ASDisplayNode participates in ASAsyncTransactions, so you can determine when your subnodes are done rendering.
+ * See: -(void)asyncdisplaykit_asyncTransactionContainerStateDidChange in ASDisplayNodeSubclass.h
  */
 @interface ASDisplayNode (ASDisplayNodeAsyncTransactionContainer) <ASDisplayNodeAsyncTransactionContainer>
 @end
@@ -812,7 +845,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)addSubnode:(nonnull ASDisplayNode *)node;
 @end
 
-/** CALayer(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to a CALayer. */
+/*
+ * CALayer(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to a CALayer.
+ */
 @interface CALayer (AsyncDisplayKit)
 /**
  * Convenience method, equivalent to [layer addSublayer:node.layer].
@@ -872,6 +907,17 @@ NS_ASSUME_NONNULL_BEGIN
  * @deprecated Deprecated in version 2.0: Use cancelLayoutTransition
  */
 - (void)cancelLayoutTransitionsInProgress ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * @abstract A boolean that shows whether the node automatically inserts and removes nodes based on the presence or
+ * absence of the node and its subnodes is completely determined in its layoutSpecThatFits: method.
+ *
+ * @discussion If flag is YES the node no longer require addSubnode: or removeFromSupernode method calls. The presence
+ * or absence of subnodes is completely determined in its layoutSpecThatFits: method.
+ *
+ * @deprecated Deprecated in version 2.0: Use automaticallyManagesSubnodes
+ */
+@property (nonatomic, assign) BOOL usesImplicitHierarchyManagement ASDISPLAYNODE_DEPRECATED;
 
 - (void)reclaimMemory ASDISPLAYNODE_DEPRECATED;
 - (void)recursivelyReclaimMemory ASDISPLAYNODE_DEPRECATED;
