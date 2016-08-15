@@ -43,6 +43,19 @@ static NSArray *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
   return subnodes;
 }
 
+- (void)testDefaultStackLayoutableFlexProperties
+{
+  ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
+  
+  XCTAssertEqual(displayNode.flexShrink, YES);
+  XCTAssertEqual(displayNode.flexGrow, NO);
+  
+  const ASRelativeDimension unconstrainedDimension = ASRelativeDimensionUnconstrained;
+  const ASRelativeDimension flexBasis = displayNode.flexBasis;
+  XCTAssertEqual(flexBasis.type, unconstrainedDimension.type);
+  XCTAssertEqual(flexBasis.value, unconstrainedDimension.value);
+}
+
 - (void)testStackLayoutSpecWithJustify:(ASStackLayoutJustifyContent)justify
                                   flex:(BOOL)flex
                              sizeRange:(ASSizeRange)sizeRange
