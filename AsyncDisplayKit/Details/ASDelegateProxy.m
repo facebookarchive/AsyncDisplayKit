@@ -91,8 +91,7 @@
           selector == @selector(collectionView:nodeForItemAtIndexPath:) ||
           selector == @selector(collectionView:nodeBlockForItemAtIndexPath:) ||
           selector == @selector(collectionView:numberOfItemsInSection:) ||
-          selector == @selector(collectionView:constrainedSizeForNodeAtIndexPath:) ||
-          selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)
+          selector == @selector(collectionView:constrainedSizeForNodeAtIndexPath:)
           );
 }
 
