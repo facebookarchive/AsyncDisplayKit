@@ -10,7 +10,7 @@
 
 #import <FBSnapshotTestCase/FBSnapshotTestCase.h>
 
-#import <AsyncDisplayKit/ASDisplayNode.h>
+@class ASDisplayNode;
 
 #define ASSnapshotVerifyNode(node__, identifier__) \
 { \

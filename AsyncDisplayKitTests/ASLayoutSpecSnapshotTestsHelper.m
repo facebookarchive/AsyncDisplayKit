@@ -15,7 +15,7 @@
 #import "ASLayout.h"
 
 @interface ASTestNode : ASDisplayNode
-- (void)setLayoutSpecUnderTest:(ASLayoutSpec *)layoutSpecUnderTest sizeRange:(ASSizeRange)sizeRange;
+@property (strong, nonatomic, nullable) ASLayoutSpec *layoutSpecUnderTest;
 @end
 
 @implementation ASLayoutSpecSnapshotTestCase
@@ -37,18 +37,15 @@
     [node addSubnode:subnode];
   }
   
-  [node setLayoutSpecUnderTest:layoutSpec sizeRange:sizeRange];
+  node.layoutSpecUnderTest = layoutSpec;
   
+  [node measureWithSizeRange:sizeRange];
   ASSnapshotVerifyNode(node, identifier);
 }
 
 @end
 
 @implementation ASTestNode
-{
-  ASLayout *_layoutUnderTest;
-}
-
 - (instancetype)init
 {
   if (self = [super init]) {
@@ -57,22 +54,9 @@
   return self;
 }
 
-- (void)setLayoutSpecUnderTest:(ASLayoutSpec *)layoutSpecUnderTest sizeRange:(ASSizeRange)sizeRange
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASLayout *layout = [layoutSpecUnderTest measureWithSizeRange:sizeRange];
-  layout.position = CGPointZero;
-  layout = [ASLayout layoutWithLayoutableObject:self
-                           constrainedSizeRange:sizeRange
-                                           size:layout.size
-                                     sublayouts:@[layout]];
-  _layoutUnderTest = [layout filteredNodeLayoutTree];
-  self.frame = CGRectMake(0, 0, _layoutUnderTest.size.width, _layoutUnderTest.size.height);
-  [self measure:_layoutUnderTest.size];
-}
-
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-{
-  return _layoutUnderTest;
+  return _layoutSpecUnderTest;
 }
 
 @end
