@@ -893,8 +893,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
  */
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
 {
+  if ([context isAnimated] == NO) {
+    [self __layoutSublayouts];
+    [context completeTransition:YES];
+    return;
+  }
+ 
   ASDisplayNode *node = self;
-
+  
   NSAssert(node.isNodeLoaded == YES, @"Invalid node state");
   NSAssert([context isAnimated] == YES, @"Can't animate a non-animatable context");
   

@@ -63,7 +63,8 @@
   [super didLoad];
   
   ASCollectionView *cv = self.view;
-  cv.asyncDelegate = self;
+  cv.asyncDataSource = _proxyDataSource ?: self;
+  cv.asyncDelegate = _proxyDelegate ?: self;
 #if TARGET_OS_IOS
   cv.pagingEnabled = YES;
   cv.scrollsToTop = NO;
