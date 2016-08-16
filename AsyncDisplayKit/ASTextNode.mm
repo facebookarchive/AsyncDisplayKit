@@ -27,6 +27,8 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
+#import "CGRect+ASConvenience.h"
+
 static const NSTimeInterval ASTextNodeHighlightFadeOutDuration = 0.15;
 static const NSTimeInterval ASTextNodeHighlightFadeInDuration = 0.1;
 static const CGFloat ASTextNodeHighlightLightOpacity = 0.11;
@@ -910,7 +912,7 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
   // FIXME: Replace this implementation with reusable CALayers that have .backgroundColor set.
   // This would completely eliminate the memory and performance cost of the backing store.
   CGSize size = self.calculatedSize;
-  if (CGSizeEqualToSize(size, CGSizeZero)) {
+  if ((size.width * size.height) < CGFLOAT_EPSILON) {
     return nil;
   }
   
