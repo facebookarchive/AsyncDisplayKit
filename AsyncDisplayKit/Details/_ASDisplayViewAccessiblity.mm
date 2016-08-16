@@ -95,21 +95,17 @@ static void CollectAccessibilityElementsForView(_ASDisplayView *view, NSMutableA
     if (subnode.isAccessibilityElement) {
       
       // An accessiblityElement can either be a UIView or a UIAccessibilityElement
-      id accessiblityElement = nil;
       if (subnode.isLayerBacked) {
         // No view for layer backed nodes exist. It's necessary to create a UIAccessibilityElement that represents this node
-        accessiblityElement = [UIAccessibilityElement accessibilityElementWithContainer:view node:subnode];
+        UIAccessibilityElement *accessiblityElement = [UIAccessibilityElement accessibilityElementWithContainer:view node:subnode];
         
         CGRect frame = [node convertRect:subnode.bounds fromNode:subnode];
         [accessiblityElement setAccessibilityFrame:UIAccessibilityConvertFrameToScreenCoordinates(frame, view)];
         [elements addObject:accessiblityElement];
       } else {
-        // Accessiblity element is not layer backed just translate the view's frame to the container and add the view
-        accessiblityElement = subnode.view;
-        [accessiblityElement setAccessibilityFrame:UIAccessibilityConvertFrameToScreenCoordinates(subnode.frame, view)];
-        [elements addObject:accessiblityElement];
+        // Accessiblity element is not layer backed just add the view as accessibility element
+        [elements addObject:subnode.view];
       }
-      
     } else if (subnode.isLayerBacked) {
       // Go down the hierarchy of the layer backed subnode and collect all of the UIAccessibilityElement
       CollectUIAccessibilityElementsForNode(subnode, node, view, elements);
