@@ -141,7 +141,7 @@ static void CollectAccessibilityElementsForView(_ASDisplayView *view, NSMutableA
     return @[];
   }
   
-  CGRect screenFrame = UIAccessibilityConvertFrameToScreenCoordinates(self.frame, self);
+  CGRect screenFrame = UIAccessibilityConvertFrameToScreenCoordinates(self.bounds, self);
   if (_accessibleElements != nil && CGRectEqualToRect(_lastAccessibleElementsFrame, screenFrame)) {
     return _accessibleElements;
   }
@@ -168,7 +168,7 @@ static void CollectAccessibilityElementsForView(_ASDisplayView *view, NSMutableA
 
 - (NSInteger)indexOfAccessibilityElement:(id)element
 {
-  return [self.accessibleElements indexOfObject:element];
+  return [self.accessibleElements indexOfObjectIdenticalTo:element];
 }
 
 @end
