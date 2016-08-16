@@ -14,6 +14,14 @@
 #import "ASBaseDefines.h"
 #import "ASLayoutController.h"
 
+#ifndef CGFLOAT_EPSILON
+  #if CGFLOAT_IS_DOUBLE
+    #define CGFLOAT_EPSILON DBL_EPSILON
+  #else
+    #define CGFLOAT_EPSILON FLT_EPSILON
+  #endif
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
