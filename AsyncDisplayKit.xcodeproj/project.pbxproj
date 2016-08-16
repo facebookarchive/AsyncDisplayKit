@@ -225,6 +225,7 @@
 		8021EC1D1D2B00B100799119 /* UIImage+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 8021EC1A1D2B00B100799119 /* UIImage+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8021EC1E1D2B00B100799119 /* UIImage+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */; };
 		8021EC1F1D2B00B100799119 /* UIImage+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */; };
+		81E95C141D62639600336598 /* ASTextNodeSnapshotTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 81E95C131D62639600336598 /* ASTextNodeSnapshotTests.m */; };
 		81EE38501C8E94F000456208 /* ASRunLoopQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = 81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */; };
 		83A7D95A1D44542100BF333E /* ASWeakMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 83A7D9591D44542100BF333E /* ASWeakMap.m */; };
 		83A7D95B1D44547700BF333E /* ASWeakMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 83A7D9591D44542100BF333E /* ASWeakMap.m */; };
@@ -977,6 +978,7 @@
 		7AB338681C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRelativeLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
 		8021EC1A1D2B00B100799119 /* UIImage+ASConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ASConvenience.h"; sourceTree = "<group>"; };
 		8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ASConvenience.m"; sourceTree = "<group>"; };
+		81E95C131D62639600336598 /* ASTextNodeSnapshotTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTextNodeSnapshotTests.m; sourceTree = "<group>"; };
 		81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASRunLoopQueue.h; path = ../ASRunLoopQueue.h; sourceTree = "<group>"; };
 		81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASRunLoopQueue.mm; path = ../ASRunLoopQueue.mm; sourceTree = "<group>"; };
 		83A7D9581D44542100BF333E /* ASWeakMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASWeakMap.h; sourceTree = "<group>"; };
@@ -1336,6 +1338,7 @@
 				ACF6ED5A1B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm */,
 				ACF6ED5B1B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm */,
 				AC026B571BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m */,
+				81E95C131D62639600336598 /* ASTextNodeSnapshotTests.m */,
 				ACF6ED571B178DC700DA7C62 /* ASLayoutSpecSnapshotTestsHelper.h */,
 				ACF6ED581B178DC700DA7C62 /* ASLayoutSpecSnapshotTestsHelper.m */,
 				242995D21B29743C00090100 /* ASBasicImageDownloaderTests.m */,
@@ -2195,6 +2198,7 @@
 				254C6B541BF8FF2A003EC431 /* ASTextKitTests.mm in Sources */,
 				05EA6FE71AC0966E00E35788 /* ASSnapshotTestCase.mm in Sources */,
 				ACF6ED631B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm in Sources */,
+				81E95C141D62639600336598 /* ASTextNodeSnapshotTests.m in Sources */,
 				3C9C128519E616EF00E942A0 /* ASTableViewTests.m in Sources */,
 				AEEC47E41C21D3D200EC1693 /* ASVideoNodeTests.m in Sources */,
 				254C6B521BF8FE6D003EC431 /* ASTextKitTruncationTests.mm in Sources */,
