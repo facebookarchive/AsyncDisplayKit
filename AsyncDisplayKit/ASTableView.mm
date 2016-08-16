@@ -496,6 +496,31 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     }
   }
   
+  BOOL needsHeightQuery = NO;
+  for (ASCellNode *dirtyNode in _dirtyNodes) {
+    // Measure the cell node
+    ASSizeRange constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, 0), CGSizeMake(_nodesConstrainedWidth, CGFLOAT_MAX));
+    
+    CGSize oldSize = dirtyNode.frame.size;
+    CGSize calculatedSize = [[dirtyNode measureWithSizeRange:constrainedSize] size];
+    
+    // Update Nodes bounds
+    dirtyNode.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
+    
+    // Layout node synchronously
+    [dirtyNode layoutIfNeeded];
+    
+    // Update height query
+    needsHeightQuery = needsHeightQuery || CGSizeEqualToSize(oldSize, dirtyNode.frame.size) == NO;
+  }
+
+  [_dirtyNodes removeAllObjects];
+  
+  if (needsHeightQuery) {
+    [super beginUpdates];
+    [super endUpdates];
+  }
+
   // To ensure _nodesConstrainedWidth is up-to-date for every usage, this call to super must be done last
   [super layoutSubviews];
   [_rangeController updateIfNeeded];
@@ -1169,31 +1194,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)didLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell
 {
-  ASCellNode *node = tableViewCell.node;
-  if (node == nil) {
-    return;
-  }
-  
-  // Table view cells should always fill its content view width.
-  // Normally the content view width equals to the constrained size width (which equals to the table view width).
-  // If there is a mismatch between these values, for example after the table view entered or left editing mode,
-  // content view width is preferred and used to re-measure the cell node.
-  if ([_dirtyNodes containsObject:node]) {
-    [_dirtyNodes removeObject:node];
-
-    // Re-measurement is done on main to ensure thread affinity. In the worst case, this is as fast as UIKit's implementation.
-    //
-    // Unloaded nodes *could* be re-measured off the main thread, but only with the assumption that content view width
-    // is the same for all cells (because there is no easy way to get that individual value before the node being assigned to a _ASTableViewCell).
-    // Also, in many cases, some nodes may not need to be re-measured at all, such as when user enters and then immediately leaves editing mode.
-    // To avoid premature optimization and making such assumption, as well as to keep ASTableView simple, re-measurement is strictly done on main.
-    ASSizeRange constrainedSize = ASSizeRangeMake(CGSizeMake(contentViewWidth, 0), CGSizeMake(contentViewWidth, CGFLOAT_MAX));
-
-    [self beginUpdates];
-    CGSize calculatedSize = [[node measureWithSizeRange:constrainedSize] size];
-    node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
-    [self endUpdates];
-  }
+  // No op for now
 }
 
 #pragma mark - ASCellNodeDelegate
@@ -1231,6 +1232,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return;
   }
   
+  // Add the notes to dirty nodes to layout in next layout pass of table view
   [_dirtyNodes addObject:node];
   
   if (_queuedNodeHeightUpdate) {
@@ -1249,8 +1251,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   _queuedNodeHeightUpdate = NO;
 
-  [super beginUpdates];
-  [super endUpdates];
+  [self setNeedsLayout];
 }
 
 #pragma mark - Memory Management
