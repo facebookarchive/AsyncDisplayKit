@@ -26,11 +26,15 @@
 @implementation _ASDisplayView
 {
   __unsafe_unretained ASDisplayNode *_node;  // Though UIView has a .node property added via category, since we can add an ivar to a subclass, use that for performance.
+
   BOOL _inHitTest;
   BOOL _inPointInside;
+
   NSArray *_accessibleElements;
+  CGRect _lastAccessibleElementsFrame;
 }
 
+@synthesize accessibleElements = _accessibleElements;
 @synthesize asyncdisplaykit_node = _node;
 
 + (Class)layerClass
@@ -126,7 +130,6 @@
       [newSuperview.asyncdisplaykit_node addSubnode:_node];
     }
   }
-
 }
 
 - (void)didMoveToSuperview
@@ -167,6 +170,24 @@
       [_node removeFromSupernode];
     }
   }
+}
+
+- (void)addSubview:(UIView *)view
+{
+  [super addSubview:view];
+  
+#ifndef ASDK_ACCESSIBILITY_DISABLE
+  [self setAccessibleElements:nil];
+#endif
+}
+
+- (void)willRemoveSubview:(UIView *)subview
+{
+  [super willRemoveSubview:subview];
+  
+#ifndef ASDK_ACCESSIBILITY_DISABLE
+  [self setAccessibleElements:nil];
+#endif
 }
 
 - (void)setNeedsDisplay

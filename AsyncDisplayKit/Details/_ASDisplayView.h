@@ -16,6 +16,8 @@
 
 @interface _ASDisplayView : UIView
 
+@property (copy, nonatomic) NSArray *accessibleElements;
+
 // These methods expose a way for ASDisplayNode touch events to let the view call super touch events
 // Some UIKit mechanisms, like UITableView and UICollectionView selection handling, require this to work
 - (void)__forwardTouchesBegan:(NSSet *)touches withEvent:(UIEvent *)event;
