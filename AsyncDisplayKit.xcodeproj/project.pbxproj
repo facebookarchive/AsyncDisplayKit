@@ -265,7 +265,7 @@
 		9C70F20B1CDBE9A4007D6C76 /* ASDataController+Subclasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF61BBB3D690087C538 /* ASDataController+Subclasses.h */; };
 		9C70F20C1CDBE9B6007D6C76 /* ASCollectionDataController.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF21BBB3D690087C538 /* ASCollectionDataController.h */; };
 		9C70F20D1CDBE9CB007D6C76 /* ASDefaultPlayButton.h in Headers */ = {isa = PBXBuildFile; fileRef = AEB7B0181C5962EA00662EF4 /* ASDefaultPlayButton.h */; };
-		9C70F20E1CDBE9E5007D6C76 /* NSArray+Diffing.h in Headers */ = {isa = PBXBuildFile; fileRef = DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */; };
+		9C70F20E1CDBE9E5007D6C76 /* NSArray+Diffing.h in Headers */ = {isa = PBXBuildFile; fileRef = DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C70F20F1CDBE9FF007D6C76 /* ASLayoutManager.h in Headers */ = {isa = PBXBuildFile; fileRef = B30BF6501C5964B0004FCD53 /* ASLayoutManager.h */; };
 		9C8221961BA237B80037F19A /* ASStackBaselinePositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */; };
 		9C8221971BA237B80037F19A /* ASStackBaselinePositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9C8221941BA237B80037F19A /* ASStackBaselinePositionedLayout.mm */; };
@@ -410,7 +410,7 @@
 		CC3B20841C3F76D600798563 /* ASPendingStateController.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20811C3F76D600798563 /* ASPendingStateController.h */; };
 		CC3B20851C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
 		CC3B20861C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
-		CC3B208A1C3F7A5400798563 /* ASWeakSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20871C3F7A5400798563 /* ASWeakSet.h */; };
+		CC3B208A1C3F7A5400798563 /* ASWeakSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20871C3F7A5400798563 /* ASWeakSet.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC3B208B1C3F7A5400798563 /* ASWeakSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20881C3F7A5400798563 /* ASWeakSet.m */; };
 		CC3B208C1C3F7A5400798563 /* ASWeakSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20881C3F7A5400798563 /* ASWeakSet.m */; };
 		CC3B208E1C3F7D0A00798563 /* ASWeakSetTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */; };
@@ -1446,6 +1446,10 @@
 				058D09FF195D050800B7D73C /* UIView+ASConvenience.h */,
 				9C70F2011CDA4EFA007D6C76 /* ASTraitCollection.h */,
 				9C70F2021CDA4EFA007D6C76 /* ASTraitCollection.m */,
+				CC3B20871C3F7A5400798563 /* ASWeakSet.h */,
+				CC3B20881C3F7A5400798563 /* ASWeakSet.m */,
+				DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */,
+				DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */,
 			);
 			path = Details;
 			sourceTree = "<group>";
@@ -1514,10 +1518,6 @@
 				ACF6ED4A1B17847A00DA7C62 /* ASStackUnpositionedLayout.mm */,
 				83A7D9581D44542100BF333E /* ASWeakMap.h */,
 				83A7D9591D44542100BF333E /* ASWeakMap.m */,
-				CC3B20871C3F7A5400798563 /* ASWeakSet.h */,
-				CC3B20881C3F7A5400798563 /* ASWeakSet.m */,
-				DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */,
-				DBC452DA1C5BF64600B16017 /* NSArray+Diffing.m */,
 				8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */,
 				8B0768B21CE752EC002E1453 /* ASDefaultPlaybackButton.m */,
 			);

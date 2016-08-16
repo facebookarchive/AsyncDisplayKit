@@ -11,6 +11,7 @@
 //
 
 #import "NSArray+Diffing.h"
+#import "ASAssert.h"
 
 @implementation NSArray (Diffing)
 
@@ -58,12 +59,24 @@
   NSInteger selfCount = self.count;
   NSInteger arrayCount = array.count;
   
-  NSInteger lengths[selfCount+1][arrayCount+1];
+  // Allocate the diff map in the heap so we don't blow the stack for large arrays.
+  NSInteger (*lengths)[arrayCount+1] = NULL;
+  size_t lengthsSize = ((selfCount+1) * sizeof(*lengths));
+  // Would rather use initWithCapacity: to skip the zeroing, but TECHNICALLY
+  // `mutableBytes` is only guaranteed to be non-NULL if the data object has a non-zero length.
+  NS_VALID_UNTIL_END_OF_SCOPE NSMutableData *lengthsData = [[NSMutableData alloc] initWithLength:lengthsSize];
+  lengths = lengthsData.mutableBytes;
+  if (lengths == NULL) {
+    ASDisplayNodeFailAssert(@"Failed to allocate memory for diffing with size %tu", lengthsSize);
+    return nil;
+  }
+  
   for (NSInteger i = 0; i <= selfCount; i++) {
+    id selfObj = i > 0 ? self[i-1] : nil;
     for (NSInteger j = 0; j <= arrayCount; j++) {
       if (i == 0 || j == 0) {
         lengths[i][j] = 0;
-      } else if (comparison(self[i-1], array[j-1])) {
+      } else if (comparison(selfObj, array[j-1])) {
         lengths[i][j] = 1 + lengths[i-1][j-1];
       } else {
         lengths[i][j] = MAX(lengths[i-1][j], lengths[i][j-1]);
