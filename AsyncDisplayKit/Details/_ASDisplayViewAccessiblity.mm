@@ -41,11 +41,22 @@ static void SortAccessibilityElements(NSMutableArray *elements)
   [elements sortUsingComparator:comparator];
 }
 
-@implementation UIAccessibilityElement (_ASDisplayView)
+@interface ASAccessibilityElement : UIAccessibilityElement
 
-+ (UIAccessibilityElement *)accessibilityElementWithContainer:(id)container node:(ASDisplayNode *)node
+@property (nonatomic, strong) ASDisplayNode *node;
+@property (nonatomic, strong) ASDisplayNode *containerNode;
+
++ (ASAccessibilityElement *)accessibilityElementWithContainer:(UIView *)container node:(ASDisplayNode *)node containerNode:(ASDisplayNode *)containerNode;
+
+@end
+
+@implementation ASAccessibilityElement
+
++ (ASAccessibilityElement *)accessibilityElementWithContainer:(UIView *)container node:(ASDisplayNode *)node containerNode:(ASDisplayNode *)containerNode
 {
-  UIAccessibilityElement *accessibilityElement = [[UIAccessibilityElement alloc] initWithAccessibilityContainer:container];
+  ASAccessibilityElement *accessibilityElement = [[ASAccessibilityElement alloc] initWithAccessibilityContainer:container];
+  accessibilityElement.node = node;
+  accessibilityElement.containerNode = containerNode;
   accessibilityElement.accessibilityIdentifier = node.accessibilityIdentifier;
   accessibilityElement.accessibilityLabel = node.accessibilityLabel;
   accessibilityElement.accessibilityHint = node.accessibilityHint;
@@ -54,8 +65,14 @@ static void SortAccessibilityElements(NSMutableArray *elements)
   return accessibilityElement;
 }
 
-@end
+- (CGRect)accessibilityFrame
+{
+  CGRect accessibilityFrame = [self.containerNode convertRect:self.node.bounds fromNode:self.node];
+  accessibilityFrame = UIAccessibilityConvertFrameToScreenCoordinates(accessibilityFrame, self.accessibilityContainer);
+  return accessibilityFrame;
+}
 
+@end
 
 #pragma mark - _ASDisplayView / UIAccessibilityContainer
 
@@ -68,7 +85,7 @@ static void CollectUIAccessibilityElementsForNode(ASDisplayNode *node, ASDisplay
     // For every subnode that is layer backed or it's supernode has shouldRasterizeDescendants enabled
     // we have to create a UIAccessibilityElement as no view for this node exists
     if (currentNode != containerNode && currentNode.isAccessibilityElement) {
-      UIAccessibilityElement *accessibilityElement = [UIAccessibilityElement accessibilityElementWithContainer:container node:currentNode];
+      UIAccessibilityElement *accessibilityElement = [ASAccessibilityElement accessibilityElementWithContainer:container node:currentNode containerNode:containerNode];
       // As the node hierarchy is flattened it's necessary to convert the frame for each subnode in the tree to the
       // coordinate system of the supernode
       CGRect frame = [containerNode convertRect:currentNode.bounds fromNode:currentNode];
@@ -97,7 +114,7 @@ static void CollectAccessibilityElementsForView(_ASDisplayView *view, NSMutableA
       // An accessiblityElement can either be a UIView or a UIAccessibilityElement
       if (subnode.isLayerBacked) {
         // No view for layer backed nodes exist. It's necessary to create a UIAccessibilityElement that represents this node
-        UIAccessibilityElement *accessiblityElement = [UIAccessibilityElement accessibilityElementWithContainer:view node:subnode];
+        UIAccessibilityElement *accessiblityElement = [ASAccessibilityElement accessibilityElementWithContainer:view node:subnode containerNode:node];
         
         CGRect frame = [node convertRect:subnode.bounds fromNode:subnode];
         [accessiblityElement setAccessibilityFrame:UIAccessibilityConvertFrameToScreenCoordinates(frame, view)];
@@ -118,7 +135,6 @@ static void CollectAccessibilityElementsForView(_ASDisplayView *view, NSMutableA
 
 @interface _ASDisplayView () {
   NSArray *_accessibleElements;
-  CGRect _lastAccessibleElementsFrame;
 }
 
 @end
@@ -139,12 +155,9 @@ static void CollectAccessibilityElementsForView(_ASDisplayView *view, NSMutableA
     return @[];
   }
   
-  CGRect screenFrame = UIAccessibilityConvertFrameToScreenCoordinates(self.bounds, self);
-  if (_accessibleElements != nil && CGRectEqualToRect(_lastAccessibleElementsFrame, screenFrame)) {
+  if (_accessibleElements != nil) {
     return _accessibleElements;
   }
-  
-  _lastAccessibleElementsFrame = screenFrame;
   
   NSMutableArray *accessibleElements = [NSMutableArray array];
   CollectAccessibilityElementsForView(self, accessibleElements);
