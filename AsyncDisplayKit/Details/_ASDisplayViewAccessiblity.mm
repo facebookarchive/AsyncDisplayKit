@@ -86,10 +86,6 @@ static void CollectUIAccessibilityElementsForNode(ASDisplayNode *node, ASDisplay
     // we have to create a UIAccessibilityElement as no view for this node exists
     if (currentNode != containerNode && currentNode.isAccessibilityElement) {
       UIAccessibilityElement *accessibilityElement = [ASAccessibilityElement accessibilityElementWithContainer:container node:currentNode containerNode:containerNode];
-      // As the node hierarchy is flattened it's necessary to convert the frame for each subnode in the tree to the
-      // coordinate system of the supernode
-      CGRect frame = [containerNode convertRect:currentNode.bounds fromNode:currentNode];
-      accessibilityElement.accessibilityFrame = UIAccessibilityConvertFrameToScreenCoordinates(frame, container);
       [elements addObject:accessibilityElement];
     }
   });
@@ -115,9 +111,6 @@ static void CollectAccessibilityElementsForView(_ASDisplayView *view, NSMutableA
       if (subnode.isLayerBacked) {
         // No view for layer backed nodes exist. It's necessary to create a UIAccessibilityElement that represents this node
         UIAccessibilityElement *accessiblityElement = [ASAccessibilityElement accessibilityElementWithContainer:view node:subnode containerNode:node];
-        
-        CGRect frame = [node convertRect:subnode.bounds fromNode:subnode];
-        [accessiblityElement setAccessibilityFrame:UIAccessibilityConvertFrameToScreenCoordinates(frame, view)];
         [elements addObject:accessiblityElement];
       } else {
         // Accessiblity element is not layer backed just add the view as accessibility element
