@@ -176,14 +176,18 @@
 {
   [super addSubview:view];
   
+#ifndef ASDK_ACCESSIBILITY_DISABLE
   [self setAccessibleElements:nil];
+#endif
 }
 
 - (void)willRemoveSubview:(UIView *)subview
 {
   [super willRemoveSubview:subview];
   
+#ifndef ASDK_ACCESSIBILITY_DISABLE
   [self setAccessibleElements:nil];
+#endif
 }
 
 - (void)setNeedsDisplay

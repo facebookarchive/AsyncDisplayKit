@@ -8,6 +8,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#ifndef ASDK_ACCESSIBILITY_DISABLE
+
 #import "_ASDisplayView.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
@@ -172,3 +174,5 @@ static void CollectAccessibilityElementsForView(_ASDisplayView *view, NSMutableA
 }
 
 @end
+
+#endif
