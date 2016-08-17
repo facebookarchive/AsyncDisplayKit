@@ -50,12 +50,14 @@
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   std::vector<CGSize> sizeOptions;
+  // TODO: sizeRange: isValidForLayout() call should not be necessary if INFINITY is used
   if (!isinf(constrainedSize.max.width) && isValidForLayout(constrainedSize.max.width)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
       constrainedSize.max.width,
       ASFloorPixelValue(_ratio * constrainedSize.max.width)
     }));
   }
+  // TODO: sizeRange: isValidForLayout() call should not be necessary if INFINITY is used
   if (!isinf(constrainedSize.max.height) && isValidForLayout(constrainedSize.max.width)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
       ASFloorPixelValue(constrainedSize.max.height / _ratio),

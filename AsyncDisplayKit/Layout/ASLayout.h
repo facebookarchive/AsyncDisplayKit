@@ -22,17 +22,17 @@ extern CGPoint const CGPointNull;
 extern BOOL CGPointIsNull(CGPoint point);
 
 /**
- Safely calculates the layout of the given root layoutable by guarding against nil nodes.
- @param rootLayoutable The root node to calculate the layout for.
- @param sizeRange The size range to calculate the root layout within.
+ * Safely calculates the layout of the given root layoutable by guarding against nil nodes.
+ * @param rootLayoutable The root node to calculate the layout for.
+ * @param sizeRange The size range to calculate the root layout within.
  */
 ASLayout *ASCalculateRootLayout(id<ASLayoutable> rootLayoutable, const ASSizeRange sizeRange);
 
 /**
- Safely computes the layout of the given node by guarding against nil nodes.
- @param component The component to calculate the layout for.
- @param sizeRange The size range to calculate the node layout within.
- @param parentSize The parent size of the node to calculate the layout for.
+ * Safely computes the layout of the given node by guarding against nil nodes.
+ * @param component The component to calculate the layout for.
+ * @param sizeRange The size range to calculate the node layout within.
+ * @param parentSize The parent size of the node to calculate the layout for.
  */
 ASLayout *ASCalculateLayout(id<ASLayoutable> layoutable, const ASSizeRange sizeRange, const CGSize parentSize);
 
