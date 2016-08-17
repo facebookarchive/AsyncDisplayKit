@@ -336,7 +336,7 @@ ASLayout *ASCalculateLayout(id<ASLayoutable> layoutable, const ASSizeRange sizeR
 ASLayout *ASCalculateRootLayout(id<ASLayoutable> rootLayoutable, const ASSizeRange sizeRange)
 {
   ASLayout *layout = ASCalculateLayout(rootLayoutable, sizeRange, sizeRange.max);
-  // TODO: sizeRange: Add validation?
+  // TODO: sizeRange: Add specific validation?
   return layout;
 }
 
