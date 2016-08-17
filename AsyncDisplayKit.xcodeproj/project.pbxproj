@@ -438,7 +438,7 @@
 		DE4843DB1C93EAB100A1F33B /* ASLayoutTransition.mm in Sources */ = {isa = PBXBuildFile; fileRef = E52405B21C8FEF03004DC8E7 /* ASLayoutTransition.mm */; };
 		DE4843DC1C93EAC100A1F33B /* ASLayoutTransition.h in Headers */ = {isa = PBXBuildFile; fileRef = E52405B41C8FEF16004DC8E7 /* ASLayoutTransition.h */; };
 		DE6EA3231C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = DE6EA3211C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h */; };
-		DE72E2AC1D4D90E000DDB258 /* ASLayoutSpec+Private.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 69F6058C1D3DA27E00C8CA38 /* ASLayoutSpec+Private.h */; };
+		DE72E2AC1D4D90E000DDB258 /* (null) in CopyFiles */ = {isa = PBXBuildFile; };
 		DE84918D1C8FFF2B003D89E9 /* ASRunLoopQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DE84918E1C8FFF9F003D89E9 /* ASRunLoopQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = 81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */; };
 		DE8BEAC21C2DF3FC00D57C12 /* ASDelegateProxy.h in Headers */ = {isa = PBXBuildFile; fileRef = DE8BEABF1C2DF3FC00D57C12 /* ASDelegateProxy.h */; };
@@ -709,7 +709,7 @@
 				F7CE6C611D2CDB3E00BE4C15 /* ASLayoutable.h in CopyFiles */,
 				F7CE6C621D2CDB3E00BE4C15 /* ASLayoutablePrivate.h in CopyFiles */,
 				F7CE6C631D2CDB3E00BE4C15 /* ASLayoutSpec.h in CopyFiles */,
-				DE72E2AC1D4D90E000DDB258 /* ASLayoutSpec+Private.h in CopyFiles */,
+				DE72E2AC1D4D90E000DDB258 /* (null) in CopyFiles */,
 				F7CE6C641D2CDB3E00BE4C15 /* ASOverlayLayoutSpec.h in CopyFiles */,
 				F7CE6C651D2CDB3E00BE4C15 /* ASRatioLayoutSpec.h in CopyFiles */,
 				F7CE6C661D2CDB3E00BE4C15 /* ASRelativeLayoutSpec.h in CopyFiles */,
@@ -1877,12 +1877,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 058D09D2195D04C000B7D73C /* Build configuration list for PBXNativeTarget "AsyncDisplayKitTests" */;
 			buildPhases = (
+				B29C7F4E5E72CBDC82939605 /* 📦 Check Pods Manifest.lock */,
 				2E61B6A0DB0F436A9DDBE86F /* [CP] Check Pods Manifest.lock */,
 				058D09B8195D04C000B7D73C /* Sources */,
 				058D09B9195D04C000B7D73C /* Frameworks */,
 				058D09BA195D04C000B7D73C /* Resources */,
 				3B9D88CDF51B429C8409E4B6 /* [CP] Copy Pods Resources */,
 				B130AB1AC0A1E5162E211C19 /* [CP] Embed Pods Frameworks */,
+				47FEBAC527C86C3C7E855E41 /* 📦 Embed Pods Frameworks */,
+				ED07A0DFB252FD7A96DD0460 /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -2013,6 +2016,21 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		47FEBAC527C86C3C7E855E41 /* 📦 Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		B130AB1AC0A1E5162E211C19 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2026,6 +2044,36 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B29C7F4E5E72CBDC82939605 /* 📦 Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		ED07A0DFB252FD7A96DD0460 /* 📦 Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -2491,7 +2539,9 @@
 				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AsyncDisplayKit/AsyncDisplayKit-Prefix.pch";
+				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				OTHER_CFLAGS = "-Wall";
@@ -2512,7 +2562,9 @@
 				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AsyncDisplayKit/AsyncDisplayKit-Prefix.pch";
+				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				OTHER_CFLAGS = "-Wall";
@@ -2693,7 +2745,9 @@
 				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "AsyncDisplayKit/AsyncDisplayKit-Prefix.pch";
+				GCC_TREAT_INCOMPATIBLE_POINTER_TYPE_WARNINGS_AS_ERRORS = YES;
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
+				GCC_WARN_ABOUT_MISSING_NEWLINE = YES;
 				GCC_WARN_INITIALIZER_NOT_FULLY_BRACKETED = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				OTHER_CFLAGS = "-Wall";
