@@ -71,7 +71,7 @@ struct ASTextNodeDrawParameter {
 
   UILongPressGestureRecognizer *_longPressGestureRecognizer;
 }
-@dynamic placeholderEnabled;
+@dynamic placeholderEnabled, flexShrink;
 
 #pragma mark - NSObject
 
@@ -103,6 +103,9 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     self.userInteractionEnabled = NO;
     self.needsDisplayOnBoundsChange = YES;
 
+    // Enable flexShrink by default so that text nodes wrap to multiple lines when in a stack.
+    self.flexShrink = YES;
+    
     _truncationMode = NSLineBreakByWordWrapping;
     _composedTruncationText = DefaultTruncationAttributedString();
 
