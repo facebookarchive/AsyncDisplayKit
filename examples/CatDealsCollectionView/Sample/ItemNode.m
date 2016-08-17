@@ -107,7 +107,8 @@ const CGFloat kSoldOutGBHeight = 50.0;
   self.soldOutLabelFlat.layerBacked = YES;
 
   self.soldOutLabelBackground = [[ASDisplayNode alloc] init];
-  self.soldOutLabelBackground.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(1), ASRelativeDimensionMakeWithPoints(kSoldOutGBHeight)), ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(1), ASRelativeDimensionMakeWithPoints(kSoldOutGBHeight)));
+  self.soldOutLabelBackground.sizeRange = ASSizeRangeMake(ASRelativeSizeMake(ASDimensionMakeWithPoints(1), ASDimensionMakeWithPoints(kSoldOutGBHeight)),
+                                                          ASRelativeSizeMake(ASDimensionMakeWithPoints(1), ASDimensionMakeWithPoints(kSoldOutGBHeight)));
   self.soldOutLabelBackground.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.9];
   self.soldOutLabelBackground.flexGrow = YES;
   self.soldOutLabelBackground.layerBacked = YES;
@@ -284,12 +285,13 @@ const CGFloat kSoldOutGBHeight = 50.0;
 }
 
 - (ASLayoutSpec *)imageSpecWithSize:(ASSizeRange)constrainedSize {
-  CGFloat imageRatio = [self imageRatioFromSize:constrainedSize.max];
+  CGFloat imageRatio = [self imageRatioFromSize:CGSizeFromASRelativeSize(constrainedSize.max)];
   
   ASRatioLayoutSpec *imagePlace = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:imageRatio child:self.dealImageView];
   
-  self.badge.layoutPosition = CGPointMake(0, constrainedSize.max.height - kFixedLabelsAreaHeight - kBadgeHeight);
-  self.badge.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(0), ASRelativeDimensionMakeWithPoints(kBadgeHeight)), ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(1), ASRelativeDimensionMakeWithPoints(kBadgeHeight)));
+  self.badge.layoutPosition = CGPointMake(0, constrainedSize.max.height.value - kFixedLabelsAreaHeight - kBadgeHeight);
+  self.badge.sizeRange = ASSizeRangeMake(ASRelativeSizeMake(ASDimensionMakeWithFraction(0), ASDimensionMakeWithPoints(kBadgeHeight)),
+                                         ASRelativeSizeMake(ASDimensionMakeWithFraction(1), ASDimensionMakeWithPoints(kBadgeHeight)));
   ASStaticLayoutSpec *badgePosition = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.badge]];
   
   ASOverlayLayoutSpec *badgeOverImage = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:imagePlace overlay:badgePosition];

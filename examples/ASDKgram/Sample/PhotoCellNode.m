@@ -154,7 +154,7 @@
   ASInsetLayoutSpec *footerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:footerInsets child:footerStack];
   
   // vertical stack
-  CGFloat cellWidth                  = constrainedSize.max.width;
+  CGFloat cellWidth                  = constrainedSize.max.width.value;
   _photoImageView.preferredFrameSize = CGSizeMake(cellWidth, cellWidth);              // constrain photo frame size
   
   ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];

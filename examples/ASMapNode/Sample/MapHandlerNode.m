@@ -98,7 +98,7 @@
 {
 #define SPACING 5
 #define HEIGHT 30
-  CGSize preferredSize = CGSizeMake(constrainedSize.max.width * 0.3, HEIGHT);
+  CGSize preferredSize = CGSizeMake(ASDimensionGetPoints(constrainedSize.max.width) * 0.3, HEIGHT);
 
   _latEditableNode.preferredFrameSize = _lonEditableNode.preferredFrameSize = preferredSize;
   _deltaLatEditableNode.preferredFrameSize = _deltaLonEditableNode.preferredFrameSize = preferredSize;

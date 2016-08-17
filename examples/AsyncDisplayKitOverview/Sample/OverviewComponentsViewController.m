@@ -425,9 +425,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
         verticalStackLayoutSpec.spacing = 5.0; // Spacing between children
         
         // Layout the stack layout with 100% width and 100% height of the parent node
-        ASRelativeSizeRange sizeRange = ASRelativeSizeRangeMakeWithExactRelativeDimensions(ASRelativeDimensionMakeWithFraction(1),
-                                                                                           ASRelativeDimensionMakeWithFraction(1));
-        verticalStackLayoutSpec.sizeRange = sizeRange;
+        verticalStackLayoutSpec.sizeRange = ASSizeRangeMake(ASDimensionMakeWithFraction(1), ASDimensionMakeWithFraction(1));
         
         // Wrap the static stack layout in a static spec so it will grow to the whole parent node size
         ASStaticLayoutSpec *staticLayoutSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[verticalStackLayoutSpec]];

@@ -25,7 +25,7 @@
 {
   return [ASLayout layoutWithLayoutableObject:self 
                          constrainedSizeRange:constrainedSize
-                                         size:constrainedSize.max];
+                                         size:CGSizeFromASRelativeSize(constrainedSize.max)];
 }
 
 - (void)fetchData
