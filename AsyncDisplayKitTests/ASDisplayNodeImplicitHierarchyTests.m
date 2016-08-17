@@ -19,7 +19,11 @@
 #import "ASStaticLayoutSpec.h"
 #import "ASStackLayoutSpec.h"
 
+typedef ASLayoutSpec * _Nonnull(^ASSpecTestDisplayNodeSpecBlock)(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize);
+
 @interface ASSpecTestDisplayNode : ASDisplayNode
+
+@property (nonatomic, readwrite, copy, nullable) ASSpecTestDisplayNodeSpecBlock layoutSpecBlock;
 
 /**
  Simple state identifier to allow control of current spec inside of the layoutSpecBlock
@@ -37,6 +41,11 @@
     _layoutState = @1;
   }
   return self;
+}
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  return self.layoutSpecBlock(self, constrainedSize);
 }
 
 @end
