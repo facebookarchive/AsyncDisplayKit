@@ -12,7 +12,7 @@
 
 #import <Foundation/Foundation.h>
 
-@interface ASWeakProxy : NSObject
+@interface ASWeakProxy : NSProxy
 
 @property (nonatomic, weak, readonly) id target;
 
