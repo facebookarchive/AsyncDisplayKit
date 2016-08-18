@@ -26,6 +26,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
+ASDISPLAYNODE_INLINE BOOL CGSizeHasPositiveArea(CGSize size)
+{
+  return size.width > 0 && size.height > 0;
+};
+
 struct ASDirectionalScreenfulBuffer {
   CGFloat positiveDirection; // Positive relative to iOS Core Animation layer coordinate space.
   CGFloat negativeDirection;

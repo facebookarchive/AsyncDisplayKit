@@ -1998,15 +1998,16 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"logo-square"
                                                                     ofType:@"png" inDirectory:@"TestResources"];
   UIImage *image = [UIImage imageWithContentsOfFile:path];
+  UIWindow *window = [[[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds] autorelease];
   ASImageNode *node = [[[ASImageNode alloc] init] autorelease];
   node.image = image;
-  XCTAssert(CGSizeEqualToSize(node.bounds.size, node.bounds.size));
-  [node recursivelyEnsureDisplaySynchronously:YES];
+  [window addSubnode:node];
+  XCTAssert(CGSizeEqualToSize(node.bounds.size, CGSizeZero));
+  [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
   XCTAssertNil(node.contents);
   node.bounds = CGRectMake(0, 0, 100, 100);
-  [node recursivelyEnsureDisplaySynchronously:YES];
-
-  XCTAssertNotNil(node.contents);
+  [self expectationForPredicate:[NSPredicate predicateWithFormat:@"contents != nil"] evaluatedWithObject:node.layer handler:nil];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
 @end

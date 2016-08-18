@@ -17,6 +17,7 @@
 #import "ASDisplayNode.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "CGRect+ASConvenience.h"
 
 @implementation _ASDisplayLayer
 {
@@ -84,6 +85,21 @@
 {
   [super setBounds:bounds];
   self.asyncdisplaykit_node.threadSafeBounds = bounds;
+
+  /**
+   * If this is a valid size and we are not displayed or pending
+   *
+   * This way if your node was onscreen at zero-size and so it
+   * skipped rendering itself, it'll render itself now that it's got a real
+   * size.
+   */
+  BOOL shouldSetNeedsDisplay = (CGSizeHasPositiveArea(bounds.size)
+      && self.contents == nil
+      && self.needsDisplay == NO);
+
+  if (shouldSetNeedsDisplay) {
+    [self setNeedsDisplay];
+  }
 }
 
 #if DEBUG // These override is strictly to help detect application-level threading errors.  Avoid method overhead in release.
@@ -183,7 +199,7 @@
 
 - (void)display:(BOOL)asynchronously
 {
-  id<_ASDisplayLayerDelegate> __attribute__((objc_precise_lifetime)) strongAsyncDelegate;
+  NS_VALID_UNTIL_END_OF_SCOPE id<_ASDisplayLayerDelegate> strongAsyncDelegate;
   {
     _asyncDelegateLock.lock();
     strongAsyncDelegate = _asyncDelegate;
