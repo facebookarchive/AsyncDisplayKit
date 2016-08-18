@@ -43,10 +43,6 @@
 }
 
 #pragma mark - NSObject Overrides
-- (instancetype)init
-{
-  return [self initWithFrame:CGRectZero];
-}
 
 - (NSString *)description
 {
@@ -56,14 +52,6 @@
 }
 
 #pragma mark - UIView Overrides
-
-- (instancetype)initWithFrame:(CGRect)frame
-{
-  if (!(self = [super initWithFrame:frame]))
-    return nil;
-
-  return self;
-}
 
 - (void)willMoveToWindow:(UIWindow *)newWindow
 {
@@ -192,25 +180,9 @@
 
 - (void)setNeedsDisplay
 {
+  ASDisplayNodeAssertMainThread();
   // Standard implementation does not actually get to the layer, at least for views that don't implement drawRect:.
-  if (ASDisplayNodeThreadIsMain()) {
-    [self.layer setNeedsDisplay];
-  } else {
-    dispatch_async(dispatch_get_main_queue(), ^ {
-      [self.layer setNeedsDisplay];
-    });
-  }
-}
-
-- (void)setNeedsLayout
-{
-  if (ASDisplayNodeThreadIsMain()) {
-    [super setNeedsLayout];
-  } else {
-    dispatch_async(dispatch_get_main_queue(), ^ {
-      [super setNeedsLayout];
-    });
-  }
+  [self.layer setNeedsDisplay];
 }
 
 - (UIViewContentMode)contentMode
