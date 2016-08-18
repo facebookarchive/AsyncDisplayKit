@@ -1163,8 +1163,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)didLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell
 {
-  CGFloat contentViewWidth = tableViewCell.contentView.bounds.size.width;
   ASCellNode *node = tableViewCell.node;
+  if (node == nil) {
+    return;
+  }
+  
+  CGFloat contentViewWidth = tableViewCell.contentView.bounds.size.width;
   ASSizeRange constrainedSize = node.constrainedSizeForCalculatedLayout;
   
   // Table view cells should always fill its content view width.
