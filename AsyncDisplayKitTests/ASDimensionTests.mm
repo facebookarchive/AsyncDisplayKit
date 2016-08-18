@@ -24,10 +24,10 @@
   //  other:      |----------|
   // result:      |----|
 
-  ASSizeRange range = {{0,0}, {10,10}};
-  ASSizeRange other = {{7,7}, {15,15}};
-  ASSizeRange result = ASSizeRangeIntersect(range, other);
-  ASSizeRange expected = {{7,7}, {10,10}};
+  ASSizeRange range = ASSizeRangeMake({0,0}, {10,10});
+  ASSizeRange other = ASSizeRangeMake({7,7}, {15,15});
+  ASSizeRange result = ASSizeRangeIntersection(range, other);
+  ASSizeRange expected = ASSizeRangeMake({7,7}, {10,10});
   XCTAssertTrue(ASSizeRangeEqualToSizeRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
 }
 
@@ -37,10 +37,10 @@
   //  other:  |---------|
   // result:    |-----|
 
-  ASSizeRange range = {{2,2}, {8,8}};
-  ASSizeRange other = {{0,0}, {10,10}};
-  ASSizeRange result = ASSizeRangeIntersect(range, other);
-  ASSizeRange expected = {{2,2}, {8,8}};
+  ASSizeRange range = ASSizeRangeMake({2,2}, {8,8});
+  ASSizeRange other = ASSizeRangeMake({0,0}, {10,10});
+  ASSizeRange result = ASSizeRangeIntersection(range, other);
+  ASSizeRange expected = ASSizeRangeMake({2,2}, {8,8});
   XCTAssertTrue(ASSizeRangeEqualToSizeRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
 }
 
@@ -50,10 +50,10 @@
   //  other:    |-----|
   // result:    |-----|
 
-  ASSizeRange range = {{0,0}, {10,10}};
-  ASSizeRange other = {{2,2}, {8,8}};
-  ASSizeRange result = ASSizeRangeIntersect(range, other);
-  ASSizeRange expected = {{2,2}, {8,8}};
+  ASSizeRange range = ASSizeRangeMake({0,0}, {10,10});
+  ASSizeRange other = ASSizeRangeMake({2,2}, {8,8});
+  ASSizeRange result = ASSizeRangeIntersection(range, other);
+  ASSizeRange expected = ASSizeRangeMake({2,2}, {8,8});
   XCTAssertTrue(ASSizeRangeEqualToSizeRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
 }
 
@@ -63,10 +63,10 @@
   //  other:          |---|
   // result:       *
 
-  ASSizeRange range = {{0,0}, {5,5}};
-  ASSizeRange other = {{10,10}, {15,15}};
-  ASSizeRange result = ASSizeRangeIntersect(range, other);
-  ASSizeRange expected = {{5,5}, {5,5}};
+  ASSizeRange range = ASSizeRangeMake({0,0}, {5,5});
+  ASSizeRange other = ASSizeRangeMake({10,10}, {15,15});
+  ASSizeRange result = ASSizeRangeIntersection(range, other);
+  ASSizeRange expected = ASSizeRangeMake({5,5}, {5,5});
   XCTAssertTrue(ASSizeRangeEqualToSizeRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
 }
 
@@ -76,10 +76,10 @@
   //  other: |-----|
   // result:          *
 
-  ASSizeRange range = {{10,10}, {15,15}};
-  ASSizeRange other = {{0,0}, {5,5}};
-  ASSizeRange result = ASSizeRangeIntersect(range, other);
-  ASSizeRange expected = {{10,10}, {10,10}};
+  ASSizeRange range = ASSizeRangeMake({10,10}, {15,15});
+  ASSizeRange other = ASSizeRangeMake({0,0}, {5,5});
+  ASSizeRange result = ASSizeRangeIntersection(range, other);
+  ASSizeRange expected = ASSizeRangeMake({10,10}, {10,10});
   XCTAssertTrue(ASSizeRangeEqualToSizeRange(result, expected), @"Expected %@ but got %@", NSStringFromASSizeRange(expected), NSStringFromASSizeRange(result));
 }
 

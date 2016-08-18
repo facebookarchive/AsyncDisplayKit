@@ -318,6 +318,8 @@ static const CGFloat kASTextCellNodeDefaultVerticalPadding = 11.0f;
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
+  ASSizeRangeAssertPoints(constrainedSize);
+
   return [ASInsetLayoutSpec insetLayoutSpecWithInsets:self.textInsets child:self.textNode];
 }
 

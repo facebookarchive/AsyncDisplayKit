@@ -8,11 +8,10 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
-#import <AsyncDisplayKit/ASRelativeSize.h>
 
 @protocol ASEnvironment;
 @class UITraitCollection;
@@ -40,12 +39,12 @@ typedef struct ASEnvironmentLayoutOptionsState {
   CGFloat spacingAfter;// = 0;
   BOOL flexGrow;// = NO;
   BOOL flexShrink;// = NO;
-  ASRelativeDimension flexBasis;// = ASRelativeDimensionUnconstrained;
+  ASDimension flexBasis;// = ASDimensionUnconstrained;
   ASStackLayoutAlignSelf alignSelf;// = ASStackLayoutAlignSelfAuto;
   CGFloat ascender;// = 0;
   CGFloat descender;// = 0;
   
-  ASRelativeSizeRange sizeRange;// = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero), ASRelativeSizeMakeWithCGSize(CGSizeZero));;
+  ASSizeRange sizeRange;// = ASSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero), ASRelativeSizeMakeWithCGSize(CGSizeZero));;
   CGPoint layoutPosition;// = CGPointZero;
   
   struct ASEnvironmentStateExtensions _extensions;

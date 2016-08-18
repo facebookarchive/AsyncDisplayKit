@@ -60,6 +60,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
   self = [super init];
   if (self) {
     NSParameterAssert(layoutableObject);
+    ASSizeRangeAssertPoints(sizeRange);
 #if DEBUG
     for (ASLayout *sublayout in sublayouts) {
       ASDisplayNodeAssert(CGPointIsNull(sublayout.position) == NO, @"Invalid position is not allowed in sublayout.");

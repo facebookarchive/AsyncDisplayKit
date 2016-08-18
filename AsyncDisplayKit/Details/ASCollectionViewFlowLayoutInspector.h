@@ -14,6 +14,7 @@
 #import <AsyncDisplayKit/ASDimension.h>
 
 @class ASCollectionView;
+@class UICollectionViewFlowLayout;
 @protocol ASCollectionDataSource;
 @protocol ASCollectionDelegate;
 

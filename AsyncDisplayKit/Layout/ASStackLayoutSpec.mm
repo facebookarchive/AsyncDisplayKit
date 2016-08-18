@@ -120,10 +120,12 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  ASSizeRangeAssertPoints(constrainedSize);
+  
   if (self.children.count == 0) {
     return [ASLayout layoutWithLayoutableObject:self
                            constrainedSizeRange:constrainedSize
-                                           size:constrainedSize.min];
+                                           size:CGSizeFromASRelativeSize(constrainedSize.min)];
   }
   
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};

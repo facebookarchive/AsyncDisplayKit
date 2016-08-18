@@ -93,7 +93,7 @@
 - (void)viewWillLayoutSubviews
 {
   [super viewWillLayoutSubviews];
-  [_node measureWithSizeRange:[self nodeConstrainedSize]];
+  [_node measureWithSizeRange:[self _nodeConstrainedSize]];
   
   if (!AS_AT_LEAST_IOS9) {
     [self _legacyHandleViewDidLayoutSubviews];
@@ -115,7 +115,7 @@ ASVisibilityDidMoveToParentViewController;
 {
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
-  [_node measureWithSizeRange:[self nodeConstrainedSize]];
+  [_node measureWithSizeRange:[self _nodeConstrainedSize]];
   [_node recursivelyFetchData];
   
   if (_parentManagesVisibilityDepth == NO) {
@@ -197,6 +197,13 @@ ASVisibilityDepthImplementation;
 
 #pragma mark - Layout Helpers
 
+- (ASSizeRange)_nodeConstrainedSize
+{
+  ASSizeRange constrainedSize = [self nodeConstrainedSize];
+  ASSizeRangeAssertPoints(constrainedSize);
+  return constrainedSize;
+}
+
 - (ASSizeRange)nodeConstrainedSize
 {
   if (AS_AT_LEAST_IOS9) {
@@ -252,7 +259,7 @@ ASVisibilityDepthImplementation;
   // In modal presentation or as root viw controller the view does not automatic resize in iOS7 and iOS8.
   // As workaround we adjust the frame of the view manually
   if ([self _shouldLayoutTheLegacyWay]) {
-    CGSize maxConstrainedSize = [self nodeConstrainedSize].max;
+    CGSize maxConstrainedSize = CGSizeFromASRelativeSize([self _nodeConstrainedSize].max);
     _node.frame = (CGRect){.origin = CGPointZero, .size = maxConstrainedSize};
   }
 }

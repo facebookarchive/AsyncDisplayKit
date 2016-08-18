@@ -47,7 +47,7 @@ static const NSInteger kImageHeight = 200;
     
     // Enable usesImplicitHierarchyManagement so the first time the layout pass of the node is happening all nodes that are referenced
     // in layouts within layoutSpecThatFits: will be added automatically
-    self.usesImplicitHierarchyManagement = YES;
+    self.automaticallyManagesSubnodes = YES;
     
     return self;
 }
@@ -63,7 +63,7 @@ static const NSInteger kImageHeight = 200;
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
     self.collectionNode.position = CGPointZero;
-    self.collectionNode.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
+    self.collectionNode.sizeRange = ASSizeRangeMake(constrainedSize.max);
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.collectionNode]];
 }
 

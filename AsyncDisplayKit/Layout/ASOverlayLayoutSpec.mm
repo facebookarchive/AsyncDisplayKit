@@ -49,11 +49,13 @@ static NSUInteger const kOverlayChildIndex = 1;
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  ASSizeRangeAssertPoints(constrainedSize);
+  
   ASLayout *contentsLayout = [self.child measureWithSizeRange:constrainedSize];
   contentsLayout.position = CGPointZero;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithObject:contentsLayout];
   if (self.overlay) {
-    ASLayout *overlayLayout = [self.overlay measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
+    ASLayout *overlayLayout = [self.overlay measureWithSizeRange:ASSizeRangeMake(contentsLayout.size)];
     overlayLayout.position = CGPointZero;
     [sublayouts addObject:overlayLayout];
   }

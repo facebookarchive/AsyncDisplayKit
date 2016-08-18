@@ -985,7 +985,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [self.layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
+  ASSizeRange sizeRange = [self.layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
+  ASSizeRangeAssertPoints(sizeRange);
+  return sizeRange;
 }
 
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section
@@ -1025,7 +1027,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASSizeRange)dataController:(ASCollectionDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  return [self.layoutInspector collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+  ASSizeRange sizeRange = [self.layoutInspector collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+  ASSizeRangeAssertPoints(sizeRange);
+  return sizeRange;
 }
 
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section

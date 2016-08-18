@@ -24,7 +24,7 @@
 #import "ASTableNode.h"
 #import "ASEqualityHelpers.h"
 
-static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
+static const ASSizeRange kInvalidSizeRange = ASSizeRangeMake(CGSizeZero);
 static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 //#define LOG(...) NSLog(__VA_ARGS__)
@@ -1125,9 +1125,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASSizeRange constrainedSize = kInvalidSizeRange;
   if (_asyncDelegateFlags.asyncDelegateTableViewConstrainedSizeForRowAtIndexPath) {
     ASSizeRange delegateConstrainedSize = [_asyncDelegate tableView:self constrainedSizeForRowAtIndexPath:indexPath];
+    ASSizeRangeAssertPoints(delegateConstrainedSize);
+
     // ignore widths in the returned size range (for TableView)
-    constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, delegateConstrainedSize.min.height),
-                                      CGSizeMake(_nodesConstrainedWidth, delegateConstrainedSize.max.height));
+    constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, ASDimensionGetPoints(delegateConstrainedSize.min.height)),
+                                      CGSizeMake(_nodesConstrainedWidth, ASDimensionGetPoints(delegateConstrainedSize.max.height)));
   } else {
     constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, 0),
                                       CGSizeMake(_nodesConstrainedWidth, FLT_MAX));
@@ -1175,9 +1177,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   // Normally the content view width equals to the constrained size width (which equals to the table view width).
   // If there is a mismatch between these values, for example after the table view entered or left editing mode,
   // content view width is preferred and used to re-measure the cell node.
-  if (contentViewWidth != constrainedSize.max.width) {
-    constrainedSize.min.width = contentViewWidth;
-    constrainedSize.max.width = contentViewWidth;
+  if (contentViewWidth != ASDimensionGetPoints(constrainedSize.max.width)) {
+    constrainedSize = ASSizeRangeMake(
+                          ASRelativeSizeMake(ASDimensionMakeWithPoints(contentViewWidth), constrainedSize.min.height),
+                          ASRelativeSizeMake(ASDimensionMakeWithPoints(contentViewWidth), constrainedSize.max.height)
+                      );
 
     // Re-measurement is done on main to ensure thread affinity. In the worst case, this is as fast as UIKit's implementation.
     //

@@ -163,8 +163,8 @@ static CGFloat computeViolation(const CGFloat stackDimensionSum,
                                 const ASStackLayoutSpecStyle &style,
                                 const ASSizeRange &sizeRange)
 {
-  const CGFloat minStackDimension = stackDimension(style.direction, sizeRange.min);
-  const CGFloat maxStackDimension = stackDimension(style.direction, sizeRange.max);
+  const CGFloat minStackDimension = stackDimension(style.direction, CGSizeFromASRelativeSize(sizeRange.min));
+  const CGFloat maxStackDimension = stackDimension(style.direction, CGSizeFromASRelativeSize(sizeRange.max));
   if (stackDimensionSum < minStackDimension) {
     return minStackDimension - stackDimensionSum;
   } else if (stackDimensionSum > maxStackDimension) {
@@ -207,8 +207,8 @@ ASDISPLAYNODE_INLINE BOOL useOptimizedFlexing(const std::vector<id<ASLayoutable>
 {
   const NSUInteger flexibleChildren = std::count_if(children.begin(), children.end(), isFlexibleInBothDirections);
   return ((flexibleChildren == 1)
-          && (stackDimension(style.direction, sizeRange.min) ==
-              stackDimension(style.direction, sizeRange.max)));
+          && (stackDimension(style.direction, CGSizeFromASRelativeSize(sizeRange.min)) ==
+              stackDimension(style.direction, CGSizeFromASRelativeSize(sizeRange.max))));
 }
 
 /**
@@ -226,8 +226,8 @@ static void layoutFlexibleChildrenAtZeroSize(std::vector<ASStackUnpositionedItem
                                      style,
                                      0,
                                      0,
-                                     crossDimension(style.direction, sizeRange.min),
-                                     crossDimension(style.direction, sizeRange.max));
+                                     crossDimension(style.direction, CGSizeFromASRelativeSize(sizeRange.min)),
+                                     crossDimension(style.direction, CGSizeFromASRelativeSize(sizeRange.max)));
     }
   }
 }
@@ -279,8 +279,8 @@ static void flexChildrenAlongStackDimension(std::vector<ASStackUnpositionedItem>
                                      style,
                                      MAX(flexedStackSize, 0),
                                      MAX(flexedStackSize, 0),
-                                     crossDimension(style.direction, sizeRange.min),
-                                     crossDimension(style.direction, sizeRange.max));
+                                     crossDimension(style.direction, CGSizeFromASRelativeSize(sizeRange.min)),
+                                     crossDimension(style.direction, CGSizeFromASRelativeSize(sizeRange.max)));
       isFirstFlex = NO;
     }
   }
@@ -296,13 +296,13 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
                                                                                            const CGSize size,
                                                                                            const BOOL useOptimizedFlexing)
 {
-  const CGFloat minCrossDimension = crossDimension(style.direction, sizeRange.min);
-  const CGFloat maxCrossDimension = crossDimension(style.direction, sizeRange.max);
+  const CGFloat minCrossDimension = crossDimension(style.direction, CGSizeFromASRelativeSize(sizeRange.min));
+  const CGFloat maxCrossDimension = crossDimension(style.direction, CGSizeFromASRelativeSize(sizeRange.max));
   
   return AS::map(children, [&](id<ASLayoutable> child) -> ASStackUnpositionedItem {
-    const ASRelativeDimension flexBasis = child.flexBasis;
-    const BOOL isUnconstrainedFlexBasis = ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimensionUnconstrained, flexBasis);
-    const CGFloat exactStackDimension = ASRelativeDimensionResolve(flexBasis, stackDimension(style.direction, size));
+    const ASDimension flexBasis = child.flexBasis;
+    const BOOL isUnconstrainedFlexBasis = ASDimensionEqualToDimension(ASDimensionUnconstrained, flexBasis);
+    const CGFloat exactStackDimension = ASDimensionResolve(flexBasis, stackDimension(style.direction, size));
 
     if (useOptimizedFlexing && isFlexibleInBothDirections(child)) {
       return { child, [ASLayout layoutWithLayoutableObject:child constrainedSizeRange:sizeRange size:{0, 0}] };
@@ -324,10 +324,7 @@ ASStackUnpositionedLayout ASStackUnpositionedLayout::compute(const std::vector<i
                                                              const ASStackLayoutSpecStyle &style,
                                                              const ASSizeRange &sizeRange)
 {
-  const CGSize size = {
-    sizeRange.max.width,
-    sizeRange.max.height
-  };
+  const CGSize size = CGSizeFromASRelativeSize(sizeRange.max);
 
   // We may be able to avoid some redundant layout passes
   const BOOL optimizedFlexing = useOptimizedFlexing(children, style, sizeRange);

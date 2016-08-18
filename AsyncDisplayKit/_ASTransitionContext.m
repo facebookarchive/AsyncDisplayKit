@@ -49,7 +49,9 @@ NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransi
 
 - (ASSizeRange)constrainedSizeForKey:(NSString *)key
 {
-  return [_layoutDelegate transitionContext:self constrainedSizeForKey:key];
+  ASSizeRange sizeRange = [_layoutDelegate transitionContext:self constrainedSizeForKey:key];
+  ASSizeRangeAssertPoints(sizeRange);
+  return sizeRange;
 }
 
 - (CGRect)initialFrameForNode:(ASDisplayNode *)node

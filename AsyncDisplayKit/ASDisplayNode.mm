@@ -629,6 +629,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  ASSizeRangeAssertPoints(constrainedSize);
+  
   ASDN::MutexLocker l(__instanceLock__);
   if (! [self shouldMeasureWithSizeRange:constrainedSize]) {
     ASDisplayNodeAssertNotNil(_calculatedLayout, @"-[ASDisplayNode measureWithSizeRange:] _layout should not be nil! %@", self);
@@ -655,6 +657,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (BOOL)shouldMeasureWithSizeRange:(ASSizeRange)constrainedSize
 {
+  ASSizeRangeAssertPoints(constrainedSize);
+  
   ASDN::MutexLocker l(__instanceLock__);
   if (![self __shouldSize]) {
     return NO;
@@ -723,6 +727,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                 measurementCompletion:(void (^)())completion
 {
   ASDisplayNodeAssertMainThread();
+  ASSizeRangeAssertPoints(constrainedSize);
+  
   if (! [self shouldMeasureWithSizeRange:constrainedSize]) {
     return;
   }
@@ -1314,7 +1320,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     if (CGRectEqualToRect(bounds, CGRectZero)) {
       LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     } else {
-      [self measureWithSizeRange:ASSizeRangeMake(bounds.size, bounds.size)];
+      [self measureWithSizeRange:ASSizeRangeMake(bounds.size)];
     }
   }
 }
@@ -2175,6 +2181,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
+  ASSizeRangeAssertPoints(constrainedSize);
 
   ASDN::MutexLocker l(__instanceLock__);
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
@@ -2204,7 +2211,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   } else {
     // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
     // assume that the default implementation of -calculateSizeThatFits: returns it.
-    CGSize size = [self calculateSizeThatFits:constrainedSize.max];
+    CGSize size = [self calculateSizeThatFits:CGSizeFromASRelativeSize(constrainedSize.max)];
     return [ASLayout layoutWithLayoutableObject:self
                            constrainedSizeRange:constrainedSize
                                            size:ASSizeRangeClamp(constrainedSize, size)];
@@ -2222,6 +2229,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
+  ASSizeRangeAssertPoints(constrainedSize);
 
   ASDN::MutexLocker l(__instanceLock__);
   
@@ -2288,7 +2296,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(__instanceLock__);
   if (! CGSizeEqualToSize(_preferredFrameSize, preferredFrameSize)) {
     _preferredFrameSize = preferredFrameSize;
-    self.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(_preferredFrameSize);
+    self.sizeRange = ASSizeRangeMake(_preferredFrameSize);
     [self invalidateCalculatedLayout];
   }
 }

@@ -29,6 +29,8 @@
        environmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
   NSAssert(nodeBlock != nil && indexPath != nil, @"Node block and index path must not be nil");
+  ASSizeRangeAssertPoints(constrainedSize);
+
   self = [super init];
   if (self) {
     _nodeBlock = nodeBlock;

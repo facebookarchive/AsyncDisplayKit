@@ -9,7 +9,6 @@
 //
 
 #import <AsyncDisplayKit/ASDimension.h>
-#import <AsyncDisplayKit/ASRelativeSize.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
 #import <AsyncDisplayKit/ASStackLayoutable.h>
 #import <AsyncDisplayKit/ASStaticLayoutable.h>
@@ -94,10 +93,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * @abstract Specifies the initial size in the stack dimension for this object.
- * Default to ASRelativeDimensionUnconstrained.
+ * Default to ASDimensionUnconstrained.
  * Used when attached to a stack layout.
  */
-@property (nonatomic, readwrite) ASRelativeDimension flexBasis;
+@property (nonatomic, readwrite) ASDimension flexBasis;
 
 /**
  * @abstract Orientation of the object along cross axis, overriding alignItems
@@ -119,7 +118,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  If specified, the child's size is restricted according to this size. Fractions are resolved relative to the static layout spec.
  */
-@property (nonatomic, assign) ASRelativeSizeRange sizeRange;
+@property (nonatomic, assign) ASSizeRange sizeRange;
 
 /** The position of this object within its parent spec. */
 @property (nonatomic, assign) CGPoint layoutPosition;

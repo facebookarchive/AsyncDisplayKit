@@ -151,3 +151,7 @@
 #define AS_UNAVAILABLE(message)
 #endif
 #endif
+
+#define OVERLOADABLE __attribute__((overloadable))
+
+#define ASDKDynamicCast(x, c) ((c *) ([x isKindOfClass:[c class]] ? x : nil))
