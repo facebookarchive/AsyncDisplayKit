@@ -9,6 +9,7 @@
 //
 
 #import "_ASDisplayView.h"
+#import "_ASDisplayViewAccessiblity.h"
 
 #import "_ASCoreAnimationExtras.h"
 #import "ASDisplayNodeInternal.h"
@@ -34,7 +35,6 @@
   CGRect _lastAccessibleElementsFrame;
 }
 
-@synthesize accessibleElements = _accessibleElements;
 @synthesize asyncdisplaykit_node = _node;
 
 + (Class)layerClass
@@ -165,7 +165,7 @@
   [super addSubview:view];
   
 #ifndef ASDK_ACCESSIBILITY_DISABLE
-  [self setAccessibleElements:nil];
+  self.accessibleElements = nil;
 #endif
 }
 
@@ -174,7 +174,7 @@
   [super willRemoveSubview:subview];
   
 #ifndef ASDK_ACCESSIBILITY_DISABLE
-  [self setAccessibleElements:nil];
+  self.accessibleElements = nil;
 #endif
 }
 
