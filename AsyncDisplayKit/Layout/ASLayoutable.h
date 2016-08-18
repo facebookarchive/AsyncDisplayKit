@@ -194,8 +194,10 @@ NS_ASSUME_NONNULL_BEGIN
  * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
  *
  * @return An ASLayout instance defining the layout of the receiver and its children.
+ *
+ * @deprecated Deprecated in version 2.0: Use ASCalculateRootLayout or ASCalculateLayout instead
  */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize; //ASDISPLAYNODE_DEPRECATED;
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize ASDISPLAYNODE_DEPRECATED;
 
 @end
 
