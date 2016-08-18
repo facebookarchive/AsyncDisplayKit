@@ -284,7 +284,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _defaultLayoutTransitionOptions = UIViewAnimationOptionBeginFromCurrentState;
   
   _flags.canClearContentsOfLayer = YES;
-  _flags.canCallNeedsDisplayOfLayer = NO;
+  _flags.canCallSetNeedsDisplayOfLayer = YES;
 }
 
 - (instancetype)init
@@ -454,12 +454,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   // Update flags related to special handling of UIImageView layers. More details on the flags
-  if (_flags.synchronous) {
-    if ([view isKindOfClass:[UIImageView class]]) {
-      _flags.canClearContentsOfLayer = NO;
-    } else {
-      _flags.canCallNeedsDisplayOfLayer = YES;
-    }
+  if (_flags.synchronous && [_viewClass isSubclassOfClass:[UIImageView class]]) {
+    _flags.canClearContentsOfLayer = NO;
+    _flags.canCallSetNeedsDisplayOfLayer = NO;
   }
 
   return view;
@@ -2056,11 +2053,11 @@ static NSInteger incrementIfFound(NSInteger i) {
          _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
 }
 
-// Helper method to determine if it's save to call setNeedsDisplay on a layer without throwing away the content.
-// For details look at the comment on the canCallNeedsDisplayOfLayer flag
-- (BOOL)__canCallNeedsDisplayOfLayer
+// Helper method to determine if it's safe to call setNeedsDisplay on a layer without throwing away the content.
+// For details look at the comment on the canCallSetNeedsDisplayOfLayer flag
+- (BOOL)__canCallSetNeedsDisplayOfLayer
 {
-  return _flags.canCallNeedsDisplayOfLayer;
+  return _flags.canCallSetNeedsDisplayOfLayer;
 }
 
 - (BOOL)placeholderShouldPersist
@@ -2111,9 +2108,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   
   ASDisplayNode *node = [layer asyncdisplaykit_node];
   
-  if ([node __canCallNeedsDisplayOfLayer]) {
-    // Layers for UIKit components that are wrapped wtihin a node needs to be set to be displayed as the contents of
-    // the layer get's cleared and would not be recreated otherwise
+  if (node.isSynchronous && [node __canCallSetNeedsDisplayOfLayer]) {
+    // Layers for UIKit components that are wrapped within a node needs to be set to be displayed as the contents of
+    // the layer get's cleared and would not be recreated otherwise.
+    // We do not call this for _ASDisplayLayer as an optimization.
     [layer setNeedsDisplay];
   }
   
