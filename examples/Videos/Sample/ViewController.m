@@ -49,20 +49,27 @@
   ASVideoNode *hlsVideoNode = self.hlsVideoNode;
   [_rootNode addSubnode:hlsVideoNode];
   
+  CGSize mainScreenBoundsSize = [UIScreen mainScreen].bounds.size;
+  
   _rootNode.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    
+    // Layout all nodes absolute in a static layout spec
     guitarVideoNode.layoutPosition = CGPointMake(0, 0);
-    guitarVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width, [UIScreen mainScreen].bounds.size.height/3);
+    guitarVideoNode.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(mainScreenBoundsSize.width, mainScreenBoundsSize.height / 3.0));
     
-    nicCageVideoNode.layoutPosition = CGPointMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
-    nicCageVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
+    nicCageVideoNode.layoutPosition = CGPointMake(mainScreenBoundsSize.width / 2.0,
+                                                  mainScreenBoundsSize.height / 3.0);
+    nicCageVideoNode.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(mainScreenBoundsSize.width/2, mainScreenBoundsSize.height / 3.0));
     
-    simonVideoNode.layoutPosition = CGPointMake(0, [UIScreen mainScreen].bounds.size.height - ([UIScreen mainScreen].bounds.size.height/3));
-    simonVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
+    simonVideoNode.layoutPosition = CGPointMake(0.0,
+                                                mainScreenBoundsSize.height - (mainScreenBoundsSize.height / 3.0));
+    simonVideoNode.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(mainScreenBoundsSize.width/2, mainScreenBoundsSize.height / 3.0));
     
-    hlsVideoNode.layoutPosition = CGPointMake(0, [UIScreen mainScreen].bounds.size.height/3);
-    hlsVideoNode.preferredFrameSize = CGSizeMake([UIScreen mainScreen].bounds.size.width/2, [UIScreen mainScreen].bounds.size.height/3);
+    hlsVideoNode.layoutPosition = CGPointMake(0.0, mainScreenBoundsSize.height / 3.0);
+    hlsVideoNode.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(mainScreenBoundsSize.width / 2.0, mainScreenBoundsSize.height / 3.0));
     
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode, hlsVideoNode]];
+    NSArray *children = @[guitarVideoNode, nicCageVideoNode, simonVideoNode, hlsVideoNode];
+    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
   };
   
   [self.view addSubnode:_rootNode];
