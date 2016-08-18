@@ -30,7 +30,6 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutSpec.h"
-#import "ASLayoutValidation.h"
 #import "ASCellNode.h"
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
@@ -2239,9 +2238,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     if (isFinalLayoutable) {
       layout.position = CGPointZero;
       layout = [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:layout.size sublayouts:@[layout]];
-#if LAYOUT_VALIDATION
-      ASLayoutableValidateLayout(layout);
-#endif
     }
     return [layout filteredNodeLayoutTree];
   } else {
