@@ -1033,11 +1033,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return [self.layoutInspector collectionView:self supplementaryNodesOfKind:kind inSection:section];
 }
 
-- (NSUInteger)dataController:(ASCollectionDataController *)dataController numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind;
-{
-  return [self.layoutInspector collectionView:self numberOfSectionsForSupplementaryNodeOfKind:kind];
-}
-
 #pragma mark - ASRangeControllerDataSource
 
 - (ASRangeController *)rangeController

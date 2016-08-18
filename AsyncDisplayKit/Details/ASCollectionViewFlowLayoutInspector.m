@@ -74,12 +74,6 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
   return ASSizeRangeMake(CGSizeZero, CGSizeZero);
 }
 
-- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind
-{
-  ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
-  return 0;
-}
-
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
   ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
@@ -169,15 +163,6 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
     constrainedSize = CGSizeMake(supplementarySize.width, CGRectGetHeight(collectionView.bounds));
   }
   return ASSizeRangeMake(CGSizeZero, constrainedSize);
-}
-
-- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind
-{
-  if (_dataSourceFlags.implementsNumberOfSectionsInCollectionView) {
-    return [collectionView.asyncDataSource numberOfSectionsInCollectionView:collectionView];
-  } else {
-    return 1;
-  }
 }
 
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section

@@ -15,9 +15,11 @@
 
 @implementation ASUICollectionViewTests
 
-/// Test that collection view throws an exception if your layout specifies
-/// supplementaries in sections that are out of bounds (e.g. in section 5
-/// when there's only 3 sections).
+/**
+ * Test that collection view throws an exception if your layout specifies
+ * supplementaries in sections that are out of bounds (e.g. in section 5
+ * when there's only 3 sections).
+ */
 - (void)testThatSupplementariesMustBeWithinNormalSections
 {
   NSInteger sectionCount = 2;
