@@ -29,7 +29,7 @@
   // trivial test case to ensure ASSnapshotTestCase works
   ASImageNode *imageNode = [[ASImageNode alloc] init];
   imageNode.image = [self testImage];
-  imageNode.frame = CGRectMake(0, 0, 100, 100);
+  [imageNode measure:CGSizeMake(100, 100)];
 
   ASSnapshotVerifyNode(imageNode, nil);
 }

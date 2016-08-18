@@ -26,7 +26,6 @@
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"judar"
                                                             attributes:@{NSFontAttributeName : [UIFont italicSystemFontOfSize:24]}];
   [textNode measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
-  textNode.frame = CGRectMake(0, 0, textNode.calculatedSize.width, textNode.calculatedSize.height);
   textNode.textContainerInset = UIEdgeInsetsMake(0, 2, 0, 2);
   
   ASSnapshotVerifyNode(textNode, nil);

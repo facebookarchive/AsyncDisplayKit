@@ -21,8 +21,6 @@
 #import "ASLayoutTransition.h"
 #import "ASEnvironment.h"
 
-#include <vector>
-
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
 @class _ASPendingState;
