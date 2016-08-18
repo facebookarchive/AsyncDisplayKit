@@ -138,18 +138,6 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
   XCTAssertTrue(secureEditableTextNode.textView.secureTextEntry == YES,                                @"textView's isSecureTextEntry should be YES.");
 }
 
-- (void)testSetPreferredFrameSize
-{
-  CGSize preferredFrameSize = CGSizeMake(100, 100);
-  _editableTextNode.preferredFrameSize = preferredFrameSize;
-  
-  CGSize calculatedSize = [_editableTextNode measure:CGSizeZero];
-  XCTAssertTrue(calculatedSize.width != preferredFrameSize.width, @"Calculated width (%f) should be equal to preferred width (%f)", calculatedSize.width, preferredFrameSize.width);
-  XCTAssertTrue(calculatedSize.width != preferredFrameSize.width, @"Calculated height (%f) should be equal to preferred height (%f)", calculatedSize.width, preferredFrameSize.width);
-  
-  _editableTextNode.preferredFrameSize = CGSizeZero;
-}
-
 - (void)testCalculatedSizeIsGreaterThanOrEqualToConstrainedSize
 {
   for (NSInteger i = 10; i < 500; i += 50) {
