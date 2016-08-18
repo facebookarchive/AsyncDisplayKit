@@ -640,7 +640,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (CGSize)sizeThatFits:(CGSize)constrainedSize
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   return [self measureWithSizeRange:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
+#pragma clang diagnostic pop
 }
 
 - (BOOL)shouldCalculateLayoutWithConstrainedSize:(ASSizeRange)constrainedSize

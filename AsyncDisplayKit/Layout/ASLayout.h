@@ -17,6 +17,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+ASDISPLAYNODE_EXTERN_C_BEGIN
+
 extern CGPoint const CGPointNull;
 
 extern BOOL CGPointIsNull(CGPoint point);
@@ -26,7 +28,7 @@ extern BOOL CGPointIsNull(CGPoint point);
  * @param rootLayoutable The root node to calculate the layout for.
  * @param sizeRange The size range to calculate the root layout within.
  */
-ASLayout *ASCalculateRootLayout(id<ASLayoutable> rootLayoutable, const ASSizeRange sizeRange);
+extern ASLayout *ASCalculateRootLayout(id<ASLayoutable> rootLayoutable, const ASSizeRange sizeRange);
 
 /**
  * Safely computes the layout of the given node by guarding against nil nodes.
@@ -34,7 +36,9 @@ ASLayout *ASCalculateRootLayout(id<ASLayoutable> rootLayoutable, const ASSizeRan
  * @param sizeRange The size range to calculate the node layout within.
  * @param parentSize The parent size of the node to calculate the layout for.
  */
-ASLayout *ASCalculateLayout(id<ASLayoutable> layoutable, const ASSizeRange sizeRange, const CGSize parentSize);
+extern ASLayout *ASCalculateLayout(id<ASLayoutable> layoutable, const ASSizeRange sizeRange, const CGSize parentSize);
+
+ASDISPLAYNODE_EXTERN_C_END
 
 /**
  * A node in the layout tree that represents the size and position of the object that created it (ASLayoutable).
