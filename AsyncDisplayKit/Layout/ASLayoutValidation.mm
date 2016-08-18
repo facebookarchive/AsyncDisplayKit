@@ -75,16 +75,7 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
     ASRelativeSizeRange sizeRange = sublayoutLayoutable.sizeRange;
     ASRelativeSizeRange zeroSizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeZero);
     
-    // Currently setting the preferredFrameSize also updates the sizeRange. Create a size range based on the
-    // preferredFrameSize and check it if it's the same as the current sizeRange to be sure it was not changed manually
-    CGSize preferredFrameSize = CGSizeZero;
-    if ([sublayoutLayoutable respondsToSelector:@selector(preferredFrameSize)]) {
-      preferredFrameSize = [((ASDisplayNode *)sublayoutLayoutable) preferredFrameSize];
-    }
-    ASRelativeSizeRange preferredFrameSizeRange = ASRelativeSizeRangeMakeWithExactCGSize(preferredFrameSize);
-    
-    if (ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, zeroSizeRange) == NO &&
-        ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, preferredFrameSizeRange) == NO) {
+    if (ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, zeroSizeRange) == NO) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(sizeRange), sublayoutLayoutable, stackContainerClass);
     } else if (!CGPointEqualToPoint(sublayoutLayoutable.layoutPosition, CGPointZero)) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(layoutPosition), sublayoutLayoutable, stackContainerClass);

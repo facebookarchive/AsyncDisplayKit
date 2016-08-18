@@ -939,7 +939,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @deprecated Deprecated in version 2.0: Use size and the helper function ASRelativeSizeRangeMakeWithExactCGSize(preferredFrameSize) if you want to have the same behavior.
  */
-@property (nonatomic, assign, readwrite) CGSize preferredFrameSize;// ASDISPLAYNODE_DEPRECATED;
+@property (nonatomic, assign, readwrite) CGSize preferredFrameSize ASDISPLAYNODE_DEPRECATED;
 
 - (void)reclaimMemory ASDISPLAYNODE_DEPRECATED;
 - (void)recursivelyReclaimMemory ASDISPLAYNODE_DEPRECATED;
