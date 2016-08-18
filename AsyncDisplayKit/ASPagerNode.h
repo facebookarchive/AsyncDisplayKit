@@ -61,13 +61,13 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 
 /**
- * Provides the constrained size range for measuring the node at the index path.
+ * Provides the constrained size range for measuring the node at the index.
  *
  * @param pagerNode The sender.
- * @param indexPath The index path of the node.
- * @returns A constrained size range for layout the node at this index path.
+ * @param index The index of the node.
+ * @returns A constrained size range for layout the node at this index.
  */
-- (ASSizeRange)pagerNode:(ASPagerNode *)pagerNode constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+- (ASSizeRange)pagerNode:(ASPagerNode *)pagerNode constrainedSizeForNodeAtIndex:(NSInteger)index;
 
 @end
 
