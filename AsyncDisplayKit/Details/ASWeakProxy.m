@@ -49,7 +49,7 @@
 
 - (void)forwardInvocation:(NSInvocation *)invocation
 {
-  // If we are down here this means _interceptor and _target where nil. Just don't do anything to prevent a crash
+  // If we are down here this means _target where nil. Just don't do anything to prevent a crash
 }
 
 @end
