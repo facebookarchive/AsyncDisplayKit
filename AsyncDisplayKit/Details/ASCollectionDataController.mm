@@ -65,7 +65,10 @@
     [self deleteSectionsOfKind:kind atIndexSet:indexSet completion:nil];
     
     // Insert each section
-    NSUInteger sectionCount = self.itemCountsFromDataSource.size();
+    NSUInteger sectionCount = 0;
+    for (ASIndexedNodeContext *context in contexts) {
+      sectionCount = MAX(sectionCount, context.indexPath.section + 1);
+    }
     NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
     for (int i = 0; i < sectionCount; i++) {
       [sections addObject:[NSMutableArray array]];
