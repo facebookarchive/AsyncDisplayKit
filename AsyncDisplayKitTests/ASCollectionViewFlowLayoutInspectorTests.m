@@ -294,34 +294,6 @@
   collectionView.asyncDelegate = nil;
 }
 
-#pragma mark - #collectionView:numberOfSectionsForSupplementaryNodeOfKind:
-
-- (void)testThatItRespondsWithTheDefaultNumberOfSections
-{
-  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
-  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
-  NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  XCTAssert(sections == 1, @"should return 1 by default");
-  
-  collectionView.asyncDataSource = nil;
-  collectionView.asyncDelegate = nil;
-}
-
-- (void)testThatItProvidesTheNumberOfSectionsInTheDataSource
-{
-  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
-  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
-  collectionView.asyncDataSource = dataSource;
-  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
-  NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  XCTAssert(sections == 2, @"should return 2");
-  
-  collectionView.asyncDataSource = nil;
-  collectionView.asyncDelegate = nil;
-}
-
 #pragma mark - #collectionView:supplementaryNodesOfKind:inSection:
 
 - (void)testThatItReturnsOneWhenAValidSizeIsImplementedOnTheDelegate

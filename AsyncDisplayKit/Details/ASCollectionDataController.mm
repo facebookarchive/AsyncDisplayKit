@@ -65,7 +65,7 @@
     [self deleteSectionsOfKind:kind atIndexSet:indexSet completion:nil];
     
     // Insert each section
-    NSUInteger sectionCount = [self.collectionDataSource dataController:self numberOfSectionsForSupplementaryNodeOfKind:kind];
+    NSUInteger sectionCount = self.itemCountsFromDataSource.size();
     NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
     for (int i = 0; i < sectionCount; i++) {
       [sections addObject:[NSMutableArray array]];
@@ -194,7 +194,7 @@
   ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
   
   id<ASCollectionDataControllerSource> source = self.collectionDataSource;
-  NSUInteger sectionCount = [source dataController:self numberOfSectionsForSupplementaryNodeOfKind:kind];
+  NSUInteger sectionCount = self.itemCountsFromDataSource.size();
   for (NSUInteger i = 0; i < sectionCount; i++) {
     NSUInteger rowCount = [source dataController:self supplementaryNodesOfKind:kind inSection:i];
     for (NSUInteger j = 0; j < rowCount; j++) {
