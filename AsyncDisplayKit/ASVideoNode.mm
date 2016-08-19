@@ -247,7 +247,8 @@ static NSString * const kRate = @"rate";
   }
   
   if (_playerNode) {
-    _playerNode.size = ASRelativeSizeRangeMakeWithExactCGSize(calculatedSize);
+    _playerNode.width = ASRelativeDimensionMakeWithPoints(calculatedSize.width);
+    _playerNode.height = ASRelativeDimensionMakeWithPoints(calculatedSize.height);
     [_playerNode measure:calculatedSize];
   }
   

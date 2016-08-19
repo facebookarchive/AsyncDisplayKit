@@ -307,9 +307,6 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
     } else {
         
       ASRelativeDimension flexBasis = child.flexBasis;
-      const BOOL isUnconstrainedFlexBasis = ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimensionUnconstrained, flexBasis);
-      // TODO: sizeRange: We don't need this anymore if ASRelativeDimensionAuto is used as default for .flexBasis
-      flexBasis = isUnconstrainedFlexBasis ? ASRelativeDimensionAuto : flexBasis;
       return {
         child,
         crossChildLayout(child,

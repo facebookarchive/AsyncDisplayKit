@@ -33,23 +33,14 @@
 
 - (void)testChildrenMeasuredWithAutoMaxSize
 {
-  ASStaticSizeDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
+  ASStaticSizeDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor], CGSizeMake(50, 50));
   firstChild.layoutPosition = CGPointMake(0, 0);
-  firstChild.staticSize = CGSizeMake(50, 50);
   
-  ASStaticSizeDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
+  ASStaticSizeDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor], CGSizeMake(100, 100));
   secondChild.layoutPosition = CGPointMake(10, 60);
-  secondChild.staticSize = CGSizeMake(100, 100);
 
   ASSizeRange sizeRange = ASSizeRangeMake(CGSizeMake(10, 10), CGSizeMake(110, 160));
   [self testWithChildren:@[firstChild, secondChild] sizeRange:sizeRange identifier:nil];
-  
-  XCTAssertTrue(ASSizeRangeEqualToSizeRange(firstChild.constrainedSizeForCalculatedLayout,
-                                            ASSizeRangeMake(CGSizeZero, sizeRange.max)));
-  CGSize secondChildMaxSize = CGSizeMake(sizeRange.max.width - secondChild.layoutPosition.x,
-                                         sizeRange.max.height - secondChild.layoutPosition.y);
-  XCTAssertTrue(ASSizeRangeEqualToSizeRange(secondChild.constrainedSizeForCalculatedLayout,
-                                            ASSizeRangeMake(CGSizeZero, secondChildMaxSize)));
 }
 
 - (void)testWithSizeRange:(ASSizeRange)sizeRange identifier:(NSString *)identifier
@@ -57,7 +48,6 @@
   ASDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
   firstChild.layoutPosition = CGPointMake(0, 0);
   firstChild.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(50, 50));
-  
   
   ASDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
   secondChild.layoutPosition = CGPointMake(0, 50);
@@ -73,9 +63,12 @@
   NSMutableArray *subnodes = [NSMutableArray arrayWithArray:children];
   [subnodes insertObject:backgroundNode atIndex:0];
 
-  ASStaticLayoutSpec *staticLayoutSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
-  ASLayoutSpec *layoutSpec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:staticLayoutSpec
-                                                                        background:backgroundNode];
+  ASLayoutSpec *layoutSpec =
+  [ASBackgroundLayoutSpec
+   backgroundLayoutSpecWithChild:
+   [ASStaticLayoutSpec
+    staticLayoutSpecWithChildren:children]
+   background:backgroundNode];
   
   [self testLayoutSpec:layoutSpec sizeRange:sizeRange subnodes:subnodes identifier:identifier];
 }

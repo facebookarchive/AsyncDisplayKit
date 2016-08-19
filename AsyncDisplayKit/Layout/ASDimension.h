@@ -23,12 +23,12 @@
  * "Percent" - Multiplied to a provided parent amount to resolve a final amount.
  */
 typedef NS_ENUM(NSInteger, ASRelativeDimensionType) {
+  /** This indicated "I have no opinion" and may be resolved in whatever way makes most sense given the circumstances. */
+  ASRelativeDimensionTypeAuto,
   /** Just a number. It will always resolve to exactly this amount. This is the default type. */
   ASRelativeDimensionTypePoints,
   /** Multiplied to a provided parent amount to resolve a final amount. */
   ASRelativeDimensionTypeFraction,
-  /** This indicated "I have no opinion" and may be resolved in whatever way makes most sense given the circumstances. */
-  ASRelativeDimensionTypeAuto,
 };
 
 typedef struct {
@@ -41,6 +41,16 @@ typedef struct {
   CGSize min;
   CGSize max;
 } ASSizeRange;
+
+/**  */
+typedef struct {
+  ASRelativeDimension width;
+  ASRelativeDimension height;
+  ASRelativeDimension minWidth;
+  ASRelativeDimension maxWidth;
+  ASRelativeDimension minHeight;
+  ASRelativeDimension maxHeight;
+} ASSize;
 
 extern ASRelativeDimension const ASRelativeDimensionUnconstrained;
 extern ASRelativeDimension const ASRelativeDimensionAuto;
@@ -65,6 +75,14 @@ extern BOOL ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimension lhs,
 extern NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension);
 
 extern CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSize, CGFloat parent);
+
+#pragma mark - ASSize
+
+extern ASSize ASSizeMake();
+
+extern BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs);
+
+extern ASSizeRange ASSizeResolve(ASSize size, const CGSize parentSize);
 
 #pragma mark - ASSizeRange
 

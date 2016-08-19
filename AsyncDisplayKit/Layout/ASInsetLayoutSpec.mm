@@ -68,9 +68,16 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
  the child to respect the inset.
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                restrictedToSizeRange:(ASRelativeSizeRange)size
+                     restrictedToSize:(ASSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
+  if (self.child == nil) {
+    ASDisplayNodeAssert(NO, @"Inset spec measured without a child. The spec will do nothing.");
+    return [ASLayout layoutWithLayoutableObject:self
+                                constrainedSize:constrainedSize
+                                           size:CGSizeZero];
+  }
+  
   const CGFloat insetsX = (finiteOrZero(_insets.left) + finiteOrZero(_insets.right));
   const CGFloat insetsY = (finiteOrZero(_insets.top) + finiteOrZero(_insets.bottom));
 
@@ -89,13 +96,6 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
       MAX(0, constrainedSize.max.height - insetsY),
     }
   };
-  
-  if (self.child == nil) {
-    ASDisplayNodeAssert(NO, @"Inset spec measured without a child. The spec will do nothing.");
-    return [ASLayout layoutWithLayoutableObject:self
-                                constrainedSize:constrainedSize
-                                           size:CGSizeZero];
-  }
   
   const CGSize insetParentSize = {
     MAX(0, parentSize.width - insetsX),

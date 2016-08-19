@@ -47,13 +47,11 @@
 
   for (id<ASLayoutable> child in children) {
     CGPoint layoutPosition = child.layoutPosition;
-    CGSize autoMaxSize = CGSizeMake(constrainedSize.max.width  - layoutPosition.x,
-                                    constrainedSize.max.height - layoutPosition.y);
-    
-    ASRelativeSizeRange childSizeRange = child.sizeRange;
-    BOOL childIsUnconstrained = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, childSizeRange);
-    ASSizeRange childConstraint = childIsUnconstrained ? ASSizeRangeMake({0, 0}, autoMaxSize)
-                                                       : ASRelativeSizeRangeResolve(childSizeRange, constrainedSize.max);
+    CGSize autoMaxSize = {
+      constrainedSize.max.width  - layoutPosition.x,
+      constrainedSize.max.height - layoutPosition.y
+    };
+    ASSizeRange childConstraint = ASRelativeSizeRangeResolveAutoSize(child.sizeRange, size, {{0,0}, autoMaxSize});
     
     ASLayout *sublayout = [child calculateLayoutThatFits:childConstraint parentSize:size];
     sublayout.position = layoutPosition;

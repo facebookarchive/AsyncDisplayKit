@@ -63,9 +63,9 @@
 
 @implementation ASStaticSizeDisplayNode
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+/*- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   return _staticSize;
-}
+}*/
 
 @end

@@ -9,6 +9,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "ASDimension.h"
 
 @class ASLayoutSpec;
 @protocol ASLayoutable;
@@ -39,6 +40,11 @@ extern void ASLayoutableClearCurrentContext();
  *  called by the end user and are only called internally. However, there may be a case where the methods are useful.
  */
 @protocol ASLayoutablePrivate <NSObject>
+
+/**
+ * @abstract A size constraint that should apply to this ASLayoutable.
+ */
+@property (nonatomic, assign, readwrite) ASSize size;
 
 /**
  *  @abstract This method can be used to give the user a chance to wrap an ASLayoutable in an ASLayoutSpec 

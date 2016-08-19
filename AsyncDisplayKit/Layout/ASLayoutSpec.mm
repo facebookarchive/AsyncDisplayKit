@@ -25,18 +25,22 @@
 typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASChildMap;
 
 @interface ASLayoutSpec() {
-  ASRelativeSizeRange _size;
-  ASEnvironmentState _environmentState;
   ASDN::RecursiveMutex __instanceLock__;
+  ASSize _size;
+  ASEnvironmentState _environmentState;
   ASChildMap _children;
 }
 @end
 
 @implementation ASLayoutSpec
 
-// these dynamic properties all defined in ASLayoutOptionsPrivate.m
-@dynamic size, spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis,
-         alignSelf, ascender, descender, sizeRange, layoutPosition, layoutableType;
+// Dynamic properties for ASLayoutables
+@dynamic layoutableType, size, width, height, minWidth, maxWidth, minHeight, maxHeight;
+// Dynamic properties for stack spec
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender;
+// Dynamic properties for static spec
+@dynamic sizeRange, layoutPosition;
+
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 
 #pragma mark - Class
@@ -58,7 +62,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
     return nil;
   }
   _isMutable = YES;
-  _size = ASRelativeSizeRangeAuto;
+  _size = ASSizeMake();
   _environmentState = ASEnvironmentStateMakeDefault();
   return self;
 }
@@ -75,31 +79,102 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 
 #pragma mark - Layout
 
-- (ASRelativeSizeRange)size
+- (ASSize)size
 {
+  ASDN::MutexLocker l(__instanceLock__);
   return _size;
 }
 
-- (void)setSize:(ASRelativeSizeRange)size
+- (void)setSize:(ASSize)size
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if (ASRelativeSizeRangeEqualToRelativeSizeRange(_size, size) == NO) {
-    _size = size;
-  }
+  _size = size;
+}
+
+- (ASRelativeDimension)width
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.width;
+}
+
+- (void)setWidth:(ASRelativeDimension)width
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.width = width;
+}
+
+- (ASRelativeDimension)height
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.height;
+}
+
+- (void)setHeight:(ASRelativeDimension)height
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.height = height;
+}
+
+- (ASRelativeDimension)minWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.minWidth;
+}
+
+- (void)setMinWidth:(ASRelativeDimension)minWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.minWidth = minWidth;
+}
+
+- (ASRelativeDimension)maxWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.maxWidth;
+}
+
+- (void)setMaxWidth:(ASRelativeDimension)maxWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.maxWidth = maxWidth;
+}
+
+- (ASRelativeDimension)minHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.minHeight;
+}
+
+- (void)setMinHeight:(ASRelativeDimension)minHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.minHeight = minHeight;
+}
+
+- (ASRelativeDimension)maxHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.maxHeight;
+}
+
+- (void)setMaxHeight:(ASRelativeDimension)maxHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.maxHeight = maxHeight;
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
 {
   return [self calculateLayoutThatFits:constrainedSize
-                 restrictedToSizeRange:_size
+                 restrictedToSize:_size
                   relativeToParentSize:parentSize];
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                restrictedToSizeRange:(ASRelativeSizeRange)size
+                     restrictedToSize:(ASSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(ASRelativeSizeRangeResolve(_size, parentSize), constrainedSize);
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASSizeResolve(_size, parentSize));
   return [self calculateLayoutThatFits:resolvedRange];
 }
 

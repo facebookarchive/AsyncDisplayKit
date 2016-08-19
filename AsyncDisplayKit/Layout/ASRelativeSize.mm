@@ -10,7 +10,6 @@
 
 #import "ASRelativeSize.h"
 
-ASRelativeSizeRange const ASRelativeSizeRangeUnconstrained = {};
 ASRelativeSizeRange const ASRelativeSizeRangeAuto = {{ASRelativeDimensionAuto, ASRelativeDimensionAuto},
                                                      {ASRelativeDimensionAuto, ASRelativeDimensionAuto}};
 
@@ -97,6 +96,11 @@ BOOL ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRange lhs, ASRela
 
 ASSizeRange ASRelativeSizeRangeResolve(ASRelativeSizeRange relativeSizeRange, CGSize parentSize)
 {
-  return ASSizeRangeMake(ASRelativeSizeResolveSize(relativeSizeRange.min, parentSize, {0, 0}),
-                         ASRelativeSizeResolveSize(relativeSizeRange.max, parentSize, {CGFLOAT_MAX, CGFLOAT_MAX}));
+  return ASRelativeSizeRangeResolveAutoSize(relativeSizeRange, parentSize, ASSizeRangeMake({0, 0}, {CGFLOAT_MAX, CGFLOAT_MAX}));
+}
+
+ASSizeRange ASRelativeSizeRangeResolveAutoSize(ASRelativeSizeRange relativeSizeRange, CGSize parentSize, ASSizeRange autoASSizeRange)
+{
+  return ASSizeRangeMake(ASRelativeSizeResolveSize(relativeSizeRange.min, parentSize, autoASSizeRange.min),
+                         ASRelativeSizeResolveSize(relativeSizeRange.max, parentSize, autoASSizeRange.max));
 }

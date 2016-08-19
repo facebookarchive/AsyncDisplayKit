@@ -54,9 +54,50 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ASLayoutable <ASEnvironment, ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate, ASLayoutableExtensibility>
 
 /**
- * @abstract A size constraint that should apply to this ASLayoutable.
+ * @abstract The width property specifies the height of the content area of an ASLayoutable.
+ * The minWidth and maxWidth properties override width.
+ * Default: ASRelativeDimensionTypeAuto
  */
-@property (nonatomic, assign, readwrite) ASRelativeSizeRange size;
+@property (nonatomic, assign, readwrite) ASRelativeDimension width;
+
+/**
+ * @abstract The height property specifies the height of the content area of an ASLayoutable
+ * The minHeight and maxHeight properties override height.
+ * Default to ASRelativeDimensionTypeAuto
+ */
+@property (nonatomic, assign, readwrite) ASRelativeDimension height;
+
+/**
+ * @abstract The minHeight property is used to set the minimum height of a given element. It prevents the used value
+ * of the height property from becoming smaller than the value specified for minHeight.
+ * The value of minHeight overrides both maxHeight and height.
+ * Default to ASRelativeDimensionTypeAuto
+ */
+@property (nonatomic, assign, readwrite) ASRelativeDimension minHeight;
+
+/**
+ * @abstract The maxHeight property is used to set the maximum height of an element. It prevents the used value of the
+ * height property from becoming larger than the value specified for maxHeight.
+ * The value of maxHeight overrides height, but minHeight overrides maxHeight.
+ * Default to ASRelativeDimensionTypeAuto
+ */
+@property (nonatomic, assign, readwrite) ASRelativeDimension maxHeight;
+
+/**
+ * @abstract The minWidth property is used to set the minimum width of a given element. It prevents the used value of
+ * the width property from becoming smaller than the value specified for minWidth.
+ * The value of minWidth overrides both maxWidth and width.
+ * Default to ASRelativeDimensionTypeAuto
+ */
+@property (nonatomic, assign, readwrite) ASRelativeDimension minWidth;
+
+/**
+ * @abstract The maxWidth property is used to set the maximum width of a given element. It prevents the used value of
+ * the width property from becoming larger than the value specified for maxWidth.
+ * The value of maxWidth overrides width, but minWidth overrides maxWidth.
+ * Default to ASRelativeDimensionTypeAuto
+ */
+@property (nonatomic, assign, readwrite) ASRelativeDimension maxWidth;
 
 /**
  * @abstract Returns type of layoutable
@@ -112,7 +153,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @warning Overriding this method should be done VERY rarely.
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                restrictedToSizeRange:(ASRelativeSizeRange)size
+                     restrictedToSize:(ASSize)size
                  relativeToParentSize:(CGSize)parentSize;
 
 

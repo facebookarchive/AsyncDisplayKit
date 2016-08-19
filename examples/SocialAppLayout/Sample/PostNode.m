@@ -137,7 +137,8 @@
         // User pic
         _avatarNode = [[ASNetworkImageNode alloc] init];
         _avatarNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
-        _avatarNode.preferredFrameSize = CGSizeMake(44, 44);
+        _avatarNode.width = ASRelativeDimensionMakeWithPoints(44);
+        _avatarNode.height = ASRelativeDimensionMakeWithPoints(44);
         _avatarNode.cornerRadius = 22.0;
         _avatarNode.URL = [NSURL URLWithString:_post.photo];
         _avatarNode.imageModificationBlock = ^UIImage *(UIImage *image) {

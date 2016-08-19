@@ -30,7 +30,6 @@ typedef struct {
   ASRelativeSize max;
 } ASRelativeSizeRange;
 
-extern ASRelativeSizeRange const ASRelativeSizeRangeUnconstrained;
 extern ASRelativeSizeRange const ASRelativeSizeRangeAuto;
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
@@ -74,6 +73,9 @@ extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeDimensions(AS
                                                                               ASRelativeDimension exactHeight);
 
 extern BOOL ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRange lhs, ASRelativeSizeRange rhs);
+
+/** Provided a parent size, compute final dimensions for this RelativeSizeRange to arrive at a SizeRange. */
+extern ASSizeRange ASRelativeSizeRangeResolveAutoSize(ASRelativeSizeRange relativeSizeRange, CGSize parentSize, ASSizeRange autoASSizeRange);
 
 /** Provided a parent size, compute final dimensions for this RelativeSizeRange to arrive at a SizeRange. */
 extern ASSizeRange ASRelativeSizeRangeResolve(ASRelativeSizeRange relativeSizeRange, CGSize parentSize);

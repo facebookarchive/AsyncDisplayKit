@@ -69,9 +69,12 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 @implementation ASDisplayNode
 
-// these dynamic properties all defined in ASLayoutOptionsPrivate.m
-@dynamic size, spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis,
-         alignSelf, ascender, descender, sizeRange, layoutPosition, layoutableType;
+// Dynamic properties for ASLayoutables
+@dynamic layoutableType, size, width, height, minWidth, maxWidth, minHeight, maxHeight;
+// Dynamic properties for stack spec
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender;
+// Dynamic properties for static spec
+@dynamic sizeRange, layoutPosition;
 
 @synthesize name = _name;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
@@ -296,7 +299,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
   
-  _size = ASRelativeSizeRangeAuto;
+  _size = ASSizeMake();
   _environmentState = ASEnvironmentStateMakeDefault();
   
   _defaultLayoutTransitionDuration = 0.2;
@@ -642,19 +645,91 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Layout measurement calculation
 
-- (ASRelativeSizeRange)size
+- (ASSize)size
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _size;
 }
 
-- (void)setSize:(ASRelativeSizeRange)size
+- (void)setSize:(ASSize)size
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if (ASRelativeSizeRangeEqualToRelativeSizeRange(_size, size) == NO) {
+  if (ASSizeEqualToSize(_size, size) == NO) {
     _size = size;
     [self invalidateCalculatedLayout];
   }
+}
+
+- (ASRelativeDimension)width
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.width;
+}
+
+- (void)setWidth:(ASRelativeDimension)width
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.width = width;
+}
+
+- (ASRelativeDimension)height
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.height;
+}
+
+- (void)setHeight:(ASRelativeDimension)height
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.height = height;
+}
+
+- (ASRelativeDimension)minWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.minWidth;
+}
+
+- (void)setMinWidth:(ASRelativeDimension)minWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.minWidth = minWidth;
+}
+
+- (ASRelativeDimension)maxWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.maxWidth;
+}
+
+- (void)setMaxWidth:(ASRelativeDimension)maxWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.maxWidth = maxWidth;
+}
+
+- (ASRelativeDimension)minHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.minHeight;
+}
+
+- (void)setMinHeight:(ASRelativeDimension)minHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.minHeight = minHeight;
+}
+
+- (ASRelativeDimension)maxHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.maxHeight;
+}
+
+- (void)setMaxHeight:(ASRelativeDimension)maxHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.maxHeight = maxHeight;
 }
 
 - (CGSize)sizeThatFits:(CGSize)constrainedSize
@@ -2220,7 +2295,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   
   ASLayout *previousLayout = _calculatedLayout;
   ASLayout *newLayout = [self calculateLayoutThatFits:constrainedSize
-                                restrictedToSizeRange:_size
+                                     restrictedToSize:_size
                                  relativeToParentSize:parentSize];
   
   _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
@@ -2237,10 +2312,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                restrictedToSizeRange:(ASRelativeSizeRange)size
+                     restrictedToSize:(ASSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(ASRelativeSizeRangeResolve(_size, parentSize), constrainedSize);
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASSizeResolve(_size, parentSize));
   return [self calculateLayoutThatFits:resolvedRange];
 }
 
@@ -2364,7 +2439,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (! CGSizeEqualToSize(_preferredFrameSize, preferredFrameSize)) {
     _preferredFrameSize = preferredFrameSize;
     
-    self.size = ASRelativeSizeRangeMakeWithExactCGSize(preferredFrameSize);
+    self.width = ASRelativeDimensionMakeWithPoints(preferredFrameSize.width);
+    self.height = ASRelativeDimensionMakeWithPoints(preferredFrameSize.height);
+
     self.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(preferredFrameSize);
     
     [self invalidateCalculatedLayout];

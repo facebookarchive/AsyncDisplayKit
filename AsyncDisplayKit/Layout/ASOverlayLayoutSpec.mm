@@ -48,7 +48,7 @@ static NSUInteger const kOverlayChildIndex = 1;
  First layout the contents, then fit the overlay on top of it.
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                restrictedToSizeRange:(ASRelativeSizeRange)size
+                     restrictedToSize:(ASSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
   ASLayout *contentsLayout = [self.child calculateLayoutThatFits:constrainedSize parentSize:parentSize];

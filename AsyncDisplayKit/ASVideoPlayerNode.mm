@@ -324,7 +324,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_playbackButtonNode == nil) {
     _playbackButtonNode = [[ASDefaultPlaybackButton alloc] init];
-    _playbackButtonNode.size = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(16.0, 22.0));
+    _playbackButtonNode.width = ASRelativeDimensionMakeWithPoints(16.0);
+    _playbackButtonNode.height = ASRelativeDimensionMakeWithPoints(22.0);
+
     if (_delegateFlags.delegatePlaybackButtonTint) {
       _playbackButtonNode.tintColor = [_delegate videoPlayerNodePlaybackButtonTint:self];
     } else {
@@ -598,7 +600,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       
       return spinnnerView;
     }];
-    _spinnerNode.size = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(44.0, 44.0));
+    
+    _spinnerNode.width = ASRelativeDimensionMakeWithPoints(44.0);
+    _spinnerNode.height = ASRelativeDimensionMakeWithPoints(44.0);
 
     [self addSubnode:_spinnerNode];
     [self setNeedsLayout];
@@ -729,7 +733,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (ASLayoutSpec *)defaultLayoutSpecThatFits:(CGSize)maxSize
 {
-  _scrubberNode.size = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(maxSize.width, 44.0));
+  _scrubberNode.width = ASRelativeDimensionMakeWithPoints(maxSize.width);
+  _scrubberNode.height = ASRelativeDimensionMakeWithPoints(44.0);
 
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.flexGrow = YES;

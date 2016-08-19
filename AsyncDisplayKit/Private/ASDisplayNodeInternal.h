@@ -105,7 +105,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 @protected
   ASDisplayNode * __weak _supernode;
   
-  ASRelativeSizeRange _size;
+  ASSize _size;
   CGSize _preferredFrameSize;
 
   ASSentinel *_displaySentinel;

@@ -42,7 +42,7 @@ static NSUInteger const kBackgroundChildIndex = 1;
  * First layout the contents, then fit the background image.
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                restrictedToSizeRange:(ASRelativeSizeRange)size
+                     restrictedToSize:(ASSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
   ASLayout *contentsLayout = [self.child calculateLayoutThatFits:constrainedSize parentSize:parentSize];

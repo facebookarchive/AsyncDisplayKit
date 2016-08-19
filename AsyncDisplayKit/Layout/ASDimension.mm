@@ -9,6 +9,7 @@
 //
 
 #import "ASDimension.h"
+#import "ASRelativeSize.h"
 #import "ASAssert.h"
 
 ASRelativeDimension const ASRelativeDimensionUnconstrained = {};
@@ -64,13 +65,81 @@ NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension)
 CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSize, CGFloat parent)
 {
   switch (dimension.type) {
+    case ASRelativeDimensionTypeAuto:
+      return autoSize;
     case ASRelativeDimensionTypePoints:
       return dimension.value;
     case ASRelativeDimensionTypeFraction:
       return dimension.value * parent;
-    case ASRelativeDimensionTypeAuto:
-      return autoSize;
   }
+}
+
+#pragma mark - ASSize
+
+ASSize ASSizeMake()
+{
+  return (ASSize){
+    .width = ASRelativeDimensionAuto,
+    .height = ASRelativeDimensionAuto,
+    .minWidth = ASRelativeDimensionAuto,
+    .maxWidth = ASRelativeDimensionAuto,
+    .minHeight = ASRelativeDimensionAuto,
+    .maxHeight = ASRelativeDimensionAuto
+  };
+}
+
+extern BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs)
+{
+  return ASRelativeDimensionEqualToRelativeDimension(lhs.width, rhs.width) &&
+         ASRelativeDimensionEqualToRelativeDimension(lhs.height, rhs.height) &&
+         ASRelativeDimensionEqualToRelativeDimension(lhs.minWidth, rhs.minWidth) &&
+         ASRelativeDimensionEqualToRelativeDimension(lhs.maxWidth, rhs.maxWidth) &&
+         ASRelativeDimensionEqualToRelativeDimension(lhs.minHeight, rhs.minHeight) &&
+         ASRelativeDimensionEqualToRelativeDimension(lhs.maxHeight, rhs.maxHeight);
+}
+
+static inline void ASSizeConstrain(CGFloat minVal, CGFloat exactVal, CGFloat maxVal, CGFloat *outMin, CGFloat *outMax)
+{
+    NSCAssert(!isnan(minVal), @"minVal must not be NaN");
+    NSCAssert(!isnan(maxVal), @"maxVal must not be NaN");
+    // Avoid use of min/max primitives since they're harder to reason
+    // about in the presence of NaN (in exactVal)
+    // Follow CSS: min overrides max overrides exact.
+
+    // Begin with the min/max range
+    *outMin = minVal;
+    *outMax = maxVal;
+    if (maxVal <= minVal) {
+        // min overrides max and exactVal is irrelevant
+        *outMax = minVal;
+        return;
+    }
+    if (isnan(exactVal)) {
+        // no exact value, so leave as a min/max range
+        return;
+    }
+    if (exactVal > maxVal) {
+        // clip to max value
+        *outMin = maxVal;
+    } else if (exactVal < minVal) {
+        // clip to min value
+        *outMax = minVal;
+    } else {
+        // use exact value
+        *outMin = *outMax = exactVal;
+    }
+}
+
+ASSizeRange ASSizeResolve(ASSize size, const CGSize parentSize)
+{
+  CGSize resolvedExact = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.width, size.height), parentSize, {NAN, NAN});
+  CGSize resolvedMin = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.minWidth, size.minHeight), parentSize, {0, 0});
+  CGSize resolvedMax = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight), parentSize, {INFINITY, INFINITY});
+  
+  CGSize rangeMin, rangeMax;
+  ASSizeConstrain(resolvedMin.width, resolvedExact.width, resolvedMax.width, &rangeMin.width, &rangeMax.width);
+  ASSizeConstrain(resolvedMin.height, resolvedExact.height, resolvedMax.height, &rangeMin.height, &rangeMax.height);
+  return {rangeMin, rangeMax};
 }
 
 #pragma mark - ASSizeRange

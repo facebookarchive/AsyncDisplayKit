@@ -327,8 +327,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
 ASLayout *ASCalculateLayout(id<ASLayoutable> layoutable, const ASSizeRange sizeRange, const CGSize parentSize)
 {
-  // TODO: sizeRange: This breaks TrashTester test but we should enable we it?  
-  //ASDisplayNodeCAssertNotNil(layoutable, @"Not valid layoutable passed in.");
+  ASDisplayNodeCAssertNotNil(layoutable, @"Not valid layoutable passed in.");
   
   return layoutable ? [layoutable calculateLayoutThatFits:sizeRange parentSize:parentSize] : nil;
 }
