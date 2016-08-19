@@ -39,6 +39,7 @@ struct ASImageNodeDrawParameters {
   UIViewContentMode contentMode;
   BOOL cropEnabled;
   BOOL forceUpscaling;
+  CGSize forcedSize;
   CGRect cropRect;
   CGRect cropDisplayBounds;
   asimagenode_modification_block_t imageModificationBlock;
@@ -129,6 +130,7 @@ struct ASImageNodeDrawParameters {
   // Cropping.
   BOOL _cropEnabled; // Defaults to YES.
   BOOL _forceUpscaling; //Defaults to NO.
+  CGSize _forcedSize; //Defaults to CGSizeZero, indicating no forced size.
   CGRect _cropRect; // Defaults to CGRectMake(0.5, 0.5, 0, 0)
   CGRect _cropDisplayBounds; // Defaults to CGRectNull
 }
@@ -246,6 +248,7 @@ struct ASImageNodeDrawParameters {
     .contentMode = self.contentMode,
     .cropEnabled = _cropEnabled,
     .forceUpscaling = _forceUpscaling,
+    .forcedSize = _forcedSize,
     .cropRect = _cropRect,
     .cropDisplayBounds = _cropDisplayBounds,
     .imageModificationBlock = _imageModificationBlock
@@ -271,6 +274,7 @@ struct ASImageNodeDrawParameters {
   
   CGRect drawParameterBounds    = CGRectZero;
   BOOL forceUpscaling           = NO;
+  CGSize forcedSize             = CGSizeZero;
   BOOL cropEnabled              = YES;
   BOOL isOpaque                 = NO;
   UIColor *backgroundColor      = nil;
@@ -286,6 +290,7 @@ struct ASImageNodeDrawParameters {
     
     drawParameterBounds       = drawParameter.bounds;
     forceUpscaling            = drawParameter.forceUpscaling;
+    forcedSize                = drawParameter.forcedSize;
     cropEnabled               = drawParameter.cropEnabled;
     isOpaque                  = drawParameter.opaque;
     backgroundColor           = drawParameter.backgroundColor;
@@ -342,16 +347,23 @@ struct ASImageNodeDrawParameters {
     return nil;
   }
   
+  
   // If we're not supposed to do any cropping, just decode image at original size
   if (!cropEnabled || !contentModeSupported || stretchable) {
     backingSize = imageSizeInPixels;
     imageDrawRect = (CGRect){.size = backingSize};
   } else {
+    if (CGSizeEqualToSize(CGSizeZero, forcedSize) == NO) {
+      //scale forced size
+      forcedSize.width *= contentsScale;
+      forcedSize.height *= contentsScale;
+    }
     ASCroppedImageBackingSizeAndDrawRectInBounds(imageSizeInPixels,
                                                  boundsSizeInPixels,
                                                  contentMode,
                                                  cropRect,
                                                  forceUpscaling,
+                                                 forcedSize,
                                                  &backingSize,
                                                  &imageDrawRect);
   }
@@ -591,6 +603,18 @@ static ASDN::Mutex cacheLock;
 {
   ASDN::MutexLocker l(__instanceLock__);
   _forceUpscaling = forceUpscaling;
+}
+
+- (CGSize)forcedSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _forcedSize;
+}
+
+- (void)setForcedSize:(CGSize)forcedSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _forcedSize = forcedSize;
 }
 
 - (asimagenode_modification_block_t)imageModificationBlock

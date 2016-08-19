@@ -40,6 +40,7 @@ void ASCroppedImageBackingSizeAndDrawRectInBounds(CGSize sourceImageSize,
                                                   UIViewContentMode contentMode,
                                                   CGRect cropRect,
                                                   BOOL forceUpscaling,
+                                                  CGSize forcedSize,
                                                   CGSize *outBackingSize,
                                                   CGRect *outDrawRect
                                                   )
@@ -66,7 +67,10 @@ void ASCroppedImageBackingSizeAndDrawRectInBounds(CGSize sourceImageSize,
 
   // If fitting the desired aspect ratio to the image size actually results in a larger buffer, use the input values.
   // However, if there is a pixel savings (e.g. we would have to upscale the image), overwrite the function arguments.
-  if (forceUpscaling == NO && (scaledSizeForImage.width * scaledSizeForImage.height) < (destinationWidth * destinationHeight)) {
+  if (CGSizeEqualToSize(CGSizeZero, forcedSize) == NO) {
+    destinationWidth = forcedSize.width;
+    destinationHeight = forcedSize.height;
+  } else if (forceUpscaling == NO && (scaledSizeForImage.width * scaledSizeForImage.height) < (destinationWidth * destinationHeight)) {
     destinationWidth = (size_t)round(scaledSizeForImage.width);
     destinationHeight = (size_t)round(scaledSizeForImage.height);
     if (destinationWidth == 0 || destinationHeight == 0) {
