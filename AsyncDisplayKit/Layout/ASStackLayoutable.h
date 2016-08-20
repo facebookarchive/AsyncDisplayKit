@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * @abstract Specifies the initial size in the stack dimension for this object.
- * Default to ASRelativeDimensionUnconstrained.
+ * Default to ASRelativeDimensionAuto
  * Used when attached to a stack layout.
  */
 @property (nonatomic, readwrite) ASRelativeDimension flexBasis;

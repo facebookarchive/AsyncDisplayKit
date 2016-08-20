@@ -9,7 +9,6 @@
 //
 
 #import <AsyncDisplayKit/ASDimension.h>
-#import <AsyncDisplayKit/ASRelativeSize.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
 #import <AsyncDisplayKit/ASStackLayoutable.h>
 #import <AsyncDisplayKit/ASStaticLayoutable.h>
@@ -192,7 +191,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * @abstract Specifies the initial size in the stack dimension for this object.
- * Default to ASRelativeDimensionUnconstrained.
+ * Default to ASRelativeDimensionAuto
  * Used when attached to a stack layout.
  */
 @property (nonatomic, readwrite) ASRelativeDimension flexBasis;

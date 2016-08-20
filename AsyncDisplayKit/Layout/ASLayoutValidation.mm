@@ -112,7 +112,7 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexGrow), sublayoutLayoutable, stackContainerClass);
     } else if (sublayoutLayoutable.flexShrink == YES) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexShrink), sublayoutLayoutable, stackContainerClass);
-    } else if (!ASRelativeDimensionEqualToRelativeDimension(sublayoutLayoutable.flexBasis, ASRelativeDimensionUnconstrained) ) {
+    } else if (!ASRelativeDimensionEqualToRelativeDimension(sublayoutLayoutable.flexBasis, ASRelativeDimensionAuto) ) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexBasis), sublayoutLayoutable, stackContainerClass);
     } else if (sublayoutLayoutable.alignSelf != ASStackLayoutAlignSelfAuto) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(alignSelf), sublayoutLayoutable, stackContainerClass);

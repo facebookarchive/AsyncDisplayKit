@@ -9,10 +9,8 @@
 //
 
 #import "ASDimension.h"
-#import "ASRelativeSize.h"
 #import "ASAssert.h"
 
-ASRelativeDimension const ASRelativeDimensionUnconstrained = {};
 ASRelativeDimension const ASRelativeDimensionAuto = {ASRelativeDimensionTypeAuto, 0};
 
 #pragma mark - ASRelativeDimension
@@ -74,6 +72,33 @@ CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSi
   }
 }
 
+#pragma mark - ASRelativeSize
+
+ASRelativeSize ASRelativeSizeMake(ASRelativeDimension width, ASRelativeDimension height)
+{
+  ASRelativeSize size; size.width = width; size.height = height; return size;
+}
+
+// ** Resolve this relative size relative to a parent size. */
+CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize, CGSize autoSize)
+{
+  return CGSizeMake(ASRelativeDimensionResolve(relativeSize.width, autoSize.width, parentSize.width),
+                    ASRelativeDimensionResolve(relativeSize.height, autoSize.height, parentSize.height));
+}
+
+BOOL ASRelativeSizeEqualToRelativeSize(ASRelativeSize lhs, ASRelativeSize rhs)
+{
+  return ASRelativeDimensionEqualToRelativeDimension(lhs.width, rhs.width)
+  && ASRelativeDimensionEqualToRelativeDimension(lhs.height, rhs.height);
+}
+
+NSString *NSStringFromASRelativeSize(ASRelativeSize size)
+{
+  return [NSString stringWithFormat:@"{%@, %@}",
+          NSStringFromASRelativeDimension(size.width),
+          NSStringFromASRelativeDimension(size.height)];
+}
+
 #pragma mark - ASSize
 
 ASSize ASSizeMake()
@@ -96,14 +121,23 @@ ASSize ASSizeMakeFromCGSize(CGSize size)
   return s;
 }
 
-extern BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs)
+BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs)
 {
-  return ASRelativeDimensionEqualToRelativeDimension(lhs.width, rhs.width) &&
-         ASRelativeDimensionEqualToRelativeDimension(lhs.height, rhs.height) &&
-         ASRelativeDimensionEqualToRelativeDimension(lhs.minWidth, rhs.minWidth) &&
-         ASRelativeDimensionEqualToRelativeDimension(lhs.maxWidth, rhs.maxWidth) &&
-         ASRelativeDimensionEqualToRelativeDimension(lhs.minHeight, rhs.minHeight) &&
-         ASRelativeDimensionEqualToRelativeDimension(lhs.maxHeight, rhs.maxHeight);
+  return ASRelativeDimensionEqualToRelativeDimension(lhs.width, rhs.width)
+  && ASRelativeDimensionEqualToRelativeDimension(lhs.height, rhs.height)
+  && ASRelativeDimensionEqualToRelativeDimension(lhs.minWidth, rhs.minWidth)
+  && ASRelativeDimensionEqualToRelativeDimension(lhs.maxWidth, rhs.maxWidth)
+  && ASRelativeDimensionEqualToRelativeDimension(lhs.minHeight, rhs.minHeight)
+  && ASRelativeDimensionEqualToRelativeDimension(lhs.maxHeight, rhs.maxHeight);
+}
+
+NSString *NSStringFromASSize(ASSize size)
+{
+  return [NSString stringWithFormat:
+          @"<ASSize: exact=%@, min=%@, max=%@>",
+          NSStringFromASRelativeSize(ASRelativeSizeMake(size.width, size.height)),
+          NSStringFromASRelativeSize(ASRelativeSizeMake(size.minWidth, size.minHeight)),
+          NSStringFromASRelativeSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight))];
 }
 
 static inline void ASSizeConstrain(CGFloat minVal, CGFloat exactVal, CGFloat maxVal, CGFloat *outMin, CGFloat *outMax)

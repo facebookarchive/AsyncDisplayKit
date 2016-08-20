@@ -36,13 +36,34 @@ typedef struct {
   CGFloat value;
 } ASRelativeDimension;
 
-/** Expresses an inclusive range of sizes. Used to provide a simple constraint to layout. */
+/**
+ * Expresses a size with relative dimensions.
+ */
+typedef struct {
+  ASRelativeDimension width;
+  ASRelativeDimension height;
+} ASRelativeSize;
+
+/**
+ * Expresses an inclusive range of sizes. Used to provide a simple constraint to layout.
+ */
 typedef struct {
   CGSize min;
   CGSize max;
 } ASSizeRange;
 
-/**  */
+/**
+ * A struct specifying a ASLayoutable's size. Example:
+ *
+ *  ASSize size = (ASSize){
+ *    .width = ASRelativeDimensionMakeWithFraction(0.25),
+ *    .maxWidth = ASRelativeDimensionMakeWithPoints(200),
+ *    .minHeight = ASRelativeDimensionMakeWithFraction(0.50)
+ *  };
+ *
+ *  Description: <ASSize: exact={25%, Auto}, min={Auto, 50%}, max={200pt, Auto}>
+ *
+ */
 typedef struct {
   ASRelativeDimension width;
   ASRelativeDimension height;
@@ -52,7 +73,6 @@ typedef struct {
   ASRelativeDimension maxHeight;
 } ASSize;
 
-extern ASRelativeDimension const ASRelativeDimensionUnconstrained;
 extern ASRelativeDimension const ASRelativeDimensionAuto;
 
 #define isValidForLayout(x) ((isnormal(x) || x == 0.0) && x >= 0.0 && x < (CGFLOAT_MAX / 2.0))
@@ -84,11 +104,14 @@ extern ASSize ASSizeMakeFromCGSize(CGSize size);
 
 extern BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs);
 
+extern NSString *NSStringFromASSize(ASSize size);
+
 extern ASSizeRange ASSizeResolve(ASSize size, const CGSize parentSize);
 extern ASSizeRange ASSizeResolveAutoSize(ASSize size, const CGSize parentSize, ASSizeRange autoASSizeRange);
 
 #pragma mark - ASSizeRange
 
+/** Creates an ASSizeRange with provided min and max size */
 extern ASSizeRange ASSizeRangeMake(CGSize min, CGSize max);
 
 /** Creates an ASSizeRange with the provided size as both min and max */
