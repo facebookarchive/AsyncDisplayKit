@@ -2111,7 +2111,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (node.isSynchronous && [node __canCallSetNeedsDisplayOfLayer]) {
     // Layers for UIKit components that are wrapped within a node needs to be set to be displayed as the contents of
     // the layer get's cleared and would not be recreated otherwise.
-    // We do not call this for _ASDisplayLayer as an optimization.
+    // We do not call this for _ASDisplayLayer as an optimization.
     [layer setNeedsDisplay];
   }
   
