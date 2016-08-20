@@ -719,13 +719,12 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   if (_spinnerNode) {
     ASCenterLayoutSpec *centerLayoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_spinnerNode];
-    centerLayoutSpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
+    centerLayoutSpec.size = ASSizeMakeFromCGSize(maxSize);
     [children addObject:centerLayoutSpec];
   }
 
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
-  overlaySpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
-
+  overlaySpec.size = ASSizeMakeFromCGSize(maxSize);
   [children addObject:overlaySpec];
 
   return [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];

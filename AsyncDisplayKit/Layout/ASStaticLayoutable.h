@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * The default is ASRelativeDimensionUnconstrained, which sets the child's min size to zero and max size to the maximum available space it can consume without overflowing the spec's size.
  */
-@property (nonatomic, assign) ASRelativeSizeRange sizeRange;
+//@property (nonatomic, assign) ASRelativeSizeRange sizeRange;
 
 /**
  * @abstract The position of this object within its parent spec.

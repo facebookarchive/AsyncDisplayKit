@@ -80,9 +80,12 @@ extern CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat
 
 extern ASSize ASSizeMake();
 
+extern ASSize ASSizeMakeFromCGSize(CGSize size);
+
 extern BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs);
 
 extern ASSizeRange ASSizeResolve(ASSize size, const CGSize parentSize);
+extern ASSizeRange ASSizeResolveAutoSize(ASSize size, const CGSize parentSize, ASSizeRange autoASSizeRange);
 
 #pragma mark - ASSizeRange
 

@@ -88,6 +88,14 @@ ASSize ASSizeMake()
   };
 }
 
+ASSize ASSizeMakeFromCGSize(CGSize size)
+{
+  ASSize s = ASSizeMake();
+  s.width = ASRelativeDimensionMakeWithPoints(size.width);
+  s.height = ASRelativeDimensionMakeWithPoints(size.height);
+  return s;
+}
+
 extern BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs)
 {
   return ASRelativeDimensionEqualToRelativeDimension(lhs.width, rhs.width) &&
@@ -130,16 +138,21 @@ static inline void ASSizeConstrain(CGFloat minVal, CGFloat exactVal, CGFloat max
     }
 }
 
-ASSizeRange ASSizeResolve(ASSize size, const CGSize parentSize)
+ASSizeRange ASSizeResolveAutoSize(ASSize size, const CGSize parentSize, ASSizeRange autoASSizeRange)
 {
   CGSize resolvedExact = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.width, size.height), parentSize, {NAN, NAN});
-  CGSize resolvedMin = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.minWidth, size.minHeight), parentSize, {0, 0});
-  CGSize resolvedMax = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight), parentSize, {INFINITY, INFINITY});
+  CGSize resolvedMin = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.minWidth, size.minHeight), parentSize, autoASSizeRange.min);
+  CGSize resolvedMax = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight), parentSize, autoASSizeRange.max);
   
   CGSize rangeMin, rangeMax;
   ASSizeConstrain(resolvedMin.width, resolvedExact.width, resolvedMax.width, &rangeMin.width, &rangeMax.width);
   ASSizeConstrain(resolvedMin.height, resolvedExact.height, resolvedMax.height, &rangeMin.height, &rangeMax.height);
   return {rangeMin, rangeMax};
+}
+
+ASSizeRange ASSizeResolve(ASSize size, const CGSize parentSize)
+{
+  return ASSizeResolveAutoSize(size, parentSize, {{0, 0}, {INFINITY, INFINITY}});
 }
 
 #pragma mark - ASSizeRange

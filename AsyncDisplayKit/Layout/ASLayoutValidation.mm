@@ -72,12 +72,12 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
     Class stackContainerClass = [ASStaticLayoutSpec class];
     
     // Check for default sizeRange and layoutPosition
-    ASRelativeSizeRange sizeRange = sublayoutLayoutable.sizeRange;
-    ASRelativeSizeRange zeroSizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeZero);
+    //ASRelativeSizeRange sizeRange = sublayoutLayoutable.sizeRange;
+    //ASRelativeSizeRange zeroSizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeZero);
     
-    if (ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, zeroSizeRange) == NO) {
+    /*if (ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, zeroSizeRange) == NO) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(sizeRange), sublayoutLayoutable, stackContainerClass);
-    } else if (!CGPointEqualToPoint(sublayoutLayoutable.layoutPosition, CGPointZero)) {
+    } else */if (!CGPointEqualToPoint(sublayoutLayoutable.layoutPosition, CGPointZero)) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(layoutPosition), sublayoutLayoutable, stackContainerClass);
     }
     

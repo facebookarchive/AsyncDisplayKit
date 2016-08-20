@@ -74,7 +74,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 // Dynamic properties for stack spec
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender;
 // Dynamic properties for static spec
-@dynamic sizeRange, layoutPosition;
+@dynamic /*sizeRange, */layoutPosition;
 
 @synthesize name = _name;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
@@ -660,77 +660,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 }
 
-- (ASRelativeDimension)width
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _size.width;
-}
-
-- (void)setWidth:(ASRelativeDimension)width
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _size.width = width;
-}
-
-- (ASRelativeDimension)height
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _size.height;
-}
-
-- (void)setHeight:(ASRelativeDimension)height
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _size.height = height;
-}
-
-- (ASRelativeDimension)minWidth
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _size.minWidth;
-}
-
-- (void)setMinWidth:(ASRelativeDimension)minWidth
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _size.minWidth = minWidth;
-}
-
-- (ASRelativeDimension)maxWidth
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _size.maxWidth;
-}
-
-- (void)setMaxWidth:(ASRelativeDimension)maxWidth
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _size.maxWidth = maxWidth;
-}
-
-- (ASRelativeDimension)minHeight
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _size.minHeight;
-}
-
-- (void)setMinHeight:(ASRelativeDimension)minHeight
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _size.minHeight = minHeight;
-}
-
-- (ASRelativeDimension)maxHeight
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _size.maxHeight;
-}
-
-- (void)setMaxHeight:(ASRelativeDimension)maxHeight
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _size.maxHeight = maxHeight;
-}
+ASLayoutableSizeForwarding
 
 - (CGSize)sizeThatFits:(CGSize)constrainedSize
 {
@@ -2442,8 +2372,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     self.width = ASRelativeDimensionMakeWithPoints(preferredFrameSize.width);
     self.height = ASRelativeDimensionMakeWithPoints(preferredFrameSize.height);
 
-    self.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(preferredFrameSize);
-    
     [self invalidateCalculatedLayout];
   }
 }

@@ -204,7 +204,8 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 #pragma mark ASImageNode
     ASImageNode *imageNode = [ASImageNode new];
     imageNode.image = [UIImage imageNamed:@"image"];
-    imageNode.preferredFrameSize = CGSizeMake(imageNode.image.size.width / 7, imageNode.image.size.height / 7);
+    imageNode.size = ASSizeMakeFromCGSize(CGSizeMake(imageNode.image.size.width / 7,
+                                                     imageNode.image.size.height / 7));
     
     parentNode = [self centeringParentNodeWithChild:imageNode];
     parentNode.entryTitle = @"ASImageNode";
@@ -214,7 +215,8 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 #pragma mark ASNetworkImageNode
     ASNetworkImageNode *networkImageNode = [ASNetworkImageNode new];
     networkImageNode.URL = [NSURL URLWithString:@"http://i.imgur.com/FjOR9kX.jpg"];
-    networkImageNode.preferredFrameSize = CGSizeMake(imageNode.image.size.width / 7, imageNode.image.size.height / 7);
+    networkImageNode.size = ASSizeMakeFromCGSize(CGSizeMake(imageNode.image.size.width / 7,
+                                                            imageNode.image.size.height / 7));
     
     parentNode = [self centeringParentNodeWithChild:networkImageNode];
     parentNode.entryTitle = @"ASNetworkImageNode";
@@ -223,7 +225,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark ASMapNode
     ASMapNode *mapNode = [ASMapNode new];
-    mapNode.preferredFrameSize = CGSizeMake(300.0, 300.0);
+    mapNode.size = ASSizeMakeFromCGSize((CGSize){300.0, 300.0});
     
     // San Francisco
     CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(37.7749, -122.4194);
@@ -236,7 +238,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark ASVideoNode
     ASVideoNode *videoNode = [ASVideoNode new];
-    videoNode.preferredFrameSize = CGSizeMake(300.0, 400.0);
+    videoNode.size = ASSizeMakeFromCGSize((CGSize){300.0, 400.0});
     
     AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"http://www.w3schools.com/html/mov_bbb.mp4"]];
     videoNode.asset = asset;
@@ -250,7 +252,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     UIImage *scrollNodeImage = [UIImage imageNamed:@"image"];
     
     ASScrollNode *scrollNode = [ASScrollNode new];
-    scrollNode.preferredFrameSize = CGSizeMake(300.0, 400.0);
+    scrollNode.size = ASSizeMakeFromCGSize((CGSize){300.0, 400.0});
     
     UIScrollView *scrollNodeView = scrollNode.view;
     [scrollNodeView addSubview:[[UIImageView alloc] initWithImage:scrollNodeImage]];
@@ -401,17 +403,17 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark Horizontal ASStackLayoutSpec
     childNode1 = [ASDisplayNode new];
-    childNode1.preferredFrameSize = CGSizeMake(10.0, 20);
+    childNode1.size = ASSizeMakeFromCGSize((CGSize){10.0, 20.0});
     childNode1.flexGrow = YES;
     childNode1.backgroundColor = [UIColor greenColor];
     
     childNode2 = [ASDisplayNode new];
-    childNode2.preferredFrameSize = CGSizeMake(10.0, 20.0);
+    childNode2.size = ASSizeMakeFromCGSize((CGSize){10.0, 20.0});
     childNode2.alignSelf = ASStackLayoutAlignSelfStretch;
     childNode2.backgroundColor = [UIColor blueColor];
     
     childNode3 = [ASDisplayNode new];
-    childNode3.preferredFrameSize = CGSizeMake(10.0, 20.0);
+    childNode3.size = ASSizeMakeFromCGSize((CGSize){10.0, 20.0});
     childNode3.backgroundColor = [UIColor yellowColor];
     
     parentNode = [self parentNodeWithChild:childNode];
@@ -425,15 +427,11 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
         verticalStackLayoutSpec.spacing = 5.0; // Spacing between children
         
         // Layout the stack layout with 100% width and 100% height of the parent node
-        ASRelativeSizeRange sizeRange = ASRelativeSizeRangeMakeWithExactRelativeDimensions(ASRelativeDimensionMakeWithFraction(1),
-                                                                                           ASRelativeDimensionMakeWithFraction(1));
-        verticalStackLayoutSpec.sizeRange = sizeRange;
-        
-        // Wrap the static stack layout in a static spec so it will grow to the whole parent node size
-        ASStaticLayoutSpec *staticLayoutSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[verticalStackLayoutSpec]];
+        verticalStackLayoutSpec.height = ASRelativeDimensionMakeWithFraction(1.0);
+        verticalStackLayoutSpec.width = ASRelativeDimensionMakeWithFraction(1.0);
         
         // Add a bit of inset
-        return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0.0, 5.0, 0.0, 5.0) child:staticLayoutSpec];
+        return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0.0, 5.0, 0.0, 5.0) child:verticalStackLayoutSpec];
     };
     [parentNode addSubnode:childNode1];
     [parentNode addSubnode:childNode2];
@@ -465,7 +463,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 - (OverviewDisplayNodeWithSizeBlock *)parentNodeWithChild:(ASDisplayNode *)child
 {
     OverviewDisplayNodeWithSizeBlock *parentNode = [OverviewDisplayNodeWithSizeBlock new];
-    parentNode.preferredFrameSize = CGSizeMake(100, 100);
+    parentNode.size = ASSizeMakeFromCGSize((CGSize){100, 100});
     parentNode.backgroundColor = [UIColor redColor];
     return parentNode;
 }
@@ -489,7 +487,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 - (ASDisplayNode *)childNode
 {
     ASDisplayNode *childNode = [ASDisplayNode new];
-    childNode.preferredFrameSize = CGSizeMake(50, 50);
+    childNode.size = ASSizeMakeFromCGSize((CGSize){50, 50});
     childNode.backgroundColor = [UIColor blueColor];
     return childNode;
 }

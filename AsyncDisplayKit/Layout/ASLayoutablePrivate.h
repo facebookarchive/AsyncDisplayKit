@@ -67,8 +67,9 @@ extern void ASLayoutableClearCurrentContext();
 
 @end
 
+#pragma mark - ASLayoutableForwarding
 
-#pragma mark - ASLayoutOptionsForwarding
+
 
 /**
  *  Both an ASDisplayNode and an ASLayoutSpec conform to ASLayoutable. There are several properties
@@ -81,6 +82,99 @@ extern void ASLayoutableClearCurrentContext();
  *  ASDisplayNode and ASLayoutSpec to provide convenience properties for any options that your
  *  layoutSpec may require.
  */
+
+#pragma mark - ASLayoutableSizeForwarding
+
+#define ASLayoutableSizeForwarding \
+\
+- (ASRelativeDimension)width\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.width;\
+}\
+\
+- (void)setWidth:(ASRelativeDimension)width\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.width = width;\
+}\
+\
+- (ASRelativeDimension)height\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.height;\
+}\
+\
+- (void)setHeight:(ASRelativeDimension)height\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.height = height;\
+}\
+\
+- (ASRelativeDimension)minWidth\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.minWidth;\
+}\
+\
+- (void)setMinWidth:(ASRelativeDimension)minWidth\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.minWidth = minWidth;\
+}\
+\
+- (ASRelativeDimension)maxWidth\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.maxWidth;\
+}\
+\
+- (void)setMaxWidth:(ASRelativeDimension)maxWidth\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.maxWidth = maxWidth;\
+}\
+\
+- (ASRelativeDimension)minHeight\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.minHeight;\
+}\
+\
+- (void)setMinHeight:(ASRelativeDimension)minHeight\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.minHeight = minHeight;\
+}\
+\
+- (ASRelativeDimension)maxHeight\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.maxHeight;\
+}\
+\
+- (void)setMaxHeight:(ASRelativeDimension)maxHeight\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.maxHeight = maxHeight;\
+}\
+\
+- (void)setSizeWithCGSize:(CGSize)size\
+{\
+  self.width = ASRelativeDimensionMakeWithPoints(size.width);\
+  self.height = ASRelativeDimensionMakeWithPoints(size.height);\
+}\
+\
+- (void)setExactSizeWithCGSize:(CGSize)size\
+{\
+  self.minWidth = ASRelativeDimensionMakeWithPoints(size.width);\
+  self.minHeight = ASRelativeDimensionMakeWithPoints(size.height);\
+  self.maxWidth = ASRelativeDimensionMakeWithPoints(size.width);\
+  self.maxHeight = ASRelativeDimensionMakeWithPoints(size.height);\
+}\
+
+
+#pragma mark - ASLayoutOptionsForwarding
 
 #define ASEnvironmentLayoutOptionsForwarding \
 - (void)propagateUpLayoutOptionsState\
@@ -182,7 +276,7 @@ extern void ASLayoutableClearCurrentContext();
   [self propagateUpLayoutOptionsState];\
 }\
 \
-- (ASRelativeSizeRange)sizeRange\
+/*- (ASRelativeSizeRange)sizeRange\
 {\
   return _environmentState.layoutOptionsState.sizeRange;\
 }\
@@ -191,7 +285,7 @@ extern void ASLayoutableClearCurrentContext();
 {\
   _environmentState.layoutOptionsState.sizeRange = sizeRange;\
   [self propagateUpLayoutOptionsState];\
-}\
+}\*/\
 \
 - (CGPoint)layoutPosition\
 {\

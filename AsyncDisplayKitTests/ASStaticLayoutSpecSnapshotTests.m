@@ -33,10 +33,10 @@
 
 - (void)testChildrenMeasuredWithAutoMaxSize
 {
-  ASStaticSizeDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor], CGSizeMake(50, 50));
+  ASStaticSizeDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor], (CGSize){50, 50});
   firstChild.layoutPosition = CGPointMake(0, 0);
   
-  ASStaticSizeDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor], CGSizeMake(100, 100));
+  ASStaticSizeDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor], (CGSize){100, 100});
   secondChild.layoutPosition = CGPointMake(10, 60);
 
   ASSizeRange sizeRange = ASSizeRangeMake(CGSizeMake(10, 10), CGSizeMake(110, 160));
@@ -45,13 +45,11 @@
 
 - (void)testWithSizeRange:(ASSizeRange)sizeRange identifier:(NSString *)identifier
 {
-  ASDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
+  ASDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor], (CGSize){50, 50});
   firstChild.layoutPosition = CGPointMake(0, 0);
-  firstChild.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(50, 50));
   
-  ASDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
+  ASDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor], (CGSize){100, 100});
   secondChild.layoutPosition = CGPointMake(0, 50);
-  secondChild.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(100, 100));
   
   [self testWithChildren:@[firstChild, secondChild] sizeRange:sizeRange identifier:identifier];
 }

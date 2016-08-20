@@ -10,8 +10,8 @@
 
 #import "ASRelativeSize.h"
 
-ASRelativeSizeRange const ASRelativeSizeRangeAuto = {{ASRelativeDimensionAuto, ASRelativeDimensionAuto},
-                                                     {ASRelativeDimensionAuto, ASRelativeDimensionAuto}};
+/*ASRelativeSizeRange const ASRelativeSizeRangeAuto = {{ASRelativeDimensionAuto, ASRelativeDimensionAuto},
+                                                     {ASRelativeDimensionAuto, ASRelativeDimensionAuto}};*/
 
 #pragma mark - ASRelativeSize
 
@@ -53,7 +53,7 @@ NSString *NSStringFromASRelativeSize(ASRelativeSize size)
 
 #pragma mark - ASRelativeSizeRange
 
-ASRelativeSizeRange ASRelativeSizeRangeMake(ASRelativeSize min, ASRelativeSize max)
+/*ASRelativeSizeRange ASRelativeSizeRangeMake(ASRelativeSize min, ASRelativeSize max)
 {
   ASRelativeSizeRange sizeRange; sizeRange.min = min; sizeRange.max = max; return sizeRange;
 }
@@ -103,4 +103,4 @@ ASSizeRange ASRelativeSizeRangeResolveAutoSize(ASRelativeSizeRange relativeSizeR
 {
   return ASSizeRangeMake(ASRelativeSizeResolveSize(relativeSizeRange.min, parentSize, autoASSizeRange.min),
                          ASRelativeSizeResolveSize(relativeSizeRange.max, parentSize, autoASSizeRange.max));
-}
+}*/
