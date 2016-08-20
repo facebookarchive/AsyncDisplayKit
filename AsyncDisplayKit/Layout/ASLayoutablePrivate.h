@@ -276,17 +276,6 @@ extern void ASLayoutableClearCurrentContext();
   [self propagateUpLayoutOptionsState];\
 }\
 \
-/*- (ASRelativeSizeRange)sizeRange\
-{\
-  return _environmentState.layoutOptionsState.sizeRange;\
-}\
-\
-- (void)setSizeRange:(ASRelativeSizeRange)sizeRange\
-{\
-  _environmentState.layoutOptionsState.sizeRange = sizeRange;\
-  [self propagateUpLayoutOptionsState];\
-}\*/\
-\
 - (CGPoint)layoutPosition\
 {\
   return _environmentState.layoutOptionsState.layoutPosition;\
