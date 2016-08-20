@@ -54,9 +54,9 @@ struct ASImageNodeDrawParameters {
 @property CGRect imageDrawRect;
 @property BOOL isOpaque;
 @property (nonatomic, strong) UIColor *backgroundColor;
-@property (strong) ASDisplayNodeContextModifier preContextBlock;
-@property (strong) ASDisplayNodeContextModifier postContextBlock;
-@property (strong) asimagenode_modification_block_t imageModificationBlock;
+@property (copy) ASDisplayNodeContextModifier preContextBlock;
+@property (copy) ASDisplayNodeContextModifier postContextBlock;
+@property (copy) asimagenode_modification_block_t imageModificationBlock;
 
 @end
 
