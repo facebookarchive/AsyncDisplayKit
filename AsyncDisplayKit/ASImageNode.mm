@@ -50,9 +50,9 @@ struct ASImageNodeDrawParameters {
 @interface ASImageNodeContentsKey : NSObject {}
 
 @property (nonatomic, strong) UIImage *image;
-@property CGSize backingSize;
-@property CGRect imageDrawRect;
-@property BOOL isOpaque;
+@property (nonatomic, assign) CGSize backingSize;
+@property (nonatomic, assign) CGRect imageDrawRect;
+@property (nonatomic, assign) BOOL isOpaque;
 @property (nonatomic, strong) UIColor *backgroundColor;
 @property ASDisplayNodeContextModifier preContextBlock;
 @property ASDisplayNodeContextModifier postContextBlock;
