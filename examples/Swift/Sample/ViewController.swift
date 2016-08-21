@@ -127,7 +127,7 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
   /// (Pretend) fetches some new items and calls the
   /// completion handler on the main thread.
   private static func fetchDataWithCompletion(completion: (Int) -> Void) {
-    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(NSTimeInterval(NSEC_PER_SEC) * 0.5))
+    let time = dispatch_time(DISPATCH_TIME_NOW, Int64(NSTimeInterval(NSEC_PER_SEC) * 1.0))
     dispatch_after(time, dispatch_get_main_queue()) {
       let resultCount = Int(arc4random_uniform(20))
       completion(resultCount)

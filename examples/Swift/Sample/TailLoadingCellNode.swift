@@ -55,9 +55,7 @@ final class SpinnerNode: ASDisplayNode {
   override init() {
     super.init(viewBlock: { UIActivityIndicatorView(activityIndicatorStyle: .Gray) }, didLoadBlock: nil)
     
-    // Height based on the view we are wrapping and a static width of 32.0
-    size = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeMake(0, 32)),
-                                   ASRelativeSizeMakeWithCGSize(CGSizeMake(CGFloat.max, 32)));
+    size.minHeight = ASRelativeDimensionMakeWithPoints(44.0)
   }
 
   override func didLoad() {

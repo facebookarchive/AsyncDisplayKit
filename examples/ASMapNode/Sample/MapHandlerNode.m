@@ -115,11 +115,11 @@
 {
 #define SPACING 5
 #define HEIGHT 30
-  CGSize preferredSize = CGSizeMake(constrainedSize.max.width * 0.3, HEIGHT);
+  CGSize nodeSize = CGSizeMake(constrainedSize.max.width * 0.3, HEIGHT);
 
-  _latEditableNode.preferredFrameSize = _lonEditableNode.preferredFrameSize = preferredSize;
-  _deltaLatEditableNode.preferredFrameSize = _deltaLonEditableNode.preferredFrameSize = preferredSize;
-  _updateRegionButton.preferredFrameSize = _liveMapToggleButton.preferredFrameSize = preferredSize;
+  _latEditableNode.size = _lonEditableNode.size = ASSizeMakeFromCGSize(nodeSize);
+  _deltaLatEditableNode.size = _deltaLonEditableNode.size = ASSizeMakeFromCGSize(nodeSize);
+  _updateRegionButton.size = _liveMapToggleButton.size = ASSizeMakeFromCGSize(nodeSize);
 
   _latEditableNode.flexGrow = _lonEditableNode.flexGrow = true;
   _deltaLatEditableNode.flexGrow = _deltaLonEditableNode.flexGrow = true;
@@ -127,54 +127,69 @@
 
   _mapNode.flexGrow = true;
 
-  ASStackLayoutSpec * lonlatSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
-                                                                           spacing:SPACING
-                                                                    justifyContent:ASStackLayoutJustifyContentStart
-                                                                        alignItems:ASStackLayoutAlignItemsCenter
-                                                                          children:@[_latEditableNode, _lonEditableNode]];
+  ASStackLayoutSpec *lonlatSpec =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+     spacing:SPACING
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsCenter
+     children:@[_latEditableNode, _lonEditableNode]];
   lonlatSpec.flexGrow = true;
 
-  ASStackLayoutSpec * deltaLonlatSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
-                                                                                spacing:SPACING
-                                                                         justifyContent:ASStackLayoutJustifyContentStart
-                                                                             alignItems:ASStackLayoutAlignItemsCenter
-                                                                               children:@[_deltaLatEditableNode, _deltaLonEditableNode]];
+  ASStackLayoutSpec *deltaLonlatSpec =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+     spacing:SPACING
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsCenter
+     children:@[_deltaLatEditableNode, _deltaLonEditableNode]];
   deltaLonlatSpec.flexGrow = true;
 
-  ASStackLayoutSpec * lonlatConfigSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
-                                                                                 spacing:SPACING
-                                                                          justifyContent:ASStackLayoutJustifyContentStart
-                                                                              alignItems:ASStackLayoutAlignItemsStretch
-                                                                                children:@[lonlatSpec, deltaLonlatSpec]];
+  ASStackLayoutSpec *lonlatConfigSpec =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+     spacing:SPACING
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsStretch
+     children:@[lonlatSpec, deltaLonlatSpec]];
   lonlatConfigSpec.flexGrow = true;
 
-  ASStackLayoutSpec * buttonsSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
-                                                                            spacing:SPACING
-                                                                     justifyContent:ASStackLayoutJustifyContentStart
-                                                                         alignItems:ASStackLayoutAlignItemsStretch
-                                                                           children:@[_updateRegionButton, _liveMapToggleButton]];
+  ASStackLayoutSpec *buttonsSpec =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+     spacing:SPACING
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsStretch
+     children:@[_updateRegionButton, _liveMapToggleButton]];
   buttonsSpec.flexGrow = true;
 
-  ASStackLayoutSpec * dashboardSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
-                                                                              spacing:SPACING
-                                                                       justifyContent:ASStackLayoutJustifyContentStart
-                                                                           alignItems:ASStackLayoutAlignItemsStretch
-                                                                             children:@[lonlatConfigSpec, buttonsSpec]];
+  ASStackLayoutSpec *dashboardSpec =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+     spacing:SPACING
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsStretch
+     children:@[lonlatConfigSpec, buttonsSpec]];
   dashboardSpec.flexGrow = true;
 
-  ASInsetLayoutSpec * insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(20, 10, 0, 10) child:dashboardSpec];
+  ASInsetLayoutSpec *insetSpec =
+    [ASInsetLayoutSpec
+     insetLayoutSpecWithInsets:UIEdgeInsetsMake(20, 10, 0, 10)
+     child:dashboardSpec];
 
-  ASStackLayoutSpec * layoutSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
-                                                                           spacing:SPACING
-                                                                    justifyContent:ASStackLayoutJustifyContentStart
-                                                                        alignItems:ASStackLayoutAlignItemsStretch
-                                                                          children:@[insetSpec, _mapNode ]];
+  ASStackLayoutSpec *layoutSpec =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+     spacing:SPACING
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsStretch
+     children:@[insetSpec, _mapNode ]];
   return layoutSpec;
 }
 
 #pragma mark - Button actions
 
--(void)updateRegion
+- (void)updateRegion
 {
   NSNumberFormatter *f = [[NSNumberFormatter alloc] init];
   f.numberStyle = NSNumberFormatterDecimalStyle;
@@ -190,7 +205,7 @@
   _mapNode.region = region;
 }
 
--(void)toggleLiveMap
+- (void)toggleLiveMap
 {
   _mapNode.liveMap = !_mapNode.liveMap;
   NSString * const liveMapStr = [self liveMapStr];
