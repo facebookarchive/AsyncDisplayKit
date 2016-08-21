@@ -72,7 +72,7 @@ static UIColor *OverViewASPagerNodeRandomColor() {
     // 100% of container
     _node.width = ASRelativeDimensionMakeWithFraction(1.0);
     _node.height = ASRelativeDimensionMakeWithFraction(1.0);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_node]];
+    return [ASWrapperLayoutSpec wrapperWithLayoutable:_node];
 }
 
 - (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode

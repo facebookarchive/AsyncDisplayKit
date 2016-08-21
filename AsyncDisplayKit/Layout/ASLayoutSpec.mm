@@ -299,6 +299,38 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 @end
 
+
+#pragma mark - ASWrapperLayoutSpec
+
+@implementation ASWrapperLayoutSpec
+
++ (instancetype)wrapperWithLayoutable:(id<ASLayoutable>)layoutable
+{
+  return [[self alloc] initWithLayoutable:layoutable];
+}
+
+- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable
+{
+    self = [super init];
+    self.child = layoutable;
+    return self;
+}
+
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+{
+  ASLayout *sublayout = [self.child calculateLayoutThatFits:constrainedSize parentSize:constrainedSize.max];
+  sublayout.position = CGPointZero;
+  return [ASLayout layoutWithLayoutableObject:self
+                              constrainedSize:constrainedSize
+                                         size:sublayout.size
+                                   sublayouts:@[sublayout]];
+}
+
+@end
+
+
+#pragma mark - ASLayoutSpec (Debugging)
+
 @implementation ASLayoutSpec (Debugging)
 
 #pragma mark - ASLayoutableAsciiArtProtocol
