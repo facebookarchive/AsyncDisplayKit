@@ -394,7 +394,7 @@
 {
   // FIXME: Need a better way to allow maps to take up the right amount of space in a layout (sizeRange, etc)
   // These fallbacks protect against inheriting a constrainedSize that contains a CGFLOAT_MAX value.
-  if (!isValidForLayout(constrainedSize.width) || !isValidForLayout(constrainedSize.height)) {
+  if (!ASCGSizeIsValidForLayout(constrainedSize)) {
     //ASDisplayNodeAssert(NO, @"Invalid width or height in ASMapNode");
     constrainedSize = CGSizeZero;
   }

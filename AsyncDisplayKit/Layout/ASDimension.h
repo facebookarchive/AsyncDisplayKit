@@ -75,7 +75,8 @@ typedef struct {
 
 extern ASRelativeDimension const ASRelativeDimensionAuto;
 
-#define isValidForLayout(x) ((isnormal(x) || x == 0.0) && x >= 0.0 && x < (CGFLOAT_MAX / 2.0))
+#define ASPointsAreValidForLayout(x) ((isnormal(x) || x == 0.0) && x >= 0.0 && x < (CGFLOAT_MAX / 2.0))
+#define ASCGSizeIsValidForLayout(x) (ASPointsAreValidForLayout(x.width) && ASPointsAreValidForLayout(x.height)) 
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 NS_ASSUME_NONNULL_BEGIN
@@ -111,13 +112,19 @@ extern ASSizeRange ASSizeResolveAutoSize(ASSize size, const CGSize parentSize, A
 
 #pragma mark - ASSizeRange
 
-/** Creates an ASSizeRange with provided min and max size */
+/**
+ * Creates an ASSizeRange with provided min and max size
+ */
 extern ASSizeRange ASSizeRangeMake(CGSize min, CGSize max);
 
-/** Creates an ASSizeRange with the provided size as both min and max */
+/**
+ * Creates an ASSizeRange with the provided size as both min and max
+ */
 extern ASSizeRange ASSizeRangeMakeWithExactCGSize(CGSize size);
 
-/** Clamps the provided CGSize between the [min, max] bounds of this ASSizeRange. */
+/**
+ * Clamps the provided CGSize between the [min, max] bounds of this ASSizeRange.
+ */
 extern CGSize ASSizeRangeClamp(ASSizeRange sizeRange, CGSize size);
 
 /**

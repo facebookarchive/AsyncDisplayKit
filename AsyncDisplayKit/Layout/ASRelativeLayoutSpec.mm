@@ -59,8 +59,8 @@
   // as the size will depend on the content
   // TODO: sizeRange: isValidForLayout() call should not be necessary if INFINITY is used
   CGSize size = {
-    isinf(constrainedSize.max.width) || !isValidForLayout(constrainedSize.max.width) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.width,
-    isinf(constrainedSize.max.height) || !isValidForLayout(constrainedSize.max.height) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.height
+    isinf(constrainedSize.max.width) || !ASPointsAreValidForLayout(constrainedSize.max.width) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.width,
+    isinf(constrainedSize.max.height) || !ASPointsAreValidForLayout(constrainedSize.max.height) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.height
   };
   
   BOOL reduceWidth = (_horizontalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||

@@ -42,8 +42,8 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    //_node.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
-    [_node setSizeWithCGSize:constrainedSize.max];
+    _node.width = ASRelativeDimensionMakeWithFraction(1.0);
+    _node.height = ASRelativeDimensionMakeWithFraction(1.0);
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_node]];
 }
 

@@ -35,11 +35,16 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 @implementation ASLayoutSpec
 
 // Dynamic properties for ASLayoutables
-@dynamic layoutableType, size, width, height, minWidth, maxWidth, minHeight, maxHeight;
+@dynamic layoutableType, size;
+
+// Dynamic properties for sizing
+@dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
+@dynamic widthAsPoints, widthAsFraction, minWidthAsPoints, minWidthAsFraction, maxWidthAsPoints, maxWidthAsFraction;
+@dynamic heightAsPoints, heightAsFraction, minHeightAsPoints, minHeightAsFraction, maxHeightAsPoints, maxHeightAsFraction;
 // Dynamic properties for stack spec
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender;
 // Dynamic properties for static spec
-@dynamic /*sizeRange, */layoutPosition;
+@dynamic layoutPosition;
 
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 
@@ -77,7 +82,8 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   return YES;
 }
 
-#pragma mark - Layout
+
+#pragma mark - Sizing
 
 - (ASSize)size
 {
@@ -92,6 +98,10 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 }
 
 ASLayoutableSizeForwarding
+ASLayoutableSizeHelperForwarding
+
+
+#pragma mark - Layout
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
 {

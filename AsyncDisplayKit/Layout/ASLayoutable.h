@@ -98,9 +98,32 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readwrite) ASRelativeDimension maxWidth;
 
+// Helper
+// TODO: sizeRange: Extract them to another protocol
+#define ASLayoutableDefineGetterOnlyProperty(propertyName)\
+@property (nonatomic, assign) CGFloat propertyName;\
+- (CGFloat)propertyName UNAVAILABLE_ATTRIBUTE;\
 
-- (void)setSizeWithCGSize:(CGSize)size;
-- (void)setExactSizeWithCGSize:(CGSize)size;
+ASLayoutableDefineGetterOnlyProperty(widthAsPoints);
+ASLayoutableDefineGetterOnlyProperty(widthAsFraction);
+
+ASLayoutableDefineGetterOnlyProperty(minWidthAsPoints);
+ASLayoutableDefineGetterOnlyProperty(minWidthAsFraction);
+
+ASLayoutableDefineGetterOnlyProperty(maxWidthAsPoints);
+ASLayoutableDefineGetterOnlyProperty(maxWidthAsFraction);
+
+ASLayoutableDefineGetterOnlyProperty(heightAsPoints);
+ASLayoutableDefineGetterOnlyProperty(heightAsFraction);
+
+ASLayoutableDefineGetterOnlyProperty(minHeightAsPoints);
+ASLayoutableDefineGetterOnlyProperty(minHeightAsFraction);
+
+ASLayoutableDefineGetterOnlyProperty(maxHeightAsPoints);
+ASLayoutableDefineGetterOnlyProperty(maxHeightAsFraction);
+
+- (void)setSizeFromCGSize:(CGSize)size;
+- (void)setExactSizeFromCGSize:(CGSize)size;
 
 /**
  * @abstract Returns type of layoutable

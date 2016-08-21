@@ -68,9 +68,6 @@ extern void ASLayoutableClearCurrentContext();
 @end
 
 #pragma mark - ASLayoutableForwarding
-
-
-
 /**
  *  Both an ASDisplayNode and an ASLayoutSpec conform to ASLayoutable. There are several properties
  *  in ASLayoutable that are used when a node or spec is used in a layout spec.
@@ -158,14 +155,90 @@ extern void ASLayoutableClearCurrentContext();
   ASDN::MutexLocker l(__instanceLock__);\
   _size.maxHeight = maxHeight;\
 }\
+
+
+#pragma mark - ASLayoutableSizeHelperForwarding
+
+#define ASLayoutableSizeHelperForwarding \
+- (void)setWidthAsPoints:(CGFloat)widthAsPoints\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.width = {ASRelativeDimensionTypePoints, widthAsPoints};\
+}\
 \
-- (void)setSizeWithCGSize:(CGSize)size\
+- (void)setWidthAsFraction:(CGFloat)widthAsFraction\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.width = {ASRelativeDimensionTypeFraction, widthAsFraction};\
+}\
+\
+- (void)setMinWidthAsPoints:(CGFloat)minWidthAsPoints\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.minWidth = {ASRelativeDimensionTypePoints, minWidthAsPoints};\
+}\
+\
+- (void)setMinWidthAsFraction:(CGFloat)minWidthAsFraction\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.minWidth = {ASRelativeDimensionTypeFraction, minWidthAsFraction};\
+}\
+\
+- (void)setMaxWidthAsPoints:(CGFloat)maxWidthAsPoints\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.maxWidth = {ASRelativeDimensionTypePoints, maxWidthAsPoints};\
+}\
+\
+- (void)setMaxWidthAsFraction:(CGFloat)maxWidthAsFraction\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.maxWidth = {ASRelativeDimensionTypeFraction, maxWidthAsFraction};\
+}\
+\
+- (void)setHeightAsPoints:(CGFloat)points\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.height = {ASRelativeDimensionTypePoints, points};\
+}\
+\
+- (void)setHeightAsFraction:(CGFloat)heightAsFraction\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.height = {ASRelativeDimensionTypeFraction, heightAsFraction};\
+}\
+\
+- (void)setMinHeightAsPoints:(CGFloat)minHeightAsPoints\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.minHeight = {ASRelativeDimensionTypePoints, minHeightAsPoints};\
+}\
+\
+- (void)setMinHeightAsFraction:(CGFloat)minHeightAsFraction\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.minHeight = {ASRelativeDimensionTypeFraction, minHeightAsFraction};\
+}\
+\
+- (void)setMaxHeightAsPoints:(CGFloat)maxHeightAsPoints\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.maxHeight = {ASRelativeDimensionTypePoints, maxHeightAsPoints};\
+}\
+\
+- (void)setMaxHeightAsFraction:(CGFloat)maxHeightAsFraction\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.maxHeight = {ASRelativeDimensionTypeFraction, maxHeightAsFraction};\
+}\
+\
+- (void)setSizeFromCGSize:(CGSize)size\
 {\
   self.width = ASRelativeDimensionMakeWithPoints(size.width);\
   self.height = ASRelativeDimensionMakeWithPoints(size.height);\
 }\
 \
-- (void)setExactSizeWithCGSize:(CGSize)size\
+- (void)setExactSizeFromCGSize:(CGSize)size\
 {\
   self.minWidth = ASRelativeDimensionMakeWithPoints(size.width);\
   self.minHeight = ASRelativeDimensionMakeWithPoints(size.height);\

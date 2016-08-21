@@ -70,11 +70,16 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @implementation ASDisplayNode
 
 // Dynamic properties for ASLayoutables
-@dynamic layoutableType, size, width, height, minWidth, maxWidth, minHeight, maxHeight;
+@dynamic layoutableType, size;
+
+// Dynamic properties for sizing
+@dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
+@dynamic widthAsPoints, widthAsFraction, minWidthAsPoints, minWidthAsFraction, maxWidthAsPoints, maxWidthAsFraction;
+@dynamic heightAsPoints, heightAsFraction, minHeightAsPoints, minHeightAsFraction, maxHeightAsPoints, maxHeightAsFraction;
 // Dynamic properties for stack spec
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender;
 // Dynamic properties for static spec
-@dynamic /*sizeRange, */layoutPosition;
+@dynamic layoutPosition;
 
 @synthesize name = _name;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
@@ -661,6 +666,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 }
 
 ASLayoutableSizeForwarding
+ASLayoutableSizeHelperForwarding
 
 - (CGSize)sizeThatFits:(CGSize)constrainedSize
 {

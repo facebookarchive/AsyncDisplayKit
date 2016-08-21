@@ -68,7 +68,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     
     _layoutableObject = layoutableObject;
     
-    if (!isValidForLayout(size.width) || !isValidForLayout(size.height)) {
+    if (!ASCGSizeIsValidForLayout(size)) {
       ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutableObject);
       size = CGSizeZero;
     } else {
