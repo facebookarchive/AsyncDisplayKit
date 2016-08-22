@@ -12,6 +12,8 @@ An ASViewController can be used in place of any UIViewController - including wit
 
 One of the main benefits to using an ASViewController is to save memory. An ASViewController that goes off screen will automatically reduce the size of the fetch data and display ranges of any of its children. This is key for memory management in large applications. 
 
+A second benefit is <a href="asvisibility.html"><code>ASVisibility</code></a>. When used in `ASNavigationController` or `ASTabBarController`, these classes know the exact number of user taps it would take to make the view controller visible. 
+
 More features will be added over time, so it is a good idea to base your view controllers off of this class. 
 
 A UIViewController provides a view of its own. An ASViewController is assigned a node to manage in its designated initializer `-initWithNode:`. 

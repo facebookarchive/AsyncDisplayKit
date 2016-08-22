@@ -15,10 +15,6 @@ It is highly recommended that you use AsyncDisplayKit's nodes within a node cont
     <th>UIKit Equivalent</th> 
   </tr>
   <tr>
-    <td><a href = "containers-asviewcontroller.html"><code>ASViewController</code></a></td>
-    <td>in place of UIKit's <code>UIViewController</code></td>
-  </tr>
-  <tr>
     <td><a href = "containers-ascollectionnode.html"><code>ASCollectionNode</code></a></td>
     <td>in place of UIKit's <code>UICollectionView</code></td>
   </tr>
@@ -29,6 +25,18 @@ It is highly recommended that you use AsyncDisplayKit's nodes within a node cont
   <tr>
     <td><a href = "containers-astablenode.html"><code>ASTableNode</code></a></td>
     <td>in place of UIKit's <code>UITableView</code></td>
+  </tr>
+  <tr>
+    <td><a href = "containers-asviewcontroller.html"><code>ASViewController</code></a></td>
+    <td>in place of UIKit's <code>UIViewController</code></td>
+  </tr>
+  <tr>
+    <td><code>ASNavigationController</code></td>
+    <td>in place of UIKit's <code>UINavigationController</code>. Implements the <a href = "asvisibility.html"><code>ASVisibility</code></a> protocol.</td>
+  </tr>
+  <tr>
+    <td><code>ASTabBarController</code></td>
+    <td>in place of UIKit's <code>UITabBarController</code>. Implements the <a href = "asvisibility.html"><code>ASVisibility</code></a> protocol.</td>
   </tr>
 </table>
 
