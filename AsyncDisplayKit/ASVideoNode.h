@@ -39,6 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)play;
 - (void)pause;
 - (BOOL)isPlaying;
+- (void)reset;
 
 @property (nullable, nonatomic, strong, readwrite) AVAsset *asset;
 /**
