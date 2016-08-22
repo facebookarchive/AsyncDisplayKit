@@ -33,11 +33,19 @@ ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(CGFloat points
 
 ASOVERLOADABLE ASRelativeDimension ASRelativeDimensionMake(NSString *dimension)
 {
-  ASRelativeDimensionType type = ASRelativeDimensionTypePoints;
-
   // Handle empty string
   if (dimension.length == 0) {
-    return ASRelativeDimensionMake(type, 0.0);
+    return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, 0.0);
+  }
+  
+  // Handle points
+  NSUInteger pointsStringLocation = [dimension rangeOfString:@"pt"].location;
+  if (pointsStringLocation != NSNotFound) {
+    // Check if points is at the end and remove it
+    if (pointsStringLocation == (dimension.length-2)) {
+      dimension = [dimension substringToIndex:(dimension.length-2)];
+      return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, dimension.floatValue);
+    }
   }
   
   // Handle fraction
@@ -46,12 +54,13 @@ ASOVERLOADABLE ASRelativeDimension ASRelativeDimensionMake(NSString *dimension)
     // Check if percent is at the end and remove it
     if (percentStringLocation == (dimension.length-1)) {
       dimension = [dimension substringToIndex:(dimension.length-1)];
-      type = ASRelativeDimensionTypeFraction;
+      return ASRelativeDimensionMake(ASRelativeDimensionTypeFraction, dimension.floatValue);
     }
   }
 
-  // Juse use points
-  return ASRelativeDimensionMake(type, dimension.floatValue);
+  // Assert as parsing went wrong
+  ASDisplayNodeCAssert(NO, @"Parsing dimension failed");
+  return ASRelativeDimensionAuto;
 }
 
 ASRelativeDimension ASRelativeDimensionMakeWithPoints(CGFloat points)
@@ -102,12 +111,12 @@ CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSi
 
 @implementation NSNumber (ASRelativeDimension)
 
-- (ASRelativeDimension)points
+- (ASRelativeDimension)as_points
 {
   return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, self.floatValue);
 }
 
-- (ASRelativeDimension)fraction
+- (ASRelativeDimension)as_fraction
 {
   return ASRelativeDimensionMake(ASRelativeDimensionTypeFraction, self.floatValue);
 }

@@ -83,30 +83,59 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - ASRelativeDimension
 
+/**
+ * Returns a dimension with the specified type and value.
+ */
 ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value);
 
+/**
+ * Returns a dimension with the specified points value.
+ */
 ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(CGFloat points);
 
+/**
+ * Returns a dimension by parsing the specified dimension string.
+ * Examples: ASRelativeDimensionMake(@"0.5%") = ASRelativeDimensionMake(ASRelativeDimensionTypeFraction, 0.5)
+ *           ASRelativeDimensionMake(@"0.5pt") = ASRelativeDimensionMake(ASRelativeDimensionTypePoints, 0.5)
+ */
 ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(NSString *dimension);
 
+/**
+ * Returns a dimension with the specified points value.
+ */
 extern ASRelativeDimension ASRelativeDimensionMakeWithPoints(CGFloat points);
 
+/**
+ * Returns a dimension with the specified fraction value.
+ */
 extern ASRelativeDimension ASRelativeDimensionMakeWithFraction(CGFloat fraction);
 
+/**
+ * Returns a dimension with the same type and value as the specified dimension.
+ */
 extern ASRelativeDimension ASRelativeDimensionCopy(ASRelativeDimension aDimension);
 
+/**
+ * Returns whether two dimensions are equal.
+ */
 extern BOOL ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimension lhs, ASRelativeDimension rhs);
 
+/**
+ * Returns a NSString representation of a dimension.
+ */
 extern NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension);
 
+/**
+ * Resolve this dimension to a parent size.
+ */
 extern CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSize, CGFloat parent);
 
-#define ASRD(x) ASRelativeDimensionMake(x)
-#define ASD(x) ASRelativeDimensionMake(x)
+#define ASRD(...) ASRelativeDimensionMake(__VA_ARGS__)
+#define ASD(...) ASRelativeDimensionMake(__VA_ARGS__)
 
 @interface NSNumber (ASRelativeDimension)
-@property (nonatomic, readonly) ASRelativeDimension points;
-@property (nonatomic, readonly) ASRelativeDimension fraction;
+@property (nonatomic, readonly) ASRelativeDimension as_points;
+@property (nonatomic, readonly) ASRelativeDimension as_fraction;
 @end
 
 #pragma mark - ASSize
@@ -122,7 +151,7 @@ extern ASSize ASSizeMake();
 extern ASSize ASSizeMakeFromCGSize(CGSize size);
 
 /**
- * Returns whether two ASSize are equal.
+ * Returns whether two sizes are equal.
  */
 extern BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs);
 
@@ -131,7 +160,14 @@ extern BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs);
  */
 extern NSString *NSStringFromASSize(ASSize size);
 
+/**
+ * Resolve this size to a parent size.
+ */
 extern ASSizeRange ASSizeResolve(ASSize size, const CGSize parentSize);
+
+/**
+ * Resolve this size to a parent size and use autoASSizeRange if
+ */
 extern ASSizeRange ASSizeResolveAutoSize(ASSize size, const CGSize parentSize, ASSizeRange autoASSizeRange);
 
 #pragma mark - ASSizeRange
@@ -171,7 +207,7 @@ extern NSString *NSStringFromASSizeRange(ASSizeRange sizeRange);
 #pragma mark - Deprecated
 
 /**
- * Function is deprecated please use ASSizeRangeMakeWithExactCGSize
+ * Function is deprecated. Use ASSizeRangeMakeWithExactCGSize instead.
  */
 extern ASSizeRange ASSizeRangeMakeExactSize(CGSize size);
 
