@@ -313,12 +313,13 @@ ASVisibilityDepthImplementation;
 {
   [super willTransitionToTraitCollection:newCollection withTransitionCoordinator:coordinator];
   
-  // here we take the new UITraitCollection and use it to create a new ASEnvironmentTraitCollection on self.node
-  // We will propagate when the corresponding viewWillTransitionToSize:withTransitionCoordinator: is called and we have the
-  // new windowSize. There are cases when viewWillTransitionToSize: is called when willTransitionToTraitCollection: is not.
-  // Since we do the propagation on viewWillTransitionToSize: our subnodes should always get the proper trait collection.
-  ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(newCollection);
-  self.node.environmentTraitCollection = asyncTraitCollection;
+  ASEnvironmentTraitCollection environmentTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(newCollection);
+  // A call to willTransitionToTraitCollection:withTransitionCoordinator: is always followed by a call to viewWillTransitionToSize:withTransitionCoordinator:.
+  // However, it is not immediate and we may need the new trait collection before viewWillTransitionToSize:withTransitionCoordinator: is called. Our view already has the
+  // new bounds, so go ahead and set the containerSize and propagate the traits here. As long as nothing else in the traits changes (which it shouldn't)
+  // then we won't we will skip the propagation in viewWillTransitionToSize:withTransitionCoordinator:.
+  environmentTraitCollection.containerSize = self.view.bounds.size;
+  [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
