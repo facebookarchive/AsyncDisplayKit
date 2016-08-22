@@ -15,7 +15,7 @@ ASRelativeDimension const ASRelativeDimensionAuto = {ASRelativeDimensionTypeAuto
 
 #pragma mark - ASRelativeDimension
 
-ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value)
+ASOVERLOADABLE ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value)
 {
   if (type == ASRelativeDimensionTypePoints) {
     ASDisplayNodeCAssertPositiveReal(@"Points", value);
@@ -24,6 +24,34 @@ ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloa
     // ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASRelativeDimension fraction value (%f) must be between 0 and 1.", value);
   }
   ASRelativeDimension dimension; dimension.type = type; dimension.value = value; return dimension;
+}
+
+ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(CGFloat points)
+{
+  return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, points);
+}
+
+ASOVERLOADABLE ASRelativeDimension ASRelativeDimensionMake(NSString *dimension)
+{
+  ASRelativeDimensionType type = ASRelativeDimensionTypePoints;
+
+  // Handle empty string
+  if (dimension.length == 0) {
+    return ASRelativeDimensionMake(type, 0.0);
+  }
+  
+  // Handle fraction
+  NSUInteger percentStringLocation = [dimension rangeOfString:@"%"].location;
+  if (percentStringLocation != NSNotFound) {
+    // Check if percent is at the end and remove it
+    if (percentStringLocation == (dimension.length-1)) {
+      dimension = [dimension substringToIndex:(dimension.length-1)];
+      type = ASRelativeDimensionTypeFraction;
+    }
+  }
+
+  // Juse use points
+  return ASRelativeDimensionMake(type, dimension.floatValue);
 }
 
 ASRelativeDimension ASRelativeDimensionMakeWithPoints(CGFloat points)
@@ -71,6 +99,20 @@ CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSi
       return dimension.value * parent;
   }
 }
+
+@implementation NSNumber (ASRelativeDimension)
+
+- (ASRelativeDimension)points
+{
+  return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, self.floatValue);
+}
+
+- (ASRelativeDimension)fraction
+{
+  return ASRelativeDimensionMake(ASRelativeDimensionTypeFraction, self.floatValue);
+}
+
+@end
 
 #pragma mark - ASRelativeSize
 

@@ -12,6 +12,9 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
+#define ASPointsAreValidForLayout(x) ((isnormal(x) || x == 0.0) && x >= 0.0 && x < (CGFLOAT_MAX / 2.0))
+#define ASCGSizeIsValidForLayout(x) (ASPointsAreValidForLayout(x.width) && ASPointsAreValidForLayout(x.height))
+
 /**
  * A dimension relative to constraints to be provided in the future.
  * A RelativeDimension can be one of three types:
@@ -75,15 +78,16 @@ typedef struct {
 
 extern ASRelativeDimension const ASRelativeDimensionAuto;
 
-#define ASPointsAreValidForLayout(x) ((isnormal(x) || x == 0.0) && x >= 0.0 && x < (CGFLOAT_MAX / 2.0))
-#define ASCGSizeIsValidForLayout(x) (ASPointsAreValidForLayout(x.width) && ASPointsAreValidForLayout(x.height)) 
-
 ASDISPLAYNODE_EXTERN_C_BEGIN
 NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - ASRelativeDimension
 
-extern ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value);
+ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value);
+
+ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(CGFloat points);
+
+ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(NSString *dimension);
 
 extern ASRelativeDimension ASRelativeDimensionMakeWithPoints(CGFloat points);
 
@@ -97,14 +101,34 @@ extern NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension);
 
 extern CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSize, CGFloat parent);
 
+#define ASRD(x) ASRelativeDimensionMake(x)
+#define ASD(x) ASRelativeDimensionMake(x)
+
+@interface NSNumber (ASRelativeDimension)
+@property (nonatomic, readonly) ASRelativeDimension points;
+@property (nonatomic, readonly) ASRelativeDimension fraction;
+@end
+
 #pragma mark - ASSize
 
+/**
+ * Returns an ASSize with default values.
+ */
 extern ASSize ASSizeMake();
 
+/**
+ * Returns an ASSize with the specified CGSize values as width and height.
+ */
 extern ASSize ASSizeMakeFromCGSize(CGSize size);
 
+/**
+ * Returns whether two ASSize are equal.
+ */
 extern BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs);
 
+/**
+ * Returns a string formatted to contain the data from an ASSize.
+ */
 extern NSString *NSStringFromASSize(ASSize size);
 
 extern ASSizeRange ASSizeResolve(ASSize size, const CGSize parentSize);
@@ -113,12 +137,12 @@ extern ASSizeRange ASSizeResolveAutoSize(ASSize size, const CGSize parentSize, A
 #pragma mark - ASSizeRange
 
 /**
- * Creates an ASSizeRange with provided min and max size
+ * Creates an ASSizeRange with provided min and max size.
  */
 extern ASSizeRange ASSizeRangeMake(CGSize min, CGSize max);
 
 /**
- * Creates an ASSizeRange with the provided size as both min and max
+ * Creates an ASSizeRange with the provided size as both min and max.
  */
 extern ASSizeRange ASSizeRangeMakeWithExactCGSize(CGSize size);
 
@@ -133,14 +157,22 @@ extern CGSize ASSizeRangeClamp(ASSizeRange sizeRange, CGSize size);
  */
 extern ASSizeRange ASSizeRangeIntersect(ASSizeRange sizeRange, ASSizeRange otherSizeRange);
 
+/**
+ * Returns whether two size ranges are equal in min and max size
+ */
 extern BOOL ASSizeRangeEqualToSizeRange(ASSizeRange lhs, ASSizeRange rhs);
 
+/**
+ * Returns a string representation of a size range
+ */
 extern NSString *NSStringFromASSizeRange(ASSizeRange sizeRange);
 
 
 #pragma mark - Deprecated
 
-/** Function is deprecated please use ASSizeRangeMakeWithExactCGSize*/
+/**
+ * Function is deprecated please use ASSizeRangeMakeWithExactCGSize
+ */
 extern ASSizeRange ASSizeRangeMakeExactSize(CGSize size);
 
 NS_ASSUME_NONNULL_END

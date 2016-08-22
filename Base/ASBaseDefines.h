@@ -151,3 +151,5 @@
 #define AS_UNAVAILABLE(message)
 #endif
 #endif
+
+#define ASOVERLOADABLE __attribute__((overloadable))
