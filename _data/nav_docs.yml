@@ -58,6 +58,7 @@
   - debug-tool-ASRangeController
 - title: Advanced Technologies
   items:
+  - asvisibility
   - asenvironment
   - asrunloopqueue
   

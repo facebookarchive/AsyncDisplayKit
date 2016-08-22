@@ -2,11 +2,11 @@
 title: ASEnvironment
 layout: docs
 permalink: /docs/asenvironment.html
-prevPage: debug-tool-ASRangeController.html
+prevPage: asvisibility.html
 nextPage: asrunloopqueue.html
 ---
 
-`ASEnvironment` is an optimized state propagation system that allows the framework to distrubute a variety of important "evironmental" information up and down the node hierarchy. 
+`ASEnvironment` is a performant and scalable way to enable upward and downward propagation of information throughout the node hierarchy. It stores a variety of critical “environmental” metadata, like the trait collection, interface state, hierarchy state, and more. 
 
 Any object that conforms to the `<ASEnvironment>` protocol can propagate specific states defined in an `ASEnvironmentState` up and/or down the ASEnvironment tree. To define how merges of States should happen, specific merge functions can be provided.
 
@@ -16,4 +16,4 @@ This means that whenever a node needs to query something about its environment, 
 
 A key operating principle of ASEnvironment is to update values when new subnodes are added or removed. 
 
-**ASEnvironment is currently used internally in the framework. There is no public API available at this time.**
+ASEnvironment powers many of the most valuable features of AsyncDisplayKit. **There is no public API available at this time.**

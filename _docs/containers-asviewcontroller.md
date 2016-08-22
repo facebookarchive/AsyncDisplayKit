@@ -8,7 +8,7 @@ nextPage: containers-astablenode.html
 
 `ASViewController` is a subclass of `UIViewController` that adds several useful features for hosting `ASDisplayNode` hierarchies. 
 
-An ASViewController can be used in place of any UIViewController - including within a UINavigationController, UITabBarController and UISpitViewController or as a modal view controller.
+An ASViewController can be used in place of any UIViewController - including within a `UINavigationController`, `UITabBarController` and `UISpitViewController` or as a modal view controller. 
 
 One of the main benefits to using an ASViewController is to save memory. An ASViewController that goes off screen will automatically reduce the size of the fetch data and display ranges of any of its children. This is key for memory management in large applications. 
 
