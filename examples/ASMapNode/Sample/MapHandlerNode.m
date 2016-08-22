@@ -99,8 +99,8 @@
     MapHandlerNode *grabbedSelf = weakSelf;
     if (grabbedSelf) {
       if ([annotation isKindOfClass:[CustomMapAnnotation class]]) {
-        MKAnnotationView *av = [grabbedSelf annotationViewForAnnotation:annotation];
-        return av.image;
+        CustomMapAnnotation *customAnnotation = (CustomMapAnnotation *)annotation;
+        return customAnnotation.image;
       }
     }
     return nil;

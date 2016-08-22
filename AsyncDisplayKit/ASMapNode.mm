@@ -227,7 +227,7 @@
                     
                     for (id<MKAnnotation> annotation in annotations) {
                       if (strongSelf.imageForStaticMapAnnotationBlock) {
-                        // Get custom annotation view pin from custom annotation block.
+                        // Get custom annotation image from custom annotation block.
                         pinImage = strongSelf.imageForStaticMapAnnotationBlock(annotation, &pinCenterOffset);
                         if (!pinImage) {
                           // just for case block returned nil, which can happen
