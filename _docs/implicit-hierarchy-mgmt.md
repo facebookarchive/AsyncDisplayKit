@@ -1,5 +1,5 @@
 ---
-title: Implicit Hierarchy Management <b><i>(Beta)</i></b>
+title: Implicit Hierarchy Management
 layout: docs
 permalink: /docs/implicit-hierarchy-mgmt.html
 prevPage: batch-fetching-api.html
@@ -9,12 +9,6 @@ nextPage: image-modification-block.html
 Enabling Implicit Hierarchy Management (IHM) is required to use the <a href="layout-transition-api.html">Layout Transition API</a>. However, apps that don't require animations can still benefit from the reduction in code size that this feature enables.
 
 When enabled, IHM means that your nodes no longer require `addSubnode:` or `removeFromSupernode` method calls. The presence or absence of the IHM node _and_ its subnodes is completely determined in its `layoutSpecThatFits:` method.
-
-### Enabling IHM ###
-<ul>
- <li>import `"ASDisplayNode+Beta.h"`. <b><i>This feature will soon be enabled by default for all ASDisplayNodes using ASLayouts.</b></i></li>
- <li>set `.usesImplicitHierarchyManagement = YES` on the node that you would like managed.</li>
-</ul>
 
 ### Example ###
 <br>
