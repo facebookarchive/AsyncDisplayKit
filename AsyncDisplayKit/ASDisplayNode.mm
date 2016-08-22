@@ -84,6 +84,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize name = _name;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 @synthesize threadSafeBounds = _threadSafeBounds;
+@synthesize layoutSpecBlock = _layoutSpecBlock;
 
 static BOOL suppressesInvalidCollectionUpdateExceptions = NO;
 
@@ -2325,7 +2326,20 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   return [[ASLayoutSpec alloc] init];
 }
 
+- (void)setLayoutSpecBlock:(ASLayoutSpecBlock)layoutSpecBlock
+{
+  // For now there should never be a overwrite of layoutSpecThatFits: and a layoutSpecThatFitsBlock: be provided
+  ASDisplayNodeAssert(!(_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits), @"Overwriting layoutSpecThatFits: and providing a layoutSpecBlock block is currently not supported");
 
+  ASDN::MutexLocker l(__instanceLock__);
+  _layoutSpecBlock = [layoutSpecBlock copy];
+}
+
+- (ASLayoutSpecBlock)layoutSpecBlock
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _layoutSpecBlock;
+}
 
 - (ASLayout *)calculatedLayout
 {
