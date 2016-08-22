@@ -3,7 +3,7 @@ title: Placeholders
 layout: docs
 permalink: /docs/placeholder-fade-duration.html
 prevPage: image-modification-block.html
-nextPage: layer-backing.html
+nextPage: accessibility.html
 ---
 
 ## ASDisplayNodes may Implement Placeholders

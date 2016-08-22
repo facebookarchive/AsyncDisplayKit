@@ -45,6 +45,7 @@
   - implicit-hierarchy-mgmt
   - image-modification-block
   - placeholder-fade-duration
+  - accessibility
 - title: Optimizations
   items:
   - layer-backing
