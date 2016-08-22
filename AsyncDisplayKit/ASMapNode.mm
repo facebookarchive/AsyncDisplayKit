@@ -167,6 +167,14 @@
   self.options = options;
 }
 
+- (void)setMapDelegate:(id<MKMapViewDelegate>)mapDelegate {
+  _mapDelegate = mapDelegate;
+  
+  if (_mapView) {
+    _mapView.delegate = mapDelegate;
+  }
+}
+
 #pragma mark - Snapshotter
 
 - (void)takeSnapshot
@@ -209,15 +217,27 @@
                     UIGraphicsBeginImageContextWithOptions(image.size, YES, image.scale);
                     [image drawAtPoint:CGPointZero];
                     
-                    // Get a standard annotation view pin. Future implementations should use a custom annotation image property.
-                    MKAnnotationView *pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
-                    UIImage *pinImage = pin.image;
-                    CGSize pinSize = pin.bounds.size;
+                    UIImage *pinImage;
+                    CGPoint pinCenterOffset = CGPointZero;
+                    
+                    // Get a standard annotation view pin if there is no custom annotation block.
+                    if (!strongSelf.imageForStaticMapAnnotationBlock) {
+                      pinImage = [strongSelf.class defaultPinImageWithCenterOffset:&pinCenterOffset];
+                    }
                     
                     for (id<MKAnnotation> annotation in annotations) {
+                      if (strongSelf.imageForStaticMapAnnotationBlock) {
+                        // Get custom annotation image from custom annotation block.
+                        pinImage = strongSelf.imageForStaticMapAnnotationBlock(annotation, &pinCenterOffset);
+                        if (!pinImage) {
+                          // just for case block returned nil, which can happen
+                          pinImage = [strongSelf.class defaultPinImageWithCenterOffset:&pinCenterOffset];
+                        }
+                      }
+                      
                       CGPoint point = [snapshot pointForCoordinate:annotation.coordinate];
                       if (CGRectContainsPoint(finalImageRect, point)) {
-                        CGPoint pinCenterOffset = pin.centerOffset;
+                        CGSize pinSize = pinImage.size;
                         point.x -= pinSize.width / 2.0;
                         point.y -= pinSize.height / 2.0;
                         point.x += pinCenterOffset.x;
@@ -233,6 +253,17 @@
                   strongSelf.image = image;
                 }
   }];
+}
+
++ (UIImage *)defaultPinImageWithCenterOffset:(CGPoint *)centerOffset
+{
+  static MKAnnotationView *pin;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    pin = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+  });
+  *centerOffset = pin.centerOffset;
+  return pin.image;
 }
 
 - (void)setUpSnapshotter
