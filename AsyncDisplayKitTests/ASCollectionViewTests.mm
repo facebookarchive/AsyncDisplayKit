@@ -16,6 +16,7 @@
 #import "ASCollectionNode.h"
 #import "ASDisplayNode+Beta.h"
 #import <vector>
+#import <OCMock/OCMock.h>
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 
@@ -92,9 +93,10 @@
   if (self) {
     // Populate these immediately so that they're not unexpectedly nil during tests.
     self.asyncDelegate = [[ASCollectionViewTestDelegate alloc] initWithNumberOfSections:10 numberOfItemsInSection:10];
-    
+    id realLayout = [UICollectionViewFlowLayout new];
+    id mockLayout = [OCMockObject partialMockForObject:realLayout];
     self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds
-                                             collectionViewLayout:[UICollectionViewFlowLayout new]];
+                                             collectionViewLayout:mockLayout];
     self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.collectionView.asyncDataSource = self.asyncDelegate;
     self.collectionView.asyncDelegate = self.asyncDelegate;
@@ -249,6 +251,7 @@
   __unused ASCollectionViewTestDelegate *del = testController.asyncDelegate;\
   __unused ASCollectionView *cv = testController.collectionView;\
   UIWindow *window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];\
+  [window makeKeyAndVisible]; \
   window.rootViewController = testController;\
   \
   [testController.collectionView reloadDataImmediately];\
@@ -343,6 +346,38 @@
     [cv reloadSections:sections];
     [cv deleteSections:sections];
   } completion:nil]);
+}
+
+
+- (void)testThatNodeCalculatedSizesAreUpdatedBeforeFirstPrepareLayoutAfterRotation
+{
+  updateValidationTestPrologue
+  id layout = cv.collectionViewLayout;
+  CGSize initialItemSize = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  CGSize initialCVSize = cv.bounds.size;
+
+  // Capture the node size before first call to prepareLayout after frame change.
+  __block CGSize itemSizeAtFirstLayout = CGSizeZero;
+  __block CGSize boundsSizeAtFirstLayout = CGSizeZero;
+  [[[[layout expect] andDo:^(NSInvocation *) {
+    itemSizeAtFirstLayout = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+    boundsSizeAtFirstLayout = [cv bounds].size;
+  }] andForwardToRealObject] prepareLayout];
+
+  // Rotate the device
+  UIDeviceOrientation oldDeviceOrientation = [[UIDevice currentDevice] orientation];
+  [[UIDevice currentDevice] setValue:@(UIDeviceOrientationLandscapeLeft) forKey:@"orientation"];
+
+  CGSize finalItemSize = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  CGSize finalCVSize = cv.bounds.size;
+  XCTAssertNotEqualObjects(NSStringFromCGSize(initialItemSize),  NSStringFromCGSize(itemSizeAtFirstLayout));
+  XCTAssertNotEqualObjects(NSStringFromCGSize(initialCVSize),  NSStringFromCGSize(boundsSizeAtFirstLayout));
+  XCTAssertEqualObjects(NSStringFromCGSize(itemSizeAtFirstLayout), NSStringFromCGSize(finalItemSize));
+  XCTAssertEqualObjects(NSStringFromCGSize(boundsSizeAtFirstLayout), NSStringFromCGSize(finalCVSize));
+  [layout verify];
+
+  // Teardown
+  [[UIDevice currentDevice] setValue:@(oldDeviceOrientation) forKey:@"orientation"];
 }
 
 @end
