@@ -36,17 +36,17 @@ ASEnvironmentTraitCollection ASEnvironmentTraitCollectionMakeDefault()
 
 ASEnvironmentTraitCollection ASEnvironmentTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection)
 {
-  ASEnvironmentTraitCollection asyncTraitCollection;
+  ASEnvironmentTraitCollection environmentTraitCollection = ASEnvironmentTraitCollectionMakeDefault();
   if (AS_AT_LEAST_IOS8) {
-    asyncTraitCollection.displayScale = traitCollection.displayScale;
-    asyncTraitCollection.horizontalSizeClass = traitCollection.horizontalSizeClass;
-    asyncTraitCollection.verticalSizeClass = traitCollection.verticalSizeClass;
-    asyncTraitCollection.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
+    environmentTraitCollection.displayScale = traitCollection.displayScale;
+    environmentTraitCollection.horizontalSizeClass = traitCollection.horizontalSizeClass;
+    environmentTraitCollection.verticalSizeClass = traitCollection.verticalSizeClass;
+    environmentTraitCollection.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
     if (AS_AT_LEAST_IOS9) {
-      asyncTraitCollection.forceTouchCapability = traitCollection.forceTouchCapability;
+      environmentTraitCollection.forceTouchCapability = traitCollection.forceTouchCapability;
     }
   }
-  return asyncTraitCollection;
+  return environmentTraitCollection;
 }
 
 BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnvironmentTraitCollection lhs, ASEnvironmentTraitCollection rhs)
