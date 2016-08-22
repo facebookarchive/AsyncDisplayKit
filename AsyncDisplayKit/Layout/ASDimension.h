@@ -26,7 +26,7 @@
  * "Percent" - Multiplied to a provided parent amount to resolve a final amount.
  */
 typedef NS_ENUM(NSInteger, ASRelativeDimensionType) {
-  /** This indicated "I have no opinion" and may be resolved in whatever way makes most sense given the circumstances. */
+  /** This indicates "I have no opinion" and may be resolved in whatever way makes most sense given the circumstances. */
   ASRelativeDimensionTypeAuto,
   /** Just a number. It will always resolve to exactly this amount. This is the default type. */
   ASRelativeDimensionTypePoints,
