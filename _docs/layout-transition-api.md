@@ -1,5 +1,5 @@
 ---
-title: Layout Transition API <b><i>(Beta)</i></b>
+title: Layout Transition API
 layout: docs
 permalink: /docs/layout-transition-api.html
 prevPage: batch-fetching-api.html

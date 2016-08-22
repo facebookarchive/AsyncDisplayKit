@@ -3,7 +3,7 @@ title: Installation
 layout: docs
 permalink: /docs/installation.html
 prevPage: resources.html
-nextPage: intelligent-preloading.html
+nextPage: upgrading.html
 ---
 
 AsyncDisplayKit may be added to your project via <a href = "installation.html#cocoapods">CocoaPods</a> or <a href = "installation.html#carthage-standard-build">Carthage</a> (standard build)</li>. Do not forget to import the framework header 
