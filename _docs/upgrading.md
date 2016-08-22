@@ -6,7 +6,7 @@ prevPage: installation.html
 nextPage: image-modification-block.html
 ---
 
-AsyncDisplayKit 2.0 is finally here! Here's a brief summary of the changes that have happened so far on [master](https://github.com/facebook/AsyncDisplayKit):
+AsyncDisplayKit **2.0 Beta** is (almost) here! Here's a brief summary of the changes on [master](https://github.com/facebook/AsyncDisplayKit) as of today:
 
 **Find & replace API naming improvements:**
 
