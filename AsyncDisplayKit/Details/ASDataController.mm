@@ -399,7 +399,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   NSArray<ASIndexedNodeContext *> *contexts = [self _populateFromDataSourceWithSectionIndexSet:sectionIndexSet];
   
   // Allow subclasses to perform setup before going into the edit transaction
-  [self prepareForReloadData];
+  [self prepareForReloadDataWithSectionCount:sectionCount];
   
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     LOG(@"Edit Transaction - reloadData");
@@ -414,7 +414,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
       [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
     }
     
-    [self willReloadData];
+    [self willReloadDataWithSectionCount:sectionCount];
     
     // Insert empty sections
     NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
@@ -636,12 +636,12 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 #pragma mark - Backing store manipulation optional hooks (Subclass API)
 
-- (void)prepareForReloadData
+- (void)prepareForReloadDataWithSectionCount:(NSInteger)newSectionCount
 {
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
-- (void)willReloadData
+- (void)willReloadDataWithSectionCount:(NSInteger)newSectionCount
 {
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
