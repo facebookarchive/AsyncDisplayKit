@@ -51,6 +51,8 @@
   imageNode.frame = containerNode.bounds;
   
   ASSnapshotVerifyNode(containerNode, @"second");
+  
+  XCTAssert(CGImageGetWidth((CGImageRef)imageNode.contents) == 100 * imageNode.contentsScale && CGImageGetHeight((CGImageRef)imageNode.contents) == 100 * imageNode.contentsScale, @"contents should be 100 x 100 by contents scale.");
 }
 
 @end
