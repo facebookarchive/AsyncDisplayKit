@@ -214,11 +214,15 @@ void ASAsyncTransactionQueue::GroupImpl::schedule(NSInteger priority, dispatch_q
   
   ++_pendingOperations; // enter group
   
+#if ASDISPLAYNODE_DELAY_DISPLAY
+  NSUInteger maxThreads = 1;
+#else 
   NSUInteger maxThreads = [NSProcessInfo processInfo].activeProcessorCount * 2;
 
   // Bit questionable maybe - we can give main thread more CPU time during tracking;
   if ([[NSRunLoop mainRunLoop].currentMode isEqualToString:UITrackingRunLoopMode])
     --maxThreads;
+#endif
   
   if (entry._threadCount < maxThreads) { // we need to spawn another thread
 

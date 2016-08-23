@@ -20,74 +20,16 @@
 
 @implementation ASDisplayNode (AsyncDisplay)
 
-/**
- * Support for limiting the number of concurrent displays.
- * Set __ASDisplayLayerMaxConcurrentDisplayCount to change the maximum allowed number of concurrent displays.
- */
-
-#define ASDISPLAYNODE_DELAY_DISPLAY 0
-
 #if ASDISPLAYNODE_DELAY_DISPLAY
-static long __ASDisplayLayerMaxConcurrentDisplayCount = 1;
-#define ASDN_DELAY_FOR_DISPLAY() usleep( (long)(0.1 * USEC_PER_SEC) )
+  #define ASDN_DELAY_FOR_DISPLAY() usleep( (long)(0.1 * USEC_PER_SEC) )
 #else
-// Basing this off of CPU core count would make sense, but first some experimentation should be done to understand
-// if having more ready-to-run work keeps the CPU clock up (or other interesting scheduler effects).
-static long __ASDisplayLayerMaxConcurrentDisplayCount = 8;
-#define ASDN_DELAY_FOR_DISPLAY()
+  #define ASDN_DELAY_FOR_DISPLAY()
 #endif
-
-static dispatch_semaphore_t __ASDisplayLayerConcurrentDisplaySemaphore;
-
-/*
- * Call __ASDisplayLayerIncrementConcurrentDisplayCount() upon entry into a display block (either drawRect: or display).
- * This will block if the number of currently executing displays is equal or greater to the limit.
- */
-static void __ASDisplayLayerIncrementConcurrentDisplayCount(BOOL displayIsAsync, BOOL isRasterizing)
-{
-  // Displays while rasterizing are not counted as concurrent displays, because they draw in serial when their rasterizing container displays.
-  if (isRasterizing) {
-    return;
-  }
-
-  static dispatch_once_t onceToken;
-  if (displayIsAsync) {
-    dispatch_once(&onceToken, ^{
-      __ASDisplayLayerConcurrentDisplaySemaphore = dispatch_semaphore_create(__ASDisplayLayerMaxConcurrentDisplayCount);
-    });
-
-    dispatch_semaphore_wait(__ASDisplayLayerConcurrentDisplaySemaphore, DISPATCH_TIME_FOREVER);
-  }
-}
-
-/*
- * Call __ASDisplayLayerDecrementConcurrentDisplayCount() upon exit from a display block, matching calls to __ASDisplayLayerIncrementConcurrentDisplayCount().
- */
-static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync, BOOL isRasterizing)
-{
-  // Displays while rasterizing are not counted as concurrent displays, because they draw in serial when their rasterizing container displays.
-  if (isRasterizing) {
-    return;
-  }
-
-  if (displayIsAsync) {
-    dispatch_semaphore_signal(__ASDisplayLayerConcurrentDisplaySemaphore);
-  }
-}
-
-#define DISPLAY_COUNT_INCREMENT() __ASDisplayLayerIncrementConcurrentDisplayCount(asynchronous, rasterizing);
-#define DISPLAY_COUNT_DECREMENT() __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing);
-#define CHECK_CANCELLED_AND_RETURN_NIL_WITH_DECREMENT(expr)       if (isCancelledBlock()) { \
-                                                                    expr; \
-                                                                    __ASDisplayLayerDecrementConcurrentDisplayCount(asynchronous, rasterizing); \
-                                                                    return nil; \
-                                                                  } \
 
 #define CHECK_CANCELLED_AND_RETURN_NIL(expr)                      if (isCancelledBlock()) { \
                                                                     expr; \
                                                                     return nil; \
                                                                   } \
-
 
 - (NSObject *)drawParameters
 {
@@ -156,7 +98,7 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
         if (cornerRadius) {
           [[UIBezierPath bezierPathWithRoundedRect:bounds cornerRadius:cornerRadius] addClip];
         } else {
-          [[UIBezierPath bezierPathWithRect:bounds] addClip];
+          CGContextClipToRect(context, bounds);
         }
       }
 
@@ -248,13 +190,12 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
     opaque = opaque && CGColorGetAlpha(self.backgroundColor.CGColor) == 1.0f;
 
     displayBlock = ^id{
-      DISPLAY_COUNT_INCREMENT();
-      CHECK_CANCELLED_AND_RETURN_NIL_WITH_DECREMENT();
+      CHECK_CANCELLED_AND_RETURN_NIL();
       
       UIGraphicsBeginImageContextWithOptions(bounds.size, opaque, contentsScaleForDisplay);
 
       for (dispatch_block_t block in displayBlocks) {
-        CHECK_CANCELLED_AND_RETURN_NIL_WITH_DECREMENT(UIGraphicsEndImageContext());
+        CHECK_CANCELLED_AND_RETURN_NIL(UIGraphicsEndImageContext());
         block();
       }
       
@@ -262,17 +203,15 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       UIGraphicsEndImageContext();
 
       ASDN_DELAY_FOR_DISPLAY();
-      DISPLAY_COUNT_DECREMENT();
       return image;
     };
   } else {
     displayBlock = ^id{
-      DISPLAY_COUNT_INCREMENT();
-      CHECK_CANCELLED_AND_RETURN_NIL_WITH_DECREMENT();
+      CHECK_CANCELLED_AND_RETURN_NIL();
 
       if (shouldCreateGraphicsContext) {
         UIGraphicsBeginImageContextWithOptions(bounds.size, opaque, contentsScaleForDisplay);
-        CHECK_CANCELLED_AND_RETURN_NIL_WITH_DECREMENT( UIGraphicsEndImageContext(); );
+        CHECK_CANCELLED_AND_RETURN_NIL( UIGraphicsEndImageContext(); );
       }
 
       CGContextRef currentContext = UIGraphicsGetCurrentContext();
@@ -300,13 +239,12 @@ static void __ASDisplayLayerDecrementConcurrentDisplayCount(BOOL displayIsAsync,
       }
       
       if (shouldCreateGraphicsContext) {
-        CHECK_CANCELLED_AND_RETURN_NIL_WITH_DECREMENT( UIGraphicsEndImageContext(); );
+        CHECK_CANCELLED_AND_RETURN_NIL( UIGraphicsEndImageContext(); );
         image = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
       }
 
       ASDN_DELAY_FOR_DISPLAY();
-      DISPLAY_COUNT_DECREMENT();
       return image;
     };
   }

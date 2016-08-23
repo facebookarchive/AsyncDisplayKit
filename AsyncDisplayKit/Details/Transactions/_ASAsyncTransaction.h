@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 
+#define ASDISPLAYNODE_DELAY_DISPLAY 0
 
 @class _ASAsyncTransaction;
 
