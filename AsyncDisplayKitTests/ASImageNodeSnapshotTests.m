@@ -34,4 +34,23 @@
   ASSnapshotVerifyNode(imageNode, nil);
 }
 
+- (void)testForcedScaling
+{
+  ASDisplayNode *containerNode = [[ASDisplayNode alloc] init];
+  ASImageNode *imageNode = [[ASImageNode alloc] init];
+  [containerNode addSubnode:imageNode];
+  
+  imageNode.image = [self testImage];
+  containerNode.frame = CGRectMake(0, 0, 100, 100);
+  imageNode.frame = containerNode.bounds;
+  imageNode.forcedSize = CGSizeMake(100, 100);
+  
+  ASSnapshotVerifyNode(containerNode, @"first");
+  
+  containerNode.frame = CGRectMake(0, 0, 200, 200);
+  imageNode.frame = containerNode.bounds;
+  
+  ASSnapshotVerifyNode(containerNode, @"second");
+}
+
 @end
