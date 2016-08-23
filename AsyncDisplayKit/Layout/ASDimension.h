@@ -173,9 +173,14 @@ extern ASSizeRange ASSizeResolveAutoSize(ASSize size, const CGSize parentSize, A
 #pragma mark - ASSizeRange
 
 /**
+ * Creates an ASSizeRange with provided size as both min and max.
+ */
+ASOVERLOADABLE extern ASSizeRange ASSizeRangeMake(CGSize size);
+
+/**
  * Creates an ASSizeRange with provided min and max size.
  */
-extern ASSizeRange ASSizeRangeMake(CGSize min, CGSize max);
+ASOVERLOADABLE extern ASSizeRange ASSizeRangeMake(CGSize min, CGSize max);
 
 /**
  * Creates an ASSizeRange with the provided size as both min and max.
