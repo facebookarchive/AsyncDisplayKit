@@ -36,21 +36,17 @@
 
 - (void)testForcedScaling
 {
-  ASDisplayNode *containerNode = [[ASDisplayNode alloc] init];
   ASImageNode *imageNode = [[ASImageNode alloc] init];
-  [containerNode addSubnode:imageNode];
   
   imageNode.image = [self testImage];
-  containerNode.frame = CGRectMake(0, 0, 100, 100);
-  imageNode.frame = containerNode.bounds;
+  imageNode.frame = CGRectMake(0, 0, 100, 100);
   imageNode.forcedSize = CGSizeMake(100, 100);
   
-  ASSnapshotVerifyNode(containerNode, @"first");
+  ASSnapshotVerifyNode(imageNode, @"first");
   
-  containerNode.frame = CGRectMake(0, 0, 200, 200);
-  imageNode.frame = containerNode.bounds;
+  imageNode.frame = CGRectMake(0, 0, 200, 200);
   
-  ASSnapshotVerifyNode(containerNode, @"second");
+  ASSnapshotVerifyNode(imageNode, @"second");
   
   XCTAssert(CGImageGetWidth((CGImageRef)imageNode.contents) == 100 * imageNode.contentsScale && CGImageGetHeight((CGImageRef)imageNode.contents) == 100 * imageNode.contentsScale, @"contents should be 100 x 100 by contents scale.");
 }
