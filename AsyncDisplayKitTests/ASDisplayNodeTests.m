@@ -19,6 +19,7 @@
 #import "ASDisplayNodeTestsHelper.h"
 #import "UIView+ASConvenience.h"
 #import "ASCellNode.h"
+#import "ASImageNode.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[[ASDisplayNode alloc] init] autorelease]; n.name = @#n
@@ -1989,6 +1990,24 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
 
   XCTAssert([node loadStateChangedToNO]);
+}
+
+
+- (void)testThatNodeGetsRenderedIfItGoesFromZeroSizeToRealSize
+{
+  NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"logo-square"
+                                                                    ofType:@"png" inDirectory:@"TestResources"];
+  UIImage *image = [UIImage imageWithContentsOfFile:path];
+  UIWindow *window = [[[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds] autorelease];
+  ASImageNode *node = [[[ASImageNode alloc] init] autorelease];
+  node.image = image;
+  [window addSubnode:node];
+  XCTAssert(CGSizeEqualToSize(node.bounds.size, CGSizeZero));
+  [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
+  XCTAssertNil(node.contents);
+  node.bounds = CGRectMake(0, 0, 100, 100);
+  [self expectationForPredicate:[NSPredicate predicateWithFormat:@"contents != nil"] evaluatedWithObject:node.layer handler:nil];
+  [self waitForExpectationsWithTimeout:1 handler:nil];
 }
 
 @end
