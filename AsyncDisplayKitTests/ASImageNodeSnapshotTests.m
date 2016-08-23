@@ -34,4 +34,21 @@
   ASSnapshotVerifyNode(imageNode, nil);
 }
 
+- (void)testForcedScaling
+{
+  ASImageNode *imageNode = [[ASImageNode alloc] init];
+  
+  imageNode.image = [self testImage];
+  imageNode.frame = CGRectMake(0, 0, 100, 100);
+  imageNode.forcedSize = CGSizeMake(100, 100);
+  
+  ASSnapshotVerifyNode(imageNode, @"first");
+  
+  imageNode.frame = CGRectMake(0, 0, 200, 200);
+  
+  ASSnapshotVerifyNode(imageNode, @"second");
+  
+  XCTAssert(CGImageGetWidth((CGImageRef)imageNode.contents) == 100 * imageNode.contentsScale && CGImageGetHeight((CGImageRef)imageNode.contents) == 100 * imageNode.contentsScale, @"contents should be 100 x 100 by contents scale.");
+}
+
 @end
