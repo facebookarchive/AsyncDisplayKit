@@ -259,6 +259,11 @@ ASVisibilityDepthImplementation;
 
 #pragma mark - ASEnvironmentTraitCollection
 
+- (void)asyncTraitCollectionDidChange
+{
+
+}
+
 - (ASEnvironmentTraitCollection)environmentTraitCollectionForUITraitCollection:(UITraitCollection *)traitCollection
 {
   if (self.overrideDisplayTraitsWithTraitCollection) {
@@ -292,6 +297,7 @@ ASVisibilityDepthImplementation;
     environmentState.environmentTraitCollection = environmentTraitCollection;
     self.node.environmentState = environmentState;
     [self.node setNeedsLayout];
+    [self asyncTraitCollectionDidChange];
     
     NSArray<id<ASEnvironment>> *children = [self.node children];
     for (id<ASEnvironment> child in children) {
