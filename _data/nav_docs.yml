@@ -34,7 +34,12 @@
   - multiplex-image-node
 - title: Layout
   items:
+  - automatic-layout-basics
   - automatic-layout-containers
+  - automatic-layout-examples
+  - background-layout-spec
+  - layout-options
+  - layout-engine
   - layout-api-debugging
   - layout-api-sizing
   - layout-transition-api
