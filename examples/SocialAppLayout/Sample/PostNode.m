@@ -216,7 +216,10 @@
     // NOTE: This inset is not actually required by the layout, but is an example of the upward propogation of layoutable
     // properties.  Specifically, .flexGrow from the child is transferred to the inset spec so they can expand together.
     // Without this capability, it would be required to set insetSpacer.flexGrow = YES;
-    ASInsetLayoutSpec *insetSpacer = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0, 0, 0, 0) child:spacer];
+    ASInsetLayoutSpec *insetSpacer =
+    [ASInsetLayoutSpec
+     insetLayoutSpecWithInsets:UIEdgeInsetsMake(0, 0, 0, 0)
+     child:spacer];
   
     // Horizontal stack for name, username, via icon and time
     NSMutableArray *layoutSpecChildren = [@[_nameNode, _usernameNode, insetSpacer] mutableCopy];
@@ -225,11 +228,23 @@
     }
     [layoutSpecChildren addObject:_timeNode];
     
-    ASStackLayoutSpec *nameStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal spacing:5.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsCenter children:layoutSpecChildren];
+    ASStackLayoutSpec *nameStack =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+     spacing:5.0
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsCenter
+     children:layoutSpecChildren];
     nameStack.alignSelf = ASStackLayoutAlignSelfStretch;
     
     // bottom controls horizontal stack
-    ASStackLayoutSpec *controlsStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal spacing:10 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsCenter children:@[_likesNode, _commentsNode, _optionsNode]];
+    ASStackLayoutSpec *controlsStack =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+     spacing:10
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsCenter
+     children:@[_likesNode, _commentsNode, _optionsNode]];
     
     // Add more gaps for control line
     controlsStack.spacingAfter = 3.0;
@@ -242,17 +257,13 @@
     
     if (![_post.media isEqualToString:@""]){
         
-        // 1. Way: Only add the media node if an image is present
+        // Only add the media node if an image is present
         if (_mediaNode.image != nil) {
-            
-            // 2. Way: Add the media node but set the size based if image is already loaded
-            /*CGSize maxSize = _mediaNode.image != nil ? constrainedSize.max : CGSizeZero;
-            _mediaNode.size = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeZero),
-                                                      ASRelativeSizeMakeWithCGSize(maxSize));*/
-            
-            
             CGFloat imageRatio = (_mediaNode.image != nil ? _mediaNode.image.size.height / _mediaNode.image.size.width : 0.5);
-            ASRatioLayoutSpec *imagePlace = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:imageRatio child:_mediaNode];
+            ASRatioLayoutSpec *imagePlace =
+            [ASRatioLayoutSpec
+             ratioLayoutSpecWithRatio:imageRatio
+             child:_mediaNode];
             imagePlace.spacingAfter = 3.0;
             imagePlace.spacingBefore = 3.0;
             
@@ -262,14 +273,27 @@
     [mainStackContent addObject:controlsStack];
     
     // Vertical spec of cell main content
-    ASStackLayoutSpec *contentSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical spacing:8.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:mainStackContent];
-    contentSpec.alignItems = ASStackLayoutAlignSelfStretch;
+    ASStackLayoutSpec *contentSpec =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+     spacing:8.0
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsStretch
+     children:mainStackContent];
     contentSpec.flexShrink = YES;
     
     // Horizontal spec for avatar
-    ASStackLayoutSpec *avatarContentSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal spacing:8.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:@[_avatarNode, contentSpec]];
+    ASStackLayoutSpec *avatarContentSpec =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+     spacing:8.0
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsStart
+     children:@[_avatarNode, contentSpec]];
     
-    return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(10, 10, 10, 10) child:avatarContentSpec];
+    return [ASInsetLayoutSpec
+            insetLayoutSpecWithInsets:UIEdgeInsetsMake(10, 10, 10, 10)
+            child:avatarContentSpec];
     
 }
 
