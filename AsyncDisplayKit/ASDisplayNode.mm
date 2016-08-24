@@ -2454,12 +2454,14 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)didEnterPreloadState
 {
-  //subclass override
+  [self fetchData];
 }
 
 - (void)didExitPreloadState
 {
-  //subclass override
+  if ([self supportsRangeManagedInterfaceState]) {
+    [self clearFetchedData];
+  }
 }
 
 /**
@@ -2508,12 +2510,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   
   if (nowFetchData != wasFetchData) {
     if (nowFetchData) {
-      [self fetchData];
       [self didEnterPreloadState];
     } else {
-      if ([self supportsRangeManagedInterfaceState]) {
-        [self clearFetchedData];
-      }
       [self didExitPreloadState];
     }
   }
