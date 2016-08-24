@@ -12,6 +12,7 @@
 
 #import <OCMock/OCMock.h>
 
+#import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 
 #import <XCTest/XCTest.h>
@@ -111,7 +112,7 @@
 {
   for (NSInteger i = 10; i < 500; i += 50) {
     CGSize constrainedSize = CGSizeMake(i, i);
-    CGSize calculatedSize = [_textNode measure:constrainedSize];
+    CGSize calculatedSize = [_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
     XCTAssertTrue(calculatedSize.width <= constrainedSize.width, @"Calculated width (%f) should be less than or equal to constrained width (%f)", calculatedSize.width, constrainedSize.width);
     XCTAssertTrue(calculatedSize.height <= constrainedSize.height, @"Calculated height (%f) should be less than or equal to constrained height (%f)", calculatedSize.height, constrainedSize.height);
   }
@@ -121,8 +122,8 @@
 {
   for (NSInteger i = 10; i < 500; i += 50) {
     CGSize constrainedSize = CGSizeMake(i, i);
-    CGSize calculatedSize = [_textNode measure:constrainedSize];
-    CGSize recalculatedSize = [_textNode measure:constrainedSize];
+    CGSize calculatedSize = [_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
+    CGSize recalculatedSize = [_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
     
     XCTAssertTrue(CGSizeEqualToSizeWithIn(calculatedSize, recalculatedSize, 4.0), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
   }
@@ -132,8 +133,8 @@
 {
   for (CGFloat i = 10; i < 500; i *= 1.3) {
     CGSize constrainedSize = CGSizeMake(i, i);
-    CGSize calculatedSize = [_textNode measure:constrainedSize];
-    CGSize recalculatedSize = [_textNode measure:constrainedSize];
+    CGSize calculatedSize = [_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
+    CGSize recalculatedSize = [_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
 
     XCTAssertTrue(CGSizeEqualToSizeWithIn(calculatedSize, recalculatedSize, 11.0), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
   }
@@ -143,9 +144,9 @@
 {
   _textNode.placeholderEnabled = YES;
   
-  XCTAssertNoThrow([_textNode measure:CGSizeZero], @"Measure with zero size and placeholder enabled should not throw an exception");
-  XCTAssertNoThrow([_textNode measure:CGSizeMake(0, 100)], @"Measure with zero width and placeholder enabled should not throw an exception");
-  XCTAssertNoThrow([_textNode measure:CGSizeMake(100, 0)], @"Measure with zero height and placeholder enabled should not throw an exception");
+  XCTAssertNoThrow([_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeZero)], @"Measure with zero size and placeholder enabled should not throw an exception");
+  XCTAssertNoThrow([_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(0, 100))], @"Measure with zero width and placeholder enabled should not throw an exception");
+  XCTAssertNoThrow([_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 0))], @"Measure with zero height and placeholder enabled should not throw an exception");
 }
 
 - (void)testAccessibility
@@ -170,7 +171,7 @@
   ASTextNodeTestDelegate *delegate = [ASTextNodeTestDelegate new];
   _textNode.delegate = delegate;
 
-  [_textNode measure:CGSizeMake(100, 100)];
+  [_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))];
   NSRange returnedLinkRange;
   NSString *returnedAttributeName;
   NSString *returnedLinkAttributeValue = [_textNode linkAttributeValueAtPoint:CGPointMake(3, 3) attributeName:&returnedAttributeName range:&returnedLinkRange];
@@ -192,7 +193,7 @@
   ASTextNodeTestDelegate *delegate = [ASTextNodeTestDelegate new];
   _textNode.delegate = delegate;
 
-  CGSize calculatedSize = [_textNode measure:CGSizeMake(100, 100)];
+  CGSize calculatedSize = [_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))].size;
   NSRange returnedLinkRange = NSMakeRange(NSNotFound, 0);
   NSRange expectedRange = NSMakeRange(NSNotFound, 0);
   NSString *returnedAttributeName;
@@ -218,9 +219,9 @@
 - (void)testAddingExclusionPathsShouldInvalidateAndIncreaseTheSize
 {
   CGSize constrainedSize = CGSizeMake(100, CGFLOAT_MAX);
-  CGSize sizeWithoutExclusionPaths = [_textNode measure:constrainedSize];
+  CGSize sizeWithoutExclusionPaths = [_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
   _textNode.exclusionPaths = @[[UIBezierPath bezierPathWithRect:CGRectMake(50, 20, 30, 40)]];
-  CGSize sizeWithExclusionPaths = [_textNode measure:constrainedSize];
+  CGSize sizeWithExclusionPaths = [_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
 
   XCTAssertGreaterThan(sizeWithExclusionPaths.height, sizeWithoutExclusionPaths.height, @"Setting exclusions paths should invalidate the calculated size and return a greater size");
 }

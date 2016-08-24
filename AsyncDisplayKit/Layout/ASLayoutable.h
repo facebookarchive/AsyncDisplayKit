@@ -139,6 +139,23 @@ ASLayoutableDefineGetterOnlyProperty(maxHeightAsFraction);
 #pragma mark - Calculate layout
 
 /**
+ * @abstract Asks the node to return a layout based on given size range.
+ *
+ * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
+ *
+ * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
+ *
+ * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
+ * constraint and the result.
+ *
+ * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:parentSize:.  Calling this method may
+ * be expensive if result is not cached.
+ *
+ * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
+ */
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize;
+
+/**
  * Call this on children layoutables to compute their layouts within your implementation of -calculateLayoutThatFits:.
  *
  * @warning You may not override this method. Override -calculateLayoutThatFits: instead.

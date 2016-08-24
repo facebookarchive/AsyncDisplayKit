@@ -103,6 +103,11 @@ ASLayoutableSizeHelperForwarding
 
 #pragma mark - Layout
 
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
+{
+  return ASCalculateRootLayout(self, constrainedSize);
+}
+
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
 {
   return [self calculateLayoutThatFits:constrainedSize

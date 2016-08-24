@@ -657,7 +657,7 @@ static ASDN::Mutex cacheLock;
   
   if (_debugLabelNode) {
     CGSize boundsSize        = self.bounds.size;
-    CGSize debugLabelSize    = [_debugLabelNode measure:boundsSize];
+    CGSize debugLabelSize    = [_debugLabelNode layoutThatFits:ASSizeRangeMake(CGSizeZero, boundsSize)].size;
     CGPoint debugLabelOrigin = CGPointMake(boundsSize.width - debugLabelSize.width,
                                            boundsSize.height - debugLabelSize.height);
     _debugLabelNode.frame    = (CGRect) {debugLabelOrigin, debugLabelSize};

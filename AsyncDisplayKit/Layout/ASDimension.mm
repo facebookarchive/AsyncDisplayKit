@@ -242,12 +242,12 @@ ASSizeRange ASSizeResolve(ASSize size, const CGSize parentSize)
 
 #pragma mark - ASSizeRange
 
-ASSizeRange ASSizeRangeMake(CGSize size)
+ASOVERLOADABLE ASSizeRange ASSizeRangeMake(CGSize size)
 {
     return ASSizeRangeMake(size, size);
 }
 
-ASSizeRange ASSizeRangeMake(CGSize min, CGSize max)
+ASOVERLOADABLE ASSizeRange ASSizeRangeMake(CGSize min, CGSize max)
 {
   ASDisplayNodeCAssertPositiveReal(@"Range min width", min.width);
   ASDisplayNodeCAssertPositiveReal(@"Range min height", min.height);

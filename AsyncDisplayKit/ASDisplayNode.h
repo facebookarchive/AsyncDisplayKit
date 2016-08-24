@@ -248,23 +248,21 @@ NS_ASSUME_NONNULL_BEGIN
 /** @name Managing dimensions */
 
 /**
- * @abstract Asks the node to measure and return the size that best fits its subnodes.
+ * @abstract Asks the node to return a layout based on given size range.
  *
- * @param constrainedSize The maximum size the receiver should fit in.
+ * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
  *
- * @return A new size that fits the receiver's subviews.
+ * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
  *
  * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
  * constraint and the result.
  *
- * @warning Subclasses must not override this; it calls -measureWithSizeRange: with zero min size.
- * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may
+ * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:parentSize:.  Calling this method may
  * be expensive if result is not cached.
  *
- * @see measureWithSizeRange:
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
  */
-- (CGSize)sizeThatFits:(CGSize)constrainedSize;
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize;
 
 /**
  * @abstract Provides a way to declare a block to provide an ASLayoutSpec without having to subclass ASDisplayNode and
@@ -611,27 +609,10 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @see measureWithSizeRange:
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
+ *
+ * @deprecated Deprecated in version 2.0: Use layoutThatFits: with a constrained size of (CGSizeZero, constrainedSize) and call size on the returned ASLayout
  */
-- (CGSize)measure:(CGSize)constrainedSize; //ASDISPLAYNODE_DEPRECATED;
-
-/**
- * @abstract Asks the node to measure a layout based on given size range.
- *
- * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
- *
- * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
- *
- * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
- * constraint and the result.
- *
- * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
- * be expensive if result is not cached.
- *
- * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
- *
- * @deprecated Deprecated in version 2.0: Use ASCalculateRootLayout or ASCalculateLayout instead
- */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize ASDISPLAYNODE_DEPRECATED;
+- (CGSize)measure:(CGSize)constrainedSize ASDISPLAYNODE_DEPRECATED;
 
 @end
 

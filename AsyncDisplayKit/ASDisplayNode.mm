@@ -669,11 +669,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 ASLayoutableSizeForwarding
 ASLayoutableSizeHelperForwarding
 
-- (CGSize)sizeThatFits:(CGSize)constrainedSize
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
 {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  return [self measureWithSizeRange:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
+  return [self measureWithSizeRange:constrainedSize];
 #pragma clang diagnostic pop
 }
 
@@ -3270,7 +3270,7 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (CGSize)measure:(CGSize)constrainedSize
 {
-  return [self sizeThatFits:constrainedSize];
+  return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
 }
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize

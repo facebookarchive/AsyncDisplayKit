@@ -11,6 +11,7 @@
 //
 
 #import <XCTest/XCTest.h>
+#import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASEditableTextNode.h>
 
 static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
@@ -142,7 +143,7 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
 {
   for (NSInteger i = 10; i < 500; i += 50) {
     CGSize constrainedSize = CGSizeMake(i, i);
-    CGSize calculatedSize = [_editableTextNode measure:constrainedSize];
+    CGSize calculatedSize = [_editableTextNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
     XCTAssertTrue(calculatedSize.width <= constrainedSize.width, @"Calculated width (%f) should be less than or equal to constrained width (%f)", calculatedSize.width, constrainedSize.width);
     XCTAssertTrue(calculatedSize.height <= constrainedSize.height, @"Calculated height (%f) should be less than or equal to constrained height (%f)", calculatedSize.height, constrainedSize.height);
   }
@@ -152,8 +153,8 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
 {
   for (NSInteger i = 10; i < 500; i += 50) {
     CGSize constrainedSize = CGSizeMake(i, i);
-    CGSize calculatedSize = [_editableTextNode measure:constrainedSize];
-    CGSize recalculatedSize = [_editableTextNode measure:calculatedSize];
+    CGSize calculatedSize = [_editableTextNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
+    CGSize recalculatedSize = [_editableTextNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
     
     XCTAssertTrue(CGSizeEqualToSizeWithIn(calculatedSize, recalculatedSize, 4.0), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
   }
@@ -163,8 +164,8 @@ static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
 {
   for (CGFloat i = 10; i < 500; i *= 1.3) {
     CGSize constrainedSize = CGSizeMake(i, i);
-    CGSize calculatedSize = [_editableTextNode measure:constrainedSize];
-    CGSize recalculatedSize = [_editableTextNode measure:calculatedSize];
+    CGSize calculatedSize = [_editableTextNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
+    CGSize recalculatedSize = [_editableTextNode layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
 
     XCTAssertTrue(CGSizeEqualToSizeWithIn(calculatedSize, recalculatedSize, 11.0), @"Recalculated size %@ should be same as original size %@", NSStringFromCGSize(recalculatedSize), NSStringFromCGSize(calculatedSize));
   }
