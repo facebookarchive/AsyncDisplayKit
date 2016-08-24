@@ -176,27 +176,27 @@ ASDISPLAYNODE_EXTERN_C_END
                     constrainedSizeRange:(ASSizeRange)sizeRange
                                     size:(CGSize)size
                                 position:(CGPoint)position
-                              sublayouts:(NSArray *)sublayouts;
+                              sublayouts:(NSArray *)sublayouts ASDISPLAYNODE_DEPRECATED;
 
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                       constrainedSizeRange:(ASSizeRange)sizeRange
                                       size:(CGSize)size
                                   position:(CGPoint)position
-                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
+                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts ASDISPLAYNODE_DEPRECATED;
 
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                       constrainedSizeRange:(ASSizeRange)sizeRange
                                       size:(CGSize)size
-                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
+                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts ASDISPLAYNODE_DEPRECATED;
 
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                       constrainedSizeRange:(ASSizeRange)sizeRange
-                                      size:(CGSize)size;
+                                      size:(CGSize)size ASDISPLAYNODE_DEPRECATED;
 
 + (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
                                constrainedSizeRange:(ASSizeRange)sizeRange
                                                size:(CGSize)size
-                                         sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
+                                         sublayouts:(nullable NSArray<ASLayout *> *)sublayouts ASDISPLAYNODE_DEPRECATED;
 
 @end
 

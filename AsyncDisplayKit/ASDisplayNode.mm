@@ -2235,9 +2235,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
 {
   ASDN::MutexLocker l(__instanceLock__);
+    
+  // TODO: layout: Add caching
   if (! [self shouldCalculateLayoutWithConstrainedSize:constrainedSize]) {
     ASDisplayNodeAssertNotNil(_calculatedLayout, @"-[ASDisplayNode measureWithSizeRange:] _layout should not be nil! %@", self);
-    return _calculatedLayout ? : [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:CGSizeZero];
+    return _calculatedLayout ? : [ASLayout layoutWithLayoutable:self constrainedSize:constrainedSize size:CGSizeZero];
   }
   
   [self cancelLayoutTransition];

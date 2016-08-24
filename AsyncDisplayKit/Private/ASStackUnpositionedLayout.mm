@@ -32,7 +32,7 @@ static ASLayout *crossChildLayout(const id<ASLayoutable> child,
   const ASSizeRange childSizeRange = directionSizeRange(style.direction, stackMin, stackMax, childCrossMin, crossMax);
   ASLayout *layout = [child layoutThatFits:childSizeRange parentSize:size];
   ASDisplayNodeCAssertNotNil(layout, @"ASLayout returned from measureWithSizeRange: must not be nil: %@", child);
-  return layout ? : [ASLayout layoutWithLayoutableObject:child constrainedSizeRange:childSizeRange size:CGSizeZero];
+  return layout ? : [ASLayout layoutWithLayoutable:child constrainedSize:childSizeRange size:CGSizeZero];
 }
 
 /**
