@@ -675,6 +675,11 @@ ASLayoutableSizeHelperForwarding
 #pragma clang diagnostic pop
 }
 
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+{
+  return ASCalculateRootLayout(self, constrainedSize);
+}
+
 - (BOOL)shouldCalculateLayoutWithConstrainedSize:(ASSizeRange)constrainedSize
 {
   ASDN::MutexLocker l(__instanceLock__);
@@ -2274,13 +2279,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     ASDisplayNodeAssertNotNil(layout, @"[ASLayoutSpec measureWithSizeRange:] should never return nil! %@, %@", self, layoutSpec);
       
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
-    BOOL isFinalLayoutable = (layout.layoutableObject != self);
+    BOOL isFinalLayoutable = (layout.layoutable != self);
     if (isFinalLayoutable) {
       layout.position = CGPointZero;
-      layout = [ASLayout layoutWithLayoutableObject:self
-                                    constrainedSize:constrainedSize
-                                               size:layout.size
-                                         sublayouts:@[layout]];
+      layout = [ASLayout layoutWithLayoutable:self
+                              constrainedSize:constrainedSize
+                                         size:layout.size
+                                   sublayouts:@[layout]];
 #if LAYOUT_VALIDATION
       ASLayoutableValidateLayout(layout);
 #endif
@@ -2290,9 +2295,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
     // assume that the default implementation of -calculateSizeThatFits: returns it.
     CGSize size = [self calculateSizeThatFits:constrainedSize.max];
-    return [ASLayout layoutWithLayoutableObject:self
-                                constrainedSize:constrainedSize
-                                           size:ASSizeRangeClamp(constrainedSize, size)];
+    return [ASLayout layoutWithLayoutable:self
+                          constrainedSize:constrainedSize
+                                     size:ASSizeRangeClamp(constrainedSize, size)];
   }
 }
 
@@ -2349,7 +2354,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(__instanceLock__);
   
-  ASDisplayNodeAssertTrue(calculatedLayout.layoutableObject == self);
+  ASDisplayNodeAssertTrue(calculatedLayout.layoutable == self);
   ASDisplayNodeAssertTrue(calculatedLayout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(calculatedLayout.size.height >= 0.0);
   
@@ -2828,7 +2833,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDN::MutexLocker l(__instanceLock__);
   _calculatedLayout = layout;
   
-  ASDisplayNodeAssertTrue(layout.layoutableObject == self);
+  ASDisplayNodeAssertTrue(layout.layoutable == self);
   ASDisplayNodeAssertTrue(layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(layout.size.height >= 0.0);
   
@@ -2864,7 +2869,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)__layoutSublayouts
 {
   for (ASLayout *subnodeLayout in _calculatedLayout.sublayouts) {
-    ((ASDisplayNode *)subnodeLayout.layoutableObject).frame = [subnodeLayout frame];
+    ((ASDisplayNode *)subnodeLayout.layoutable).frame = [subnodeLayout frame];
   }
 }
 
@@ -3269,11 +3274,6 @@ ASEnvironmentLayoutExtensibilityForwarding
 - (CGSize)measure:(CGSize)constrainedSize
 {
   return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
-}
-
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
-{
-  return ASCalculateRootLayout(self, constrainedSize);
 }
 
 @end

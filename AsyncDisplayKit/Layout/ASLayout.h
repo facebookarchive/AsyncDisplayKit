@@ -48,7 +48,7 @@ ASDISPLAYNODE_EXTERN_C_END
 /**
  * The underlying object described by this layout
  */
-@property (nonatomic, weak, readonly) id<ASLayoutable> layoutableObject;
+@property (nonatomic, weak, readonly) id<ASLayoutable> layoutable;
 
 /**
  * The type of ASLayoutable that created this layout
@@ -92,25 +92,25 @@ ASDISPLAYNODE_EXTERN_C_END
 /**
  * Designated initializer
  */
-- (instancetype)initWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                         constrainedSize:(ASSizeRange)constrainedSize
-                                    size:(CGSize)size
-                                position:(CGPoint)position
-                              sublayouts:(NSArray *)sublayouts NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable
+                   constrainedSize:(ASSizeRange)constrainedSize
+                              size:(CGSize)size
+                          position:(CGPoint)position
+                        sublayouts:(NSArray *)sublayouts NS_DESIGNATED_INITIALIZER;
 
 /**
  * Convenience class initializer for layout construction.
  *
- * @param layoutableObject The backing ASLayoutable object.
+ * @param layoutable The backing ASLayoutable object.
  * @param size             The size of this layout.
  * @param position         The position of this layout within its parent (if available).
  * @param sublayouts       Sublayouts belong to the new layout.
  */
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                           constrainedSize:(ASSizeRange)constrainedSize
-                                      size:(CGSize)size
-                                  position:(CGPoint)position
-                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
++ (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
+                     constrainedSize:(ASSizeRange)constrainedSize
+                                size:(CGSize)size
+                            position:(CGPoint)position
+                          sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
 /**
  * Convenience initializer that has CGPointNull position.
@@ -118,38 +118,38 @@ ASDISPLAYNODE_EXTERN_C_END
  * or for ASLayoutSpec subclasses that are referencing the "self" level in the layout tree,
  * or for creating a sublayout of which the position is yet to be determined.
  *
- * @param layoutableObject  The backing ASLayoutable object.
+ * @param layoutable  The backing ASLayoutable object.
  * @param size              The size of this layout.
  * @param sublayouts        Sublayouts belong to the new layout.
  */
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                           constrainedSize:(ASSizeRange)constrainedSize
-                                      size:(CGSize)size
-                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
++ (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
+                     constrainedSize:(ASSizeRange)constrainedSize
+                                size:(CGSize)size
+                          sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
 /**
  * Convenience that has CGPointNull position and no sublayouts. 
  * Best used for creating a layout that has no sublayouts, and is either a root one
  * or a sublayout of which the position is yet to be determined.
  *
- * @param layoutableObject The backing ASLayoutable object.
+ * @param layoutable The backing ASLayoutable object.
  * @param size             The size of this layout.
  */
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                           constrainedSize:(ASSizeRange)constrainedSize
-                                      size:(CGSize)size;
++ (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
+                     constrainedSize:(ASSizeRange)constrainedSize
+                                size:(CGSize)size;
 
 /**
  * Convenience initializer that is flattened and has CGPointNull position.
 
- * @param layoutableObject The backing ASLayoutable object.
+ * @param layoutable The backing ASLayoutable object.
  * @param size             The size of this layout.
  * @param sublayouts       Sublayouts belong to the new layout.
  */
-+ (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                    constrainedSize:(ASSizeRange)constrainedSize
-                                               size:(CGSize)size
-                                         sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
++ (instancetype)flattenedLayoutWithLayoutable:(id<ASLayoutable>)layoutable
+                              constrainedSize:(ASSizeRange)constrainedSize
+                                         size:(CGSize)size
+                                   sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
 /**
  * Convenience initializer that creates a layout based on the values of the given layout, with a new position

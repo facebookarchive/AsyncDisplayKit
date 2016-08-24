@@ -65,8 +65,8 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
 - (void)validateLayout:(ASLayout *)layout
 {
   for (ASLayout *sublayout in layout.sublayouts) {
-    id<ASLayoutable> layoutable = layout.layoutableObject;
-    id<ASLayoutable> sublayoutLayoutable = sublayout.layoutableObject;
+    id<ASLayoutable> layoutable = layout.layoutable;
+    id<ASLayoutable> sublayoutLayoutable = sublayout.layoutable;
     
     NSString *assertMessage = nil;
     Class stackContainerClass = [ASStaticLayoutSpec class];
@@ -96,9 +96,9 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
 
 - (void)validateLayout:(ASLayout *)layout
 {
-  id<ASLayoutable> layoutable = layout.layoutableObject;
+  id<ASLayoutable> layoutable = layout.layoutable;
   for (ASLayout *sublayout in layout.sublayouts) {
-    id<ASLayoutable> sublayoutLayoutable = sublayout.layoutableObject;
+    id<ASLayoutable> sublayoutLayoutable = sublayout.layoutable;
     
     NSString *assertMessage = nil;
     Class stackContainerClass = [ASStackLayoutSpec class];

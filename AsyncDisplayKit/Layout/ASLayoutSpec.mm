@@ -123,9 +123,9 @@ ASLayoutableSizeHelperForwarding
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-    return [ASLayout layoutWithLayoutableObject:self
-                                constrainedSize:constrainedSize
-                                           size:constrainedSize.min];
+    return [ASLayout layoutWithLayoutable:self
+                          constrainedSize:constrainedSize
+                                     size:constrainedSize.min];
 }
 
 - (id<ASLayoutable>)finalLayoutable
@@ -323,10 +323,10 @@ ASEnvironmentLayoutExtensibilityForwarding
 {
   ASLayout *sublayout = [self.child calculateLayoutThatFits:constrainedSize parentSize:constrainedSize.max];
   sublayout.position = CGPointZero;
-  return [ASLayout layoutWithLayoutableObject:self
-                              constrainedSize:constrainedSize
-                                         size:sublayout.size
-                                   sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutable:self
+                        constrainedSize:constrainedSize
+                                   size:sublayout.size
+                             sublayouts:@[sublayout]];
 }
 
 @end

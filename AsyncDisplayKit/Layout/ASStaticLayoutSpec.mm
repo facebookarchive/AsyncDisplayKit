@@ -73,10 +73,10 @@
     }
   }
   
-  return [ASLayout layoutWithLayoutableObject:self
-                              constrainedSize:constrainedSize
-                                         size:ASSizeRangeClamp(constrainedSize, size)
-                                   sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutable:self
+                        constrainedSize:constrainedSize
+                                   size:ASSizeRangeClamp(constrainedSize, size)
+                             sublayouts:sublayouts];
 }
 
 @end

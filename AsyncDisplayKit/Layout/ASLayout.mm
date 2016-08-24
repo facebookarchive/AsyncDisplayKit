@@ -51,25 +51,25 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
 @dynamic frame, type;
 
-- (instancetype)initWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                         constrainedSize:(ASSizeRange)constrainedSize
-                                    size:(CGSize)size
-                                position:(CGPoint)position
-                              sublayouts:(NSArray *)sublayouts
+- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable
+                   constrainedSize:(ASSizeRange)constrainedSize
+                              size:(CGSize)size
+                          position:(CGPoint)position
+                        sublayouts:(NSArray *)sublayouts
 {
   self = [super init];
   if (self) {
-    NSParameterAssert(layoutableObject);
+    NSParameterAssert(layoutable);
 #if DEBUG
     for (ASLayout *sublayout in sublayouts) {
       ASDisplayNodeAssert(CGPointIsNull(sublayout.position) == NO, @"Invalid position is not allowed in sublayout.");
     }
 #endif
     
-    _layoutableObject = layoutableObject;
+    _layoutable = layoutable;
     
     if (!ASCGSizeIsValidForLayout(size)) {
-      ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutableObject);
+      ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutable);
       size = CGSizeZero;
     } else {
       size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
@@ -97,62 +97,62 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
 #pragma mark - Class Constructors
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                           constrainedSize:(ASSizeRange)constrainedSize
-                                      size:(CGSize)size
-                                  position:(CGPoint)position
-                                sublayouts:(NSArray *)sublayouts
++ (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
+                     constrainedSize:(ASSizeRange)constrainedSize
+                                size:(CGSize)size
+                            position:(CGPoint)position
+                          sublayouts:(NSArray *)sublayouts
 {
-  return [[self alloc] initWithLayoutableObject:layoutableObject
-                                constrainedSize:constrainedSize
-                                           size:size
-                                       position:position
-                                     sublayouts:sublayouts];
-}
-
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                           constrainedSize:(ASSizeRange)sizeRange
-                                      size:(CGSize)size
-                                sublayouts:(NSArray *)sublayouts
-{
-  return [self layoutWithLayoutableObject:layoutableObject
-                          constrainedSize:sizeRange
+  return [[self alloc] initWithLayoutable:layoutable
+                          constrainedSize:constrainedSize
                                      size:size
-                                 position:CGPointNull
+                                 position:position
                                sublayouts:sublayouts];
 }
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
++ (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
+                     constrainedSize:(ASSizeRange)sizeRange
+                                size:(CGSize)size
+                          sublayouts:(NSArray *)sublayouts
+{
+  return [self layoutWithLayoutable:layoutable
+                    constrainedSize:sizeRange
+                               size:size
+                           position:CGPointNull
+                         sublayouts:sublayouts];
+}
+
++ (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
                            constrainedSize:(ASSizeRange)sizeRange
                                       size:(CGSize)size
 {
-  return [self layoutWithLayoutableObject:layoutableObject
-                          constrainedSize:sizeRange
-                                     size:size
-                                 position:CGPointNull
-                               sublayouts:nil];
+  return [self layoutWithLayoutable:layoutable
+                    constrainedSize:sizeRange
+                               size:size
+                           position:CGPointNull
+                         sublayouts:nil];
 }
 
-+ (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                                    constrainedSize:(ASSizeRange)sizeRange
-                                               size:(CGSize)size
-                                         sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
++ (instancetype)flattenedLayoutWithLayoutable:(id<ASLayoutable>)layoutable
+                              constrainedSize:(ASSizeRange)sizeRange
+                                         size:(CGSize)size
+                                   sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
 {
-  return [self layoutWithLayoutableObject:layoutableObject
-                          constrainedSize:sizeRange
-                                     size:size
-                                 position:CGPointNull
-                               sublayouts:sublayouts];
+  return [self layoutWithLayoutable:layoutable
+                    constrainedSize:sizeRange
+                               size:size
+                           position:CGPointNull
+                         sublayouts:sublayouts];
 }
 
 
 + (instancetype)layoutWithLayout:(ASLayout *)layout position:(CGPoint)position
 {
-  return [self layoutWithLayoutableObject:layout.layoutableObject
-                          constrainedSize:layout.constrainedSize
-                                     size:layout.size
-                                 position:position
-                               sublayouts:layout.sublayouts];
+  return [self layoutWithLayoutable:layout.layoutable
+                    constrainedSize:layout.constrainedSize
+                               size:layout.size
+                           position:position
+                         sublayouts:layout.sublayouts];
 }
 
 #pragma mark - Layout Flattening
@@ -187,17 +187,17 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     }
   }
 
-  return [ASLayout layoutWithLayoutableObject:_layoutableObject
-                              constrainedSize:_constrainedSize
-                                         size:_size
-                                   sublayouts:flattenedSublayouts];
+  return [ASLayout layoutWithLayoutable:_layoutable
+                        constrainedSize:_constrainedSize
+                                   size:_size
+                             sublayouts:flattenedSublayouts];
 }
 
 #pragma mark - Accessors
 
 - (ASLayoutableType)type
 {
-  return _layoutableObject.layoutableType;
+  return _layoutable.layoutableType;
 }
 
 - (CGRect)frame
@@ -233,7 +233,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"<<ASLayout: %p>, layoutable = %@, position = %@; size = %@; constrainedSizeRange = %@>",
-            self, self.layoutableObject, NSStringFromCGPoint(self.position), NSStringFromCGSize(self.size), NSStringFromASSizeRange(self.constrainedSize)];
+            self, self.layoutable, NSStringFromCGPoint(self.position), NSStringFromCGSize(self.size), NSStringFromASSizeRange(self.constrainedSize)];
 }
 
 - (NSString *)recursiveDescription
@@ -268,11 +268,11 @@ static inline NSString * descriptionIndents(NSUInteger indents)
                                 position:(CGPoint)position
                               sublayouts:(NSArray *)sublayouts
 {
-  return [self initWithLayoutableObject:layoutableObject
-                        constrainedSize:constrainedSize
-                                   size:size
-                               position:position
-                             sublayouts:sublayouts];
+  return [self initWithLayoutable:layoutableObject
+                  constrainedSize:constrainedSize
+                             size:size
+                         position:position
+                       sublayouts:sublayouts];
 }
 
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
@@ -281,11 +281,11 @@ static inline NSString * descriptionIndents(NSUInteger indents)
                                   position:(CGPoint)position
                                 sublayouts:(NSArray *)sublayouts
 {
-  return [[self alloc] initWithLayoutableObject:layoutableObject
-                                constrainedSize:constrainedSize
-                                           size:size
-                                       position:position
-                                     sublayouts:sublayouts];
+  return [[self alloc] initWithLayoutable:layoutableObject
+                          constrainedSize:constrainedSize
+                                     size:size
+                                 position:position
+                               sublayouts:sublayouts];
 }
 
 + (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject

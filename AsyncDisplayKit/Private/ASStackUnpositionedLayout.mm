@@ -303,7 +303,7 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
   const CGFloat maxCrossDimension = crossDimension(style.direction, sizeRange.max);
   return AS::map(children, [&](id<ASLayoutable> child) -> ASStackUnpositionedItem {
     if (useOptimizedFlexing && isFlexibleInBothDirections(child)) {
-      return { child, [ASLayout layoutWithLayoutableObject:child constrainedSize:sizeRange size:{0, 0}] };
+      return { child, [ASLayout layoutWithLayoutable:child constrainedSize:sizeRange size:{0, 0}] };
     } else {
       return {
         child,

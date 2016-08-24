@@ -58,10 +58,10 @@ static NSUInteger const kBackgroundChildIndex = 1;
   contentsLayout.position = CGPointZero;
   [sublayouts addObject:contentsLayout];
 
-  return [ASLayout layoutWithLayoutableObject:self
-                              constrainedSize:constrainedSize
-                                         size:contentsLayout.size
-                                   sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutable:self
+                        constrainedSize:constrainedSize
+                                   size:contentsLayout.size
+                             sublayouts:sublayouts];
 }
 
 - (void)setBackground:(id<ASLayoutable>)background

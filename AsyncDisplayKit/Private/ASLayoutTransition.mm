@@ -34,7 +34,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
     layout = queue.front();
     queue.pop();
     
-    if (layout.layoutableObject.canLayoutAsynchronous == NO) {
+    if (layout.layoutable.canLayoutAsynchronous == NO) {
       return NO;
     }
     
@@ -118,7 +118,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
                                                  insertions:&insertions
                                                   deletions:&deletions
                                                compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
-                                                 return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
+                                                 return ASObjectIsEqual(lhs.layoutable, rhs.layoutable);
                                                }];
     findNodesInLayoutAtIndexes(_pendingLayout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
     findNodesInLayoutAtIndexesWithFilteredNodes(_previousLayout,
@@ -212,7 +212,7 @@ static inline void findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
   for (ASLayout *sublayout in layout.sublayouts) {
     if (idx > lastIndex) { break; }
     if (idx >= firstIndex && [indexes containsIndex:idx]) {
-      ASDisplayNode *node = (ASDisplayNode *)sublayout.layoutableObject;
+      ASDisplayNode *node = (ASDisplayNode *)sublayout.layoutable;
       ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
       // Ignore the odd case in which a non-node sublayout is accessed and the type cast fails
       if (node != nil) {

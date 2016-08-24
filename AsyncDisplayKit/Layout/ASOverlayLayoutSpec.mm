@@ -61,10 +61,10 @@ static NSUInteger const kOverlayChildIndex = 1;
     [sublayouts addObject:overlayLayout];
   }
   
-  return [ASLayout layoutWithLayoutableObject:self
-                              constrainedSize:constrainedSize
-                                         size:contentsLayout.size
-                                   sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutable:self
+                        constrainedSize:constrainedSize
+                                   size:contentsLayout.size
+                             sublayouts:sublayouts];
 }
 
 @end
