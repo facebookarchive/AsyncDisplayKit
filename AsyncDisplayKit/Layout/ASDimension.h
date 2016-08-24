@@ -130,8 +130,7 @@ extern NSString *NSStringFromASDimension(ASDimension dimension);
  */
 extern CGFloat ASDimensionResolve(ASDimension dimension, CGFloat autoSize, CGFloat parent);
 
-#define ASRD(...) ASRelativeDimensionMake(__VA_ARGS__)
-#define ASD(...) ASRelativeDimensionMake(__VA_ARGS__)
+#define ASD(...) ASDimensionMake(__VA_ARGS__)
 
 @interface NSNumber (ASRelativeDimension)
 @property (nonatomic, readonly) ASDimension as_points;
