@@ -39,8 +39,6 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 
 // Dynamic properties for sizing
 @dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
-@dynamic widthAsPoints, widthAsFraction, minWidthAsPoints, minWidthAsFraction, maxWidthAsPoints, maxWidthAsFraction;
-@dynamic heightAsPoints, heightAsFraction, minHeightAsPoints, minHeightAsFraction, maxHeightAsPoints, maxHeightAsFraction;
 // Dynamic properties for stack spec
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender;
 // Dynamic properties for static spec

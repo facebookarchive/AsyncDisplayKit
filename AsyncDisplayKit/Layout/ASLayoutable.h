@@ -98,31 +98,14 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readwrite) ASDimension maxWidth;
 
-// Helper
-// TODO: sizeRange: Extract them to another protocol
-#define ASLayoutableDefineGetterOnlyProperty(propertyName)\
-@property (nonatomic, assign) CGFloat propertyName;\
-- (CGFloat)propertyName UNAVAILABLE_ATTRIBUTE;\
-
-ASLayoutableDefineGetterOnlyProperty(widthAsPoints);
-ASLayoutableDefineGetterOnlyProperty(widthAsFraction);
-
-ASLayoutableDefineGetterOnlyProperty(minWidthAsPoints);
-ASLayoutableDefineGetterOnlyProperty(minWidthAsFraction);
-
-ASLayoutableDefineGetterOnlyProperty(maxWidthAsPoints);
-ASLayoutableDefineGetterOnlyProperty(maxWidthAsFraction);
-
-ASLayoutableDefineGetterOnlyProperty(heightAsPoints);
-ASLayoutableDefineGetterOnlyProperty(heightAsFraction);
-
-ASLayoutableDefineGetterOnlyProperty(minHeightAsPoints);
-ASLayoutableDefineGetterOnlyProperty(minHeightAsFraction);
-
-ASLayoutableDefineGetterOnlyProperty(maxHeightAsPoints);
-ASLayoutableDefineGetterOnlyProperty(maxHeightAsFraction);
-
+/**
+ * @abstract Set max and width properties from given size
+ */
 - (void)setSizeFromCGSize:(CGSize)size;
+
+/**
+ * @abstract Set minHeight, maxHeight and minWidth, maxWidth properties from given size
+ */
 - (void)setExactSizeFromCGSize:(CGSize)size;
 
 /**
