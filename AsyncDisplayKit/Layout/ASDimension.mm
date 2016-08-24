@@ -11,31 +11,31 @@
 #import "ASDimension.h"
 #import "ASAssert.h"
 
-ASRelativeDimension const ASRelativeDimensionAuto = {ASRelativeDimensionTypeAuto, 0};
+ASDimension const ASDimensionAuto = {ASDimensionTypeAuto, 0};
 
-#pragma mark - ASRelativeDimension
+#pragma mark - ASDimension
 
-ASOVERLOADABLE ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value)
+ASOVERLOADABLE ASDimension ASDimensionMake(ASDimensionType type, CGFloat value)
 {
-  if (type == ASRelativeDimensionTypePoints) {
+  if (type == ASDimensionTypePoints) {
     ASDisplayNodeCAssertPositiveReal(@"Points", value);
-  } else if (type == ASRelativeDimensionTypeFraction) {
+  } else if (type == ASDimensionTypeFraction) {
     // TODO: Enable this assertion for 2.0.  Check that there is no use case for using a larger value, e.g. to layout for a clipsToBounds = NO element.
-    // ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASRelativeDimension fraction value (%f) must be between 0 and 1.", value);
+    // ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASDimension fraction value (%f) must be between 0 and 1.", value);
   }
-  ASRelativeDimension dimension; dimension.type = type; dimension.value = value; return dimension;
+  ASDimension dimension; dimension.type = type; dimension.value = value; return dimension;
 }
 
-ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(CGFloat points)
+ASOVERLOADABLE extern ASDimension ASDimensionMake(CGFloat points)
 {
-  return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, points);
+  return ASDimensionMake(ASDimensionTypePoints, points);
 }
 
-ASOVERLOADABLE ASRelativeDimension ASRelativeDimensionMake(NSString *dimension)
+ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
 {
   // Handle empty string
   if (dimension.length == 0) {
-    return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, 0.0);
+    return ASDimensionMake(ASDimensionTypePoints, 0.0);
   }
   
   // Handle points
@@ -44,7 +44,7 @@ ASOVERLOADABLE ASRelativeDimension ASRelativeDimensionMake(NSString *dimension)
     // Check if points is at the end and remove it
     if (pointsStringLocation == (dimension.length-2)) {
       dimension = [dimension substringToIndex:(dimension.length-2)];
-      return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, dimension.floatValue);
+      return ASDimensionMake(ASDimensionTypePoints, dimension.floatValue);
     }
   }
   
@@ -54,78 +54,78 @@ ASOVERLOADABLE ASRelativeDimension ASRelativeDimensionMake(NSString *dimension)
     // Check if percent is at the end and remove it
     if (percentStringLocation == (dimension.length-1)) {
       dimension = [dimension substringToIndex:(dimension.length-1)];
-      return ASRelativeDimensionMake(ASRelativeDimensionTypeFraction, dimension.floatValue);
+      return ASDimensionMake(ASDimensionTypeFraction, dimension.floatValue);
     }
   }
 
   // Assert as parsing went wrong
   ASDisplayNodeCAssert(NO, @"Parsing dimension failed");
-  return ASRelativeDimensionAuto;
+  return ASDimensionAuto;
 }
 
-ASRelativeDimension ASRelativeDimensionMakeWithPoints(CGFloat points)
+ASDimension ASDimensionMakeWithPoints(CGFloat points)
 {
   ASDisplayNodeCAssertPositiveReal(@"Points", points);
-  return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, points);
+  return ASDimensionMake(ASDimensionTypePoints, points);
 }
 
-ASRelativeDimension ASRelativeDimensionMakeWithFraction(CGFloat fraction)
+ASDimension ASDimensionMakeWithFraction(CGFloat fraction)
 {
-  // ASDisplayNodeCAssert( 0 <= fraction && fraction <= 1.0, @"ASRelativeDimension fraction value (%f) must be between 0 and 1.", fraction);
-  return ASRelativeDimensionMake(ASRelativeDimensionTypeFraction, fraction);
+  // ASDisplayNodeCAssert( 0 <= fraction && fraction <= 1.0, @"ASDimension fraction value (%f) must be between 0 and 1.", fraction);
+  return ASDimensionMake(ASDimensionTypeFraction, fraction);
 }
 
-ASRelativeDimension ASRelativeDimensionCopy(ASRelativeDimension aDimension)
+ASDimension ASDimensionCopy(ASDimension aDimension)
 {
-  return ASRelativeDimensionMake(aDimension.type, aDimension.value);
+  return ASDimensionMake(aDimension.type, aDimension.value);
 }
 
-BOOL ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimension lhs, ASRelativeDimension rhs)
+BOOL ASDimensionEqualToDimension(ASDimension lhs, ASDimension rhs)
 {
   return lhs.type == rhs.type && lhs.value == rhs.value;
 }
 
-NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension)
+NSString *NSStringFromASDimension(ASDimension dimension)
 {
   switch (dimension.type) {
-    case ASRelativeDimensionTypePoints:
+    case ASDimensionTypePoints:
       return [NSString stringWithFormat:@"%.0fpt", dimension.value];
-    case ASRelativeDimensionTypeFraction:
+    case ASDimensionTypeFraction:
       return [NSString stringWithFormat:@"%.0f%%", dimension.value * 100.0];
-    case ASRelativeDimensionTypeAuto:
+    case ASDimensionTypeAuto:
       return @"Auto";
   }
 }
 
-CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSize, CGFloat parent)
+CGFloat ASDimensionResolve(ASDimension dimension, CGFloat autoSize, CGFloat parent)
 {
   switch (dimension.type) {
-    case ASRelativeDimensionTypeAuto:
+    case ASDimensionTypeAuto:
       return autoSize;
-    case ASRelativeDimensionTypePoints:
+    case ASDimensionTypePoints:
       return dimension.value;
-    case ASRelativeDimensionTypeFraction:
+    case ASDimensionTypeFraction:
       return dimension.value * parent;
   }
 }
 
-@implementation NSNumber (ASRelativeDimension)
+@implementation NSNumber (ASDimension)
 
-- (ASRelativeDimension)as_points
+- (ASDimension)as_points
 {
-  return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, self.floatValue);
+  return ASDimensionMake(ASDimensionTypePoints, self.floatValue);
 }
 
-- (ASRelativeDimension)as_fraction
+- (ASDimension)as_fraction
 {
-  return ASRelativeDimensionMake(ASRelativeDimensionTypeFraction, self.floatValue);
+  return ASDimensionMake(ASDimensionTypeFraction, self.floatValue);
 }
 
 @end
 
 #pragma mark - ASRelativeSize
 
-ASRelativeSize ASRelativeSizeMake(ASRelativeDimension width, ASRelativeDimension height)
+ASRelativeSize ASRelativeSizeMake(ASDimension width, ASDimension height)
 {
   ASRelativeSize size; size.width = width; size.height = height; return size;
 }
@@ -133,21 +133,21 @@ ASRelativeSize ASRelativeSizeMake(ASRelativeDimension width, ASRelativeDimension
 // ** Resolve this relative size relative to a parent size. */
 CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize, CGSize autoSize)
 {
-  return CGSizeMake(ASRelativeDimensionResolve(relativeSize.width, autoSize.width, parentSize.width),
-                    ASRelativeDimensionResolve(relativeSize.height, autoSize.height, parentSize.height));
+  return CGSizeMake(ASDimensionResolve(relativeSize.width, autoSize.width, parentSize.width),
+                    ASDimensionResolve(relativeSize.height, autoSize.height, parentSize.height));
 }
 
 BOOL ASRelativeSizeEqualToRelativeSize(ASRelativeSize lhs, ASRelativeSize rhs)
 {
-  return ASRelativeDimensionEqualToRelativeDimension(lhs.width, rhs.width)
-  && ASRelativeDimensionEqualToRelativeDimension(lhs.height, rhs.height);
+  return ASDimensionEqualToDimension(lhs.width, rhs.width)
+  && ASDimensionEqualToDimension(lhs.height, rhs.height);
 }
 
 NSString *NSStringFromASRelativeSize(ASRelativeSize size)
 {
   return [NSString stringWithFormat:@"{%@, %@}",
-          NSStringFromASRelativeDimension(size.width),
-          NSStringFromASRelativeDimension(size.height)];
+          NSStringFromASDimension(size.width),
+          NSStringFromASDimension(size.height)];
 }
 
 #pragma mark - ASSize
@@ -155,31 +155,31 @@ NSString *NSStringFromASRelativeSize(ASRelativeSize size)
 ASSize ASSizeMake()
 {
   return (ASSize){
-    .width = ASRelativeDimensionAuto,
-    .height = ASRelativeDimensionAuto,
-    .minWidth = ASRelativeDimensionAuto,
-    .maxWidth = ASRelativeDimensionAuto,
-    .minHeight = ASRelativeDimensionAuto,
-    .maxHeight = ASRelativeDimensionAuto
+    .width = ASDimensionAuto,
+    .height = ASDimensionAuto,
+    .minWidth = ASDimensionAuto,
+    .maxWidth = ASDimensionAuto,
+    .minHeight = ASDimensionAuto,
+    .maxHeight = ASDimensionAuto
   };
 }
 
 ASSize ASSizeMakeFromCGSize(CGSize size)
 {
   ASSize s = ASSizeMake();
-  s.width = ASRelativeDimensionMakeWithPoints(size.width);
-  s.height = ASRelativeDimensionMakeWithPoints(size.height);
+  s.width = ASDimensionMakeWithPoints(size.width);
+  s.height = ASDimensionMakeWithPoints(size.height);
   return s;
 }
 
 BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs)
 {
-  return ASRelativeDimensionEqualToRelativeDimension(lhs.width, rhs.width)
-  && ASRelativeDimensionEqualToRelativeDimension(lhs.height, rhs.height)
-  && ASRelativeDimensionEqualToRelativeDimension(lhs.minWidth, rhs.minWidth)
-  && ASRelativeDimensionEqualToRelativeDimension(lhs.maxWidth, rhs.maxWidth)
-  && ASRelativeDimensionEqualToRelativeDimension(lhs.minHeight, rhs.minHeight)
-  && ASRelativeDimensionEqualToRelativeDimension(lhs.maxHeight, rhs.maxHeight);
+  return ASDimensionEqualToDimension(lhs.width, rhs.width)
+  && ASDimensionEqualToDimension(lhs.height, rhs.height)
+  && ASDimensionEqualToDimension(lhs.minWidth, rhs.minWidth)
+  && ASDimensionEqualToDimension(lhs.maxWidth, rhs.maxWidth)
+  && ASDimensionEqualToDimension(lhs.minHeight, rhs.minHeight)
+  && ASDimensionEqualToDimension(lhs.maxHeight, rhs.maxHeight);
 }
 
 NSString *NSStringFromASSize(ASSize size)

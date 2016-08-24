@@ -74,8 +74,8 @@
      alignItems:ASStackLayoutAlignItemsCenter
      children:@[_iconNode, _countNode]];
 
-    mainStack.minWidth = ASRelativeDimensionMakeWithPoints(60.0);
-    mainStack.maxHeight = ASRelativeDimensionMakeWithPoints(40.0);
+    mainStack.minWidth = ASDimensionMakeWithPoints(60.0);
+    mainStack.maxHeight = ASDimensionMakeWithPoints(40.0);
 
     return mainStack;
 }

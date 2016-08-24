@@ -57,14 +57,14 @@ NS_ASSUME_NONNULL_BEGIN
  * The minWidth and maxWidth properties override width.
  * Default: ASRelativeDimensionTypeAuto
  */
-@property (nonatomic, assign, readwrite) ASRelativeDimension width;
+@property (nonatomic, assign, readwrite) ASDimension width;
 
 /**
  * @abstract The height property specifies the height of the content area of an ASLayoutable
  * The minHeight and maxHeight properties override height.
  * Default to ASRelativeDimensionTypeAuto
  */
-@property (nonatomic, assign, readwrite) ASRelativeDimension height;
+@property (nonatomic, assign, readwrite) ASDimension height;
 
 /**
  * @abstract The minHeight property is used to set the minimum height of a given element. It prevents the used value
@@ -72,7 +72,7 @@ NS_ASSUME_NONNULL_BEGIN
  * The value of minHeight overrides both maxHeight and height.
  * Default to ASRelativeDimensionTypeAuto
  */
-@property (nonatomic, assign, readwrite) ASRelativeDimension minHeight;
+@property (nonatomic, assign, readwrite) ASDimension minHeight;
 
 /**
  * @abstract The maxHeight property is used to set the maximum height of an element. It prevents the used value of the
@@ -80,7 +80,7 @@ NS_ASSUME_NONNULL_BEGIN
  * The value of maxHeight overrides height, but minHeight overrides maxHeight.
  * Default to ASRelativeDimensionTypeAuto
  */
-@property (nonatomic, assign, readwrite) ASRelativeDimension maxHeight;
+@property (nonatomic, assign, readwrite) ASDimension maxHeight;
 
 /**
  * @abstract The minWidth property is used to set the minimum width of a given element. It prevents the used value of
@@ -88,7 +88,7 @@ NS_ASSUME_NONNULL_BEGIN
  * The value of minWidth overrides both maxWidth and width.
  * Default to ASRelativeDimensionTypeAuto
  */
-@property (nonatomic, assign, readwrite) ASRelativeDimension minWidth;
+@property (nonatomic, assign, readwrite) ASDimension minWidth;
 
 /**
  * @abstract The maxWidth property is used to set the maximum width of a given element. It prevents the used value of
@@ -96,7 +96,7 @@ NS_ASSUME_NONNULL_BEGIN
  * The value of maxWidth overrides width, but minWidth overrides maxWidth.
  * Default to ASRelativeDimensionTypeAuto
  */
-@property (nonatomic, assign, readwrite) ASRelativeDimension maxWidth;
+@property (nonatomic, assign, readwrite) ASDimension maxWidth;
 
 // Helper
 // TODO: sizeRange: Extract them to another protocol
@@ -234,7 +234,7 @@ ASLayoutableDefineGetterOnlyProperty(maxHeightAsFraction);
  * Default to ASRelativeDimensionAuto
  * Used when attached to a stack layout.
  */
-@property (nonatomic, readwrite) ASRelativeDimension flexBasis;
+@property (nonatomic, readwrite) ASDimension flexBasis;
 
 /**
  * @abstract Orientation of the object along cross axis, overriding alignItems

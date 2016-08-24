@@ -41,8 +41,8 @@ __attribute__((overloadable)) static inline ASStaticSizeDisplayNode *ASDisplayNo
   ASStaticSizeDisplayNode *node = [[ASStaticSizeDisplayNode alloc] init];
   node.layerBacked = YES;
   node.backgroundColor = backgroundColor;
-  node.width = ASRelativeDimensionMakeWithPoints(size.width);
-  node.height = ASRelativeDimensionMakeWithPoints(size.height);
+  node.width = ASDimensionMakeWithPoints(size.width);
+  node.height = ASDimensionMakeWithPoints(size.height);
   return node;
 }
 

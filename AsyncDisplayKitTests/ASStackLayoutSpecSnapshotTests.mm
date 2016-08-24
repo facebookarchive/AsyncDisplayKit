@@ -44,8 +44,8 @@ static NSArray<ASStaticSizeDisplayNode *> *defaultSubnodesWithSameSize(CGSize su
 
 static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
-  node.width = ASRelativeDimensionMakeWithPoints(size.width);
-  node.height = ASRelativeDimensionMakeWithPoints(size.height);
+  node.width = ASDimensionMakeWithPoints(size.width);
+  node.height = ASDimensionMakeWithPoints(size.height);
 }
 
 - (void)testStackLayoutSpecWithJustify:(ASStackLayoutJustifyContent)justify
@@ -338,7 +338,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   ASStaticSizeDisplayNode * subnode2 = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});
   
   ASRatioLayoutSpec *child1 = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.5 child:subnode1];
-  child1.flexBasis = ASRelativeDimensionMakeWithFraction(1);
+  child1.flexBasis = ASDimensionMakeWithFraction(1);
   child1.flexGrow = YES;
   child1.flexShrink = YES;
   
@@ -500,7 +500,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 
   for (ASStaticSizeDisplayNode *subnode in subnodes) {
     subnode.flexGrow = YES;
-    subnode.flexBasis = ASRelativeDimensionMakeWithPoints(10);
+    subnode.flexBasis = ASDimensionMakeWithPoints(10);
   }
 
   // width 300px; height 0-150px.
@@ -523,7 +523,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 
   // This should override the intrinsic size of 50pts and instead compute to 50% = 100pts.
   // The result should be that the red box is twice as wide as the blue and gree boxes after flexing.
-  subnodes[0].flexBasis = ASRelativeDimensionMakeWithFraction(0.5);
+  subnodes[0].flexBasis = ASDimensionMakeWithFraction(0.5);
 
   static ASSizeRange kSize = {{200, 0}, {200, INFINITY}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
@@ -539,7 +539,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   setCGSizeToNode({150, 50}, subnodes[2]);
 
   for (ASStaticSizeDisplayNode *subnode in subnodes) {
-    subnode.flexBasis = ASRelativeDimensionMakeWithPoints(20);
+    subnode.flexBasis = ASDimensionMakeWithPoints(20);
   }
   
   static ASSizeRange kSize = {{300, 0}, {300, 150}};

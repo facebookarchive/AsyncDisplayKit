@@ -25,26 +25,26 @@
  *
  * "Percent" - Multiplied to a provided parent amount to resolve a final amount.
  */
-typedef NS_ENUM(NSInteger, ASRelativeDimensionType) {
+typedef NS_ENUM(NSInteger, ASDimensionType) {
   /** This indicates "I have no opinion" and may be resolved in whatever way makes most sense given the circumstances. */
-  ASRelativeDimensionTypeAuto,
+  ASDimensionTypeAuto,
   /** Just a number. It will always resolve to exactly this amount. This is the default type. */
-  ASRelativeDimensionTypePoints,
+  ASDimensionTypePoints,
   /** Multiplied to a provided parent amount to resolve a final amount. */
-  ASRelativeDimensionTypeFraction,
+  ASDimensionTypeFraction,
 };
 
 typedef struct {
-  ASRelativeDimensionType type;
+  ASDimensionType type;
   CGFloat value;
-} ASRelativeDimension;
+} ASDimension;
 
 /**
  * Expresses a size with relative dimensions.
  */
 typedef struct {
-  ASRelativeDimension width;
-  ASRelativeDimension height;
+  ASDimension width;
+  ASDimension height;
 } ASRelativeSize;
 
 /**
@@ -59,83 +59,83 @@ typedef struct {
  * A struct specifying a ASLayoutable's size. Example:
  *
  *  ASSize size = (ASSize){
- *    .width = ASRelativeDimensionMakeWithFraction(0.25),
- *    .maxWidth = ASRelativeDimensionMakeWithPoints(200),
- *    .minHeight = ASRelativeDimensionMakeWithFraction(0.50)
+ *    .width = ASDimensionMakeWithFraction(0.25),
+ *    .maxWidth = ASDimensionMakeWithPoints(200),
+ *    .minHeight = ASDimensionMakeWithFraction(0.50)
  *  };
  *
  *  Description: <ASSize: exact={25%, Auto}, min={Auto, 50%}, max={200pt, Auto}>
  *
  */
 typedef struct {
-  ASRelativeDimension width;
-  ASRelativeDimension height;
-  ASRelativeDimension minWidth;
-  ASRelativeDimension maxWidth;
-  ASRelativeDimension minHeight;
-  ASRelativeDimension maxHeight;
+  ASDimension width;
+  ASDimension height;
+  ASDimension minWidth;
+  ASDimension maxWidth;
+  ASDimension minHeight;
+  ASDimension maxHeight;
 } ASSize;
 
-extern ASRelativeDimension const ASRelativeDimensionAuto;
+extern ASDimension const ASDimensionAuto;
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 NS_ASSUME_NONNULL_BEGIN
 
-#pragma mark - ASRelativeDimension
+#pragma mark - ASDimension
 
 /**
  * Returns a dimension with the specified type and value.
  */
-ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value);
+ASOVERLOADABLE extern ASDimension ASDimensionMake(ASDimensionType type, CGFloat value);
 
 /**
  * Returns a dimension with the specified points value.
  */
-ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(CGFloat points);
+ASOVERLOADABLE extern ASDimension ASDimensionMake(CGFloat points);
 
 /**
  * Returns a dimension by parsing the specified dimension string.
- * Examples: ASRelativeDimensionMake(@"0.5%") = ASRelativeDimensionMake(ASRelativeDimensionTypeFraction, 0.5)
- *           ASRelativeDimensionMake(@"0.5pt") = ASRelativeDimensionMake(ASRelativeDimensionTypePoints, 0.5)
+ * Examples: ASDimensionMake(@"0.5%") = ASDimensionMake(ASDimensionTypeFraction, 0.5)
+ *           ASDimensionMake(@"0.5pt") = ASDimensionMake(ASDimensionTypePoints, 0.5)
  */
-ASOVERLOADABLE extern ASRelativeDimension ASRelativeDimensionMake(NSString *dimension);
+ASOVERLOADABLE extern ASDimension ASDimensionMake(NSString *dimension);
 
 /**
  * Returns a dimension with the specified points value.
  */
-extern ASRelativeDimension ASRelativeDimensionMakeWithPoints(CGFloat points);
+extern ASDimension ASDimensionMakeWithPoints(CGFloat points);
 
 /**
  * Returns a dimension with the specified fraction value.
  */
-extern ASRelativeDimension ASRelativeDimensionMakeWithFraction(CGFloat fraction);
+extern ASDimension ASDimensionMakeWithFraction(CGFloat fraction);
 
 /**
  * Returns a dimension with the same type and value as the specified dimension.
  */
-extern ASRelativeDimension ASRelativeDimensionCopy(ASRelativeDimension aDimension);
+extern ASDimension ASDimensionCopy(ASDimension aDimension);
 
 /**
  * Returns whether two dimensions are equal.
  */
-extern BOOL ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimension lhs, ASRelativeDimension rhs);
+extern BOOL ASDimensionEqualToDimension(ASDimension lhs, ASDimension rhs);
 
 /**
  * Returns a NSString representation of a dimension.
  */
-extern NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension);
+extern NSString *NSStringFromASDimension(ASDimension dimension);
 
 /**
  * Resolve this dimension to a parent size.
  */
-extern CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat autoSize, CGFloat parent);
+extern CGFloat ASDimensionResolve(ASDimension dimension, CGFloat autoSize, CGFloat parent);
 
 #define ASRD(...) ASRelativeDimensionMake(__VA_ARGS__)
 #define ASD(...) ASRelativeDimensionMake(__VA_ARGS__)
 
 @interface NSNumber (ASRelativeDimension)
-@property (nonatomic, readonly) ASRelativeDimension as_points;
-@property (nonatomic, readonly) ASRelativeDimension as_fraction;
+@property (nonatomic, readonly) ASDimension as_points;
+@property (nonatomic, readonly) ASDimension as_fraction;
 @end
 
 #pragma mark - ASSize

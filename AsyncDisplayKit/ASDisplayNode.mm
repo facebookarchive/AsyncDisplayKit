@@ -2389,8 +2389,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (! CGSizeEqualToSize(_preferredFrameSize, preferredFrameSize)) {
     _preferredFrameSize = preferredFrameSize;
     
-    self.width = ASRelativeDimensionMakeWithPoints(preferredFrameSize.width);
-    self.height = ASRelativeDimensionMakeWithPoints(preferredFrameSize.height);
+    self.width = ASDimensionMake(preferredFrameSize.width);
+    self.height = ASDimensionMake(preferredFrameSize.height);
 
     [self invalidateCalculatedLayout];
   }

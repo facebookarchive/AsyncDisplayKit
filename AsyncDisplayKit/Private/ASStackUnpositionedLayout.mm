@@ -305,14 +305,12 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
     if (useOptimizedFlexing && isFlexibleInBothDirections(child)) {
       return { child, [ASLayout layoutWithLayoutableObject:child constrainedSize:sizeRange size:{0, 0}] };
     } else {
-        
-      ASRelativeDimension flexBasis = child.flexBasis;
       return {
         child,
         crossChildLayout(child,
                          style,
-                         ASRelativeDimensionResolve(flexBasis, 0, stackDimension(style.direction, size)),
-                         ASRelativeDimensionResolve(flexBasis, INFINITY, stackDimension(style.direction, size)),
+                         ASDimensionResolve(child.flexBasis, 0, stackDimension(style.direction, size)),
+                         ASDimensionResolve(child.flexBasis, INFINITY, stackDimension(style.direction, size)),
                          minCrossDimension,
                          maxCrossDimension,
                          size)

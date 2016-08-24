@@ -84,73 +84,73 @@ extern void ASLayoutableClearCurrentContext();
 
 #define ASLayoutableSizeForwarding \
 \
-- (ASRelativeDimension)width\
+- (ASDimension)width\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   return _size.width;\
 }\
 \
-- (void)setWidth:(ASRelativeDimension)width\
+- (void)setWidth:(ASDimension)width\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   _size.width = width;\
 }\
 \
-- (ASRelativeDimension)height\
+- (ASDimension)height\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   return _size.height;\
 }\
 \
-- (void)setHeight:(ASRelativeDimension)height\
+- (void)setHeight:(ASDimension)height\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   _size.height = height;\
 }\
 \
-- (ASRelativeDimension)minWidth\
+- (ASDimension)minWidth\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   return _size.minWidth;\
 }\
 \
-- (void)setMinWidth:(ASRelativeDimension)minWidth\
+- (void)setMinWidth:(ASDimension)minWidth\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   _size.minWidth = minWidth;\
 }\
 \
-- (ASRelativeDimension)maxWidth\
+- (ASDimension)maxWidth\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   return _size.maxWidth;\
 }\
 \
-- (void)setMaxWidth:(ASRelativeDimension)maxWidth\
+- (void)setMaxWidth:(ASDimension)maxWidth\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   _size.maxWidth = maxWidth;\
 }\
 \
-- (ASRelativeDimension)minHeight\
+- (ASDimension)minHeight\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   return _size.minHeight;\
 }\
 \
-- (void)setMinHeight:(ASRelativeDimension)minHeight\
+- (void)setMinHeight:(ASDimension)minHeight\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   _size.minHeight = minHeight;\
 }\
 \
-- (ASRelativeDimension)maxHeight\
+- (ASDimension)maxHeight\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   return _size.maxHeight;\
 }\
 \
-- (void)setMaxHeight:(ASRelativeDimension)maxHeight\
+- (void)setMaxHeight:(ASDimension)maxHeight\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
   _size.maxHeight = maxHeight;\
@@ -163,87 +163,87 @@ extern void ASLayoutableClearCurrentContext();
 - (void)setWidthAsPoints:(CGFloat)widthAsPoints\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.width = {ASRelativeDimensionTypePoints, widthAsPoints};\
+  _size.width = {ASDimensionTypePoints, widthAsPoints};\
 }\
 \
 - (void)setWidthAsFraction:(CGFloat)widthAsFraction\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.width = {ASRelativeDimensionTypeFraction, widthAsFraction};\
+  _size.width = {ASDimensionTypeFraction, widthAsFraction};\
 }\
 \
 - (void)setMinWidthAsPoints:(CGFloat)minWidthAsPoints\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.minWidth = {ASRelativeDimensionTypePoints, minWidthAsPoints};\
+  _size.minWidth = {ASDimensionTypePoints, minWidthAsPoints};\
 }\
 \
 - (void)setMinWidthAsFraction:(CGFloat)minWidthAsFraction\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.minWidth = {ASRelativeDimensionTypeFraction, minWidthAsFraction};\
+  _size.minWidth = {ASDimensionTypeFraction, minWidthAsFraction};\
 }\
 \
 - (void)setMaxWidthAsPoints:(CGFloat)maxWidthAsPoints\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.maxWidth = {ASRelativeDimensionTypePoints, maxWidthAsPoints};\
+  _size.maxWidth = {ASDimensionTypePoints, maxWidthAsPoints};\
 }\
 \
 - (void)setMaxWidthAsFraction:(CGFloat)maxWidthAsFraction\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.maxWidth = {ASRelativeDimensionTypeFraction, maxWidthAsFraction};\
+  _size.maxWidth = {ASDimensionTypeFraction, maxWidthAsFraction};\
 }\
 \
 - (void)setHeightAsPoints:(CGFloat)points\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.height = {ASRelativeDimensionTypePoints, points};\
+  _size.height = {ASDimensionTypePoints, points};\
 }\
 \
 - (void)setHeightAsFraction:(CGFloat)heightAsFraction\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.height = {ASRelativeDimensionTypeFraction, heightAsFraction};\
+  _size.height = {ASDimensionTypeFraction, heightAsFraction};\
 }\
 \
 - (void)setMinHeightAsPoints:(CGFloat)minHeightAsPoints\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.minHeight = {ASRelativeDimensionTypePoints, minHeightAsPoints};\
+  _size.minHeight = {ASDimensionTypePoints, minHeightAsPoints};\
 }\
 \
 - (void)setMinHeightAsFraction:(CGFloat)minHeightAsFraction\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.minHeight = {ASRelativeDimensionTypeFraction, minHeightAsFraction};\
+  _size.minHeight = {ASDimensionTypeFraction, minHeightAsFraction};\
 }\
 \
 - (void)setMaxHeightAsPoints:(CGFloat)maxHeightAsPoints\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.maxHeight = {ASRelativeDimensionTypePoints, maxHeightAsPoints};\
+  _size.maxHeight = {ASDimensionTypePoints, maxHeightAsPoints};\
 }\
 \
 - (void)setMaxHeightAsFraction:(CGFloat)maxHeightAsFraction\
 {\
   ASDN::MutexLocker l(__instanceLock__);\
-  _size.maxHeight = {ASRelativeDimensionTypeFraction, maxHeightAsFraction};\
+  _size.maxHeight = {ASDimensionTypeFraction, maxHeightAsFraction};\
 }\
 \
 - (void)setSizeFromCGSize:(CGSize)size\
 {\
-  self.width = ASRelativeDimensionMakeWithPoints(size.width);\
-  self.height = ASRelativeDimensionMakeWithPoints(size.height);\
+  self.width = ASDimensionMakeWithPoints(size.width);\
+  self.height = ASDimensionMakeWithPoints(size.height);\
 }\
 \
 - (void)setExactSizeFromCGSize:(CGSize)size\
 {\
-  self.minWidth = ASRelativeDimensionMakeWithPoints(size.width);\
-  self.minHeight = ASRelativeDimensionMakeWithPoints(size.height);\
-  self.maxWidth = ASRelativeDimensionMakeWithPoints(size.width);\
-  self.maxHeight = ASRelativeDimensionMakeWithPoints(size.height);\
+  self.minWidth = ASDimensionMakeWithPoints(size.width);\
+  self.minHeight = ASDimensionMakeWithPoints(size.height);\
+  self.maxWidth = ASDimensionMakeWithPoints(size.width);\
+  self.maxHeight = ASDimensionMakeWithPoints(size.height);\
 }\
 
 
@@ -305,12 +305,12 @@ extern void ASLayoutableClearCurrentContext();
   [self propagateUpLayoutOptionsState];\
 }\
 \
-- (ASRelativeDimension)flexBasis\
+- (ASDimension)flexBasis\
 {\
   return _environmentState.layoutOptionsState.flexBasis;\
 }\
 \
-- (void)setFlexBasis:(ASRelativeDimension)flexBasis\
+- (void)setFlexBasis:(ASDimension)flexBasis\
 {\
   _environmentState.layoutOptionsState.flexBasis = flexBasis;\
   [self propagateUpLayoutOptionsState];\
