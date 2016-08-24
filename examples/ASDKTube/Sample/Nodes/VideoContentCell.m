@@ -65,8 +65,8 @@
     [self addSubnode:_likeButtonNode];
 
     _muteButtonNode = [[ASButtonNode alloc] init];
-    _muteButtonNode.width = ASRelativeDimensionMakeWithPoints(16.0);
-    _muteButtonNode.height = ASRelativeDimensionMakeWithPoints(22.0);
+    _muteButtonNode.width = ASDimensionMakeWithPoints(16.0);
+    _muteButtonNode.height = ASDimensionMakeWithPoints(22.0);
     [_muteButtonNode addTarget:self action:@selector(didTapMuteButton) forControlEvents:ASControlNodeEventTouchUpInside];
 
     _videoPlayerNode = [[ASVideoPlayerNode alloc] initWithUrl:_videoModel.url loadAssetWhenNodeBecomesVisible:YES];
@@ -91,14 +91,14 @@
 {
   CGFloat fullWidth = [UIScreen mainScreen].bounds.size.width;
   
-  _videoPlayerNode.width = ASRelativeDimensionMakeWithPoints(fullWidth);
-  _videoPlayerNode.height = ASRelativeDimensionMakeWithPoints(fullWidth * 9 / 16);
+  _videoPlayerNode.width = ASDimensionMakeWithPoints(fullWidth);
+  _videoPlayerNode.height = ASDimensionMakeWithPoints(fullWidth * 9 / 16);
   
-  _avatarNode.width = ASRelativeDimensionMakeWithPoints(AVATAR_IMAGE_HEIGHT);
-  _avatarNode.height = ASRelativeDimensionMakeWithPoints(AVATAR_IMAGE_HEIGHT);
+  _avatarNode.width = ASDimensionMakeWithPoints(AVATAR_IMAGE_HEIGHT);
+  _avatarNode.height = ASDimensionMakeWithPoints(AVATAR_IMAGE_HEIGHT);
   
-  _likeButtonNode.width = ASRelativeDimensionMakeWithPoints(50.0);
-  _likeButtonNode.height = ASRelativeDimensionMakeWithPoints(26.0);
+  _likeButtonNode.width = ASDimensionMakeWithPoints(50.0);
+  _likeButtonNode.height = ASDimensionMakeWithPoints(26.0);
 
   ASStackLayoutSpec *headerStack  = [ASStackLayoutSpec horizontalStackLayoutSpec];
   headerStack.spacing = HORIZONTAL_BUFFER;
@@ -190,9 +190,9 @@
 
   if (controls[ @(ASVideoPlayerNodeControlTypeScrubber) ]) {
     ASDisplayNode *scrubber = controls[ @(ASVideoPlayerNodeControlTypeScrubber) ];
-    scrubber.height = ASRelativeDimensionMakeWithPoints(44.0);
-    scrubber.minWidth = ASRelativeDimensionMakeWithPoints(0.0);
-    scrubber.maxWidth = ASRelativeDimensionMakeWithPoints(maxSize.width);
+    scrubber.height = ASDimensionMakeWithPoints(44.0);
+    scrubber.minWidth = ASDimensionMakeWithPoints(0.0);
+    scrubber.maxWidth = ASDimensionMakeWithPoints(maxSize.width);
     scrubber.flexGrow = YES;
   }
 

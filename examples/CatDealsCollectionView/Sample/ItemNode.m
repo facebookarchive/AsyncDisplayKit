@@ -107,8 +107,8 @@ const CGFloat kSoldOutGBHeight = 50.0;
   self.soldOutLabelFlat.layerBacked = YES;
 
   self.soldOutLabelBackground = [[ASDisplayNode alloc] init];
-  self.soldOutLabelBackground.width = ASRelativeDimensionMakeWithFraction(1.0);
-  self.soldOutLabelBackground.height = ASRelativeDimensionMakeWithPoints(kSoldOutGBHeight);
+  self.soldOutLabelBackground.width = ASDimensionMakeWithFraction(1.0);
+  self.soldOutLabelBackground.height = ASDimensionMakeWithPoints(kSoldOutGBHeight);
   self.soldOutLabelBackground.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.9];
   self.soldOutLabelBackground.flexGrow = YES;
   self.soldOutLabelBackground.layerBacked = YES;
@@ -290,7 +290,7 @@ const CGFloat kSoldOutGBHeight = 50.0;
   ASRatioLayoutSpec *imagePlace = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:imageRatio child:self.dealImageView];
   
   self.badge.layoutPosition = CGPointMake(0, constrainedSize.max.height - kFixedLabelsAreaHeight - kBadgeHeight);
-  self.badge.height = ASRelativeDimensionMakeWithPoints(kBadgeHeight);
+  self.badge.height = ASDimensionMakeWithPoints(kBadgeHeight);
   ASStaticLayoutSpec *badgePosition = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.badge]];
   
   ASOverlayLayoutSpec *badgeOverImage = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:imagePlace overlay:badgePosition];

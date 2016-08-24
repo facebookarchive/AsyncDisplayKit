@@ -427,8 +427,8 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
         verticalStackLayoutSpec.spacing = 5.0; // Spacing between children
         
         // Layout the stack layout with 100% width and 100% height of the parent node
-        verticalStackLayoutSpec.height = ASRelativeDimensionMakeWithFraction(1.0);
-        verticalStackLayoutSpec.width = ASRelativeDimensionMakeWithFraction(1.0);
+        verticalStackLayoutSpec.height = ASDimensionMakeWithFraction(1.0);
+        verticalStackLayoutSpec.width = ASDimensionMakeWithFraction(1.0);
         
         // Add a bit of inset
         return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0.0, 5.0, 0.0, 5.0) child:verticalStackLayoutSpec];
