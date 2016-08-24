@@ -96,7 +96,8 @@
     CGRect oldBounds = self.bounds;
     [super setBounds:bounds];
     self.asyncdisplaykit_node.threadSafeBounds = bounds;
-    [self.delegate layer:self didChangeBoundsWithOldValue:oldBounds newValue:bounds];
+    [(id<ASCALayerExtendedDelegate>)self.delegate layer:self didChangeBoundsWithOldValue:oldBounds newValue:bounds];
+    
   } else {
     [super setBounds:bounds];
     self.asyncdisplaykit_node.threadSafeBounds = bounds;
