@@ -53,6 +53,18 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ASLayoutable <ASEnvironment, ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate, ASLayoutableExtensibility>
 
 /**
+ * @abstract Returns type of layoutable
+ */
+@property (nonatomic, assign, readonly) ASLayoutableType layoutableType;
+
+/**
+ * @abstract Returns if the layoutable can be used to layout in an asynchronous way on a background thread.
+ */
+@property (nonatomic, assign, readonly) BOOL canLayoutAsynchronous;
+
+#pragma mark - Sizing
+
+/**
  * @abstract The width property specifies the height of the content area of an ASLayoutable.
  * The minWidth and maxWidth properties override width.
  * Default: ASRelativeDimensionTypeAuto
@@ -108,16 +120,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)setExactSizeFromCGSize:(CGSize)size;
 
-/**
- * @abstract Returns type of layoutable
- */
-@property (nonatomic, assign, readonly) ASLayoutableType layoutableType;
-
-/**
- * @abstract Returns if the layoutable can be used to layout in an asynchronous way on a background thread.
- */
-@property (nonatomic, assign, readonly) BOOL canLayoutAsynchronous;
-
 
 #pragma mark - Calculate layout
 
@@ -131,7 +133,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
  * constraint and the result.
  *
- * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:parentSize:.  Calling this method may
+ * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
  * be expensive if result is not cached.
  *
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
@@ -149,20 +151,24 @@ NS_ASSUME_NONNULL_BEGIN
  *                  then it should be passed as ASLayoutableParentDimensionUndefined (for example, if the parent's width
  *                  depends on the child's size).
  *
- * @return A struct defining the layout of the receiver and its children.
+ * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
+ * constraint and the result.
+ *
+ * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
  */
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize;
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize;
 
 /**
- * Override this method to compute your nodes's layout.
+ * Override this method to compute your layoutable's layout.
  *
- * @discussion Why do you need to override -calculateLayoutThatFits: instead of -calculateLayoutThatFits:parentSize:?
- * The base implementation of -calculateLayoutThatFits:parentSize: does the following for you:
+ * @discussion Why do you need to override -calculateLayoutThatFits: instead of -layoutThatFits:parentSize:?
+ * The base implementation of -layoutThatFits:parentSize: does the following for you:
  * 1. First, it uses the parentSize parameter to resolve the nodes's size (the one assigned to the sizeRange property).
  * 2. Then, it intersects the resolved size with the constrainedSize parameter. If the two don't intersect,
  *    constrainedSize wins. This allows a component to always override its childrens' sizes when computing its layout.
  *    (The analogy for UIView: you might return a certain size from -sizeThatFits:, but a parent view can always override
  *    that size and set your frame to any size.)
+ * 3. It caches it result for reuse
  *
  * @param constrainedSize A min and max size. This is computed as described in the description. The ASLayout you
  *                        return MUST have a size between these two sizes.
@@ -170,11 +176,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize;
 
 /**
- * ASLayoutable's implementation of -calculateLayoutThatFits:parentSize: calls this method to resolve the component's size
- * against parentSize, intersect it with constrainedSize, and call -calculateLayoutThatFits: with the result.
- *
- * In certain advanced cases, you may want to customize this logic. Overriding this method allows you to receive all
- * three parameters and do the computation yourself.
+ * In certain advanced cases, you may want to override this method. Overriding this method allows you to receive the
+ * layoutable's size, parentSize, and constrained size. With these values you could calculate the final constrained size
+ * and call -calculateLayoutThatFits: with the result.
  *
  * @warning Overriding this method should be done VERY rarely.
  */

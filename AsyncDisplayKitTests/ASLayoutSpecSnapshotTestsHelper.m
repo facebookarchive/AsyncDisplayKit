@@ -39,7 +39,7 @@
   
   node.layoutSpecUnderTest = layoutSpec;
   
-  ASCalculateRootLayout(node, sizeRange);
+  [node layoutThatFits:sizeRange];
   ASSnapshotVerifyNode(node, identifier);
 }
 

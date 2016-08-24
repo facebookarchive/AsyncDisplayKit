@@ -329,7 +329,7 @@ ASLayout *ASCalculateLayout(id<ASLayoutable> layoutable, const ASSizeRange sizeR
 {
   ASDisplayNodeCAssertNotNil(layoutable, @"Not valid layoutable passed in.");
   
-  return layoutable ? [layoutable calculateLayoutThatFits:sizeRange parentSize:parentSize] : nil;
+  return layoutable ? [layoutable layoutThatFits:sizeRange parentSize:parentSize] : nil;
 }
 
 ASLayout *ASCalculateRootLayout(id<ASLayoutable> rootLayoutable, const ASSizeRange sizeRange)

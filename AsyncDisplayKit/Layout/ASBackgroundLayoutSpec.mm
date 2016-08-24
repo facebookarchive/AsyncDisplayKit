@@ -45,13 +45,13 @@ static NSUInteger const kBackgroundChildIndex = 1;
                      restrictedToSize:(ASSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  ASLayout *contentsLayout = [self.child calculateLayoutThatFits:constrainedSize parentSize:parentSize];
+  ASLayout *contentsLayout = [self.child layoutThatFits:constrainedSize parentSize:parentSize];
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:2];
   if (self.background) {
     // Size background to exactly the same size.
-    ASLayout *backgroundLayout = [self.background calculateLayoutThatFits:{contentsLayout.size, contentsLayout.size}
-                                                               parentSize:parentSize];
+    ASLayout *backgroundLayout = [self.background layoutThatFits:ASSizeRangeMake(contentsLayout.size)
+                                                      parentSize:parentSize];
     backgroundLayout.position = CGPointZero;
     [sublayouts addObject:backgroundLayout];
   }

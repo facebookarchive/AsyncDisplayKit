@@ -667,6 +667,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 ASLayoutableSizeForwarding
 ASLayoutableSizeHelperForwarding
 
+// Deprecated
+- (CGSize)measure:(CGSize)constrainedSize
+{
+    return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
+}
+
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
 {
 #pragma clang diagnostic push
@@ -675,9 +681,10 @@ ASLayoutableSizeHelperForwarding
 #pragma clang diagnostic pop
 }
 
+// Deprecated
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  return ASCalculateRootLayout(self, constrainedSize);
+  return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];
 }
 
 - (BOOL)shouldCalculateLayoutWithConstrainedSize:(ASSizeRange)constrainedSize
@@ -786,7 +793,9 @@ ASLayoutableSizeHelperForwarding
       ASDN::MutexLocker l(__instanceLock__);
       BOOL automaticallyManagesSubnodesDisabled = (self.automaticallyManagesSubnodes == NO);
       self.automaticallyManagesSubnodes = YES; // Temporary flag for 1.9.x
-      newLayout = [self calculateLayoutThatFits:constrainedSize];
+      newLayout = [self calculateLayoutThatFits:constrainedSize
+                               restrictedToSize:_size
+                           relativeToParentSize:constrainedSize.max];
       if (automaticallyManagesSubnodesDisabled) {
         self.automaticallyManagesSubnodes = NO; // Temporary flag for 1.9.x
       }
@@ -1290,7 +1299,7 @@ ASLayoutableSizeHelperForwarding
   }
   
   // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
-  ASCalculateRootLayout(self, _calculatedLayout.constrainedSize);
+  [self layoutThatFits:_calculatedLayout.constrainedSize];
 
   CGRect oldBounds = self.bounds;
   CGSize oldSize = oldBounds.size;
@@ -1365,7 +1374,7 @@ ASLayoutableSizeHelperForwarding
     if (CGRectEqualToRect(bounds, CGRectZero)) {
       LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     } else {
-      ASCalculateRootLayout(self, ASSizeRangeMake(bounds.size, bounds.size));
+      [self layoutThatFits:ASSizeRangeMake(bounds.size)];
     }
   }
 }
@@ -2223,7 +2232,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 #pragma mark - For Subclasses
 
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
 {
   ASDN::MutexLocker l(__instanceLock__);
   if (! [self shouldCalculateLayoutWithConstrainedSize:constrainedSize]) {
@@ -2251,6 +2260,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   return newLayout;
 }
 
+#pragma mark - For Subclasses
+
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
                      restrictedToSize:(ASSize)size
                  relativeToParentSize:(CGSize)parentSize
@@ -2275,17 +2286,14 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     ASEnvironmentStatePropagateDown(layoutSpec, self.environmentTraitCollection);
     
     layoutSpec.isMutable = NO;
-    ASLayout *layout = [layoutSpec calculateLayoutThatFits:constrainedSize parentSize:constrainedSize.max];
+    ASLayout *layout = [layoutSpec layoutThatFits:constrainedSize];
     ASDisplayNodeAssertNotNil(layout, @"[ASLayoutSpec measureWithSizeRange:] should never return nil! %@, %@", self, layoutSpec);
       
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
     BOOL isFinalLayoutable = (layout.layoutable != self);
     if (isFinalLayoutable) {
       layout.position = CGPointZero;
-      layout = [ASLayout layoutWithLayoutable:self
-                              constrainedSize:constrainedSize
-                                         size:layout.size
-                                   sublayouts:@[layout]];
+      layout = [ASLayout layoutWithLayoutable:self constrainedSize:constrainedSize size:layout.size sublayouts:@[layout]];
 #if LAYOUT_VALIDATION
       ASLayoutableValidateLayout(layout);
 #endif
@@ -2295,9 +2303,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
     // assume that the default implementation of -calculateSizeThatFits: returns it.
     CGSize size = [self calculateSizeThatFits:constrainedSize.max];
-    return [ASLayout layoutWithLayoutable:self
-                          constrainedSize:constrainedSize
-                                     size:ASSizeRangeClamp(constrainedSize, size)];
+    return [ASLayout layoutWithLayoutable:self constrainedSize:constrainedSize size:ASSizeRangeClamp(constrainedSize, size)];
   }
 }
 
@@ -3268,13 +3274,6 @@ ASEnvironmentLayoutExtensibilityForwarding
   }
 }
 #endif
-
-#pragma mark - Deprecated
-
-- (CGSize)measure:(CGSize)constrainedSize
-{
-  return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
-}
 
 @end
 

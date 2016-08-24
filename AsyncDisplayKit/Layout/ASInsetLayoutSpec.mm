@@ -102,7 +102,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
     MAX(0, parentSize.height - insetsY)
   };
   
-  ASLayout *sublayout = [self.child calculateLayoutThatFits:insetConstrainedSize parentSize:insetParentSize];
+  ASLayout *sublayout = [self.child layoutThatFits:insetConstrainedSize parentSize:insetParentSize];
 
   const CGSize computedSize = ASSizeRangeClamp(constrainedSize, {
     finite(sublayout.size.width + _insets.left + _insets.right, constrainedSize.max.width),

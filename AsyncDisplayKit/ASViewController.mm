@@ -106,7 +106,7 @@
       [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
     }];
   } else {
-    ASCalculateRootLayout(_node, [self nodeConstrainedSize]);
+    [_node layoutThatFits:[self nodeConstrainedSize]];
   }
   
   if (!AS_AT_LEAST_IOS9) {
@@ -133,7 +133,7 @@ ASVisibilityDidMoveToParentViewController;
   // We do this early layout because we need to get any ASCollectionNodes etc. into the
   // hierarchy before UIKit applies the scroll view inset adjustments, if you are using
   // automatic subnode management.
-  ASCalculateRootLayout(_node, [self nodeConstrainedSize]);
+  [_node layoutThatFits:[self nodeConstrainedSize]];
 
   [_node recursivelyFetchData];
   

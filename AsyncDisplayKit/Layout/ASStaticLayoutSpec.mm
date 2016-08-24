@@ -36,7 +36,7 @@
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  // TODO: sizeRange: isValidForLayout() call should not be necessary if INFINITY is used
+  // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
   CGSize size = {
     (isinf(constrainedSize.max.width) || !ASPointsAreValidForLayout(constrainedSize.max.width)) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.width,
     (isinf(constrainedSize.max.height) || !ASPointsAreValidForLayout(constrainedSize.max.height)) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.height
@@ -54,7 +54,7 @@
 
     const ASSizeRange childConstraint = ASSizeResolveAutoSize(child.size, size, {{0,0}, autoMaxSize});
     
-    ASLayout *sublayout = [child calculateLayoutThatFits:childConstraint parentSize:size];
+    ASLayout *sublayout = [child layoutThatFits:childConstraint parentSize:size];
     sublayout.position = layoutPosition;
     [sublayouts addObject:sublayout];
   }

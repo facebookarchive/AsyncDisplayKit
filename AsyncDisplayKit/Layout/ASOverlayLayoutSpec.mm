@@ -51,12 +51,12 @@ static NSUInteger const kOverlayChildIndex = 1;
                      restrictedToSize:(ASSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  ASLayout *contentsLayout = [self.child calculateLayoutThatFits:constrainedSize parentSize:parentSize];
+  ASLayout *contentsLayout = [self.child layoutThatFits:constrainedSize parentSize:parentSize];
   contentsLayout.position = CGPointZero;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithObject:contentsLayout];
   if (self.overlay) {
-    ASLayout *overlayLayout = [self.overlay calculateLayoutThatFits:{contentsLayout.size, contentsLayout.size}
-                                                         parentSize:contentsLayout.size];
+    ASLayout *overlayLayout = [self.overlay layoutThatFits:ASSizeRangeMake(contentsLayout.size)
+                                                parentSize:contentsLayout.size];
     overlayLayout.position = CGPointZero;
     [sublayouts addObject:overlayLayout];
   }

@@ -101,16 +101,20 @@ ASLayoutableSizeHelperForwarding
 
 #pragma mark - Layout
 
-- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
+// Deprecated
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  return ASCalculateRootLayout(self, constrainedSize);
+    return [self layoutThatFits:constrainedSize];
 }
 
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
 {
-  return [self calculateLayoutThatFits:constrainedSize
-                 restrictedToSize:_size
-                  relativeToParentSize:parentSize];
+  return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];
+}
+
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
+{
+  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:_size relativeToParentSize:parentSize];
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
@@ -123,9 +127,7 @@ ASLayoutableSizeHelperForwarding
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-    return [ASLayout layoutWithLayoutable:self
-                          constrainedSize:constrainedSize
-                                     size:constrainedSize.min];
+  return [ASLayout layoutWithLayoutable:self constrainedSize:constrainedSize size:constrainedSize.min];
 }
 
 - (id<ASLayoutable>)finalLayoutable
@@ -293,13 +295,6 @@ ASEnvironmentLayoutExtensibilityForwarding
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
 }
 
-#pragma mark - Deprecated
-
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
-{
-  return ASCalculateRootLayout(self, constrainedSize);
-}
-
 @end
 
 
@@ -321,7 +316,7 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  ASLayout *sublayout = [self.child calculateLayoutThatFits:constrainedSize parentSize:constrainedSize.max];
+  ASLayout *sublayout = [self.child layoutThatFits:constrainedSize parentSize:constrainedSize.max];
   sublayout.position = CGPointZero;
   return [ASLayout layoutWithLayoutable:self
                         constrainedSize:constrainedSize

@@ -257,7 +257,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
  * constraint and the result.
  *
- * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:parentSize:.  Calling this method may
+ * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
  * be expensive if result is not cached.
  *
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
