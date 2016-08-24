@@ -2432,22 +2432,32 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   });
 }
 
-- (void)visibilityDidChange:(BOOL)isVisible
-{
-  // subclass override
-}
-
-- (void)visibleStateDidChange:(BOOL)isVisible
-{
-  // subclass override
-}
-
-- (void)displayStateDidChange:(BOOL)inDisplayState
+- (void)didEnterVisibleState
 {
   //subclass override
 }
 
-- (void)loadStateDidChange:(BOOL)inLoadState
+- (void)didExitVisibleState
+{
+  //subclass override
+}
+
+- (void)didEnterDisplayState
+{
+  //subclass override
+}
+
+- (void)didExitDisplayState
+{
+  //subclass override
+}
+
+- (void)didEnterPreloadState
+{
+  //subclass override
+}
+
+- (void)didExitPreloadState
 {
   //subclass override
 }
@@ -2496,12 +2506,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (nowFetchData != wasFetchData) {
     if (nowFetchData) {
       [self fetchData];
-      [self loadStateDidChange:YES];
+      [self didEnterPreloadState];
     } else {
       if ([self supportsRangeManagedInterfaceState]) {
         [self clearFetchedData];
       }
-      [self loadStateDidChange:NO];
+      [self didExitPreloadState];
     }
   }
 
@@ -2546,7 +2556,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       }
     }
     
-    [self displayStateDidChange:nowDisplay];
+    if (nowDisplay) {
+      [self didEnterDisplayState];
+    } else {
+      [self didExitDisplayState];
+    }
   }
 
   // Became visible or invisible.  When range-managed, this represents literal visibility - at least one pixel
@@ -2555,8 +2569,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   BOOL wasVisible = ASInterfaceStateIncludesVisible(oldState);
 
   if (nowVisible != wasVisible) {
-    [self visibleStateDidChange:nowVisible];
-    [self visibilityDidChange:nowVisible];   //TODO: remove once this method has been deprecated
+    if (nowVisible) {
+      [self didEnterVisibleState];
+    } else {
+      [self didExitVisibleState];
+    }
   }
 
   [self interfaceStateDidChange:newState fromState:oldState];

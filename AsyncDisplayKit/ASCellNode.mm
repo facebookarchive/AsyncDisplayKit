@@ -253,14 +253,23 @@
   // To be overriden by subclasses
 }
 
-- (void)visibleStateDidChange:(BOOL)isVisible
+- (void)didEnterVisibleState
 {
-  [super visibleStateDidChange:isVisible];
-  
-  if (isVisible && self.neverShowPlaceholders) {
+  [super didEnterVisibleState];
+  if (self.neverShowPlaceholders) {
     [self recursivelyEnsureDisplaySynchronously:YES];
   }
-  
+  [self handleVisibilityChange:YES];
+}
+
+- (void)didExitVisibleState
+{
+  [super didExitVisibleState];
+  [self handleVisibilityChange:NO];
+}
+
+- (void)handleVisibilityChange:(BOOL)isVisible
+{
   // NOTE: This assertion is failing in some apps and will be enabled soon.
   // ASDisplayNodeAssert(self.isNodeLoaded, @"Node should be loaded in order for it to become visible or invisible.  If not in this situation, we shouldn't trigger creating the view.");
   UIView *view = self.view;
@@ -274,7 +283,7 @@
   }
   
   // If we did not convert, we'll pass along CGRectZero and a nil scrollView.  The EventInvisible call is thus equivalent to
-  // visibleStateDidChange:NO, but is more convenient for the developer than implementing multiple methods.
+  // didExitVisibileState, but is more convenient for the developer than implementing multiple methods.
   [self cellNodeVisibilityEvent:isVisible ? ASCellNodeVisibilityEventVisible : ASCellNodeVisibilityEventInvisible
                    inScrollView:scrollView
                   withCellFrame:cellFrame];

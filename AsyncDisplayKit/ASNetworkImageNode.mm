@@ -281,21 +281,31 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 /* visibileStateDidChange in ASMultiplexImageNode has a very similar implementation. Changes here are likely necessary
  in ASMultiplexImageNode as well. */
-- (void)visibleStateDidChange:(BOOL)isVisible
+- (void)didEnterVisibleState
 {
-  [super visibleStateDidChange:isVisible];
-
+  [super didEnterVisibleState];
+  
   if (_downloaderFlags.downloaderImplementsSetPriority) {
     ASDN::MutexLocker l(__instanceLock__);
     if (_downloadIdentifier != nil) {
-      if (isVisible) {
-        [_downloader setPriority:ASImageDownloaderPriorityVisible withDownloadIdentifier:_downloadIdentifier];
-      } else {
-        [_downloader setPriority:ASImageDownloaderPriorityPreload withDownloadIdentifier:_downloadIdentifier];
-      }
+      [_downloader setPriority:ASImageDownloaderPriorityVisible withDownloadIdentifier:_downloadIdentifier];
     }
   }
+  
+  [self _updateProgressImageBlockOnDownloaderIfNeeded];
+}
 
+- (void)didExitVisibleState
+{
+  [super didExitVisibleState];
+  
+  if (_downloaderFlags.downloaderImplementsSetPriority) {
+    ASDN::MutexLocker l(__instanceLock__);
+    if (_downloadIdentifier != nil) {
+      [_downloader setPriority:ASImageDownloaderPriorityPreload withDownloadIdentifier:_downloadIdentifier];
+    }
+  }
+  
   [self _updateProgressImageBlockOnDownloaderIfNeeded];
 }
 

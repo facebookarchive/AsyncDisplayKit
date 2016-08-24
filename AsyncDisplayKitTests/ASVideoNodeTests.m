@@ -233,7 +233,7 @@
   }];
   _videoNode.playerNode.layer.frame = CGRectZero;
   
-  [_videoNode visibleStateDidChange:YES];
+  [_videoNode didEnterVisibleState];
 
   XCTAssertTrue(_videoNode.shouldBePlaying);
 }
