@@ -39,12 +39,16 @@
   ASImageNode *imageNode = [[ASImageNode alloc] init];
   
   imageNode.image = [self testImage];
-  imageNode.frame = CGRectMake(0, 0, 100, 100);
   imageNode.forcedSize = CGSizeMake(100, 100);
   
+  // Snapshot testing requires that node is formally laid out.
+  imageNode.preferredFrameSize = CGSizeMake(100, 100);
+  [imageNode measure:CGSizeMake(100, 100)];
+
   ASSnapshotVerifyNode(imageNode, @"first");
   
-  imageNode.frame = CGRectMake(0, 0, 200, 200);
+  imageNode.preferredFrameSize = CGSizeMake(200, 200);
+  [imageNode measure:CGSizeMake(200, 200)];
   
   ASSnapshotVerifyNode(imageNode, @"second");
   
