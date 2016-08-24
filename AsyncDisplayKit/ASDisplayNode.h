@@ -40,7 +40,7 @@ typedef CALayer * _Nonnull(^ASDisplayNodeLayerBlock)();
 /**
  * ASDisplayNode loaded callback block. This block is called BEFORE the -didLoad method and is always called on the main thread.
  */
-typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode * _Nonnull node);
+typedef void (^ASDisplayNodeDidLoadBlock)(__kindof ASDisplayNode * _Nonnull node);
 
 /**
  * ASDisplayNode will / did render node content in context.
@@ -50,7 +50,7 @@ typedef void (^ASDisplayNodeContextModifier)(_Nonnull CGContextRef context);
 /**
  * ASDisplayNode layout spec block. This block can be used instead of implementing layoutSpecThatFits: in subclass
  */
-typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize);
+typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize);
 
 /**
  Interface state is available on ASDisplayNode and ASViewController, and
@@ -160,6 +160,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
 
+/**
+ * @abstract Add a block of work to be performed on the main thread when the node's view or layer is loaded. Thread safe.
+ * @warning Be careful not to retain self in `body`. Change the block parameter list to `^(MYCustomNode *self) {}` if you
+ *   want to shadow self (e.g. if calling this during `init`).
+ *
+ * @param body The work to be performed when the node is loaded.
+ *
+ * @precondition The node is not already loaded.
+ * @note This will only be called the next time the node is loaded. If the node is later added to a subtree of a node
+ *    that has `shouldRasterizeDescendants=YES`, and is unloaded, this block will not be called if it is loaded again.
+ */
+- (void)onDidLoad:(ASDisplayNodeDidLoadBlock)body;
 
 /** @name Properties */
 

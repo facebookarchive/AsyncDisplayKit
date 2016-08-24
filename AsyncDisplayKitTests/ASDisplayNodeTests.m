@@ -1991,4 +1991,29 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   XCTAssert([node loadStateChangedToNO]);
 }
 
+- (void)testThatOnDidLoadThrowsIfCalledOnLoaded
+{
+  ASTestDisplayNode *node = [[[ASTestDisplayNode alloc] init] autorelease];
+  [node view];
+  XCTAssertThrows([node onDidLoad:^(ASDisplayNode * _Nonnull node) { }]);
+}
+
+- (void)testThatOnDidLoadWorks
+{
+  ASTestDisplayNode *node = [[[ASTestDisplayNode alloc] init] autorelease];
+  NSMutableArray *calls = [NSMutableArray array];
+  [node onDidLoad:^(ASTestDisplayNode * _Nonnull node) {
+    [calls addObject:@0];
+  }];
+  [node onDidLoad:^(ASTestDisplayNode * _Nonnull node) {
+    [calls addObject:@1];
+  }];
+  [node onDidLoad:^(ASTestDisplayNode * _Nonnull node) {
+    [calls addObject:@2];
+  }];
+  [node view];
+  NSArray *expected = @[ @0, @1, @2 ];
+  XCTAssertEqualObjects(calls, expected);
+}
+
 @end

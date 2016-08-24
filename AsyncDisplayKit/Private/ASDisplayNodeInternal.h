@@ -132,7 +132,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
-  ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
+  NSMutableArray<ASDisplayNodeDidLoadBlock> *_onDidLoadBlocks;
   Class _viewClass;
   Class _layerClass;
   

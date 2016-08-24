@@ -340,8 +340,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   [self _initializeInstance];
   _viewBlock = viewBlock;
-  _nodeLoadedBlock = didLoadBlock;
   _flags.synchronous = YES;
+  if (didLoadBlock != nil) {
+    _onDidLoadBlocks = [NSMutableArray arrayWithObject:didLoadBlock];
+  }
   
   return self;
 }
@@ -360,11 +362,28 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   [self _initializeInstance];
   _layerBlock = layerBlock;
-  _nodeLoadedBlock = didLoadBlock;
   _flags.synchronous = YES;
   _flags.layerBacked = YES;
+  if (didLoadBlock != nil) {
+    _onDidLoadBlocks = [NSMutableArray arrayWithObject:didLoadBlock];
+  }
   
   return self;
+}
+
+- (void)onDidLoad:(ASDisplayNodeDidLoadBlock)body
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if ([self _isNodeLoaded]) {
+    ASDisplayNodeFailAssert(@"Attempt to call %@ on node after it was loaded. Node: %@", NSStringFromSelector(_cmd), self);
+    return;
+  }
+  
+  if (_onDidLoadBlocks == nil) {
+    _onDidLoadBlocks = [NSMutableArray arrayWithObject:body];
+  } else {
+    [_onDidLoadBlocks addObject:body];
+  }
 }
 
 - (void)dealloc
@@ -569,11 +588,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (ASDisplayNodeThreadIsMain()) {
     // Because the view and layer can only be created and destroyed on Main, that is also the only thread
     // where the state of this property can change. As an optimization, we can avoid locking.
-    return (_view != nil || (_layer != nil && _flags.layerBacked));
+    return [self _isNodeLoaded];
   } else {
     ASDN::MutexLocker l(__instanceLock__);
-    return (_view != nil || (_layer != nil && _flags.layerBacked));
+    return [self _isNodeLoaded];
   }
+}
+
+- (BOOL)_isNodeLoaded
+{
+  return (_view != nil || (_layer != nil && _flags.layerBacked));
 }
 
 - (NSString *)name
@@ -2328,10 +2352,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)__didLoad
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if (_nodeLoadedBlock) {
-    _nodeLoadedBlock(self);
-    _nodeLoadedBlock = nil;
+  
+  for (ASDisplayNodeDidLoadBlock block in _onDidLoadBlocks) {
+    block(self);
   }
+  _onDidLoadBlocks = nil;
   [self didLoad];
 }
 
