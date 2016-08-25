@@ -55,47 +55,6 @@
 - (void)loadStateDidChange:(BOOL)inLoadState ASDISPLAYNODE_REQUIRES_SUPER ASDISPLAYNODE_DEPRECATED;
 
 /**
- * @abstract Transitions the current layout with a new constrained size. Must be called on main thread.
- *
- * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
- * @param shouldMeasureAsync Measure the layout asynchronously.
- * @param measurementCompletion Optional completion block called only if a new layout is calculated.
- * It is called on main, right after the measurement and before -animateLayoutTransition:.
- *
- * @discussion If the passed constrainedSize is the the same as the node's current constrained size, this method is noop.
- *
- * @see animateLayoutTransition:
- *
- * @deprecated Deprecated in version 2.0: Use transitionLayoutWithSizeRange:animated:measurementCompletion:.
- * shouldMeasureAsync is enabled by default now.
- *
- */
-- (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
-                             animated:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(nullable void(^)())completion ASDISPLAYNODE_DEPRECATED;
-
-
-/**
- * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
- *
- * @discussion It is called right after the measurement and before -animateLayoutTransition:.
- *
- * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
- * @param shouldMeasureAsync Measure the layout asynchronously.
- * @param measurementCompletion Optional completion block called only if a new layout is calculated.
- *
- * @see animateLayoutTransition:
- *
- * @deprecated Deprecated in version 2.0: Use transitionLayoutAnimated:measurementCompletion:
- * shouldMeasureAsync is enabled by default now.
- *
- */
-- (void)transitionLayoutWithAnimation:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(nullable void(^)())completion ASDISPLAYNODE_DEPRECATED;
-
-/**
  * @abstract Cancels all performing layout transitions. Can be called on any thread.
  *
  * @deprecated Deprecated in version 2.0: Use cancelLayoutTransition

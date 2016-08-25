@@ -782,14 +782,18 @@ NS_ASSUME_NONNULL_BEGIN
  * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
  * @param shouldMeasureAsync Measure the layout asynchronously.
  * @param measurementCompletion Optional completion block called only if a new layout is calculated.
+ * It is called on main, right after the measurement and before -animateLayoutTransition:.
  *
- * @discussion It is called on main, right after the measurement and before -animateLayoutTransition:. If the passed constrainedSize is the the same as the node's current constrained size, this method is noop.
+ * @discussion If the passed constrainedSize is the the same as the node's current constrained size, this method is noop. If passed YES to shouldMeasureAsync it's guaranteed that measurement is happening on a background thread, otherwise measaurement will happen on the thread that the method was called on. The measurementCompletion callback is always called on the main thread right after the measurement and before -animateLayoutTransition:.
  *
  * @see animateLayoutTransition:
+ *
  */
 - (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
                              animated:(BOOL)animated
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(nullable void(^)())completion;
+
 
 /**
  * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
@@ -797,12 +801,15 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion It is called right after the measurement and before -animateLayoutTransition:.
  *
  * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
+ * @param shouldMeasureAsync Measure the layout asynchronously.
  * @param measurementCompletion Optional completion block called only if a new layout is calculated.
  *
  * @see animateLayoutTransition:
  *
  */
-- (void)transitionLayoutAnimated:(BOOL)animated measurementCompletion:(nullable void(^)())completion;
+- (void)transitionLayoutWithAnimation:(BOOL)animated
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                measurementCompletion:(nullable void(^)())completion;
 
 /**
  * @abstract Cancels all performing layout transitions. Can be called on any thread.
