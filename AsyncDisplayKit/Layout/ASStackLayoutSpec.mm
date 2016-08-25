@@ -120,7 +120,12 @@
 
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  if (self.children.count == 0) {
+  std::vector<id<ASLayoutable>> stackChildren;
+  for (id<ASLayoutable> child in self.children) {
+    stackChildren.push_back(child);
+  }
+  
+  if (stackChildren.empty()) {
     return [ASLayout layoutWithLayoutableObject:self
                            constrainedSizeRange:constrainedSize
                                            size:constrainedSize.min];
@@ -128,11 +133,6 @@
   
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
   BOOL needsBaselinePass = _baselineRelativeArrangement || _alignItems == ASStackLayoutAlignItemsBaselineFirst || _alignItems == ASStackLayoutAlignItemsBaselineLast;
-  
-  std::vector<id<ASLayoutable>> stackChildren = std::vector<id<ASLayoutable>>();
-  for (id<ASLayoutable> child in self.children) {
-    stackChildren.push_back(child);
-  }
   
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, style, constrainedSize);
@@ -145,8 +145,8 @@
   const auto baselinePositionedLayout = ASStackBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
   if (self.direction == ASStackLayoutDirectionVertical) {
     ASDN::MutexLocker l(__instanceLock__);
-    self.ascender = [[self.children firstObject] ascender];
-    self.descender = [[self.children lastObject] descender];
+    self.ascender = [stackChildren.front() ascender];
+    self.descender = [stackChildren.back() descender];
   } else {
     ASDN::MutexLocker l(__instanceLock__);
     self.ascender = baselinePositionedLayout.ascender;
