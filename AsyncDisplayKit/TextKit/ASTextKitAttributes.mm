@@ -24,7 +24,6 @@ size_t ASTextKitAttributes::hash() const
     [truncationAttributedString hash],
     [avoidTailTruncationSet hash],
     std::hash<NSUInteger>()((NSUInteger) layoutManagerCreationBlock),
-    std::hash<NSUInteger>()((NSUInteger) textStorageCreationBlock),
     std::hash<NSInteger>()(lineBreakMode),
     std::hash<NSInteger>()(maximumNumberOfLines),
     [exclusionPaths hash],

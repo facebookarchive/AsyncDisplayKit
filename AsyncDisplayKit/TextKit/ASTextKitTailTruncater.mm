@@ -68,8 +68,7 @@
                                                                             exclusionPaths:nil
                                                                            constrainedSize:constrainedRect.size
                                                                       layoutManagerCreationBlock:nil
-                                                                     layoutManagerDelegate:nil
-                                                                  textStorageCreationBlock:nil];
+                                                                     layoutManagerDelegate:nil];
   __block CGRect truncationUsedRect;
 
   [truncationContext performBlockWithLockedTextKitComponents:^(NSLayoutManager *truncationLayoutManager, NSTextStorage *truncationTextStorage, NSTextContainer *truncationTextContainer) {

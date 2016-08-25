@@ -92,11 +92,6 @@ struct ASTextKitAttributes {
   id<NSLayoutManagerDelegate> layoutManagerDelegate;
 
   /**
-   An optional block that returns a custom NSTextStorage for the layout manager. 
-   */
-  NSTextStorage * (^textStorageCreationBlock)(NSAttributedString *attributedString);
-
-  /**
    We provide an explicit copy function so we can use aggregate initializer syntax while providing copy semantics for
    the NSObjects inside.
    */
@@ -116,7 +111,6 @@ struct ASTextKitAttributes {
       pointSizeScaleFactors,
       layoutManagerCreationBlock,
       layoutManagerDelegate,
-      textStorageCreationBlock,
     };
   };
 
@@ -129,7 +123,6 @@ struct ASTextKitAttributes {
     && shadowRadius == other.shadowRadius
     && [pointSizeScaleFactors isEqualToArray:other.pointSizeScaleFactors]
     && layoutManagerCreationBlock == other.layoutManagerCreationBlock
-    && textStorageCreationBlock == other.textStorageCreationBlock
     && CGSizeEqualToSize(shadowOffset, other.shadowOffset)
     && ASObjectIsEqual(exclusionPaths, other.exclusionPaths)
     && ASObjectIsEqual(avoidTailTruncationSet, other.avoidTailTruncationSet)

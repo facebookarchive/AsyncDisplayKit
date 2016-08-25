@@ -31,7 +31,6 @@
                          constrainedSize:(CGSize)constrainedSize
               layoutManagerCreationBlock:(NSLayoutManager * (^)(void))layoutCreationBlock
                    layoutManagerDelegate:(id<NSLayoutManagerDelegate>)layoutManagerDelegate
-                textStorageCreationBlock:(NSTextStorage * (^)(NSAttributedString *attributedString))textStorageCreationBlock
 
 {
   if (self = [super init]) {
@@ -42,11 +41,7 @@
     __instanceLock__ = std::make_shared<ASDN::Mutex>();
     
     // Create the TextKit component stack with our default configuration.
-    if (textStorageCreationBlock) {
-      _textStorage = textStorageCreationBlock(attributedString);
-    } else {
-      _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString] : [[NSTextStorage alloc] init]);
-    }
+    _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString] : [[NSTextStorage alloc] init]);
     _layoutManager = layoutCreationBlock ? layoutCreationBlock() : [[ASLayoutManager alloc] init];
     _layoutManager.usesFontLeading = NO;
     _layoutManager.delegate = layoutManagerDelegate;

@@ -101,8 +101,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
                                                    exclusionPaths:attributes.exclusionPaths
                                                   constrainedSize:shadowConstrainedSize
                                        layoutManagerCreationBlock:attributes.layoutManagerCreationBlock
-                                            layoutManagerDelegate:attributes.layoutManagerDelegate
-                                         textStorageCreationBlock:attributes.textStorageCreationBlock];
+                                            layoutManagerDelegate:attributes.layoutManagerDelegate];
   }
   return _context;
 }
