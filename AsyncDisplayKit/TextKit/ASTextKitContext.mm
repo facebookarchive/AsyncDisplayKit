@@ -29,7 +29,6 @@
                     maximumNumberOfLines:(NSUInteger)maximumNumberOfLines
                           exclusionPaths:(NSArray *)exclusionPaths
                          constrainedSize:(CGSize)constrainedSize
-              layoutManagerCreationBlock:(NSLayoutManager * (^)(void))layoutCreationBlock
                    layoutManagerDelegate:(id<NSLayoutManagerDelegate>)layoutManagerDelegate
 
 {
@@ -42,7 +41,7 @@
     
     // Create the TextKit component stack with our default configuration.
     _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString] : [[NSTextStorage alloc] init]);
-    _layoutManager = layoutCreationBlock ? layoutCreationBlock() : [[ASLayoutManager alloc] init];
+    _layoutManager = [[ASLayoutManager alloc] init];
     _layoutManager.usesFontLeading = NO;
     _layoutManager.delegate = layoutManagerDelegate;
     [_textStorage addLayoutManager:_layoutManager];

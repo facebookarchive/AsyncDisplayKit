@@ -81,10 +81,6 @@ struct ASTextKitAttributes {
    An array of scale factors in descending order to apply to the text to try to make it fit into a constrained size.
    */
   NSArray *pointSizeScaleFactors;
-  /**
-   An optional block that returns a custom layout manager subclass. If nil, defaults to NSLayoutManager.
-   */
-  NSLayoutManager * (^layoutManagerCreationBlock)(void);
   
   /**
    An optional delegate for the NSLayoutManager
@@ -109,7 +105,6 @@ struct ASTextKitAttributes {
       shadowOpacity,
       shadowRadius,
       pointSizeScaleFactors,
-      layoutManagerCreationBlock,
       layoutManagerDelegate,
     };
   };
@@ -122,7 +117,6 @@ struct ASTextKitAttributes {
     && shadowOpacity == other.shadowOpacity
     && shadowRadius == other.shadowRadius
     && [pointSizeScaleFactors isEqualToArray:other.pointSizeScaleFactors]
-    && layoutManagerCreationBlock == other.layoutManagerCreationBlock
     && CGSizeEqualToSize(shadowOffset, other.shadowOffset)
     && ASObjectIsEqual(exclusionPaths, other.exclusionPaths)
     && ASObjectIsEqual(avoidTailTruncationSet, other.avoidTailTruncationSet)

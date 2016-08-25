@@ -67,7 +67,6 @@
                                                                       maximumNumberOfLines:1
                                                                             exclusionPaths:nil
                                                                            constrainedSize:constrainedRect.size
-                                                                      layoutManagerCreationBlock:nil
                                                                      layoutManagerDelegate:nil];
   __block CGRect truncationUsedRect;
 
