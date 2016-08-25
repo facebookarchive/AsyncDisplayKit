@@ -60,6 +60,13 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
  */
 - (ASSizeRange)nodeConstrainedSize;
 
+/**
+ * @abstract Called when the node's ASTraitCollection changes
+ *
+ * @discussion Subclasses can override this method to react to a trait collection change.
+ */
+- (void)asyncTraitCollectionDidChange;
+
 @end
 
 @interface ASViewController (ASRangeControllerUpdateRangeProtocol)
