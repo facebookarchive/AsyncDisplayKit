@@ -199,12 +199,23 @@ ASVisibilityDepthImplementation;
 
 - (ASSizeRange)nodeConstrainedSize
 {
+  ASDisplayNodeAssertMainThread();
+  
+  CGSize viewSize;
   if (AS_AT_LEAST_IOS9) {
-    CGSize viewSize = self.view.bounds.size;
-    return ASSizeRangeMake(viewSize, viewSize);
+    viewSize = self.view.bounds.size;
   } else {
-    return [self _legacyConstrainedSize];
+    viewSize = [self _legacyConstrainedSize];
   }
+  
+  //handle UIViewController insets
+  if ((self.edgesForExtendedLayout & UIRectEdgeTop) != UIRectEdgeTop) {
+    //Sadly, it appears as if topLayoutGuide.length is zero when edgesForExtendedLayout doesn't include
+    //the top, so we need to cheat and see what our origin was set to.
+    viewSize.height -= self.view.frame.origin.y;
+  }
+  
+  return ASSizeRangeMake(viewSize, viewSize);
 }
 
 - (ASInterfaceState)interfaceState
@@ -232,7 +243,7 @@ ASVisibilityDepthImplementation;
   return NO;
 }
 
-- (ASSizeRange)_legacyConstrainedSize
+- (CGSize)_legacyConstrainedSize
 {
   // In modal presentation the view does not have the right bounds in iOS7 and iOS8. As workaround using the superviews
   // view bounds
@@ -244,7 +255,7 @@ ASVisibilityDepthImplementation;
       viewSize = superview.bounds.size;
     }
   }
-  return ASSizeRangeMake(viewSize, viewSize);
+  return viewSize;
 }
 
 - (void)_legacyHandleViewDidLayoutSubviews
