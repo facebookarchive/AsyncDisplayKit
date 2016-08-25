@@ -291,12 +291,14 @@ ASVisibilityDepthImplementation;
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, oldEnvironmentTraitCollection) == NO) {
     environmentState.environmentTraitCollection = environmentTraitCollection;
     self.node.environmentState = environmentState;
-    [self.node setNeedsLayout];
     
     NSArray<id<ASEnvironment>> *children = [self.node children];
     for (id<ASEnvironment> child in children) {
       ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
     }
+    
+    // once we've propagated all the traits, layout this node.
+    [self.node setNeedsLayout];
   }
 }
 
