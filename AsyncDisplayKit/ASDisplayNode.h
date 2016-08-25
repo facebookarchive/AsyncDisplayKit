@@ -233,35 +233,17 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return A new size that fits the receiver's subviews.
  *
- * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the 
+ * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
  * constraint and the result.
  *
- * @warning Subclasses must not override this; it calls -measureWithSizeRange: with zero min size. 
- * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may 
+ * @warning Subclasses must not override this; it calls -measureWithSizeRange: with zero min size.
+ * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may
  * be expensive if result is not cached.
  *
  * @see measureWithSizeRange:
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
  */
-- (CGSize)measure:(CGSize)constrainedSize;
-
-/**
- * @abstract Asks the node to measure a layout based on given size range.
- *
- * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
- *
- * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
- *
- * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
- * constraint and the result.
- *
- * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
- * be expensive if result is not cached.
- *
- * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
- */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
-
+- (CGSize)sizeThatFits:(CGSize)constrainedSize;
 
 /**
  * @abstract Provides a way to declare a block to provide an ASLayoutSpec without having to subclass ASDisplayNode and
@@ -295,16 +277,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @return The minimum and maximum constrained sizes used by calculateLayoutThatFits:.
  */
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSizeForCalculatedLayout;
-
-/**
- * @abstract Provides a default intrinsic content size for calculateSizeThatFits:. This is useful when laying out
- * a node that either has no intrinsic content size or should be laid out at a different size than its intrinsic content
- * size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
- * image size.
- *
- * @return The preferred frame size of this node
- */
-@property (nonatomic, assign, readwrite) CGSize preferredFrameSize;
 
 /** @name Managing the nodes hierarchy */
 
@@ -599,12 +571,52 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (CGRect)convertRect:(CGRect)rect fromNode:(nullable ASDisplayNode *)node;
 
+
+#pragma mark - Deprecated
+
+/**
+ * @abstract Asks the node to measure and return the size that best fits its subnodes.
+ *
+ * @param constrainedSize The maximum size the receiver should fit in.
+ *
+ * @return A new size that fits the receiver's subviews.
+ *
+ * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the 
+ * constraint and the result.
+ *
+ * @warning Subclasses must not override this; it calls -measureWithSizeRange: with zero min size. 
+ * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may 
+ * be expensive if result is not cached.
+ *
+ * @see measureWithSizeRange:
+ * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
+ */
+- (CGSize)measure:(CGSize)constrainedSize; //ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * @abstract Asks the node to measure a layout based on given size range.
+ *
+ * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
+ *
+ * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
+ *
+ * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
+ * constraint and the result.
+ *
+ * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
+ * be expensive if result is not cached.
+ *
+ * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
+ *
+ * @deprecated Deprecated in version 2.0: Use ASCalculateRootLayout or ASCalculateLayout instead
+ */
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize ASDISPLAYNODE_DEPRECATED;
+
 @end
 
 /**
  * Convenience methods for debugging.
  */
-
 @interface ASDisplayNode (Debugging) <ASLayoutableAsciiArtProtocol>
 
 /**
@@ -918,6 +930,18 @@ NS_ASSUME_NONNULL_BEGIN
  * @deprecated Deprecated in version 2.0: Use automaticallyManagesSubnodes
  */
 @property (nonatomic, assign) BOOL usesImplicitHierarchyManagement ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * @abstract Provides a default intrinsic content size for calculateSizeThatFits:. This is useful when laying out
+ * a node that either has no intrinsic content size or should be laid out at a different size than its intrinsic content
+ * size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
+ * image size.
+ *
+ * @return The preferred frame size of this node
+ *
+ * @deprecated Deprecated in version 2.0: Use size and the helper function ASRelativeSizeRangeMakeWithExactCGSize(preferredFrameSize) if you want to have the same behavior.
+ */
+@property (nonatomic, assign, readwrite) CGSize preferredFrameSize ASDISPLAYNODE_DEPRECATED;
 
 - (void)reclaimMemory ASDISPLAYNODE_DEPRECATED;
 - (void)recursivelyReclaimMemory ASDISPLAYNODE_DEPRECATED;

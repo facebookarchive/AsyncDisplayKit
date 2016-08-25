@@ -16,6 +16,7 @@
 #import "ASDisplayNode+Beta.h"
 #import "ASDisplayNode+Subclasses.h"
 
+#import "ASLayout.h"
 #import "ASStaticLayoutSpec.h"
 #import "ASStackLayoutSpec.h"
 
@@ -77,7 +78,7 @@
     
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack1, stack2, node5]];
   };
-  [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+  ASCalculateRootLayout(node, ASSizeRangeMake(CGSizeZero, CGSizeZero));
   XCTAssertEqual(node.subnodes[0], node5);
   XCTAssertEqual(node.subnodes[1], node1);
   XCTAssertEqual(node.subnodes[2], node2);
@@ -104,13 +105,13 @@
     }
   };
   
-  [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+  ASCalculateRootLayout(node, ASSizeRangeMake(CGSizeZero, CGSizeZero));
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
   
   node.layoutState = @2;
   [node invalidateCalculatedLayout];
-  [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+  ASCalculateRootLayout(node, ASSizeRangeMake(CGSizeZero, CGSizeZero));
 
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node3);
@@ -140,12 +141,12 @@
   
   dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     
-    [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+    ASCalculateRootLayout(node, ASSizeRangeMake(CGSizeZero, CGSizeZero));
     XCTAssertEqual(node.subnodes[0], node1);
     
     node.layoutState = @2;
     [node invalidateCalculatedLayout];
-    [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+    ASCalculateRootLayout(node, ASSizeRangeMake(CGSizeZero, CGSizeZero));
     
     // Dispatch back to the main thread to let the insertion / deletion of subnodes happening
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -185,7 +186,7 @@
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Fix IHM layout transition also if one node is already loaded"];
   
-  [node measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero)];
+  ASCalculateRootLayout(node, ASSizeRangeMake(CGSizeZero, CGSizeZero));
   XCTAssertEqual(node.subnodes[0], node1);
   
   node.layoutState = @2;

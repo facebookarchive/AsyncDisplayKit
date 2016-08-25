@@ -65,7 +65,7 @@
     [self addSubnode:_likeButtonNode];
 
     _muteButtonNode = [[ASButtonNode alloc] init];
-    _muteButtonNode.preferredFrameSize = CGSizeMake(16.0, 22.0);
+    _muteButtonNode.size = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(16.0, 22.0));
     [_muteButtonNode addTarget:self action:@selector(didTapMuteButton) forControlEvents:ASControlNodeEventTouchUpInside];
 
     _videoPlayerNode = [[ASVideoPlayerNode alloc] initWithUrl:_videoModel.url loadAssetWhenNodeBecomesVisible:YES];
@@ -89,9 +89,9 @@
 - (ASLayoutSpec*)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   CGFloat fullWidth = [UIScreen mainScreen].bounds.size.width;
-  _videoPlayerNode.preferredFrameSize = CGSizeMake(fullWidth, fullWidth * 9 / 16);
-  _avatarNode.preferredFrameSize = CGSizeMake(AVATAR_IMAGE_HEIGHT, AVATAR_IMAGE_HEIGHT);
-  _likeButtonNode.preferredFrameSize = CGSizeMake(50.0, 26.0);
+  _videoPlayerNode.size = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(fullWidth, fullWidth * 9 / 16));
+  _avatarNode.size = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(AVATAR_IMAGE_HEIGHT, AVATAR_IMAGE_HEIGHT));
+  _likeButtonNode.size = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(50.0, 26.0));
 
   ASStackLayoutSpec *headerStack  = [ASStackLayoutSpec horizontalStackLayoutSpec];
   headerStack.spacing = HORIZONTAL_BUFFER;
@@ -104,15 +104,15 @@
   ASStackLayoutSpec *bottomControlsStack  = [ASStackLayoutSpec horizontalStackLayoutSpec];
   bottomControlsStack.spacing = HORIZONTAL_BUFFER;
   bottomControlsStack.alignItems = ASStackLayoutAlignItemsCenter;
-  [bottomControlsStack setChildren:@[ _likeButtonNode]];
+  bottomControlsStack.children = @[_likeButtonNode];
 
-  UIEdgeInsets bottomControlsInsets       = UIEdgeInsetsMake(HORIZONTAL_BUFFER, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
+  UIEdgeInsets bottomControlsInsets = UIEdgeInsetsMake(HORIZONTAL_BUFFER, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
   ASInsetLayoutSpec *bottomControlsInset  = [ASInsetLayoutSpec insetLayoutSpecWithInsets:bottomControlsInsets child:bottomControlsStack];
 
 
-  ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
-  verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;
-  [verticalStack setChildren:@[ headerInset, _videoPlayerNode, bottomControlsInset ]];
+  ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  verticalStack.alignItems = ASStackLayoutAlignItemsStretch;
+  verticalStack.children = @[headerInset, _videoPlayerNode, bottomControlsInset];
   return verticalStack;
 }
 
@@ -183,7 +183,9 @@
 
   if (controls[ @(ASVideoPlayerNodeControlTypeScrubber) ]) {
     ASDisplayNode *scrubber = controls[ @(ASVideoPlayerNodeControlTypeScrubber) ];
-    scrubber.preferredFrameSize = CGSizeMake(maxSize.width, 44.0);
+    scrubber.size = ASRelativeSizeRangeMake(ASRelativeSizeMakeWithCGSize(CGSizeMake(0.0, 44.0)),
+                                            ASRelativeSizeMakeWithCGSize(CGSizeMake(maxSize.width, 44.0)));
+    scrubber.flexGrow = YES;
   }
 
   NSArray *controlBarControls = [self controlsForControlBar:controls];

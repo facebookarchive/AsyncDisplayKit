@@ -52,11 +52,15 @@
   _sizingOption = sizingOption;
 }
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
+  // If we have a finite size in any direction, pass this so that the child can
+  // resolve percentages against it. Otherwise pass ASLayoutableParentDimensionUndefined
+  // as the size will depend on the content
+  // TODO: sizeRange: isValidForLayout() call should not be necessary if INFINITY is used
   CGSize size = {
-    constrainedSize.max.width,
-    constrainedSize.max.height
+    isinf(constrainedSize.max.width) || !isValidForLayout(constrainedSize.max.width) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.width,
+    isinf(constrainedSize.max.height) || !isValidForLayout(constrainedSize.max.height) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.height
   };
   
   BOOL reduceWidth = (_horizontalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||
@@ -70,7 +74,8 @@
     reduceWidth ? 0 : constrainedSize.min.width,
     reduceHeight ? 0 : constrainedSize.min.height,
   };
-  ASLayout *sublayout = [self.child measureWithSizeRange:ASSizeRangeMake(minChildSize, constrainedSize.max)];
+  
+  ASLayout *sublayout = [self.child calculateLayoutThatFits:ASSizeRangeMake(minChildSize, constrainedSize.max) parentSize:size];
   
   // If we have an undetermined height or width, use the child size to define the layout
   // size
@@ -95,7 +100,7 @@
   };
   
   return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
+                              constrainedSize:constrainedSize
                                          size:size
                                    sublayouts:@[sublayout]];
 }

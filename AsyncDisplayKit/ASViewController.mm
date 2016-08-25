@@ -15,6 +15,7 @@
 #import "ASAvailability.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASLayout.h"
 #import "ASTraitCollection.h"
 #import "ASEnvironmentInternal.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
@@ -93,7 +94,7 @@
 - (void)viewWillLayoutSubviews
 {
   [super viewWillLayoutSubviews];
-  [_node measureWithSizeRange:[self nodeConstrainedSize]];
+  ASCalculateRootLayout(_node, [self nodeConstrainedSize]);
   
   if (!AS_AT_LEAST_IOS9) {
     [self _legacyHandleViewDidLayoutSubviews];
@@ -115,7 +116,7 @@ ASVisibilityDidMoveToParentViewController;
 {
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
-  [_node measureWithSizeRange:[self nodeConstrainedSize]];
+  ASCalculateRootLayout(_node, [self nodeConstrainedSize]);
   [_node recursivelyFetchData];
   
   if (_parentManagesVisibilityDepth == NO) {

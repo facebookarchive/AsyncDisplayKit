@@ -172,9 +172,9 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 {
   ASDN::MutexSharedLocker l(__instanceLock__);
   if ([key isEqualToString:ASTransitionContextFromLayoutKey]) {
-    return _previousLayout.constrainedSizeRange;
+    return _previousLayout.constrainedSize;
   } else if ([key isEqualToString:ASTransitionContextToLayoutKey]) {
-    return _pendingLayout.constrainedSizeRange;
+    return _pendingLayout.constrainedSize;
   } else {
     return ASSizeRangeMake(CGSizeZero, CGSizeZero);
   }

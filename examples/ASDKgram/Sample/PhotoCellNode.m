@@ -126,7 +126,7 @@
   
   // header stack
   
-  _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);     // constrain avatar image frame size
+  _userAvatarImageView.size = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT));     // constrain avatar image frame size
   _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER;                                    // to remove double spaces around spacer
   
   ASLayoutSpec *spacer           = [[ASLayoutSpec alloc] init];    // FIXME: long locations overflow post time - set max size?
@@ -155,7 +155,7 @@
   
   // vertical stack
   CGFloat cellWidth                  = constrainedSize.max.width;
-  _photoImageView.preferredFrameSize = CGSizeMake(cellWidth, cellWidth);              // constrain photo frame size
+  _photoImageView.size = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(cellWidth, cellWidth));              // constrain photo frame size
   
   ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;                // stretch headerStack to fill horizontal space

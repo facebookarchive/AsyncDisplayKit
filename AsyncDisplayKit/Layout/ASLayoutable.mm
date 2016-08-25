@@ -12,9 +12,14 @@
 
 #import "ASLayoutablePrivate.h"
 #import "ASEnvironmentInternal.h"
+
 #import "ASDisplayNodeInternal.h"
+#import "ASLayoutSpec.h"
 
 #import <map>
+
+CGFloat const ASLayoutableParentDimensionUndefined = NAN;
+CGSize const ASLayoutableParentSizeUndefined = {ASLayoutableParentDimensionUndefined, ASLayoutableParentDimensionUndefined};
 
 int32_t const ASLayoutableContextInvalidTransitionID = 0;
 int32_t const ASLayoutableContextDefaultTransitionID = ASLayoutableContextInvalidTransitionID + 1;
@@ -79,3 +84,7 @@ void ASLayoutableClearCurrentContext()
   ASDN::StaticMutexLocker l(_layoutableContextLock);
   layoutableContextMap.erase(key);
 }
+
+#pragma mark - 
+
+

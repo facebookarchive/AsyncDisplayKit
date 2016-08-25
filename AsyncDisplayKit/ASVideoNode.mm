@@ -240,18 +240,14 @@ static NSString * const kRate = @"rate";
   ASDN::MutexLocker l(__instanceLock__);
   CGSize calculatedSize = constrainedSize;
   
-  // if a preferredFrameSize is set, call the superclass to return that instead of using the image size.
-  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO)
-    calculatedSize = self.preferredFrameSize;
- 
   // Prevent crashes through if infinite width or height
   if (isinf(calculatedSize.width) || isinf(calculatedSize.height)) {
-    ASDisplayNodeAssert(NO, @"Infinite width or height in ASVideoNode");
+    //ASDisplayNodeAssert(NO, @"Infinite width or height in ASVideoNode");
     calculatedSize = CGSizeZero;
   }
   
   if (_playerNode) {
-    _playerNode.preferredFrameSize = calculatedSize;
+    _playerNode.size = ASRelativeSizeRangeMakeWithExactCGSize(calculatedSize);
     [_playerNode measure:calculatedSize];
   }
   

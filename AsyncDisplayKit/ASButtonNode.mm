@@ -491,11 +491,6 @@
     spec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentEdgeInsets child:spec];
   }
   
-  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
-    stack.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(self.preferredFrameSize);
-    spec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack]];
-  }
-  
   if (_backgroundImageNode.image) {
     spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec background:_backgroundImageNode];
   }

@@ -134,7 +134,8 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
     }
   }
 
-  private static func handleAction(action: Action, var fromState state: State) -> State {
+  private static func handleAction(action: Action, fromState state: State) -> State {
+    var state = state
     switch action {
     case .BeginBatchFetch:
       state.fetchingMore = true
