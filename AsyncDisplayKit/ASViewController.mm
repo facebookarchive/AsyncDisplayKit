@@ -116,7 +116,12 @@ ASVisibilityDidMoveToParentViewController;
 {
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
+
+  // We do this early layout because we need to get any ASCollectionNodes etc. into the
+  // hierarchy before UIKit applies the scroll view inset adjustments, if you are using
+  // automatic subnode management.
   [_node measureWithSizeRange:[self nodeConstrainedSize]];
+
   [_node recursivelyFetchData];
   
   if (_parentManagesVisibilityDepth == NO) {
@@ -295,6 +300,8 @@ ASVisibilityDepthImplementation;
     }
     
     // once we've propagated all the traits, layout this node.
+    // Remeasure the node with the latest constrained size – old constrained size may be incorrect.
+    [self.node measureWithSizeRange:[self nodeConstrainedSize]];
     [self.node setNeedsLayout];
   }
 }
