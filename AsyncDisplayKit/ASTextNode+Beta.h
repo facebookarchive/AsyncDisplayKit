@@ -20,17 +20,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nullable, nonatomic, copy) NSArray *pointSizeScaleFactors;
 
-#pragma mark - ASTextKit Customization
-/**
- A block to provide a hook to provide a custom NSLayoutManager to the ASTextKitRenderer
- */
-@property (nullable, nonatomic, copy) NSLayoutManager * (^layoutManagerCreationBlock)(void);
-
-/**
- A block to provide a hook to provide a NSTextStorage to the TextKit's layout manager.
- */
-@property (nullable, nonatomic, copy) NSTextStorage * (^textStorageCreationBlock)(NSAttributedString *_Nullable attributedString);
-
 /**
  @abstract Text margins for text laid out in the text node.
  @discussion defaults to UIEdgeInsetsZero.

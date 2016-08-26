@@ -244,8 +244,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .exclusionPaths = _exclusionPaths,
     // use the property getter so a subclass can provide these scale factors on demand if desired
     .pointSizeScaleFactors = self.pointSizeScaleFactors,
-    .layoutManagerCreationBlock = self.layoutManagerCreationBlock,
-    .textStorageCreationBlock = self.textStorageCreationBlock,
     .shadowOffset = _shadowOffset,
     .shadowColor = _cachedShadowUIColor,
     .shadowOpacity = _shadowOpacity,

@@ -90,9 +90,9 @@
     static std::mutex __static_mutex;
     std::lock_guard<std::mutex> l(__static_mutex);
     
-    NSTextStorage *textStorage = _attributes.textStorageCreationBlock ? _attributes.textStorageCreationBlock(attributedString) : [[NSTextStorage alloc] initWithAttributedString:attributedString];
+    NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:attributedString];
     if (_sizingLayoutManager == nil) {
-        _sizingLayoutManager = _attributes.layoutManagerCreationBlock ? _attributes.layoutManagerCreationBlock() : [[ASLayoutManager alloc] init];
+        _sizingLayoutManager = [[ASLayoutManager alloc] init]; 
         _sizingLayoutManager.usesFontLeading = NO;
     }
     [textStorage addLayoutManager:_sizingLayoutManager];
