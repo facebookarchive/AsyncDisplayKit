@@ -73,6 +73,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView NS_DESIGNATED_INITIALIZER;
+- (void)didChangeCollectionViewDelegate:(nullable id<ASCollectionDelegate>)delegate ASDISPLAYNODE_REQUIRES_SUPER;
 
 @end
 
