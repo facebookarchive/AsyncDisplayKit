@@ -1176,13 +1176,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)applyPendingViewState
 {
   ASDisplayNodeAssertMainThread();
-  ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
 
   // FIXME: Ideally we'd call this as soon as the node receives -setNeedsLayout
   // but automatic subnode management would require us to modify the node tree
   // in the background on a loaded node, which isn't currently supported.
   if (_pendingViewState.hasSetNeedsLayout) {
+    __instanceLock__.unlock();
     [self __setNeedsLayout];
+    __instanceLock__.lock();
   }
 
   if (self.layerBacked) {
@@ -1193,6 +1195,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   [_pendingViewState clearChanges];
+  __instanceLock__.unlock();
 }
 
 - (void)displayImmediately
