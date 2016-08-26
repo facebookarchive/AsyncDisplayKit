@@ -1176,23 +1176,28 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)applyPendingViewState
 {
   ASDisplayNodeAssertMainThread();
-  ASDN::MutexLocker l(__instanceLock__);
+  BOOL shouldSetNeedsLayout = NO;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    shouldSetNeedsLayout = _pendingViewState.hasSetNeedsLayout;
 
+    if (self.layerBacked) {
+      [_pendingViewState applyToLayer:self.layer];
+    } else {
+      BOOL specialPropertiesHandling = ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(_flags);
+      [_pendingViewState applyToView:self.view withSpecialPropertiesHandling:specialPropertiesHandling];
+    }
+
+    [_pendingViewState clearChanges];
+  }
+
+  // NOTE: It's important to call this without holding the lock.
   // FIXME: Ideally we'd call this as soon as the node receives -setNeedsLayout
   // but automatic subnode management would require us to modify the node tree
   // in the background on a loaded node, which isn't currently supported.
-  if (_pendingViewState.hasSetNeedsLayout) {
+  if (shouldSetNeedsLayout) {
     [self __setNeedsLayout];
   }
-
-  if (self.layerBacked) {
-    [_pendingViewState applyToLayer:self.layer];
-  } else {
-    BOOL specialPropertiesHandling = ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(_flags);
-    [_pendingViewState applyToView:self.view withSpecialPropertiesHandling:specialPropertiesHandling];
-  }
-
-  [_pendingViewState clearChanges];
 }
 
 - (void)displayImmediately
@@ -1213,6 +1218,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self displayImmediately];
 }
 
+/// NOTE: Do not call this with the node's lock held!
 - (void)__setNeedsLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);
