@@ -25,10 +25,6 @@
   ASDN::RecursiveMutex _displaySuspendedLock;
   BOOL _displaySuspended;
 
-  struct {
-    BOOL delegateDidChangeBounds:1;
-  } _delegateFlags;
-
   id<_ASDisplayLayerDelegate> __weak _asyncDelegate;
 }
 
@@ -54,12 +50,6 @@
 {
   ASDN::MutexLocker l(_asyncDelegateLock);
   return _asyncDelegate;
-}
-
-- (void)setDelegate:(id)delegate
-{
-  [super setDelegate:delegate];
-  _delegateFlags.delegateDidChangeBounds = [delegate respondsToSelector:@selector(layer:didChangeBoundsWithOldValue:newValue:)];
 }
 
 - (void)setAsyncDelegate:(id<_ASDisplayLayerDelegate>)asyncDelegate
@@ -92,15 +82,8 @@
 
 - (void)setBounds:(CGRect)bounds
 {
-  if (_delegateFlags.delegateDidChangeBounds) {
-    CGRect oldBounds = self.bounds;
-    [super setBounds:bounds];
-    self.asyncdisplaykit_node.threadSafeBounds = bounds;
-    [self.delegate layer:self didChangeBoundsWithOldValue:oldBounds newValue:bounds];
-  } else {
-    [super setBounds:bounds];
-    self.asyncdisplaykit_node.threadSafeBounds = bounds;
-  }
+  [super setBounds:bounds];
+  self.asyncdisplaykit_node.threadSafeBounds = bounds;
 }
 
 #if DEBUG // These override is strictly to help detect application-level threading errors.  Avoid method overhead in release.

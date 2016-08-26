@@ -70,20 +70,6 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 @end
 
 /**
- * Optional methods that the view associated with an _ASDisplayLayer can implement. 
- * This is distinguished from _ASDisplayLayerDelegate in that it points to the _view_
- * not the node. Unfortunately this is required by ASCollectionView, since we currently
- * can't guarantee that an ASCollectionNode exists for it.
- */
-@protocol ASCALayerExtendedDelegate
-
-@optional
-
-- (void)layer:(CALayer *)layer didChangeBoundsWithOldValue:(CGRect)oldBounds newValue:(CGRect)newBounds;
-
-@end
-
-/**
  Implement one of +displayAsyncLayer:parameters:isCancelled: or +drawRect:withParameters:isCancelled: to provide drawing for your node.
  Use -drawParametersForAsyncLayer: to copy any properties that are involved in drawing into an immutable object for use on the display queue.
  display/drawRect implementations MUST be thread-safe, as they can be called on the displayQueue (async) or the main thread (sync/displayImmediately)
