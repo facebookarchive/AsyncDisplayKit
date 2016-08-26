@@ -346,15 +346,16 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (void)setShouldRenderProgressImages:(BOOL)shouldRenderProgressImages
 {
-  ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
   if (shouldRenderProgressImages == _shouldRenderProgressImages) {
+    __instanceLock__.unlock();
     return;
   }
   
   _shouldRenderProgressImages = shouldRenderProgressImages;
   
   
-  ASDN::MutexUnlocker u(__instanceLock__);
+  __instanceLock__.unlock();
   [self _updateProgressImageBlockOnDownloaderIfNeeded];
 }
 
