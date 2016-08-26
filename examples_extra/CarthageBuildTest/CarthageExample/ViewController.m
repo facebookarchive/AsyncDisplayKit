@@ -34,7 +34,7 @@
     
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         ASTextNode *node = [[ASTextNode alloc] init];
-        node.attributedString = [[NSAttributedString alloc] initWithString:@"hello world"];
+        node.attributedText = [[NSAttributedString alloc] initWithString:@"hello world"];
         [node measure:(CGSize){.width = screenSize.width, .height = CGFLOAT_MAX}];
         node.frame = (CGRect) {.origin = (CGPoint){.x = 100, .y = 100}, .size = node.calculatedSize };
         

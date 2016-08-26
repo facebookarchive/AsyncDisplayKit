@@ -346,7 +346,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_elapsedTextNode == nil) {
     _elapsedTextNode = [[ASTextNode alloc] init];
-    _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00"
+    _elapsedTextNode.attributedText = [self timeLabelAttributedStringForString:@"00:00"
                                                                   forControlType:ASVideoPlayerNodeControlTypeElapsedText];
     _elapsedTextNode.truncationMode = NSLineBreakByClipping;
 
@@ -359,7 +359,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_durationTextNode == nil) {
     _durationTextNode = [[ASTextNode alloc] init];
-    _durationTextNode.attributedString = [self timeLabelAttributedStringForString:@"00:00"
+    _durationTextNode.attributedText = [self timeLabelAttributedStringForString:@"00:00"
                                                                    forControlType:ASVideoPlayerNodeControlTypeDurationText];
     _durationTextNode.truncationMode = NSLineBreakByClipping;
 
@@ -428,7 +428,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     return;
   }
   NSString *formattedDuration = [self timeStringForCMTime:_duration forTimeLabelType:ASVideoPlayerNodeControlTypeDurationText];
-  _durationTextNode.attributedString = [self timeLabelAttributedStringForString:formattedDuration forControlType:ASVideoPlayerNodeControlTypeDurationText];
+  _durationTextNode.attributedText = [self timeLabelAttributedStringForString:formattedDuration forControlType:ASVideoPlayerNodeControlTypeDurationText];
 }
 
 - (void)updateElapsedTimeLabel:(NSTimeInterval)seconds
@@ -436,8 +436,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   if (!_elapsedTextNode) {
     return;
   }
-  NSString *formatteElapsed = [self timeStringForCMTime:CMTimeMakeWithSeconds( seconds, _videoNode.periodicTimeObserverTimescale ) forTimeLabelType:ASVideoPlayerNodeControlTypeElapsedText];
-  _elapsedTextNode.attributedString = [self timeLabelAttributedStringForString:formatteElapsed forControlType:ASVideoPlayerNodeControlTypeElapsedText];
+  NSString *formattedElapsed = [self timeStringForCMTime:CMTimeMakeWithSeconds( seconds, _videoNode.periodicTimeObserverTimescale ) forTimeLabelType:ASVideoPlayerNodeControlTypeElapsedText];
+  _elapsedTextNode.attributedText = [self timeLabelAttributedStringForString:formattedElapsed forControlType:ASVideoPlayerNodeControlTypeElapsedText];
 }
 
 - (NSAttributedString*)timeLabelAttributedStringForString:(NSString*)string forControlType:(ASVideoPlayerNodeControlType)controlType

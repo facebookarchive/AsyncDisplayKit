@@ -56,7 +56,7 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
   // generate an attributed string using the custom link attribute specified above
   NSString *blurb = @"Nic Cage courtesy of himself.";
   NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithString:blurb];
-  _textNode.attributedString = string;
+  _textNode.attributedText = string;
 
   // add it as a subnode, and we're done
   [self addSubnode:_textNode];

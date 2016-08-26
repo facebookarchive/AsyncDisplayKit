@@ -70,7 +70,7 @@
     _photoImageView.layerBacked = YES;
     
     _userNameLabel                  = [[ASTextNode alloc] init];
-    _userNameLabel.attributedString = [photo.ownerUserProfile usernameAttributedStringWithFontSize:FONT_SIZE];
+    _userNameLabel.attributedText = [photo.ownerUserProfile usernameAttributedStringWithFontSize:FONT_SIZE];
     
     _photoLocationLabel      = [[ASTextNode alloc] init];
     _photoLocationLabel.maximumNumberOfLines = 1;
@@ -80,7 +80,7 @@
       // make sure to use _photoModel instance variable as photo may change when cell is reused,
       // where as local variable will never change
       if (locationModel == _photoModel.location) {
-        _photoLocationLabel.attributedString = [photo locationAttributedStringWithFontSize:FONT_SIZE];
+        _photoLocationLabel.attributedText = [photo locationAttributedStringWithFontSize:FONT_SIZE];
         [self setNeedsLayout];
       }
     }];
@@ -181,7 +181,7 @@
 {
   ASTextNode *textNode      = [[ASTextNode alloc] init];
   textNode.layerBacked      = YES;
-  textNode.attributedString = attributedString;
+  textNode.attributedText = attributedString;
   
   return textNode;
 }
