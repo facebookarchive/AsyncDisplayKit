@@ -16,6 +16,7 @@
 #import "ASTextKitShadower.h"
 #import "ASTextKitTailTruncater.h"
 #import "ASTextKitFontSizeAdjuster.h"
+#import "ASInternalHelpers.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -129,9 +130,17 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     // truncater do it's job again for the new constrained size. This is necessary as after a truncation did happen
     // the context would use the truncated string and not the original string to truncate based on the new
     // constrained size
+    __block ASTextKitContext *ctx = _context;
+    __block ASTextKitTailTruncater *tru = _truncater;
+    __block ASTextKitFontSizeAdjuster *adj = _fontSizeAdjuster;
     _context = nil;
     _truncater = nil;
     _fontSizeAdjuster = nil;
+    ASPerformBlockOnDeallocationQueue(^{
+      ctx = nil;
+      tru = nil;
+      adj = nil;
+    });
   }
 }
 
