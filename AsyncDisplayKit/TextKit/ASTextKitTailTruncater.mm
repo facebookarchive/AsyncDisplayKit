@@ -148,6 +148,10 @@
 
 - (void)truncate
 {
+  // Reset the text storage to start always with the full string
+  [_context resetTextStorage];
+  
+  // Start truncation
   [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     NSUInteger originalStringLength = textStorage.length;
 

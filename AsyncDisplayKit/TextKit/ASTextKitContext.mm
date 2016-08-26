@@ -22,6 +22,8 @@
   NSLayoutManager *_layoutManager;
   NSTextStorage *_textStorage;
   NSTextContainer *_textContainer;
+  
+  NSAttributedString *_attributedString;
 }
 
 - (instancetype)initWithAttributedString:(NSAttributedString *)attributedString
@@ -55,6 +57,24 @@
   }
   return self;
 }
+
+#pragma mark - Text Storage
+
+- (void)resetTextStorage
+{
+  ASDN::MutexSharedLocker l(__instanceLock__);
+  [self _resetTextStorage];
+}
+
+- (void)_resetTextStorage
+{
+  if (_attributedString.length) {
+    [_textStorage setAttributedString:_attributedString];
+  }
+  
+}
+
+#pragma mark - Setter / Getter
 
 - (CGSize)constrainedSize
 {
