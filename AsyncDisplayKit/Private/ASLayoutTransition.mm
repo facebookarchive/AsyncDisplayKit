@@ -58,8 +58,8 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 }
 
 - (instancetype)initWithNode:(ASDisplayNode *)node
-               pendingLayout:(ASDisplayNodeLayout)pendingLayout
-              previousLayout:(ASDisplayNodeLayout)previousLayout
+               pendingLayout:(std::shared_ptr<ASDisplayNodeLayout>)pendingLayout
+              previousLayout:(std::shared_ptr<ASDisplayNodeLayout>)previousLayout
 {
   self = [super init];
   if (self) {
@@ -81,7 +81,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 - (BOOL)isSynchronous
 {
   ASDN::MutexSharedLocker l(__instanceLock__);
-  return !ASLayoutCanTransitionAsynchronous(_pendingLayout.layout);
+  return !ASLayoutCanTransitionAsynchronous(_pendingLayout->layout);
 }
 
 - (void)commitTransition
@@ -119,8 +119,8 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
     return;
   }
   
-  ASLayout *previousLayout = _previousLayout.layout;
-  ASLayout *pendingLayout = _pendingLayout.layout;
+  ASLayout *previousLayout = _previousLayout->layout;
+  ASLayout *pendingLayout = _pendingLayout->layout;
 
   if (previousLayout) {
     NSIndexSet *insertions, *deletions;
@@ -170,9 +170,9 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 {
   ASDN::MutexSharedLocker l(__instanceLock__);
   if ([key isEqualToString:ASTransitionContextFromLayoutKey]) {
-    return _previousLayout.layout;
+    return _previousLayout->layout;
   } else if ([key isEqualToString:ASTransitionContextToLayoutKey]) {
-    return _pendingLayout.layout;
+    return _pendingLayout->layout;
   } else {
     return nil;
   }
@@ -182,9 +182,9 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 {
   ASDN::MutexSharedLocker l(__instanceLock__);
   if ([key isEqualToString:ASTransitionContextFromLayoutKey]) {
-    return _previousLayout.constrainedSize;
+    return _previousLayout->constrainedSize;
   } else if ([key isEqualToString:ASTransitionContextToLayoutKey]) {
-    return _pendingLayout.constrainedSize;
+    return _pendingLayout->constrainedSize;
   } else {
     return ASSizeRangeMake(CGSizeZero, CGSizeZero);
   }

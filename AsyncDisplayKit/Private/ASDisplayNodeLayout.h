@@ -24,7 +24,13 @@ struct ASDisplayNodeLayout {
   ASSizeRange constrainedSize;
   CGSize parentSize;
   BOOL _dirty;
-    
+  
+  ASDisplayNodeLayout(ASLayout *layout, ASSizeRange constrainedSize, CGSize parentSize)
+  : layout(layout), constrainedSize(constrainedSize), parentSize(parentSize), _dirty(NO) {};
+  
+  ASDisplayNodeLayout()
+  : layout(nil), constrainedSize({{0, 0}, {0, 0}}), parentSize({0, 0}), _dirty(NO) {};
+  
   BOOL isDirty() {
     return _dirty || layout == nil;
   }

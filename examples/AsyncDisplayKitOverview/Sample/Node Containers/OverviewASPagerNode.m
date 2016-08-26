@@ -37,9 +37,7 @@ static UIColor *OverViewASPagerNodeRandomColor() {
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-    return [ASLayout layoutWithLayoutableObject:self
-                           constrainedSizeRange:constrainedSize
-                                           size:constrainedSize.max];
+    return [ASLayout layoutWithLayoutable:self size:constrainedSize.max];
 }
 
 @end

@@ -14,6 +14,8 @@
 #import "_ASTransitionContext.h"
 #import "ASDisplayNodeLayout.h"
 
+#import <memory>
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class ASDisplayNode;
@@ -28,12 +30,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Previous layout to transition from
  */
-@property (nonatomic, readonly, assign) ASDisplayNodeLayout previousLayout;
+@property (nonatomic, readonly, assign) std::shared_ptr<ASDisplayNodeLayout> previousLayout;
 
 /**
  * Pending layout to transition to
  */
-@property (nonatomic, readonly, assign) ASDisplayNodeLayout pendingLayout;
+@property (nonatomic, readonly, assign) std::shared_ptr<ASDisplayNodeLayout> pendingLayout;
 
 /**
  * Returns if the layout transition needs to happen synchronously
@@ -44,8 +46,8 @@ NS_ASSUME_NONNULL_BEGIN
  * Returns a newly initialized layout transition
  */
 - (instancetype)initWithNode:(ASDisplayNode *)node
-               pendingLayout:(ASDisplayNodeLayout)pendingLayout
-              previousLayout:(ASDisplayNodeLayout)previousLayout NS_DESIGNATED_INITIALIZER;
+               pendingLayout:(std::shared_ptr<ASDisplayNodeLayout>)pendingLayout
+              previousLayout:(std::shared_ptr<ASDisplayNodeLayout>)previousLayout NS_DESIGNATED_INITIALIZER;
 
 /**
  * Insert and remove subnodes that where added or removed between the previousLayout and the pendingLayout

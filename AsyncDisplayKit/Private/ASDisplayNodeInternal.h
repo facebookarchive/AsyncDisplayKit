@@ -128,7 +128,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
   int32_t _pendingTransitionID;
   ASLayoutTransition *_pendingLayoutTransition;
-  ASDisplayNodeLayout _calculatedDisplayNodeLayout;
+  std::shared_ptr<ASDisplayNodeLayout> _calculatedDisplayNodeLayout;
   
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
