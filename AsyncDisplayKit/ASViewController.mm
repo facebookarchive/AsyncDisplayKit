@@ -303,7 +303,7 @@ ASVisibilityDepthImplementation;
     
     // once we've propagated all the traits, layout this node.
     // Remeasure the node with the latest constrained size – old constrained size may be incorrect.
-    [self.node measureWithSizeRange:[self nodeConstrainedSize]];
+    [self.node layoutThatFits:[self nodeConstrainedSize]];
     [self.node setNeedsLayout];
   }
 }

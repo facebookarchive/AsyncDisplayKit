@@ -40,7 +40,7 @@
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"judar judar judar judar judar judar"
                                                             attributes:@{ NSFontAttributeName : [UIFont systemFontOfSize:30] }];
   
-  [textNode measureWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 80))];
+  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 80))];
   textNode.frame = CGRectMake(50, 50, textNode.calculatedSize.width, textNode.calculatedSize.height);
   textNode.textContainerInset = UIEdgeInsetsMake(10, 10, 10, 10);
 
