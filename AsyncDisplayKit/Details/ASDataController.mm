@@ -19,6 +19,7 @@
 #import "ASThread.h"
 #import "ASIndexedNodeContext.h"
 #import "ASDataController+Subclasses.h"
+#import "ASDispatch.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -183,7 +184,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(nodeCount, sizeof(ASCellNode *));
 
   dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-  dispatch_apply(nodeCount, queue, ^(size_t i) {
+  ASDispatchApply(nodeCount, queue, 0, ^(size_t i) {
     RETURN_IF_NO_DATASOURCE();
 
     // Allocate the node.
