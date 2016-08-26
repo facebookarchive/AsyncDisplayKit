@@ -1993,20 +1993,29 @@ static bool stringContainsPointer(NSString *description, const void *p) {
 }
 
 
-- (void)testThatNodeGetsRenderedIfItGoesFromZeroSizeToRealSize
+- (void)testThatNodeGetsRenderedIfItGoesFromZeroSizeToRealSizeButOnlyOnce
 {
   NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"logo-square"
                                                                     ofType:@"png" inDirectory:@"TestResources"];
   UIImage *image = [UIImage imageWithContentsOfFile:path];
   ASImageNode *node = [[[ASImageNode alloc] init] autorelease];
   node.image = image;
-  XCTAssert(CGSizeEqualToSize(node.bounds.size, node.bounds.size));
+
+  // When rendered at zero-size, we get no contents
+  XCTAssert(CGSizeEqualToSize(node.bounds.size, CGSizeZero));
   [node recursivelyEnsureDisplaySynchronously:YES];
   XCTAssertNil(node.contents);
+
+  // When size becomes positive, we got some new contents
   node.bounds = CGRectMake(0, 0, 100, 100);
   [node recursivelyEnsureDisplaySynchronously:YES];
+  id contentsAfterRedisplay = node.contents;
+  XCTAssertNotNil(contentsAfterRedisplay);
 
-  XCTAssertNotNil(node.contents);
+  // When size changes again, we do not get new contents
+  node.bounds = CGRectMake(0, 0, 1000, 1000);
+  [node recursivelyEnsureDisplaySynchronously:YES];
+  XCTAssertEqual(contentsAfterRedisplay, node.contents);
 }
 
 @end

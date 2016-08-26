@@ -17,6 +17,7 @@
 #import "ASDisplayNode.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "CGRect+ASConvenience.h"
 
 @implementation _ASDisplayLayer
 {
@@ -24,6 +25,7 @@
   // We can take this lock when we're setting displaySuspended and in setNeedsDisplay, so to not deadlock, this is recursive
   ASDN::RecursiveMutex _displaySuspendedLock;
   BOOL _displaySuspended;
+  BOOL _attemptedDisplayWhileZeroSized;
 
   struct {
     BOOL delegateDidChangeBounds:1;
@@ -101,6 +103,11 @@
   } else {
     [super setBounds:bounds];
     self.asyncdisplaykit_node.threadSafeBounds = bounds;
+  }
+
+  if (_attemptedDisplayWhileZeroSized && CGRectIsEmpty(bounds) == NO && self.needsDisplayOnBoundsChange == NO) {
+    _attemptedDisplayWhileZeroSized = NO;
+    [self setNeedsDisplay];
   }
 }
 
@@ -189,9 +196,9 @@
 
 - (void)display
 {
+  ASDisplayNodeAssertMainThread();
   [self _hackResetNeedsDisplay];
 
-  ASDisplayNodeAssertMainThread();
   if (self.isDisplaySuspended) {
     return;
   }
@@ -201,7 +208,11 @@
 
 - (void)display:(BOOL)asynchronously
 {
-  id<_ASDisplayLayerDelegate> __attribute__((objc_precise_lifetime)) strongAsyncDelegate;
+  if (CGRectIsEmpty(self.bounds)) {
+    _attemptedDisplayWhileZeroSized = YES;
+  }
+
+  id<_ASDisplayLayerDelegate> NS_VALID_UNTIL_END_OF_SCOPE strongAsyncDelegate;
   {
     _asyncDelegateLock.lock();
     strongAsyncDelegate = _asyncDelegate;
