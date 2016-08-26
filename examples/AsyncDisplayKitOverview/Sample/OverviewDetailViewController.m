@@ -51,7 +51,7 @@
     
     // Center node frame
     CGRect bounds = self.view.bounds;
-    CGSize nodeSize = [self.node measure:bounds.size];
+    CGSize nodeSize = [self.node layoutThatFits:ASSizeRangeMake(CGSizeZero, bounds.size)].size;
     self.node.frame = CGRectMake(CGRectGetMidX(bounds) - (nodeSize.width / 2.0),
                                  CGRectGetMidY(bounds) - (nodeSize.height / 2.0),
                                  nodeSize.width,

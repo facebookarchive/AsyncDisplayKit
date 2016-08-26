@@ -32,7 +32,7 @@ static ASLayout *crossChildLayout(const id<ASLayoutable> child,
   const ASSizeRange childSizeRange = directionSizeRange(style.direction, stackMin, stackMax, childCrossMin, crossMax);
   ASLayout *layout = [child layoutThatFits:childSizeRange parentSize:size];
   ASDisplayNodeCAssertNotNil(layout, @"ASLayout returned from measureWithSizeRange: must not be nil: %@", child);
-  return layout ? : [ASLayout layoutWithLayoutable:child constrainedSize:childSizeRange size:CGSizeZero];
+  return layout ? : [ASLayout layoutWithLayoutable:child size:{0, 0}];
 }
 
 /**
@@ -303,7 +303,7 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
   const CGFloat maxCrossDimension = crossDimension(style.direction, sizeRange.max);
   return AS::map(children, [&](id<ASLayoutable> child) -> ASStackUnpositionedItem {
     if (useOptimizedFlexing && isFlexibleInBothDirections(child)) {
-      return { child, [ASLayout layoutWithLayoutable:child constrainedSize:sizeRange size:{0, 0}] };
+      return { child, [ASLayout layoutWithLayoutable:child size:{0, 0}] };
     } else {
       return {
         child,

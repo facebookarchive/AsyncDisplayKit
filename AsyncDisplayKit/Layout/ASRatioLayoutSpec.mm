@@ -75,10 +75,7 @@
   const CGSize parentSize = (bestSize == sizeOptions.end()) ? ASLayoutableParentSizeUndefined : *bestSize;
   ASLayout *sublayout = [self.child layoutThatFits:childRange parentSize:parentSize];
   sublayout.position = CGPointZero;
-  return [ASLayout layoutWithLayoutable:self
-                        constrainedSize:constrainedSize
-                                   size:sublayout.size
-                             sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutable:self size:sublayout.size sublayouts:@[sublayout]];
 }
 
 @end

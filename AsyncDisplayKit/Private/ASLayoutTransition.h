@@ -12,9 +12,11 @@
 
 #import "ASDimension.h"
 #import "_ASTransitionContext.h"
+#import "ASDisplayNodeLayout.h"
+
+NS_ASSUME_NONNULL_BEGIN
 
 @class ASDisplayNode;
-@class ASLayout;
 
 @interface ASLayoutTransition : NSObject <_ASTransitionContextLayoutDelegate>
 
@@ -26,12 +28,12 @@
 /**
  * Previous layout to transition from
  */
-@property (nonatomic, readonly, strong) ASLayout *previousLayout;
+@property (nonatomic, readonly, assign) ASDisplayNodeLayout previousLayout;
 
 /**
  * Pending layout to transition to
  */
-@property (nonatomic, readonly, strong) ASLayout *pendingLayout;
+@property (nonatomic, readonly, assign) ASDisplayNodeLayout pendingLayout;
 
 /**
  * Returns if the layout transition needs to happen synchronously
@@ -41,8 +43,9 @@
 /**
  * Returns a newly initialized layout transition
  */
-- (instancetype)initWithNode:(ASDisplayNode *)node pendingLayout:(ASLayout *)pendingLayout previousLayout:(ASLayout *)previousLayout NS_DESIGNATED_INITIALIZER;
-- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)initWithNode:(ASDisplayNode *)node
+               pendingLayout:(ASDisplayNodeLayout)pendingLayout
+              previousLayout:(ASDisplayNodeLayout)previousLayout NS_DESIGNATED_INITIALIZER;
 
 /**
  * Insert and remove subnodes that where added or removed between the previousLayout and the pendingLayout
@@ -60,3 +63,11 @@
 - (void)applySubnodeRemovals;
 
 @end
+
+@interface ASLayoutTransition (Unavailable)
+
+- (instancetype)init __unavailable;
+
+@end
+
+NS_ASSUME_NONNULL_END

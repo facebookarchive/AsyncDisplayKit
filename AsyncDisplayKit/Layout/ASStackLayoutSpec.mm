@@ -126,9 +126,7 @@
   }
   
   if (stackChildren.empty()) {
-    return [ASLayout layoutWithLayoutable:self
-                          constrainedSize:constrainedSize
-                                     size:constrainedSize.min];
+    return [ASLayout layoutWithLayoutable:self size:constrainedSize.min];
   }
   
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
@@ -161,10 +159,7 @@
     sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];
   }
   
-  return [ASLayout layoutWithLayoutable:self
-                        constrainedSize:constrainedSize
-                                   size:ASSizeRangeClamp(constrainedSize, finalSize)
-                             sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutable:self size:ASSizeRangeClamp(constrainedSize, finalSize) sublayouts:sublayouts];
 }
 
 - (void)resolveHorizontalAlignment

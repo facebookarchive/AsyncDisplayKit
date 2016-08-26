@@ -53,47 +53,35 @@ ASDISPLAYNODE_EXTERN_C_END
 /**
  * The type of ASLayoutable that created this layout
  */
-@property (nonatomic, readonly) ASLayoutableType type;
+@property (nonatomic, assign, readonly) ASLayoutableType type;
 
 /**
  * Size of the current layout
  */
-@property (nonatomic, readonly) CGSize size;
+@property (nonatomic, assign, readonly) CGSize size;
 
 /**
  * Position in parent. Default to CGPointNull.
  * 
  * @discussion When being used as a sublayout, this property must not equal CGPointNull.
  */
-@property (nonatomic, readwrite) CGPoint position;
-
-/**
- * The size range that was use to determine the size of the layout.
- */
-@property (nonatomic, readonly) ASSizeRange constrainedSize;
+@property (nonatomic, assign, readwrite) CGPoint position;
 
 /**
  * Array of ASLayouts. Each must have a valid non-null position.
  */
-@property (nonatomic, readonly) NSArray<ASLayout *> *sublayouts;
-
-/**
- * Mark the layout dirty for future regeneration.
- */
-@property (nonatomic, getter=isDirty) BOOL dirty;
+@property (nonatomic, copy, readonly) NSArray<ASLayout *> *sublayouts;
 
 /**
  * @abstract Returns a valid frame for the current layout computed with the size and position.
  * @discussion Clamps the layout's origin or position to 0 if any of the calculated values are infinite.
  */
-@property (nonatomic, readonly) CGRect frame;
-
+@property (nonatomic, assign, readonly) CGRect frame;
 
 /**
  * Designated initializer
  */
 - (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable
-                   constrainedSize:(ASSizeRange)constrainedSize
                               size:(CGSize)size
                           position:(CGPoint)position
                         sublayouts:(NSArray *)sublayouts NS_DESIGNATED_INITIALIZER;
@@ -107,7 +95,6 @@ ASDISPLAYNODE_EXTERN_C_END
  * @param sublayouts       Sublayouts belong to the new layout.
  */
 + (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
-                     constrainedSize:(ASSizeRange)constrainedSize
                                 size:(CGSize)size
                             position:(CGPoint)position
                           sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
@@ -123,12 +110,11 @@ ASDISPLAYNODE_EXTERN_C_END
  * @param sublayouts        Sublayouts belong to the new layout.
  */
 + (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
-                     constrainedSize:(ASSizeRange)constrainedSize
                                 size:(CGSize)size
                           sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
 /**
- * Convenience that has CGPointNull position and no sublayouts. 
+ * Convenience that has CGPointNull position and no sublayouts.
  * Best used for creating a layout that has no sublayouts, and is either a root one
  * or a sublayout of which the position is yet to be determined.
  *
@@ -136,21 +122,7 @@ ASDISPLAYNODE_EXTERN_C_END
  * @param size             The size of this layout.
  */
 + (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
-                     constrainedSize:(ASSizeRange)constrainedSize
                                 size:(CGSize)size;
-
-/**
- * Convenience initializer that is flattened and has CGPointNull position.
-
- * @param layoutable The backing ASLayoutable object.
- * @param size             The size of this layout.
- * @param sublayouts       Sublayouts belong to the new layout.
- */
-+ (instancetype)flattenedLayoutWithLayoutable:(id<ASLayoutable>)layoutable
-                              constrainedSize:(ASSizeRange)constrainedSize
-                                         size:(CGSize)size
-                                   sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
-
 /**
  * Convenience initializer that creates a layout based on the values of the given layout, with a new position
  *
@@ -166,37 +138,9 @@ ASDISPLAYNODE_EXTERN_C_END
 
 @end
 
-#pragma mark - Deprecated
+@interface ASLayout (Unavailable)
 
-@interface ASLayout (Deprecated)
-
-@property (nonatomic, readonly) ASSizeRange constrainedSizeRange;
-
-- (instancetype)initWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                    constrainedSizeRange:(ASSizeRange)sizeRange
-                                    size:(CGSize)size
-                                position:(CGPoint)position
-                              sublayouts:(NSArray *)sublayouts ASDISPLAYNODE_DEPRECATED;
-
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                      constrainedSizeRange:(ASSizeRange)sizeRange
-                                      size:(CGSize)size
-                                  position:(CGPoint)position
-                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts ASDISPLAYNODE_DEPRECATED;
-
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                      constrainedSizeRange:(ASSizeRange)sizeRange
-                                      size:(CGSize)size
-                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts ASDISPLAYNODE_DEPRECATED;
-
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                      constrainedSizeRange:(ASSizeRange)sizeRange
-                                      size:(CGSize)size ASDISPLAYNODE_DEPRECATED;
-
-+ (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                               constrainedSizeRange:(ASSizeRange)sizeRange
-                                               size:(CGSize)size
-                                         sublayouts:(nullable NSArray<ASLayout *> *)sublayouts ASDISPLAYNODE_DEPRECATED;
+- (instancetype)init __unavailable;
 
 @end
 
@@ -208,12 +152,6 @@ ASDISPLAYNODE_EXTERN_C_END
  * Recrusively output the description of the layout tree.
  */
 - (NSString *)recursiveDescription;
-
-@end
-
-@interface ASLayout (Unavailable)
-
-- (instancetype)init __unavailable;
 
 @end
 
