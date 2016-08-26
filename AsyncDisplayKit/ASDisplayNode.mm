@@ -1216,6 +1216,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self displayImmediately];
 }
 
+//Calling this with the lock held can lead to deadlocks. Always call *unlocked*
 - (void)__setNeedsLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);
