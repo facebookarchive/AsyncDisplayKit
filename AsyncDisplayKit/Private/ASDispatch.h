@@ -7,7 +7,6 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ASBaseDefines.h"
 
 /**
  * Like dispatch_apply, but you can set the thread count. 0 means 2*active CPUs.
