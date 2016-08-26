@@ -17,7 +17,6 @@
 #import "ASDisplayNode.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "CGRect+ASConvenience.h"
 
 @implementation _ASDisplayLayer
 {
