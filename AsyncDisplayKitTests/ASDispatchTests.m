@@ -31,7 +31,7 @@
     [indices addIndex:i];
     [lock unlock];
   });
-  XCTAssertEqual(threads.count, expectedThreadCount);
+  XCTAssertLessThanOrEqual(threads.count, expectedThreadCount);
   XCTAssertEqualObjects(indices, [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, iterations)]);
 }
 
