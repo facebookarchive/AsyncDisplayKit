@@ -2434,22 +2434,22 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)didEnterVisibleState
 {
-  //subclass override
+  // subclass override
 }
 
 - (void)didExitVisibleState
 {
-  //subclass override
+  // subclass override
 }
 
 - (void)didEnterDisplayState
 {
-  //subclass override
+  // subclass override
 }
 
 - (void)didExitDisplayState
 {
-  //subclass override
+  // subclass override
 }
 
 - (void)didEnterPreloadState
