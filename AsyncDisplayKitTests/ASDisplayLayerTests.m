@@ -27,7 +27,7 @@ static UIImage *bogusImage() {
 
     UIGraphicsBeginImageContext(CGSizeMake(10, 10));
 
-    bogusImage = [UIGraphicsGetImageFromCurrentImageContext() retain];
+    bogusImage = UIGraphicsGetImageFromCurrentImageContext();
 
     UIGraphicsEndImageContext();
 
@@ -88,9 +88,7 @@ static UIImage *bogusImage() {
 
   if (self.displaysAsynchronously) {
     if (_isInDisplay) {
-      [[NSException exceptionWithName:NSInvalidArgumentException
-                               reason:@"There is no placeholder logic in _ASDisplayLayer, unknown caller for setContents:"
-                             userInfo:nil] raise];
+      [NSException raise:NSInvalidArgumentException format:@"There is no placeholder logic in _ASDisplayLayer, unknown caller for setContents:"];
     } else if (!_isInCancelAsyncDisplay) {
       _setContentsAsyncCount++;
     }
@@ -235,12 +233,6 @@ static _ASDisplayLayerTestDelegateClassModes _class_modes;
   return(__atomic_load_n(&_drawRectCount, __ATOMIC_SEQ_CST));
 }
 
-- (void)dealloc
-{
-  [_displayLayerBlock release];
-  [super dealloc];
-}
-
 @end
 
 @interface _ASDisplayLayerTests : XCTestCase
@@ -325,8 +317,6 @@ static _ASDisplayLayerTestDelegateClassModes _class_modes;
   XCTAssertEqual(layer.drawInContextCount, 0u);
   XCTAssertEqual(asyncDelegate.didDisplayCount, 1u);
   XCTAssertEqual(asyncDelegate.displayCount, 1u);
-
-  [asyncDelegate release];
 }
 
 - (void)testDelegateDisplaySync
@@ -374,8 +364,6 @@ static _ASDisplayLayerTestDelegateClassModes _class_modes;
   XCTAssertEqual(asyncDelegate.displayCount, 0u);
   XCTAssertEqual(asyncDelegate.drawParametersCount, 1u);
   XCTAssertEqual(asyncDelegate.drawRectCount, 1u);
-
-  [asyncDelegate release];
 }
 
 - (void)testDelegateDrawInContextSync
@@ -423,8 +411,6 @@ static _ASDisplayLayerTestDelegateClassModes _class_modes;
   XCTAssertEqual(asyncDelegate.displayCount, 1u);
   XCTAssertEqual(asyncDelegate.drawParametersCount, 1u);
   XCTAssertEqual(asyncDelegate.drawRectCount, 0u);
-
-  [asyncDelegate release];
 }
 
 - (void)testDelegateDisplayAndDrawInContextSync
@@ -464,11 +450,9 @@ static _ASDisplayLayerTestDelegateClassModes _class_modes;
   XCTAssertEqual(asyncDelegate.didDisplayCount, 0u);
   XCTAssertEqual(asyncDelegate.displayCount, 0u);
   XCTAssertEqual(asyncDelegate.drawParametersCount, 0u);
-
-  [asyncDelegate release];
 }
 
-/*- (void)testTransaction
+- (void)DISABLED_testTransaction
 {
   _ASDisplayLayerTestDelegateMode delegateModes = _ASDisplayLayerTestDelegateModeDidDisplay | _ASDisplayLayerTestDelegateModeDrawParameters;
   [_ASDisplayLayerTestDelegate setClassModes:_ASDisplayLayerTestDelegateClassModeDisplay];
@@ -547,10 +531,7 @@ static _ASDisplayLayerTestDelegateClassModes _class_modes;
   XCTAssertTrue(ASDisplayNodeRunRunLoopUntilBlockIsTrue(^BOOL{
     return (containerLayer.didCompleteTransactionCount == 1);
   }));
-
-  [containerLayer release];
-  dispatch_release(displayAsyncLayer1Sema);
-}*/
+}
 
 - (void)checkSuspendResume:(BOOL)displaysAsynchronously
 {
@@ -605,8 +586,6 @@ static _ASDisplayLayerTestDelegateClassModes _class_modes;
   XCTAssertEqual(asyncDelegate.drawParametersCount, 1u);
   XCTAssertEqual(asyncDelegate.drawRectCount, 1u);
   XCTAssertFalse(layer.needsDisplay);
-
-  [asyncDelegate release];
 }
 
 - (void)testSuspendResumeAsync
