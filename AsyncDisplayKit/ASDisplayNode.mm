@@ -106,7 +106,15 @@ _ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node)
   ASDN::MutexLocker l(node->__instanceLock__);
   _ASPendingState *result = node->_pendingViewState;
   if (result == nil) {
-    result = [[_ASPendingState alloc] init];
+    if (node.isNodeLoaded) {
+      if (node->_flags.layerBacked)
+        result = [_ASPendingState pendingViewStateFromLayer:node->_layer];
+      else
+        result = [_ASPendingState pendingViewStateFromView:node->_view];
+    } else {
+      result = [[_ASPendingState alloc] init];
+    }
+    
     node->_pendingViewState = result;
   }
   return result;
@@ -1195,7 +1203,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [_pendingViewState applyToView:self.view withSpecialPropertiesHandling:specialPropertiesHandling];
   }
 
-  [_pendingViewState clearChanges];
+  // _ASPendingState objects can add up very quickly when adding
+  // many nodes. This is especially an issue in large collection views
+  // and table views. This needs to be weighed against the cost of
+  // reallocing a _ASPendingState. So in range managed nodes we
+  // delete the pending state, otherwise we just clear it.
+  if (ASHierarchyStateIncludesRangeManaged(_hierarchyState)) {
+    _pendingViewState = nil;
+  } else {
+    [_pendingViewState clearChanges];
+  }
 }
 
 - (void)displayImmediately
