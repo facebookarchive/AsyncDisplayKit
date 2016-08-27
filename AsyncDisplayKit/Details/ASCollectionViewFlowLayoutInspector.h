@@ -73,6 +73,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView NS_DESIGNATED_INITIALIZER;
+- (void)didChangeCollectionViewDelegate:(nullable id<ASCollectionDelegate>)delegate ASDISPLAYNODE_REQUIRES_SUPER;
 
 @end
 
@@ -85,6 +86,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)init NS_UNAVAILABLE;
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout NS_DESIGNATED_INITIALIZER;
+- (void)didChangeCollectionViewDelegate:(nullable id<ASCollectionDelegate>)delegate ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didChangeCollectionViewDataSource:(nullable id<ASCollectionDataSource>)dataSource ASDISPLAYNODE_REQUIRES_SUPER;
 
 @end
 
