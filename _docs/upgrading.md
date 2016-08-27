@@ -12,6 +12,18 @@ AsyncDisplayKit **2.0 Beta** is (almost) here! Here's a brief summary of the cha
 
 - `.usesImplicitHierarchyManagement` renamed to `.automaticallyManagesSubnodes`
 - `ASRelativeDimensionTypePercent` and associated functions renamed to use `Fraction` to be consistent with Apple terminology.
+- 
+**Updated Interface State callback method names**
+The new names are meant to unify the range update methods to show how they relate to each other & hopefully be a bit more self explanatory:
+
+- `didEnter/ExitPreloadState`
+- `didEnter/ExitDisplayState`
+- `didEnter/ExitVisibleState`
+These new methods replace the following:
+
+- `loadStateDidChange:(BOOL)inLoadState`
+- `displayStateDidChange:(BOOL)inDisplayState`
+- `visibleStateDidChange:(BOOL)isVisible`
 
 **Make sure to check:**
 
