@@ -17,7 +17,8 @@
 @class ASLayout;
 
 /*
- * Represents an ASLayout connected to a ASDisplayNode
+ * Represents a connection between an ASLayout and a ASDisplayNode
+ * ASDisplayNode uses this to store additional information that are necessary besides the layout
  */
 struct ASDisplayNodeLayout {
   ASLayout *layout;
@@ -25,27 +26,33 @@ struct ASDisplayNodeLayout {
   CGSize parentSize;
   BOOL _dirty;
   
+  /*
+   * Create a new display node layout with
+   * @param layout The layout to associate, usually returned from a call to -layoutThatFits:parentSize:
+   * @param constrainedSize Constrained size used to create the layout
+   * @param parentSize Parent size used to create the layout
+   */
   ASDisplayNodeLayout(ASLayout *layout, ASSizeRange constrainedSize, CGSize parentSize)
   : layout(layout), constrainedSize(constrainedSize), parentSize(parentSize), _dirty(NO) {};
   
+  /*
+   * Creates a layout without any layout associated. By default this display node layotu is dirty.
+   */
   ASDisplayNodeLayout()
-  : layout(nil), constrainedSize({{0, 0}, {0, 0}}), parentSize({0, 0}), _dirty(NO) {};
+  : layout(nil), constrainedSize({{0, 0}, {0, 0}}), parentSize({0, 0}), _dirty(YES) {};
   
-  BOOL isDirty() {
-    return _dirty || layout == nil;
-  }
+  /**
+   * Returns if the display node layout is dirty as it was invalidated or it was created without a layout.
+   */
+  BOOL isDirty();
   
-  BOOL isValidForConstrainedSizeParentSize(ASSizeRange theConstrainedSize, CGSize theParentSize) {
-    // Only generate a new layout if:
-    // - The current layout is dirty
-    // - The passed constrained size is different than the original layout's parent or constrained  size
-    return (layout != nil
-            && _dirty == NO
-            && CGSizeEqualToSize(parentSize, theParentSize)
-            && ASSizeRangeEqualToSizeRange(constrainedSize, theConstrainedSize));
-  }
+  /**
+   * Returns if ASDisplayNode is still valid for a given constrained and parent size
+   */
+  BOOL isValidForConstrainedSizeParentSize(ASSizeRange constrainedSize, CGSize parentSize);
   
-  void invalidate() {
-    _dirty = YES;
-  }
+  /**
+   * Invalidate the display node layout
+   */
+  void invalidate();
 };
