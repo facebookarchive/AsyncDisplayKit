@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import <OCMock/OCMock.h>
+#import <OCMock/NSInvocation+OCMAdditions.h>
 
 @interface ASViewControllerTests : XCTestCase
 
@@ -50,9 +51,7 @@
   [[[animator expect] andReturnValue:@0.3] transitionDuration:[OCMArg any]];
   XCTestExpectation *e = [self expectationWithDescription:@"Transition completed"];
   [[[animator expect] andDo:^(NSInvocation *invocation) {
-    __unsafe_unretained id<UIViewControllerContextTransitioning> _ctx;
-    [invocation getArgument:&_ctx atIndex:2];
-    __strong id<UIViewControllerContextTransitioning> ctx = _ctx;
+    id<UIViewControllerContextTransitioning> ctx = [invocation getArgumentAtIndexAsObject:2];
     UIView *container = [ctx containerView];
     [container addSubview:vc.view];
     vc.view.alpha = 0;
