@@ -141,7 +141,6 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 {
   if (_willDeallocBlock) {
     _willDeallocBlock(self);
-    _willDeallocBlock = nil;
   }
 }
 
@@ -1803,7 +1802,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 }
 
 static bool stringContainsPointer(NSString *description, id p) {
-  return [description containsString:[NSString stringWithFormat:@"%p", p]];
+  return [description rangeOfString:[NSString stringWithFormat:@"%p", p]].location != NSNotFound;
 }
 
 - (void)testDebugDescription

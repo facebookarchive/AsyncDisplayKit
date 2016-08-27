@@ -99,6 +99,9 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
   for(dispatch_block_t cleanupBlock in _swizzleCleanupBlocks) {
     cleanupBlock();
   }
+  _swizzleCleanupBlocks = nil;
+  _willEnterHierarchyCounts = nil;
+  _didExitHierarchyCounts = nil;
 }
 
 - (void)testAppearanceMethodsCalledWithRootNodeInWindowLayer
