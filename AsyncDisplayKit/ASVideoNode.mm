@@ -436,22 +436,28 @@ static NSString * const kRate = @"rate";
   }
 }
 
-- (void)visibleStateDidChange:(BOOL)isVisible
+- (void)didEnterVisibleState
 {
-  [super visibleStateDidChange:isVisible];
+  [super didEnterVisibleState];
   
   ASDN::MutexLocker l(__instanceLock__);
   
-  if (isVisible) {
-    if (_shouldBePlaying || _shouldAutoplay) {
-      [self play];
-    }
-  } else if (_shouldBePlaying) {
+  if (_shouldBePlaying || _shouldAutoplay) {
+    [self play];
+  }
+}
+
+- (void)didExitVisibleState
+{
+  [super didExitVisibleState];
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  if (_shouldBePlaying) {
     [self pause];
     _shouldBePlaying = YES;
   }
 }
-
 
 #pragma mark - Video Properties
 

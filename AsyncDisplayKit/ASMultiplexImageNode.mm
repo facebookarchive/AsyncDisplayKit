@@ -293,20 +293,30 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   }
 }
 
-/* visibileStateDidChange in ASNetworkImageNode has a very similar implementation. Changes here are likely necessary
+/* didEnterVisibleState / didExitVisibleState in ASNetworkImageNode has a very similar implementation. Changes here are likely necessary
  in ASNetworkImageNode as well. */
-- (void)visibleStateDidChange:(BOOL)isVisible
+- (void)didEnterVisibleState
 {
-  [super visibleStateDidChange:isVisible];
+  [super didEnterVisibleState];
   
   if (_downloaderImplementsSetPriority) {
     ASDN::MutexLocker l(_downloadIdentifierLock);
     if (_downloadIdentifier != nil) {
-      if (isVisible) {
-        [_downloader setPriority:ASImageDownloaderPriorityVisible withDownloadIdentifier:_downloadIdentifier];
-      } else {
-        [_downloader setPriority:ASImageDownloaderPriorityPreload withDownloadIdentifier:_downloadIdentifier];
-      }
+      [_downloader setPriority:ASImageDownloaderPriorityVisible withDownloadIdentifier:_downloadIdentifier];
+    }
+  }
+  
+  [self _updateProgressImageBlockOnDownloaderIfNeeded];
+}
+
+- (void)didExitVisibleState
+{
+  [super didExitVisibleState];
+  
+  if (_downloaderImplementsSetPriority) {
+    ASDN::MutexLocker l(_downloadIdentifierLock);
+    if (_downloadIdentifier != nil) {
+      [_downloader setPriority:ASImageDownloaderPriorityPreload withDownloadIdentifier:_downloadIdentifier];
     }
   }
   

@@ -2436,24 +2436,36 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   });
 }
 
-- (void)visibilityDidChange:(BOOL)isVisible
+- (void)didEnterVisibleState
 {
   // subclass override
 }
 
-- (void)visibleStateDidChange:(BOOL)isVisible
+- (void)didExitVisibleState
 {
   // subclass override
 }
 
-- (void)displayStateDidChange:(BOOL)inDisplayState
+- (void)didEnterDisplayState
 {
-  //subclass override
+  // subclass override
 }
 
-- (void)loadStateDidChange:(BOOL)inLoadState
+- (void)didExitDisplayState
 {
-  //subclass override
+  // subclass override
+}
+
+- (void)didEnterPreloadState
+{
+  [self fetchData];
+}
+
+- (void)didExitPreloadState
+{
+  if ([self supportsRangeManagedInterfaceState]) {
+    [self clearFetchedData];
+  }
 }
 
 /**
@@ -2473,6 +2485,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)setInterfaceState:(ASInterfaceState)newState
 {
+  //This method is currently called on the main thread. The assert has been added here because all of the
+  //did(Enter|Exit)(Display|Visible|Preload)State methods currently guarantee calling on main.
+  ASDisplayNodeAssertMainThread();
   // It should never be possible for a node to be visible but not be allowed / expected to display.
   ASDisplayNodeAssertFalse(ASInterfaceStateIncludesVisible(newState) && !ASInterfaceStateIncludesDisplay(newState));
   ASInterfaceState oldState = ASInterfaceStateNone;
@@ -2499,13 +2514,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   
   if (nowFetchData != wasFetchData) {
     if (nowFetchData) {
-      [self fetchData];
-      [self loadStateDidChange:YES];
+      [self didEnterPreloadState];
     } else {
-      if ([self supportsRangeManagedInterfaceState]) {
-        [self clearFetchedData];
-      }
-      [self loadStateDidChange:NO];
+      [self didExitPreloadState];
     }
   }
 
@@ -2550,7 +2561,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       }
     }
     
-    [self displayStateDidChange:nowDisplay];
+    if (nowDisplay) {
+      [self didEnterDisplayState];
+    } else {
+      [self didExitDisplayState];
+    }
   }
 
   // Became visible or invisible.  When range-managed, this represents literal visibility - at least one pixel
@@ -2559,8 +2574,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   BOOL wasVisible = ASInterfaceStateIncludesVisible(oldState);
 
   if (nowVisible != wasVisible) {
-    [self visibleStateDidChange:nowVisible];
-    [self visibilityDidChange:nowVisible];   //TODO: remove once this method has been deprecated
+    if (nowVisible) {
+      [self didEnterVisibleState];
+    } else {
+      [self didExitVisibleState];
+    }
   }
 
   [self interfaceStateDidChange:newState fromState:oldState];

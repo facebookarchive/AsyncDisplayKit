@@ -238,36 +238,58 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
- * @abstract Called whenever the visiblity of the node changed.
+ * @abstract Called whenever the node becomes visible.
  *
  * @discussion Subclasses may use this to monitor when they become visible.
- */
-- (void)visibilityDidChange:(BOOL)isVisible ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the visiblity of the node changed.
  *
- * @discussion Subclasses may use this to monitor when they become visible.
+ * @note This method is guaranteed to be called on main.
  */
-- (void)visibleStateDidChange:(BOOL)isVisible ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didEnterVisibleState ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
- * @abstract Called whenever the the node has entered or exited the display state.
+ * @abstract Called whenever the node is no longer visible.
+ *
+ * @discussion Subclasses may use this to monitor when they are no longer visible.
+ *
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didExitVisibleState ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called whenever the the node has entered the display state.
  *
  * @discussion Subclasses may use this to monitor when a node should be rendering its content.
  *
- * @note This method can be called from any thread and should therefore be thread safe.
+ * @note This method is guaranteed to be called on main.
  */
-- (void)displayStateDidChange:(BOOL)inDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didEnterDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
- * @abstract Called whenever the the node has entered or left the load state.
+ * @abstract Called whenever the the node has exited the display state.
  *
- * @discussion Subclasses may use this to monitor data for a node should be loaded, either from a local or remote source.  
+ * @discussion Subclasses may use this to monitor when a node should no longer be rendering its content.
  *
- * @note This method can be called from any thread and should therefore be thread safe.
+ * @note This method is guaranteed to be called on main.
  */
-- (void)loadStateDidChange:(BOOL)inLoadState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called whenever the the node has entered the preload state.
+ *
+ * @discussion Subclasses may use this to monitor data for a node should be preloaded, either from a local or remote source.
+ *
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didEnterPreloadState ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called whenever the the node has exited the preload state.
+ *
+ * @discussion Subclasses may use this to monitor whether preloading data for a node should be canceled.
+ *
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didExitPreloadState ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * Called just before the view is added to a window.

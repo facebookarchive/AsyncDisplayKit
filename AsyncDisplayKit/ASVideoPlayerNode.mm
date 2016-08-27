@@ -211,13 +211,13 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
-- (void)visibleStateDidChange:(BOOL)isVisible
+- (void)didEnterVisibleState
 {
-  [super visibleStateDidChange:isVisible];
-
+  [super didEnterVisibleState];
+  
   ASDN::MutexLocker l(__instanceLock__);
-
-  if (isVisible && _loadAssetWhenNodeBecomesVisible) {
+  
+  if (_loadAssetWhenNodeBecomesVisible) {
     if (_asset != _videoNode.asset) {
       _videoNode.asset = _asset;
     }

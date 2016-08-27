@@ -93,8 +93,8 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @property (nonatomic) BOOL displayRangeStateChangedToYES;
 @property (nonatomic) BOOL displayRangeStateChangedToNO;
 
-@property (nonatomic) BOOL loadStateChangedToYES;
-@property (nonatomic) BOOL loadStateChangedToNO;
+@property (nonatomic) BOOL preloadStateChangedToYES;
+@property (nonatomic) BOOL preloadStateChangedToNO;
 @end
 
 @interface ASTestResponderNode : ASTestDisplayNode
@@ -119,26 +119,28 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   self.hasFetchedData = NO;
 }
 
-- (void)displayStateDidChange:(BOOL)inDisplayState
+- (void)didEnterDisplayState
 {
-  [super displayStateDidChange:inDisplayState];
-  
-  if (inDisplayState) {
-    self.displayRangeStateChangedToYES = YES;
-  } else {
-    self.displayRangeStateChangedToNO = YES;
-  }
+  [super didEnterDisplayState];
+  self.displayRangeStateChangedToYES = YES;
 }
 
-- (void)loadStateDidChange:(BOOL)inLoadState
+- (void)didExitDisplayState
 {
-  [super loadStateDidChange:inLoadState];
-  
-  if (inLoadState) {
-    self.loadStateChangedToYES = YES;
-  } else {
-    self.loadStateChangedToNO = YES;
-  }
+  [super didExitDisplayState];
+  self.displayRangeStateChangedToNO = YES;
+}
+
+- (void)didEnterPreloadState
+{
+  [super didEnterPreloadState];
+  self.preloadStateChangedToYES = YES;
+}
+
+- (void)didExitPreloadState
+{
+  [super didExitPreloadState];
+  self.preloadStateChangedToNO = YES;
 }
 
 - (void)dealloc
@@ -1973,23 +1975,23 @@ static bool stringContainsPointer(NSString *description, const void *p) {
   XCTAssert([node displayRangeStateChangedToNO]);
 }
 
-- (void)testDidEnterFetchDataIsCalledWhenNodesEnterFetchDataRange
+- (void)testDidEnterPreloadIsCalledWhenNodesEnterFetchDataRange
 {
   ASTestDisplayNode *node = [[[ASTestDisplayNode alloc] init] autorelease];
   
   [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
   
-  XCTAssert([node loadStateChangedToYES]);
+  XCTAssert([node preloadStateChangedToYES]);
 }
 
-- (void)testDidExitFetchDataIsCalledWhenNodesExitFetchDataRange
+- (void)testDidExitPreloadIsCalledWhenNodesExitFetchDataRange
 {
   ASTestDisplayNode *node = [[[ASTestDisplayNode alloc] init] autorelease];
   
   [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
 
-  XCTAssert([node loadStateChangedToNO]);
+  XCTAssert([node preloadStateChangedToNO]);
 }
 
 
