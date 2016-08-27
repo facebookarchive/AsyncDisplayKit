@@ -21,7 +21,7 @@
 		0516FA411A1563D200B4EBED /* ASMultiplexImageNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0516FA3F1A1563D200B4EBED /* ASMultiplexImageNode.mm */; };
 		051943131A1575630030A7D0 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943121A1575630030A7D0 /* AssetsLibrary.framework */; };
 		051943151A1575670030A7D0 /* Photos.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943141A1575670030A7D0 /* Photos.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
-		052EE0661A159FEF002C6279 /* ASMultiplexImageNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 052EE0651A159FEF002C6279 /* ASMultiplexImageNodeTests.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		052EE0661A159FEF002C6279 /* ASMultiplexImageNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 052EE0651A159FEF002C6279 /* ASMultiplexImageNodeTests.m */; };
 		052EE06B1A15A0D8002C6279 /* TestResources in Resources */ = {isa = PBXBuildFile; fileRef = 052EE06A1A15A0D8002C6279 /* TestResources */; };
 		0549634A1A1EA066000F8E56 /* ASBasicImageDownloader.mm in Sources */ = {isa = PBXBuildFile; fileRef = 054963481A1EA066000F8E56 /* ASBasicImageDownloader.mm */; };
 		055B9FA91A1C154B00035D6D /* ASNetworkImageNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 055B9FA71A1C154B00035D6D /* ASNetworkImageNode.mm */; };
@@ -57,9 +57,9 @@
 		058D0A2A195D050800B7D73C /* ASDisplayNode+UIViewBridge.mm in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A0B195D050800B7D73C /* ASDisplayNode+UIViewBridge.mm */; };
 		058D0A2B195D050800B7D73C /* ASImageNode+CGExtras.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A0E195D050800B7D73C /* ASImageNode+CGExtras.m */; };
 		058D0A2C195D050800B7D73C /* ASSentinel.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A11195D050800B7D73C /* ASSentinel.m */; };
-		058D0A38195D057000B7D73C /* ASDisplayLayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A2D195D057000B7D73C /* ASDisplayLayerTests.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		058D0A39195D057000B7D73C /* ASDisplayNodeAppearanceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A2E195D057000B7D73C /* ASDisplayNodeAppearanceTests.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
-		058D0A3A195D057000B7D73C /* ASDisplayNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A2F195D057000B7D73C /* ASDisplayNodeTests.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
+		058D0A38195D057000B7D73C /* ASDisplayLayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A2D195D057000B7D73C /* ASDisplayLayerTests.m */; };
+		058D0A39195D057000B7D73C /* ASDisplayNodeAppearanceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A2E195D057000B7D73C /* ASDisplayNodeAppearanceTests.m */; };
+		058D0A3A195D057000B7D73C /* ASDisplayNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A2F195D057000B7D73C /* ASDisplayNodeTests.m */; };
 		058D0A3B195D057000B7D73C /* ASDisplayNodeTestsHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A31195D057000B7D73C /* ASDisplayNodeTestsHelper.m */; };
 		058D0A3C195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A32195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m */; };
 		058D0A3D195D057000B7D73C /* ASTextKitCoreTextAdditionsTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 058D0A33195D057000B7D73C /* ASTextKitCoreTextAdditionsTests.m */; };
