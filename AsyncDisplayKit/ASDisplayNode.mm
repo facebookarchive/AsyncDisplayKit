@@ -1321,22 +1321,21 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)measureNodeWithBoundsIfNecessary:(CGRect)bounds
 {
-  BOOL supportsRangedManagedInterfaceState = NO;
   BOOL hasDirtyLayout = NO;
-  BOOL hasSupernode = NO;
+  CGSize calculatedLayoutSize = CGSizeZero;
   {
     ASDN::MutexLocker l(__instanceLock__);
-    supportsRangedManagedInterfaceState = [self supportsRangeManagedInterfaceState];
     hasDirtyLayout = [self _hasDirtyLayout];
-    hasSupernode = (self.supernode != nil);
+    calculatedLayoutSize = _calculatedLayout.size;
   }
   
-  // Normally measure will be called before layout occurs. If this doesn't happen, nothing is going to call it at all.
-  // We simply call measureWithSizeRange: using a size range equal to whatever bounds were provided to that element
-  if (!hasSupernode && !supportsRangedManagedInterfaceState && hasDirtyLayout) {
+  // If no measure pass happened or the bounds changed between layout passes we manually trigger a measurement pass
+  // for the node using a size range equal to whatever bounds were provided to the node
+  if (hasDirtyLayout || CGSizeEqualToSize(calculatedLayoutSize, bounds.size) == NO) {
     if (CGRectEqualToRect(bounds, CGRectZero)) {
       LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     } else {
+      // This is a no op if the bounds size is the same as the cosntrained size we used to create the layout previously
       [self measureWithSizeRange:ASSizeRangeMake(bounds.size, bounds.size)];
     }
   }
