@@ -1,15 +1,3 @@
-//
-//  ASDisplayNodeLayoutTests.m
-//  AsyncDisplayKit
-//
-//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
-//  This source code is licensed under the BSD-style license found in the
-//  LICENSE file in the root directory of this source tree. An additional grant
-//  of patent rights can be found in the PATENTS file in the same directory.
-//
-
-#import <XCTest/XCTestAssertionsImpl.h>
-
 /**
  * XCTest extensions for CGGeometry.
  *
@@ -17,6 +5,8 @@
  * that tells you what went wrong.
  * Could use NSValue, but using strings makes the description messages shorter.
  */
+
+#import <XCTest/XCTestAssertionsImpl.h>
 
 #define ASXCTAssertEqualSizes(s0, s1, ...) \
    _XCTPrimitiveAssertEqualObjects(self, NSStringFromCGSize(s0), @#s0, NSStringFromCGSize(s1), @#s1, __VA_ARGS__)
