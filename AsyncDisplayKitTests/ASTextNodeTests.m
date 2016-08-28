@@ -15,11 +15,8 @@
 #import <AsyncDisplayKit/ASTextNode.h>
 
 #import <XCTest/XCTest.h>
+#include "CGRect+ASConvenience.h"
 
-static BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
-{
-  return fabs(size1.width - size2.width) < delta && fabs(size1.height - size2.height) < delta;
-}
 
 @interface ASTextNodeTestDelegate : NSObject <ASTextNodeDelegate>
 

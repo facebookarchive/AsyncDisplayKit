@@ -13,6 +13,7 @@
 
 #import "ASBaseDefines.h"
 #import "ASLayoutController.h"
+#include "tgmath.h"
 
 #ifndef CGFLOAT_EPSILON
   #if CGFLOAT_IS_DOUBLE
@@ -25,6 +26,11 @@
 NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
+
+ASDISPLAYNODE_INLINE BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CGFloat delta)
+{
+  return fabs(size1.width - size2.width) < delta && fabs(size1.height - size2.height) < delta;
+};
 
 struct ASDirectionalScreenfulBuffer {
   CGFloat positiveDirection; // Positive relative to iOS Core Animation layer coordinate space.
