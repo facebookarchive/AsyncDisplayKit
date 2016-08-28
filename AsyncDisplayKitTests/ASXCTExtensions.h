@@ -1,15 +1,3 @@
-//
-//  ASDisplayNodeLayoutTests.m
-//  AsyncDisplayKit
-//
-//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
-//  This source code is licensed under the BSD-style license found in the
-//  LICENSE file in the root directory of this source tree. An additional grant
-//  of patent rights can be found in the PATENTS file in the same directory.
-//
-
-#import <XCTest/XCTestAssertionsImpl.h>
-
 /**
  * XCTest extensions for CGGeometry.
  *
@@ -18,20 +6,22 @@
  * Could use NSValue, but using strings makes the description messages shorter.
  */
 
+#import <XCTest/XCTestAssertionsImpl.h>
+
 #define ASXCTAssertEqualSizes(s0, s1, ...) \
-   _XCTPrimitiveAssertEqualObjects(self, NSStringFromCGSize(s0), @#s0, NSStringFromCGSize(s1), @#s1, __VA_ARGS__)
+  _XCTPrimitiveAssertEqualObjects(self, NSStringFromCGSize(s0), @#s0, NSStringFromCGSize(s1), @#s1, __VA_ARGS__)
 
 #define ASXCTAssertNotEqualSizes(s0, s1, ...) \
- _XCTPrimitiveAssertNotEqualObjects(self, NSStringFromCGSize(s0), @#s0, NSStringFromCGSize(s1), @#s1, __VA_ARGS__)
+  _XCTPrimitiveAssertNotEqualObjects(self, NSStringFromCGSize(s0), @#s0, NSStringFromCGSize(s1), @#s1, __VA_ARGS__)
 
 #define ASXCTAssertEqualPoints(p0, p1, ...) \
   _XCTPrimitiveAssertEqualObjects(self, NSStringFromCGPoint(p0), @#p0, NSStringFromCGPoint(p1), @#p1, __VA_ARGS__)
 
 #define ASXCTAssertNotEqualPoints(p0, p1, ...) \
- _XCTPrimitiveAssertNotEqualObjects(self, NSStringFromCGPoint(p0), @#p0, NSStringFromCGPoint(p1), @#p1, __VA_ARGS__)
+  _XCTPrimitiveAssertNotEqualObjects(self, NSStringFromCGPoint(p0), @#p0, NSStringFromCGPoint(p1), @#p1, __VA_ARGS__)
 
 #define ASXCTAssertEqualRects(r0, r1, ...) \
   _XCTPrimitiveAssertEqualObjects(self, NSStringFromCGRect(r0), @#r0, NSStringFromCGRect(r1), @#r1, __VA_ARGS__)
 
 #define ASXCTAssertNotEqualRects(r0, r1, ...) \
- _XCTPrimitiveAssertNotEqualObjects(self, NSStringFromCGRect(r0), @#r0, NSStringFromCGRect(r1), @#r1, __VA_ARGS__)
+  _XCTPrimitiveAssertNotEqualObjects(self, NSStringFromCGRect(r0), @#r0, NSStringFromCGRect(r1), @#r1, __VA_ARGS__)
