@@ -106,15 +106,7 @@ _ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node)
   ASDN::MutexLocker l(node->__instanceLock__);
   _ASPendingState *result = node->_pendingViewState;
   if (result == nil) {
-    if (node.isNodeLoaded) {
-      if (node->_flags.layerBacked)
-        result = [_ASPendingState pendingViewStateFromLayer:node->_layer];
-      else
-        result = [_ASPendingState pendingViewStateFromView:node->_view];
-    } else {
-      result = [[_ASPendingState alloc] init];
-    }
-    
+    result = [[_ASPendingState alloc] init];
     node->_pendingViewState = result;
   }
   return result;
