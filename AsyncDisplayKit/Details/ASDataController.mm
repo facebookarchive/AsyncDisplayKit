@@ -396,8 +396,8 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
   [self invalidateDataSourceItemCounts];
   NSUInteger sectionCount = [self itemCountsFromDataSource].size();
-  NSIndexSet *sectionIndexSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-  NSArray<ASIndexedNodeContext *> *contexts = [self _populateFromDataSourceWithSectionIndexSet:sectionIndexSet];
+  NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
+  NSArray<ASIndexedNodeContext *> *contexts = [self _populateNodeContextsFromDataSourceForSections:sectionIndexes];
   
   // Allow subclasses to perform setup before going into the edit transaction
   [self prepareForReloadDataWithSectionCount:sectionCount];
@@ -422,7 +422,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     for (int i = 0; i < sectionCount; i++) {
       [sections addObject:[[NSMutableArray alloc] init]];
     }
-    [self _insertSections:sections atIndexSet:sectionIndexSet withAnimationOptions:animationOptions];
+    [self _insertSections:sections atIndexSet:sectionIndexes withAnimationOptions:animationOptions];
 
     [self _batchLayoutAndInsertNodesFromContexts:contexts withAnimationOptions:animationOptions];
 
@@ -451,7 +451,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 /**
  * Fetches row contexts for the provided sections from the data source.
  */
-- (NSArray<ASIndexedNodeContext *> *)_populateFromDataSourceWithSectionIndexSet:(NSIndexSet *)indexSet
+- (NSArray<ASIndexedNodeContext *> *)_populateNodeContextsFromDataSourceForSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
   
@@ -460,7 +460,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   
   std::vector<NSInteger> counts = [self itemCountsFromDataSource];
   NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
-  [indexSet enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
+  [sections enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
     for (NSUInteger sectionIndex = range.location; sectionIndex < NSMaxRange(range); sectionIndex++) {
       NSUInteger itemCount = counts[sectionIndex];
       for (NSUInteger i = 0; i < itemCount; i++) {
@@ -556,7 +556,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
-  NSArray<ASIndexedNodeContext *> *contexts = [self _populateFromDataSourceWithSectionIndexSet:sections];
+  NSArray<ASIndexedNodeContext *> *contexts = [self _populateNodeContextsFromDataSourceForSections:sections];
 
   [self prepareForInsertSections:sections];
   
@@ -824,7 +824,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 #pragma mark - Data Querying (Subclass API)
 
-- (NSArray *)indexPathsForEditingNodesOfKind:(NSString *)kind
+- (NSArray<NSIndexPath *> *)indexPathsForEditingNodesOfKind:(NSString *)kind
 {
   NSArray *nodes = _editingNodes[kind];
   return nodes != nil ? ASIndexPathsForTwoDimensionalArray(nodes) : nil;
