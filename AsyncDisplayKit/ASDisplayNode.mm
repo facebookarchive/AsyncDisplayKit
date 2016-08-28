@@ -220,6 +220,25 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   });
 
   class_replaceMethod(self, @selector(_staticInitialize), staticInitialize, "v:@");
+  
+  
+#if DEBUG
+  // Check if subnodes where modified during layoutSpecThatFits:
+  if (self == [ASDisplayNode class] || ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(layoutSpecThatFits:)))
+  {
+    __block IMP originalLayoutSpecThatFitsIMP = ASReplaceMethodWithBlock(self, @selector(layoutSpecThatFits:), ^(ASDisplayNode *_self, ASSizeRange sizeRange) {
+      NSArray *oldSubnodes = _self.subnodes;
+      ASLayoutSpec *layoutSpec = ((ASLayoutSpec *( *)(id, SEL, ASSizeRange))originalLayoutSpecThatFitsIMP)(_self, @selector(layoutSpecThatFits:), sizeRange);
+      NSArray *subnodes = _self.subnodes;
+      ASDisplayNodeAssertTrue(oldSubnodes.count == subnodes.count);
+      for (NSInteger i = 0; i < oldSubnodes.count; i++) {
+        ASDisplayNodeAssertTrue(oldSubnodes[i] == subnodes[i]);
+      }
+      return layoutSpec;
+    });
+  }
+#endif
+
 }
 
 + (void)load

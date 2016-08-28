@@ -34,4 +34,35 @@
   ASXCTAssertEqualSizes(displayNode.calculatedSize, CGSizeMake(100, 100), @"Automatic measurement pass should be happened in layout");
 }
 
+#if DEBUG
+- (void)testNotAllowAddingSubnodesInLayoutSpecThatFits
+{
+  ASDisplayNode *displayNode = [ASDisplayNode new];
+  ASDisplayNode *someOtherNode = [ASDisplayNode new];
+  
+  displayNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    [node addSubnode:someOtherNode];
+    return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:someOtherNode];
+  };
+  
+  XCTAssertThrows([displayNode measure:CGSizeMake(100, 100)], @"Should throw if subnode was added in layoutSpecThatFits:");
+}
+
+- (void)testNotAllowModifyingSubnodesInLayoutSpecThatFits
+{
+  ASDisplayNode *displayNode = [ASDisplayNode new];
+  ASDisplayNode *someOtherNode = [ASDisplayNode new];
+  
+  [displayNode addSubnode:someOtherNode];
+  
+  displayNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    [someOtherNode removeFromSupernode];
+    [node addSubnode:[ASDisplayNode new]];
+    return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:someOtherNode];
+  };
+  
+  XCTAssertThrows([displayNode measure:CGSizeMake(100, 100)], @"Should throw if subnodes where modified in layoutSpecThatFits:");
+}
+#endif
+
 @end
