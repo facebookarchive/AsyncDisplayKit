@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitCollectionBlock)(UITraitCollection *traitCollection);
 typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(CGSize windowSize);
+typedef BOOL (^ASDisplayTraitsComparisonBlock)(ASEnvironmentTraitCollection lhs, ASEnvironmentTraitCollection rhs);
 
 @interface ASViewController<__covariant DisplayNodeType : ASDisplayNode *> : UIViewController <ASVisibilityDepth>
 
@@ -36,6 +37,15 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
  * Set this block to customize the ASDisplayTraits returned when the VC transitions to the given window size.
  */
 @property (nonatomic, copy) ASDisplayTraitsForTraitWindowSizeBlock overrideDisplayTraitsWithWindowSize;
+
+/**
+ * When traits change, the new traits are propogated down the VC's subnodes. By default the traits are compared
+ * using ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(). However, you can use this block to
+ * customize this comparison logic. For example, if you only want the traits to propagate when the horizontal size
+ * class changes (i.e., you don't care about vertical size class or container size) then you can set that logic
+ * via this block.
+ */
+@property (nonatomic, copy) ASDisplayTraitsComparisonBlock overrideTraitsComparisonBlock;
 
 /**
  * @abstract Passthrough property to the the .interfaceState of the node.

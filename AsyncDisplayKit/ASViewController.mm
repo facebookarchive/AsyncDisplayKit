@@ -290,7 +290,14 @@ ASVisibilityDepthImplementation;
   ASEnvironmentState environmentState = self.node.environmentState;
   ASEnvironmentTraitCollection oldEnvironmentTraitCollection = environmentState.environmentTraitCollection;
   
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, oldEnvironmentTraitCollection) == NO) {
+  BOOL traitsEqual = NO;
+  if (self.overrideTraitsComparisonBlock) {
+    traitsEqual = self.overrideTraitsComparisonBlock(environmentTraitCollection, oldEnvironmentTraitCollection);
+  } else {
+    traitsEqual = ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, oldEnvironmentTraitCollection);
+  }
+  
+  if (traitsEqual == NO) {
     environmentState.environmentTraitCollection = environmentTraitCollection;
     self.node.environmentState = environmentState;
     
