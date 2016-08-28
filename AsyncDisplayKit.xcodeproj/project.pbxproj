@@ -426,6 +426,8 @@
 		CC7FD9DF1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; };
 		CC7FD9E11BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */; };
 		CC7FD9E21BB603FF005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CC8B05D61D73836400F54286 /* ASPerformanceTestContext.m in Sources */ = {isa = PBXBuildFile; fileRef = CC8B05D51D73836400F54286 /* ASPerformanceTestContext.m */; };
+		CC8B05D81D73979700F54286 /* ASTextNodePerformanceTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC8B05D71D73979700F54286 /* ASTextNodePerformanceTests.m */; };
 		CCA221D31D6FA7EF00AF6A0F /* ASViewControllerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CCA221D21D6FA7EF00AF6A0F /* ASViewControllerTests.m */; };
 		CCB2F34D1D63CCC6004E6DE9 /* ASDisplayNodeSnapshotTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CCB2F34C1D63CCC6004E6DE9 /* ASDisplayNodeSnapshotTests.m */; };
 		CCF18FF41D2575E300DF5895 /* NSIndexSet+ASHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4981BA1D1C7F65004E13CC /* NSIndexSet+ASHelpers.h */; };
@@ -1102,6 +1104,9 @@
 		CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPhotosFrameworkImageRequest.h; sourceTree = "<group>"; };
 		CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequest.m; sourceTree = "<group>"; };
 		CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequestTests.m; sourceTree = "<group>"; };
+		CC8B05D41D73836400F54286 /* ASPerformanceTestContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPerformanceTestContext.h; sourceTree = "<group>"; };
+		CC8B05D51D73836400F54286 /* ASPerformanceTestContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPerformanceTestContext.m; sourceTree = "<group>"; };
+		CC8B05D71D73979700F54286 /* ASTextNodePerformanceTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTextNodePerformanceTests.m; sourceTree = "<group>"; };
 		CCA221D21D6FA7EF00AF6A0F /* ASViewControllerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASViewControllerTests.m; sourceTree = "<group>"; };
 		CCB2F34C1D63CCC6004E6DE9 /* ASDisplayNodeSnapshotTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDisplayNodeSnapshotTests.m; sourceTree = "<group>"; };
 		D3779BCFF841AD3EB56537ED /* Pods-AsyncDisplayKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.release.xcconfig"; sourceTree = "<group>"; };
@@ -1338,6 +1343,9 @@
 		058D09C5195D04C000B7D73C /* AsyncDisplayKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				CC8B05D71D73979700F54286 /* ASTextNodePerformanceTests.m */,
+				CC8B05D41D73836400F54286 /* ASPerformanceTestContext.h */,
+				CC8B05D51D73836400F54286 /* ASPerformanceTestContext.m */,
 				69B225681D7265DA00B25B22 /* ASXCTExtensions.h */,
 				CC54A81D1D7008B300296A24 /* ASDispatchTests.m */,
 				CCA221D21D6FA7EF00AF6A0F /* ASViewControllerTests.m */,
@@ -2221,8 +2229,10 @@
 				CC7FD9E11BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m in Sources */,
 				052EE0661A159FEF002C6279 /* ASMultiplexImageNodeTests.m in Sources */,
 				058D0A3C195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m in Sources */,
+				CC8B05D81D73979700F54286 /* ASTextNodePerformanceTests.m in Sources */,
 				697B315A1CFE4B410049936F /* ASEditableTextNodeTests.m in Sources */,
 				ACF6ED611B178DC700DA7C62 /* ASOverlayLayoutSpecSnapshotTests.mm in Sources */,
+				CC8B05D61D73836400F54286 /* ASPerformanceTestContext.m in Sources */,
 				CC0AEEA41D66316E005D1C78 /* ASUICollectionViewTests.m in Sources */,
 				69B225671D72535E00B25B22 /* ASDisplayNodeLayoutTests.mm in Sources */,
 				ACF6ED621B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm in Sources */,
