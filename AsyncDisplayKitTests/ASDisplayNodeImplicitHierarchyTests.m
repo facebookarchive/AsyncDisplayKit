@@ -117,6 +117,23 @@
   XCTAssertEqual(node.subnodes[2], node2);
 }
 
+- (void)testLayoutTransitionMeasurementCompletionBlockIsCalledOnMainThread
+{
+  ASDisplayNode *displayNode = [ASDisplayNode new];
+  
+  // Trigger explicit view creation to be able to use the Transition API
+  [displayNode view];
+  
+  XCTestExpectation *expectation = [self expectationWithDescription:@"Call measurement completion block on main"];
+  
+  [displayNode transitionLayoutWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero) animated:YES measurementCompletion:^{
+    XCTAssertTrue(ASDisplayNodeThreadIsMain(), @"Measurement completion block should be called on main thread");
+    [expectation fulfill];
+  }];
+  
+  [self waitForExpectationsWithTimeout:2.0 handler:nil];
+}
+
 - (void)testMeasurementInBackgroundThreadWithLoadedNode
 {
   ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
