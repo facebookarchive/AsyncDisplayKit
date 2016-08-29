@@ -99,4 +99,30 @@
 }
 #endif
 
+- (void)testMeasureOnLayoutIfNotHappenedBeforeNoRemeasureForSameBounds
+{
+  CGSize nodeSize = CGSizeMake(100, 100);
+  
+  ASStaticSizeDisplayNode *displayNode = [ASStaticSizeDisplayNode new];
+  displayNode.staticSize  = nodeSize;
+  
+  ASButtonNode *buttonNode = [ASButtonNode new];
+  [displayNode addSubnode:buttonNode];
+  
+  __block size_t numberOfLayoutSpecThatFitsCalls = 0;
+  displayNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    __sync_fetch_and_add(&numberOfLayoutSpecThatFitsCalls, 1);
+    return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:buttonNode];
+  };
+  
+  displayNode.frame = {.size = nodeSize};
+  
+  // Trigger initial layout pass without a measurement pass before
+  [displayNode.view layoutIfNeeded];
+  XCTAssertEqual(numberOfLayoutSpecThatFitsCalls, 1, @"Should measure during layout if not measured");
+  
+  [displayNode measureWithSizeRange:ASSizeRangeMake(nodeSize, nodeSize)];
+  XCTAssertEqual(numberOfLayoutSpecThatFitsCalls, 1, @"Should not remeasure with same bounds");
+}
+
 @end
