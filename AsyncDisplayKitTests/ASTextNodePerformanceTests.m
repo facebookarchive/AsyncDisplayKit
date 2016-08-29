@@ -157,7 +157,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
   ctx.results[kTestCaseUIKitPrivateCaching].userInfo[@"size"] = NSStringFromCGSize(cachedSize);
   
   XCTAssertTrue([ctx areAllUserInfosEqual]);
-  ASXCTAssertRelativePerformanceInRange(ctx, kTestCaseUIKitPrivateCaching, 1.5, FLT_MAX);
+  ASXCTAssertRelativePerformanceInRange(ctx, kTestCaseUIKitPrivateCaching, 1.2, FLT_MAX);
 }
 
 #pragma mark Fixture Data
