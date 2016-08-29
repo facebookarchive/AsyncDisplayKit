@@ -30,16 +30,25 @@
                          constrainedSize:(CGSize)constrainedSize
                    layoutManagerDelegate:(id<NSLayoutManagerDelegate>)layoutManagerDelegate;
 
+/**
+ * Set the constrained size for the text context.
+ */
 @property (nonatomic, assign, readwrite) CGSize constrainedSize;
 
 /**
- All operations on TextKit values MUST occur within this locked context.  Simultaneous access (even non-mutative) to
- TextKit components may cause crashes.
+ * Resets the text storage to the original value in case it was truncated before. This method is called within
+ * a locked context.
+ */
+- (void)resetTextStorage;
 
- The block provided MUST not call out to client code from within its scope or it is possible for this to cause deadlocks
- in your application.  Use with EXTREME care.
-
- Callers MUST NOT keep a ref to these internal objects and use them later.  This WILL cause crashes in your application.
+/**
+ * All operations on TextKit values MUST occur within this locked context.  Simultaneous access (even non-mutative) to
+ * TextKit components may cause crashes.
+ *
+ * The block provided MUST not call out to client code from within its scope or it is possible for this to cause deadlocks
+ * in your application.  Use with EXTREME care.
+ *
+ * Callers MUST NOT keep a ref to these internal objects and use them later.  This WILL cause crashes in your application.
  */
 - (void)performBlockWithLockedTextKitComponents:(void (^)(NSLayoutManager *layoutManager,
                                                           NSTextStorage *textStorage,
