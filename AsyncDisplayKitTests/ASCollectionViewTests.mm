@@ -352,77 +352,39 @@
 // https://github.com/facebook/AsyncDisplayKit/issues/2011
 - (void)testThatDisappearingSupplementariesWithLayerBackedNodesDontFailAssert
 {
-  __weak __block ASCellNode *suppNode0 = nil;
-  __weak __block ASCellNode *suppNode1 = nil;
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UICollectionViewLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionNode *collectionNode = [[ASCollectionNode alloc] initWithFrame:window.bounds collectionViewLayout:layout];
-  @autoreleasepool {
-
-
-
-
-
-  ASCollectionView *cv = collectionNode.view;
+  ASCollectionView *cv = [[ASCollectionView alloc] initWithFrame:window.bounds collectionViewLayout:layout];
 
   id dataSource = [OCMockObject niceMockForProtocol:@protocol(ASCollectionDataSource)];
-  __block NSInteger suppNodeCount = 0;
-
   [[[dataSource stub] andDo:^(NSInvocation *invocation) {
     __autoreleasing ASCellNode *suppNode = [[ASCellNode alloc] init];
-    switch (suppNodeCount++) {
-      case 0:
-        suppNode0 = suppNode;
-        break;
-      case 1:
-        suppNode1 = suppNode;
-        break;
-      default:
-        XCTFail(@"Too many supplementary nodes!");
-        break;
-    }
     ASDisplayNode *layerBacked = [[ASDisplayNode alloc] init];
     layerBacked.layerBacked = YES;
     [suppNode addSubnode:layerBacked];
     [invocation setReturnValue:&suppNode];
   }] collectionView:cv nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];
   [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] numberOfSectionsInCollectionView:cv];
-  collectionNode.dataSource = dataSource;
+  cv.asyncDataSource = dataSource;
 
   id delegate = [OCMockObject niceMockForProtocol:@protocol(UICollectionViewDelegateFlowLayout)];
   [[[delegate stub] andReturnValue:[NSValue valueWithCGSize:CGSizeMake(100, 100)]] collectionView:cv layout:OCMOCK_ANY referenceSizeForHeaderInSection:0];
-  collectionNode.delegate = delegate;
+  cv.asyncDelegate = delegate;
 
   [cv registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  @autoreleasepool {
-    [cv reloadDataImmediately];
-    [window addSubview:cv];
+  [window addSubview:cv];
 
-    [window makeKeyAndVisible];
+  [window makeKeyAndVisible];
 
-    [cv layoutIfNeeded];
+  for (NSInteger i = 0; i < 2; i++) {
+    // NOTE: waitUntilAllUpdatesAreCommitted or reloadDataImmediately is not sufficient here!!
+    XCTestExpectation *done = [self expectationWithDescription:[NSString stringWithFormat:@"Reload #%td complete", i]];
+    [cv reloadDataWithCompletion:^{
+      [done fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
   }
 
-  XCTAssertEqualObjects([cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], suppNode0);
-  XCTAssertNotNil([layout layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
-  XCTAssertNotNil(suppNode0);
-  XCTAssertEqualObjects(suppNode0.view.window, window);
-  XCTAssertNil(suppNode1);
-  XCTAssert(ASInterfaceStateIncludesVisible(suppNode0.interfaceState));
-  @autoreleasepool {
-    [cv reloadData];
-    [cv waitUntilAllUpdatesAreCommitted];
-    [cv layoutIfNeeded];
-  }
-
-  [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
-
-  XCTAssertEqualObjects([cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], suppNode1);
-  XCTAssertEqualObjects(suppNode1.view.window, window);
-    }
-  XCTAssert(ASInterfaceStateIncludesVisible(suppNode1.interfaceState));
-  XCTAssertNotNil(suppNode1);
-  XCTAssertNil(suppNode0);
 }
 
 - (void)testThatNodeCalculatedSizesAreUpdatedBeforeFirstPrepareLayoutAfterRotation
