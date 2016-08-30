@@ -115,6 +115,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
   ASEnvironmentState _environmentState;
   ASLayout *_calculatedLayout;
+  ASLayout *_pendingLayout;
 
 
   UIEdgeInsets _hitTestSlop;
@@ -184,12 +185,14 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;
-- (BOOL)__shouldSize;
+//- (BOOL)__shouldSize;
 
 /**
  Invoked before a call to setNeedsLayout to the underlying view
  */
 - (void)__setNeedsLayout;
+
+- (void)__layoutIfNeeded;
 
 /**
  Invoked after a call to setNeedsDisplay to the underlying view

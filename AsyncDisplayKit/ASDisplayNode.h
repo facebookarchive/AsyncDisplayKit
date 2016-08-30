@@ -647,6 +647,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)setNeedsLayout;
 
+
+- (void)layoutIfNeeded;
+
 @property (nonatomic, strong, nullable) id contents;                           // default=nil
 @property (nonatomic, assign)           BOOL clipsToBounds;                    // default==NO
 @property (nonatomic, getter=isOpaque)  BOOL opaque;                           // default==YES

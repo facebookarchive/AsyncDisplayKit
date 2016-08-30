@@ -185,6 +185,17 @@
   [self.layer setNeedsDisplay];
 }
 
+- (void)layoutIfNeeded
+{
+  if (ASDisplayNodeThreadIsMain()) {
+    [super layoutIfNeeded];
+  } else {
+    dispatch_async(dispatch_get_main_queue(), ^ {
+      [super layoutIfNeeded];
+    });
+  }
+}
+
 - (UIViewContentMode)contentMode
 {
   return ASDisplayNodeUIContentModeFromCAContentsGravity(self.layer.contentsGravity);

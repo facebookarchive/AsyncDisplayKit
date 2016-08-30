@@ -51,7 +51,6 @@
     
     _tableNode.dataSource = self;
     _tableNode.delegate = self;
-    
   }
   
   return self;
@@ -95,7 +94,7 @@
     [_activityIndicatorView stopAnimating];
     
     [self insertNewRowsInTableView:newPhotos];
-//    [self requestCommentsForPhotos:newPhotos];
+    //[self requestCommentsForPhotos:newPhotos];
     
     // immediately start second larger fetch
     [self loadPageWithContext:nil];
@@ -179,6 +178,11 @@
 }
 
 #pragma mark - ASTableDelegate methods
+
+/*- (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView
+{
+  return NO;
+}*/
 
 // Receive a message that the tableView is near the end of its data set and more data should be fetched if necessary.
 - (void)tableView:(ASTableView *)tableView willBeginBatchFetchWithContext:(ASBatchContext *)context

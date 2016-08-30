@@ -104,15 +104,12 @@
   _viewControllerNode.frame = self.bounds;
 }
 
-- (void)__setNeedsLayout
+- (void)__layout
 {
-  CGSize oldSize = self.calculatedSize;
-  [super __setNeedsLayout];
+  [super __layout];
   
-  //Adding this lock because lock used to be held when this method was called. Not sure if it's necessary for
-  //didRelayoutFromOldSize:toNewSize:
   ASDN::MutexLocker l(__instanceLock__);
-  [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
+  [self didRelayout];
 }
 
 - (void)transitionLayoutAnimated:(BOOL)animated
@@ -162,11 +159,21 @@
   [self transitionLayoutWithSizeRange:constrainedSize animated:animated measurementCompletion:completion];
 }
 
+- (void)didRelayout
+{
+  [self didRelayoutSizeChanged:YES];
+}
+
 - (void)didRelayoutFromOldSize:(CGSize)oldSize toNewSize:(CGSize)newSize
+{
+  BOOL sizeChanged = !CGSizeEqualToSize(oldSize, newSize);
+  [self didRelayoutSizeChanged:sizeChanged];
+}
+
+- (void)didRelayoutSizeChanged:(BOOL)sizeChanged
 {
   if (_interactionDelegate != nil) {
     ASPerformBlockOnMainThread(^{
-      BOOL sizeChanged = !CGSizeEqualToSize(oldSize, newSize);
       [_interactionDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }
