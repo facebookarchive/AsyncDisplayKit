@@ -16,27 +16,27 @@
 
 // Because inline methods can't be extern'd and need to be part of the translation unit of code
 // that compiles with them to actually inline, we both declare and define these in the header.
-inline BOOL ASInterfaceStateIncludesVisible(ASInterfaceState interfaceState)
+static inline BOOL ASInterfaceStateIncludesVisible(ASInterfaceState interfaceState)
 {
   return ((interfaceState & ASInterfaceStateVisible) == ASInterfaceStateVisible);
 }
 
-inline BOOL ASInterfaceStateIncludesDisplay(ASInterfaceState interfaceState)
+static inline BOOL ASInterfaceStateIncludesDisplay(ASInterfaceState interfaceState)
 {
   return ((interfaceState & ASInterfaceStateDisplay) == ASInterfaceStateDisplay);
 }
 
-inline BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
+static inline BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
 {
   return ((interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
 }
 
-inline BOOL ASInterfaceStateIncludesMeasureLayout(ASInterfaceState interfaceState)
+static inline BOOL ASInterfaceStateIncludesMeasureLayout(ASInterfaceState interfaceState)
 {
   return ((interfaceState & ASInterfaceStateMeasureLayout) == ASInterfaceStateMeasureLayout);
 }
 
-inline NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfaceState)
+static inline NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfaceState)
 {
   NSMutableArray *states = [NSMutableArray array];
   if (interfaceState == ASInterfaceStateNone) {
