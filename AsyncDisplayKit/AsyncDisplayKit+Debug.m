@@ -217,7 +217,7 @@ static BOOL __enableHitTestDebug = NO;
               scrollDirection:(ASScrollDirection)direction
                     rangeMode:(ASLayoutRangeMode)mode
       displayTuningParameters:(ASRangeTuningParameters)displayTuningParameters
-    fetchDataTuningParameters:(ASRangeTuningParameters)fetchDataTuningParameters
+      preloadTuningParameters:(ASRangeTuningParameters)preloadTuningParameters
                interfaceState:(ASInterfaceState)interfaceState;
 
 @end
@@ -233,8 +233,8 @@ static BOOL __enableHitTestDebug = NO;
 - (void)updateWithVisibleRatio:(CGFloat)visibleRatio
                   displayRatio:(CGFloat)displayRatio
            leadingDisplayRatio:(CGFloat)leadingDisplayRatio
-                fetchDataRatio:(CGFloat)fetchDataRatio
-         leadingFetchDataRatio:(CGFloat)leadingFetchDataRatio
+                  preloadRatio:(CGFloat)preloadRatio
+           leadingpreloadRatio:(CGFloat)leadingpreloadRatio
                      direction:(ASScrollDirection)direction;
 
 @end
@@ -268,7 +268,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
               scrollDirection:(ASScrollDirection)direction
                     rangeMode:(ASLayoutRangeMode)mode
       displayTuningParameters:(ASRangeTuningParameters)displayTuningParameters
-    fetchDataTuningParameters:(ASRangeTuningParameters)fetchDataTuningParameters
+      preloadTuningParameters:(ASRangeTuningParameters)preloadTuningParameters
                interfaceState:(ASInterfaceState)interfaceState
 {
   [[_ASRangeDebugOverlayView sharedInstance] updateRangeController:controller
@@ -276,7 +276,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
                                                    scrollDirection:direction
                                                          rangeMode:mode
                                            displayTuningParameters:displayTuningParameters
-                                         fetchDataTuningParameters:fetchDataTuningParameters
+                                           preloadTuningParameters:preloadTuningParameters
                                                     interfaceState:interfaceState];
 }
 
@@ -438,7 +438,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
               scrollDirection:(ASScrollDirection)scrollDirection
                     rangeMode:(ASLayoutRangeMode)rangeMode
       displayTuningParameters:(ASRangeTuningParameters)displayTuningParameters
-    fetchDataTuningParameters:(ASRangeTuningParameters)fetchDataTuningParameters
+      preloadTuningParameters:(ASRangeTuningParameters)preloadTuningParameters
                interfaceState:(ASInterfaceState)interfaceState;
 {
   _ASRangeDebugBarView *viewToUpdate = [self barViewForRangeController:controller];
@@ -446,65 +446,65 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   CGRect boundsRect = self.bounds;
   CGRect visibleRect   = CGRectExpandToRangeWithScrollableDirections(boundsRect, ASRangeTuningParametersZero, scrollableDirections, scrollDirection);
   CGRect displayRect   = CGRectExpandToRangeWithScrollableDirections(boundsRect, displayTuningParameters,     scrollableDirections, scrollDirection);
-  CGRect fetchDataRect = CGRectExpandToRangeWithScrollableDirections(boundsRect, fetchDataTuningParameters,   scrollableDirections, scrollDirection);
+  CGRect preloadRect   = CGRectExpandToRangeWithScrollableDirections(boundsRect, preloadTuningParameters,   scrollableDirections, scrollDirection);
   
   // figure out which is biggest and assume that is full bounds
-  BOOL displayRangeLargerThanFetch    = NO;
+  BOOL displayRangeLargerThanPreload  = NO;
   CGFloat visibleRatio                = 0;
   CGFloat displayRatio                = 0;
-  CGFloat fetchDataRatio              = 0;
+  CGFloat preloadRatio                = 0;
   CGFloat leadingDisplayTuningRatio   = 0;
-  CGFloat leadingFetchDataTuningRatio = 0;
+  CGFloat leadingPreloadTuningRatio   = 0;
 
   if (!((displayTuningParameters.leadingBufferScreenfuls + displayTuningParameters.trailingBufferScreenfuls) == 0)) {
     leadingDisplayTuningRatio = displayTuningParameters.leadingBufferScreenfuls / (displayTuningParameters.leadingBufferScreenfuls + displayTuningParameters.trailingBufferScreenfuls);
   }
-  if (!((fetchDataTuningParameters.leadingBufferScreenfuls + fetchDataTuningParameters.trailingBufferScreenfuls) == 0)) {
-    leadingFetchDataTuningRatio = fetchDataTuningParameters.leadingBufferScreenfuls / (fetchDataTuningParameters.leadingBufferScreenfuls + fetchDataTuningParameters.trailingBufferScreenfuls);
+  if (!((preloadTuningParameters.leadingBufferScreenfuls + preloadTuningParameters.trailingBufferScreenfuls) == 0)) {
+    leadingPreloadTuningRatio = preloadTuningParameters.leadingBufferScreenfuls / (preloadTuningParameters.leadingBufferScreenfuls + preloadTuningParameters.trailingBufferScreenfuls);
   }
   
   if (ASScrollDirectionContainsVerticalDirection(scrollDirection)) {
     
-    if (displayRect.size.height >= fetchDataRect.size.height) {
-      displayRangeLargerThanFetch = YES;
+    if (displayRect.size.height >= preloadRect.size.height) {
+      displayRangeLargerThanPreload = YES;
     } else {
-      displayRangeLargerThanFetch = NO;
+      displayRangeLargerThanPreload = NO;
     }
     
-    if (displayRangeLargerThanFetch) {
+    if (displayRangeLargerThanPreload) {
       visibleRatio    = visibleRect.size.height / displayRect.size.height;
       displayRatio    = 1.0;
-      fetchDataRatio  = fetchDataRect.size.height / displayRect.size.height;
+      preloadRatio    = preloadRect.size.height / displayRect.size.height;
     } else {
-      visibleRatio    = visibleRect.size.height / fetchDataRect.size.height;
-      displayRatio    = displayRect.size.height / fetchDataRect.size.height;
-      fetchDataRatio  = 1.0;
+      visibleRatio    = visibleRect.size.height / preloadRect.size.height;
+      displayRatio    = displayRect.size.height / preloadRect.size.height;
+      preloadRatio    = 1.0;
     }
 
   } else {
     
-    if (displayRect.size.width >= fetchDataRect.size.width) {
-      displayRangeLargerThanFetch = YES;
+    if (displayRect.size.width >= preloadRect.size.width) {
+      displayRangeLargerThanPreload = YES;
     } else {
-      displayRangeLargerThanFetch = NO;
+      displayRangeLargerThanPreload = NO;
     }
     
-    if (displayRangeLargerThanFetch) {
+    if (displayRangeLargerThanPreload) {
       visibleRatio    = visibleRect.size.width / displayRect.size.width;
       displayRatio    = 1.0;
-      fetchDataRatio  = fetchDataRect.size.width / displayRect.size.width;
+      preloadRatio    = preloadRect.size.width / displayRect.size.width;
     } else {
-      visibleRatio    = visibleRect.size.width / fetchDataRect.size.width;
-      displayRatio    = displayRect.size.width / fetchDataRect.size.width;
-      fetchDataRatio  = 1.0;
+      visibleRatio    = visibleRect.size.width / preloadRect.size.width;
+      displayRatio    = displayRect.size.width / preloadRect.size.width;
+      preloadRatio    = 1.0;
     }
   }
 
   [viewToUpdate updateWithVisibleRatio:visibleRatio
                           displayRatio:displayRatio
                    leadingDisplayRatio:leadingDisplayTuningRatio
-                        fetchDataRatio:fetchDataRatio
-                 leadingFetchDataRatio:leadingFetchDataTuningRatio
+                          preloadRatio:preloadRatio
+                   leadingpreloadRatio:leadingPreloadTuningRatio
                              direction:scrollDirection];
 
   [self setNeedsLayout];
@@ -574,12 +574,12 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   ASTextNode        *_rightDebugText;
   ASImageNode       *_visibleRect;
   ASImageNode       *_displayRect;
-  ASImageNode       *_fetchDataRect;
+  ASImageNode       *_preloadRect;
   CGFloat           _visibleRatio;
   CGFloat           _displayRatio;
-  CGFloat           _fetchDataRatio;
+  CGFloat           _preloadRatio;
   CGFloat           _leadingDisplayRatio;
-  CGFloat           _leadingFetchDataRatio;
+  CGFloat           _leadingpreloadRatio;
   ASScrollDirection _scrollDirection;
   BOOL              _firstLayoutOfRects;
 }
@@ -593,7 +593,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     _debugText          = [self createDebugTextNode];
     _leftDebugText      = [self createDebugTextNode];
     _rightDebugText     = [self createDebugTextNode];
-    _fetchDataRect      = [self createRangeNodeWithColor:[UIColor orangeColor]];
+    _preloadRect        = [self createRangeNodeWithColor:[UIColor orangeColor]];
     _displayRect        = [self createRangeNodeWithColor:[UIColor yellowColor]];
     _visibleRect        = [self createRangeNodeWithColor:[UIColor greenColor]];
   }
@@ -626,29 +626,29 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 
   CGFloat visibleDimension   = (boundsSize.width - 2 * HORIZONTAL_INSET) * _visibleRatio;
   CGFloat displayDimension   = (boundsSize.width - 2 * HORIZONTAL_INSET) * _displayRatio;
-  CGFloat fetchDataDimension = (boundsSize.width - 2 * HORIZONTAL_INSET) * _fetchDataRatio;
+  CGFloat preloadDimension   = (boundsSize.width - 2 * HORIZONTAL_INSET) * _preloadRatio;
   CGFloat visiblePoint       = 0;
   CGFloat displayPoint       = 0;
-  CGFloat fetchDataPoint     = 0;
+  CGFloat preloadPoint       = 0;
   
-  BOOL displayLargerThanFetchData = (_displayRatio == 1.0) ? YES : NO;
+  BOOL displayLargerThanPreload = (_displayRatio == 1.0) ? YES : NO;
   
   if (ASScrollDirectionContainsLeft(_scrollDirection) || ASScrollDirectionContainsUp(_scrollDirection)) {
     
-    if (displayLargerThanFetchData) {
+    if (displayLargerThanPreload) {
       visiblePoint        = (displayDimension - visibleDimension) * _leadingDisplayRatio;
-      fetchDataPoint      = visiblePoint - (fetchDataDimension - visibleDimension) * _leadingFetchDataRatio;
+      preloadPoint        = visiblePoint - (preloadDimension - visibleDimension) * _leadingpreloadRatio;
     } else {
-      visiblePoint        = (fetchDataDimension - visibleDimension) * _leadingFetchDataRatio;
+      visiblePoint        = (preloadDimension - visibleDimension) * _leadingpreloadRatio;
       displayPoint        = visiblePoint - (displayDimension - visibleDimension) * _leadingDisplayRatio;
     }
   } else if (ASScrollDirectionContainsRight(_scrollDirection) || ASScrollDirectionContainsDown(_scrollDirection)) {
     
-    if (displayLargerThanFetchData) {
+    if (displayLargerThanPreload) {
       visiblePoint        = (displayDimension - visibleDimension) * (1 - _leadingDisplayRatio);
-      fetchDataPoint      = visiblePoint - (fetchDataDimension - visibleDimension) * (1 - _leadingFetchDataRatio);
+      preloadPoint        = visiblePoint - (preloadDimension - visibleDimension) * (1 - _leadingpreloadRatio);
     } else {
-      visiblePoint        = (fetchDataDimension - visibleDimension) * (1 - _leadingFetchDataRatio);
+      visiblePoint        = (preloadDimension - visibleDimension) * (1 - _leadingpreloadRatio);
       displayPoint        = visiblePoint - (displayDimension - visibleDimension) * (1 - _leadingDisplayRatio);
     }
   }
@@ -657,13 +657,13 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
   [UIView animateWithDuration:animate ? 0.3 : 0.0 delay:0.0 options:UIViewAnimationOptionLayoutSubviews animations:^{
     _visibleRect.frame    = CGRectMake(HORIZONTAL_INSET + visiblePoint,    rect.origin.y, visibleDimension,    subCellHeight);
     _displayRect.frame    = CGRectMake(HORIZONTAL_INSET + displayPoint,    rect.origin.y, displayDimension,    subCellHeight);
-    _fetchDataRect.frame  = CGRectMake(HORIZONTAL_INSET + fetchDataPoint,  rect.origin.y, fetchDataDimension,  subCellHeight);
+    _preloadRect.frame    = CGRectMake(HORIZONTAL_INSET + preloadPoint,  rect.origin.y, preloadDimension,  subCellHeight);
   } completion:^(BOOL finished) {}];
   
   if (!animate) {
-    _visibleRect.alpha = _displayRect.alpha = _fetchDataRect.alpha = 0;
+    _visibleRect.alpha = _displayRect.alpha = _preloadRect.alpha = 0;
     [UIView animateWithDuration:0.3 animations:^{
-      _visibleRect.alpha = _displayRect.alpha = _fetchDataRect.alpha = 1;
+      _visibleRect.alpha = _displayRect.alpha = _preloadRect.alpha = 1;
     }];
   }
   
@@ -673,15 +673,15 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 - (void)updateWithVisibleRatio:(CGFloat)visibleRatio
                   displayRatio:(CGFloat)displayRatio
            leadingDisplayRatio:(CGFloat)leadingDisplayRatio
-                fetchDataRatio:(CGFloat)fetchDataRatio
-         leadingFetchDataRatio:(CGFloat)leadingFetchDataRatio
+                preloadRatio:(CGFloat)preloadRatio
+         leadingpreloadRatio:(CGFloat)leadingpreloadRatio
                      direction:(ASScrollDirection)scrollDirection
 {
   _visibleRatio          = visibleRatio;
   _displayRatio          = displayRatio;
   _leadingDisplayRatio   = leadingDisplayRatio;
-  _fetchDataRatio        = fetchDataRatio;
-  _leadingFetchDataRatio = leadingFetchDataRatio;
+  _preloadRatio          = preloadRatio;
+  _leadingpreloadRatio   = leadingpreloadRatio;
   _scrollDirection       = scrollDirection;
   
   [self setNeedsLayout];
@@ -689,8 +689,8 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 
 - (void)setBarSubviewOrder
 {
-  if (_fetchDataRatio == 1.0) {
-    [self sendSubviewToBack:_fetchDataRect.view];
+  if (_preloadRatio == 1.0) {
+    [self sendSubviewToBack:_preloadRect.view];
   } else {
     [self sendSubviewToBack:_displayRect.view];
   }

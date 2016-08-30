@@ -143,9 +143,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     });
   }
 
-  if (self.interfaceState & ASInterfaceStateFetchData) {
-    [self fetchData];
-  }
+  [self setNeedsDataFetch];
 }
 
 - (NSURL *)URL

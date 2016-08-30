@@ -1733,9 +1733,9 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 
   // Simulate range handler updating cell node.
   [cellNode addSubnode:node];
-  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+  [cellNode enterInterfaceState:ASInterfaceStatePreload];
   XCTAssert(node.hasFetchedData);
-  XCTAssert(node.interfaceState == ASInterfaceStateFetchData);
+  XCTAssert(node.interfaceState == ASInterfaceStatePreload);
 
   // If the node goes into a view it should not adopt the `InHierarchy` state.
   ASTestWindow *window = [ASTestWindow new];
@@ -1749,7 +1749,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   ASCellNode *cellNode = [ASCellNode new];
   ASTestDisplayNode *node = [ASTestDisplayNode new];
   [cellNode addSubnode:node];
-  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+  [cellNode enterInterfaceState:ASInterfaceStatePreload];
   node.hasFetchedData = NO;
   [cellNode setNeedsDataFetch];
   XCTAssert(node.hasFetchedData);
@@ -1763,10 +1763,10 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [cellNode setHierarchyState:ASHierarchyStateRangeManaged];
   
   // Simulate enter range, fetch data, exit range
-  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
-  [cellNode exitInterfaceState:ASInterfaceStateFetchData];
+  [cellNode enterInterfaceState:ASInterfaceStatePreload];
+  [cellNode exitInterfaceState:ASInterfaceStatePreload];
   node.hasFetchedData = NO;
-  [cellNode enterInterfaceState:ASInterfaceStateFetchData];
+  [cellNode enterInterfaceState:ASInterfaceStatePreload];
 
   XCTAssert(node.hasFetchedData);
 }
@@ -1891,25 +1891,25 @@ static bool stringContainsPointer(NSString *description, id p) {
   ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
   
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
-  [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
+  [node recursivelySetInterfaceState:ASInterfaceStatePreload];
   
   XCTAssert([node displayRangeStateChangedToNO]);
 }
 
-- (void)testDidEnterPreloadIsCalledWhenNodesEnterFetchDataRange
+- (void)testDidEnterPreloadIsCalledWhenNodesEnterPreloadRange
 {
   ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
   
-  [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
+  [node recursivelySetInterfaceState:ASInterfaceStatePreload];
   
   XCTAssert([node preloadStateChangedToYES]);
 }
 
-- (void)testDidExitPreloadIsCalledWhenNodesExitFetchDataRange
+- (void)testDidExitPreloadIsCalledWhenNodesExitPreloadRange
 {
   ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
   
-  [node recursivelySetInterfaceState:ASInterfaceStateFetchData];
+  [node recursivelySetInterfaceState:ASInterfaceStatePreload];
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
 
   XCTAssert([node preloadStateChangedToNO]);

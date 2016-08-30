@@ -2451,7 +2451,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)setNeedsDataFetch
 {
-  if (ASInterfaceStateIncludesFetchData(_interfaceState)) {
+  if (self.isInPreloadState) {
     [self recursivelyFetchData];
   }
 }
@@ -2516,6 +2516,24 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   return ASHierarchyStateIncludesRangeManaged(_hierarchyState);
 }
 
+- (BOOL)isVisible
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASInterfaceStateIncludesVisible(_interfaceState);
+}
+
+- (BOOL)isInDisplayState
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASInterfaceStateIncludesDisplay(_interfaceState);
+}
+
+- (BOOL)isInPreloadState
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASInterfaceStateIncludesPreload(_interfaceState);
+}
+
 - (ASInterfaceState)interfaceState
 {
   ASDN::MutexLocker l(__instanceLock__);
@@ -2548,11 +2566,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // Still, the interfaceState should be updated to the current state of the node; just don't act on the transition.
   
   // Entered or exited data loading state.
-  BOOL nowFetchData = ASInterfaceStateIncludesFetchData(newState);
-  BOOL wasFetchData = ASInterfaceStateIncludesFetchData(oldState);
+  BOOL nowPreload = ASInterfaceStateIncludesPreload(newState);
+  BOOL wasPreload = ASInterfaceStateIncludesPreload(oldState);
   
-  if (nowFetchData != wasFetchData) {
-    if (nowFetchData) {
+  if (nowPreload != wasPreload) {
+    if (nowPreload) {
       [self didEnterPreloadState];
     } else {
       [self didExitPreloadState];
