@@ -348,6 +348,73 @@
   } completion:nil]);
 }
 
+// https://github.com/facebook/AsyncDisplayKit/issues/2011
+- (void)testThatDisappearingSupplementariesWithLayerBackedNodesDontFailAssert
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  UICollectionViewLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionNode *collectionNode = [[ASCollectionNode alloc] initWithFrame:window.bounds collectionViewLayout:layout];
+  ASCollectionView *cv = collectionNode.view;
+
+  id dataSource = [OCMockObject niceMockForProtocol:@protocol(ASCollectionDataSource)];
+  __block NSInteger suppNodeCount = 0;
+  __weak __block ASCellNode *suppNode0 = nil;
+  __weak __block ASCellNode *suppNode1 = nil;
+  [[[dataSource stub] andDo:^(NSInvocation *invocation) {
+    __autoreleasing ASCellNode *suppNode = [[ASCellNode alloc] init];
+    switch (suppNodeCount++) {
+      case 0:
+        suppNode0 = suppNode;
+        break;
+      case 1:
+        suppNode1 = suppNode;
+        break;
+      default:
+        XCTFail(@"Too many supplementary nodes!");
+        break;
+    }
+    ASDisplayNode *layerBacked = [[ASDisplayNode alloc] init];
+    layerBacked.layerBacked = YES;
+    [suppNode addSubnode:layerBacked];
+    [invocation setReturnValue:&suppNode];
+//    [invocation retainArguments];
+  }] collectionView:cv nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];
+  [[[dataSource stub] andDo:^(NSInvocation *invocation) {
+    ASCellNodeBlock block = ^{
+      return [[ASCellNode alloc] init];
+    };
+    [invocation setReturnValue:&block];
+    [invocation retainArguments];
+  }] collectionView:cv nodeBlockForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] numberOfSectionsInCollectionView:cv];
+  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] collectionView:cv numberOfItemsInSection:0];
+  collectionNode.dataSource = dataSource;
+
+  id delegate = [OCMockObject niceMockForProtocol:@protocol(UICollectionViewDelegateFlowLayout)];
+  [[[delegate stub] andReturnValue:[NSValue valueWithCGSize:CGSizeMake(100, 100)]] collectionView:cv layout:OCMOCK_ANY referenceSizeForHeaderInSection:0];
+  collectionNode.delegate = delegate;
+
+  [cv registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+  @autoreleasepool {
+    [window addSubview:cv];
+
+    [window makeKeyAndVisible];
+    [cv layoutIfNeeded];
+    [cv waitUntilAllUpdatesAreCommitted];
+  }
+
+  XCTAssertEqual([cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], suppNode0);
+  XCTAssertNotNil([layout layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
+  XCTAssertNotNil(suppNode0);
+  XCTAssertNil(suppNode1);
+  XCTAssertNotEqual(suppNode0.interfaceState & ASInterfaceStateVisible, 0);
+
+  [cv reloadDataImmediately];
+  [cv layoutIfNeeded];
+  XCTAssertEqual([cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], suppNode1);
+  XCTAssertNotNil(suppNode1);
+  XCTAssertNil(suppNode0);
+}
 
 - (void)testThatNodeCalculatedSizesAreUpdatedBeforeFirstPrepareLayoutAfterRotation
 {
