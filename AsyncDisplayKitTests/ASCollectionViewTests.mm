@@ -17,6 +17,7 @@
 #import "ASDisplayNode+Beta.h"
 #import <vector>
 #import <OCMock/OCMock.h>
+#import "ASDisplayNodeExtras.h"
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 
@@ -351,15 +352,22 @@
 // https://github.com/facebook/AsyncDisplayKit/issues/2011
 - (void)testThatDisappearingSupplementariesWithLayerBackedNodesDontFailAssert
 {
+  __weak __block ASCellNode *suppNode0 = nil;
+  __weak __block ASCellNode *suppNode1 = nil;
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UICollectionViewLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   ASCollectionNode *collectionNode = [[ASCollectionNode alloc] initWithFrame:window.bounds collectionViewLayout:layout];
+  @autoreleasepool {
+
+
+
+
+
   ASCollectionView *cv = collectionNode.view;
 
   id dataSource = [OCMockObject niceMockForProtocol:@protocol(ASCollectionDataSource)];
   __block NSInteger suppNodeCount = 0;
-  __weak __block ASCellNode *suppNode0 = nil;
-  __weak __block ASCellNode *suppNode1 = nil;
+
   [[[dataSource stub] andDo:^(NSInvocation *invocation) {
     __autoreleasing ASCellNode *suppNode = [[ASCellNode alloc] init];
     switch (suppNodeCount++) {
@@ -377,17 +385,8 @@
     layerBacked.layerBacked = YES;
     [suppNode addSubnode:layerBacked];
     [invocation setReturnValue:&suppNode];
-//    [invocation retainArguments];
   }] collectionView:cv nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];
-  [[[dataSource stub] andDo:^(NSInvocation *invocation) {
-    ASCellNodeBlock block = ^{
-      return [[ASCellNode alloc] init];
-    };
-    [invocation setReturnValue:&block];
-    [invocation retainArguments];
-  }] collectionView:cv nodeBlockForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] numberOfSectionsInCollectionView:cv];
-  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] collectionView:cv numberOfItemsInSection:0];
   collectionNode.dataSource = dataSource;
 
   id delegate = [OCMockObject niceMockForProtocol:@protocol(UICollectionViewDelegateFlowLayout)];
@@ -396,22 +395,32 @@
 
   [cv registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   @autoreleasepool {
+    [cv reloadDataImmediately];
     [window addSubview:cv];
 
     [window makeKeyAndVisible];
+
     [cv layoutIfNeeded];
-    [cv waitUntilAllUpdatesAreCommitted];
   }
 
-  XCTAssertEqual([cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], suppNode0);
+  XCTAssertEqualObjects([cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], suppNode0);
   XCTAssertNotNil([layout layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
   XCTAssertNotNil(suppNode0);
+  XCTAssertEqualObjects(suppNode0.view.window, window);
   XCTAssertNil(suppNode1);
-  XCTAssertNotEqual(suppNode0.interfaceState & ASInterfaceStateVisible, 0);
+  XCTAssert(ASInterfaceStateIncludesVisible(suppNode0.interfaceState));
+  @autoreleasepool {
+    [cv reloadData];
+    [cv waitUntilAllUpdatesAreCommitted];
+    [cv layoutIfNeeded];
+  }
 
-  [cv reloadDataImmediately];
-  [cv layoutIfNeeded];
-  XCTAssertEqual([cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], suppNode1);
+  [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
+
+  XCTAssertEqualObjects([cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], suppNode1);
+  XCTAssertEqualObjects(suppNode1.view.window, window);
+    }
+  XCTAssert(ASInterfaceStateIncludesVisible(suppNode1.interfaceState));
   XCTAssertNotNil(suppNode1);
   XCTAssertNil(suppNode0);
 }
