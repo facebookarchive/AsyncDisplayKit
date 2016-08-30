@@ -8,7 +8,7 @@ nextPage: automatic-layout-containers.html
 
 ##Box Model Layout
 
-ASLayout is an automatic, asynchronous, purely Objective-C box model layout feature. It is a simplified version of CSS flex box, loosely inspired by ComponetKit’s Layout. It is designed to make your layouts extensible and reusable.
+ASLayout is an automatic, asynchronous, purely Objective-C box model layout feature. It is a simplified version of CSS flex box, loosely inspired by ComponentKit’s Layout. It is designed to make your layouts extensible and reusable.
 
 `UIView` instances store position and size in their `center` and `bounds` properties. As constraints change, Core Animation performs a layout pass to call `layoutSubviews`, asking views to update these properties on their subviews. 
 
