@@ -94,7 +94,7 @@
     _photoCommentsView.shouldRasterizeDescendants = YES;
     
     // instead of adding everything addSubnode:
-    self.usesImplicitHierarchyManagement = YES;
+    self.automaticallyManagesSubnodes = YES;
     
 #if DEBUG_PHOTOCELL_LAYOUT
     _userAvatarImageView.backgroundColor              = [UIColor greenColor];
