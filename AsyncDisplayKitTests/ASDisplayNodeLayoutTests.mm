@@ -13,25 +13,59 @@
 #import "ASLayoutSpecSnapshotTestsHelper.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
-
 @interface ASDisplayNodeLayoutTests : XCTestCase
 @end
 
 @implementation ASDisplayNodeLayoutTests
 
-- (void)testMeasurePassOnLayoutIfNotHappenedBefore
+- (void)testMeasureOnLayoutIfNotHappenedBefore
 {
+  CGSize nodeSize = CGSizeMake(100, 100);
+  
   ASStaticSizeDisplayNode *displayNode = [ASStaticSizeDisplayNode new];
-  displayNode.staticSize  = CGSizeMake(100, 100);
-  displayNode.frame = CGRectMake(0, 0, 100, 100);
+  displayNode.staticSize  = nodeSize;
+  
+  // Use a button node in here as ASButtonNode uses layoutSpecThatFits:
+  ASButtonNode *buttonNode = [ASButtonNode new];
+  [displayNode addSubnode:buttonNode];
+  
+  displayNode.frame = {.size = nodeSize};
+  buttonNode.frame = {.size = nodeSize};
   
   ASXCTAssertEqualSizes(displayNode.calculatedSize, CGSizeZero, @"Calculated size before measurement and layout should be 0");
+  ASXCTAssertEqualSizes(buttonNode.calculatedSize, CGSizeZero, @"Calculated size before measurement and layout should be 0");
   
   // Trigger view creation and layout pass without a manual measure: call before so the automatic measurement
   // pass will trigger in the layout pass
   [displayNode.view layoutIfNeeded];
   
-  ASXCTAssertEqualSizes(displayNode.calculatedSize, CGSizeMake(100, 100), @"Automatic measurement pass should be happened in layout");
+  ASXCTAssertEqualSizes(displayNode.calculatedSize, nodeSize, @"Automatic measurement pass should have happened in layout pass");
+  ASXCTAssertEqualSizes(buttonNode.calculatedSize, nodeSize, @"Automatic measurement pass should have happened in layout pass");
+}
+
+- (void)testMeasureOnLayoutIfNotHappenedBeforeForRangeManagedNodes
+{
+  CGSize nodeSize = CGSizeMake(100, 100);
+  
+  ASStaticSizeDisplayNode *displayNode = [ASStaticSizeDisplayNode new];
+  displayNode.staticSize  = nodeSize;
+  
+  ASButtonNode *buttonNode = [ASButtonNode new];
+  [displayNode addSubnode:buttonNode];
+  
+  [displayNode enterHierarchyState:ASHierarchyStateRangeManaged];
+  
+  displayNode.frame = {.size = nodeSize};
+  buttonNode.frame = {.size = nodeSize};
+  
+  ASXCTAssertEqualSizes(displayNode.calculatedSize, CGSizeZero, @"Calculated size before measurement and layout should be 0");
+  ASXCTAssertEqualSizes(buttonNode.calculatedSize, CGSizeZero, @"Calculated size before measurement and layout should be 0");
+  
+  // Trigger layout pass without a maeasurment pass before
+  [displayNode.view layoutIfNeeded];
+  
+  ASXCTAssertEqualSizes(displayNode.calculatedSize, nodeSize, @"Automatic measurement pass should have happened in layout pass");
+  ASXCTAssertEqualSizes(buttonNode.calculatedSize, nodeSize, @"Automatic measurement pass should have happened in layout pass");
 }
 
 #if DEBUG
@@ -64,5 +98,31 @@
   XCTAssertThrows([displayNode measure:CGSizeMake(100, 100)], @"Should throw if subnodes where modified in layoutSpecThatFits:");
 }
 #endif
+
+- (void)testMeasureOnLayoutIfNotHappenedBeforeNoRemeasureForSameBounds
+{
+  CGSize nodeSize = CGSizeMake(100, 100);
+  
+  ASStaticSizeDisplayNode *displayNode = [ASStaticSizeDisplayNode new];
+  displayNode.staticSize  = nodeSize;
+  
+  ASButtonNode *buttonNode = [ASButtonNode new];
+  [displayNode addSubnode:buttonNode];
+  
+  __block size_t numberOfLayoutSpecThatFitsCalls = 0;
+  displayNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    __sync_fetch_and_add(&numberOfLayoutSpecThatFitsCalls, 1);
+    return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:buttonNode];
+  };
+  
+  displayNode.frame = {.size = nodeSize};
+  
+  // Trigger initial layout pass without a measurement pass before
+  [displayNode.view layoutIfNeeded];
+  XCTAssertEqual(numberOfLayoutSpecThatFitsCalls, 1, @"Should measure during layout if not measured");
+  
+  [displayNode measureWithSizeRange:ASSizeRangeMake(nodeSize, nodeSize)];
+  XCTAssertEqual(numberOfLayoutSpecThatFitsCalls, 1, @"Should not remeasure with same bounds");
+}
 
 @end
