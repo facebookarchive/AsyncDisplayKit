@@ -52,6 +52,11 @@
                BlueprintName = "AsyncDisplayKitTests"
                ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "ASTextNodePerformanceTests">
+               </Test>
+            </SkippedTests>
          </TestableReference>
       </Testables>
       <MacroExpansion>

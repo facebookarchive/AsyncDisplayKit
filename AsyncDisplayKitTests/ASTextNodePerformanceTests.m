@@ -13,6 +13,10 @@
 #import "ASXCTExtensions.h"
 #include "CGRect+ASConvenience.h"
 
+/**
+ * NOTE: This test case is not run during the "test" action. You have to run it manually (click the little diamond.)
+ */
+
 @interface ASTextNodePerformanceTests : XCTestCase
 
 @end
