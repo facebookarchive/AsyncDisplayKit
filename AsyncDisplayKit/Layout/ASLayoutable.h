@@ -67,6 +67,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 #pragma mark - Layout options from the Layoutable Protocols
 
+#pragma mark - ASLayoutValidation
+
+@property (nonatomic, readwrite) BOOL shouldValidate;
+
+
 #pragma mark - ASStackLayoutable
 /**
  * @abstract Additional space to place before this object in the stacking direction.

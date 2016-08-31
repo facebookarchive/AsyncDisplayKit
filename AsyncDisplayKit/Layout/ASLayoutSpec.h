@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASLayoutable.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
+#import <AsyncDisplayKit/ASLayoutableValidationBlockProvider.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -86,6 +87,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable id<ASLayoutable>)childForIndex:(NSUInteger)index;
 
+@end
+
+@interface ASLayoutSpec (Validation) <ASLayoutableValidationBlockProvider>
 @end
 
 @interface ASLayoutSpec (Debugging) <ASLayoutableAsciiArtProtocol>

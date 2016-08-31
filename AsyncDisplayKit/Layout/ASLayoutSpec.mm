@@ -16,6 +16,7 @@
 #import "ASLayout.h"
 #import "ASThread.h"
 #import "ASTraitCollection.h"
+#import "ASLayoutableValidation.h"
 
 #import <objc/runtime.h>
 #import <map>
@@ -35,7 +36,9 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 // these dynamic properties all defined in ASLayoutOptionsPrivate.m
 @dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis,
          alignSelf, ascender, descender, sizeRange, layoutPosition, layoutableType;
+
 @synthesize isFinalLayoutable = _isFinalLayoutable;
+@synthesize shouldValidate = _shouldValidate;
 
 - (instancetype)init
 {
@@ -44,6 +47,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   }
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
+  _shouldValidate = YES;
   return self;
 }
 
@@ -90,6 +94,21 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
     //}
 
     id<ASLayoutable> finalLayoutable = [child finalLayoutable];
+    
+#if LAYOUT_VALIDATION
+    if (self.shouldValidate && finalLayoutable.shouldValidate) {
+      for (ASLayoutableValidationBlock validatorBlock in [self layoutableValidatorBlocks]) {
+        NSError *error = nil;
+        BOOL success = validatorBlock(finalLayoutable, &error);
+        
+        if (error != nil) {
+          ASDisplayNodeCAssert(success, error.localizedDescription);
+        }
+      }
+    }
+#endif
+    
+    // Layout Options State propagation
     if (finalLayoutable != child) {
       if (ASEnvironmentStatePropagationEnabled()) {
         ASEnvironmentStatePropagateUp(finalLayoutable, child.environmentState.layoutOptionsState);
@@ -229,6 +248,20 @@ ASEnvironmentLayoutExtensibilityForwarding
 {
   ASDN::MutexLocker l(__instanceLock__);
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
+}
+
+@end
+
+@implementation ASLayoutSpec (Validation)
+
+#pragma mark - ASLayoutableValidatorProvider
+
+- (NSArray<ASLayoutableValidationBlock> *)layoutableValidatorBlocks
+{
+  return (NSArray<ASLayoutableValidationBlock>*)@[
+    ASLayoutableValidatorBlockRejectStaticLayoutable(),
+    ASLayoutableValidatorBlockRejectStackLayoutable()
+  ];
 }
 
 @end
