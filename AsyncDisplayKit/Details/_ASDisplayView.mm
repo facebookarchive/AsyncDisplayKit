@@ -55,7 +55,6 @@
 
 - (void)willMoveToWindow:(UIWindow *)newWindow
 {
-  NSLog(@"%@ willMoveToWindow %@", self.asyncdisplaykit_node.name, newWindow);
   BOOL visible = (newWindow != nil);
   if (visible && !_node.inHierarchy) {
     [_node __enterHierarchy];
@@ -64,7 +63,6 @@
 
 - (void)didMoveToWindow
 {
-  NSLog(@"%@ didMoveToWindow %@", self.asyncdisplaykit_node.name, self.window);
   BOOL visible = (self.window != nil);
   if (!visible && _node.inHierarchy) {
     [_node __exitHierarchy];
@@ -73,7 +71,6 @@
 
 - (void)willMoveToSuperview:(UIView *)newSuperview
 {
-  NSLog(@"%@ willMoveToSuperview %@", self.asyncdisplaykit_node.name, newSuperview);
   // Keep the node alive while the view is in a view hierarchy.  This helps ensure that async-drawing views can always
   // display their contents as long as they are visible somewhere, and aids in lifecycle management because the
   // lifecycle of the node can be treated as the same as the lifecycle of the view (let the view hierarchy own the
@@ -81,16 +78,7 @@
   UIView *currentSuperview = self.superview;
   if (!currentSuperview && newSuperview) {
     self.keepalive_node = _node;
-  } else if (currentSuperview && !newSuperview) {
-    // Clearing keepalive_node may cause deallocation of the node.  In this case, __exitHierarchy may not have an opportunity (e.g. _node will be cleared
-    // by the time -didMoveToWindow occurs after this) to clear the Visible interfaceState, which we need to do before deallocation to meet an API guarantee.
-    if (_node.inHierarchy) {
-      [_node __exitHierarchy];
-    }
-    self.keepalive_node = nil;
   }
-    
-  ASDisplayNodeAssert(self.keepalive_node == nil || newSuperview != nil, @"Keepalive reference should not exist if there is no superview.");
   
   if (newSuperview) {
     ASDisplayNode *supernode = _node.supernode;
@@ -125,13 +113,21 @@
 
 - (void)didMoveToSuperview
 {
-  NSLog(@"%@ didMoveToSuperview %@", self.asyncdisplaykit_node.name, self.superview);
+  UIView *superview = self.superview;
+  if (superview == nil) {
+    // Clearing keepalive_node may cause deallocation of the node.  In this case, __exitHierarchy may not have an opportunity (e.g. _node will be cleared
+    // by the time -didMoveToWindow occurs after this) to clear the Visible interfaceState, which we need to do before deallocation to meet an API guarantee.
+    if (_node.inHierarchy) {
+      [_node __exitHierarchy];
+    }
+    self.keepalive_node = nil;
+  }
+
   ASDisplayNode *supernode = _node.supernode;
   ASDisplayNodeAssert(!supernode.isLayerBacked, @"Shouldn't be possible for superview's node to be layer-backed.");
   
   if (supernode) {
     ASDisplayNodeAssertTrue(_node.nodeLoaded);
-    UIView *superview = self.superview;
     BOOL supernodeLoaded = supernode.nodeLoaded;
     BOOL needsSupernodeRemoval = NO;
     

@@ -1941,4 +1941,27 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertEqual(contentsAfterRedisplay, node.contents);
 }
 
+// Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2011
+- (void)testThatLayerBackedSubnodesAreMarkedInvisibleBeforeDeallocWhenSupernodesViewIsRemovedFromHierarchyWhileBeingRetained
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+
+  NS_VALID_UNTIL_END_OF_SCOPE UIView *nodeView = nil;
+  {
+    NS_VALID_UNTIL_END_OF_SCOPE ASDisplayNode *node = [[ASDisplayNode alloc] init];
+    nodeView = node.view;
+    node.name = @"Node";
+
+    NS_VALID_UNTIL_END_OF_SCOPE ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+    subnode.layerBacked = YES;
+    [node addSubnode:subnode];
+    subnode.name = @"Subnode";
+    
+    [window addSubview:nodeView];
+  }
+
+  // nodeView must continue to be retained across this call, but the nodes must not.
+  XCTAssertNoThrow([nodeView removeFromSuperview]);
+}
+
 @end

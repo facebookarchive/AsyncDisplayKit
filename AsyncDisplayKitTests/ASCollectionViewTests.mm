@@ -17,7 +17,6 @@
 #import "ASDisplayNode+Beta.h"
 #import <vector>
 #import <OCMock/OCMock.h>
-#import "ASDisplayNodeExtras.h"
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 
@@ -349,7 +348,11 @@
   } completion:nil]);
 }
 
-// https://github.com/facebook/AsyncDisplayKit/issues/2011
+/**
+ * https://github.com/facebook/AsyncDisplayKit/issues/2011
+ *
+ * If this ever becomes a pain to maintain, drop it. The underlying issue is tested by testThatLayerBackedSubnodesAreMarkedInvisibleBeforeDeallocWhenSupernodesViewIsRemovedFromHierarchyWhileBeingRetained
+ */
 - (void)testThatDisappearingSupplementariesWithLayerBackedNodesDontFailAssert
 {
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
@@ -393,30 +396,6 @@
     [self waitForExpectationsWithTimeout:1 handler:nil];
   }
 
-}
-
-// https://github.com/facebook/AsyncDisplayKit/issues/2011
-- (void)testLayerBackedVisiblityCallbacks
-{
-  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-
-  NS_VALID_UNTIL_END_OF_SCOPE UIView *suppNodeView = nil;
-    {
-        
-    }
-  NS_VALID_UNTIL_END_OF_SCOPE ASCellNode *suppNode = [[ASCellNode alloc] init];
-
-  suppNode.name = @"Node";
-
-  NS_VALID_UNTIL_END_OF_SCOPE ASDisplayNode *layerBacked = [[ASDisplayNode alloc] init];
-  layerBacked.layerBacked = YES;
-  [suppNode addSubnode:layerBacked];
-  layerBacked.name = @"Subnode";
-  [window addSubview:suppNode.view];
-  suppNode = nil;
-  layerBacked = nil;
-
-  [suppNodeView removeFromSuperview];
 }
 
 - (void)testThatNodeCalculatedSizesAreUpdatedBeforeFirstPrepareLayoutAfterRotation

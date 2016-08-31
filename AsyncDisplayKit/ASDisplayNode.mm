@@ -389,11 +389,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)dealloc
 {
   ASDisplayNodeAssertMainThread();
-
-  NSLog(@"%@ dealloc.", self.name);
   // Synchronous nodes may not be able to call the hierarchy notifications, so only enforce for regular nodes.
   ASDisplayNodeAssert(_flags.synchronous || !ASInterfaceStateIncludesVisible(_interfaceState), @"Node should always be marked invisible before deallocating; interfaceState: %lu, %@", (unsigned long)_interfaceState, self);
-
+  
   self.asyncLayer.asyncDelegate = nil;
   _view.asyncdisplaykit_node = nil;
   _layer.asyncdisplaykit_node = nil;
@@ -1464,10 +1462,8 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 - (id<CAAction>)actionForLayer:(CALayer *)layer forKey:(NSString *)event
 {
   if (event == kCAOnOrderIn) {
-    NSLog(@"%@ order in.", self.name);
     [self __enterHierarchy];
   } else if (event == kCAOnOrderOut) {
-    NSLog(@"%@ order out.", self.name);
     [self __exitHierarchy];
   }
 
@@ -2522,8 +2518,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     oldState = _interfaceState;
     _interfaceState = newState;
   }
-
-  NSLog(@"%@ moved to interface state %@", self.name, NSStringFromASInterfaceState(newState));
+  
   if ((newState & ASInterfaceStateMeasureLayout) != (oldState & ASInterfaceStateMeasureLayout)) {
     // Trigger asynchronous measurement if it is not already cached or being calculated.
   }
