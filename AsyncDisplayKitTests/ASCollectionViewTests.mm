@@ -348,6 +348,55 @@
   } completion:nil]);
 }
 
+/**
+ * https://github.com/facebook/AsyncDisplayKit/issues/2011
+ *
+ * If this ever becomes a pain to maintain, drop it. The underlying issue is tested by testThatLayerBackedSubnodesAreMarkedInvisibleBeforeDeallocWhenSupernodesViewIsRemovedFromHierarchyWhileBeingRetained
+ */
+- (void)testThatDisappearingSupplementariesWithLayerBackedNodesDontFailAssert
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  UICollectionViewLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionView *cv = [[ASCollectionView alloc] initWithFrame:window.bounds collectionViewLayout:layout];
+
+
+  __unused NSMutableSet *keepaliveNodes = [NSMutableSet set];
+  id dataSource = [OCMockObject niceMockForProtocol:@protocol(ASCollectionDataSource)];
+  static int nodeIdx = 0;
+  [[[dataSource stub] andDo:^(NSInvocation *invocation) {
+    __autoreleasing ASCellNode *suppNode = [[ASCellNode alloc] init];
+    int thisNodeIdx = nodeIdx++;
+    suppNode.name = [NSString stringWithFormat:@"Cell #%d", thisNodeIdx];
+    [keepaliveNodes addObject:suppNode];
+
+    ASDisplayNode *layerBacked = [[ASDisplayNode alloc] init];
+    layerBacked.layerBacked = YES;
+    layerBacked.name = [NSString stringWithFormat:@"Subnode #%d", thisNodeIdx];
+    [suppNode addSubnode:layerBacked];
+    [invocation setReturnValue:&suppNode];
+  }] collectionView:cv nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];
+  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] numberOfSectionsInCollectionView:cv];
+  cv.asyncDataSource = dataSource;
+
+  id delegate = [OCMockObject niceMockForProtocol:@protocol(UICollectionViewDelegateFlowLayout)];
+  [[[delegate stub] andReturnValue:[NSValue valueWithCGSize:CGSizeMake(100, 100)]] collectionView:cv layout:OCMOCK_ANY referenceSizeForHeaderInSection:0];
+  cv.asyncDelegate = delegate;
+
+  [cv registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+  [window addSubview:cv];
+
+  [window makeKeyAndVisible];
+
+  for (NSInteger i = 0; i < 2; i++) {
+    // NOTE: waitUntilAllUpdatesAreCommitted or reloadDataImmediately is not sufficient here!!
+    XCTestExpectation *done = [self expectationWithDescription:[NSString stringWithFormat:@"Reload #%td complete", i]];
+    [cv reloadDataWithCompletion:^{
+      [done fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+  }
+
+}
 
 - (void)testThatNodeCalculatedSizesAreUpdatedBeforeFirstPrepareLayoutAfterRotation
 {

@@ -1468,7 +1468,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
   }
 
   ASDisplayNodeAssert(_flags.layerBacked, @"We shouldn't get called back here if there is no layer");
-  return (id<CAAction>)[NSNull null];
+  return (id)kCFNull;
 }
 
 #pragma mark - Managing the Node Hierarchy
