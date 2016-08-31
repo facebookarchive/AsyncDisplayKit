@@ -55,6 +55,7 @@
 
 - (void)willMoveToWindow:(UIWindow *)newWindow
 {
+  NSLog(@"%@ willMoveToWindow %@", self.asyncdisplaykit_node.name, newWindow);
   BOOL visible = (newWindow != nil);
   if (visible && !_node.inHierarchy) {
     [_node __enterHierarchy];
@@ -63,6 +64,7 @@
 
 - (void)didMoveToWindow
 {
+  NSLog(@"%@ didMoveToWindow %@", self.asyncdisplaykit_node.name, self.window);
   BOOL visible = (self.window != nil);
   if (!visible && _node.inHierarchy) {
     [_node __exitHierarchy];
@@ -71,6 +73,7 @@
 
 - (void)willMoveToSuperview:(UIView *)newSuperview
 {
+  NSLog(@"%@ willMoveToSuperview %@", self.asyncdisplaykit_node.name, newSuperview);
   // Keep the node alive while the view is in a view hierarchy.  This helps ensure that async-drawing views can always
   // display their contents as long as they are visible somewhere, and aids in lifecycle management because the
   // lifecycle of the node can be treated as the same as the lifecycle of the view (let the view hierarchy own the
@@ -122,6 +125,7 @@
 
 - (void)didMoveToSuperview
 {
+  NSLog(@"%@ didMoveToSuperview %@", self.asyncdisplaykit_node.name, self.superview);
   ASDisplayNode *supernode = _node.supernode;
   ASDisplayNodeAssert(!supernode.isLayerBacked, @"Shouldn't be possible for superview's node to be layer-backed.");
   

@@ -356,11 +356,19 @@
   UICollectionViewLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   ASCollectionView *cv = [[ASCollectionView alloc] initWithFrame:window.bounds collectionViewLayout:layout];
 
+
+  __unused NSMutableSet *keepaliveNodes = [NSMutableSet set];
   id dataSource = [OCMockObject niceMockForProtocol:@protocol(ASCollectionDataSource)];
+  static int nodeIdx = 0;
   [[[dataSource stub] andDo:^(NSInvocation *invocation) {
     __autoreleasing ASCellNode *suppNode = [[ASCellNode alloc] init];
+    int thisNodeIdx = nodeIdx++;
+    suppNode.name = [NSString stringWithFormat:@"Cell #%d", thisNodeIdx];
+    [keepaliveNodes addObject:suppNode];
+
     ASDisplayNode *layerBacked = [[ASDisplayNode alloc] init];
     layerBacked.layerBacked = YES;
+    layerBacked.name = [NSString stringWithFormat:@"Subnode #%d", thisNodeIdx];
     [suppNode addSubnode:layerBacked];
     [invocation setReturnValue:&suppNode];
   }] collectionView:cv nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];
@@ -385,6 +393,30 @@
     [self waitForExpectationsWithTimeout:1 handler:nil];
   }
 
+}
+
+// https://github.com/facebook/AsyncDisplayKit/issues/2011
+- (void)testLayerBackedVisiblityCallbacks
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+
+  NS_VALID_UNTIL_END_OF_SCOPE UIView *suppNodeView = nil;
+    {
+        
+    }
+  NS_VALID_UNTIL_END_OF_SCOPE ASCellNode *suppNode = [[ASCellNode alloc] init];
+
+  suppNode.name = @"Node";
+
+  NS_VALID_UNTIL_END_OF_SCOPE ASDisplayNode *layerBacked = [[ASDisplayNode alloc] init];
+  layerBacked.layerBacked = YES;
+  [suppNode addSubnode:layerBacked];
+  layerBacked.name = @"Subnode";
+  [window addSubview:suppNode.view];
+  suppNode = nil;
+  layerBacked = nil;
+
+  [suppNodeView removeFromSuperview];
 }
 
 - (void)testThatNodeCalculatedSizesAreUpdatedBeforeFirstPrepareLayoutAfterRotation
