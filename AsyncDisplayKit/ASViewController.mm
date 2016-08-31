@@ -285,14 +285,14 @@ ASVisibilityDepthImplementation;
   return traitCollection;
 }
 
-- (void)progagateNewEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
+- (BOOL)progagateNewEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
   ASEnvironmentState environmentState = self.node.environmentState;
   ASEnvironmentTraitCollection oldEnvironmentTraitCollection = environmentState.environmentTraitCollection;
   
   BOOL traitsEqual = NO;
-  if (self.overrideTraitsComparisonBlock) {
-    traitsEqual = self.overrideTraitsComparisonBlock(environmentTraitCollection, oldEnvironmentTraitCollection);
+  if (self.overrideTraitsEqualityBlock) {
+    traitsEqual = self.overrideTraitsEqualityBlock(environmentTraitCollection, oldEnvironmentTraitCollection);
   } else {
     traitsEqual = ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, oldEnvironmentTraitCollection);
   }
@@ -311,6 +311,8 @@ ASVisibilityDepthImplementation;
     [self.node measureWithSizeRange:[self nodeConstrainedSize]];
     [self.node setNeedsLayout];
   }
+  // return whether or not these traits propagated.
+  return !traitsEqual;
 }
 
 - (void)traitCollectionDidChange:(UITraitCollection *)previousTraitCollection

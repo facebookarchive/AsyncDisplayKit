@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitCollectionBlock)(UITraitCollection *traitCollection);
 typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(CGSize windowSize);
-typedef BOOL (^ASDisplayTraitsComparisonBlock)(ASEnvironmentTraitCollection lhs, ASEnvironmentTraitCollection rhs);
+typedef BOOL (^ASDisplayTraitsEqualityBlock)(ASEnvironmentTraitCollection lhs, ASEnvironmentTraitCollection rhs);
 
 @interface ASViewController<__covariant DisplayNodeType : ASDisplayNode *> : UIViewController <ASVisibilityDepth>
 
@@ -45,7 +45,7 @@ typedef BOOL (^ASDisplayTraitsComparisonBlock)(ASEnvironmentTraitCollection lhs,
  * class changes (i.e., you don't care about vertical size class or container size) then you can set that logic
  * via this block.
  */
-@property (nonatomic, copy) ASDisplayTraitsComparisonBlock overrideTraitsComparisonBlock;
+@property (nonatomic, copy) ASDisplayTraitsEqualityBlock overrideTraitsEqualityBlock;
 
 /**
  * @abstract Passthrough property to the the .interfaceState of the node.
