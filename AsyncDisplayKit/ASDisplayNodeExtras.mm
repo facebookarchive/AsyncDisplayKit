@@ -54,7 +54,7 @@ extern void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *
     layer = node.layer;
   }
   
-  if (layer) {
+  if (layer && node.shouldRasterizeDescendants == NO) {
     /// NOTE: The docs say `sublayers` returns a copy, but it does not.
     /// See: http://stackoverflow.com/questions/14854480/collection-calayerarray-0x1ed8faa0-was-mutated-while-being-enumerated
     for (CALayer *sublayer in [[layer sublayers] copy]) {
