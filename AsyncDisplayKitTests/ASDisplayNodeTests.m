@@ -1977,11 +1977,11 @@ static bool stringContainsPointer(NSString *description, id p) {
   
   [node view]; // Node needs to be loaded
   
-  [node enterInterfaceState:ASInterfaceStateFetchData];
+  [node enterInterfaceState:ASInterfaceStatePreload];
   
   
-  XCTAssertTrue((node.interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
-  XCTAssertTrue((subnode.interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
+  XCTAssertTrue((node.interfaceState & ASInterfaceStatePreload) == ASInterfaceStatePreload);
+  XCTAssertTrue((subnode.interfaceState & ASInterfaceStatePreload) == ASInterfaceStatePreload);
   XCTAssertTrue(node.hasFetchedData);
   XCTAssertTrue(subnode.hasFetchedData);
 }
