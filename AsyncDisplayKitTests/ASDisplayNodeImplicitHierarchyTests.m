@@ -126,7 +126,7 @@
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Call measurement completion block on main"];
   
-  [displayNode transitionLayoutWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero) animated:YES measurementCompletion:^{
+  [displayNode transitionLayoutWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero) animated:YES shouldMeasureAsync:YES measurementCompletion:^{
     XCTAssertTrue(ASDisplayNodeThreadIsMain(), @"Measurement completion block should be called on main thread");
     [expectation fulfill];
   }];
@@ -207,7 +207,7 @@
   
   node.layoutState = @2;
   [node invalidateCalculatedLayout];
-  [node transitionLayoutAnimated:YES measurementCompletion:^{
+  [node transitionLayoutWithAnimation:YES shouldMeasureAsync:YES measurementCompletion:^{
     // Push this to the next runloop to let async insertion / removing of nodes finished before checking
     dispatch_async(dispatch_get_main_queue(), ^{
       XCTAssertEqual(node.subnodes[0], node2);

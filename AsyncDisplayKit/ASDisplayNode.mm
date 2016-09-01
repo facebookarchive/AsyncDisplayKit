@@ -723,7 +723,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Layout Transition
 
-- (void)transitionLayoutAnimated:(BOOL)animated measurementCompletion:(void (^)())completion
+- (void)transitionLayoutWithAnimation:(BOOL)animated
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                measurementCompletion:(void(^)())completion
 {
   if (_calculatedLayout == nil) {
     // constrainedSizeRange returns a struct and is invalid to call on nil.
@@ -734,15 +736,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self invalidateCalculatedLayout];
   [self transitionLayoutWithSizeRange:_calculatedLayout.constrainedSizeRange
                              animated:animated
+                   shouldMeasureAsync:shouldMeasureAsync
                 measurementCompletion:completion];
+  
 }
 
 - (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
                              animated:(BOOL)animated
-                measurementCompletion:(void (^)())completion
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                measurementCompletion:(void(^)())completion
 {
-  ASDisplayNodeAssertMainThread();
-  if (! [self shouldMeasureWithSizeRange:constrainedSize]) {
+  // Passed constrainedSize is the the same as the node's current constrained size it's a noop
+  if ([self shouldMeasureWithSizeRange:constrainedSize] == NO) {
     return;
   }
   
@@ -759,7 +764,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     node.pendingTransitionID = transitionID;
   });
   
-  ASPerformBlockOnBackgroundThread(^{
+  
+  void (^transitionBlock)(void) = ^{
     if ([self _shouldAbortTransitionWithID:transitionID]) {
       return;
     }
@@ -821,7 +827,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       // Kick off animating the layout transition
       [self animateLayoutTransition:_pendingLayoutTransitionContext];
     });
-  });
+  };
+  
+  if (shouldMeasureAsync) {
+    ASPerformBlockOnBackgroundThread(transitionBlock);
+  } else {
+    transitionBlock();
+  }
 }
 
 - (void)cancelLayoutTransition
@@ -3316,21 +3328,6 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 
 @implementation ASDisplayNode (Deprecated)
-
-- (void)transitionLayoutWithAnimation:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(void(^)())completion
-{
-  [self transitionLayoutAnimated:animated measurementCompletion:completion];
-}
-
-- (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
-                             animated:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(void(^)())completion
-{
-  [self transitionLayoutWithSizeRange:constrainedSize animated:animated measurementCompletion:completion];
-}
 
 - (void)cancelLayoutTransitionsInProgress
 {

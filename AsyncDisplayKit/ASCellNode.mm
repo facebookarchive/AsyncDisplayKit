@@ -115,35 +115,13 @@
   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
 }
 
-- (void)transitionLayoutAnimated:(BOOL)animated
-           measurementCompletion:(void (^)())completion
-{
-  CGSize oldSize = self.calculatedSize;
-  [super transitionLayoutAnimated:animated
-            measurementCompletion:^{
-              [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
-              if (completion) {
-                completion();
-              }
-            }
-   ];
-}
-
-//Deprecated
 - (void)transitionLayoutWithAnimation:(BOOL)animated
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(void(^)())completion
 {
-  [self transitionLayoutAnimated:animated measurementCompletion:completion];
-}
-
-- (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
-                             animated:(BOOL)animated
-                measurementCompletion:(void (^)())completion
-{
   CGSize oldSize = self.calculatedSize;
-  [super transitionLayoutWithSizeRange:constrainedSize
-                              animated:animated
+  [super transitionLayoutWithAnimation:animated
+                    shouldMeasureAsync:shouldMeasureAsync
                  measurementCompletion:^{
                    [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
                    if (completion) {
@@ -153,13 +131,22 @@
    ];
 }
 
-//Deprecated
 - (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
                              animated:(BOOL)animated
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(void(^)())completion
 {
-  [self transitionLayoutWithSizeRange:constrainedSize animated:animated measurementCompletion:completion];
+  CGSize oldSize = self.calculatedSize;
+  [super transitionLayoutWithSizeRange:constrainedSize
+                              animated:animated
+                    shouldMeasureAsync:shouldMeasureAsync
+                 measurementCompletion:^{
+                   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
+                   if (completion) {
+                     completion();
+                   }
+                 }
+   ];
 }
 
 - (void)didRelayoutFromOldSize:(CGSize)oldSize toNewSize:(CGSize)newSize
