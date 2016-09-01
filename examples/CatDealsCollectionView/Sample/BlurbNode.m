@@ -72,7 +72,7 @@ static CGFloat kTextPadding = 10.0f;
                           NSForegroundColorAttributeName: [UIColor blueColor],
                           NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle | NSUnderlinePatternDot),
                           } range:[blurb rangeOfString:@"catipsum.com"]];
-  _textNode.attributedString = string;
+  _textNode.attributedText = string;
 
   // add it as a subnode, and we're done
   [self addSubnode:_textNode];

@@ -704,7 +704,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
     _debugString = [[_rangeController dataSource] nameForRangeControllerDataSource];
   }
   if (_debugString) {
-    _debugText.attributedString = [_ASRangeDebugBarView whiteAttributedStringFromString:_debugString withSize:size];
+    _debugText.attributedText = [_ASRangeDebugBarView whiteAttributedStringFromString:_debugString withSize:size];
   }
   
   if (ASScrollDirectionContainsVerticalDirection(_scrollDirection)) {

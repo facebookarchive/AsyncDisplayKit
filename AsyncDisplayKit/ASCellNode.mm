@@ -297,7 +297,7 @@ static const CGFloat kASTextCellNodeDefaultVerticalPadding = 11.0f;
 
 - (instancetype)init
 {
-  return [self initWithAttributes:[self defaultTextAttributes] insets:[self defaultTextInsets]];
+  return [self initWithAttributes:[ASTextCellNode defaultTextAttributes] insets:[ASTextCellNode defaultTextInsets]];
 }
 
 - (instancetype)initWithAttributes:(NSDictionary *)textAttributes insets:(UIEdgeInsets)textInsets
@@ -306,8 +306,8 @@ static const CGFloat kASTextCellNodeDefaultVerticalPadding = 11.0f;
   if (self) {
     _textInsets = textInsets;
     _textAttributes = [textAttributes copy];
+    self.automaticallyManagesSubnodes = YES;
     _textNode = [[ASTextNode alloc] init];
-    [self addSubnode:_textNode];
   }
   return self;
 }
@@ -317,12 +317,12 @@ static const CGFloat kASTextCellNodeDefaultVerticalPadding = 11.0f;
   return [ASInsetLayoutSpec insetLayoutSpecWithInsets:self.textInsets child:self.textNode];
 }
 
-- (NSDictionary *)defaultTextAttributes
++ (NSDictionary *)defaultTextAttributes
 {
   return @{NSFontAttributeName : [UIFont systemFontOfSize:kASTextCellNodeDefaultFontSize]};
 }
 
-- (UIEdgeInsets)defaultTextInsets
++ (UIEdgeInsets)defaultTextInsets
 {
     return UIEdgeInsetsMake(kASTextCellNodeDefaultVerticalPadding, kASTextCellNodeDefaultHorizontalPadding, kASTextCellNodeDefaultVerticalPadding, kASTextCellNodeDefaultHorizontalPadding);
 }
@@ -333,14 +333,14 @@ static const CGFloat kASTextCellNodeDefaultVerticalPadding = 11.0f;
   
   _textAttributes = [textAttributes copy];
   
-  [self updateAttributedString];
+  [self updateAttributedText];
 }
 
 - (void)setTextInsets:(UIEdgeInsets)textInsets
 {
   _textInsets = textInsets;
 
-  [self updateAttributedString];
+  [self setNeedsLayout];
 }
 
 - (void)setText:(NSString *)text
@@ -349,17 +349,17 @@ static const CGFloat kASTextCellNodeDefaultVerticalPadding = 11.0f;
 
   _text = [text copy];
   
-  [self updateAttributedString];
+  [self updateAttributedText];
 }
 
-- (void)updateAttributedString
+- (void)updateAttributedText
 {
   if (_text == nil) {
-    _textNode.attributedString = nil;
+    _textNode.attributedText = nil;
     return;
   }
   
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:self.text attributes:self.textAttributes];
+  _textNode.attributedText = [[NSAttributedString alloc] initWithString:self.text attributes:self.textAttributes];
   [self setNeedsLayout];
 }
 

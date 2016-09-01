@@ -79,7 +79,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    BOOL hasDescription = self.descriptionNode.attributedString.length > 0;
+    BOOL hasDescription = self.descriptionNode.attributedText.length > 0;
     
     ASStackLayoutSpec *verticalStackLayoutSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
     verticalStackLayoutSpec.spacing = 5.0;
@@ -184,7 +184,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark ASTextNode
     ASTextNode *textNode = [ASTextNode new];
-    textNode.attributedString = [[NSAttributedString alloc] initWithString:@"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum varius nisi quis mattis dignissim. Proin convallis odio nec ipsum molestie, in porta quam viverra. Fusce ornare dapibus velit, nec malesuada mauris pretium vitae. Etiam malesuada ligula magna."];
+    textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum varius nisi quis mattis dignissim. Proin convallis odio nec ipsum molestie, in porta quam viverra. Fusce ornare dapibus velit, nec malesuada mauris pretium vitae. Etiam malesuada ligula magna."];
     
     parentNode = [self centeringParentNodeWithChild:textNode];
     parentNode.entryTitle = @"ASTextNode";
@@ -529,11 +529,11 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
             NSFontAttributeName : [UIFont boldSystemFontOfSize:14.0],
             NSForegroundColorAttributeName : [UIColor blackColor]
         };
-        cellNode.titleNode.attributedString = [[NSAttributedString alloc] initWithString:node.entryTitle attributes:titleNodeAttributes];
+        cellNode.titleNode.attributedText = [[NSAttributedString alloc] initWithString:node.entryTitle attributes:titleNodeAttributes];
         
         if (node.entryDescription) {
             NSDictionary *descriptionNodeAttributes = @{NSForegroundColorAttributeName : [UIColor lightGrayColor]};
-            cellNode.descriptionNode.attributedString = [[NSAttributedString alloc] initWithString:node.entryDescription attributes:descriptionNodeAttributes];
+            cellNode.descriptionNode.attributedText = [[NSAttributedString alloc] initWithString:node.entryDescription attributes:descriptionNodeAttributes];
         }
         
         return cellNode;

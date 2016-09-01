@@ -326,12 +326,12 @@ struct ASImageNodeDrawParameters {
     CGFloat pixelCountRatio            = (imageSizeInPixels.width * imageSizeInPixels.height) / (boundsSizeInPixels.width * boundsSizeInPixels.height);
     if (pixelCountRatio != 1.0) {
       NSString *scaleString            = [NSString stringWithFormat:@"%.2fx", pixelCountRatio];
-      _debugLabelNode.attributedString = [[NSAttributedString alloc] initWithString:scaleString attributes:[self debugLabelAttributes]];
+      _debugLabelNode.attributedText   = [[NSAttributedString alloc] initWithString:scaleString attributes:[self debugLabelAttributes]];
       _debugLabelNode.hidden           = NO;
       [self setNeedsLayout];
     } else {
       _debugLabelNode.hidden           = YES;
-      _debugLabelNode.attributedString = nil;
+      _debugLabelNode.attributedText   = nil;
     }
   }
   
