@@ -26,9 +26,9 @@ ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesDisplay(ASInterfaceState inter
   return ((interfaceState & ASInterfaceStateDisplay) == ASInterfaceStateDisplay);
 }
 
-ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
+ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesPreload(ASInterfaceState interfaceState)
 {
-  return ((interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
+  return ((interfaceState & ASInterfaceStatePreload) == ASInterfaceStatePreload);
 }
 
 ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesMeasureLayout(ASInterfaceState interfaceState)
@@ -45,8 +45,8 @@ ASDISPLAYNODE_INLINE NSString * _Nonnull NSStringFromASInterfaceState(ASInterfac
   if (ASInterfaceStateIncludesMeasureLayout(interfaceState)) {
     [states addObject:@"MeasureLayout"];
   }
-  if (ASInterfaceStateIncludesFetchData(interfaceState)) {
-    [states addObject:@" | FetchData"];
+  if (ASInterfaceStateIncludesPreload(interfaceState)) {
+    [states addObject:@" | Preload"];
   }
   if (ASInterfaceStateIncludesDisplay(interfaceState)) {
     [states addObject:@" | Display"];

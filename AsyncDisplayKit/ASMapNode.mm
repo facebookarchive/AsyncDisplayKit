@@ -428,8 +428,8 @@
     // If our bounds.size is different from our current snapshot size, then let's request a new image from MKMapSnapshotter.
     if (_needsMapReloadOnBoundsChange) {
       [self setSnapshotSizeWithReloadIfNeeded:self.bounds.size];
-      // FIXME: Adding a check for FetchData here seems to cause intermittent map load failures, but shouldn't.
-      // if (ASInterfaceStateIncludesFetchData(self.interfaceState)) {
+      // FIXME: Adding a check for Preload here seems to cause intermittent map load failures, but shouldn't.
+      // if (ASInterfaceStateIncludesPreload(self.interfaceState)) {
     }
   }
 }

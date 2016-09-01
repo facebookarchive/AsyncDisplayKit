@@ -55,7 +55,7 @@ typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(ASDisplayNode * _Nonnull nod
 /**
  Interface state is available on ASDisplayNode and ASViewController, and
  allows checking whether a node is in an interface situation where it is prudent to trigger certain
- actions: measurement, data fetching, display, and visibility (the latter for animations or other onscreen-only effects).
+ actions: measurement, data loading, display, and visibility (the latter for animations or other onscreen-only effects).
  */
 
 typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
@@ -65,7 +65,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
   /** The element may be added to a view soon that could become visible.  Measure the layout, including size calculation. */
   ASInterfaceStateMeasureLayout = 1 << 0,
   /** The element is likely enough to come onscreen that disk and/or network data required for display should be fetched. */
-  ASInterfaceStateFetchData     = 1 << 1,
+  ASInterfaceStatePreload       = 1 << 1,
   /** The element is very likely to become visible, and concurrent rendering should be executed for any -setNeedsDisplay. */
   ASInterfaceStateDisplay       = 1 << 2,
   /** The element is physically onscreen by at least 1 pixel.
@@ -78,7 +78,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
    * Currently we only set `interfaceState` to other values for
    * nodes contained in table views or collection views.
    */
-  ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay | ASInterfaceStateVisible,
+  ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStatePreload | ASInterfaceStateDisplay | ASInterfaceStateVisible,
 };
 
 /**
@@ -215,13 +215,34 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, strong) CALayer * _Nonnull layer;
 
 /**
+ * Returns YES if the node is – at least partially – visible in a window.
+ *
+ * @see didEnterVisibleState and didExitVisibleState
+ */
+@property (readonly, getter=isVisible) BOOL visible;
+
+/**
+ * Returns YES if the node is in the preloading interface state.
+ *
+ * @see didEnterPreloadState and didExitPreloadState
+ */
+@property (readonly, getter=isInPreloadState) BOOL inPreloadState;
+
+/**
+ * Returns YES if the node is in the displaying interface state.
+ *
+ * @see didEnterDisplayState and didExitDisplayState
+ */
+@property (readonly, getter=isInDisplayState) BOOL inDisplayState;
+
+/**
  * @abstract Returns the Interface State of the node.
  *
  * @return The current ASInterfaceState of the node, indicating whether it is visible and other situational properties.
  *
  * @see ASInterfaceState
  */
-@property (nonatomic, readonly) ASInterfaceState interfaceState;
+@property (readonly) ASInterfaceState interfaceState;
 
 
 /** @name Managing dimensions */
@@ -500,7 +521,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)recursivelyFetchData;
 
 /**
- * @abstract Triggers a recursive call to fetchData when the node has an interfaceState of ASInterfaceStateFetchData
+ * @abstract Triggers a recursive call to fetchData when the node has an interfaceState of ASInterfaceStatePreload
  */
 - (void)setNeedsDataFetch;
 
