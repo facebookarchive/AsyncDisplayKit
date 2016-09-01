@@ -1964,4 +1964,26 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertNoThrow([nodeView removeFromSuperview]);
 }
 
+
+- (void)testThatSubnodeGetsInterfaceStateSetIfRasterized
+{
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  node.name = @"Node";
+  node.shouldRasterizeDescendants = YES;
+  
+  ASTestDisplayNode *subnode = [[ASTestDisplayNode alloc] init];
+  subnode.name = @"Subnode";
+  [node addSubnode:subnode];
+  
+  [node view]; // Node needs to be loaded
+  
+  [node enterInterfaceState:ASInterfaceStateFetchData];
+  
+  
+  XCTAssertTrue((node.interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
+  XCTAssertTrue((subnode.interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
+  XCTAssertTrue(node.hasFetchedData);
+  XCTAssertTrue(subnode.hasFetchedData);
+}
+
 @end
