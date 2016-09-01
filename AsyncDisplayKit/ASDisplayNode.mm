@@ -77,7 +77,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 @synthesize threadSafeBounds = _threadSafeBounds;
 
-static BOOL suppressesInvalidCollectionUpdateExceptions = YES;
+static BOOL suppressesInvalidCollectionUpdateExceptions = NO;
 
 + (BOOL)suppressesInvalidCollectionUpdateExceptions
 {
