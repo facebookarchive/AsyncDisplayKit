@@ -18,10 +18,12 @@
 
 #import <unordered_map>
 
+// NOTE: We log before throwing so they don't have to let it bubble up to see the error.
 #define ASFailUpdateValidation(...)\
   if ([ASDisplayNode suppressesInvalidCollectionUpdateExceptions]) {\
     NSLog(__VA_ARGS__);\
   } else {\
+    NSLog(__VA_ARGS__);\
     ASDisplayNodeFailAssert(__VA_ARGS__);\
   }
 
