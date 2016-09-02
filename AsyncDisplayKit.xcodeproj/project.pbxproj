@@ -410,6 +410,7 @@
 		B350625E1B0111780018CF92 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943121A1575630030A7D0 /* AssetsLibrary.framework */; };
 		B350625F1B0111800018CF92 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
 		C78F7E2B1BF7809800CDEAFC /* ASTableNode.h in Headers */ = {isa = PBXBuildFile; fileRef = B0F880581BEAEC7500D17647 /* ASTableNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CC051F1F1D7A286A006434CB /* ASCALayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC051F1E1D7A286A006434CB /* ASCALayerTests.m */; };
 		CC0AEEA41D66316E005D1C78 /* ASUICollectionViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC0AEEA31D66316E005D1C78 /* ASUICollectionViewTests.m */; };
 		CC3B20841C3F76D600798563 /* ASPendingStateController.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20811C3F76D600798563 /* ASPendingStateController.h */; };
 		CC3B20851C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
@@ -1089,6 +1090,7 @@
 		B35061DA1B010EDF0018CF92 /* AsyncDisplayKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncDisplayKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B35061DD1B010EDF0018CF92 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../AsyncDisplayKit-iOS/Info.plist"; sourceTree = "<group>"; };
 		BDC2D162BD55A807C1475DA5 /* Pods-AsyncDisplayKitTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.profile.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.profile.xcconfig"; sourceTree = "<group>"; };
+		CC051F1E1D7A286A006434CB /* ASCALayerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCALayerTests.m; sourceTree = "<group>"; };
 		CC0AEEA31D66316E005D1C78 /* ASUICollectionViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASUICollectionViewTests.m; sourceTree = "<group>"; };
 		CC3B20811C3F76D600798563 /* ASPendingStateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPendingStateController.h; sourceTree = "<group>"; };
 		CC3B20821C3F76D600798563 /* ASPendingStateController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASPendingStateController.mm; sourceTree = "<group>"; };
@@ -1343,6 +1345,7 @@
 		058D09C5195D04C000B7D73C /* AsyncDisplayKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				CC051F1E1D7A286A006434CB /* ASCALayerTests.m */,
 				CC8B05D71D73979700F54286 /* ASTextNodePerformanceTests.m */,
 				CC8B05D41D73836400F54286 /* ASPerformanceTestContext.h */,
 				CC8B05D51D73836400F54286 /* ASPerformanceTestContext.m */,
@@ -2203,6 +2206,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				29CDC2E21AAE70D000833CA4 /* ASBasicImageDownloaderContextTests.m in Sources */,
+				CC051F1F1D7A286A006434CB /* ASCALayerTests.m in Sources */,
 				242995D31B29743C00090100 /* ASBasicImageDownloaderTests.m in Sources */,
 				296A0A351A951ABF005ACEAA /* ASBatchFetchingTests.m in Sources */,
 				ACF6ED5C1B178DC700DA7C62 /* ASCenterLayoutSpecSnapshotTests.mm in Sources */,
