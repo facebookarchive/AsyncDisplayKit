@@ -30,7 +30,7 @@
   self = [super init];
   if (self != nil) {
     _textNode = [[ASTextNode alloc] init];
-    _textNode.attributedString = [[NSAttributedString alloc] initWithString:text
+    _textNode.attributedText = [[NSAttributedString alloc] initWithString:text
                                                                  attributes:[self textAttributes]];
     [self addSubnode:_textNode];
   }

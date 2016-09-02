@@ -59,10 +59,10 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
     _collectionView.backgroundColor = [UIColor grayColor];
     _collectionView.leadingScreensForBatching = 2;
     
-    ASRangeTuningParameters fetchDataTuning;
-    fetchDataTuning.leadingBufferScreenfuls = 2;
-    fetchDataTuning.trailingBufferScreenfuls = 1;
-    [_collectionView setTuningParameters:fetchDataTuning forRangeType:ASLayoutRangeTypeFetchData];
+    ASRangeTuningParameters preloadTuning;
+    preloadTuning.leadingBufferScreenfuls = 2;
+    preloadTuning.trailingBufferScreenfuls = 1;
+    [_collectionView setTuningParameters:preloadTuning forRangeType:ASLayoutRangeTypePreload];
     
     ASRangeTuningParameters preRenderTuning;
     preRenderTuning.leadingBufferScreenfuls = 1;

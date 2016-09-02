@@ -40,7 +40,7 @@
   self = [super init];
   if (self == nil) { return self; }
   
-  self.usesImplicitHierarchyManagement = YES;
+  self.automaticallyManagesSubnodes = YES;
   
   // Define the layout transition duration for the default transition
   self.defaultLayoutTransitionDuration = 1.0;
@@ -89,7 +89,7 @@
 {
   self.enabled = !self.enabled;
   
-  [self transitionLayoutAnimated:YES measurementCompletion:nil];
+  [self transitionLayoutWithAnimation:YES shouldMeasureAsync:NO measurementCompletion:nil];
 }
 
 

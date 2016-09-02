@@ -55,7 +55,7 @@ typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(ASDisplayNode * _Nonnull nod
 /**
  Interface state is available on ASDisplayNode and ASViewController, and
  allows checking whether a node is in an interface situation where it is prudent to trigger certain
- actions: measurement, data fetching, display, and visibility (the latter for animations or other onscreen-only effects).
+ actions: measurement, data loading, display, and visibility (the latter for animations or other onscreen-only effects).
  */
 
 typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
@@ -65,7 +65,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
   /** The element may be added to a view soon that could become visible.  Measure the layout, including size calculation. */
   ASInterfaceStateMeasureLayout = 1 << 0,
   /** The element is likely enough to come onscreen that disk and/or network data required for display should be fetched. */
-  ASInterfaceStateFetchData     = 1 << 1,
+  ASInterfaceStatePreload       = 1 << 1,
   /** The element is very likely to become visible, and concurrent rendering should be executed for any -setNeedsDisplay. */
   ASInterfaceStateDisplay       = 1 << 2,
   /** The element is physically onscreen by at least 1 pixel.
@@ -78,7 +78,7 @@ typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
    * Currently we only set `interfaceState` to other values for
    * nodes contained in table views or collection views.
    */
-  ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStateFetchData | ASInterfaceStateDisplay | ASInterfaceStateVisible,
+  ASInterfaceStateInHierarchy   = ASInterfaceStateMeasureLayout | ASInterfaceStatePreload | ASInterfaceStateDisplay | ASInterfaceStateVisible,
 };
 
 /**
@@ -215,13 +215,34 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, strong) CALayer * _Nonnull layer;
 
 /**
+ * Returns YES if the node is – at least partially – visible in a window.
+ *
+ * @see didEnterVisibleState and didExitVisibleState
+ */
+@property (readonly, getter=isVisible) BOOL visible;
+
+/**
+ * Returns YES if the node is in the preloading interface state.
+ *
+ * @see didEnterPreloadState and didExitPreloadState
+ */
+@property (readonly, getter=isInPreloadState) BOOL inPreloadState;
+
+/**
+ * Returns YES if the node is in the displaying interface state.
+ *
+ * @see didEnterDisplayState and didExitDisplayState
+ */
+@property (readonly, getter=isInDisplayState) BOOL inDisplayState;
+
+/**
  * @abstract Returns the Interface State of the node.
  *
  * @return The current ASInterfaceState of the node, indicating whether it is visible and other situational properties.
  *
  * @see ASInterfaceState
  */
-@property (nonatomic, readonly) ASInterfaceState interfaceState;
+@property (readonly) ASInterfaceState interfaceState;
 
 
 /** @name Managing dimensions */
@@ -500,7 +521,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)recursivelyFetchData;
 
 /**
- * @abstract Triggers a recursive call to fetchData when the node has an interfaceState of ASInterfaceStateFetchData
+ * @abstract Triggers a recursive call to fetchData when the node has an interfaceState of ASInterfaceStatePreload
  */
 - (void)setNeedsDataFetch;
 
@@ -782,14 +803,18 @@ NS_ASSUME_NONNULL_BEGIN
  * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
  * @param shouldMeasureAsync Measure the layout asynchronously.
  * @param measurementCompletion Optional completion block called only if a new layout is calculated.
+ * It is called on main, right after the measurement and before -animateLayoutTransition:.
  *
- * @discussion It is called on main, right after the measurement and before -animateLayoutTransition:. If the passed constrainedSize is the the same as the node's current constrained size, this method is noop.
+ * @discussion If the passed constrainedSize is the the same as the node's current constrained size, this method is noop. If passed YES to shouldMeasureAsync it's guaranteed that measurement is happening on a background thread, otherwise measaurement will happen on the thread that the method was called on. The measurementCompletion callback is always called on the main thread right after the measurement and before -animateLayoutTransition:.
  *
  * @see animateLayoutTransition:
+ *
  */
 - (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
                              animated:(BOOL)animated
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(nullable void(^)())completion;
+
 
 /**
  * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
@@ -797,12 +822,15 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion It is called right after the measurement and before -animateLayoutTransition:.
  *
  * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
+ * @param shouldMeasureAsync Measure the layout asynchronously.
  * @param measurementCompletion Optional completion block called only if a new layout is calculated.
  *
  * @see animateLayoutTransition:
  *
  */
-- (void)transitionLayoutAnimated:(BOOL)animated measurementCompletion:(nullable void(^)())completion;
+- (void)transitionLayoutWithAnimation:(BOOL)animated
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                measurementCompletion:(nullable void(^)())completion;
 
 /**
  * @abstract Cancels all performing layout transitions. Can be called on any thread.
@@ -855,73 +883,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @param node The node to be added.
  */
 - (void)addSubnode:(nonnull ASDisplayNode *)node;
-@end
-
-
-@interface ASDisplayNode (Deprecated)
-
-/**
- * @abstract Transitions the current layout with a new constrained size. Must be called on main thread.
- *
- * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
- * @param shouldMeasureAsync Measure the layout asynchronously.
- * @param measurementCompletion Optional completion block called only if a new layout is calculated.
- * It is called on main, right after the measurement and before -animateLayoutTransition:.
- *
- * @discussion If the passed constrainedSize is the the same as the node's current constrained size, this method is noop.
- *
- * @see animateLayoutTransition:
- *
- * @deprecated Deprecated in version 2.0: Use transitionLayoutWithSizeRange:animated:measurementCompletion:.
- * shouldMeasureAsync is enabled by default now.
- *
- */
-- (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
-                             animated:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(nullable void(^)())completion ASDISPLAYNODE_DEPRECATED;
-
-
-/**
- * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
- *
- * @discussion It is called right after the measurement and before -animateLayoutTransition:.
- *
- * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
- * @param shouldMeasureAsync Measure the layout asynchronously.
- * @param measurementCompletion Optional completion block called only if a new layout is calculated.
- *
- * @see animateLayoutTransition:
- *
- * @deprecated Deprecated in version 2.0: Use transitionLayoutAnimated:measurementCompletion:
- * shouldMeasureAsync is enabled by default now.
- *
- */
-- (void)transitionLayoutWithAnimation:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(nullable void(^)())completion ASDISPLAYNODE_DEPRECATED;
-
-/**
- * @abstract Cancels all performing layout transitions. Can be called on any thread.
- *
- * @deprecated Deprecated in version 2.0: Use cancelLayoutTransition
- */
-- (void)cancelLayoutTransitionsInProgress ASDISPLAYNODE_DEPRECATED;
-
-/**
- * @abstract A boolean that shows whether the node automatically inserts and removes nodes based on the presence or
- * absence of the node and its subnodes is completely determined in its layoutSpecThatFits: method.
- *
- * @discussion If flag is YES the node no longer require addSubnode: or removeFromSupernode method calls. The presence
- * or absence of subnodes is completely determined in its layoutSpecThatFits: method.
- *
- * @deprecated Deprecated in version 2.0: Use automaticallyManagesSubnodes
- */
-@property (nonatomic, assign) BOOL usesImplicitHierarchyManagement ASDISPLAYNODE_DEPRECATED;
-
-- (void)reclaimMemory ASDISPLAYNODE_DEPRECATED;
-- (void)recursivelyReclaimMemory ASDISPLAYNODE_DEPRECATED;
-@property (nonatomic, assign) BOOL placeholderFadesOut ASDISPLAYNODE_DEPRECATED;
 
 @end
 

@@ -439,29 +439,34 @@ static NSString * const kRate = @"rate";
   }
 }
 
-- (void)visibleStateDidChange:(BOOL)isVisible
+- (void)didEnterVisibleState
 {
-  [super visibleStateDidChange:isVisible];
+  [super didEnterVisibleState];
   
   ASDN::MutexLocker l(__instanceLock__);
   
-  if (isVisible) {
-    if (_shouldBePlaying || _shouldAutoplay) {
-	  if(_player != nil && CMTIME_IS_VALID(_lastPlaybackTime)) {
-		[_player seekToTime:_lastPlaybackTime];
-	  }
-      [self play];
+  if (_shouldBePlaying || _shouldAutoplay) {
+    if(_player != nil && CMTIME_IS_VALID(_lastPlaybackTime)) {
+      [_player seekToTime:_lastPlaybackTime];
     }
-  } else if (_shouldBePlaying) {
-	
-	if(_player != nil && CMTIME_IS_VALID(_player.currentTime)) {
-	  _lastPlaybackTime = _player.currentTime;
-	}
+    [self play];
+  }
+}
+
+- (void)didExitVisibleState
+{
+  [super didExitVisibleState];
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  if (_shouldBePlaying) {
+    if(_player != nil && CMTIME_IS_VALID(_player.currentTime)) {
+      _lastPlaybackTime = _player.currentTime;
+    }
     [self pause];
     _shouldBePlaying = YES;
   }
 }
-
 
 #pragma mark - Video Properties
 

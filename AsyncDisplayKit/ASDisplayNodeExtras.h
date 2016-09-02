@@ -16,27 +16,27 @@
 
 // Because inline methods can't be extern'd and need to be part of the translation unit of code
 // that compiles with them to actually inline, we both declare and define these in the header.
-inline BOOL ASInterfaceStateIncludesVisible(ASInterfaceState interfaceState)
+ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesVisible(ASInterfaceState interfaceState)
 {
   return ((interfaceState & ASInterfaceStateVisible) == ASInterfaceStateVisible);
 }
 
-inline BOOL ASInterfaceStateIncludesDisplay(ASInterfaceState interfaceState)
+ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesDisplay(ASInterfaceState interfaceState)
 {
   return ((interfaceState & ASInterfaceStateDisplay) == ASInterfaceStateDisplay);
 }
 
-inline BOOL ASInterfaceStateIncludesFetchData(ASInterfaceState interfaceState)
+ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesPreload(ASInterfaceState interfaceState)
 {
-  return ((interfaceState & ASInterfaceStateFetchData) == ASInterfaceStateFetchData);
+  return ((interfaceState & ASInterfaceStatePreload) == ASInterfaceStatePreload);
 }
 
-inline BOOL ASInterfaceStateIncludesMeasureLayout(ASInterfaceState interfaceState)
+ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesMeasureLayout(ASInterfaceState interfaceState)
 {
   return ((interfaceState & ASInterfaceStateMeasureLayout) == ASInterfaceStateMeasureLayout);
 }
 
-inline NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfaceState)
+ASDISPLAYNODE_INLINE NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfaceState)
 {
   NSMutableArray *states = [NSMutableArray array];
   if (interfaceState == ASInterfaceStateNone) {
@@ -45,8 +45,8 @@ inline NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfa
   if (ASInterfaceStateIncludesMeasureLayout(interfaceState)) {
     [states addObject:@"MeasureLayout"];
   }
-  if (ASInterfaceStateIncludesFetchData(interfaceState)) {
-    [states addObject:@" | FetchData"];
+  if (ASInterfaceStateIncludesPreload(interfaceState)) {
+    [states addObject:@" | Preload"];
   }
   if (ASInterfaceStateIncludesDisplay(interfaceState)) {
     [states addObject:@" | Display"];

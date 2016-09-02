@@ -152,33 +152,33 @@ const CGFloat kSoldOutGBHeight = 50.0;
 - (void)updateLabels {
   // Set Title text
   if (self.viewModel.titleText) {
-    self.titleLabel.attributedString = [[NSAttributedString alloc] initWithString:self.viewModel.titleText attributes:[ItemStyles titleStyle]];
+    self.titleLabel.attributedText = [[NSAttributedString alloc] initWithString:self.viewModel.titleText attributes:[ItemStyles titleStyle]];
   }
   if (self.viewModel.firstInfoText) {
-    self.firstInfoLabel.attributedString = [[NSAttributedString alloc] initWithString:self.viewModel.firstInfoText attributes:[ItemStyles subtitleStyle]];
+    self.firstInfoLabel.attributedText = [[NSAttributedString alloc] initWithString:self.viewModel.firstInfoText attributes:[ItemStyles subtitleStyle]];
   }
   
   if (self.viewModel.secondInfoText) {
-    self.secondInfoLabel.attributedString = [[NSAttributedString alloc] initWithString:self.viewModel.secondInfoText attributes:[ItemStyles secondInfoStyle]];
+    self.secondInfoLabel.attributedText = [[NSAttributedString alloc] initWithString:self.viewModel.secondInfoText attributes:[ItemStyles secondInfoStyle]];
   }
   if (self.viewModel.originalPriceText) {
-    self.originalPriceLabel.attributedString = [[NSAttributedString alloc] initWithString:self.viewModel.originalPriceText attributes:[ItemStyles originalPriceStyle]];
+    self.originalPriceLabel.attributedText = [[NSAttributedString alloc] initWithString:self.viewModel.originalPriceText attributes:[ItemStyles originalPriceStyle]];
   }
   if (self.viewModel.finalPriceText) {
-        self.finalPriceLabel.attributedString = [[NSAttributedString alloc] initWithString:self.viewModel.finalPriceText attributes:[ItemStyles finalPriceStyle]];
+        self.finalPriceLabel.attributedText = [[NSAttributedString alloc] initWithString:self.viewModel.finalPriceText attributes:[ItemStyles finalPriceStyle]];
   }
   if (self.viewModel.distanceLabelText) {
     NSString *format = [ItemNode isRTL] ? @"%@ •" : @"• %@";
     NSString *distanceText = [NSString stringWithFormat:format, self.viewModel.distanceLabelText];
     
-    self.distanceLabel.attributedString = [[NSAttributedString alloc] initWithString:distanceText attributes:[ItemStyles distanceStyle]];
+    self.distanceLabel.attributedText = [[NSAttributedString alloc] initWithString:distanceText attributes:[ItemStyles distanceStyle]];
   }
   
   BOOL isSoldOut = self.viewModel.soldOutText != nil;
   
   if (isSoldOut) {
     NSString *soldOutText = self.viewModel.soldOutText;
-    self.soldOutLabelFlat.attributedString = [[NSAttributedString alloc] initWithString:soldOutText attributes:[ItemStyles soldOutStyle]];
+    self.soldOutLabelFlat.attributedText = [[NSAttributedString alloc] initWithString:soldOutText attributes:[ItemStyles soldOutStyle]];
   }
   self.soldOutOverlay.hidden = !isSoldOut;
   self.soldOutLabelFlat.hidden = !isSoldOut;
@@ -186,7 +186,7 @@ const CGFloat kSoldOutGBHeight = 50.0;
   
   BOOL hasBadge = self.viewModel.badgeText != nil;
   if (hasBadge) {
-    self.badge.attributedString = [[NSAttributedString alloc] initWithString:self.viewModel.badgeText attributes:[ItemStyles badgeStyle]];
+    self.badge.attributedText = [[NSAttributedString alloc] initWithString:self.viewModel.badgeText attributes:[ItemStyles badgeStyle]];
     self.badge.backgroundColor = [ItemStyles badgeColor];
   }
   self.badge.hidden = !hasBadge;

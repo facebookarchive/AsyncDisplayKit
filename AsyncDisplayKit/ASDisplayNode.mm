@@ -77,7 +77,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 @synthesize threadSafeBounds = _threadSafeBounds;
 
-static BOOL suppressesInvalidCollectionUpdateExceptions = YES;
+static BOOL suppressesInvalidCollectionUpdateExceptions = NO;
 
 + (BOOL)suppressesInvalidCollectionUpdateExceptions
 {
@@ -220,6 +220,25 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   });
 
   class_replaceMethod(self, @selector(_staticInitialize), staticInitialize, "v:@");
+  
+  
+#if DEBUG
+  // Check if subnodes where modified during layoutSpecThatFits:
+  if (self == [ASDisplayNode class] || ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(layoutSpecThatFits:)))
+  {
+    __block IMP originalLayoutSpecThatFitsIMP = ASReplaceMethodWithBlock(self, @selector(layoutSpecThatFits:), ^(ASDisplayNode *_self, ASSizeRange sizeRange) {
+      NSArray *oldSubnodes = _self.subnodes;
+      ASLayoutSpec *layoutSpec = ((ASLayoutSpec *( *)(id, SEL, ASSizeRange))originalLayoutSpecThatFitsIMP)(_self, @selector(layoutSpecThatFits:), sizeRange);
+      NSArray *subnodes = _self.subnodes;
+      ASDisplayNodeAssertTrue(oldSubnodes.count == subnodes.count);
+      for (NSInteger i = 0; i < oldSubnodes.count; i++) {
+        ASDisplayNodeAssertTrue(oldSubnodes[i] == subnodes[i]);
+      }
+      return layoutSpec;
+    });
+  }
+#endif
+
 }
 
 + (void)load
@@ -704,7 +723,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Layout Transition
 
-- (void)transitionLayoutAnimated:(BOOL)animated measurementCompletion:(void (^)())completion
+- (void)transitionLayoutWithAnimation:(BOOL)animated
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                measurementCompletion:(void(^)())completion
 {
   if (_calculatedLayout == nil) {
     // constrainedSizeRange returns a struct and is invalid to call on nil.
@@ -715,15 +736,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self invalidateCalculatedLayout];
   [self transitionLayoutWithSizeRange:_calculatedLayout.constrainedSizeRange
                              animated:animated
+                   shouldMeasureAsync:shouldMeasureAsync
                 measurementCompletion:completion];
+  
 }
 
 - (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
                              animated:(BOOL)animated
-                measurementCompletion:(void (^)())completion
+                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
+                measurementCompletion:(void(^)())completion
 {
-  ASDisplayNodeAssertMainThread();
-  if (! [self shouldMeasureWithSizeRange:constrainedSize]) {
+  // Passed constrainedSize is the the same as the node's current constrained size it's a noop
+  if ([self shouldMeasureWithSizeRange:constrainedSize] == NO) {
     return;
   }
   
@@ -740,7 +764,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     node.pendingTransitionID = transitionID;
   });
   
-  ASPerformBlockOnBackgroundThread(^{
+  
+  void (^transitionBlock)(void) = ^{
     if ([self _shouldAbortTransitionWithID:transitionID]) {
       return;
     }
@@ -802,7 +827,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       // Kick off animating the layout transition
       [self animateLayoutTransition:_pendingLayoutTransitionContext];
     });
-  });
+  };
+  
+  if (shouldMeasureAsync) {
+    ASPerformBlockOnBackgroundThread(transitionBlock);
+  } else {
+    transitionBlock();
+  }
 }
 
 - (void)cancelLayoutTransition
@@ -1182,6 +1213,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // but automatic subnode management would require us to modify the node tree
   // in the background on a loaded node, which isn't currently supported.
   if (_pendingViewState.hasSetNeedsLayout) {
+    //Need to unlock before calling setNeedsLayout to avoid deadlocks.
+    //MutexUnlocker will re-lock at the end of scope.
+    ASDN::MutexUnlocker u(__instanceLock__);
     [self __setNeedsLayout];
   }
 
@@ -1192,7 +1226,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [_pendingViewState applyToView:self.view withSpecialPropertiesHandling:specialPropertiesHandling];
   }
 
-  [_pendingViewState clearChanges];
+  // _ASPendingState objects can add up very quickly when adding
+  // many nodes. This is especially an issue in large collection views
+  // and table views. This needs to be weighed against the cost of
+  // reallocing a _ASPendingState. So in range managed nodes we
+  // delete the pending state, otherwise we just clear it.
+  if (ASHierarchyStateIncludesRangeManaged(_hierarchyState)) {
+    _pendingViewState = nil;
+  } else {
+    [_pendingViewState clearChanges];
+  }
 }
 
 - (void)displayImmediately
@@ -1213,6 +1256,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self displayImmediately];
 }
 
+//Calling this with the lock held can lead to deadlocks. Always call *unlocked*
 - (void)__setNeedsLayout
 {
   ASDisplayNodeAssertThreadAffinity(self);
@@ -1298,22 +1342,21 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)measureNodeWithBoundsIfNecessary:(CGRect)bounds
 {
-  BOOL supportsRangedManagedInterfaceState = NO;
   BOOL hasDirtyLayout = NO;
-  BOOL hasSupernode = NO;
+  CGSize calculatedLayoutSize = CGSizeZero;
   {
     ASDN::MutexLocker l(__instanceLock__);
-    supportsRangedManagedInterfaceState = [self supportsRangeManagedInterfaceState];
     hasDirtyLayout = [self _hasDirtyLayout];
-    hasSupernode = (self.supernode != nil);
+    calculatedLayoutSize = _calculatedLayout.size;
   }
   
-  // Normally measure will be called before layout occurs. If this doesn't happen, nothing is going to call it at all.
-  // We simply call measureWithSizeRange: using a size range equal to whatever bounds were provided to that element
-  if (!hasSupernode && !supportsRangedManagedInterfaceState && hasDirtyLayout) {
+  // If no measure pass happened or the bounds changed between layout passes we manually trigger a measurement pass
+  // for the node using a size range equal to whatever bounds were provided to the node
+  if (hasDirtyLayout || CGSizeEqualToSize(calculatedLayoutSize, bounds.size) == NO) {
     if (CGRectEqualToRect(bounds, CGRectZero)) {
       LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     } else {
+      // This is a no op if the bounds size is the same as the cosntrained size we used to create the layout previously
       [self measureWithSizeRange:ASSizeRangeMake(bounds.size, bounds.size)];
     }
   }
@@ -1445,7 +1488,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
   }
 
   ASDisplayNodeAssert(_flags.layerBacked, @"We shouldn't get called back here if there is no layer");
-  return (id<CAAction>)[NSNull null];
+  return (id)kCFNull;
 }
 
 #pragma mark - Managing the Node Hierarchy
@@ -2408,7 +2451,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)setNeedsDataFetch
 {
-  if (ASInterfaceStateIncludesFetchData(_interfaceState)) {
+  if (self.isInPreloadState) {
     [self recursivelyFetchData];
   }
 }
@@ -2432,24 +2475,36 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   });
 }
 
-- (void)visibilityDidChange:(BOOL)isVisible
+- (void)didEnterVisibleState
 {
   // subclass override
 }
 
-- (void)visibleStateDidChange:(BOOL)isVisible
+- (void)didExitVisibleState
 {
   // subclass override
 }
 
-- (void)displayStateDidChange:(BOOL)inDisplayState
+- (void)didEnterDisplayState
 {
-  //subclass override
+  // subclass override
 }
 
-- (void)loadStateDidChange:(BOOL)inLoadState
+- (void)didExitDisplayState
 {
-  //subclass override
+  // subclass override
+}
+
+- (void)didEnterPreloadState
+{
+  [self fetchData];
+}
+
+- (void)didExitPreloadState
+{
+  if ([self supportsRangeManagedInterfaceState]) {
+    [self clearFetchedData];
+  }
 }
 
 /**
@@ -2461,6 +2516,24 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   return ASHierarchyStateIncludesRangeManaged(_hierarchyState);
 }
 
+- (BOOL)isVisible
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASInterfaceStateIncludesVisible(_interfaceState);
+}
+
+- (BOOL)isInDisplayState
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASInterfaceStateIncludesDisplay(_interfaceState);
+}
+
+- (BOOL)isInPreloadState
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASInterfaceStateIncludesPreload(_interfaceState);
+}
+
 - (ASInterfaceState)interfaceState
 {
   ASDN::MutexLocker l(__instanceLock__);
@@ -2469,6 +2542,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)setInterfaceState:(ASInterfaceState)newState
 {
+  //This method is currently called on the main thread. The assert has been added here because all of the
+  //did(Enter|Exit)(Display|Visible|Preload)State methods currently guarantee calling on main.
+  ASDisplayNodeAssertMainThread();
   // It should never be possible for a node to be visible but not be allowed / expected to display.
   ASDisplayNodeAssertFalse(ASInterfaceStateIncludesVisible(newState) && !ASInterfaceStateIncludesDisplay(newState));
   ASInterfaceState oldState = ASInterfaceStateNone;
@@ -2490,18 +2566,14 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // Still, the interfaceState should be updated to the current state of the node; just don't act on the transition.
   
   // Entered or exited data loading state.
-  BOOL nowFetchData = ASInterfaceStateIncludesFetchData(newState);
-  BOOL wasFetchData = ASInterfaceStateIncludesFetchData(oldState);
+  BOOL nowPreload = ASInterfaceStateIncludesPreload(newState);
+  BOOL wasPreload = ASInterfaceStateIncludesPreload(oldState);
   
-  if (nowFetchData != wasFetchData) {
-    if (nowFetchData) {
-      [self fetchData];
-      [self loadStateDidChange:YES];
+  if (nowPreload != wasPreload) {
+    if (nowPreload) {
+      [self didEnterPreloadState];
     } else {
-      if ([self supportsRangeManagedInterfaceState]) {
-        [self clearFetchedData];
-      }
-      [self loadStateDidChange:NO];
+      [self didExitPreloadState];
     }
   }
 
@@ -2546,7 +2618,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       }
     }
     
-    [self displayStateDidChange:nowDisplay];
+    if (nowDisplay) {
+      [self didEnterDisplayState];
+    } else {
+      [self didExitDisplayState];
+    }
   }
 
   // Became visible or invisible.  When range-managed, this represents literal visibility - at least one pixel
@@ -2555,8 +2631,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   BOOL wasVisible = ASInterfaceStateIncludesVisible(oldState);
 
   if (nowVisible != wasVisible) {
-    [self visibleStateDidChange:nowVisible];
-    [self visibilityDidChange:nowVisible];   //TODO: remove once this method has been deprecated
+    if (nowVisible) {
+      [self didEnterVisibleState];
+    } else {
+      [self didExitVisibleState];
+    }
   }
 
   [self interfaceStateDidChange:newState fromState:oldState];
@@ -3267,21 +3346,6 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 
 @implementation ASDisplayNode (Deprecated)
-
-- (void)transitionLayoutWithAnimation:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(void(^)())completion
-{
-  [self transitionLayoutAnimated:animated measurementCompletion:completion];
-}
-
-- (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
-                             animated:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(void(^)())completion
-{
-  [self transitionLayoutWithSizeRange:constrainedSize animated:animated measurementCompletion:completion];
-}
 
 - (void)cancelLayoutTransitionsInProgress
 {

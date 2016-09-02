@@ -36,8 +36,8 @@ NS_ASSUME_NONNULL_BEGIN
     weakKey = key;
     weakValue = value;
 }
-  XCTAssertEqual(weakKey, nil);
-  XCTAssertEqual(weakValue, nil);
+  XCTAssertNil(weakKey);
+  XCTAssertNil(weakValue);
 }
 
 - (void)testKeyEquality

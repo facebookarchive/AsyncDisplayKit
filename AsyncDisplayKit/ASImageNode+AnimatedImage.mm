@@ -164,19 +164,23 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
   [self.animatedImage clearAnimatedImageCache];
 }
 
-- (void)visibleStateDidChange:(BOOL)isVisible
+- (void)didEnterVisibleState
 {
-  [super visibleStateDidChange:isVisible];
-  
   ASDisplayNodeAssertMainThread();
-  if (isVisible) {
-    if (self.animatedImage.coverImageReady) {
-      self.image = self.animatedImage.coverImage;
-    }
-    [self startAnimating];
-  } else {
-    [self stopAnimating];
+  [super didEnterVisibleState];
+  
+  if (self.animatedImage.coverImageReady) {
+    self.image = self.animatedImage.coverImage;
   }
+  [self startAnimating];
+}
+
+- (void)didExitVisibleState
+{
+  ASDisplayNodeAssertMainThread();
+  [super didExitVisibleState];
+  
+  [self stopAnimating];
 }
 
 - (void)displayLinkFired:(CADisplayLink *)displayLink

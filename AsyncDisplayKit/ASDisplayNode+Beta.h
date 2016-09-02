@@ -28,8 +28,7 @@ ASDISPLAYNODE_EXTERN_C_END
  * Note that even if AsyncDisplayKit's exception is suppressed, the app may still crash
  * as it proceeds with an invalid update.
  *
- * This currently defaults to YES. In a future release it will default to NO and later
- * be removed entirely.
+ * This property defaults to NO. It will be removed in a future release.
  */
 + (BOOL)suppressesInvalidCollectionUpdateExceptions;
 + (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses;

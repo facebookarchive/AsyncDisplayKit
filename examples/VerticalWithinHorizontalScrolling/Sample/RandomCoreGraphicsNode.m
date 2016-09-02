@@ -68,7 +68,7 @@
 - (void)setIndexPath:(NSIndexPath *)indexPath
 {
   _indexPath = indexPath;
-  _indexPathTextNode.attributedString = [[NSAttributedString alloc] initWithString:[indexPath description] attributes:nil];
+  _indexPathTextNode.attributedText = [[NSAttributedString alloc] initWithString:[indexPath description] attributes:nil];
 }
 
 //- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize

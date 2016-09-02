@@ -9,6 +9,7 @@
 //
 
 #import <OCMock/OCMock.h>
+#import <OCMock/NSInvocation+OCMAdditions.h>
 
 #import <AsyncDisplayKit/ASImageProtocols.h>
 #import <AsyncDisplayKit/ASMultiplexImageNode.h>
@@ -42,7 +43,7 @@
 
 - (UIImage *)_testImage
 {
-  return [[[UIImage alloc] initWithContentsOfFile:[self _testImageURL].path] autorelease];
+  return [UIImage imageWithContentsOfFile:[self _testImageURL].path];
 }
 
 #pragma mark -
@@ -54,21 +55,14 @@
 {
   [super setUp];
 
-  _mockCache = [[OCMockObject mockForProtocol:@protocol(ASImageCacheProtocol)] retain];
-  _mockDownloader = [[OCMockObject mockForProtocol:@protocol(ASImageDownloaderProtocol)] retain];
+  _mockCache = [OCMockObject mockForProtocol:@protocol(ASImageCacheProtocol)];
+  _mockDownloader = [OCMockObject mockForProtocol:@protocol(ASImageDownloaderProtocol)];
 }
 
 - (void)tearDown
 {
-  if(_mockCache) {
-    [_mockCache release];
-    _mockCache = nil;
-  }
-  if(_mockDownloader) {
-    [_mockDownloader release];
-    _mockDownloader = nil;
-  }
-
+  _mockCache = nil;
+  _mockDownloader = nil;
   [super tearDown];
 }
 
@@ -102,7 +96,6 @@
 
   imageNode.delegate = nil;
   imageNode.dataSource = nil;
-  [imageNode release];
 }
 
 - (void)testDataSourceURLMethod
@@ -123,11 +116,9 @@
   // Mock the cache to do a cache-hit for the test image URL.
   [[[_mockCache stub] andDo:^(NSInvocation *inv) {
     // Params are URL, callbackQueue, completion
-    NSArray *URL;
-    [inv getArgument:&URL atIndex:2];
+    NSArray *URL = [inv getArgumentAtIndexAsObject:2];
 
-    ASImageCacherCompletion completionBlock;
-    [inv getArgument:&completionBlock atIndex:4];
+    ASImageCacherCompletion completionBlock = [inv getArgumentAtIndexAsObject:4];
 
     // Call the completion block with our test image and URL.
     NSURL *testImageURL = [self _testImageURL];
@@ -147,10 +138,6 @@
   XCTAssertEqualObjects(UIImagePNGRepresentation(imageNode.image),
                         UIImagePNGRepresentation([self _testImage]),
                         @"Loaded image isn't the one we provided");
-
-  imageNode.delegate = nil;
-  imageNode.dataSource = nil;
-  [imageNode release];
 }
 
 - (void)testAddLowerQualityImageIdentifier
@@ -186,10 +173,6 @@
   // At this point the high-res should still be loaded, and the data source should have been hit again
   XCTAssertEqualObjects(imageNode.loadedImageIdentifier, highResIdentifier, @"High res identifier should be loaded.");
   XCTAssertTrue(dataSourceHits == 2, @"Unexpected DS hit count");
-
-  imageNode.delegate = nil;
-  imageNode.dataSource = nil;
-  [imageNode release];
 }
 
 - (void)testAddHigherQualityImageIdentifier
@@ -225,10 +208,6 @@
   // At this point the high-res should be loaded, and the data source should been hit twice.
   XCTAssertEqualObjects(imageNode.loadedImageIdentifier, highResIdentifier, @"High res identifier should be loaded.");
   XCTAssertTrue(dataSourceHits == 2, @"Unexpected DS hit count");
-
-  imageNode.delegate = nil;
-  imageNode.dataSource = nil;
-  [imageNode release];
 }
 
 - (void)testProgressiveDownloading
@@ -249,8 +228,7 @@
   imageNode.dataSource = mockDataSource;
   __block NSUInteger loadedImageCount = 0;
   [[[mockDataSource stub] andDo:^(NSInvocation *inv) {
-    id requestedIdentifier;
-    [inv getArgument:&requestedIdentifier atIndex:3];
+    id requestedIdentifier = [inv getArgumentAtIndexAsObject:3];
 
     NSInteger requestedIdentifierValue = [requestedIdentifier intValue];
 
@@ -272,10 +250,6 @@
   [imageNode reloadImageIdentifierSources];
 
   XCTAssertTrue(loadedImageCount == identifierCount, @"Expected to load the same number of identifiers we supplied");
-
-  imageNode.delegate = nil;
-  imageNode.dataSource = nil;
-  [imageNode release];
 }
 
 - (void)testUncachedDownload
@@ -283,8 +257,7 @@
   // Mock a cache miss.
   id mockCache = [OCMockObject mockForProtocol:@protocol(ASImageCacheProtocol)];
   [[[mockCache stub] andDo:^(NSInvocation *inv) {
-    ASImageCacherCompletion completion;
-    [inv getArgument:&completion atIndex:4];
+    ASImageCacherCompletion completion = [inv getArgumentAtIndexAsObject:4];
     completion(nil);
   }] cachedImageWithURL:[OCMArg any] callbackQueue:[OCMArg any] completion:[OCMArg any]];
 
@@ -293,13 +266,11 @@
   const CGFloat mockedProgress = 0.5;
   [[[mockDownloader stub] andDo:^(NSInvocation *inv) {
     // Simulate progress.
-    ASImageDownloaderProgress progressBlock;
-    [inv getArgument:&progressBlock atIndex:4];
+    ASImageDownloaderProgress progressBlock = [inv getArgumentAtIndexAsObject:4];
     progressBlock(mockedProgress);
 
     // Simulate completion.
-    ASImageDownloaderCompletion completionBlock;
-    [inv getArgument:&completionBlock atIndex:5];
+    ASImageDownloaderCompletion completionBlock = [inv getArgumentAtIndexAsObject:5];
     completionBlock([self _testImage], nil, nil);
   }] downloadImageWithURL:[OCMArg any] callbackQueue:[OCMArg any] downloadProgress:[OCMArg any] completion:[OCMArg any]];
 
@@ -329,8 +300,6 @@
 
   // Verify the delegation.
   [mockDelegate verify];
-  
-  [imageNode release];
 }
 
 @end
