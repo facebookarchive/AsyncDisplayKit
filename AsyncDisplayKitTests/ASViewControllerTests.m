@@ -11,6 +11,11 @@
 #import <OCMock/OCMock.h>
 #import <OCMock/NSInvocation+OCMAdditions.h>
 
+
+@interface ASViewController(Private)
+- (BOOL)progagateNewEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection;
+@end
+
 @interface ASViewControllerTests : XCTestCase
 
 @end
@@ -79,6 +84,44 @@
   XCTAssertEqualObjects(NSStringFromCGRect(expectedRect), NSStringFromCGRect(node.frame));
   [navDelegate verify];
   [animator verify];
+}
+
+- (void)testThatTraitComparisonBlockIsWorking
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  
+  ASViewController *vc = [[ASViewController alloc] initWithNode:node];
+  
+  ASEnvironmentTraitCollection lhs = ASEnvironmentTraitCollectionMakeDefault();
+  lhs.horizontalSizeClass = UIUserInterfaceSizeClassRegular;
+  lhs.containerSize = CGSizeMake(100, 100);
+  node.environmentTraitCollection = lhs;
+  
+  ASEnvironmentTraitCollection rhs = ASEnvironmentTraitCollectionMakeDefault();
+  rhs.horizontalSizeClass = UIUserInterfaceSizeClassCompact;
+  rhs.containerSize = CGSizeMake(100, 100);
+  
+  // trait collections are different in horizontal size class so we should see size class get propagated:
+  
+  BOOL propagated = [vc progagateNewEnvironmentTraitCollection:lhs];
+  XCTAssertFalse(propagated);
+  
+  propagated = [vc progagateNewEnvironmentTraitCollection:rhs];
+  XCTAssertTrue(propagated);
+  
+  vc.node.environmentTraitCollection = lhs;
+  // add a comparison block that only propagates on containerSize change:
+  vc.overrideTraitsEqualityBlock = ^(ASEnvironmentTraitCollection lhs, ASEnvironmentTraitCollection rhs) {
+    return (BOOL)(lhs.containerSize.width == rhs.containerSize.width);
+  };
+  
+  propagated = [vc progagateNewEnvironmentTraitCollection:rhs];
+  // assert that even though lhs has a different horz size class, it did not propagate.
+  XCTAssertFalse(propagated);
+  
+  lhs.containerSize = CGSizeMake(101, 100);
+  propagated = [vc progagateNewEnvironmentTraitCollection:lhs];
+  XCTAssertTrue(propagated);
 }
 
 @end
