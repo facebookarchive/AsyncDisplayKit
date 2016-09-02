@@ -230,9 +230,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       NSArray *oldSubnodes = _self.subnodes;
       ASLayoutSpec *layoutSpec = ((ASLayoutSpec *( *)(id, SEL, ASSizeRange))originalLayoutSpecThatFitsIMP)(_self, @selector(layoutSpecThatFits:), sizeRange);
       NSArray *subnodes = _self.subnodes;
-      ASDisplayNodeAssertTrue(oldSubnodes.count == subnodes.count);
+      ASDisplayNodeAssert(oldSubnodes.count == subnodes.count, @"Adding or removing nodes in layoutSpecThatFits: is verboten.");
       for (NSInteger i = 0; i < oldSubnodes.count; i++) {
-        ASDisplayNodeAssertTrue(oldSubnodes[i] == subnodes[i]);
+        ASDisplayNodeAssert(oldSubnodes[i] == subnodes[i], @"Adding and removing nodes in layoutSpecThatFits: is verboten.");
       }
       return layoutSpec;
     });
