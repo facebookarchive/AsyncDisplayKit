@@ -79,7 +79,7 @@
     return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:someOtherNode];
   };
   
-  XCTAssertThrows([displayNode measure:CGSizeMake(100, 100)], @"Should throw if subnode was added in layoutSpecThatFits:");
+  XCTAssertThrows([displayNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))], @"Should throw if subnode was added in layoutSpecThatFits:");
 }
 
 - (void)testNotAllowModifyingSubnodesInLayoutSpecThatFits
@@ -95,7 +95,7 @@
     return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:someOtherNode];
   };
   
-  XCTAssertThrows([displayNode measure:CGSizeMake(100, 100)], @"Should throw if subnodes where modified in layoutSpecThatFits:");
+  XCTAssertThrows([displayNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))], @"Should throw if subnodes where modified in layoutSpecThatFits:");
 }
 #endif
 
