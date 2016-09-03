@@ -100,8 +100,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
                                                     lineBreakMode:attributes.lineBreakMode
                                              maximumNumberOfLines:attributes.maximumNumberOfLines
                                                    exclusionPaths:attributes.exclusionPaths
-                                                  constrainedSize:shadowConstrainedSize
-                                            layoutManagerDelegate:attributes.layoutManagerDelegate];
+                                                  constrainedSize:shadowConstrainedSize];
   }
   return _context;
 }
