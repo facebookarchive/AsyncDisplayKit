@@ -32,6 +32,54 @@ static NSString *const kTestCaseUIKitWithNoContext = @"UIKitNoContext";
 static NSString *const kTestCaseUIKitWithFreshContext = @"UIKitFreshContext";
 static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
 
++ (NSArray<NSAttributedString *> *)realisticDataSet
+{
+  static NSArray *array;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    NSString *file = [[NSBundle bundleForClass:self] pathForResource:@"AttributedStringsFixture0" ofType:@"plist" inDirectory:@"TestResources"];
+    if (file != nil) {
+    	array = [NSKeyedUnarchiver unarchiveObjectWithFile:file];
+    }
+    NSAssert([array isKindOfClass:[NSArray class]], nil);
+    NSSet *unique = [NSSet setWithArray:array];
+    NSLog(@"Loaded realistic text data set with %d attributed strings, %d unique.", (int)array.count, (int)unique.count);
+  });
+  return array;
+}
+
+- (void)testPerformance_RealisticData
+{
+  NSArray *data = [self.class realisticDataSet];
+
+  CGSize maxSize = CGSizeMake(355, CGFLOAT_MAX);
+  CGSize __block uiKitSize, __block asdkSize;
+
+  ASPerformanceTestContext *ctx = [[ASPerformanceTestContext alloc] init];
+  [ctx addCaseWithName:kTestCaseUIKit block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+    NSAttributedString *text = data[i % data.count];
+    startMeasuring();
+    uiKitSize = [text boundingRectWithSize:maxSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil].size;
+    stopMeasuring();
+  }];
+  uiKitSize.width = ASCeilPixelValue(uiKitSize.width);
+  uiKitSize.height = ASCeilPixelValue(uiKitSize.height);
+  ctx.results[kTestCaseUIKit].userInfo[@"size"] = NSStringFromCGSize(uiKitSize);
+
+  [ctx addCaseWithName:kTestCaseASDK block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+    ASTextNode *node = [[ASTextNode alloc] init];
+    NSAttributedString *text = data[i % data.count];
+    startMeasuring();
+    node.attributedText = text;
+    asdkSize = [node measure:maxSize];
+    stopMeasuring();
+  }];
+  ctx.results[kTestCaseASDK].userInfo[@"size"] = NSStringFromCGSize(asdkSize);
+
+  ASXCTAssertEqualSizes(uiKitSize, asdkSize);
+  ASXCTAssertRelativePerformanceInRange(ctx, kTestCaseASDK, 0.2, 0.5);
+}
+
 - (void)testPerformance_TwoParagraphLatinNoTruncation
 {
   NSAttributedString *text = [ASTextNodePerformanceTests twoParagraphLatinText];
