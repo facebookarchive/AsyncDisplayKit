@@ -98,6 +98,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSMutableSet *_cellsForVisibilityUpdates;
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
+  BOOL _hasReceivedReloadData;
   BOOL _performingBatchUpdates;
   NSUInteger _superBatchUpdateCount;
   NSMutableArray *_batchUpdateBlocks;
@@ -283,21 +284,29 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  ASPerformBlockOnMainThread(^{
-    _superIsPendingDataLoad = YES;
-    [super reloadData];
-  });
+  ASDisplayNodeAssertMainThread();
+  BOOL isFirst = (_hasReceivedReloadData == NO);
+  _hasReceivedReloadData = YES;
+  
+  _superIsPendingDataLoad = YES;
+  [super reloadData];
   [_dataController reloadDataWithAnimationOptions:kASCollectionViewAnimationNone completion:completion];
+  if (isFirst && _waitsForInitialDataLoad) {
+    [self waitUntilAllUpdatesAreCommitted];
+  }
 }
 
 - (void)reloadData
 {
+  ASDisplayNodeAssertMainThread();
   [self reloadDataWithCompletion:nil];
 }
 
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
+  _hasReceivedReloadData = YES;
+  
   _superIsPendingDataLoad = YES;
   [_dataController reloadDataImmediatelyWithAnimationOptions:kASCollectionViewAnimationNone];
   [super reloadData];
