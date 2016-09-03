@@ -122,7 +122,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
    */
   CALayer *_retainedLayer;
 
-  BOOL _hasReceivedReloadData;
+  BOOL _waitsForUpdatesDuringNextLayout;
+  BOOL _isInSuperLayoutSubviews;
   CGFloat _nodesConstrainedWidth;
   BOOL _ignoreNodesConstrainedWidthChange;
   BOOL _queuedNodeHeightUpdate;
@@ -270,8 +271,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [self setAsyncDataSource:nil];
 }
 
-#pragma mark -
-#pragma mark Overrides
+#pragma mark - Overrides
 
 - (void)setDataSource:(id<UITableViewDataSource>)dataSource
 {
@@ -284,6 +284,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   // Our UIScrollView superclass sets its delegate to nil on dealloc. Only assert if we get a non-nil value here.
   ASDisplayNodeAssert(delegate == nil, @"ASTableView uses asyncDelegate, not UITableView's delegate property.");
 }
+
+#pragma mark - Public
 
 - (void)setAsyncDataSource:(id<ASTableViewDataSource>)asyncDataSource
 {
@@ -363,14 +365,13 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssertMainThread();
-  BOOL isFirst = (_hasReceivedReloadData == NO);
-  _hasReceivedReloadData = YES;
-
-  [super reloadData];
+  
   [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
-  if (isFirst && _waitsForInitialDataLoad) {
+  if (_isInSuperLayoutSubviews && _waitsForUpdatesDuringNextLayout) {
+    _waitsForUpdatesDuringNextLayout = NO;
     [self waitUntilAllUpdatesAreCommitted];
   }
+  [super reloadData];
 }
 
 - (void)reloadData
@@ -388,6 +389,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)relayoutItems
 {
   [_dataController relayoutAllNodes];
+}
+
+- (void)waitForUpdatesDuringNextLayoutPass
+{
+  ASDisplayNodeAssertMainThread();
+  _waitsForUpdatesDuringNextLayout = YES;
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
@@ -461,6 +468,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)waitUntilAllUpdatesAreCommitted
 {
   ASDisplayNodeAssertMainThread();
+  
+  if (_dataController.initialReloadDataHasBeenCalled == NO) {
+    [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:nil];
+  }
+  
   [_dataController waitUntilAllUpdatesAreCommitted];
 }
 
@@ -504,8 +516,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     }
   }
   
+  // If we've already done our initial reload, we can just wait now.
+  // Otherwise we will wait after our initial reloadData (during [super layoutSubviews])
+  if (_dataController.initialReloadDataHasBeenCalled && _waitsForUpdatesDuringNextLayout) {
+    _waitsForUpdatesDuringNextLayout = NO;
+    [self waitUntilAllUpdatesAreCommitted];
+  }
+  
   // To ensure _nodesConstrainedWidth is up-to-date for every usage, this call to super must be done last
+  _isInSuperLayoutSubviews = YES;
   [super layoutSubviews];
+  _isInSuperLayoutSubviews = NO;
   [_rangeController updateIfNeeded];
 }
 

@@ -54,7 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
  * for the first data load. This occurs during the first layout pass, or when -reloadData is
  * called, whichever comes first. Defaults to NO. This property must be accessed on the main thread.
  */
-@property (nonatomic) BOOL waitsForInitialDataLoad;
+- (void)waitForUpdatesDuringNextLayoutPass;
 
 /**
  * Tuning parameters for a range type in full mode.
@@ -171,7 +171,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL completed))completion;
 
 /**
- *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
+ * Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
  */
 - (void)waitUntilAllUpdatesAreCommitted;
 

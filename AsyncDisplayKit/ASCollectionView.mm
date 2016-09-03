@@ -98,7 +98,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSMutableSet *_cellsForVisibilityUpdates;
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
-  BOOL _hasReceivedReloadData;
+  BOOL _isInSuperLayoutSubviews;
+  BOOL _waitsForUpdatesDuringNextLayout;
   BOOL _performingBatchUpdates;
   NSUInteger _superBatchUpdateCount;
   NSMutableArray *_batchUpdateBlocks;
@@ -285,15 +286,14 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssertMainThread();
-  BOOL isFirst = (_hasReceivedReloadData == NO);
-  _hasReceivedReloadData = YES;
   
   _superIsPendingDataLoad = YES;
-  [super reloadData];
   [_dataController reloadDataWithAnimationOptions:kASCollectionViewAnimationNone completion:completion];
-  if (isFirst && _waitsForInitialDataLoad) {
+  if (_isInSuperLayoutSubviews && _waitsForUpdatesDuringNextLayout) {
+    _waitsForUpdatesDuringNextLayout = NO;
     [self waitUntilAllUpdatesAreCommitted];
   }
+  [super reloadData];
 }
 
 - (void)reloadData
@@ -305,7 +305,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
-  _hasReceivedReloadData = YES;
   
   _superIsPendingDataLoad = YES;
   [_dataController reloadDataImmediatelyWithAnimationOptions:kASCollectionViewAnimationNone];
@@ -320,6 +319,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)waitUntilAllUpdatesAreCommitted
 {
   ASDisplayNodeAssertMainThread();
+  
+  if (_dataController.initialReloadDataHasBeenCalled == NO) {
+    [_dataController reloadDataWithAnimationOptions:kASCollectionViewAnimationNone completion:nil];
+  }
+  
   [_dataController waitUntilAllUpdatesAreCommitted];
 }
 
@@ -527,6 +531,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
   [self waitUntilAllUpdatesAreCommitted];
   [super selectItemAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+}
+
+- (void)waitForUpdatesDuringNextLayoutPass
+{
+  ASDisplayNodeAssertMainThread();
+  [self setNeedsLayout];
+  _waitsForUpdatesDuringNextLayout = YES;
 }
 
 #pragma mark Internal
@@ -879,8 +890,17 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
       break;
   }
   
+  // If we've already done our initial reload, we can just wait now.
+  // Otherwise we will wait after our initial reloadData (during [super layoutSubviews])
+  if (_dataController.initialReloadDataHasBeenCalled && _waitsForUpdatesDuringNextLayout) {
+    _waitsForUpdatesDuringNextLayout = NO;
+    [self waitUntilAllUpdatesAreCommitted];
+  }
+  
   // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
+  _isInSuperLayoutSubviews = YES;
   [super layoutSubviews];
+  _isInSuperLayoutSubviews = NO;
   
   // Update range controller immediately if possible & needed.
   // Calling -updateIfNeeded in here with self.window == nil (early in the collection view's life)

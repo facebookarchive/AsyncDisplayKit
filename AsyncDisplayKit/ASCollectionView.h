@@ -52,13 +52,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<ASCollectionDataSource> asyncDataSource;
 
 /**
- * Whether the view should block the main thread for the initial data load.
+ * Whether the view should block the main thread during the next layout pass while
+ * any pending data is loaded. This is useful if you want to ensure that the next frame
+ * that is composited with this view will have all the nodes.
  *
- * If YES, the view will wait for the initial batch of nodes to be allocated and measured
- * for the first data load. This occurs during the first layout pass, or when -reloadData is
- * called, whichever comes first. Defaults to NO. This property must be accessed on the main thread.
+ * This method must be called on the main thread.
  */
-@property (nonatomic) BOOL waitsForInitialDataLoad;
+- (void)waitForUpdatesDuringNextLayoutPass;
 
 /**
  * Tuning parameters for a range type in full mode.

@@ -390,10 +390,21 @@ static NSInteger const kDefaultNumberOfItemsPerSection = 3;
 
 }
 
-- (void)testWaitsForInitialData
+- (void)testWaitingForAllUpdatesBeforeFirstLayout
 {
   ASCollectionTestController * ctrl = [[ASCollectionTestController alloc] init];
-  ctrl.collectionView.waitsForInitialDataLoad = YES;
+  XCTAssertFalse(CGRectIsEmpty(ctrl.collectionView.bounds));
+  
+  XCTAssertNil([ctrl.collectionView nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
+  
+  [ctrl.collectionView waitUntilAllUpdatesAreCommitted];
+  XCTAssertNotNil([ctrl.collectionView nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
+}
+
+- (void)testWaitForUpdatesDuringNextLayoutFirstLoad
+{
+  ASCollectionTestController * ctrl = [[ASCollectionTestController alloc] init];
+  [ctrl.collectionView waitForUpdatesDuringNextLayoutPass];
   XCTAssertFalse(CGRectIsEmpty(ctrl.collectionView.bounds));
   XCTAssertNil([ctrl.collectionView nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
   [ctrl.collectionView layoutIfNeeded];
@@ -401,7 +412,56 @@ static NSInteger const kDefaultNumberOfItemsPerSection = 3;
   XCTAssertGreaterThan(ctrl.collectionView.subviews.count, 2);
 }
 
-- (void)testWaitsForInitialDataOFF
+- (void)testWaitForUpdatesDuringNextLayoutSubsequentLoad
+{
+  ASCollectionTestController * ctrl = [[ASCollectionTestController alloc] init];
+  [ctrl.collectionView waitForUpdatesDuringNextLayoutPass];
+  
+  // Setup initial data
+  XCTAssertFalse(CGRectIsEmpty(ctrl.collectionView.bounds));
+  XCTAssertNil([ctrl.collectionView nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
+  [ctrl.collectionView reloadDataImmediately];
+  [ctrl.collectionView layoutIfNeeded];
+  XCTAssertNotNil([ctrl.collectionView nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
+  XCTAssertGreaterThan(ctrl.collectionView.subviews.count, 2);
+  
+  // Insert an item and assert that wait works.
+  NSIndexPath *newItem = [NSIndexPath indexPathForItem:kDefaultNumberOfItemsPerSection inSection:0];
+  ctrl->_itemCounts[0] += 1;
+  [ctrl.collectionView insertItemsAtIndexPaths:@[ newItem ]];
+  [ctrl.collectionView waitForUpdatesDuringNextLayoutPass];
+  XCTAssertNil([ctrl.collectionView nodeForItemAtIndexPath:newItem]);
+  [ctrl.collectionView layoutIfNeeded];
+  XCTAssertNotNil([ctrl.collectionView nodeForItemAtIndexPath:newItem]);
+}
+
+- (void)testSubsequentLoadsAreAsyncByDefault
+{
+  ASCollectionTestController * ctrl = [[ASCollectionTestController alloc] init];
+  [ctrl.collectionView waitForUpdatesDuringNextLayoutPass];
+  
+  // Setup initial data
+  XCTAssertFalse(CGRectIsEmpty(ctrl.collectionView.bounds));
+  XCTAssertNil([ctrl.collectionView nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
+  [ctrl.collectionView reloadDataImmediately];
+  [ctrl.collectionView layoutIfNeeded];
+  XCTAssertNotNil([ctrl.collectionView nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
+  XCTAssertGreaterThan(ctrl.collectionView.subviews.count, 2);
+  
+  // Insert an item and assert that not waiting causes the update to happen after the layout.
+  NSIndexPath *newItem = [NSIndexPath indexPathForItem:kDefaultNumberOfItemsPerSection inSection:0];
+  ctrl->_itemCounts[0] += 1;
+  [ctrl.collectionView insertItemsAtIndexPaths:@[ newItem ]];
+  XCTAssertNil([ctrl.collectionView nodeForItemAtIndexPath:newItem]);
+  [ctrl.collectionView layoutIfNeeded];
+  XCTAssertNil([ctrl.collectionView nodeForItemAtIndexPath:newItem]);
+  
+  // Now we explicitly wait and we'll get our new item.
+  [ctrl.collectionView waitUntilAllUpdatesAreCommitted];
+  XCTAssertNotNil([ctrl.collectionView nodeForItemAtIndexPath:newItem]);
+}
+
+- (void)testInitialDataLoadIsAsync
 {
   ASCollectionTestController * ctrl = [[ASCollectionTestController alloc] init];
   XCTAssertFalse(CGRectIsEmpty(ctrl.collectionView.bounds));
@@ -409,6 +469,10 @@ static NSInteger const kDefaultNumberOfItemsPerSection = 3;
   [ctrl.collectionView layoutIfNeeded];
   XCTAssertNil([ctrl.collectionView nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
   XCTAssertLessThanOrEqual(ctrl.collectionView.subviews.count, 2);
+  [self expectationForPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nonnull evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+    return [ctrl.collectionView nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]!= nil;
+  }] evaluatedWithObject:(id)kCFNull handler:nil];
+  [self waitForExpectationsWithTimeout:5 handler:nil];
 }
 
 - (void)testThatNodeCalculatedSizesAreUpdatedBeforeFirstPrepareLayoutAfterRotation
