@@ -436,11 +436,12 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 	[lock lock];
 	[array addObject:str];
 	if (array.count % 20 == 0) {
-		NSLog(@"Got %d strings", (long)array.count);
+		NSLog(@"Got %d strings", (int)array.count);
 	}
 	if (array.count == 2000) {
 		NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"AttributedStrings.plist"];
-		BOOL success = [NSKeyedArchiver archiveRootObject:array toFile:path];
+		NSAssert([NSKeyedArchiver archiveRootObject:array toFile:path], nil);
+    NSLog(@"Saved to %@", path);
 	}
 	[lock unlock];
 }

@@ -98,7 +98,7 @@
     __block CFAbsoluteTime start = 0;
     __block BOOL calledStop = NO;
     @autoreleasepool {
-      block(^{
+      block(i, ^{
         ASDisplayNodeAssert(start == 0, @"Called startMeasuring block twice.");
         start = CACurrentMediaTime();
       }, ^{
