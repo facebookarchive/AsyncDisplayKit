@@ -52,11 +52,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<ASCollectionDataSource> asyncDataSource;
 
 /**
- * Whether the view should block the main thread during the next layout pass while
- * any pending data is loaded. This is useful if you want to ensure that the next frame
- * that is composited with this view will have all the nodes.
+ * Tell the collection view that, during the next layoutSubviews pass, it should block the
+ * main thread and wait for all items to be up-to-date.
  *
- * This method must be called on the main thread.
+ * @discussion This is useful when you want to ensure that the user never sees an empty
+ * collection view. It is better to call this than to explicitly wait using `waitUntilAllUpdatesAreCommitted`
+ * because the collection view's size may not be correct until the layout pass.
  */
 - (void)waitForUpdatesDuringNextLayoutPass;
 
