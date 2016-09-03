@@ -100,9 +100,9 @@
     @autoreleasepool {
       block(^{
         ASDisplayNodeAssert(start == 0, @"Called startMeasuring block twice.");
-        start = CFAbsoluteTimeGetCurrent();
+        start = CACurrentMediaTime();
       }, ^{
-        time += (CFAbsoluteTimeGetCurrent() - start);
+        time += (CACurrentMediaTime() - start);
         ASDisplayNodeAssert(calledStop == NO, @"Called stopMeasuring block twice.");
         ASDisplayNodeAssert(start != 0, @"Failed to call startMeasuring block");
         calledStop = YES;
