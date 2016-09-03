@@ -24,7 +24,7 @@
     NSLog(__VA_ARGS__);\
   } else {\
     NSLog(__VA_ARGS__);\
-    ASDisplayNodeFailAssert(__VA_ARGS__);\
+    \
   }
 
 BOOL ASHierarchyChangeTypeIsFinal(_ASHierarchyChangeType changeType) {

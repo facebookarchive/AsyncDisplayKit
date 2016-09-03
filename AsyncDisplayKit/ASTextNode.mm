@@ -424,6 +424,27 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   return lineHeight + font.descender;
 }
 
++ (void)_registerAttributedText:(NSAttributedString *)str
+{
+	static NSMutableArray *array;
+	static NSLock *lock;
+	static dispatch_once_t onceToken;
+	dispatch_once(&onceToken, ^{
+		lock = [NSLock new];
+		array = [NSMutableArray new];
+	});
+	[lock lock];
+	[array addObject:str];
+	if (array.count % 20 == 0) {
+		NSLog(@"Got %d strings", (long)array.count);
+	}
+	if (array.count == 2000) {
+		NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"AttributedStrings.plist"];
+		BOOL success = [NSKeyedArchiver archiveRootObject:array toFile:path];
+	}
+	[lock unlock];
+}
+
 - (void)setAttributedText:(NSAttributedString *)attributedText
 {
   
@@ -439,7 +460,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     }
 
     _attributedText = ASCleanseAttributedStringOfCoreTextAttributes(attributedText);
-    
+	  [ASTextNode _registerAttributedText:_attributedText];
     // Sync the truncation string with attributes from the updated _attributedString
     // Without this, the size calculation of the text with truncation applied will
     // not take into account the attributes of attributedText in the last line

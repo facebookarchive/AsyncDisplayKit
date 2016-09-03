@@ -33,6 +33,7 @@
 
 {
   if (self = [super init]) {
+    ASDisplayNodeAssertNil(layoutManagerDelegate, nil);
     // Concurrently initialising TextKit components crashes (rdar://18448377) so we use a global lock.
     static ASDN::Mutex __staticMutex;
     ASDN::MutexLocker l(__staticMutex);
