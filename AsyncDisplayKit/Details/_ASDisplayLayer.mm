@@ -226,7 +226,7 @@
   ASDisplayNodeAssertMainThread();
   [_displaySentinel increment];
 
-  id<_ASDisplayLayerDelegate> __attribute__((objc_precise_lifetime)) strongAsyncDelegate;
+  id<_ASDisplayLayerDelegate> NS_VALID_UNTIL_END_OF_SCOPE strongAsyncDelegate;
   {
     _asyncDelegateLock.lock();
     strongAsyncDelegate = _asyncDelegate;
