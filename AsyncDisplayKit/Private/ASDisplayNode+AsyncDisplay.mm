@@ -179,7 +179,7 @@
   ASDisplayNodeAssert(rasterizing || !(_hierarchyState & ASHierarchyStateRasterized),
                       @"Rasterized descendants should never display unless being drawn into the rasterized container.");
 
-  if (shouldBeginRasterizing == YES) {
+  if (shouldBeginRasterizing) {
     // Collect displayBlocks for all descendants.
     NSMutableArray *displayBlocks = [NSMutableArray array];
     [self _recursivelyRasterizeSelfAndSublayersWithIsCancelledBlock:isCancelledBlock displayBlocks:displayBlocks];
