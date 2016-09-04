@@ -58,13 +58,13 @@ typedef struct {
 /**
  * A struct specifying a ASLayoutable's size. Example:
  *
- *  ASSize size = (ASSize){
+ *  ASLayoutableSize size = (ASLayoutableSize){
  *    .width = ASDimensionMakeWithFraction(0.25),
  *    .maxWidth = ASDimensionMakeWithPoints(200),
  *    .minHeight = ASDimensionMakeWithFraction(0.50)
  *  };
  *
- *  Description: <ASSize: exact={25%, Auto}, min={Auto, 50%}, max={200pt, Auto}>
+ *  Description: <ASLayoutableSize: exact={25%, Auto}, min={Auto, 50%}, max={200pt, Auto}>
  *
  */
 typedef struct {
@@ -74,7 +74,7 @@ typedef struct {
   ASDimension maxWidth;
   ASDimension minHeight;
   ASDimension maxHeight;
-} ASSize;
+} ASLayoutableSize;
 
 extern ASDimension const ASDimensionAuto;
 
@@ -137,37 +137,37 @@ extern CGFloat ASDimensionResolve(ASDimension dimension, CGFloat autoSize, CGFlo
 @property (nonatomic, readonly) ASDimension as_fraction;
 @end
 
-#pragma mark - ASSize
+#pragma mark - ASLayoutableSize
 
 /**
- * Returns an ASSize with default values.
+ * Returns an ASLayoutableSize with default values.
  */
-extern ASSize ASSizeMake();
+extern ASLayoutableSize ASLayoutableSizeMake();
 
 /**
- * Returns an ASSize with the specified CGSize values as width and height.
+ * Returns an ASLayoutableSize with the specified CGSize values as width and height.
  */
-extern ASSize ASSizeMakeFromCGSize(CGSize size);
+extern ASLayoutableSize ASLayoutableSizeMakeFromCGSize(CGSize size);
 
 /**
  * Returns whether two sizes are equal.
  */
-extern BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs);
+extern BOOL ASLayoutableSizeEqualToLayoutableSize(ASLayoutableSize lhs, ASLayoutableSize rhs);
 
 /**
- * Returns a string formatted to contain the data from an ASSize.
+ * Returns a string formatted to contain the data from an ASLayoutableSize.
  */
-extern NSString *NSStringFromASSize(ASSize size);
+extern NSString *NSStringFromASLayoutableSize(ASLayoutableSize size);
 
 /**
  * Resolve this size to a parent size.
  */
-extern ASSizeRange ASSizeResolve(ASSize size, const CGSize parentSize);
+extern ASSizeRange ASLayoutableSizeResolve(ASLayoutableSize size, const CGSize parentSize);
 
 /**
  * Resolve this size to a parent size and use autoASSizeRange if
  */
-extern ASSizeRange ASSizeResolveAutoSize(ASSize size, const CGSize parentSize, ASSizeRange autoASSizeRange);
+extern ASSizeRange ASLayoutableSizeResolveAutoSize(ASLayoutableSize size, const CGSize parentSize, ASSizeRange autoASSizeRange);
 
 #pragma mark - ASSizeRange
 

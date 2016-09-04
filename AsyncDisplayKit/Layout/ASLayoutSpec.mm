@@ -26,7 +26,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 
 @interface ASLayoutSpec() {
   ASDN::RecursiveMutex __instanceLock__;
-  ASSize _size;
+  ASLayoutableSize _size;
   ASEnvironmentState _environmentState;
   ASChildMap _children;
 }
@@ -65,7 +65,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
     return nil;
   }
   _isMutable = YES;
-  _size = ASSizeMake();
+  _size = ASLayoutableSizeMake();
   _environmentState = ASEnvironmentStateMakeDefault();
   return self;
 }
@@ -83,13 +83,13 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 
 #pragma mark - Sizing
 
-- (ASSize)size
+- (ASLayoutableSize)size
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _size;
 }
 
-- (void)setSize:(ASSize)size
+- (void)setSize:(ASLayoutableSize)size
 {
   ASDN::MutexLocker l(__instanceLock__);
   _size = size;
@@ -118,10 +118,10 @@ ASLayoutableSizeHelperForwarding
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASSize)size
+                     restrictedToSize:(ASLayoutableSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASSizeResolve(_size, parentSize));
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutableSizeResolve(_size, parentSize));
   return [self calculateLayoutThatFits:resolvedRange];
 }
 

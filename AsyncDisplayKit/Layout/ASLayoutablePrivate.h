@@ -43,7 +43,7 @@ extern void ASLayoutableClearCurrentContext();
 /**
  * @abstract A size constraint that should apply to this ASLayoutable.
  */
-@property (nonatomic, assign, readwrite) ASSize size;
+@property (nonatomic, assign, readwrite) ASLayoutableSize size;
 
 /**
  *  @abstract This method can be used to give the user a chance to wrap an ASLayoutable in an ASLayoutSpec 

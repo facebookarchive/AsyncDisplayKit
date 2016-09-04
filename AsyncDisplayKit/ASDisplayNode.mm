@@ -304,7 +304,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   
-  _size = ASSizeMake();
+  _size = ASLayoutableSizeMake();
   _preferredFrameSize = CGSizeZero;
   _environmentState = ASEnvironmentStateMakeDefault();
   
@@ -648,16 +648,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Layout measurement and sizing
 
-- (ASSize)size
+- (ASLayoutableSize)size
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _size;
 }
 
-- (void)setSize:(ASSize)size
+- (void)setSize:(ASLayoutableSize)size
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if (ASSizeEqualToSize(_size, size) == NO) {
+  if (ASLayoutableSizeEqualToLayoutableSize(_size, size) == NO) {
     _size = size;
     [self invalidateCalculatedLayout];
   }
@@ -2267,10 +2267,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 #pragma mark - For Subclasses
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASSize)size
+                     restrictedToSize:(ASLayoutableSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASSizeResolve(_size, parentSize));
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutableSizeResolve(_size, parentSize));
   return [self calculateLayoutThatFits:resolvedRange];
 }
 

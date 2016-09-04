@@ -68,7 +68,7 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
  the child to respect the inset.
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASSize)size
+                     restrictedToSize:(ASLayoutableSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
   if (self.child == nil) {

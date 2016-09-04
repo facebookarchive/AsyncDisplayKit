@@ -52,7 +52,7 @@
       constrainedSize.max.height - layoutPosition.y
     };
 
-    const ASSizeRange childConstraint = ASSizeResolveAutoSize(child.size, size, {{0,0}, autoMaxSize});
+    const ASSizeRange childConstraint = ASLayoutableSizeResolveAutoSize(child.size, size, {{0,0}, autoMaxSize});
     
     ASLayout *sublayout = [child layoutThatFits:childConstraint parentSize:size];
     sublayout.position = layoutPosition;

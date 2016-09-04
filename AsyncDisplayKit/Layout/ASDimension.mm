@@ -150,11 +150,11 @@ NSString *NSStringFromASRelativeSize(ASRelativeSize size)
           NSStringFromASDimension(size.height)];
 }
 
-#pragma mark - ASSize
+#pragma mark - ASLayoutableSize
 
-ASSize ASSizeMake()
+ASLayoutableSize ASLayoutableSizeMake()
 {
-  return (ASSize){
+  return (ASLayoutableSize){
     .width = ASDimensionAuto,
     .height = ASDimensionAuto,
     .minWidth = ASDimensionAuto,
@@ -164,15 +164,15 @@ ASSize ASSizeMake()
   };
 }
 
-ASSize ASSizeMakeFromCGSize(CGSize size)
+ASLayoutableSize ASLayoutableSizeMakeFromCGSize(CGSize size)
 {
-  ASSize s = ASSizeMake();
+  ASLayoutableSize s = ASLayoutableSizeMake();
   s.width = ASDimensionMakeWithPoints(size.width);
   s.height = ASDimensionMakeWithPoints(size.height);
   return s;
 }
 
-BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs)
+BOOL ASLayoutableSizeEqualToLayoutableSize(ASLayoutableSize lhs, ASLayoutableSize rhs)
 {
   return ASDimensionEqualToDimension(lhs.width, rhs.width)
   && ASDimensionEqualToDimension(lhs.height, rhs.height)
@@ -182,10 +182,10 @@ BOOL ASSizeEqualToSize(ASSize lhs, ASSize rhs)
   && ASDimensionEqualToDimension(lhs.maxHeight, rhs.maxHeight);
 }
 
-NSString *NSStringFromASSize(ASSize size)
+NSString *NSStringFromASLayoutableSize(ASLayoutableSize size)
 {
   return [NSString stringWithFormat:
-          @"<ASSize: exact=%@, min=%@, max=%@>",
+          @"<ASLayoutableSize: exact=%@, min=%@, max=%@>",
           NSStringFromASRelativeSize(ASRelativeSizeMake(size.width, size.height)),
           NSStringFromASRelativeSize(ASRelativeSizeMake(size.minWidth, size.minHeight)),
           NSStringFromASRelativeSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight))];
@@ -223,7 +223,7 @@ static inline void ASSizeConstrain(CGFloat minVal, CGFloat exactVal, CGFloat max
     }
 }
 
-ASSizeRange ASSizeResolveAutoSize(ASSize size, const CGSize parentSize, ASSizeRange autoASSizeRange)
+ASSizeRange ASLayoutableSizeResolveAutoSize(ASLayoutableSize size, const CGSize parentSize, ASSizeRange autoASSizeRange)
 {
   CGSize resolvedExact = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.width, size.height), parentSize, {NAN, NAN});
   CGSize resolvedMin = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.minWidth, size.minHeight), parentSize, autoASSizeRange.min);
@@ -235,9 +235,9 @@ ASSizeRange ASSizeResolveAutoSize(ASSize size, const CGSize parentSize, ASSizeRa
   return {rangeMin, rangeMax};
 }
 
-ASSizeRange ASSizeResolve(ASSize size, const CGSize parentSize)
+ASSizeRange ASLayoutableSizeResolve(ASLayoutableSize size, const CGSize parentSize)
 {
-  return ASSizeResolveAutoSize(size, parentSize, {{0, 0}, {INFINITY, INFINITY}});
+  return ASLayoutableSizeResolveAutoSize(size, parentSize, {{0, 0}, {INFINITY, INFINITY}});
 }
 
 #pragma mark - ASSizeRange
