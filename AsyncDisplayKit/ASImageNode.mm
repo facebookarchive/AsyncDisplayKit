@@ -194,7 +194,7 @@ struct ASImageNodeDrawParameters {
   // If a preferredFrameSize is set, call the superclass to return that instead of using the image size.
   if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
 #if DEBUG
-    NSLog(@"Using -[ASDisplayNde preferredFrameSize] is deprecated.");
+    NSLog(@"Using -[ASDisplayNode preferredFrameSize] is deprecated.");
 #endif
     return self.preferredFrameSize;
   }

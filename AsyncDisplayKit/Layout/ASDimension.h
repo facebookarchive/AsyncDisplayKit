@@ -12,12 +12,19 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
-#define ASPointsAreValidForLayout(x) ((isnormal(x) || x == 0.0) && x >= 0.0 && x < (CGFLOAT_MAX / 2.0))
-#define ASCGSizeIsValidForLayout(x) (ASPointsAreValidForLayout(x.width) && ASPointsAreValidForLayout(x.height))
+ASDISPLAYNODE_INLINE BOOL ASPointsAreValidForLayout(CGFloat points)
+{
+  return ((isnormal(points) || points == 0.0) && points >= 0.0 && points < (CGFLOAT_MAX / 2.0));
+}
+
+ASDISPLAYNODE_INLINE BOOL ASIsCGSizeValidForLayout(CGSize size)
+{
+  return (ASPointsAreValidForLayout(size.width) && ASPointsAreValidForLayout(size.height));  
+}
 
 /**
  * A dimension relative to constraints to be provided in the future.
- * A RelativeDimension can be one of three types:
+ * A ASDimension can be one of three types:
  *
  * "Auto" - This indicated "I have no opinion" and may be resolved in whatever way makes most sense given the circumstances.
  *
@@ -25,27 +32,19 @@
  *
  * "Percent" - Multiplied to a provided parent amount to resolve a final amount.
  */
-typedef NS_ENUM(NSInteger, ASDimensionType) {
+typedef NS_ENUM(NSInteger, ASDimensionUnit) {
   /** This indicates "I have no opinion" and may be resolved in whatever way makes most sense given the circumstances. */
-  ASDimensionTypeAuto,
+  ASDimensionUnitAuto,
   /** Just a number. It will always resolve to exactly this amount. This is the default type. */
-  ASDimensionTypePoints,
+  ASDimensionUnitPoints,
   /** Multiplied to a provided parent amount to resolve a final amount. */
-  ASDimensionTypeFraction,
+  ASDimensionUnitFraction,
 };
 
 typedef struct {
-  ASDimensionType type;
+  ASDimensionUnit unit;
   CGFloat value;
 } ASDimension;
-
-/**
- * Expresses a size with relative dimensions.
- */
-typedef struct {
-  ASDimension width;
-  ASDimension height;
-} ASRelativeSize;
 
 /**
  * Expresses an inclusive range of sizes. Used to provide a simple constraint to layout.
@@ -86,7 +85,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Returns a dimension with the specified type and value.
  */
-ASOVERLOADABLE extern ASDimension ASDimensionMake(ASDimensionType type, CGFloat value);
+ASOVERLOADABLE extern ASDimension ASDimensionMake(ASDimensionUnit unit, CGFloat value);
 
 /**
  * Returns a dimension with the specified points value.
@@ -95,8 +94,8 @@ ASOVERLOADABLE extern ASDimension ASDimensionMake(CGFloat points);
 
 /**
  * Returns a dimension by parsing the specified dimension string.
- * Examples: ASDimensionMake(@"0.5%") = ASDimensionMake(ASDimensionTypeFraction, 0.5)
- *           ASDimensionMake(@"0.5pt") = ASDimensionMake(ASDimensionTypePoints, 0.5)
+ * Examples: ASDimensionMake(@"0.5%") = ASDimensionMake(ASDimensionUnitFraction, 0.5)
+ *           ASDimensionMake(@"0.5pt") = ASDimensionMake(ASDimensionUnitPoints, 0.5)
  */
 ASOVERLOADABLE extern ASDimension ASDimensionMake(NSString *dimension);
 
@@ -111,11 +110,6 @@ extern ASDimension ASDimensionMakeWithPoints(CGFloat points);
 extern ASDimension ASDimensionMakeWithFraction(CGFloat fraction);
 
 /**
- * Returns a dimension with the same type and value as the specified dimension.
- */
-extern ASDimension ASDimensionCopy(ASDimension aDimension);
-
-/**
  * Returns whether two dimensions are equal.
  */
 extern BOOL ASDimensionEqualToDimension(ASDimension lhs, ASDimension rhs);
@@ -128,13 +122,13 @@ extern NSString *NSStringFromASDimension(ASDimension dimension);
 /**
  * Resolve this dimension to a parent size.
  */
-extern CGFloat ASDimensionResolve(ASDimension dimension, CGFloat autoSize, CGFloat parent);
+extern CGFloat ASDimensionResolve(ASDimension dimension, CGFloat parent, CGFloat autoSize);
 
 #define ASD(...) ASDimensionMake(__VA_ARGS__)
 
-@interface NSNumber (ASRelativeDimension)
-@property (nonatomic, readonly) ASDimension as_points;
-@property (nonatomic, readonly) ASDimension as_fraction;
+@interface NSNumber (ASDimension)
+@property (nonatomic, readonly) ASDimension as_pointDimension;
+@property (nonatomic, readonly) ASDimension as_fractionDimension;
 @end
 
 #pragma mark - ASLayoutableSize
@@ -160,12 +154,12 @@ extern BOOL ASLayoutableSizeEqualToLayoutableSize(ASLayoutableSize lhs, ASLayout
 extern NSString *NSStringFromASLayoutableSize(ASLayoutableSize size);
 
 /**
- * Resolve this size to a parent size.
+ * Resolve the given size to a parent size.
  */
 extern ASSizeRange ASLayoutableSizeResolve(ASLayoutableSize size, const CGSize parentSize);
 
 /**
- * Resolve this size to a parent size and use autoASSizeRange if
+ * Resolve the given size relative to a parent size and an auto size.
  */
 extern ASSizeRange ASLayoutableSizeResolveAutoSize(ASLayoutableSize size, const CGSize parentSize, ASSizeRange autoASSizeRange);
 

@@ -117,15 +117,20 @@
 #define HEIGHT 30
   CGSize nodeSize = CGSizeMake(constrainedSize.max.width * 0.3, HEIGHT);
 
-  _latEditableNode.size = _lonEditableNode.size = ASSizeMakeFromCGSize(nodeSize);
-  _deltaLatEditableNode.size = _deltaLonEditableNode.size = ASSizeMakeFromCGSize(nodeSize);
-  _updateRegionButton.size = _liveMapToggleButton.size = ASSizeMakeFromCGSize(nodeSize);
+  [_latEditableNode setSizeFromCGSize:nodeSize];
+  [_lonEditableNode setSizeFromCGSize:nodeSize];
+  
+  [_deltaLatEditableNode setSizeFromCGSize:nodeSize];
+  [_deltaLonEditableNode setSizeFromCGSize:nodeSize];
+  
+  [_updateRegionButton setSizeFromCGSize:nodeSize];
+  [_liveMapToggleButton setSizeFromCGSize:nodeSize];
 
-  _latEditableNode.flexGrow = _lonEditableNode.flexGrow = true;
-  _deltaLatEditableNode.flexGrow = _deltaLonEditableNode.flexGrow = true;
-  _updateRegionButton.flexGrow = _liveMapToggleButton.flexGrow = true;
+  _latEditableNode.flexGrow = _lonEditableNode.flexGrow = YES;
+  _deltaLatEditableNode.flexGrow = _deltaLonEditableNode.flexGrow = YES;
+  _updateRegionButton.flexGrow = _liveMapToggleButton.flexGrow = YES;
 
-  _mapNode.flexGrow = true;
+  _mapNode.flexGrow = YES;
 
   ASStackLayoutSpec *lonlatSpec =
     [ASStackLayoutSpec

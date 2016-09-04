@@ -84,7 +84,7 @@ ASDISPLAYNODE_EXTERN_C_END
 - (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable
                               size:(CGSize)size
                           position:(CGPoint)position
-                        sublayouts:(NSArray *)sublayouts NS_DESIGNATED_INITIALIZER;
+                        sublayouts:(nullable NSArray<ASLayout *> *)sublayouts NS_DESIGNATED_INITIALIZER;
 
 /**
  * Convenience class initializer for layout construction.

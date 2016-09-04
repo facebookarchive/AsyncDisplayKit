@@ -54,17 +54,17 @@
   _rootNode.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
     
     // Layout all nodes absolute in a static layout spec
+    [guitarVideoNode setSizeFromCGSize:CGSizeMake(mainScreenBoundsSize.width, mainScreenBoundsSize.height / 3.0)];
     guitarVideoNode.layoutPosition = CGPointMake(0, 0);
-    guitarVideoNode.size = ASSizeMakeFromCGSize(CGSizeMake(mainScreenBoundsSize.width, mainScreenBoundsSize.height / 3.0));
     
+    [nicCageVideoNode setSizeFromCGSize:CGSizeMake(mainScreenBoundsSize.width/2, mainScreenBoundsSize.height / 3.0)];
     nicCageVideoNode.layoutPosition = CGPointMake(mainScreenBoundsSize.width / 2.0, mainScreenBoundsSize.height / 3.0);
-    nicCageVideoNode.size = ASSizeMakeFromCGSize(CGSizeMake(mainScreenBoundsSize.width/2, mainScreenBoundsSize.height / 3.0));
     
+    [simonVideoNode setSizeFromCGSize:CGSizeMake(mainScreenBoundsSize.width/2, mainScreenBoundsSize.height / 3.0)];
     simonVideoNode.layoutPosition = CGPointMake(0.0, mainScreenBoundsSize.height - (mainScreenBoundsSize.height / 3.0));
-    simonVideoNode.size = ASSizeMakeFromCGSize(CGSizeMake(mainScreenBoundsSize.width/2, mainScreenBoundsSize.height / 3.0));
     
+    [hlsVideoNode setSizeFromCGSize:CGSizeMake(mainScreenBoundsSize.width / 2.0, mainScreenBoundsSize.height / 3.0)];
     hlsVideoNode.layoutPosition = CGPointMake(0.0, mainScreenBoundsSize.height / 3.0);
-    hlsVideoNode.size = ASSizeMakeFromCGSize(CGSizeMake(mainScreenBoundsSize.width / 2.0, mainScreenBoundsSize.height / 3.0));
     
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode, hlsVideoNode]];
   };

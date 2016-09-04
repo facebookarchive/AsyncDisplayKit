@@ -67,14 +67,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @abstract The width property specifies the height of the content area of an ASLayoutable.
  * The minWidth and maxWidth properties override width.
- * Default: ASRelativeDimensionTypeAuto
+ * Defaults to ASRelativeDimensionTypeAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension width;
 
 /**
  * @abstract The height property specifies the height of the content area of an ASLayoutable
  * The minHeight and maxHeight properties override height.
- * Default to ASRelativeDimensionTypeAuto
+ * Defaults to ASDimensionTypeAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension height;
 
@@ -82,7 +82,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract The minHeight property is used to set the minimum height of a given element. It prevents the used value
  * of the height property from becoming smaller than the value specified for minHeight.
  * The value of minHeight overrides both maxHeight and height.
- * Default to ASRelativeDimensionTypeAuto
+ * Defaults to ASDimensionTypeAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension minHeight;
 
@@ -90,7 +90,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract The maxHeight property is used to set the maximum height of an element. It prevents the used value of the
  * height property from becoming larger than the value specified for maxHeight.
  * The value of maxHeight overrides height, but minHeight overrides maxHeight.
- * Default to ASRelativeDimensionTypeAuto
+ * Defaults to ASDimensionTypeAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension maxHeight;
 
@@ -98,7 +98,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract The minWidth property is used to set the minimum width of a given element. It prevents the used value of
  * the width property from becoming smaller than the value specified for minWidth.
  * The value of minWidth overrides both maxWidth and width.
- * Default to ASRelativeDimensionTypeAuto
+ * Defaults to ASDimensionTypeAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension minWidth;
 
@@ -106,7 +106,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract The maxWidth property is used to set the maximum width of a given element. It prevents the used value of
  * the width property from becoming larger than the value specified for maxWidth.
  * The value of maxWidth overrides width, but minWidth overrides maxWidth.
- * Default to ASRelativeDimensionTypeAuto
+ * Defaults to ASDimensionTypeAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension maxWidth;
 
@@ -163,7 +163,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion Why do you need to override -calculateLayoutThatFits: instead of -layoutThatFits:parentSize:?
  * The base implementation of -layoutThatFits:parentSize: does the following for you:
- * 1. First, it uses the parentSize parameter to resolve the nodes's size (the one assigned to the sizeRange property).
+ * 1. First, it uses the parentSize parameter to resolve the nodes's size (the one assigned to the size property).
  * 2. Then, it intersects the resolved size with the constrainedSize parameter. If the two don't intersect,
  *    constrainedSize wins. This allows a component to always override its childrens' sizes when computing its layout.
  *    (The analogy for UIView: you might return a certain size from -sizeThatFits:, but a parent view can always override

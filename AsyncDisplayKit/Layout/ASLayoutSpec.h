@@ -103,7 +103,12 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  * Returns an ASWrapperLayoutSpec object initialized with the given layoutable as child
  */
-- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable;
+- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable NS_DESIGNATED_INITIALIZER;;
+
+/*
+ * Init not available for ASWrapperLayoutSpec
+ */
+- (instancetype)init __unavailable;
 
 @end
 

@@ -36,7 +36,6 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 
 // Dynamic properties for ASLayoutables
 @dynamic layoutableType, size;
-
 // Dynamic properties for sizing
 @dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
 // Dynamic properties for stack spec
@@ -309,9 +308,11 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable
 {
-    self = [super init];
+  self = [super init];
+  if (self) {
     self.child = layoutable;
-    return self;
+  }
+  return self;
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize

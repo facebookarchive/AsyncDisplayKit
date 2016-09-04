@@ -497,8 +497,8 @@
 #if DEBUG
     NSLog(@"Using -[ASDisplayNde preferredFrameSize] is deprecated.");
 #endif
-    stack.width = ASDimensionMake(ASDimensionTypePoints, self.preferredFrameSize.width);
-    stack.height = ASDimensionMake(ASDimensionTypePoints, self.preferredFrameSize.height);
+    stack.width = ASDimensionMake(ASDimensionUnitPoints, self.preferredFrameSize.width);
+    stack.height = ASDimensionMake(ASDimensionUnitPoints, self.preferredFrameSize.height);
     spec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack]];
   }
 #pragma clang diagnostic pop

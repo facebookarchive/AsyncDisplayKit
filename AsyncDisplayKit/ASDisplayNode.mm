@@ -71,7 +71,6 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 // Dynamic properties for ASLayoutables
 @dynamic layoutableType, size;
-
 // Dynamic properties for sizing
 @dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
 // Dynamic properties for stack spec
@@ -199,14 +198,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (self != [ASDisplayNode class]) {
     
     // Subclasses should never override these
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", NSStringFromClass(self));
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", NSStringFromClass(self));
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure: method", NSStringFromClass(self));
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange: method. Instead overwrite calculateLayoutThatFits:", NSStringFromClass(self));
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutThatFits:)), @"Subclass %@ must not override layoutThatFits: method", NSStringFromClass(self));
-      ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutThatFits:parentSize:)), @"Subclass %@ must not override layoutThatFits:parentSize method", NSStringFromClass(self));
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", NSStringFromClass(self));
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", NSStringFromClass(self));
+    NSString *classString = NSStringFromClass(self);
+    
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure: method", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange: method. Instead overwrite calculateLayoutThatFits:", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutThatFits:)), @"Subclass %@ must not override layoutThatFits: method", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutThatFits:parentSize:)), @"Subclass %@ must not override layoutThatFits:parentSize method", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", classString);
   }
 
   // Below we are pre-calculating values per-class and dynamically adding a method (_staticInitialize) to populate these values
@@ -666,24 +667,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 ASLayoutableSizeForwarding
 ASLayoutableSizeHelperForwarding
 
-// Deprecated
-- (CGSize)measure:(CGSize)constrainedSize
-{
-    return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
-}
-
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
 {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
   return [self measureWithSizeRange:constrainedSize];
 #pragma clang diagnostic pop
-}
-
-// Deprecated
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
-{
-  return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];
 }
 
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
@@ -841,13 +830,13 @@ ASLayoutableSizeHelperForwarding
       }
 
       // Update display node layout
-      auto previousDisplayNodeLayout = _calculatedDisplayNodeLayout;
-      auto newDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>(
+      auto previousLayout = _calculatedDisplayNodeLayout;
+      auto pendingLayout = std::make_shared<ASDisplayNodeLayout>(
         newLayout,
         constrainedSize,
         constrainedSize.max
       );
-      [self setCalculatedDisplayNodeLayout:newDisplayNodeLayout];
+      [self setCalculatedDisplayNodeLayout:pendingLayout];
       
       // Apply complete layout transitions for all subnodes
       ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
@@ -864,8 +853,8 @@ ASLayoutableSizeHelperForwarding
       
       // Setup pending layout transition for animation
       _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                            pendingLayout:newDisplayNodeLayout
-                                                           previousLayout:previousDisplayNodeLayout];
+                                                            pendingLayout:pendingLayout
+                                                           previousLayout:previousLayout];
       // Setup context for pending layout transition. we need to hold a strong reference to the context
       _pendingLayoutTransitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
                                                                          layoutDelegate:_pendingLayoutTransition
@@ -966,7 +955,7 @@ ASLayoutableSizeHelperForwarding
 }
 
 /*
- * Hook for subclasse to perform an animation based on the given ASContextTransitioning. By default a fade in and out
+ * Hook for subclasses to perform an animation based on the given ASContextTransitioning. By default a fade in and out
  * animation is provided.
  */
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
@@ -980,7 +969,6 @@ ASLayoutableSizeHelperForwarding
   ASDisplayNode *node = self;
   
   NSAssert(node.isNodeLoaded == YES, @"Invalid node state");
-  NSAssert(context.isAnimated == YES, @"Can't animate a non-animatable context");
   
   NSArray<ASDisplayNode *> *removedSubnodes = [context removedSubnodes];
   NSMutableArray<UIView *> *removedViews = [NSMutableArray array];
@@ -3242,6 +3230,18 @@ ASEnvironmentLayoutExtensibilityForwarding
   }
 }
 #endif
+
+#pragma mark - Deprecated
+
+- (CGSize)measure:(CGSize)constrainedSize
+{
+  return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
+}
+
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+{
+  return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];
+}
 
 @end
 

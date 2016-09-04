@@ -11,31 +11,34 @@
 #import "ASDimension.h"
 #import "ASAssert.h"
 
-ASDimension const ASDimensionAuto = {ASDimensionTypeAuto, 0};
-
 #pragma mark - ASDimension
 
-ASOVERLOADABLE ASDimension ASDimensionMake(ASDimensionType type, CGFloat value)
+ASDimension const ASDimensionAuto = {ASDimensionUnitAuto, 0};
+
+ASOVERLOADABLE ASDimension ASDimensionMake(ASDimensionUnit unit, CGFloat value)
 {
-  if (type == ASDimensionTypePoints) {
+  if (unit == ASDimensionUnitPoints) {
     ASDisplayNodeCAssertPositiveReal(@"Points", value);
-  } else if (type == ASDimensionTypeFraction) {
+  } else if (unit == ASDimensionUnitFraction) {
     // TODO: Enable this assertion for 2.0.  Check that there is no use case for using a larger value, e.g. to layout for a clipsToBounds = NO element.
     // ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASDimension fraction value (%f) must be between 0 and 1.", value);
   }
-  ASDimension dimension; dimension.type = type; dimension.value = value; return dimension;
+  ASDimension dimension;
+  dimension.unit = unit;
+  dimension.value = value;
+  return dimension;
 }
 
 ASOVERLOADABLE extern ASDimension ASDimensionMake(CGFloat points)
 {
-  return ASDimensionMake(ASDimensionTypePoints, points);
+  return ASDimensionMake(ASDimensionUnitPoints, points);
 }
 
 ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
 {
   // Handle empty string
   if (dimension.length == 0) {
-    return ASDimensionMake(ASDimensionTypePoints, 0.0);
+    return ASDimensionMake(ASDimensionUnitPoints, 0.0);
   }
   
   // Handle points
@@ -44,7 +47,7 @@ ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
     // Check if points is at the end and remove it
     if (pointsStringLocation == (dimension.length-2)) {
       dimension = [dimension substringToIndex:(dimension.length-2)];
-      return ASDimensionMake(ASDimensionTypePoints, dimension.floatValue);
+      return ASDimensionMake(ASDimensionUnitPoints, dimension.floatValue);
     }
   }
   
@@ -54,87 +57,93 @@ ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
     // Check if percent is at the end and remove it
     if (percentStringLocation == (dimension.length-1)) {
       dimension = [dimension substringToIndex:(dimension.length-1)];
-      return ASDimensionMake(ASDimensionTypeFraction, dimension.floatValue);
+      return ASDimensionMake(ASDimensionUnitFraction, dimension.floatValue);
     }
   }
 
   // Assert as parsing went wrong
-  ASDisplayNodeCAssert(NO, @"Parsing dimension failed");
+  ASDisplayNodeCAssert(NO, @"Parsing dimension failed for: %@", dimension);
   return ASDimensionAuto;
 }
 
 ASDimension ASDimensionMakeWithPoints(CGFloat points)
 {
   ASDisplayNodeCAssertPositiveReal(@"Points", points);
-  return ASDimensionMake(ASDimensionTypePoints, points);
+  return ASDimensionMake(ASDimensionUnitPoints, points);
 }
 
 ASDimension ASDimensionMakeWithFraction(CGFloat fraction)
 {
-  // ASDisplayNodeCAssert( 0 <= fraction && fraction <= 1.0, @"ASDimension fraction value (%f) must be between 0 and 1.", fraction);
-  return ASDimensionMake(ASDimensionTypeFraction, fraction);
-}
-
-ASDimension ASDimensionCopy(ASDimension aDimension)
-{
-  return ASDimensionMake(aDimension.type, aDimension.value);
+  ASDisplayNodeCAssert( 0 <= fraction && fraction <= 1.0, @"ASDimension fraction value (%f) must be between 0 and 1.", fraction);
+  return ASDimensionMake(ASDimensionUnitFraction, fraction);
 }
 
 BOOL ASDimensionEqualToDimension(ASDimension lhs, ASDimension rhs)
 {
-  return lhs.type == rhs.type && lhs.value == rhs.value;
+  return lhs.unit == rhs.unit && lhs.value == rhs.value;
 }
 
 NSString *NSStringFromASDimension(ASDimension dimension)
 {
-  switch (dimension.type) {
-    case ASDimensionTypePoints:
+  switch (dimension.unit) {
+    case ASDimensionUnitPoints:
       return [NSString stringWithFormat:@"%.0fpt", dimension.value];
-    case ASDimensionTypeFraction:
+    case ASDimensionUnitFraction:
       return [NSString stringWithFormat:@"%.0f%%", dimension.value * 100.0];
-    case ASDimensionTypeAuto:
+    case ASDimensionUnitAuto:
       return @"Auto";
   }
 }
 
-CGFloat ASDimensionResolve(ASDimension dimension, CGFloat autoSize, CGFloat parent)
+CGFloat ASDimensionResolve(ASDimension dimension, CGFloat parentSize, CGFloat autoSize)
 {
-  switch (dimension.type) {
-    case ASDimensionTypeAuto:
+  switch (dimension.unit) {
+    case ASDimensionUnitAuto:
       return autoSize;
-    case ASDimensionTypePoints:
+    case ASDimensionUnitPoints:
       return dimension.value;
-    case ASDimensionTypeFraction:
-      return dimension.value * parent;
+    case ASDimensionUnitFraction:
+      return dimension.value * parentSize;
   }
 }
 
 @implementation NSNumber (ASDimension)
 
-- (ASDimension)as_points
+- (ASDimension)as_pointDimension
 {
-  return ASDimensionMake(ASDimensionTypePoints, self.floatValue);
+  return ASDimensionMake(ASDimensionUnitPoints, self.floatValue);
 }
 
-- (ASDimension)as_fraction
+- (ASDimension)as_fractionDimension
 {
-  return ASDimensionMake(ASDimensionTypeFraction, self.floatValue);
+  return ASDimensionMake(ASDimensionUnitFraction, self.floatValue);
 }
 
 @end
 
 #pragma mark - ASRelativeSize
 
+/**
+ * Expresses a size with relative dimensions. Only used for calculations internally in ASDimension.h 
+ */
+typedef struct {
+  ASDimension width;
+  ASDimension height;
+} ASRelativeSize;
+
 ASRelativeSize ASRelativeSizeMake(ASDimension width, ASDimension height)
 {
-  ASRelativeSize size; size.width = width; size.height = height; return size;
+  ASRelativeSize size;
+  size.width = width;
+  size.height = height;
+  return size;
 }
 
 // ** Resolve this relative size relative to a parent size. */
 CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize, CGSize autoSize)
 {
-  return CGSizeMake(ASDimensionResolve(relativeSize.width, autoSize.width, parentSize.width),
-                    ASDimensionResolve(relativeSize.height, autoSize.height, parentSize.height));
+  return CGSizeMake(ASDimensionResolve(relativeSize.width, parentSize.width, autoSize.width),
+                    ASDimensionResolve(relativeSize.height, parentSize.height, autoSize.height));
 }
 
 BOOL ASRelativeSizeEqualToRelativeSize(ASRelativeSize lhs, ASRelativeSize rhs)

@@ -40,8 +40,8 @@
   CGSize forcedImageSize = CGSizeMake(100, 100);
   
   ASImageNode *imageNode = [[ASImageNode alloc] init];
-  imageNode.image = [self testImage];
   imageNode.forcedSize = forcedImageSize;
+  imageNode.image = [self testImage];
   
   // Snapshot testing requires that node is formally laid out.
   [imageNode setSizeFromCGSize:forcedImageSize];

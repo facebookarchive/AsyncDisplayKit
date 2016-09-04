@@ -22,8 +22,9 @@
 {
   CGSize nodeSize = CGSizeMake(100, 100);
   
-  ASStaticSizeDisplayNode *displayNode = [ASStaticSizeDisplayNode new];
-  displayNode.staticSize  = nodeSize;
+  ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
+  displayNode.width = ASDimensionMake(100);
+  displayNode.height = ASDimensionMake(100);
   
   // Use a button node in here as ASButtonNode uses layoutSpecThatFits:
   ASButtonNode *buttonNode = [ASButtonNode new];
@@ -47,8 +48,8 @@
 {
   CGSize nodeSize = CGSizeMake(100, 100);
   
-  ASStaticSizeDisplayNode *displayNode = [ASStaticSizeDisplayNode new];
-  displayNode.staticSize  = nodeSize;
+  ASDisplayNode *displayNode = [ASDisplayNode new];
+  [displayNode setSizeFromCGSize:nodeSize];
   
   ASButtonNode *buttonNode = [ASButtonNode new];
   [displayNode addSubnode:buttonNode];
@@ -103,8 +104,8 @@
 {
   CGSize nodeSize = CGSizeMake(100, 100);
   
-  ASStaticSizeDisplayNode *displayNode = [ASStaticSizeDisplayNode new];
-  displayNode.staticSize  = nodeSize;
+  ASDisplayNode *displayNode = [ASDisplayNode new];
+  [displayNode setSizeFromCGSize:nodeSize];
   
   ASButtonNode *buttonNode = [ASButtonNode new];
   [displayNode addSubnode:buttonNode];
@@ -121,7 +122,7 @@
   [displayNode.view layoutIfNeeded];
   XCTAssertEqual(numberOfLayoutSpecThatFitsCalls, 1, @"Should measure during layout if not measured");
   
-  [displayNode measureWithSizeRange:ASSizeRangeMake(nodeSize, nodeSize)];
+  [displayNode layoutThatFits:ASSizeRangeMake(nodeSize, nodeSize)];
   XCTAssertEqual(numberOfLayoutSpecThatFitsCalls, 1, @"Should not remeasure with same bounds");
 }
 

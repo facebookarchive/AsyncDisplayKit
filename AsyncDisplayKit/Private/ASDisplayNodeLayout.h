@@ -36,7 +36,7 @@ struct ASDisplayNodeLayout {
   : layout(layout), constrainedSize(constrainedSize), parentSize(parentSize), _dirty(NO) {};
   
   /*
-   * Creates a layout without any layout associated. By default this display node layotu is dirty.
+   * Creates a layout without any layout associated. By default this display node layout is dirty.
    */
   ASDisplayNodeLayout()
   : layout(nil), constrainedSize({{0, 0}, {0, 0}}), parentSize({0, 0}), _dirty(YES) {};

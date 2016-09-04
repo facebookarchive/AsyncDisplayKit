@@ -23,19 +23,19 @@
 
 #pragma mark - Utility methods
 
-static NSArray<ASStaticSizeDisplayNode *> *defaultSubnodes()
+static NSArray<ASDisplayNode *> *defaultSubnodes()
 {
   return defaultSubnodesWithSameSize(CGSizeZero, NO);
 }
 
-static NSArray<ASStaticSizeDisplayNode *> *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
+static NSArray<ASDisplayNode *> *defaultSubnodesWithSameSize(CGSize subnodeSize, BOOL flex)
 {
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = @[
+  NSArray<ASDisplayNode *> *subnodes = @[
     ASDisplayNodeWithBackgroundColor([UIColor redColor], subnodeSize),
     ASDisplayNodeWithBackgroundColor([UIColor blueColor], subnodeSize),
     ASDisplayNodeWithBackgroundColor([UIColor greenColor], subnodeSize)
   ];
-  for (ASStaticSizeDisplayNode *subnode in subnodes) {
+  for (ASDisplayNode *subnode in subnodes) {
     subnode.flexGrow = flex;
     subnode.flexShrink = flex;
   }
@@ -58,7 +58,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .justifyContent = justify
   };
   
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, flex);
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, flex);
   
   [self testStackLayoutSpecWithStyle:style sizeRange:sizeRange subnodes:subnodes identifier:identifier];
 }
@@ -68,7 +68,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
                   itemsVerticalAlignment:(ASVerticalAlignment)verticalAlignment
                               identifier:(NSString *)identifier
 {
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
   
   ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init];
   stackLayoutSpec.direction = direction;
@@ -152,7 +152,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
   subnodes[1].flexShrink = YES;
   
   // Width is 75px--that's less than the sum of the widths of the children, which is 100px.
@@ -164,7 +164,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, YES);
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, YES);
   setCGSizeToNode({150, 150}, subnodes[1]);
 
   // width 300px; height 0-150px.
@@ -180,7 +180,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionVertical};
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
   setCGSizeToNode({50, 50}, subnodes[0]);
   setCGSizeToNode({100, 50}, subnodes[1]);
   setCGSizeToNode({150, 50}, subnodes[2]);
@@ -201,7 +201,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .spacing = 10
   };
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
   setCGSizeToNode({50, 50}, subnodes[0]);
   setCGSizeToNode({100, 50}, subnodes[1]);
   setCGSizeToNode({150, 50}, subnodes[2]);
@@ -242,7 +242,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   static ASSizeRange kAnySize = {{0, 0}, {INFINITY, INFINITY}};
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionVertical};
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
   setCGSizeToNode({50, 50}, subnodes[0]);
   setCGSizeToNode({100, 70}, subnodes[1]);
   setCGSizeToNode({150, 90}, subnodes[2]);
@@ -274,7 +274,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .justifyContent = ASStackLayoutJustifyContentCenter
   };
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
   setCGSizeToNode({50, 50}, subnodes[0]);
   setCGSizeToNode({100, 70}, subnodes[1]);
   setCGSizeToNode({150, 90}, subnodes[2]);
@@ -295,7 +295,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .justifyContent = ASStackLayoutJustifyContentSpaceBetween
   };
 
-  ASStaticSizeDisplayNode *child = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});
+  ASDisplayNode *child = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});
   
   // width 300px; height 0-INF
   static ASSizeRange kVariableHeight = {{300, 0}, {300, INFINITY}};
@@ -309,7 +309,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .justifyContent = ASStackLayoutJustifyContentSpaceAround
   };
   
-  ASStaticSizeDisplayNode *child = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});
+  ASDisplayNode *child = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});
   
   // width 300px; height 0-INF
   static ASSizeRange kVariableHeight = {{300, 0}, {300, INFINITY}};
@@ -334,8 +334,8 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
 
-  ASStaticSizeDisplayNode * subnode1 = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
-  ASStaticSizeDisplayNode * subnode2 = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});
+  ASDisplayNode * subnode1 = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
+  ASDisplayNode * subnode2 = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});
   
   ASRatioLayoutSpec *child1 = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.5 child:subnode1];
   child1.flexBasis = ASDimensionMakeWithFraction(1);
@@ -353,13 +353,13 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .alignItems = ASStackLayoutAlignItemsCenter
   };
 
-  ASStaticSizeDisplayNode *subnode1 = ASDisplayNodeWithBackgroundColor([UIColor redColor], {100, 100});
+  ASDisplayNode *subnode1 = ASDisplayNodeWithBackgroundColor([UIColor redColor], {100, 100});
   subnode1.flexShrink = YES;
 
-  ASStaticSizeDisplayNode *subnode2 = ASDisplayNodeWithBackgroundColor([UIColor blueColor], {50, 50});
+  ASDisplayNode *subnode2 = ASDisplayNodeWithBackgroundColor([UIColor blueColor], {50, 50});
   subnode2.flexShrink = YES;
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = @[subnode1, subnode2];
+  NSArray<ASDisplayNode *> *subnodes = @[subnode1, subnode2];
   static ASSizeRange kFixedWidth = {{150, 0}, {150, 100}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kFixedWidth subnodes:subnodes identifier:nil];
 }
@@ -368,12 +368,12 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
 
-  ASStaticSizeDisplayNode *subnode1 = ASDisplayNodeWithBackgroundColor([UIColor redColor], {100, 100});
+  ASDisplayNode *subnode1 = ASDisplayNodeWithBackgroundColor([UIColor redColor], {100, 100});
   
-  ASStaticSizeDisplayNode *subnode2 = ASDisplayNodeWithBackgroundColor([UIColor blueColor], {50, 50});
+  ASDisplayNode *subnode2 = ASDisplayNodeWithBackgroundColor([UIColor blueColor], {50, 50});
   subnode2.alignSelf = ASStackLayoutAlignSelfCenter;
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = @[subnode1, subnode2];
+  NSArray<ASDisplayNode *> *subnodes = @[subnode1, subnode2];
   static ASSizeRange kFixedWidth = {{150, 0}, {150, INFINITY}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kFixedWidth subnodes:subnodes identifier:nil];
 }
@@ -386,7 +386,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .alignItems = ASStackLayoutAlignItemsStart
   };
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
   setCGSizeToNode({50, 50}, subnodes[0]);
   setCGSizeToNode({100, 70}, subnodes[1]);
   setCGSizeToNode({150, 90}, subnodes[2]);
@@ -407,7 +407,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .alignItems = ASStackLayoutAlignItemsEnd
   };
   
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
   setCGSizeToNode({50, 50}, subnodes[0]);
   setCGSizeToNode({100, 70}, subnodes[1]);
   setCGSizeToNode({150, 90}, subnodes[2]);
@@ -428,7 +428,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .alignItems = ASStackLayoutAlignItemsCenter
   };
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
   setCGSizeToNode({50, 50}, subnodes[0]);
   setCGSizeToNode({100, 70}, subnodes[1]);
   setCGSizeToNode({150, 90}, subnodes[2]);
@@ -449,7 +449,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .alignItems = ASStackLayoutAlignItemsStretch
   };
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
   setCGSizeToNode({50, 50}, subnodes[0]);
   setCGSizeToNode({100, 70}, subnodes[1]);
   setCGSizeToNode({150, 90}, subnodes[2]);
@@ -471,7 +471,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .alignItems = ASStackLayoutAlignItemsStretch
   };
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
   setCGSizeToNode({50, 50}, subnodes[0]);
   setCGSizeToNode({100, 70}, subnodes[1]);
   setCGSizeToNode({150, 90}, subnodes[2]);
@@ -495,10 +495,10 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
   setCGSizeToNode({150, 150}, subnodes[1]);
 
-  for (ASStaticSizeDisplayNode *subnode in subnodes) {
+  for (ASDisplayNode *subnode in subnodes) {
     subnode.flexGrow = YES;
     subnode.flexBasis = ASDimensionMakeWithPoints(10);
   }
@@ -516,8 +516,8 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
-  for (ASStaticSizeDisplayNode *subnode in subnodes) {
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
+  for (ASDisplayNode *subnode in subnodes) {
     subnode.flexGrow = YES;
   }
 
@@ -533,12 +533,12 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
 
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
   setCGSizeToNode({50, 50}, subnodes[0]);
   setCGSizeToNode({150, 150}, subnodes[1]);
   setCGSizeToNode({150, 50}, subnodes[2]);
 
-  for (ASStaticSizeDisplayNode *subnode in subnodes) {
+  for (ASDisplayNode *subnode in subnodes) {
     subnode.flexBasis = ASDimensionMakeWithPoints(20);
   }
   
@@ -548,7 +548,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 
 - (void)testCrossAxisStretchingOccursAfterStackAxisFlexing
 {
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = @[
+  NSArray<ASDisplayNode *> *subnodes = @[
     ASDisplayNodeWithBackgroundColor([UIColor greenColor]),
     ASDisplayNodeWithBackgroundColor([UIColor blueColor], {10, 0}),
     ASDisplayNodeWithBackgroundColor([UIColor redColor], {3000, 3000})
@@ -583,7 +583,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
   
-  NSArray<ASStaticSizeDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
 
   setCGSizeToNode({300, 50}, subnodes[0]);
   setCGSizeToNode({100, 50}, subnodes[1]);

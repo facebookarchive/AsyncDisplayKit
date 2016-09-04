@@ -33,10 +33,10 @@
 
 - (void)testChildrenMeasuredWithAutoMaxSize
 {
-  ASStaticSizeDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor], (CGSize){50, 50});
+  ASDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor], (CGSize){50, 50});
   firstChild.layoutPosition = CGPointMake(0, 0);
   
-  ASStaticSizeDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor], (CGSize){100, 100});
+  ASDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor], (CGSize){100, 100});
   secondChild.layoutPosition = CGPointMake(10, 60);
 
   ASSizeRange sizeRange = ASSizeRangeMake(CGSizeMake(10, 10), CGSizeMake(110, 160));

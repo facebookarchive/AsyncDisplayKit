@@ -50,7 +50,7 @@ static NSString *nameForInsets(UIEdgeInsets insets)
   for (NSUInteger combination = 0; combination < 16; combination++) {
     UIEdgeInsets insets = insetsForCombination(combination, 10);
     ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor grayColor]);
-    ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor], {10, 10});
+    ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor], {10, 10});
     
     ASLayoutSpec *layoutSpec =
     [ASBackgroundLayoutSpec
@@ -97,7 +97,7 @@ static NSString *nameForInsets(UIEdgeInsets insets)
   for (NSUInteger combination = 0; combination < 16; combination++) {
     UIEdgeInsets insets = insetsForCombination(combination, 0);
     ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor grayColor]);
-    ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor], {10, 10});
+    ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor], {10, 10});
 
     ASLayoutSpec *layoutSpec =
     [ASBackgroundLayoutSpec

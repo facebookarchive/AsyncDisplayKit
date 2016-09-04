@@ -79,7 +79,7 @@ static const CGFloat kInnerPadding = 10.0f;
   CGSize elementSize = _elementSize;
   return ^{
     RandomCoreGraphicsNode *elementNode = [[RandomCoreGraphicsNode alloc] init];
-    elementNode.size = ASSizeMakeFromCGSize(elementSize);
+    [elementNode setSizeFromCGSize:elementSize];
     return elementNode;
   };
 }
@@ -87,7 +87,7 @@ static const CGFloat kInnerPadding = 10.0f;
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   CGSize collectionNodeSize = CGSizeMake(constrainedSize.max.width, _elementSize.height);
-  _collectionNode.size = ASSizeMakeFromCGSize(collectionNodeSize);
+  [_collectionNode setSizeFromCGSize:collectionNodeSize];
   
   ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
   insetSpec.insets = UIEdgeInsetsMake(kOuterPadding, 0.0, kOuterPadding, 0.0);

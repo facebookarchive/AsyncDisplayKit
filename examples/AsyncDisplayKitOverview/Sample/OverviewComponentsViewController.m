@@ -82,6 +82,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     BOOL hasDescription = self.descriptionNode.attributedText.length > 0;
     
     ASStackLayoutSpec *verticalStackLayoutSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
+    verticalStackLayoutSpec.alignItems = ASStackLayoutAlignItemsStart;
     verticalStackLayoutSpec.spacing = 5.0;
     verticalStackLayoutSpec.children = hasDescription ? @[self.titleNode, self.descriptionNode] : @[self.titleNode];
     
@@ -203,9 +204,11 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark ASImageNode
     ASImageNode *imageNode = [ASImageNode new];
-    imageNode.image = [UIImage imageNamed:@"image"];
-    imageNode.size = ASSizeMakeFromCGSize(CGSizeMake(imageNode.image.size.width / 7,
-                                                     imageNode.image.size.height / 7));
+    imageNode.image = [UIImage imageNamed:@"image.jpg"];
+    
+    CGSize imageNetworkImageNodeSize = (CGSize){imageNode.image.size.width / 7, imageNode.image.size.height / 7};
+    
+    [imageNode setSizeFromCGSize:imageNetworkImageNodeSize];
     
     parentNode = [self centeringParentNodeWithChild:imageNode];
     parentNode.entryTitle = @"ASImageNode";
@@ -215,8 +218,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 #pragma mark ASNetworkImageNode
     ASNetworkImageNode *networkImageNode = [ASNetworkImageNode new];
     networkImageNode.URL = [NSURL URLWithString:@"http://i.imgur.com/FjOR9kX.jpg"];
-    networkImageNode.size = ASSizeMakeFromCGSize(CGSizeMake(imageNode.image.size.width / 7,
-                                                            imageNode.image.size.height / 7));
+    [networkImageNode setSizeFromCGSize:imageNetworkImageNodeSize];
     
     parentNode = [self centeringParentNodeWithChild:networkImageNode];
     parentNode.entryTitle = @"ASNetworkImageNode";
@@ -225,7 +227,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark ASMapNode
     ASMapNode *mapNode = [ASMapNode new];
-    mapNode.size = ASSizeMakeFromCGSize((CGSize){300.0, 300.0});
+    [mapNode setSizeFromCGSize:(CGSize){300.0, 300.0}];
     
     // San Francisco
     CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(37.7749, -122.4194);
@@ -238,7 +240,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark ASVideoNode
     ASVideoNode *videoNode = [ASVideoNode new];
-    videoNode.size = ASSizeMakeFromCGSize((CGSize){300.0, 400.0});
+    [videoNode setSizeFromCGSize:(CGSize){300.0, 400.0}];
     
     AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"http://www.w3schools.com/html/mov_bbb.mp4"]];
     videoNode.asset = asset;
@@ -252,7 +254,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     UIImage *scrollNodeImage = [UIImage imageNamed:@"image"];
     
     ASScrollNode *scrollNode = [ASScrollNode new];
-    scrollNode.size = ASSizeMakeFromCGSize((CGSize){300.0, 400.0});
+    [scrollNode setSizeFromCGSize:(CGSize){300.0, 400.0}];
     
     UIScrollView *scrollNodeView = scrollNode.view;
     [scrollNodeView addSubview:[[UIImageView alloc] initWithImage:scrollNodeImage]];
@@ -393,6 +395,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     parentNode.entryDescription = @"Is based on a simplified version of CSS flexbox. It allows you to stack components vertically or horizontally and specify how they should be flexed and aligned to fit in the available space.";
     parentNode.sizeThatFitsBlock = ^ASLayoutSpec *(ASSizeRange constrainedSize) {
         ASStackLayoutSpec *verticalStackLayoutSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
+        verticalStackLayoutSpec.alignItems = ASStackLayoutAlignItemsStart;
         verticalStackLayoutSpec.children = @[childNode1, childNode2, childNode3];
         return verticalStackLayoutSpec;
     };
@@ -403,17 +406,17 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark Horizontal ASStackLayoutSpec
     childNode1 = [ASDisplayNode new];
-    childNode1.size = ASSizeMakeFromCGSize((CGSize){10.0, 20.0});
+    [childNode1 setSizeFromCGSize:(CGSize){10.0, 20.0}];
     childNode1.flexGrow = YES;
     childNode1.backgroundColor = [UIColor greenColor];
     
     childNode2 = [ASDisplayNode new];
-    childNode2.size = ASSizeMakeFromCGSize((CGSize){10.0, 20.0});
+    [childNode2 setSizeFromCGSize:(CGSize){10.0, 20.0}];
     childNode2.alignSelf = ASStackLayoutAlignSelfStretch;
     childNode2.backgroundColor = [UIColor blueColor];
     
     childNode3 = [ASDisplayNode new];
-    childNode3.size = ASSizeMakeFromCGSize((CGSize){10.0, 20.0});
+    [childNode3 setSizeFromCGSize:(CGSize){10.0, 20.0}];
     childNode3.backgroundColor = [UIColor yellowColor];
     
     parentNode = [self parentNodeWithChild:childNode];
@@ -422,16 +425,17 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     parentNode.sizeThatFitsBlock = ^ASLayoutSpec *(ASSizeRange constrainedSize) {
         
         // Create stack alyout spec to layout children
-        ASStackLayoutSpec *verticalStackLayoutSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
-        verticalStackLayoutSpec.children = @[childNode1, childNode2, childNode3];
-        verticalStackLayoutSpec.spacing = 5.0; // Spacing between children
+        ASStackLayoutSpec *horizontalStackSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
+        horizontalStackSpec.alignItems = ASStackLayoutAlignItemsStart;
+        horizontalStackSpec.children = @[childNode1, childNode2, childNode3];
+        horizontalStackSpec.spacing = 5.0; // Spacing between children
         
         // Layout the stack layout with 100% width and 100% height of the parent node
-        verticalStackLayoutSpec.height = ASDimensionMakeWithFraction(1.0);
-        verticalStackLayoutSpec.width = ASDimensionMakeWithFraction(1.0);
+        horizontalStackSpec.height = ASDimensionMakeWithFraction(1.0);
+        horizontalStackSpec.width = ASDimensionMakeWithFraction(1.0);
         
         // Add a bit of inset
-        return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0.0, 5.0, 0.0, 5.0) child:verticalStackLayoutSpec];
+        return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0.0, 5.0, 0.0, 5.0) child:horizontalStackSpec];
     };
     [parentNode addSubnode:childNode1];
     [parentNode addSubnode:childNode2];
@@ -463,7 +467,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 - (OverviewDisplayNodeWithSizeBlock *)parentNodeWithChild:(ASDisplayNode *)child
 {
     OverviewDisplayNodeWithSizeBlock *parentNode = [OverviewDisplayNodeWithSizeBlock new];
-    parentNode.size = ASSizeMakeFromCGSize((CGSize){100, 100});
+    [parentNode setSizeFromCGSize:(CGSize){100, 100}];
     parentNode.backgroundColor = [UIColor redColor];
     return parentNode;
 }
@@ -487,7 +491,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 - (ASDisplayNode *)childNode
 {
     ASDisplayNode *childNode = [ASDisplayNode new];
-    childNode.size = ASSizeMakeFromCGSize((CGSize){50, 50});
+    [childNode setSizeFromCGSize:(CGSize){50, 50}];
     childNode.backgroundColor = [UIColor blueColor];
     return childNode;
 }

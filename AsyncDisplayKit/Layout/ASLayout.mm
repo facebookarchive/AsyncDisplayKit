@@ -54,11 +54,12 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 - (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable
                               size:(CGSize)size
                           position:(CGPoint)position
-                        sublayouts:(NSArray *)sublayouts
+                        sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
 {
+  NSParameterAssert(layoutable);
+  
   self = [super init];
   if (self) {
-    NSParameterAssert(layoutable);
 #if DEBUG
     for (ASLayout *sublayout in sublayouts) {
       ASDisplayNodeAssert(CGPointIsNull(sublayout.position) == NO, @"Invalid position is not allowed in sublayout.");
@@ -67,8 +68,8 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     
     _layoutable = layoutable;
     
-    if (!ASCGSizeIsValidForLayout(size)) {
-      ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutable);
+    if (!ASIsCGSizeValidForLayout(size)) {
+      ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation! Release configurations will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutable);
       size = CGSizeZero;
     } else {
       size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
@@ -80,7 +81,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     } else {
       _position = position;
     }
-    //_constrainedSize = constrainedSize;
+
     _sublayouts = sublayouts != nil ? [sublayouts copy] : @[];
     _flattened = NO;
   }
@@ -116,8 +117,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
                          sublayouts:sublayouts];
 }
 
-+ (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
-                                size:(CGSize)size
++ (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable size:(CGSize)size
 {
   return [self layoutWithLayoutable:layoutable
                                size:size
@@ -234,7 +234,7 @@ ASLayout *ASCalculateLayout(id<ASLayoutable> layoutable, const ASSizeRange sizeR
 {
   ASDisplayNodeCAssertNotNil(layoutable, @"Not valid layoutable passed in.");
   
-  return layoutable ? [layoutable layoutThatFits:sizeRange parentSize:parentSize] : nil;
+  return [layoutable layoutThatFits:sizeRange parentSize:parentSize];
 }
 
 ASLayout *ASCalculateRootLayout(id<ASLayoutable> rootLayoutable, const ASSizeRange sizeRange)

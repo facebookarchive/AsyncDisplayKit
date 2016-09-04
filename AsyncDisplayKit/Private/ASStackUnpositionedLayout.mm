@@ -309,8 +309,8 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
         child,
         crossChildLayout(child,
                          style,
-                         ASDimensionResolve(child.flexBasis, 0, stackDimension(style.direction, size)),
-                         ASDimensionResolve(child.flexBasis, INFINITY, stackDimension(style.direction, size)),
+                         ASDimensionResolve(child.flexBasis, stackDimension(style.direction, size), 0),
+                         ASDimensionResolve(child.flexBasis, stackDimension(style.direction, size), INFINITY),
                          minCrossDimension,
                          maxCrossDimension,
                          size)
