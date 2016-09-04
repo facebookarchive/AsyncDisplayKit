@@ -40,7 +40,7 @@ struct ASTextNodeDrawParameter {
   UIColor *backgroundColor;
 };
 
-@interface ASTextNode () <UIGestureRecognizerDelegate, NSLayoutManagerDelegate>
+@interface ASTextNode () <UIGestureRecognizerDelegate>
 
 @end
 

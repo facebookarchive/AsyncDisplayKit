@@ -66,8 +66,7 @@
                                                                              lineBreakMode:NSLineBreakByWordWrapping
                                                                       maximumNumberOfLines:1
                                                                             exclusionPaths:nil
-                                                                           constrainedSize:constrainedRect.size
-                                                                     layoutManagerDelegate:nil];
+                                                                           constrainedSize:constrainedRect.size];
   __block CGRect truncationUsedRect;
 
   [truncationContext performBlockWithLockedTextKitComponents:^(NSLayoutManager *truncationLayoutManager, NSTextStorage *truncationTextStorage, NSTextContainer *truncationTextContainer) {
