@@ -14,6 +14,10 @@
 #import "_ASAsyncTransactionGroup.h"
 #import <objc/runtime.h>
 
+#ifndef ASASYNCTRANSACTIONCONTAINER_FORWARD_STATE_CHANGE
+#define ASASYNCTRANSACTIONCONTAINER_FORWARD_STATE_CHANGE 1
+#endif
+
 static const char *ASDisplayNodeAssociatedTransactionsKey = "ASAssociatedTransactions";
 static const char *ASDisplayNodeAssociatedCurrentTransactionKey = "ASAssociatedCurrentTransaction";
 
@@ -81,10 +85,12 @@ static const char *ASAsyncTransactionIsContainerKey = "ASTransactionIsContainer"
 
 - (void)asyncdisplaykit_asyncTransactionContainerStateDidChange
 {
+#if ASASYNCTRANSACTIONCONTAINER_FORWARD_STATE_CHANGE
   id delegate = self.delegate;
   if ([delegate respondsToSelector:@selector(asyncdisplaykit_asyncTransactionContainerStateDidChange)]) {
     [delegate asyncdisplaykit_asyncTransactionContainerStateDidChange];
   }
+#endif
 }
 
 - (_ASAsyncTransaction *)asyncdisplaykit_asyncTransaction
