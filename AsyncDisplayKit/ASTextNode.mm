@@ -29,6 +29,15 @@
 
 #import "CGRect+ASConvenience.h"
 
+/**
+ * If set, we will record all values set to attributedText into an array
+ * and once we get 2000, we'll write them all out into a plist file.
+ *
+ * This is useful for gathering realistic text data sets from apps for performance
+ * testing.
+ */
+#define AS_TEXTNODE_RECORD_ATTRIBUTED_STRINGS 0
+
 static const NSTimeInterval ASTextNodeHighlightFadeOutDuration = 0.15;
 static const NSTimeInterval ASTextNodeHighlightFadeInDuration = 0.1;
 static const CGFloat ASTextNodeHighlightLightOpacity = 0.11;
@@ -439,7 +448,9 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     }
 
     _attributedText = ASCleanseAttributedStringOfCoreTextAttributes(attributedText);
-    
+#if AS_TEXTNODE_RECORD_ATTRIBUTED_STRINGS
+	  [ASTextNode _registerAttributedText:_attributedText];
+#endif
     // Sync the truncation string with attributes from the updated _attributedString
     // Without this, the size calculation of the text with truncation applied will
     // not take into account the attributes of attributedText in the last line
@@ -1363,6 +1374,30 @@ static NSAttributedString *DefaultTruncationAttributedString()
   }
   return truncationMutableString;
 }
+
+#if AS_TEXTNODE_RECORD_ATTRIBUTED_STRINGS
++ (void)_registerAttributedText:(NSAttributedString *)str
+{
+  static NSMutableArray *array;
+  static NSLock *lock;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    lock = [NSLock new];
+    array = [NSMutableArray new];
+  });
+  [lock lock];
+  [array addObject:str];
+  if (array.count % 20 == 0) {
+    NSLog(@"Got %d strings", (int)array.count);
+  }
+  if (array.count == 2000) {
+    NSString *path = [NSTemporaryDirectory() stringByAppendingPathComponent:@"AttributedStrings.plist"];
+    NSAssert([NSKeyedArchiver archiveRootObject:array toFile:path], nil);
+    NSLog(@"Saved to %@", path);
+  }
+  [lock unlock];
+}
+#endif
 
 @end
 

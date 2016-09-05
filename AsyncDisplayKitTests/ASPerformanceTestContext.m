@@ -95,10 +95,10 @@
 {
   __block CFTimeInterval time = 0;
   for (NSInteger i = 0; i < _iterationCount; i++) {
-    __block CFAbsoluteTime start = 0;
+    __block CFTimeInterval start = 0;
     __block BOOL calledStop = NO;
     @autoreleasepool {
-      block(^{
+      block(i, ^{
         ASDisplayNodeAssert(start == 0, @"Called startMeasuring block twice.");
         start = CACurrentMediaTime();
       }, ^{

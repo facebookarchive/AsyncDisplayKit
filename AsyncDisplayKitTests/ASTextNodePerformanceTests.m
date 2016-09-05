@@ -32,6 +32,54 @@ static NSString *const kTestCaseUIKitWithNoContext = @"UIKitNoContext";
 static NSString *const kTestCaseUIKitWithFreshContext = @"UIKitFreshContext";
 static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
 
++ (NSArray<NSAttributedString *> *)realisticDataSet
+{
+  static NSArray *array;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    NSString *file = [[NSBundle bundleForClass:self] pathForResource:@"AttributedStringsFixture0" ofType:@"plist" inDirectory:@"TestResources"];
+    if (file != nil) {
+    	array = [NSKeyedUnarchiver unarchiveObjectWithFile:file];
+    }
+    NSAssert([array isKindOfClass:[NSArray class]], nil);
+    NSSet *unique = [NSSet setWithArray:array];
+    NSLog(@"Loaded realistic text data set with %d attributed strings, %d unique.", (int)array.count, (int)unique.count);
+  });
+  return array;
+}
+
+- (void)testPerformance_RealisticData
+{
+  NSArray *data = [self.class realisticDataSet];
+
+  CGSize maxSize = CGSizeMake(355, CGFLOAT_MAX);
+  CGSize __block uiKitSize, __block asdkSize;
+
+  ASPerformanceTestContext *ctx = [[ASPerformanceTestContext alloc] init];
+  [ctx addCaseWithName:kTestCaseUIKit block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+    NSAttributedString *text = data[i % data.count];
+    startMeasuring();
+    uiKitSize = [text boundingRectWithSize:maxSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil].size;
+    stopMeasuring();
+  }];
+  uiKitSize.width = ASCeilPixelValue(uiKitSize.width);
+  uiKitSize.height = ASCeilPixelValue(uiKitSize.height);
+  ctx.results[kTestCaseUIKit].userInfo[@"size"] = NSStringFromCGSize(uiKitSize);
+
+  [ctx addCaseWithName:kTestCaseASDK block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+    ASTextNode *node = [[ASTextNode alloc] init];
+    NSAttributedString *text = data[i % data.count];
+    startMeasuring();
+    node.attributedText = text;
+    asdkSize = [node measure:maxSize];
+    stopMeasuring();
+  }];
+  ctx.results[kTestCaseASDK].userInfo[@"size"] = NSStringFromCGSize(asdkSize);
+
+  ASXCTAssertEqualSizes(uiKitSize, asdkSize);
+  ASXCTAssertRelativePerformanceInRange(ctx, kTestCaseASDK, 0.2, 0.5);
+}
+
 - (void)testPerformance_TwoParagraphLatinNoTruncation
 {
   NSAttributedString *text = [ASTextNodePerformanceTests twoParagraphLatinText];
@@ -40,7 +88,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
   CGSize __block uiKitSize, __block asdkSize;
   
   ASPerformanceTestContext *ctx = [[ASPerformanceTestContext alloc] init];
-  [ctx addCaseWithName:kTestCaseUIKit block:^(dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+  [ctx addCaseWithName:kTestCaseUIKit block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
     startMeasuring();
     uiKitSize = [text boundingRectWithSize:maxSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil].size;
     stopMeasuring();
@@ -49,7 +97,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
   uiKitSize.height = ASCeilPixelValue(uiKitSize.height);
   ctx.results[kTestCaseUIKit].userInfo[@"size"] = NSStringFromCGSize(uiKitSize);
   
-  [ctx addCaseWithName:kTestCaseASDK block:^(dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+  [ctx addCaseWithName:kTestCaseASDK block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
     ASTextNode *node = [[ASTextNode alloc] init];
     startMeasuring();
     node.attributedText = text;
@@ -70,7 +118,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
   CGSize __block uiKitSize, __block asdkSize;
   
   ASPerformanceTestContext *testCtx = [[ASPerformanceTestContext alloc] init];
-  [testCtx addCaseWithName:kTestCaseUIKit block:^(dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+  [testCtx addCaseWithName:kTestCaseUIKit block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
     startMeasuring();
     uiKitSize = [text boundingRectWithSize:maxSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil].size;
     stopMeasuring();
@@ -79,7 +127,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
   uiKitSize.height = ASCeilPixelValue(uiKitSize.height);
   testCtx.results[kTestCaseUIKit].userInfo[@"size"] = NSStringFromCGSize(uiKitSize);
   
-  [testCtx addCaseWithName:kTestCaseASDK block:^(dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+  [testCtx addCaseWithName:kTestCaseASDK block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
     ASTextNode *node = [[ASTextNode alloc] init];
     startMeasuring();
     node.attributedText = text;
@@ -101,7 +149,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
   NSStringDrawingOptions options = NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine;
   __block CGSize size;
   // nil context
-  [ctx addCaseWithName:kTestCaseUIKitWithNoContext block:^(dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+  [ctx addCaseWithName:kTestCaseUIKitWithNoContext block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
     startMeasuring();
     size = [text boundingRectWithSize:maxSize options:options context:nil].size;
     stopMeasuring();
@@ -109,7 +157,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
   ctx.results[kTestCaseUIKitWithNoContext].userInfo[@"size"] = NSStringFromCGSize(size);
   
   // Fresh context
-  [ctx addCaseWithName:kTestCaseUIKitWithFreshContext block:^(dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+  [ctx addCaseWithName:kTestCaseUIKitWithFreshContext block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
     NSStringDrawingContext *stringDrawingCtx = [[NSStringDrawingContext alloc] init];
     startMeasuring();
       size = [text boundingRectWithSize:maxSize options:options context:stringDrawingCtx].size;
@@ -119,7 +167,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
   
   // Reused context
   NSStringDrawingContext *stringDrawingCtx = [[NSStringDrawingContext alloc] init];
-  [ctx addCaseWithName:kTestCaseUIKitWithReusedContext block:^(dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+  [ctx addCaseWithName:kTestCaseUIKitWithReusedContext block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
     startMeasuring();
       size = [text boundingRectWithSize:maxSize options:options context:stringDrawingCtx].size;
     stopMeasuring();
@@ -142,7 +190,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
   // No caching, reused ctx
   NSStringDrawingContext *defaultCtx = [[NSStringDrawingContext alloc] init];
   XCTAssertFalse([[defaultCtx valueForKey:@"cachesLayout"] boolValue]);
-  [ctx addCaseWithName:kTestCaseUIKit block:^(dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+  [ctx addCaseWithName:kTestCaseUIKit block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
     startMeasuring();
     uncachedSize = [text boundingRectWithSize:maxSize options:options context:defaultCtx].size;
     stopMeasuring();
@@ -153,7 +201,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
   // Caching
   NSStringDrawingContext *cachingCtx = [[NSStringDrawingContext alloc] init];
   [cachingCtx setValue:@YES forKey:@"cachesLayout"];
-  [ctx addCaseWithName:kTestCaseUIKitPrivateCaching block:^(dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
+  [ctx addCaseWithName:kTestCaseUIKitPrivateCaching block:^(NSUInteger i, dispatch_block_t  _Nonnull startMeasuring, dispatch_block_t  _Nonnull stopMeasuring) {
     startMeasuring();
     cachedSize = [text boundingRectWithSize:maxSize options:options context:cachingCtx].size;
     stopMeasuring();
