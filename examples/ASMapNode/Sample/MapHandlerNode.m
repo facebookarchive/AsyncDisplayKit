@@ -16,6 +16,7 @@
 //
 
 #import "MapHandlerNode.h"
+#import "CustomMapAnnotation.h"
 
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 
@@ -90,6 +91,22 @@
   [_liveMapToggleButton setTitle:[self liveMapStr] withFont:nil withColor:[UIColor blueColor] forState:ASControlStateNormal];
   [_liveMapToggleButton setTitle:[self liveMapStr] withFont:[UIFont systemFontOfSize:14] withColor:[UIColor blueColor] forState:ASControlStateHighlighted];
   [_liveMapToggleButton addTarget:self action:@selector(toggleLiveMap) forControlEvents:ASControlNodeEventTouchUpInside];
+  
+  // avoiding retain cycles
+  __weak MapHandlerNode *weakSelf = self;
+  
+  self.mapNode.imageForStaticMapAnnotationBlock = ^UIImage *(id<MKAnnotation> annotation, CGPoint *centerOffset){
+    MapHandlerNode *grabbedSelf = weakSelf;
+    if (grabbedSelf) {
+      if ([annotation isKindOfClass:[CustomMapAnnotation class]]) {
+        CustomMapAnnotation *customAnnotation = (CustomMapAnnotation *)annotation;
+        return customAnnotation.image;
+      }
+    }
+    return nil;
+  };
+  
+  [self addAnnotations];
 }
 
 #pragma mark - Layout
@@ -183,6 +200,30 @@
 
 #pragma mark - Helpers
 
+- (void)addAnnotations {
+  
+  MKPointAnnotation *brno = [MKPointAnnotation new];
+  brno.coordinate = CLLocationCoordinate2DMake(49.2002211, 16.6078411);
+  brno.title = @"Brno city";
+  
+  CustomMapAnnotation *atlantic = [CustomMapAnnotation new];
+  atlantic.coordinate = CLLocationCoordinate2DMake(38.6442228, -29.9956942);
+  atlantic.title = @"Atlantic ocean";
+  atlantic.image = [UIImage imageNamed:@"Water"];
+  
+  CustomMapAnnotation *kilimanjaro = [CustomMapAnnotation new];
+  kilimanjaro.coordinate = CLLocationCoordinate2DMake(-3.075833, 37.353333);
+  kilimanjaro.title = @"Kilimanjaro";
+  kilimanjaro.image = [UIImage imageNamed:@"Hill"];
+  
+  CustomMapAnnotation *mtblanc = [CustomMapAnnotation new];
+  mtblanc.coordinate = CLLocationCoordinate2DMake(45.8325, 6.864444);
+  mtblanc.title = @"Mont Blanc";
+  mtblanc.image = [UIImage imageNamed:@"Hill"];
+  
+  self.mapNode.annotations = @[brno, atlantic, kilimanjaro, mtblanc];
+}
+
 -(NSString *)liveMapStr
 {
   return _mapNode.liveMap ? @"Live Map is ON" : @"Live Map is OFF";
@@ -235,6 +276,21 @@
   return YES;
 }
 
+- (MKAnnotationView *)annotationViewForAnnotation:(id<MKAnnotation>)annotation
+{
+  MKAnnotationView *av;
+  if ([annotation isKindOfClass:[CustomMapAnnotation class]]) {
+    av = [[MKAnnotationView alloc] init];
+    av.centerOffset = CGPointMake(21, 21);
+    av.image = [(CustomMapAnnotation *)annotation image];
+  } else {
+    av = [[MKPinAnnotationView alloc] initWithAnnotation:nil reuseIdentifier:@""];
+  }
+  
+  av.opaque = NO;
+  return av;
+}
+
 #pragma mark - MKMapViewDelegate
 
 - (void)mapView:(MKMapView *)mapView regionDidChangeAnimated:(BOOL)animated {
@@ -242,6 +298,11 @@
   _lonEditableNode.attributedText = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%f", mapView.region.center.longitude]];
   _deltaLatEditableNode.attributedText = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%f", mapView.region.span.latitudeDelta]];
   _deltaLonEditableNode.attributedText = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%f", mapView.region.span.longitudeDelta]];
+}
+
+- (MKAnnotationView *)mapView:(MKMapView *)__unused mapView viewForAnnotation:(id<MKAnnotation>)annotation
+{
+  return [self annotationViewForAnnotation:annotation];
 }
 
 @end

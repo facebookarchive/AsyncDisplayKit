@@ -24,6 +24,11 @@
   // We can take this lock when we're setting displaySuspended and in setNeedsDisplay, so to not deadlock, this is recursive
   ASDN::RecursiveMutex _displaySuspendedLock;
   BOOL _displaySuspended;
+  BOOL _attemptedDisplayWhileZeroSized;
+
+  struct {
+    BOOL delegateDidChangeBounds:1;
+  } _delegateFlags;
 
   id<_ASDisplayLayerDelegate> __weak _asyncDelegate;
 }
@@ -50,6 +55,12 @@
 {
   ASDN::MutexLocker l(_asyncDelegateLock);
   return _asyncDelegate;
+}
+
+- (void)setDelegate:(id)delegate
+{
+  [super setDelegate:delegate];
+  _delegateFlags.delegateDidChangeBounds = [delegate respondsToSelector:@selector(layer:didChangeBoundsWithOldValue:newValue:)];
 }
 
 - (void)setAsyncDelegate:(id<_ASDisplayLayerDelegate>)asyncDelegate
@@ -82,8 +93,21 @@
 
 - (void)setBounds:(CGRect)bounds
 {
-  [super setBounds:bounds];
-  self.asyncdisplaykit_node.threadSafeBounds = bounds;
+  if (_delegateFlags.delegateDidChangeBounds) {
+    CGRect oldBounds = self.bounds;
+    [super setBounds:bounds];
+    self.asyncdisplaykit_node.threadSafeBounds = bounds;
+    [(id<ASCALayerExtendedDelegate>)self.delegate layer:self didChangeBoundsWithOldValue:oldBounds newValue:bounds];
+    
+  } else {
+    [super setBounds:bounds];
+    self.asyncdisplaykit_node.threadSafeBounds = bounds;
+  }
+
+  if (_attemptedDisplayWhileZeroSized && CGRectIsEmpty(bounds) == NO && self.needsDisplayOnBoundsChange == NO) {
+    _attemptedDisplayWhileZeroSized = NO;
+    [self setNeedsDisplay];
+  }
 }
 
 #if DEBUG // These override is strictly to help detect application-level threading errors.  Avoid method overhead in release.
@@ -171,9 +195,9 @@
 
 - (void)display
 {
+  ASDisplayNodeAssertMainThread();
   [self _hackResetNeedsDisplay];
 
-  ASDisplayNodeAssertMainThread();
   if (self.isDisplaySuspended) {
     return;
   }
@@ -183,7 +207,11 @@
 
 - (void)display:(BOOL)asynchronously
 {
-  id<_ASDisplayLayerDelegate> __attribute__((objc_precise_lifetime)) strongAsyncDelegate;
+  if (CGRectIsEmpty(self.bounds)) {
+    _attemptedDisplayWhileZeroSized = YES;
+  }
+
+  id<_ASDisplayLayerDelegate> NS_VALID_UNTIL_END_OF_SCOPE strongAsyncDelegate;
   {
     _asyncDelegateLock.lock();
     strongAsyncDelegate = _asyncDelegate;

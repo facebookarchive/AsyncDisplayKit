@@ -14,13 +14,14 @@
 		694993D81C8B334F00491CA5 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 694993D71C8B334F00491CA5 /* ViewController.m */; };
 		694993DD1C8B334F00491CA5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 694993DC1C8B334F00491CA5 /* Assets.xcassets */; };
 		694993E01C8B334F00491CA5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 694993DE1C8B334F00491CA5 /* LaunchScreen.storyboard */; };
+		905C815E1D362E9400EA2625 /* CustomMapAnnotation.m in Sources */ = {isa = PBXBuildFile; fileRef = 905C815D1D362E9400EA2625 /* CustomMapAnnotation.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		15AD337503831C4D33FF8B3A /* Pods-Sample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Sample.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Sample/Pods-Sample.debug.xcconfig"; sourceTree = "<group>"; };
 		465082D55CCF1B0CB1AEBACC /* libPods-Sample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Sample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		5E5E62821D13F39400D81E38 /* MapHandlerNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MapHandlerNode.h; sourceTree = "<group>"; };
-		5E5E62831D13F39400D81E38 /* MapHandlerNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = MapHandlerNode.m; sourceTree = "<group>"; };
+		5E5E62831D13F39400D81E38 /* MapHandlerNode.m */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.c.objc; path = MapHandlerNode.m; sourceTree = "<group>"; tabWidth = 2; };
 		694993CD1C8B334F00491CA5 /* Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		694993D11C8B334F00491CA5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		694993D31C8B334F00491CA5 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -30,6 +31,8 @@
 		694993DC1C8B334F00491CA5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		694993DF1C8B334F00491CA5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		694993E11C8B334F00491CA5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		905C815C1D362E9400EA2625 /* CustomMapAnnotation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CustomMapAnnotation.h; sourceTree = "<group>"; };
+		905C815D1D362E9400EA2625 /* CustomMapAnnotation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CustomMapAnnotation.m; sourceTree = "<group>"; };
 		97482F27BE2F7583EFE1BC2C /* Pods-Sample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Sample.release.xcconfig"; path = "Pods/Target Support Files/Pods-Sample/Pods-Sample.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -89,6 +92,8 @@
 				694993D71C8B334F00491CA5 /* ViewController.m */,
 				5E5E62821D13F39400D81E38 /* MapHandlerNode.h */,
 				5E5E62831D13F39400D81E38 /* MapHandlerNode.m */,
+				905C815C1D362E9400EA2625 /* CustomMapAnnotation.h */,
+				905C815D1D362E9400EA2625 /* CustomMapAnnotation.m */,
 				694993DC1C8B334F00491CA5 /* Assets.xcassets */,
 				694993D01C8B334F00491CA5 /* Supporting Files */,
 			);
@@ -229,6 +234,7 @@
 				694993D81C8B334F00491CA5 /* ViewController.m in Sources */,
 				694993D51C8B334F00491CA5 /* AppDelegate.m in Sources */,
 				694993D21C8B334F00491CA5 /* main.m in Sources */,
+				905C815E1D362E9400EA2625 /* CustomMapAnnotation.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

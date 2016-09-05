@@ -54,7 +54,7 @@ ASDISPLAYNODE_INLINE BOOL ASDisplayNodeShouldApplyBridgedWriteToView(ASDisplayNo
   if (ASDisplayNodeThreadIsMain()) {
     return loaded;
   } else {
-    if (loaded && !node->_pendingViewState.hasChanges) {
+    if (loaded && !ASDisplayNodeGetPendingState(node).hasChanges) {
       [[ASPendingStateController sharedInstance] registerNode:node];
     }
     return NO;

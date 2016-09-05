@@ -95,7 +95,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
  * The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
  * data stores before entering into editing the backing store on a background thread.
  */
- - (void)prepareForReloadData;
+ - (void)prepareForReloadDataWithSectionCount:(NSInteger)newSectionCount;
  
 /**
  * Notifies the subclass that the data controller is about to reload its data entirely
@@ -104,7 +104,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
  * concrete implementation. This is a great place to perform new node creation like supplementary views
  * or header/footer nodes.
  */
-- (void)willReloadData;
+- (void)willReloadDataWithSectionCount:(NSInteger)newSectionCount;
 
 /**
  * Notifies the subclass to perform setup before sections are inserted in the data controller

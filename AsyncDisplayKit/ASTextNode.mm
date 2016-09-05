@@ -244,8 +244,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .exclusionPaths = _exclusionPaths,
     // use the property getter so a subclass can provide these scale factors on demand if desired
     .pointSizeScaleFactors = self.pointSizeScaleFactors,
-    .layoutManagerCreationBlock = self.layoutManagerCreationBlock,
-    .textStorageCreationBlock = self.textStorageCreationBlock,
     .shadowOffset = _shadowOffset,
     .shadowColor = _cachedShadowUIColor,
     .shadowOpacity = _shadowOpacity,
@@ -356,6 +354,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   if (layout != nil) {
     ASDN::MutexLocker l(__instanceLock__);
     CGSize layoutSize = layout.size;
+    
     //Apply textContainerInset
     layoutSize.width -= (_textContainerInset.left + _textContainerInset.right);
     layoutSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
@@ -369,12 +368,15 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
+  ASDN::MutexLocker l(__instanceLock__);
+  
   ASDisplayNodeAssert(constrainedSize.width >= 0, @"Constrained width for text (%f) is too  narrow", constrainedSize.width);
   ASDisplayNodeAssert(constrainedSize.height >= 0, @"Constrained height for text (%f) is too short", constrainedSize.height);
   
-  ASDN::MutexLocker l(__instanceLock__);
+  // Cache the original constrained size for final size calculateion
+  CGSize originalConstrainedSize = constrainedSize;
   
-  //remove textContainerInset
+  // Adjust constrainedSize for textContainerInset before assigning it
   constrainedSize.width -= (_textContainerInset.left + _textContainerInset.right);
   constrainedSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
   
@@ -397,11 +399,12 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     }
   }
   
-  //add textContainerInset
+  // Add the constrained size back textContainerInset
   size.width += (_textContainerInset.left + _textContainerInset.right);
   size.height += (_textContainerInset.top + _textContainerInset.bottom);
   
-  return size;
+  return CGSizeMake(std::fmin(size.width, originalConstrainedSize.width),
+                    std::fmin(size.height, originalConstrainedSize.height));
 }
 
 #pragma mark - Modifying User Text

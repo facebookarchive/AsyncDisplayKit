@@ -38,7 +38,7 @@
         
         _countNode = [[ASTextNode alloc] init];
         if (_commentsCount > 0) {
-           _countNode.attributedString = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%zd", _commentsCount] attributes:[TextStyles cellControlStyle]];
+           _countNode.attributedText = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%zd", _commentsCount] attributes:[TextStyles cellControlStyle]];
         }
         [self addSubnode:_countNode];
         

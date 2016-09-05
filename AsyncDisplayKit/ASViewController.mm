@@ -29,7 +29,6 @@
   NSInteger _visibilityDepth;
   BOOL _selfConformsToRangeModeProtocol;
   BOOL _nodeConformsToRangeModeProtocol;
-  BOOL _didCheckRangeModeProtocolConformance;
 }
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -54,7 +53,9 @@
   ASDisplayNodeAssertTrue(!node.layerBacked);
   _node = node;
 
-  _automaticallyAdjustRangeModeBasedOnViewEvents = NO;
+  _selfConformsToRangeModeProtocol = [self conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
+  _nodeConformsToRangeModeProtocol = [_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
+  _automaticallyAdjustRangeModeBasedOnViewEvents = _selfConformsToRangeModeProtocol || _nodeConformsToRangeModeProtocol;
 
   return self;
 }
@@ -115,7 +116,12 @@ ASVisibilityDidMoveToParentViewController;
 {
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
+
+  // We do this early layout because we need to get any ASCollectionNodes etc. into the
+  // hierarchy before UIKit applies the scroll view inset adjustments, if you are using
+  // automatic subnode management.
   [_node measureWithSizeRange:[self nodeConstrainedSize]];
+
   [_node recursivelyFetchData];
   
   if (_parentManagesVisibilityDepth == NO) {
@@ -168,21 +174,17 @@ ASVisibilityDepthImplementation;
 
 - (void)setAutomaticallyAdjustRangeModeBasedOnViewEvents:(BOOL)automaticallyAdjustRangeModeBasedOnViewEvents
 {
-  _automaticallyAdjustRangeModeBasedOnViewEvents = automaticallyAdjustRangeModeBasedOnViewEvents;
+  if (automaticallyAdjustRangeModeBasedOnViewEvents != _automaticallyAdjustRangeModeBasedOnViewEvents) {
+    if (automaticallyAdjustRangeModeBasedOnViewEvents && _selfConformsToRangeModeProtocol == NO && _nodeConformsToRangeModeProtocol == NO) {
+      NSLog(@"Warning: automaticallyAdjustRangeModeBasedOnViewEvents set to YES in %@, but range mode updating is not possible because neither view controller nor node %@ conform to ASRangeControllerUpdateRangeProtocol.", self, _node);
+    }
+    _automaticallyAdjustRangeModeBasedOnViewEvents = automaticallyAdjustRangeModeBasedOnViewEvents;
+  }
 }
 
 - (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
 {
   if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
-  
-  if (!_didCheckRangeModeProtocolConformance) {
-    _selfConformsToRangeModeProtocol = [self conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
-    _nodeConformsToRangeModeProtocol = [_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
-    _didCheckRangeModeProtocolConformance = YES;
-    if (!_selfConformsToRangeModeProtocol && !_nodeConformsToRangeModeProtocol) {
-      NSLog(@"Warning: automaticallyAdjustRangeModeBasedOnViewEvents set to YES in %@, but range mode updating is not possible because neither view controller nor node %@ conform to ASRangeControllerUpdateRangeProtocol.", self, _node);
-    }
-  }
   
   if (_selfConformsToRangeModeProtocol) {
     id<ASRangeControllerUpdateRangeProtocol> rangeUpdater = (id<ASRangeControllerUpdateRangeProtocol>)self;
@@ -291,12 +293,16 @@ ASVisibilityDepthImplementation;
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, oldEnvironmentTraitCollection) == NO) {
     environmentState.environmentTraitCollection = environmentTraitCollection;
     self.node.environmentState = environmentState;
-    [self.node setNeedsLayout];
     
     NSArray<id<ASEnvironment>> *children = [self.node children];
     for (id<ASEnvironment> child in children) {
       ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
     }
+    
+    // once we've propagated all the traits, layout this node.
+    // Remeasure the node with the latest constrained size – old constrained size may be incorrect.
+    [self.node measureWithSizeRange:[self nodeConstrainedSize]];
+    [self.node setNeedsLayout];
   }
 }
 
@@ -313,12 +319,13 @@ ASVisibilityDepthImplementation;
 {
   [super willTransitionToTraitCollection:newCollection withTransitionCoordinator:coordinator];
   
-  // here we take the new UITraitCollection and use it to create a new ASEnvironmentTraitCollection on self.node
-  // We will propagate when the corresponding viewWillTransitionToSize:withTransitionCoordinator: is called and we have the
-  // new windowSize. There are cases when viewWillTransitionToSize: is called when willTransitionToTraitCollection: is not.
-  // Since we do the propagation on viewWillTransitionToSize: our subnodes should always get the proper trait collection.
-  ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(newCollection);
-  self.node.environmentTraitCollection = asyncTraitCollection;
+  ASEnvironmentTraitCollection environmentTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(newCollection);
+  // A call to willTransitionToTraitCollection:withTransitionCoordinator: is always followed by a call to viewWillTransitionToSize:withTransitionCoordinator:.
+  // However, it is not immediate and we may need the new trait collection before viewWillTransitionToSize:withTransitionCoordinator: is called. Our view already has the
+  // new bounds, so go ahead and set the containerSize and propagate the traits here. As long as nothing else in the traits changes (which it shouldn't)
+  // then we won't we will skip the propagation in viewWillTransitionToSize:withTransitionCoordinator:.
+  environmentTraitCollection.containerSize = self.view.bounds.size;
+  [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator

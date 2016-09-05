@@ -19,6 +19,7 @@
 #import "ASThread.h"
 #import "ASIndexedNodeContext.h"
 #import "ASDataController+Subclasses.h"
+#import "ASDispatch.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -183,7 +184,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(nodeCount, sizeof(ASCellNode *));
 
   dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-  dispatch_apply(nodeCount, queue, ^(size_t i) {
+  ASDispatchApply(nodeCount, queue, 0, ^(size_t i) {
     RETURN_IF_NO_DATASOURCE();
 
     // Allocate the node.
@@ -399,7 +400,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   NSArray<ASIndexedNodeContext *> *contexts = [self _populateFromDataSourceWithSectionIndexSet:sectionIndexSet];
   
   // Allow subclasses to perform setup before going into the edit transaction
-  [self prepareForReloadData];
+  [self prepareForReloadDataWithSectionCount:sectionCount];
   
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     LOG(@"Edit Transaction - reloadData");
@@ -414,7 +415,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
       [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
     }
     
-    [self willReloadData];
+    [self willReloadDataWithSectionCount:sectionCount];
     
     // Insert empty sections
     NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
@@ -636,12 +637,12 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 #pragma mark - Backing store manipulation optional hooks (Subclass API)
 
-- (void)prepareForReloadData
+- (void)prepareForReloadDataWithSectionCount:(NSInteger)newSectionCount
 {
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
-- (void)willReloadData
+- (void)willReloadDataWithSectionCount:(NSInteger)newSectionCount
 {
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }

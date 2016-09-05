@@ -115,7 +115,7 @@
   [self setText:[NSString stringWithFormat:@"loaded '%@'", imageIdentifier]];
   
   if ([imageIdentifier isEqualToString:@"best"]) {
-    [self setText:[_buttonNode.titleNode.attributedString.string stringByAppendingString:@".  tap to reload"]];
+    [self setText:[_buttonNode.titleNode.attributedText.string stringByAppendingString:@".  tap to reload"]];
     _buttonNode.userInteractionEnabled = YES;
   }
 }

@@ -16,6 +16,7 @@
 #import "ASCollectionNode.h"
 #import "ASDisplayNode+Beta.h"
 #import <vector>
+#import <OCMock/OCMock.h>
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 
@@ -92,9 +93,10 @@
   if (self) {
     // Populate these immediately so that they're not unexpectedly nil during tests.
     self.asyncDelegate = [[ASCollectionViewTestDelegate alloc] initWithNumberOfSections:10 numberOfItemsInSection:10];
-    
+    id realLayout = [UICollectionViewFlowLayout new];
+    id mockLayout = [OCMockObject partialMockForObject:realLayout];
     self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds
-                                             collectionViewLayout:[UICollectionViewFlowLayout new]];
+                                             collectionViewLayout:mockLayout];
     self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.collectionView.asyncDataSource = self.asyncDelegate;
     self.collectionView.asyncDelegate = self.asyncDelegate;
@@ -202,18 +204,18 @@
   ASRangeTuningParameters fullPreloadParams = { .leadingBufferScreenfuls = 1, .trailingBufferScreenfuls = 0.5 };
   
   [collectionView setTuningParameters:minimumRenderParams forRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypeDisplay];
-  [collectionView setTuningParameters:minimumPreloadParams forRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypeFetchData];
+  [collectionView setTuningParameters:minimumPreloadParams forRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypePreload];
   [collectionView setTuningParameters:fullRenderParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeDisplay];
-  [collectionView setTuningParameters:fullPreloadParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeFetchData];
+  [collectionView setTuningParameters:fullPreloadParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypePreload];
   
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(minimumRenderParams,
                                                                     [collectionView tuningParametersForRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypeDisplay]));
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(minimumPreloadParams,
-                                                                    [collectionView tuningParametersForRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypeFetchData]));
+                                                                    [collectionView tuningParametersForRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypePreload]));
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(fullRenderParams,
                                                                     [collectionView tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeDisplay]));
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(fullPreloadParams,
-                                                                    [collectionView tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeFetchData]));
+                                                                    [collectionView tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypePreload]));
 }
 
 - (void)testTuningParameters
@@ -225,10 +227,10 @@
   ASRangeTuningParameters preloadParams = { .leadingBufferScreenfuls = 4.3, .trailingBufferScreenfuls = 2.3 };
   
   [collectionView setTuningParameters:renderParams forRangeType:ASLayoutRangeTypeDisplay];
-  [collectionView setTuningParameters:preloadParams forRangeType:ASLayoutRangeTypeFetchData];
+  [collectionView setTuningParameters:preloadParams forRangeType:ASLayoutRangeTypePreload];
   
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(renderParams, [collectionView tuningParametersForRangeType:ASLayoutRangeTypeDisplay]));
-  XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(preloadParams, [collectionView tuningParametersForRangeType:ASLayoutRangeTypeFetchData]));
+  XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(preloadParams, [collectionView tuningParametersForRangeType:ASLayoutRangeTypePreload]));
 }
 
 /**
@@ -249,6 +251,7 @@
   __unused ASCollectionViewTestDelegate *del = testController.asyncDelegate;\
   __unused ASCollectionView *cv = testController.collectionView;\
   UIWindow *window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];\
+  [window makeKeyAndVisible]; \
   window.rootViewController = testController;\
   \
   [testController.collectionView reloadDataImmediately];\
@@ -343,6 +346,87 @@
     [cv reloadSections:sections];
     [cv deleteSections:sections];
   } completion:nil]);
+}
+
+/**
+ * https://github.com/facebook/AsyncDisplayKit/issues/2011
+ *
+ * If this ever becomes a pain to maintain, drop it. The underlying issue is tested by testThatLayerBackedSubnodesAreMarkedInvisibleBeforeDeallocWhenSupernodesViewIsRemovedFromHierarchyWhileBeingRetained
+ */
+- (void)testThatDisappearingSupplementariesWithLayerBackedNodesDontFailAssert
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  UICollectionViewLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionView *cv = [[ASCollectionView alloc] initWithFrame:window.bounds collectionViewLayout:layout];
+
+
+  __unused NSMutableSet *keepaliveNodes = [NSMutableSet set];
+  id dataSource = [OCMockObject niceMockForProtocol:@protocol(ASCollectionDataSource)];
+  static int nodeIdx = 0;
+  [[[dataSource stub] andDo:^(NSInvocation *invocation) {
+    __autoreleasing ASCellNode *suppNode = [[ASCellNode alloc] init];
+    int thisNodeIdx = nodeIdx++;
+    suppNode.name = [NSString stringWithFormat:@"Cell #%d", thisNodeIdx];
+    [keepaliveNodes addObject:suppNode];
+
+    ASDisplayNode *layerBacked = [[ASDisplayNode alloc] init];
+    layerBacked.layerBacked = YES;
+    layerBacked.name = [NSString stringWithFormat:@"Subnode #%d", thisNodeIdx];
+    [suppNode addSubnode:layerBacked];
+    [invocation setReturnValue:&suppNode];
+  }] collectionView:cv nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];
+  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] numberOfSectionsInCollectionView:cv];
+  cv.asyncDataSource = dataSource;
+
+  id delegate = [OCMockObject niceMockForProtocol:@protocol(UICollectionViewDelegateFlowLayout)];
+  [[[delegate stub] andReturnValue:[NSValue valueWithCGSize:CGSizeMake(100, 100)]] collectionView:cv layout:OCMOCK_ANY referenceSizeForHeaderInSection:0];
+  cv.asyncDelegate = delegate;
+
+  [cv registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+  [window addSubview:cv];
+
+  [window makeKeyAndVisible];
+
+  for (NSInteger i = 0; i < 2; i++) {
+    // NOTE: waitUntilAllUpdatesAreCommitted or reloadDataImmediately is not sufficient here!!
+    XCTestExpectation *done = [self expectationWithDescription:[NSString stringWithFormat:@"Reload #%td complete", i]];
+    [cv reloadDataWithCompletion:^{
+      [done fulfill];
+    }];
+    [self waitForExpectationsWithTimeout:1 handler:nil];
+  }
+
+}
+
+- (void)testThatNodeCalculatedSizesAreUpdatedBeforeFirstPrepareLayoutAfterRotation
+{
+  updateValidationTestPrologue
+  id layout = cv.collectionViewLayout;
+  CGSize initialItemSize = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  CGSize initialCVSize = cv.bounds.size;
+
+  // Capture the node size before first call to prepareLayout after frame change.
+  __block CGSize itemSizeAtFirstLayout = CGSizeZero;
+  __block CGSize boundsSizeAtFirstLayout = CGSizeZero;
+  [[[[layout expect] andDo:^(NSInvocation *) {
+    itemSizeAtFirstLayout = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+    boundsSizeAtFirstLayout = [cv bounds].size;
+  }] andForwardToRealObject] prepareLayout];
+
+  // Rotate the device
+  UIDeviceOrientation oldDeviceOrientation = [[UIDevice currentDevice] orientation];
+  [[UIDevice currentDevice] setValue:@(UIDeviceOrientationLandscapeLeft) forKey:@"orientation"];
+
+  CGSize finalItemSize = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  CGSize finalCVSize = cv.bounds.size;
+  XCTAssertNotEqualObjects(NSStringFromCGSize(initialItemSize),  NSStringFromCGSize(itemSizeAtFirstLayout));
+  XCTAssertNotEqualObjects(NSStringFromCGSize(initialCVSize),  NSStringFromCGSize(boundsSizeAtFirstLayout));
+  XCTAssertEqualObjects(NSStringFromCGSize(itemSizeAtFirstLayout), NSStringFromCGSize(finalItemSize));
+  XCTAssertEqualObjects(NSStringFromCGSize(boundsSizeAtFirstLayout), NSStringFromCGSize(finalCVSize));
+  [layout verify];
+
+  // Teardown
+  [[UIDevice currentDevice] setValue:@(oldDeviceOrientation) forKey:@"orientation"];
 }
 
 @end

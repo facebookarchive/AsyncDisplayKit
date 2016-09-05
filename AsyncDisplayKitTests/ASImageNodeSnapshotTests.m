@@ -34,4 +34,25 @@
   ASSnapshotVerifyNode(imageNode, nil);
 }
 
+- (void)testForcedScaling
+{
+  ASImageNode *imageNode = [[ASImageNode alloc] init];
+  
+  imageNode.image = [self testImage];
+  imageNode.forcedSize = CGSizeMake(100, 100);
+  
+  // Snapshot testing requires that node is formally laid out.
+  imageNode.preferredFrameSize = CGSizeMake(100, 100);
+  [imageNode measure:CGSizeMake(100, 100)];
+
+  ASSnapshotVerifyNode(imageNode, @"first");
+  
+  imageNode.preferredFrameSize = CGSizeMake(200, 200);
+  [imageNode measure:CGSizeMake(200, 200)];
+  
+  ASSnapshotVerifyNode(imageNode, @"second");
+  
+  XCTAssert(CGImageGetWidth((CGImageRef)imageNode.contents) == 100 * imageNode.contentsScale && CGImageGetHeight((CGImageRef)imageNode.contents) == 100 * imageNode.contentsScale, @"contents should be 100 x 100 by contents scale.");
+}
+
 @end

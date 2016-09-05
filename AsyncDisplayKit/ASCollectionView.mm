@@ -86,7 +86,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASCollectionDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASCollectionDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate, ASCALayerExtendedDelegate> {
   ASCollectionViewProxy *_proxyDataSource;
   ASCollectionViewProxy *_proxyDelegate;
   
@@ -106,8 +106,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   ASBatchContext *_batchContext;
   
-  CGSize _maxSizeForNodesConstrainedSize;
-  BOOL _ignoreMaxSizeChange;
+  CGSize _lastBoundsSizeUsedForMeasuringNodes;
+  BOOL _ignoreNextBoundsSizeChangeForMeasuringNodes;
   
   NSMutableSet *_registeredSupplementaryKinds;
   
@@ -242,10 +242,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   _superIsPendingDataLoad = YES;
   
-  _maxSizeForNodesConstrainedSize = self.bounds.size;
+  _lastBoundsSizeUsedForMeasuringNodes = self.bounds.size;
   // If the initial size is 0, expect a size change very soon which is part of the initial configuration
   // and should not trigger a relayout.
-  _ignoreMaxSizeChange = CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, CGSizeZero);
+  _ignoreNextBoundsSizeChangeForMeasuringNodes = CGSizeEqualToSize(_lastBoundsSizeUsedForMeasuringNodes, CGSizeZero);
   
   _layoutFacilitator = layoutFacilitator;
   
@@ -843,26 +843,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     self.contentInset = UIEdgeInsetsZero;
   }
   
-  if (! CGSizeEqualToSize(_maxSizeForNodesConstrainedSize, self.bounds.size)) {
-    _maxSizeForNodesConstrainedSize = self.bounds.size;
-    
-    // First size change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
-    // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
-    if (_ignoreMaxSizeChange) {
-      _ignoreMaxSizeChange = NO;
-    } else {
-      // This actually doesn't perform an animation, but prevents the transaction block from being processed in the
-      // data controller's prevent animation block that would interrupt an interrupted relayout happening in an animation block
-      // ie. ASCollectionView bounds change on rotation or multi-tasking split view resize.
-      [self performBatchAnimated:YES updates:^{
-        [_dataController relayoutAllNodes];
-      } completion:nil];
-      // We need to ensure the size requery is done before we update our layout.
-      [self waitUntilAllUpdatesAreCommitted];
-      [self.collectionViewLayout invalidateLayout];
-    }
-  }
-  
   // Flush any pending invalidation action if needed.
   ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
   _nextLayoutInvalidationStyle = ASCollectionViewInvalidationStyleNone;
@@ -1306,6 +1286,40 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (![node supportsRangeManagedInterfaceState]) {
     [_rangeController setNeedsUpdate];
     [_rangeController updateIfNeeded];
+  }
+}
+
+#pragma mark ASCALayerExtendedDelegate
+
+/**
+ * UICollectionView inadvertently triggers a -prepareLayout call to its layout object
+ * between [super setFrame:] and [self layoutSubviews] during size changes. So we need
+ * to get in there and re-measure our nodes before that -prepareLayout call.
+ * We can't wait until -layoutSubviews or the end of -setFrame:.
+ *
+ * @see @p testThatNodeCalculatedSizesAreUpdatedBeforeFirstPrepareLayoutAfterRotation
+ */
+- (void)layer:(CALayer *)layer didChangeBoundsWithOldValue:(CGRect)oldBounds newValue:(CGRect)newBounds
+{
+  if (CGSizeEqualToSize(_lastBoundsSizeUsedForMeasuringNodes, newBounds.size)) {
+    return;
+  }
+  _lastBoundsSizeUsedForMeasuringNodes = newBounds.size;
+
+  // First size change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
+  // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
+  if (_ignoreNextBoundsSizeChangeForMeasuringNodes) {
+    _ignoreNextBoundsSizeChangeForMeasuringNodes = NO;
+  } else {
+    // This actually doesn't perform an animation, but prevents the transaction block from being processed in the
+    // data controller's prevent animation block that would interrupt an interrupted relayout happening in an animation block
+    // ie. ASCollectionView bounds change on rotation or multi-tasking split view resize.
+    [self performBatchAnimated:YES updates:^{
+      [_dataController relayoutAllNodes];
+    } completion:nil];
+    // We need to ensure the size requery is done before we update our layout.
+    [self waitUntilAllUpdatesAreCommitted];
+    [self.collectionViewLayout invalidateLayout];
   }
 }
 

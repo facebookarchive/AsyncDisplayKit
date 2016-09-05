@@ -61,6 +61,14 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
 @property (nonatomic, assign) BOOL forceUpscaling;
 
 /**
+ * @abstract Forces image to be rendered at forcedSize.
+ * @discussion Defaults to CGSizeZero to indicate that the forcedSize should not be used.
+ * Setting forcedSize to non-CGSizeZero will force the backing of the layer contents to 
+ * be forcedSize (automatically adjusted for contentsSize).
+ */
+@property (nonatomic, assign) CGSize forcedSize;
+
+/**
  * @abstract Enables or disables efficient cropping.
  * 
  * @param cropEnabled YES to efficiently crop the receiver's contents such that

@@ -98,7 +98,7 @@ static const CGFloat kInnerPadding = 10.0f;
   
   // lorem ipsum text, plus some nice styling
   _textNode = [[ASTextNode alloc] init];
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:[self kittyIpsum]
+  _textNode.attributedText = [[NSAttributedString alloc] initWithString:[self kittyIpsum]
                                                                attributes:[self textStyle]];
   [self addSubnode:_textNode];
   

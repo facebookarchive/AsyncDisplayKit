@@ -77,7 +77,7 @@
   
   _textNode = [[ASTextNode alloc] init];
   _textNode.placeholderEnabled = NO;
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:@"Hello, ASDK!"
+  _textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Hello, ASDK!"
                                                                attributes:[self textStyle]];
   [self addSubnode:_textNode];
   

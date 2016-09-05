@@ -122,7 +122,7 @@ static const CGFloat kInnerPadding = 10.0f;
   [self addSubnode:_videoNode];
 
   _textNode = [[ASTextNode alloc] init];
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@ %@ %@", methodArray[videoInitMethod], autoPlayArray[autoPlay], [self kittyIpsum]]
+  _textNode.attributedText = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%@ %@ %@", methodArray[videoInitMethod], autoPlayArray[autoPlay], [self kittyIpsum]]
                                                                attributes:[self textStyle]];
   [self addSubnode:_textNode];
 

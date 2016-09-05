@@ -27,7 +27,7 @@ final class TailLoadingCellNode: ASCellNode {
   override init() {
     super.init()
     addSubnode(text)
-    text.attributedString = NSAttributedString(
+    text.attributedText = NSAttributedString(
       string: "Loading…",
       attributes: [
         NSFontAttributeName: UIFont.systemFontOfSize(12),

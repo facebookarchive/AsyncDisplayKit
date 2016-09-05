@@ -18,6 +18,9 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector);
 BOOL ASSubclassOverridesClassSelector(Class superclass, Class subclass, SEL selector);
 
+/// Replace a method from the given class with a block and returns the original method IMP
+IMP ASReplaceMethodWithBlock(Class c, SEL origSEL, id block);
+
 /// Dispatches the given block to the main queue if not already running on the main thread
 void ASPerformBlockOnMainThread(void (^block)());
 

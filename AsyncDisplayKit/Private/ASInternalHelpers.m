@@ -33,6 +33,25 @@ BOOL ASSubclassOverridesClassSelector(Class superclass, Class subclass, SEL sele
   return (superclassIMP != subclassIMP);
 }
 
+IMP ASReplaceMethodWithBlock(Class c, SEL origSEL, id block)
+{
+  NSCParameterAssert(block);
+  
+  // Get original method
+  Method origMethod = class_getInstanceMethod(c, origSEL);
+  NSCParameterAssert(origMethod);
+  
+  // Convert block to IMP trampoline and replace method implementation
+  IMP newIMP = imp_implementationWithBlock(block);
+  
+  // Try adding the method if not yet in the current class
+  if (!class_addMethod(c, origSEL, newIMP, method_getTypeEncoding(origMethod))) {
+    return method_setImplementation(origMethod, newIMP);
+  } else {
+    return method_getImplementation(origMethod);
+  }
+}
+
 void ASPerformBlockOnMainThread(void (^block)())
 {
   if (block == nil){

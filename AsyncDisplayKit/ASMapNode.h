@@ -70,6 +70,12 @@ typedef NS_OPTIONS(NSUInteger, ASMapNodeShowAnnotationsOptions)
  */
 @property (nonatomic, assign) ASMapNodeShowAnnotationsOptions showAnnotationsOptions;
 
+/**
+ * @abstract The block which should return annotation image for static map based on provided annotation.
+ * @discussion This block is executed on an arbitrary serial queue. If this block is nil, standard pin is used.
+ */
+@property (nonatomic, copy, nullable) UIImage * _Nullable (^imageForStaticMapAnnotationBlock)(id<MKAnnotation> annotation, CGPoint *centerOffset);
+
 @end
 
 NS_ASSUME_NONNULL_END

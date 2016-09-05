@@ -62,7 +62,7 @@
               scrollDirection:(ASScrollDirection)direction
                     rangeMode:(ASLayoutRangeMode)mode
       displayTuningParameters:(ASRangeTuningParameters)displayTuningParameters
-    fetchDataTuningParameters:(ASRangeTuningParameters)fetchDataTuningParameters
+      preloadTuningParameters:(ASRangeTuningParameters)preloadTuningParameters
                interfaceState:(ASInterfaceState)interfaceState;
 
 @end
