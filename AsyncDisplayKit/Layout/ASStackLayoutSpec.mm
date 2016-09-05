@@ -17,6 +17,8 @@
 #import "ASStackBaselinePositionedLayout.h"
 #import "ASThread.h"
 
+#import "ASLayoutableValidation.h"
+
 @implementation ASStackLayoutSpec
 {
   ASDN::RecursiveMutex __instanceLock__;
@@ -192,6 +194,19 @@
 - (BOOL)supportsUpwardPropagation
 {
   return NO;
+}
+
+@end
+
+@implementation ASStackLayoutSpec (Validation)
+
+#pragma mark - ASLayoutableValidatorProvider
+
+- (NSArray<ASLayoutableValidationBlock> *)layoutableValidatorBlocks;
+{
+  return (NSArray<ASLayoutableValidationBlock> *)@[
+    ASLayoutableValidatorBlockRejectStaticLayoutable()
+  ];
 }
 
 @end

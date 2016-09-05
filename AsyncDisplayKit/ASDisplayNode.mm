@@ -30,7 +30,6 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutSpec.h"
-#import "ASLayoutValidation.h"
 #import "ASCellNode.h"
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
@@ -75,6 +74,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize name = _name;
 @synthesize preferredFrameSize = _preferredFrameSize;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
+@synthesize shouldValidate = _shouldValidate;
 @synthesize threadSafeBounds = _threadSafeBounds;
 
 static BOOL suppressesInvalidCollectionUpdateExceptions = NO;
@@ -295,6 +295,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   _preferredFrameSize = CGSizeZero;
+  _shouldValidate = YES;
   
   _environmentState = ASEnvironmentStateMakeDefault();
   
@@ -2239,9 +2240,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     if (isFinalLayoutable) {
       layout.position = CGPointZero;
       layout = [ASLayout layoutWithLayoutableObject:self constrainedSizeRange:constrainedSize size:layout.size sublayouts:@[layout]];
-#if LAYOUT_VALIDATION
-      ASLayoutableValidateLayout(layout);
-#endif
     }
     return [layout filteredNodeLayoutTree];
   } else {

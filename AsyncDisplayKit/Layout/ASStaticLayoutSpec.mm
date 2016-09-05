@@ -13,6 +13,8 @@
 #import "ASLayoutSpecUtilities.h"
 #import "ASLayout.h"
 
+#import "ASLayoutableValidation.h"
+
 @implementation ASStaticLayoutSpec
 
 + (instancetype)staticLayoutSpecWithChildren:(NSArray *)children
@@ -79,6 +81,19 @@
 - (BOOL)supportsUpwardPropagation
 {
   return NO;
+}
+
+@end
+
+@implementation ASStaticLayoutSpec (Validation)
+
+#pragma mark - ASLayoutableValidatorProvider
+
+- (NSArray<ASLayoutableValidationBlock> *)layoutableValidatorBlocks;
+{
+  return (NSArray<ASLayoutableValidationBlock> *)@[
+    ASLayoutableValidatorBlockRejectStackLayoutable()
+  ];
 }
 
 @end
