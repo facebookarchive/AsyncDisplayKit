@@ -49,7 +49,7 @@
   CGSize nodeSize = CGSizeMake(100, 100);
   
   ASDisplayNode *displayNode = [ASDisplayNode new];
-  [displayNode setSizeFromCGSize:nodeSize];
+  [displayNode setSizeWithCGSize:nodeSize];
   
   ASButtonNode *buttonNode = [ASButtonNode new];
   [displayNode addSubnode:buttonNode];
@@ -105,7 +105,7 @@
   CGSize nodeSize = CGSizeMake(100, 100);
   
   ASDisplayNode *displayNode = [ASDisplayNode new];
-  [displayNode setSizeFromCGSize:nodeSize];
+  [displayNode setSizeWithCGSize:nodeSize];
   
   ASButtonNode *buttonNode = [ASButtonNode new];
   [displayNode addSubnode:buttonNode];

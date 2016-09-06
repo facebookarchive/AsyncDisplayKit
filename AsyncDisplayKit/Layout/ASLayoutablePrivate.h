@@ -159,13 +159,13 @@ extern void ASLayoutableClearCurrentContext();
 #pragma mark - ASLayoutableSizeHelperForwarding
 
 #define ASLayoutableSizeHelperForwarding \
-- (void)setSizeFromCGSize:(CGSize)size\
+- (void)setSizeWithCGSize:(CGSize)size\
 {\
   self.width = ASDimensionMakeWithPoints(size.width);\
   self.height = ASDimensionMakeWithPoints(size.height);\
 }\
 \
-- (void)setExactSizeFromCGSize:(CGSize)size\
+- (void)setExactSizeWithCGSize:(CGSize)size\
 {\
   self.minWidth = ASDimensionMakeWithPoints(size.width);\
   self.minHeight = ASDimensionMakeWithPoints(size.height);\

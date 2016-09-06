@@ -117,14 +117,14 @@
 #define HEIGHT 30
   CGSize nodeSize = CGSizeMake(constrainedSize.max.width * 0.3, HEIGHT);
 
-  [_latEditableNode setSizeFromCGSize:nodeSize];
-  [_lonEditableNode setSizeFromCGSize:nodeSize];
+  [_latEditableNode setSizeWithCGSize:nodeSize];
+  [_lonEditableNode setSizeWithCGSize:nodeSize];
   
-  [_deltaLatEditableNode setSizeFromCGSize:nodeSize];
-  [_deltaLonEditableNode setSizeFromCGSize:nodeSize];
+  [_deltaLatEditableNode setSizeWithCGSize:nodeSize];
+  [_deltaLonEditableNode setSizeWithCGSize:nodeSize];
   
-  [_updateRegionButton setSizeFromCGSize:nodeSize];
-  [_liveMapToggleButton setSizeFromCGSize:nodeSize];
+  [_updateRegionButton setSizeWithCGSize:nodeSize];
+  [_liveMapToggleButton setSizeWithCGSize:nodeSize];
 
   _latEditableNode.flexGrow = _lonEditableNode.flexGrow = YES;
   _deltaLatEditableNode.flexGrow = _deltaLonEditableNode.flexGrow = YES;

@@ -113,12 +113,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @abstract Set max and width properties from given size
  */
-- (void)setSizeFromCGSize:(CGSize)size;
+- (void)setSizeWithCGSize:(CGSize)size;
 
 /**
  * @abstract Set minHeight, maxHeight and minWidth, maxWidth properties from given size
  */
-- (void)setExactSizeFromCGSize:(CGSize)size;
+- (void)setExactSizeWithCGSize:(CGSize)size;
 
 
 #pragma mark - Calculate layout

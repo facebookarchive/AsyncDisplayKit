@@ -208,7 +208,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
     CGSize imageNetworkImageNodeSize = (CGSize){imageNode.image.size.width / 7, imageNode.image.size.height / 7};
     
-    [imageNode setSizeFromCGSize:imageNetworkImageNodeSize];
+    [imageNode setSizeWithCGSize:imageNetworkImageNodeSize];
     
     parentNode = [self centeringParentNodeWithChild:imageNode];
     parentNode.entryTitle = @"ASImageNode";
@@ -218,7 +218,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 #pragma mark ASNetworkImageNode
     ASNetworkImageNode *networkImageNode = [ASNetworkImageNode new];
     networkImageNode.URL = [NSURL URLWithString:@"http://i.imgur.com/FjOR9kX.jpg"];
-    [networkImageNode setSizeFromCGSize:imageNetworkImageNodeSize];
+    [networkImageNode setSizeWithCGSize:imageNetworkImageNodeSize];
     
     parentNode = [self centeringParentNodeWithChild:networkImageNode];
     parentNode.entryTitle = @"ASNetworkImageNode";
@@ -227,7 +227,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark ASMapNode
     ASMapNode *mapNode = [ASMapNode new];
-    [mapNode setSizeFromCGSize:(CGSize){300.0, 300.0}];
+    [mapNode setSizeWithCGSize:(CGSize){300.0, 300.0}];
     
     // San Francisco
     CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(37.7749, -122.4194);
@@ -240,7 +240,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark ASVideoNode
     ASVideoNode *videoNode = [ASVideoNode new];
-    [videoNode setSizeFromCGSize:(CGSize){300.0, 400.0}];
+    [videoNode setSizeWithCGSize:(CGSize){300.0, 400.0}];
     
     AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"http://www.w3schools.com/html/mov_bbb.mp4"]];
     videoNode.asset = asset;
@@ -254,7 +254,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     UIImage *scrollNodeImage = [UIImage imageNamed:@"image"];
     
     ASScrollNode *scrollNode = [ASScrollNode new];
-    [scrollNode setSizeFromCGSize:(CGSize){300.0, 400.0}];
+    [scrollNode setSizeWithCGSize:(CGSize){300.0, 400.0}];
     
     UIScrollView *scrollNodeView = scrollNode.view;
     [scrollNodeView addSubview:[[UIImageView alloc] initWithImage:scrollNodeImage]];
@@ -406,17 +406,17 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark Horizontal ASStackLayoutSpec
     childNode1 = [ASDisplayNode new];
-    [childNode1 setSizeFromCGSize:(CGSize){10.0, 20.0}];
+    [childNode1 setSizeWithCGSize:(CGSize){10.0, 20.0}];
     childNode1.flexGrow = YES;
     childNode1.backgroundColor = [UIColor greenColor];
     
     childNode2 = [ASDisplayNode new];
-    [childNode2 setSizeFromCGSize:(CGSize){10.0, 20.0}];
+    [childNode2 setSizeWithCGSize:(CGSize){10.0, 20.0}];
     childNode2.alignSelf = ASStackLayoutAlignSelfStretch;
     childNode2.backgroundColor = [UIColor blueColor];
     
     childNode3 = [ASDisplayNode new];
-    [childNode3 setSizeFromCGSize:(CGSize){10.0, 20.0}];
+    [childNode3 setSizeWithCGSize:(CGSize){10.0, 20.0}];
     childNode3.backgroundColor = [UIColor yellowColor];
     
     parentNode = [self parentNodeWithChild:childNode];
@@ -467,7 +467,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 - (OverviewDisplayNodeWithSizeBlock *)parentNodeWithChild:(ASDisplayNode *)child
 {
     OverviewDisplayNodeWithSizeBlock *parentNode = [OverviewDisplayNodeWithSizeBlock new];
-    [parentNode setSizeFromCGSize:(CGSize){100, 100}];
+    [parentNode setSizeWithCGSize:(CGSize){100, 100}];
     parentNode.backgroundColor = [UIColor redColor];
     return parentNode;
 }
@@ -491,7 +491,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 - (ASDisplayNode *)childNode
 {
     ASDisplayNode *childNode = [ASDisplayNode new];
-    [childNode setSizeFromCGSize:(CGSize){50, 50}];
+    [childNode setSizeWithCGSize:(CGSize){50, 50}];
     childNode.backgroundColor = [UIColor blueColor];
     return childNode;
 }
