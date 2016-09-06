@@ -28,7 +28,6 @@
 #import "ASLayout.h"
 
 #import "CGRect+ASConvenience.h"
-#import "ASTextKitRendererCache.h"
 
 /**
  * If set, we will record all values set to attributedText into an array
@@ -47,11 +46,50 @@ static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncation
 
 #pragma mark - ASTextKitRenderer
 
-static ASDK::TextKit::Renderer::Cache *sharedRendererCache()
+// Not used at the moment but handy to have
+/*ASDISPLAYNODE_INLINE NSUInteger ASHashFromCGRect(CGRect rect)
 {
-  // 500 renders cache that evicts 20% of the least recelty used renderers when it hits 500
-  static ASDK::TextKit::Renderer::Cache *__rendererCache (new ASDK::TextKit::Renderer::Cache("ASTextKitRendererCache", 500, 0.2));
-  return __rendererCache;
+  return ((*(NSUInteger *)&rect.origin.x << 10 ^ *(NSUInteger *)&rect.origin.y) + (*(NSUInteger *)&rect.size.width << 10 ^ *(NSUInteger *)&rect.size.height));
+}*/
+
+ASDISPLAYNODE_INLINE NSUInteger ASHashFromCGSize(CGSize size)
+{
+  return ((*(NSUInteger *)&size.width << 10 ^ *(NSUInteger *)&size.height));
+}
+
+@interface ASTextNodeRendererKey : NSObject
+@property (assign, nonatomic) ASTextKitAttributes attributes;
+@property (assign, nonatomic) CGSize constrainedSize;
+@end
+
+@implementation ASTextNodeRendererKey
+
+- (NSUInteger)hash
+{
+  return _attributes.hash() ^ ASHashFromCGSize(_constrainedSize);
+}
+
+- (BOOL)isEqual:(ASTextNodeRendererKey *)object
+{
+  if (self == object) {
+    return YES;
+  }
+  
+  return _attributes.hash() == object.attributes.hash()
+  && CGSizeEqualToSize(_constrainedSize, object.constrainedSize);
+}
+
+@end
+
+static NSCache *sharedRendererCache()
+{ 
+ static dispatch_once_t onceToken;
+ static NSCache *__rendererCache = nil;
+ dispatch_once(&onceToken, ^{
+   __rendererCache = [[NSCache alloc] init];
+   __rendererCache.totalCostLimit = 500; // 500 renders cache
+ });
+ return __rendererCache;
 }
 
 /**
@@ -59,22 +97,26 @@ static ASDK::TextKit::Renderer::Cache *sharedRendererCache()
  This is to reduce memory load when loading thousands and thousands of text nodes into memory at once. Instead
  we maintain a LRU renderer cache that is queried via stack-allocated keys.
  */
+
 static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, CGSize constrainedSize)
 {
-  ASDK::TextKit::Renderer::Cache *cache = sharedRendererCache();
-  const ASDK::TextKit::Renderer::Key key {
-    attributes,
-    constrainedSize
-  };
+  NSCache *cache = sharedRendererCache();
+  
+  ASTextNodeRendererKey *key = [[ASTextNodeRendererKey alloc] init];
+  key.attributes = attributes;
+  key.constrainedSize = constrainedSize;
 
-  ASTextKitRenderer *renderer = cache->objectForKey(key);
+  ASTextKitRenderer *renderer = [cache objectForKey:key];
   if (renderer == nil) {
     renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes constrainedSize:constrainedSize];
-    cache->cacheObject(key, renderer, 1);
+    [cache setObject:renderer forKey:key cost:1];
   }
-
+  
   return renderer;
 }
+
+
+#pragma mark - ASTextNode
 
 struct ASTextNodeDrawParameter {
   CGRect bounds;
