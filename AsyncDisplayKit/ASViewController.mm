@@ -311,7 +311,7 @@ ASVisibilityDepthImplementation;
   [super traitCollectionDidChange:previousTraitCollection];
   
   ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
-  environmentTraitCollection.containerSize = self.node.environmentTraitCollection.containerSize;
+  environmentTraitCollection.containerSize = self.view.bounds.size;
   [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 
