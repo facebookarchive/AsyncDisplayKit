@@ -464,9 +464,9 @@ static ASDN::Mutex cacheLock;
   // Another option is to have ASDisplayNode+AsyncDisplay coordinate these cases, and share the decoded buffer.
   // Details tracked in https://github.com/facebook/AsyncDisplayKit/issues/1068
   
-  // We want to use copy, but if our image has alpha and our context is dirty, we have to use normal.
   UIImage *image = key.image;
-  CGBlendMode blendMode = contextIsClean == NO && CGImageGetAlphaInfo(image.CGImage) != kCGImageAlphaNone ? kCGBlendModeNormal : kCGBlendModeCopy;
+  BOOL canUseCopy = (contextIsClean || CGImageGetAlphaInfo(image.CGImage) == kCGImageAlphaNone);
+  CGBlendMode blendMode = canUseCopy ? kCGBlendModeCopy : kCGBlendModeNormal;
   
   @synchronized(image) {
     [image drawInRect:key.imageDrawRect blendMode:blendMode alpha:1];
