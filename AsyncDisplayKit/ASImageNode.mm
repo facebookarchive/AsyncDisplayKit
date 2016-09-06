@@ -465,7 +465,7 @@ static ASDN::Mutex cacheLock;
   // Details tracked in https://github.com/facebook/AsyncDisplayKit/issues/1068
   
   UIImage *image = key.image;
-  BOOL canUseCopy = (contextIsClean || CGImageGetAlphaInfo(image.CGImage) == kCGImageAlphaNone);
+  BOOL canUseCopy = (contextIsClean || ASImageAlphaInfoIsOpaque(CGImageGetAlphaInfo(image.CGImage)));
   CGBlendMode blendMode = canUseCopy ? kCGBlendModeCopy : kCGBlendModeNormal;
   
   @synchronized(image) {
