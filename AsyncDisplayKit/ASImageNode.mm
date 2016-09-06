@@ -437,15 +437,19 @@ static ASDN::Mutex cacheLock;
   // will do its rounding on pixel instead of point boundaries
   UIGraphicsBeginImageContextWithOptions(key.backingSize, key.isOpaque, 1.0);
   
+  BOOL contextIsClean = YES;
+  
   CGContextRef context = UIGraphicsGetCurrentContext();
   if (context && key.preContextBlock) {
     key.preContextBlock(context);
+    contextIsClean = NO;
   }
   
   // if view is opaque, fill the context with background color
   if (key.isOpaque && key.backgroundColor) {
     [key.backgroundColor setFill];
     UIRectFill({ .size = key.backingSize });
+    contextIsClean = NO;
   }
   
   // iOS 9 appears to contain a thread safety regression when drawing the same CGImageRef on
@@ -460,8 +464,12 @@ static ASDN::Mutex cacheLock;
   // Another option is to have ASDisplayNode+AsyncDisplay coordinate these cases, and share the decoded buffer.
   // Details tracked in https://github.com/facebook/AsyncDisplayKit/issues/1068
   
-  @synchronized(key.image) {
-    [key.image drawInRect:key.imageDrawRect];
+  UIImage *image = key.image;
+  BOOL canUseCopy = (contextIsClean || CGImageGetAlphaInfo(image.CGImage) == kCGImageAlphaNone);
+  CGBlendMode blendMode = canUseCopy ? kCGBlendModeCopy : kCGBlendModeNormal;
+  
+  @synchronized(image) {
+    [image drawInRect:key.imageDrawRect blendMode:blendMode alpha:1];
   }
   
   if (context && key.postContextBlock) {
