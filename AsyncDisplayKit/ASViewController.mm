@@ -311,20 +311,7 @@ ASVisibilityDepthImplementation;
   [super traitCollectionDidChange:previousTraitCollection];
   
   ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
-  environmentTraitCollection.containerSize = self.view.bounds.size;
-  [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
-}
-
-- (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
-{
-  [super willTransitionToTraitCollection:newCollection withTransitionCoordinator:coordinator];
-  
-  ASEnvironmentTraitCollection environmentTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(newCollection);
-  // A call to willTransitionToTraitCollection:withTransitionCoordinator: is always followed by a call to viewWillTransitionToSize:withTransitionCoordinator:.
-  // However, it is not immediate and we may need the new trait collection before viewWillTransitionToSize:withTransitionCoordinator: is called. Our view already has the
-  // new bounds, so go ahead and set the containerSize and propagate the traits here. As long as nothing else in the traits changes (which it shouldn't)
-  // then we won't we will skip the propagation in viewWillTransitionToSize:withTransitionCoordinator:.
-  environmentTraitCollection.containerSize = self.view.bounds.size;
+  environmentTraitCollection.containerSize = self.node.environmentTraitCollection.containerSize;
   [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 
