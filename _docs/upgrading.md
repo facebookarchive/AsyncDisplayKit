@@ -10,7 +10,7 @@ AsyncDisplayKit **2.0 Beta** is (almost) here! Here's a brief summary of the cha
 
 **Find & replace API naming improvements:**
 
-- `.usesImplicitHierarchyManagement` renamed to `.automaticallyManagesSubnodes`
+- `.usesImplicitHierarchyManagement` renamed to `.automaticallyManagesSubnodes` for [Automatic Subnode Management](http://asyncdisplaykit.org/docs/implicit-hierarchy-mgmt.html)
 - `ASRelativeDimensionTypePercent` and associated functions renamed to use `Fraction` to be consistent with Apple terminology.
 
 **Updated Interface State callback method names**
@@ -33,6 +33,6 @@ These new methods replace the following:
 
 **Good to know:**
 
-- Layout Transition API (`transitionLayoutWithDuration:`) has been moved out of Beta
+- [Layout Transition API](http://asyncdisplaykit.org/docs/layout-transition-api.html) (`transitionLayoutWithDuration:`) has been moved out of Beta
 
 The majority of the remaining (unmerged) changes will be in the Layout API. 
