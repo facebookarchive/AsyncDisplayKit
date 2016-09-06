@@ -28,6 +28,7 @@
 #import "ASLayout.h"
 
 #import "CGRect+ASConvenience.h"
+#import "ASTextKitRendererCache.h"
 
 /**
  * If set, we will record all values set to attributedText into an array
@@ -43,6 +44,37 @@ static const NSTimeInterval ASTextNodeHighlightFadeInDuration = 0.1;
 static const CGFloat ASTextNodeHighlightLightOpacity = 0.11;
 static const CGFloat ASTextNodeHighlightDarkOpacity = 0.22;
 static NSString *ASTextNodeTruncationTokenAttributeName = @"ASTextNodeTruncationAttribute";
+
+#pragma mark - ASTextKitRenderer
+
+static ASDK::TextKit::Renderer::Cache *sharedRendererCache()
+{
+  // 500 renders cache that evicts 20% of the least recelty used renderers when it hits 500
+  static ASDK::TextKit::Renderer::Cache *__rendererCache (new ASDK::TextKit::Renderer::Cache("ASTextKitRendererCache", 500, 0.2));
+  return __rendererCache;
+}
+
+/**
+ The concept here is that neither the node nor layout should ever have a strong reference to the renderer object.
+ This is to reduce memory load when loading thousands and thousands of text nodes into memory at once. Instead
+ we maintain a LRU renderer cache that is queried via stack-allocated keys.
+ */
+static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, CGSize constrainedSize)
+{
+  ASDK::TextKit::Renderer::Cache *cache = sharedRendererCache();
+  const ASDK::TextKit::Renderer::Key key {
+    attributes,
+    constrainedSize
+  };
+
+  ASTextKitRenderer *renderer = cache->objectForKey(key);
+  if (renderer == nil) {
+    renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes constrainedSize:constrainedSize];
+    cache->cacheObject(key, renderer, 1);
+  }
+
+  return renderer;
+}
 
 struct ASTextNodeDrawParameter {
   CGRect bounds;
@@ -73,8 +105,6 @@ struct ASTextNodeDrawParameter {
   ASHighlightOverlayLayer *_activeHighlightLayer;
 
   CGSize _constrainedSize;
-
-  ASTextKitRenderer *_renderer;
 
   ASTextNodeDrawParameter _drawParameter;
 
@@ -142,8 +172,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   if (_shadowColor != NULL) {
     CGColorRelease(_shadowColor);
   }
-  
-  [self _invalidateRenderer];
 
   if (_longPressGestureRecognizer) {
     _longPressGestureRecognizer.delegate = nil;
@@ -160,33 +188,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   NSString *truncationString = [_composedTruncationText string];
   if (plainString.length > 50)
     plainString = [[plainString substringToIndex:50] stringByAppendingString:@"\u2026"];
-  return [NSString stringWithFormat:@"<%@: %p; text = \"%@\"; truncation string = \"%@\"; frame = %@; renderer = %p>", self.class, self, plainString, truncationString, self.nodeLoaded ? NSStringFromCGRect(self.layer.frame) : nil, _renderer];
+  return [NSString stringWithFormat:@"<%@: %p; text = \"%@\"; truncation string = \"%@\"; frame = %@; renderer = %p>", self.class, self, plainString, truncationString, self.nodeLoaded ? NSStringFromCGRect(self.layer.frame) : nil, [self _renderer]];
 }
 
 #pragma mark - ASDisplayNode
-
-// FIXME: Re-evaluate if it is still the right decision to clear the renderer at this stage.
-// This code was written before TextKit and when 512MB devices were still the overwhelming majority.
-- (void)displayDidFinish
-{
-  [super displayDidFinish];
-
-  // We invalidate our renderer here to clear the very high memory cost of
-  // keeping this around.  _invalidateRenderer will dealloc this onto a bg
-  // thread resulting in less stutters on the main thread than if it were
-  // to be deallocated in dealloc.  This is also helpful in opportunistically
-  // reducing memory consumption and reducing the overall footprint of the app.
-  [self _invalidateRenderer];
-}
-
-- (void)clearContents
-{
-  // We discard the backing store and renderer to prevent the very large
-  // memory overhead of maintaining these for all text nodes.  They can be
-  // regenerated when layout is necessary.
-  [super clearContents];      // ASDisplayNode will set layer.contents = nil
-  [self _invalidateRenderer];
-}
 
 - (void)didLoad
 {
@@ -202,18 +207,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 }
 
-- (void)setFrame:(CGRect)frame
-{
-  [super setFrame:frame];
-  [self _invalidateRendererIfNeededForBoundsSize:frame.size];
-}
-
-- (void)setBounds:(CGRect)bounds
-{
-  [super setBounds:bounds];
-  [self _invalidateRendererIfNeededForBoundsSize:bounds.size];
-}
-
 #pragma mark - Renderer Management
 
 - (ASTextKitRenderer *)_renderer
@@ -225,20 +218,16 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 {
   ASDN::MutexLocker l(__instanceLock__);
 
-  if (_renderer == nil) {
-    CGSize constrainedSize;
-    if (_constrainedSize.width != -INFINITY) {
-      constrainedSize = _constrainedSize;
-    } else {
-      constrainedSize = bounds.size;
-      constrainedSize.width -= (_textContainerInset.left + _textContainerInset.right);
-      constrainedSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
-    }
-    
-    _renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:[self _rendererAttributes]
-                                                     constrainedSize:constrainedSize];
+  CGSize constrainedSize;
+  if (_constrainedSize.width != -INFINITY) {
+    constrainedSize = _constrainedSize;
+  } else {
+    constrainedSize = bounds.size;
+    constrainedSize.width -= (_textContainerInset.left + _textContainerInset.right);
+    constrainedSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
   }
-  return _renderer;
+  
+  return rendererForAttributes([self _rendererAttributes], constrainedSize);
 }
 
 - (ASTextKitAttributes)_rendererAttributes
@@ -251,49 +240,13 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .lineBreakMode = _truncationMode,
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
-    // use the property getter so a subclass can provide these scale factors on demand if desired
-    .pointSizeScaleFactors = self.pointSizeScaleFactors,
     .shadowOffset = _shadowOffset,
     .shadowColor = _cachedShadowUIColor,
     .shadowOpacity = _shadowOpacity,
-    .shadowRadius = _shadowRadius
+    .shadowRadius = _shadowRadius,
+    // use the property getter so a subclass can provide these scale factors on demand if desired
+    .pointSizeScaleFactors = self.pointSizeScaleFactors
   };
-}
-
-- (void)_invalidateRendererIfNeeded
-{
-  [self _invalidateRendererIfNeededForBoundsSize:self.threadSafeBounds.size];
-}
-
-- (void)_invalidateRendererIfNeededForBoundsSize:(CGSize)boundsSize
-{
-  if ([self _needInvalidateRendererForBoundsSize:boundsSize]) {
-    // Our bounds have changed to a size that is not identical to our constraining size,
-    // so our previous layout information is invalid, and TextKit may draw at the
-    // incorrect origin.
-    {
-      ASDN::MutexLocker l(__instanceLock__);
-      _constrainedSize = CGSizeMake(-INFINITY, -INFINITY);
-    }
-    [self _invalidateRenderer];
-  }
-}
-
-- (void)_invalidateRenderer
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_renderer) {
-    // Destruction of the layout managers/containers/text storage is quite
-    // expensive, and can take some time, so we dispatch onto a bg queue to
-    // actually dealloc.
-    __block ASTextKitRenderer *renderer = _renderer;
-    
-    ASPerformBlockOnDeallocationQueue(^{
-      renderer = nil;
-    });
-    _renderer = nil;
-  }
 }
 
 #pragma mark - Layout and Sizing
@@ -316,44 +269,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   return _textContainerInset;
 }
 
-- (BOOL)_needInvalidateRendererForBoundsSize:(CGSize)boundsSize
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_renderer == nil) {
-    return YES;
-  }
-  
-  // If the size is not the same as the constraint we provided to the renderer, start out assuming we need
-  // a new one.  However, there are common cases where the constrained size doesn't need to be the same as calculated.
-  CGSize rendererConstrainedSize = _renderer.constrainedSize;
-  
-  //inset bounds
-  boundsSize.width -= _textContainerInset.left + _textContainerInset.right;
-  boundsSize.height -= _textContainerInset.top + _textContainerInset.bottom;
-  
-  if (CGSizeEqualToSize(boundsSize, rendererConstrainedSize)) {
-    return NO;
-  } else {
-    // It is very common to have a constrainedSize with a concrete, specific width but +Inf height.
-    // In this case, as long as the text node has bounds as large as the full calculatedLayout suggests,
-    // it means that the text has all the room it needs (as it was not vertically bounded).  So, we will not
-    // experience truncation and don't need to recreate the renderer with the size it already calculated,
-    // as this would essentially serve to set its constrainedSize to be its calculatedSize (unnecessary).
-    ASLayout *layout = self.calculatedLayout;
-    if (layout != nil && CGSizeEqualToSize(boundsSize, layout.size)) {
-      if (boundsSize.width != rendererConstrainedSize.width) {
-        // Don't bother changing _constrainedSize, as ASDisplayNode's -measure: method would have a cache miss
-        // and ask us to recalculate layout if it were called with the same calculatedSize that got us to this point!
-        _renderer.constrainedSize = boundsSize;
-      }
-      return NO;
-    } else {
-      return YES;
-    }
-  }
-}
-
 - (void)calculatedLayoutDidChange
 {
   [super calculatedLayoutDidChange];
@@ -364,13 +279,12 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     ASDN::MutexLocker l(__instanceLock__);
     CGSize layoutSize = layout.size;
     
-    //Apply textContainerInset
+    // Apply textContainerInset
     layoutSize.width -= (_textContainerInset.left + _textContainerInset.right);
     layoutSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
     
     if (CGSizeEqualToSize(_constrainedSize, layoutSize) == NO) {
       _constrainedSize = layoutSize;
-      _renderer.constrainedSize = layoutSize;
     }
   }
 }
@@ -391,24 +305,20 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   _constrainedSize = constrainedSize;
   
-  // Instead of invalidating the renderer, in case this is a new call with a different constrained size,
-  // just update the size of the NSTextContainer that is owned by the renderer's internal context object.
-  [self _renderer].constrainedSize = _constrainedSize;
-
-  [self setNeedsDisplay];
+  ASTextKitRenderer *renderer = [self _renderer];
   
-  CGSize size = [self _renderer].size;
+  CGSize size = renderer.size;
   if (_attributedText.length > 0) {
     self.ascender = [[self class] ascenderWithAttributedString:_attributedText];
     self.descender = [[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender];
-    if (_renderer.currentScaleFactor > 0 && _renderer.currentScaleFactor < 1.0) {
+    if (renderer.currentScaleFactor > 0 && renderer.currentScaleFactor < 1.0) {
       // while not perfect, this is a good estimate of what the ascender of the scaled font will be.
-      self.ascender *= _renderer.currentScaleFactor;
-      self.descender *= _renderer.currentScaleFactor;
+      self.ascender *= renderer.currentScaleFactor;
+      self.descender *= renderer.currentScaleFactor;
     }
   }
   
-  // Add the constrained size back textContainerInset
+  // Add textContainerInset to size
   size.width += (_textContainerInset.left + _textContainerInset.right);
   size.height += (_textContainerInset.top + _textContainerInset.bottom);
   
@@ -435,7 +345,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)setAttributedText:(NSAttributedString *)attributedText
 {
-  
   if (attributedText == nil) {
     attributedText = [[NSAttributedString alloc] initWithString:@"" attributes:nil];
   }
@@ -455,9 +364,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // Without this, the size calculation of the text with truncation applied will
     // not take into account the attributes of attributedText in the last line
     [self _updateComposedTruncationText];
-    
-    // We need an entirely new renderer
-    [self _invalidateRenderer];
   }
   
   NSUInteger length = attributedText.length;
@@ -471,7 +377,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   // Force display to create renderer with new size and redisplay with new string
   [self setNeedsDisplay];
-  
   
   // Accessiblity
   self.accessibilityLabel = attributedText.string;
@@ -489,7 +394,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
   
   _exclusionPaths = [exclusionPaths copy];
-  [self _invalidateRenderer];
   [self invalidateCalculatedLayout];
   [self setNeedsDisplay];
 }
@@ -792,10 +696,11 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
       if (highlightTargetLayer != nil) {
         ASDN::MutexLocker l(__instanceLock__);
 
-        NSArray *highlightRects = [[self _renderer] rectsForTextRange:highlightRange measureOption:ASTextKitRendererMeasureOptionBlock];
+        ASTextKitRenderer *renderer = [self _renderer];
+        NSArray *highlightRects = [renderer rectsForTextRange:highlightRange measureOption:ASTextKitRendererMeasureOptionBlock];
         NSMutableArray *converted = [NSMutableArray arrayWithCapacity:highlightRects.count];
         for (NSValue *rectValue in highlightRects) {
-          UIEdgeInsets shadowPadding = _renderer.shadower.shadowPadding;
+          UIEdgeInsets shadowPadding = renderer.shadower.shadowPadding;
           CGRect rendererRect = ASTextNodeAdjustRenderRectForShadowPadding(rectValue.CGRectValue, shadowPadding);
 
           // The rects returned from renderer don't have `textContainerInset`,
@@ -1125,7 +1030,6 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
     }
     _shadowColor = shadowColor;
     _cachedShadowUIColor = [UIColor colorWithCGColor:shadowColor];
-    [self _invalidateRenderer];
     [self setNeedsDisplay];
   }
 }
@@ -1143,7 +1047,6 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
   
   if (!CGSizeEqualToSize(_shadowOffset, shadowOffset)) {
     _shadowOffset = shadowOffset;
-    [self _invalidateRenderer];
     [self setNeedsDisplay];
   }
 }
@@ -1161,7 +1064,6 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
   
   if (_shadowOpacity != shadowOpacity) {
     _shadowOpacity = shadowOpacity;
-    [self _invalidateRenderer];
     [self setNeedsDisplay];
   }
 }
@@ -1179,7 +1081,6 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
   
   if (_shadowRadius != shadowRadius) {
     _shadowRadius = shadowRadius;
-    [self _invalidateRenderer];
     [self setNeedsDisplay];
   }
 }
@@ -1238,7 +1139,6 @@ static NSAttributedString *DefaultTruncationAttributedString()
   
   if (_truncationMode != truncationMode) {
     _truncationMode = truncationMode;
-    [self _invalidateRenderer];
     [self setNeedsDisplay];
   }
 }
@@ -1257,7 +1157,6 @@ static NSAttributedString *DefaultTruncationAttributedString()
   
   if ([_pointSizeScaleFactors isEqualToArray:pointSizeScaleFactors] == NO) {
     _pointSizeScaleFactors = pointSizeScaleFactors;
-    [self _invalidateRenderer];
     [self setNeedsDisplay];
   }}
 
@@ -1267,7 +1166,6 @@ static NSAttributedString *DefaultTruncationAttributedString()
   
   if (_maximumNumberOfLines != maximumNumberOfLines) {
     _maximumNumberOfLines = maximumNumberOfLines;
-    [self _invalidateRenderer];
     [self setNeedsDisplay];
   }
 }
@@ -1291,7 +1189,6 @@ static NSAttributedString *DefaultTruncationAttributedString()
 - (void)_invalidateTruncationText
 {
   [self _updateComposedTruncationText];
-  [self _invalidateRenderer];
   [self setNeedsDisplay];
 }
 
