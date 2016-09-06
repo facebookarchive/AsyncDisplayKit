@@ -1,26 +1,26 @@
 ---
-title: Implicit Hierarchy Management
+title: Automatic Subnode Management
 layout: docs
 permalink: /docs/implicit-hierarchy-mgmt.html
 prevPage: batch-fetching-api.html
 nextPage: image-modification-block.html
 ---
 
-Enabling Implicit Hierarchy Management (IHM) is required to use the <a href="layout-transition-api.html">Layout Transition API</a>. However, apps that don't require animations can still benefit from the reduction in code size that this feature enables.
+Enabling Automatic Subnode Management (ASM) is required to use the <a href="layout-transition-api.html">Layout Transition API</a>. However, apps that don't require animations can still benefit from the reduction in code size that this feature enables.
 
-When enabled, IHM means that your nodes no longer require `addSubnode:` or `removeFromSupernode` method calls. The presence or absence of the IHM node _and_ its subnodes is completely determined in its `layoutSpecThatFits:` method.
+When enabled, ASM means that your nodes no longer require `addSubnode:` or `removeFromSupernode` method calls. The presence or absence of the ASM node _and_ its subnodes is completely determined in its `layoutSpecThatFits:` method.
 
 ### Example ###
 <br>
 Consider the following intialization method from the PhotoCellNode class in <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a>. This ASCellNode subclass produces a simple social media photo feed cell. 
 
-In the "Original Code" we see the familiar `addSubnode:` calls in bold. In the "Code with IHM" (switch at top right of code block) these have been removed and replaced with a single line that enables IHM. 
+In the "Original Code" we see the familiar `addSubnode:` calls in bold. In the "Code with ASM" (switch at top right of code block) these have been removed and replaced with a single line that enables ASM. 
 
-By setting usesImplicitHierarchyManagement to YES on the ASCellNode, we _no longer_ need to call `addSubnode:` for each of the ASCellNode's subnodes. These subNodes will be present in the node hierarchy as long as this class' `layoutSpecThatFits:` method includes them. 
+By setting .automaticallyManagesSubnodes to YES on the ASCellNode, we _no longer_ need to call `addSubnode:` for each of the ASCellNode's subnodes. These subNodes will be present in the node hierarchy as long as this class' `layoutSpecThatFits:` method includes them. 
 
 <div class = "highlight-group">
 <span class="language-toggle">
-  <a data-lang="swift" class="swiftButton">Code with IHM</a>
+  <a data-lang="swift" class="swiftButton">Code with ASM</a>
   <a data-lang="objective-c" class = "active objcButton">Original Code</a>
 </span>
 <div class = "code">
@@ -64,7 +64,7 @@ By setting usesImplicitHierarchyManagement to YES on the ASCellNode, we _no long
   self = [super init];
   
   if (self) {
-    <b>self.usesImplicitHierarchyManagement = YES;</b>
+    <b>self.automaticallyManagesSubnodes = YES;</b>
     
     _photoModel = photo;
     
@@ -94,7 +94,7 @@ By setting usesImplicitHierarchyManagement to YES on the ASCellNode, we _no long
 
 Several of the elements in this cell - `_userAvatarImageNode`, `_photoImageNode`, and `_photoLocationLabel` depend on seperate data fetches from the network that could return at any time. When should they be added to the UI?
 
-IHM knows whether or not to include these elements in the UI based on the information provided in the cell's ASLayoutSpec.
+ASM knows whether or not to include these elements in the UI based on the information provided in the cell's ASLayoutSpec.
 
 <div class = "note">
 An `ASLayoutSpec` completely describes the UI of a view in your app by specifying the hierarchy state of a node and its subnodes. An ASLayoutSpec is returned by a node from its <code>
