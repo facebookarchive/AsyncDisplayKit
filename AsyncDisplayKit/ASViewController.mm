@@ -94,7 +94,19 @@
 - (void)viewWillLayoutSubviews
 {
   [super viewWillLayoutSubviews];
-  [_node measureWithSizeRange:[self nodeConstrainedSize]];
+  
+  // Before layout, make sure that our trait collection containerSize actually matches the size of our bounds.
+  // If not, we need to update the traits and propagate them.
+  if (CGSizeEqualToSize(self.node.environmentTraitCollection.containerSize, self.view.bounds.size) == NO) {
+    [UIView performWithoutAnimation:^{
+      ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
+      environmentTraitCollection.containerSize = self.view.bounds.size;
+      // this method will call measure
+      [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
+    }];
+  } else {
+    [_node measureWithSizeRange:[self nodeConstrainedSize]];
+  }
   
   if (!AS_AT_LEAST_IOS9) {
     [self _legacyHandleViewDidLayoutSubviews];
@@ -274,17 +286,6 @@ ASVisibilityDepthImplementation;
   return asyncTraitCollection;
 }
 
-- (ASEnvironmentTraitCollection)environmentTraitCollectionForWindowSize:(CGSize)windowSize
-{
-  if (self.overrideDisplayTraitsWithWindowSize) {
-    ASTraitCollection *traitCollection = self.overrideDisplayTraitsWithWindowSize(windowSize);
-    return [traitCollection environmentTraitCollection];
-  }
-  ASEnvironmentTraitCollection traitCollection = self.node.environmentTraitCollection;
-  traitCollection.containerSize = windowSize;
-  return traitCollection;
-}
-
 - (void)progagateNewEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
   ASEnvironmentState environmentState = self.node.environmentState;
@@ -312,14 +313,6 @@ ASVisibilityDepthImplementation;
   
   ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
   environmentTraitCollection.containerSize = self.view.bounds.size;
-  [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
-}
-
-- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
-{
-  [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-  
-  ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForWindowSize:size];
   [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 
