@@ -72,7 +72,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
     NSAttributedString *text = data[i % data.count];
     startMeasuring();
     node.attributedText = text;
-    asdkSize = [node measure:maxSize];
+    asdkSize = [node layoutThatFits:ASSizeRangeMake(CGSizeZero, maxSize)].size;
     stopMeasuring();
   }];
   ctx.results[kTestCaseASDK].userInfo[@"size"] = NSStringFromCGSize(asdkSize);
