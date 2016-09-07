@@ -142,11 +142,11 @@ inline BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState
 @end
 
 @interface UIView (ASDisplayNodeInternal)
-@property (nullable, nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
+@property (nullable, atomic, weak, readwrite) ASDisplayNode *asyncdisplaykit_node;
 @end
 
 @interface CALayer (ASDisplayNodeInternal)
-@property (nullable, nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
+@property (nullable, atomic, weak, readwrite) ASDisplayNode *asyncdisplaykit_node;
 @end
 
 NS_ASSUME_NONNULL_END

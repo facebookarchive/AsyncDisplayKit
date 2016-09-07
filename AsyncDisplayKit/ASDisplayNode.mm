@@ -33,6 +33,7 @@
 #import "ASLayoutSpec.h"
 #import "ASLayoutValidation.h"
 #import "ASCellNode.h"
+#import "ASWeakProxy.h"
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
@@ -3325,12 +3326,14 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (void)setAsyncdisplaykit_node:(ASDisplayNode *)node
 {
-  objc_setAssociatedObject(self, ASDisplayNodeAssociatedNodeKey, node, OBJC_ASSOCIATION_ASSIGN); // Weak reference to avoid cycle, since the node retains the view.
+  ASWeakProxy *weakProxy = [ASWeakProxy weakProxyWithTarget:node];
+  objc_setAssociatedObject(self, ASDisplayNodeAssociatedNodeKey, weakProxy, OBJC_ASSOCIATION_RETAIN); // Weak reference to avoid cycle, since the node retains the view.
 }
 
 - (ASDisplayNode *)asyncdisplaykit_node
 {
-  return objc_getAssociatedObject(self, ASDisplayNodeAssociatedNodeKey);
+  ASWeakProxy *weakProxy = objc_getAssociatedObject(self, ASDisplayNodeAssociatedNodeKey);
+  return weakProxy.target;
 }
 
 @end
@@ -3339,12 +3342,14 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (void)setAsyncdisplaykit_node:(ASDisplayNode *)node
 {
-  objc_setAssociatedObject(self, ASDisplayNodeAssociatedNodeKey, node, OBJC_ASSOCIATION_ASSIGN); // Weak reference to avoid cycle, since the node retains the layer.
+  ASWeakProxy *weakProxy = [ASWeakProxy weakProxyWithTarget:node];
+  objc_setAssociatedObject(self, ASDisplayNodeAssociatedNodeKey, weakProxy, OBJC_ASSOCIATION_RETAIN); // Weak reference to avoid cycle, since the node retains the layer.
 }
 
 - (ASDisplayNode *)asyncdisplaykit_node
 {
-  return objc_getAssociatedObject(self, ASDisplayNodeAssociatedNodeKey);
+  ASWeakProxy *weakProxy = objc_getAssociatedObject(self, ASDisplayNodeAssociatedNodeKey);
+  return weakProxy.target;
 }
 
 @end
