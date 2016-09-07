@@ -20,6 +20,7 @@
 #import "_ASTransitionContext.h"
 #import "ASLayoutTransition.h"
 #import "ASEnvironment.h"
+#import "ASObjectDescriptionHelpers.h"
 
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
@@ -51,7 +52,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 #define TIME_DISPLAYNODE_OPS 0 // If you're using this information frequently, try: (DEBUG || PROFILE)
 
-@interface ASDisplayNode ()
+@interface ASDisplayNode () <ASDescriptionProvider, ASDebugDescriptionProvider>
 {
 @package
   _ASPendingState *_pendingViewState;

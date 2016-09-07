@@ -28,6 +28,7 @@
 #import "ASLayout.h"
 
 #import "CGRect+ASConvenience.h"
+#import "ASObjectDescriptionHelpers.h"
 
 /**
  * If set, we will record all values set to attributedText into an array
@@ -222,15 +223,35 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 }
 
-- (NSString *)description
+#pragma mark - Description
+
+- (NSString *)_plainStringForDescription
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  NSString *plainString = [[_attributedText string] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
-  NSString *truncationString = [_composedTruncationText string];
-  if (plainString.length > 50)
+  NSString *plainString = [[self.attributedText string] stringByTrimmingCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+  if (plainString.length > 50) {
     plainString = [[plainString substringToIndex:50] stringByAppendingString:@"\u2026"];
-  return [NSString stringWithFormat:@"<%@: %p; text = \"%@\"; truncation string = \"%@\"; frame = %@; renderer = %p>", self.class, self, plainString, truncationString, self.nodeLoaded ? NSStringFromCGRect(self.layer.frame) : nil, [self _renderer]];
+  }
+  return plainString;
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDescription
+{
+  NSMutableArray *result = [super propertiesForDescription];
+  NSString *plainString = [self _plainStringForDescription];
+  if (plainString.length > 0) {
+    [result insertObject:@{ @"text" : ASStringWithQuotesIfMultiword(plainString) } atIndex:0];
+  }
+  return result;
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
+{
+  NSMutableArray *result = [super propertiesForDebugDescription];
+  NSString *plainString = [self _plainStringForDescription];
+  if (plainString.length > 0) {
+    [result insertObject:@{ @"text" : ASStringWithQuotesIfMultiword(plainString) } atIndex:0];
+  }
+  return result;
 }
 
 #pragma mark - ASDisplayNode

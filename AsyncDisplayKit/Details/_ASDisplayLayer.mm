@@ -17,6 +17,7 @@
 #import "ASDisplayNode.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASObjectDescriptionHelpers.h"
 
 @implementation _ASDisplayLayer
 {
@@ -236,11 +237,21 @@
   [strongAsyncDelegate cancelDisplayAsyncLayer:self];
 }
 
+// e.g. <MYTextNodeLayer: 0xFFFFFF; node = <MYTextNode: 0xFFFFFFE; name = "Username node for user 179">>
 - (NSString *)description
 {
-  // The standard UIView description is useless for debugging because all ASDisplayNode subclasses have _ASDisplayView-type views.
-  // This allows us to at least see the name of the node subclass and get its pointer directly from [[UIWindow keyWindow] recursiveDescription].
-  return [NSString stringWithFormat:@"<%@, layer = %@>", self.asyncdisplaykit_node, [super description]];
+  NSMutableString *description = [[super description] mutableCopy];
+  ASDisplayNode *node = self.asyncdisplaykit_node;
+  if (node != nil) {
+	NSString *classString = [NSString stringWithFormat:@"%@-", [node class]];
+    [description replaceOccurrencesOfString:@"_ASDisplay" withString:classString options:kNilOptions range:NSMakeRange(0, description.length)];
+    NSUInteger insertionIndex = [description rangeOfString:@">"].location;
+    if (insertionIndex != NSNotFound) {
+      NSString *nodeString = [NSString stringWithFormat:@"; node = %@", node];
+      [description insertString:nodeString atIndex:insertionIndex];
+    }
+  }
+  return description;
 }
 
 @end

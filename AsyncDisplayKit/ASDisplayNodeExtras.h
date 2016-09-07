@@ -46,13 +46,13 @@ ASDISPLAYNODE_INLINE NSString * _Nonnull NSStringFromASInterfaceState(ASInterfac
     [states addObject:@"MeasureLayout"];
   }
   if (ASInterfaceStateIncludesPreload(interfaceState)) {
-    [states addObject:@" | Preload"];
+    [states addObject:@"Preload"];
   }
   if (ASInterfaceStateIncludesDisplay(interfaceState)) {
-    [states addObject:@" | Display"];
+    [states addObject:@"Display"];
   }
   if (ASInterfaceStateIncludesVisible(interfaceState)) {
-    [states addObject:@" | Visible"];
+    [states addObject:@"Visible"];
   }
   return [NSString stringWithFormat:@"{ %@ }", [states componentsJoinedByString:@" | "]];
 }
