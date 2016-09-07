@@ -1382,17 +1382,28 @@ ASLayoutableSizeHelperForwarding
 
 - (void)measureNodeWithBoundsIfNecessary:(CGRect)bounds
 {
+  BOOL supportsRangeManagedInterfaceState = NO;
   BOOL hasDirtyLayout = NO;
   CGSize calculatedLayoutSize = CGSizeZero;
   {
     ASDN::MutexLocker l(__instanceLock__);
+    supportsRangeManagedInterfaceState = [self supportsRangeManagedInterfaceState];
     hasDirtyLayout = _calculatedDisplayNodeLayout->isDirty();
     calculatedLayoutSize = _calculatedDisplayNodeLayout->layout.size;
+  }
+    
+  // Check if it's a subnode in a layout transition. In this case no measurement is needed as it's part of
+  // the layout transition
+  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
+    ASLayoutableContext context =  ASLayoutableGetCurrentContext();
+    if (ASLayoutableContextIsNull(context) || _pendingTransitionID != context.transitionID) {
+      return;
+    }
   }
   
   // If no measure pass happened or the bounds changed between layout passes we manually trigger a measurement pass
   // for the node using a size range equal to whatever bounds were provided to the node
-  if (hasDirtyLayout || CGSizeEqualToSize(calculatedLayoutSize, bounds.size) == NO) {
+  if (supportsRangeManagedInterfaceState == NO && (hasDirtyLayout || CGSizeEqualToSize(calculatedLayoutSize, bounds.size) == NO)) {
     if (CGRectEqualToRect(bounds, CGRectZero)) {
       LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     } else {
