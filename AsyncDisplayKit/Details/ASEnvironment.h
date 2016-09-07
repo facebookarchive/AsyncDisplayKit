@@ -39,7 +39,7 @@ typedef struct ASEnvironmentLayoutOptionsState {
   CGFloat spacingBefore;// = 0;
   CGFloat spacingAfter;// = 0;
   BOOL flexGrow;// = NO;
-  BOOL flexShrink;// = NO;
+  BOOL flexShrink;// = NO; Default value is YES if created via ASEnvironmentLayoutOptionsStateMakeDefault
   ASRelativeDimension flexBasis;// = ASRelativeDimensionUnconstrained;
   ASStackLayoutAlignSelf alignSelf;// = ASStackLayoutAlignSelfAuto;
   CGFloat ascender;// = 0;
@@ -50,6 +50,7 @@ typedef struct ASEnvironmentLayoutOptionsState {
   
   struct ASEnvironmentStateExtensions _extensions;
 } ASEnvironmentLayoutOptionsState;
+/// Should be used to create an ASEnvironmentLayoutOptionsState
 extern ASEnvironmentLayoutOptionsState ASEnvironmentLayoutOptionsStateMakeDefault();
 
 

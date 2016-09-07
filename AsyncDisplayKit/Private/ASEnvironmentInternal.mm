@@ -127,7 +127,7 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
   if (propagation == ASEnvironmentStatePropagation::UP) {
 
    // Object is the parent and the state is the state of the child
-    const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentDefaultLayoutOptionsState;
+    const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentLayoutOptionsStateMakeDefault();
     ASEnvironmentLayoutOptionsState parentLayoutOptionsState = environmentState.layoutOptionsState;
     
     // For every field check if the parent value is equal to the default and if so propegate up the value of the passed
