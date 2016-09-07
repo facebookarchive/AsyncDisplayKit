@@ -98,8 +98,7 @@ static const CGFloat kInnerPadding = 10.0f;
   
   // lorem ipsum text, plus some nice styling
   _textNode = [[ASTextNode alloc] init];
-  _textNode.attributedText = [[NSAttributedString alloc] initWithString:[self kittyIpsum]
-                                                               attributes:[self textStyle]];
+  _textNode.attributedText = [[NSAttributedString alloc] initWithString:[self kittyIpsum] attributes:[self textStyle]];
   [self addSubnode:_textNode];
   
   // hairline cell separator
@@ -134,27 +133,36 @@ static const CGFloat kInnerPadding = 10.0f;
   style.paragraphSpacing = 0.5 * font.lineHeight;
   style.hyphenationFactor = 1.0;
   
-  return @{ NSFontAttributeName: font,
-            NSParagraphStyleAttributeName: style,
-            ASTextNodeWordKerningAttributeName : @.5};
+  return @{
+    NSFontAttributeName: font,
+    NSParagraphStyleAttributeName: style,
+    ASTextNodeWordKerningAttributeName : @.5
+  };
 }
 
 #if UseAutomaticLayout
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _imageNode.preferredFrameSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize) : CGSizeMake(kImageSize, kImageSize);
+  // Set an intrinsic size for the image node
+  CGSize imageSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize) : CGSizeMake(kImageSize, kImageSize);
+  [_imageNode setSizeWithCGSize:imageSize];
+  
+  // Shrink the text node in case the image + text gonna be too wide
   _textNode.flexShrink = YES;
+
+  // Configure stack
+  ASStackLayoutSpec *stackLayoutSpec =
+  [ASStackLayoutSpec
+   stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+   spacing:kInnerPadding
+   justifyContent:ASStackLayoutJustifyContentStart
+   alignItems:ASStackLayoutAlignItemsStart
+   children:_swappedTextAndImage ? @[_textNode, _imageNode] : @[_imageNode, _textNode]];
   
-  ASStackLayoutSpec *stackSpec = [[ASStackLayoutSpec alloc] init];
-  stackSpec.direction = ASStackLayoutDirectionHorizontal;
-  stackSpec.spacing = kInnerPadding;
-  [stackSpec setChildren:!_swappedTextAndImage ? @[_imageNode, _textNode] : @[_textNode, _imageNode]];
-  
-  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
-  insetSpec.insets = UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding);
-  insetSpec.child = stackSpec;
-  
-  return insetSpec;
+  // Add inset
+  return [ASInsetLayoutSpec
+          insetLayoutSpecWithInsets:UIEdgeInsetsMake(kOuterPadding, kOuterPadding, kOuterPadding, kOuterPadding)
+          child:stackLayoutSpec];
 }
 
 // With box model, you don't need to override this method, unless you want to add custom logic.

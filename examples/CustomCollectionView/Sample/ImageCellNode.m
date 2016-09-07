@@ -34,17 +34,9 @@
   return self;
 }
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  [_imageNode measure:constrainedSize];
-  return constrainedSize;
-}
-
-- (void)layout
-{
-  [super layout];
-  
-  _imageNode.frame = CGRectMake(0, 0, _imageNode.calculatedSize.width, _imageNode.calculatedSize.height);
+  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:_imageNode];
 }
 
 @end

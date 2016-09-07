@@ -71,17 +71,11 @@
   _indexPathTextNode.attributedText = [[NSAttributedString alloc] initWithString:[indexPath description] attributes:nil];
 }
 
-//- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
-//{
-//  ASStackLayoutSpec *stackSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical spacing:0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:@[_indexPathTextNode]];
-//  stackSpec.flexGrow = YES;
-//  return stackSpec;
-//}
-
 - (void)layout
 {
-  _indexPathTextNode.frame = self.bounds;
   [super layout];
+  
+  _indexPathTextNode.frame = self.bounds;
 }
 
 #if 0

@@ -43,8 +43,6 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   ASDisplayNodeMethodOverrideLayoutSpecThatFits = 1 << 4
 };
 
-@class _ASDisplayNodePosition;
-
 FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification;
 FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp;
 
@@ -104,6 +102,9 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   
 @protected
   ASDisplayNode * __weak _supernode;
+  
+  ASLayoutableSize _size;
+  CGSize _preferredFrameSize;
 
   ASSentinel *_displaySentinel;
 
@@ -114,21 +115,20 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   CGFloat _contentsScaleForDisplay;
 
   ASEnvironmentState _environmentState;
-  ASLayout *_calculatedLayout;
-
 
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
   
   // Main thread only
-  _ASTransitionContext *_pendingLayoutTransitionContext;
   BOOL _automaticallyManagesSubnodes;
+  _ASTransitionContext *_pendingLayoutTransitionContext;
   NSTimeInterval _defaultLayoutTransitionDuration;
   NSTimeInterval _defaultLayoutTransitionDelay;
   UIViewAnimationOptions _defaultLayoutTransitionOptions;
 
   int32_t _pendingTransitionID;
   ASLayoutTransition *_pendingLayoutTransition;
+  std::shared_ptr<ASDisplayNodeLayout> _calculatedDisplayNodeLayout;
   
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
@@ -184,7 +184,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;
-- (BOOL)__shouldSize;
 
 /**
  Invoked before a call to setNeedsLayout to the underlying view

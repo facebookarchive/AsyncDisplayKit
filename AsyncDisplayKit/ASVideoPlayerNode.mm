@@ -324,7 +324,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_playbackButtonNode == nil) {
     _playbackButtonNode = [[ASDefaultPlaybackButton alloc] init];
-    _playbackButtonNode.preferredFrameSize = CGSizeMake(16.0, 22.0);
+    _playbackButtonNode.width = ASDimensionMakeWithPoints(16.0);
+    _playbackButtonNode.height = ASDimensionMakeWithPoints(22.0);
+
     if (_delegateFlags.delegatePlaybackButtonTint) {
       _playbackButtonNode.tintColor = [_delegate videoPlayerNodePlaybackButtonTint:self];
     } else {
@@ -598,7 +600,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       
       return spinnnerView;
     }];
-    _spinnerNode.preferredFrameSize = CGSizeMake(44.0, 44.0);
+    
+    _spinnerNode.width = ASDimensionMakeWithPoints(44.0);
+    _spinnerNode.height = ASDimensionMakeWithPoints(44.0);
 
     [self addSubnode:_spinnerNode];
     [self setNeedsLayout];
@@ -689,23 +693,21 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   return controls;
 }
 
+
 #pragma mark - Layout
-- (ASLayoutSpec*)layoutSpecThatFits:(ASSizeRange)constrainedSize
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   CGSize maxSize = constrainedSize.max;
-  if (!CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero)) {
-    maxSize = self.preferredFrameSize;
-  }
 
   // Prevent crashes through if infinite width or height
   if (isinf(maxSize.width) || isinf(maxSize.height)) {
     ASDisplayNodeAssert(NO, @"Infinite width or height in ASVideoPlayerNode");
     maxSize = CGSizeZero;
   }
-  _videoNode.preferredFrameSize = maxSize;
+  _videoNode.size = ASLayoutableSizeMakeFromCGSize(maxSize);
 
   ASLayoutSpec *layoutSpec;
-
   if (_delegateFlags.delegateLayoutSpecForControls) {
     layoutSpec = [_delegate videoPlayerNodeLayoutSpec:self forControls:_cachedControls forMaximumSize:maxSize];
   } else {
@@ -716,21 +718,21 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   if (_spinnerNode) {
     ASCenterLayoutSpec *centerLayoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_spinnerNode];
-    centerLayoutSpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
+    centerLayoutSpec.size = ASLayoutableSizeMakeFromCGSize(maxSize);
     [children addObject:centerLayoutSpec];
   }
 
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
-  overlaySpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
-
+  overlaySpec.size = ASLayoutableSizeMakeFromCGSize(maxSize);
   [children addObject:overlaySpec];
 
   return [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
 }
 
-- (ASLayoutSpec*)defaultLayoutSpecThatFits:(CGSize)maxSize
+- (ASLayoutSpec *)defaultLayoutSpecThatFits:(CGSize)maxSize
 {
-  _scrubberNode.preferredFrameSize = CGSizeMake(maxSize.width, 44.0);
+  _scrubberNode.width = ASDimensionMakeWithPoints(maxSize.width);
+  _scrubberNode.height = ASDimensionMakeWithPoints(44.0);
 
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.flexGrow = YES;

@@ -45,8 +45,10 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    self.node.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.node]];
+    // 100% of container
+    _node.width = ASDimensionMakeWithFraction(1.0);
+    _node.height = ASDimensionMakeWithFraction(1.0);
+    return [ASWrapperLayoutSpec wrapperWithLayoutable:_node];
 }
 
 #pragma mark - <ASCollectionDataSource, ASCollectionDelegate>

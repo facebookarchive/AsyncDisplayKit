@@ -22,46 +22,34 @@
 
 - (void)testSizingBehaviour
 {
-  [self testWithSizeRange:ASSizeRangeMake(CGSizeMake(150, 200), CGSizeMake(FLT_MAX, FLT_MAX))
+  [self testWithSizeRange:ASSizeRangeMake(CGSizeMake(150, 200), CGSizeMake(INFINITY, INFINITY))
                identifier:@"underflowChildren"];
   [self testWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeMake(50, 100))
                identifier:@"overflowChildren"];
   // Expect the spec to wrap its content because children sizes are between constrained size
-  [self testWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeMake(FLT_MAX / 2, FLT_MAX / 2))
+  [self testWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY / 2, INFINITY / 2))
                identifier:@"wrappedChildren"];
 }
 
 - (void)testChildrenMeasuredWithAutoMaxSize
 {
-  ASStaticSizeDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
+  ASDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor], (CGSize){50, 50});
   firstChild.layoutPosition = CGPointMake(0, 0);
-  firstChild.staticSize = CGSizeMake(50, 50);
   
-  ASStaticSizeDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
+  ASDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor], (CGSize){100, 100});
   secondChild.layoutPosition = CGPointMake(10, 60);
-  secondChild.staticSize = CGSizeMake(100, 100);
 
   ASSizeRange sizeRange = ASSizeRangeMake(CGSizeMake(10, 10), CGSizeMake(110, 160));
   [self testWithChildren:@[firstChild, secondChild] sizeRange:sizeRange identifier:nil];
-  
-  XCTAssertTrue(ASSizeRangeEqualToSizeRange(firstChild.constrainedSizeForCalculatedLayout,
-                                            ASSizeRangeMake(CGSizeZero, sizeRange.max)));
-  CGSize secondChildMaxSize = CGSizeMake(sizeRange.max.width - secondChild.layoutPosition.x,
-                                         sizeRange.max.height - secondChild.layoutPosition.y);
-  XCTAssertTrue(ASSizeRangeEqualToSizeRange(secondChild.constrainedSizeForCalculatedLayout,
-                                            ASSizeRangeMake(CGSizeZero, secondChildMaxSize)));
 }
 
 - (void)testWithSizeRange:(ASSizeRange)sizeRange identifier:(NSString *)identifier
 {
-  ASDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
+  ASDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor], (CGSize){50, 50});
   firstChild.layoutPosition = CGPointMake(0, 0);
-  firstChild.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(50, 50));
   
-  
-  ASDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
+  ASDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor], (CGSize){100, 100});
   secondChild.layoutPosition = CGPointMake(0, 50);
-  secondChild.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(100, 100));
   
   [self testWithChildren:@[firstChild, secondChild] sizeRange:sizeRange identifier:identifier];
 }
@@ -73,9 +61,12 @@
   NSMutableArray *subnodes = [NSMutableArray arrayWithArray:children];
   [subnodes insertObject:backgroundNode atIndex:0];
 
-  ASStaticLayoutSpec *staticLayoutSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
-  ASLayoutSpec *layoutSpec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:staticLayoutSpec
-                                                                        background:backgroundNode];
+  ASLayoutSpec *layoutSpec =
+  [ASBackgroundLayoutSpec
+   backgroundLayoutSpecWithChild:
+   [ASStaticLayoutSpec
+    staticLayoutSpecWithChildren:children]
+   background:backgroundNode];
   
   [self testLayoutSpec:layoutSpec sizeRange:sizeRange subnodes:subnodes identifier:identifier];
 }

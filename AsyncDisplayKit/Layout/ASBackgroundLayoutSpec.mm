@@ -39,26 +39,26 @@ static NSUInteger const kBackgroundChildIndex = 1;
 }
 
 /**
- First layout the contents, then fit the background image.
+ * First layout the contents, then fit the background image.
  */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+                     restrictedToSize:(ASLayoutableSize)size
+                 relativeToParentSize:(CGSize)parentSize
 {
-  ASLayout *contentsLayout = [[self child] measureWithSizeRange:constrainedSize];
+  ASLayout *contentsLayout = [self.child layoutThatFits:constrainedSize parentSize:parentSize];
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:2];
   if (self.background) {
     // Size background to exactly the same size.
-    ASLayout *backgroundLayout = [self.background measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
+    ASLayout *backgroundLayout = [self.background layoutThatFits:ASSizeRangeMake(contentsLayout.size)
+                                                      parentSize:parentSize];
     backgroundLayout.position = CGPointZero;
     [sublayouts addObject:backgroundLayout];
   }
   contentsLayout.position = CGPointZero;
   [sublayouts addObject:contentsLayout];
 
-  return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
-                                         size:contentsLayout.size
-                                   sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutable:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
 - (void)setBackground:(id<ASLayoutable>)background

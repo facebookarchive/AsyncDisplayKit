@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <Foundation/Foundation.h>
+#import "ASDimension.h"
 
 @class ASLayoutSpec;
 @protocol ASLayoutable;
@@ -41,6 +41,11 @@ extern void ASLayoutableClearCurrentContext();
 @protocol ASLayoutablePrivate <NSObject>
 
 /**
+ * @abstract A size constraint that should apply to this ASLayoutable.
+ */
+@property (nonatomic, assign, readwrite) ASLayoutableSize size;
+
+/**
  *  @abstract This method can be used to give the user a chance to wrap an ASLayoutable in an ASLayoutSpec 
  *  just before it is added to a parent ASLayoutSpec. For example, if you wanted an ASTextNode that was always 
  *  inside of an ASInsetLayoutSpec, you could subclass ASTextNode and implement finalLayoutable so that it wraps
@@ -61,9 +66,7 @@ extern void ASLayoutableClearCurrentContext();
 
 @end
 
-
-#pragma mark - ASLayoutOptionsForwarding
-
+#pragma mark - ASLayoutableForwarding
 /**
  *  Both an ASDisplayNode and an ASLayoutSpec conform to ASLayoutable. There are several properties
  *  in ASLayoutable that are used when a node or spec is used in a layout spec.
@@ -75,6 +78,103 @@ extern void ASLayoutableClearCurrentContext();
  *  ASDisplayNode and ASLayoutSpec to provide convenience properties for any options that your
  *  layoutSpec may require.
  */
+
+#pragma mark - ASLayoutableSizeForwarding
+
+#define ASLayoutableSizeForwarding \
+\
+- (ASDimension)width\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.width;\
+}\
+\
+- (void)setWidth:(ASDimension)width\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.width = width;\
+}\
+\
+- (ASDimension)height\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.height;\
+}\
+\
+- (void)setHeight:(ASDimension)height\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.height = height;\
+}\
+\
+- (ASDimension)minWidth\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.minWidth;\
+}\
+\
+- (void)setMinWidth:(ASDimension)minWidth\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.minWidth = minWidth;\
+}\
+\
+- (ASDimension)maxWidth\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.maxWidth;\
+}\
+\
+- (void)setMaxWidth:(ASDimension)maxWidth\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.maxWidth = maxWidth;\
+}\
+\
+- (ASDimension)minHeight\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.minHeight;\
+}\
+\
+- (void)setMinHeight:(ASDimension)minHeight\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.minHeight = minHeight;\
+}\
+\
+- (ASDimension)maxHeight\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  return _size.maxHeight;\
+}\
+\
+- (void)setMaxHeight:(ASDimension)maxHeight\
+{\
+  ASDN::MutexLocker l(__instanceLock__);\
+  _size.maxHeight = maxHeight;\
+}\
+
+
+#pragma mark - ASLayoutableSizeHelperForwarding
+
+#define ASLayoutableSizeHelperForwarding \
+- (void)setSizeWithCGSize:(CGSize)size\
+{\
+  self.width = ASDimensionMakeWithPoints(size.width);\
+  self.height = ASDimensionMakeWithPoints(size.height);\
+}\
+\
+- (void)setExactSizeWithCGSize:(CGSize)size\
+{\
+  self.minWidth = ASDimensionMakeWithPoints(size.width);\
+  self.minHeight = ASDimensionMakeWithPoints(size.height);\
+  self.maxWidth = ASDimensionMakeWithPoints(size.width);\
+  self.maxHeight = ASDimensionMakeWithPoints(size.height);\
+}\
+
+
+#pragma mark - ASLayoutOptionsForwarding
 
 #define ASEnvironmentLayoutOptionsForwarding \
 - (void)propagateUpLayoutOptionsState\
@@ -132,12 +232,12 @@ extern void ASLayoutableClearCurrentContext();
   [self propagateUpLayoutOptionsState];\
 }\
 \
-- (ASRelativeDimension)flexBasis\
+- (ASDimension)flexBasis\
 {\
   return _environmentState.layoutOptionsState.flexBasis;\
 }\
 \
-- (void)setFlexBasis:(ASRelativeDimension)flexBasis\
+- (void)setFlexBasis:(ASDimension)flexBasis\
 {\
   _environmentState.layoutOptionsState.flexBasis = flexBasis;\
   [self propagateUpLayoutOptionsState];\
@@ -173,17 +273,6 @@ extern void ASLayoutableClearCurrentContext();
 - (void)setDescender:(CGFloat)descender\
 {\
   _environmentState.layoutOptionsState.descender = descender;\
-  [self propagateUpLayoutOptionsState];\
-}\
-\
-- (ASRelativeSizeRange)sizeRange\
-{\
-  return _environmentState.layoutOptionsState.sizeRange;\
-}\
-\
-- (void)setSizeRange:(ASRelativeSizeRange)sizeRange\
-{\
-  _environmentState.layoutOptionsState.sizeRange = sizeRange;\
   [self propagateUpLayoutOptionsState];\
 }\
 \

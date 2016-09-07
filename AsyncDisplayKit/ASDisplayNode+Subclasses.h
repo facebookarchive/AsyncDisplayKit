@@ -119,6 +119,19 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize;
 
 /**
+ * ASDisplayNode's implementation of -layoutThatFits:parentSize: calls this method to resolve the node's size
+ * against parentSize, intersect it with constrainedSize, and call -calculateLayoutThatFits: with the result.
+ *
+ * In certain advanced cases, you may want to customize this logic. Overriding this method allows you to receive all
+ * three parameters and do the computation yourself.
+ *
+ * @warning Overriding this method should be done VERY rarely.
+ */
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+                     restrictedToSize:(ASLayoutableSize)size
+                 relativeToParentSize:(CGSize)parentSize;
+
+/**
  * @abstract Return the calculated size.
  *
  * @param constrainedSize The maximum size the receiver should fit in.
@@ -130,7 +143,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @note Subclasses that override are committed to manual layout. Therefore, -layout: must be overriden to layout all subnodes or subviews.
  *
- * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
+ * @note This method should not be called directly outside of ASDisplayNode; use -layoutThatFits: or layoutThatFits:parentSize: instead.
  */
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize;
 

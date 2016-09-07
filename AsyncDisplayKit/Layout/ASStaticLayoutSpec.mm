@@ -34,42 +34,46 @@
   return self;
 }
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  CGSize maxConstrainedSize = CGSizeMake(constrainedSize.max.width, constrainedSize.max.height);
+  // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
+  CGSize size = {
+    (isinf(constrainedSize.max.width) || !ASPointsAreValidForLayout(constrainedSize.max.width)) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.width,
+    (isinf(constrainedSize.max.height) || !ASPointsAreValidForLayout(constrainedSize.max.height)) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.height
+  };
   
   NSArray *children = self.children;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:children.count];
 
   for (id<ASLayoutable> child in children) {
     CGPoint layoutPosition = child.layoutPosition;
-    CGSize autoMaxSize = CGSizeMake(maxConstrainedSize.width  - layoutPosition.x,
-                                    maxConstrainedSize.height - layoutPosition.y);
+    CGSize autoMaxSize = {
+      constrainedSize.max.width  - layoutPosition.x,
+      constrainedSize.max.height - layoutPosition.y
+    };
+
+    const ASSizeRange childConstraint = ASLayoutableSizeResolveAutoSize(child.size, size, {{0,0}, autoMaxSize});
     
-    ASRelativeSizeRange childSizeRange = child.sizeRange;
-    BOOL childIsUnconstrained = ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRangeUnconstrained, childSizeRange);
-    ASSizeRange childConstraint = childIsUnconstrained ? ASSizeRangeMake({0, 0}, autoMaxSize)
-                                                       : ASRelativeSizeRangeResolve(childSizeRange, maxConstrainedSize);
-    
-    ASLayout *sublayout = [child measureWithSizeRange:childConstraint];
+    ASLayout *sublayout = [child layoutThatFits:childConstraint parentSize:size];
     sublayout.position = layoutPosition;
     [sublayouts addObject:sublayout];
   }
   
-  CGSize size = CGSizeMake(constrainedSize.min.width, constrainedSize.min.height);
-
-  for (ASLayout *sublayout in sublayouts) {
-    CGPoint sublayoutPosition = sublayout.position;
-    CGSize  sublayoutSize     = sublayout.size;
-    
-    size.width  = MAX(size.width,  sublayoutPosition.x + sublayoutSize.width);
-    size.height = MAX(size.height, sublayoutPosition.y + sublayoutSize.height);
+  if (isnan(size.width)) {
+    size.width = constrainedSize.min.width;
+    for (ASLayout *sublayout in sublayouts) {
+      size.width  = MAX(size.width,  sublayout.position.x + sublayout.size.width);
+    }
   }
-
-  return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
-                                         size:ASSizeRangeClamp(constrainedSize, size)
-                                   sublayouts:sublayouts];
+  
+  if (isnan(size.height)) {
+    size.height = constrainedSize.min.height;
+    for (ASLayout *sublayout in sublayouts) {
+      size.height = MAX(size.height, sublayout.position.y + sublayout.size.height);
+    }
+  }
+  
+  return [ASLayout layoutWithLayoutable:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:sublayouts];
 }
 
 @end

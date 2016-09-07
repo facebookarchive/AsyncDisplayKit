@@ -65,28 +65,14 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
 - (void)validateLayout:(ASLayout *)layout
 {
   for (ASLayout *sublayout in layout.sublayouts) {
-    id<ASLayoutable> layoutable = layout.layoutableObject;
-    id<ASLayoutable> sublayoutLayoutable = sublayout.layoutableObject;
+    id<ASLayoutable> layoutable = layout.layoutable;
+    id<ASLayoutable> sublayoutLayoutable = sublayout.layoutable;
     
     NSString *assertMessage = nil;
     Class stackContainerClass = [ASStaticLayoutSpec class];
     
-    // Check for default sizeRange and layoutPosition
-    ASRelativeSizeRange sizeRange = sublayoutLayoutable.sizeRange;
-    ASRelativeSizeRange zeroSizeRange = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeZero);
-    
-    // Currently setting the preferredFrameSize also updates the sizeRange. Create a size range based on the
-    // preferredFrameSize and check it if it's the same as the current sizeRange to be sure it was not changed manually
-    CGSize preferredFrameSize = CGSizeZero;
-    if ([sublayoutLayoutable respondsToSelector:@selector(preferredFrameSize)]) {
-      preferredFrameSize = [((ASDisplayNode *)sublayoutLayoutable) preferredFrameSize];
-    }
-    ASRelativeSizeRange preferredFrameSizeRange = ASRelativeSizeRangeMakeWithExactCGSize(preferredFrameSize);
-    
-    if (ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, zeroSizeRange) == NO &&
-        ASRelativeSizeRangeEqualToRelativeSizeRange(sizeRange, preferredFrameSizeRange) == NO) {
-      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(sizeRange), sublayoutLayoutable, stackContainerClass);
-    } else if (!CGPointEqualToPoint(sublayoutLayoutable.layoutPosition, CGPointZero)) {
+    // Check for default layoutPosition
+    if (!CGPointEqualToPoint(sublayoutLayoutable.layoutPosition, CGPointZero)) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(layoutPosition), sublayoutLayoutable, stackContainerClass);
     }
     
@@ -110,9 +96,9 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
 
 - (void)validateLayout:(ASLayout *)layout
 {
-  id<ASLayoutable> layoutable = layout.layoutableObject;
+  id<ASLayoutable> layoutable = layout.layoutable;
   for (ASLayout *sublayout in layout.sublayouts) {
-    id<ASLayoutable> sublayoutLayoutable = sublayout.layoutableObject;
+    id<ASLayoutable> sublayoutLayoutable = sublayout.layoutable;
     
     NSString *assertMessage = nil;
     Class stackContainerClass = [ASStackLayoutSpec class];
@@ -126,7 +112,7 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexGrow), sublayoutLayoutable, stackContainerClass);
     } else if (sublayoutLayoutable.flexShrink == YES) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexShrink), sublayoutLayoutable, stackContainerClass);
-    } else if (!ASRelativeDimensionEqualToRelativeDimension(sublayoutLayoutable.flexBasis, ASRelativeDimensionUnconstrained) ) {
+    } else if (!ASDimensionEqualToDimension(sublayoutLayoutable.flexBasis, ASDimensionAuto) ) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexBasis), sublayoutLayoutable, stackContainerClass);
     } else if (sublayoutLayoutable.alignSelf != ASStackLayoutAlignSelfAuto) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(alignSelf), sublayoutLayoutable, stackContainerClass);

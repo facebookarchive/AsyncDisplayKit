@@ -20,7 +20,8 @@
 - (UIImage *)testImage
 {
   NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"logo-square"
-                                                                    ofType:@"png" inDirectory:@"TestResources"];
+                                                                    ofType:@"png"
+                                                               inDirectory:@"TestResources"];
   return [UIImage imageWithContentsOfFile:path];
 }
 
@@ -29,30 +30,32 @@
   // trivial test case to ensure ASSnapshotTestCase works
   ASImageNode *imageNode = [[ASImageNode alloc] init];
   imageNode.image = [self testImage];
-  [imageNode measure:CGSizeMake(100, 100)];
+  [imageNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))];
 
   ASSnapshotVerifyNode(imageNode, nil);
 }
 
 - (void)testForcedScaling
 {
-  ASImageNode *imageNode = [[ASImageNode alloc] init];
+  CGSize forcedImageSize = CGSizeMake(100, 100);
   
+  ASImageNode *imageNode = [[ASImageNode alloc] init];
+  imageNode.forcedSize = forcedImageSize;
   imageNode.image = [self testImage];
-  imageNode.forcedSize = CGSizeMake(100, 100);
   
   // Snapshot testing requires that node is formally laid out.
-  imageNode.preferredFrameSize = CGSizeMake(100, 100);
-  [imageNode measure:CGSizeMake(100, 100)];
-
+  [imageNode setSizeWithCGSize:forcedImageSize];
+  [imageNode layoutThatFits:ASSizeRangeMake(CGSizeZero, forcedImageSize)];
   ASSnapshotVerifyNode(imageNode, @"first");
   
-  imageNode.preferredFrameSize = CGSizeMake(200, 200);
-  [imageNode measure:CGSizeMake(200, 200)];
+  [imageNode setSizeWithCGSize:CGSizeMake(200, 200)];
+  [imageNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(200, 200))];
   
   ASSnapshotVerifyNode(imageNode, @"second");
   
-  XCTAssert(CGImageGetWidth((CGImageRef)imageNode.contents) == 100 * imageNode.contentsScale && CGImageGetHeight((CGImageRef)imageNode.contents) == 100 * imageNode.contentsScale, @"contents should be 100 x 100 by contents scale.");
+  XCTAssert(CGImageGetWidth((CGImageRef)imageNode.contents) == forcedImageSize.width * imageNode.contentsScale &&
+            CGImageGetHeight((CGImageRef)imageNode.contents) == forcedImageSize.height * imageNode.contentsScale,
+            @"Contents should be 100 x 100 by contents scale.");
 }
 
 @end

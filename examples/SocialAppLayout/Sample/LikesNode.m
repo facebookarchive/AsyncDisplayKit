@@ -66,13 +66,18 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    ASStackLayoutSpec *mainStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal spacing:6.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsCenter children:@[_iconNode, _countNode]];
-    
-    // set sizeRange to make width fixed to 60
-    ASRelativeSize min = ASRelativeSizeMake(ASRelativeDimensionMakeWithPoints(60.0), ASRelativeDimensionMakeWithPoints(0.0));
-    ASRelativeSize max = ASRelativeSizeMake(ASRelativeDimensionMakeWithPoints(60.0), ASRelativeDimensionMakeWithPoints(40.0));
-    mainStack.sizeRange = ASRelativeSizeRangeMake(min, max);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[mainStack]];
+    ASStackLayoutSpec *mainStack =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+     spacing:6.0
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsCenter
+     children:@[_iconNode, _countNode]];
+
+    mainStack.minWidth = ASDimensionMakeWithPoints(60.0);
+    mainStack.maxHeight = ASDimensionMakeWithPoints(40.0);
+
+    return mainStack;
 }
 
 @end

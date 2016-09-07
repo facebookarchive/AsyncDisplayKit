@@ -15,6 +15,7 @@
 #import "ASAvailability.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASLayout.h"
 #import "ASTraitCollection.h"
 #import "ASEnvironmentInternal.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
@@ -105,7 +106,7 @@
       [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
     }];
   } else {
-    [_node measureWithSizeRange:[self nodeConstrainedSize]];
+    [_node layoutThatFits:[self nodeConstrainedSize]];
   }
   
   if (!AS_AT_LEAST_IOS9) {
@@ -132,7 +133,7 @@ ASVisibilityDidMoveToParentViewController;
   // We do this early layout because we need to get any ASCollectionNodes etc. into the
   // hierarchy before UIKit applies the scroll view inset adjustments, if you are using
   // automatic subnode management.
-  [_node measureWithSizeRange:[self nodeConstrainedSize]];
+  [_node layoutThatFits:[self nodeConstrainedSize]];
 
   [_node recursivelyFetchData];
   
@@ -302,7 +303,7 @@ ASVisibilityDepthImplementation;
     
     // once we've propagated all the traits, layout this node.
     // Remeasure the node with the latest constrained size – old constrained size may be incorrect.
-    [self.node measureWithSizeRange:[self nodeConstrainedSize]];
+    [self.node layoutThatFits:[self nodeConstrainedSize]];
     [self.node setNeedsLayout];
   }
 }

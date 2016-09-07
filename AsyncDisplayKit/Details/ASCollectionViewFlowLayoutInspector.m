@@ -22,9 +22,9 @@
 static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView *collectionView) {
   CGSize maxSize = collectionView.bounds.size;
   if (ASScrollDirectionContainsHorizontalDirection(collectionView.scrollableDirections)) {
-    maxSize.width = FLT_MAX;
+    maxSize.width = CGFLOAT_MAX;
   } else {
-    maxSize.height = FLT_MAX;
+    maxSize.height = CGFLOAT_MAX;
   }
   return ASSizeRangeMake(CGSizeZero, maxSize);
 }

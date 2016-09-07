@@ -9,7 +9,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <CoreGraphics/CGBase.h>
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
 

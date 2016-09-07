@@ -23,7 +23,6 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
 
 - (void)testWithOptions
 {
-
   [self testAllVerticalPositionsForHorizontalPosition:ASRelativeLayoutSpecPositionStart];
   [self testAllVerticalPositionsForHorizontalPosition:ASRelativeLayoutSpecPositionCenter];
   [self testAllVerticalPositionsForHorizontalPosition:ASRelativeLayoutSpecPositionEnd];
@@ -57,14 +56,16 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
                    sizingOptions:(ASRelativeLayoutSpecSizingOption)sizingOptions
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
-  ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
-  foregroundNode.staticSize = {70, 100};
+  ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor], CGSizeMake(70, 100));
 
   ASLayoutSpec *layoutSpec =
   [ASBackgroundLayoutSpec
    backgroundLayoutSpecWithChild:
    [ASRelativeLayoutSpec
-    relativePositionLayoutSpecWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOptions child:foregroundNode]
+    relativePositionLayoutSpecWithHorizontalPosition:horizontalPosition
+    verticalPosition:verticalPosition
+    sizingOption:sizingOptions
+    child:foregroundNode]
    background:backgroundNode];
 
   [self testLayoutSpec:layoutSpec
@@ -105,17 +106,26 @@ static NSString *suffixForPositionOptions(ASRelativeLayoutSpecPosition horizonta
 - (void)testMinimumSizeRangeIsGivenToChildWhenNotPositioning
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
-  ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
-  foregroundNode.staticSize = {10, 10};
+  ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor], CGSizeMake(10, 10));
   foregroundNode.flexGrow = YES;
   
-  ASLayoutSpec *childSpec = [ASBackgroundLayoutSpec
-                             backgroundLayoutSpecWithChild:[ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical spacing:0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:@[foregroundNode]]
-                             background:backgroundNode];
+  ASLayoutSpec *childSpec =
+  [ASBackgroundLayoutSpec
+   backgroundLayoutSpecWithChild:
+   [ASStackLayoutSpec
+    stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+    spacing:0
+    justifyContent:ASStackLayoutJustifyContentStart
+    alignItems:ASStackLayoutAlignItemsStart
+    children:@[foregroundNode]]
+   background:backgroundNode];
   
-  ASRelativeLayoutSpec *layoutSpec =  [ASRelativeLayoutSpec
-                                       relativePositionLayoutSpecWithHorizontalPosition:ASRelativeLayoutSpecPositionStart verticalPosition:ASRelativeLayoutSpecPositionStart sizingOption:{} child:childSpec];
-
+  ASRelativeLayoutSpec *layoutSpec =
+  [ASRelativeLayoutSpec
+   relativePositionLayoutSpecWithHorizontalPosition:ASRelativeLayoutSpecPositionStart
+   verticalPosition:ASRelativeLayoutSpecPositionStart
+   sizingOption:{}
+   child:childSpec];
 
   [self testLayoutSpec:layoutSpec sizeRange:kSize subnodes:@[backgroundNode, foregroundNode] identifier:nil];
 }

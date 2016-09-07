@@ -192,7 +192,7 @@
 {
   [super viewDidLayoutSubviews];
   
-  CGSize size = [self.transitionNode measure:self.view.frame.size];
+  CGSize size = [self.transitionNode layoutThatFits:ASSizeRangeMake(CGSizeZero, self.view.frame.size)].size;
   self.transitionNode.frame = CGRectMake(0, 20, size.width, size.height);
 }
 

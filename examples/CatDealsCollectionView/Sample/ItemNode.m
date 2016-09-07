@@ -107,7 +107,8 @@ const CGFloat kSoldOutGBHeight = 50.0;
   self.soldOutLabelFlat.layerBacked = YES;
 
   self.soldOutLabelBackground = [[ASDisplayNode alloc] init];
-  self.soldOutLabelBackground.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(1), ASRelativeDimensionMakeWithPoints(kSoldOutGBHeight)), ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(1), ASRelativeDimensionMakeWithPoints(kSoldOutGBHeight)));
+  self.soldOutLabelBackground.width = ASDimensionMakeWithFraction(1.0);
+  self.soldOutLabelBackground.height = ASDimensionMakeWithPoints(kSoldOutGBHeight);
   self.soldOutLabelBackground.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.9];
   self.soldOutLabelBackground.flexGrow = YES;
   self.soldOutLabelBackground.layerBacked = YES;
@@ -289,7 +290,7 @@ const CGFloat kSoldOutGBHeight = 50.0;
   ASRatioLayoutSpec *imagePlace = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:imageRatio child:self.dealImageView];
   
   self.badge.layoutPosition = CGPointMake(0, constrainedSize.max.height - kFixedLabelsAreaHeight - kBadgeHeight);
-  self.badge.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(0), ASRelativeDimensionMakeWithPoints(kBadgeHeight)), ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(1), ASRelativeDimensionMakeWithPoints(kBadgeHeight)));
+  self.badge.height = ASDimensionMakeWithPoints(kBadgeHeight);
   ASStaticLayoutSpec *badgePosition = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.badge]];
   
   ASOverlayLayoutSpec *badgeOverImage = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:imagePlace overlay:badgePosition];
@@ -300,8 +301,7 @@ const CGFloat kSoldOutGBHeight = 50.0;
 
 - (ASLayoutSpec *)soldOutLabelSpec {
   ASCenterLayoutSpec *centerSoldOutLabel = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionMinimumXY child:self.soldOutLabelFlat];
-  ASStaticLayoutSpec *soldOutBG = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.soldOutLabelBackground]];
-  ASCenterLayoutSpec *centerSoldOut = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:soldOutBG];
+  ASCenterLayoutSpec *centerSoldOut = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:self.soldOutLabelBackground];
   ASBackgroundLayoutSpec *soldOutLabelOverBackground = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:centerSoldOutLabel background:centerSoldOut];
   return soldOutLabelOverBackground;
 }

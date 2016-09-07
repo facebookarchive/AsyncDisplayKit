@@ -77,7 +77,7 @@ static const CGFloat kInnerPadding = 10.0f;
   // kitten image, with a solid background colour serving as placeholder
   _imageNode = [[ASNetworkImageNode alloc] init];
   _imageNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
-  _imageNode.preferredFrameSize = _kittenSize;
+  _imageNode.size = ASRelativeSizeRangeMakeWithExactCGSize(_kittenSize);
   [_imageNode addTarget:self action:@selector(imageTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
   
   CGFloat scale = [UIScreen mainScreen].scale;

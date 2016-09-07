@@ -68,13 +68,11 @@
   _tableView.frame = self.view.bounds;
 }
 
-#pragma mark -
-#pragma mark ASTableView.
+#pragma mark - ASTableView.
 
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  HorizontalScrollCellNode *node = [[HorizontalScrollCellNode alloc] initWithElementSize:CGSizeMake(100, 100)];
-  return node;
+  return [[HorizontalScrollCellNode alloc] initWithElementSize:CGSizeMake(100, 100)];
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section

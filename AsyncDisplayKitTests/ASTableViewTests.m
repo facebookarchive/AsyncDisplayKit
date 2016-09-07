@@ -148,7 +148,7 @@
 
 - (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  return ASSizeRangeMakeExactSize(CGSizeMake(10, 42));
+  return ASSizeRangeMake(CGSizeMake(10, 42));
 }
 
 @end

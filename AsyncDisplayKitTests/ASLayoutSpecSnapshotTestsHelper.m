@@ -39,7 +39,7 @@
   
   node.layoutSpecUnderTest = layoutSpec;
   
-  [node measureWithSizeRange:sizeRange];
+  [node layoutThatFits:sizeRange];
   ASSnapshotVerifyNode(node, identifier);
 }
 
@@ -57,15 +57,6 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   return _layoutSpecUnderTest;
-}
-
-@end
-
-@implementation ASStaticSizeDisplayNode
-
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
-{
-  return _staticSize;
 }
 
 @end

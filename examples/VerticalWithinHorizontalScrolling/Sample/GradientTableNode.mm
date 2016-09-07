@@ -68,7 +68,7 @@
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   RandomCoreGraphicsNode *elementNode = [[RandomCoreGraphicsNode alloc] init];
-  elementNode.preferredFrameSize = _elementSize;
+  [elementNode setSizeWithCGSize:_elementSize];
   elementNode.indexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:_pageNumber];
   return elementNode;
 }
