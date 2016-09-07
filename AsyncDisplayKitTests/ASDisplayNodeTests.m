@@ -1986,4 +1986,22 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertTrue(subnode.hasFetchedData);
 }
 
+// FIXME
+// Supernode is measured, subnode isnt, transition starts, UIKit does a layout pass before measurement finishes
+- (void)DISABLED_testThatItsSafeToAutomeasureANodeMidTransition
+{
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
+  [supernode measure:CGSizeMake(100, 100)];
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.bounds = CGRectMake(0, 0, 50, 50);
+  [supernode addSubnode:node];
+  
+  XCTAssertNil(node.calculatedLayout);
+  XCTAssertTrue(node.layer.needsLayout);
+
+  [supernode transitionLayoutWithAnimation:NO shouldMeasureAsync:YES measurementCompletion:nil];
+
+  XCTAssertNoThrow([node.view layoutIfNeeded]);
+}
+
 @end
