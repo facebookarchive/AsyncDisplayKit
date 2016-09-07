@@ -11,163 +11,88 @@
 #import "ASDimension.h"
 #import "ASAssert.h"
 
-#pragma mark - ASDimension
+ASRelativeDimension const ASRelativeDimensionUnconstrained = {};
 
-ASDimension const ASDimensionAuto = {ASDimensionUnitAuto, 0};
+#pragma mark - ASRelativeDimension
 
-ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
+ASRelativeDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value)
 {
-  // Handle empty string
-  if (dimension.length == 0) {
-    return ASDimensionMake(ASDimensionUnitPoints, 0.0);
+  if (type == ASRelativeDimensionTypePoints) {
+    ASDisplayNodeCAssertPositiveReal(@"Points", value);
+  } else if (type == ASRelativeDimensionTypeFraction) {
+    // TODO: Enable this assertion for 2.0.  Check that there is no use case for using a larger value, e.g. to layout for a clipsToBounds = NO element.
+    // ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASRelativeDimension fraction value (%f) must be between 0 and 1.", value);
   }
-  
-  // Handle points
-  NSUInteger pointsStringLocation = [dimension rangeOfString:@"pt"].location;
-  if (pointsStringLocation != NSNotFound) {
-    // Check if points is at the end and remove it
-    if (pointsStringLocation == (dimension.length-2)) {
-      dimension = [dimension substringToIndex:(dimension.length-2)];
-      return ASDimensionMake(ASDimensionUnitPoints, dimension.floatValue);
-    }
-  }
-  
-  // Handle fraction
-  NSUInteger percentStringLocation = [dimension rangeOfString:@"%"].location;
-  if (percentStringLocation != NSNotFound) {
-    // Check if percent is at the end and remove it
-    if (percentStringLocation == (dimension.length-1)) {
-      dimension = [dimension substringToIndex:(dimension.length-1)];
-      return ASDimensionMake(ASDimensionUnitFraction, dimension.floatValue);
-    }
-  }
-
-  // Assert as parsing went wrong
-  ASDisplayNodeCAssert(NO, @"Parsing dimension failed for: %@", dimension);
-  return ASDimensionAuto;
+  ASRelativeDimension dimension; dimension.type = type; dimension.value = value; return dimension;
 }
 
-NSString *NSStringFromASDimension(ASDimension dimension)
+ASRelativeDimension ASRelativeDimensionMakeWithPoints(CGFloat points)
 {
-  switch (dimension.unit) {
-    case ASDimensionUnitPoints:
+  ASDisplayNodeCAssertPositiveReal(@"Points", points);
+  return ASRelativeDimensionMake(ASRelativeDimensionTypePoints, points);
+}
+
+ASRelativeDimension ASRelativeDimensionMakeWithFraction(CGFloat fraction)
+{
+  // ASDisplayNodeCAssert( 0 <= fraction && fraction <= 1.0, @"ASRelativeDimension fraction value (%f) must be between 0 and 1.", fraction);
+  return ASRelativeDimensionMake(ASRelativeDimensionTypeFraction, fraction);
+}
+
+ASRelativeDimension ASRelativeDimensionCopy(ASRelativeDimension aDimension)
+{
+  return ASRelativeDimensionMake(aDimension.type, aDimension.value);
+}
+
+BOOL ASRelativeDimensionEqualToRelativeDimension(ASRelativeDimension lhs, ASRelativeDimension rhs)
+{
+  return lhs.type == rhs.type && lhs.value == rhs.value;
+}
+
+NSString *NSStringFromASRelativeDimension(ASRelativeDimension dimension)
+{
+  switch (dimension.type) {
+    case ASRelativeDimensionTypePoints:
       return [NSString stringWithFormat:@"%.0fpt", dimension.value];
-    case ASDimensionUnitFraction:
+    case ASRelativeDimensionTypeFraction:
       return [NSString stringWithFormat:@"%.0f%%", dimension.value * 100.0];
-    case ASDimensionUnitAuto:
-      return @"Auto";
   }
 }
 
-
-#pragma mark - NSNumber+ASDimension
-
-@implementation NSNumber (ASDimension)
-
-- (ASDimension)as_pointDimension
+CGFloat ASRelativeDimensionResolve(ASRelativeDimension dimension, CGFloat parent)
 {
-  return ASDimensionMake(ASDimensionUnitPoints, self.floatValue);
+  switch (dimension.type) {
+    case ASRelativeDimensionTypePoints:
+      return dimension.value;
+    case ASRelativeDimensionTypeFraction:
+      return dimension.value * parent;
+  }
 }
-
-- (ASDimension)as_fractionDimension
-{
-  return ASDimensionMake(ASDimensionUnitFraction, self.floatValue);
-}
-
-@end
-
-
-#pragma mark - ASRelativeSize
-
-/**
- * Expresses a size with relative dimensions. Only used for calculations internally in ASDimension.h 
- */
-typedef struct {
-  ASDimension width;
-  ASDimension height;
-} ASRelativeSize;
-
-ASDISPLAYNODE_INLINE ASRelativeSize ASRelativeSizeMake(ASDimension width, ASDimension height)
-{
-  ASRelativeSize size;
-  size.width = width;
-  size.height = height;
-  return size;
-}
-
-// ** Resolve this relative size relative to a parent size. */
-ASDISPLAYNODE_INLINE CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize, CGSize autoSize)
-{
-  return CGSizeMake(ASDimensionResolve(relativeSize.width, parentSize.width, autoSize.width),
-                    ASDimensionResolve(relativeSize.height, parentSize.height, autoSize.height));
-}
-
-// ** Returns a string formatted to contain the data from an ASRelativeSize. */
-ASDISPLAYNODE_INLINE NSString *NSStringFromASRelativeSize(ASRelativeSize size)
-{
-  return [NSString stringWithFormat:@"{%@, %@}",
-          NSStringFromASDimension(size.width),
-          NSStringFromASDimension(size.height)];
-}
-
-
-#pragma mark - ASLayoutableSize
-
-NSString *NSStringFromASLayoutableSize(ASLayoutableSize size)
-{
-  return [NSString stringWithFormat:
-          @"<ASLayoutableSize: exact=%@, min=%@, max=%@>",
-          NSStringFromASRelativeSize(ASRelativeSizeMake(size.width, size.height)),
-          NSStringFromASRelativeSize(ASRelativeSizeMake(size.minWidth, size.minHeight)),
-          NSStringFromASRelativeSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight))];
-}
-
-ASDISPLAYNODE_INLINE void ASLayoutableSizeConstrain(CGFloat minVal, CGFloat exactVal, CGFloat maxVal, CGFloat *outMin, CGFloat *outMax)
-{
-    NSCAssert(!isnan(minVal), @"minVal must not be NaN");
-    NSCAssert(!isnan(maxVal), @"maxVal must not be NaN");
-    // Avoid use of min/max primitives since they're harder to reason
-    // about in the presence of NaN (in exactVal)
-    // Follow CSS: min overrides max overrides exact.
-
-    // Begin with the min/max range
-    *outMin = minVal;
-    *outMax = maxVal;
-    if (maxVal <= minVal) {
-        // min overrides max and exactVal is irrelevant
-        *outMax = minVal;
-        return;
-    }
-    if (isnan(exactVal)) {
-        // no exact value, so leave as a min/max range
-        return;
-    }
-    if (exactVal > maxVal) {
-        // clip to max value
-        *outMin = maxVal;
-    } else if (exactVal < minVal) {
-        // clip to min value
-        *outMax = minVal;
-    } else {
-        // use exact value
-        *outMin = *outMax = exactVal;
-    }
-}
-
-ASSizeRange ASLayoutableSizeResolveAutoSize(ASLayoutableSize size, const CGSize parentSize, ASSizeRange autoASSizeRange)
-{
-  CGSize resolvedExact = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.width, size.height), parentSize, {NAN, NAN});
-  CGSize resolvedMin = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.minWidth, size.minHeight), parentSize, autoASSizeRange.min);
-  CGSize resolvedMax = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight), parentSize, autoASSizeRange.max);
-  
-  CGSize rangeMin, rangeMax;
-  ASLayoutableSizeConstrain(resolvedMin.width, resolvedExact.width, resolvedMax.width, &rangeMin.width, &rangeMax.width);
-  ASLayoutableSizeConstrain(resolvedMin.height, resolvedExact.height, resolvedMax.height, &rangeMin.height, &rangeMax.height);
-  return {rangeMin, rangeMax};
-}
-
 
 #pragma mark - ASSizeRange
+
+ASSizeRange ASSizeRangeMake(CGSize min, CGSize max)
+{
+  ASDisplayNodeCAssertPositiveReal(@"Range min width", min.width);
+  ASDisplayNodeCAssertPositiveReal(@"Range min height", min.height);
+  ASDisplayNodeCAssertInfOrPositiveReal(@"Range max width", max.width);
+  ASDisplayNodeCAssertInfOrPositiveReal(@"Range max height", max.height);
+  ASDisplayNodeCAssert(min.width <= max.width,
+                       @"Range min width (%f) must not be larger than max width (%f).", min.width, max.width);
+  ASDisplayNodeCAssert(min.height <= max.height,
+                       @"Range min height (%f) must not be larger than max height (%f).", min.height, max.height);
+  ASSizeRange sizeRange; sizeRange.min = min; sizeRange.max = max; return sizeRange;
+}
+
+ASSizeRange ASSizeRangeMakeExactSize(CGSize size)
+{
+  return ASSizeRangeMake(size, size);
+}
+
+CGSize ASSizeRangeClamp(ASSizeRange sizeRange, CGSize size)
+{
+  return CGSizeMake(MAX(sizeRange.min.width, MIN(sizeRange.max.width, size.width)),
+                    MAX(sizeRange.min.height, MIN(sizeRange.max.height, size.height)));
+}
 
 struct _Range {
   CGFloat min;
@@ -201,17 +126,14 @@ ASSizeRange ASSizeRangeIntersect(ASSizeRange sizeRange, ASSizeRange otherSizeRan
   return {{w.min, h.min}, {w.max, h.max}};
 }
 
-NSString *NSStringFromASSizeRange(ASSizeRange sizeRange)
+BOOL ASSizeRangeEqualToSizeRange(ASSizeRange lhs, ASSizeRange rhs)
+{
+  return CGSizeEqualToSize(lhs.min, rhs.min) && CGSizeEqualToSize(lhs.max, rhs.max);
+}
+
+NSString * NSStringFromASSizeRange(ASSizeRange sizeRange)
 {
   return [NSString stringWithFormat:@"<ASSizeRange: min=%@, max=%@>",
           NSStringFromCGSize(sizeRange.min),
           NSStringFromCGSize(sizeRange.max)];
-}
-
-
-#pragma mark - Deprecated
-
-ASSizeRange ASSizeRangeMakeExactSize(CGSize size)
-{
-  return ASSizeRangeMake(size);
 }

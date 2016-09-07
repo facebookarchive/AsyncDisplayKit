@@ -99,7 +99,7 @@
     if (_sizingTextContainer == nil) {
         // make this text container unbounded in height so that the layout manager will compute the total
         // number of lines and not stop counting when height runs out.
-        _sizingTextContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(_constrainedSize.width, CGFLOAT_MAX)];
+        _sizingTextContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(_constrainedSize.width, FLT_MAX)];
         _sizingTextContainer.lineFragmentPadding = 0;
         
         // use 0 regardless of what is in the attributes so that we get an accurate line count
@@ -156,7 +156,7 @@
       
       NSRange longestWordRange = [str rangeOfString:longestWordNeedingResize];
       NSMutableAttributedString *attrString = [textStorage attributedSubstringFromRange:longestWordRange].mutableCopy;
-      CGSize longestWordSize = [attrString boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
+      CGSize longestWordSize = [attrString boundingRectWithSize:CGSizeMake(FLT_MAX, FLT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
       
       // check if the longest word is larger than our constrained width
       if (longestWordSize.width > _constrainedSize.width) {

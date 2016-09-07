@@ -42,10 +42,8 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    // 100% of container
-    _node.width = ASDimensionMakeWithFraction(1.0);
-    _node.height = ASDimensionMakeWithFraction(1.0);
-    return [ASWrapperLayoutSpec wrapperWithLayoutable:_node];
+    _node.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
+    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_node]];
 }
 
 

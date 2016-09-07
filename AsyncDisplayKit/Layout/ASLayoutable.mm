@@ -16,9 +16,6 @@
 
 #import <map>
 
-CGFloat const ASLayoutableParentDimensionUndefined = NAN;
-CGSize const ASLayoutableParentSizeUndefined = {ASLayoutableParentDimensionUndefined, ASLayoutableParentDimensionUndefined};
-
 int32_t const ASLayoutableContextInvalidTransitionID = 0;
 int32_t const ASLayoutableContextDefaultTransitionID = ASLayoutableContextInvalidTransitionID + 1;
 

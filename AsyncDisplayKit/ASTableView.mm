@@ -1130,7 +1130,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
                                       CGSizeMake(_nodesConstrainedWidth, delegateConstrainedSize.max.height));
   } else {
     constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, 0),
-                                      CGSizeMake(_nodesConstrainedWidth, CGFLOAT_MAX));
+                                      CGSizeMake(_nodesConstrainedWidth, FLT_MAX));
   }
   return constrainedSize;
 }
@@ -1186,7 +1186,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     // Also, in many cases, some nodes may not need to be re-measured at all, such as when user enters and then immediately leaves editing mode.
     // To avoid premature optimization and making such assumption, as well as to keep ASTableView simple, re-measurement is strictly done on main.
     [self beginUpdates];
-    const CGSize calculatedSize = [node layoutThatFits:constrainedSize].size;
+    CGSize calculatedSize = [[node measureWithSizeRange:constrainedSize] size];
     node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
     [self endUpdates];
   }

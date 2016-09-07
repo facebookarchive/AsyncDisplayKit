@@ -44,10 +44,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * @abstract Specifies the initial size in the stack dimension for this object.
- * Default to ASDimensionAuto
+ * Default to ASRelativeDimensionUnconstrained.
  * Used when attached to a stack layout.
  */
-@property (nonatomic, readwrite) ASDimension flexBasis;
+@property (nonatomic, readwrite) ASRelativeDimension flexBasis;
 
 /**
  * @abstract Orientation of the object along cross axis, overriding alignItems

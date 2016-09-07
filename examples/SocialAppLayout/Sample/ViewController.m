@@ -55,7 +55,7 @@
 {
     [super viewDidLoad];
     
-    self.tableView = [[ASTableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
+    self.tableView = [[ASTableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain asyncDataFetching:YES];
     self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone; // SocialAppNode has its own separator
     self.tableView.asyncDataSource = self;

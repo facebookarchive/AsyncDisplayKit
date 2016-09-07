@@ -67,15 +67,8 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
  Inset will compute a new constrained size for it's child after applying insets and re-positioning
  the child to respect the inset.
  */
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASLayoutableSize)size
-                 relativeToParentSize:(CGSize)parentSize
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  if (self.child == nil) {
-    ASDisplayNodeAssert(NO, @"Inset spec measured without a child. The spec will do nothing.");
-    return [ASLayout layoutWithLayoutable:self size:CGSizeZero];
-  }
-  
   const CGFloat insetsX = (finiteOrZero(_insets.left) + finiteOrZero(_insets.right));
   const CGFloat insetsY = (finiteOrZero(_insets.top) + finiteOrZero(_insets.bottom));
 
@@ -95,12 +88,14 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
     }
   };
   
-  const CGSize insetParentSize = {
-    MAX(0, parentSize.width - insetsX),
-    MAX(0, parentSize.height - insetsY)
-  };
+  if (self.child == nil) {
+    ASDisplayNodeAssert(NO, @"Inset spec measured without a child. The spec will do nothing.");
+    return [ASLayout layoutWithLayoutableObject:self
+                           constrainedSizeRange:constrainedSize
+                                           size:CGSizeZero];
+  }
   
-  ASLayout *sublayout = [self.child layoutThatFits:insetConstrainedSize parentSize:insetParentSize];
+  ASLayout *sublayout = [self.child measureWithSizeRange:insetConstrainedSize];
 
   const CGSize computedSize = ASSizeRangeClamp(constrainedSize, {
     finite(sublayout.size.width + _insets.left + _insets.right, constrainedSize.max.width),
@@ -118,7 +113,10 @@ static CGFloat centerInset(CGFloat outer, CGFloat inner)
   
   sublayout.position = CGPointMake(x, y);
   
-  return [ASLayout layoutWithLayoutable:self size:computedSize sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:computedSize
+                                   sublayouts:@[sublayout]];
 }
 
 @end

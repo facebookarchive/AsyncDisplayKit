@@ -47,21 +47,21 @@ static NSUInteger const kOverlayChildIndex = 1;
 /**
  First layout the contents, then fit the overlay on top of it.
  */
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASLayoutableSize)size
-                 relativeToParentSize:(CGSize)parentSize
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-  ASLayout *contentsLayout = [self.child layoutThatFits:constrainedSize parentSize:parentSize];
+  ASLayout *contentsLayout = [self.child measureWithSizeRange:constrainedSize];
   contentsLayout.position = CGPointZero;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithObject:contentsLayout];
   if (self.overlay) {
-    ASLayout *overlayLayout = [self.overlay layoutThatFits:ASSizeRangeMake(contentsLayout.size)
-                                                parentSize:contentsLayout.size];
+    ASLayout *overlayLayout = [self.overlay measureWithSizeRange:{contentsLayout.size, contentsLayout.size}];
     overlayLayout.position = CGPointZero;
     [sublayouts addObject:overlayLayout];
   }
   
-  return [ASLayout layoutWithLayoutable:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:contentsLayout.size
+                                   sublayouts:sublayouts];
 }
 
 @end

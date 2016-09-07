@@ -23,7 +23,9 @@
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  return [ASLayout layoutWithLayoutable:self size:constrainedSize.max];
+  return [ASLayout layoutWithLayoutableObject:self 
+                         constrainedSizeRange:constrainedSize
+                                         size:constrainedSize.max];
 }
 
 - (void)fetchData

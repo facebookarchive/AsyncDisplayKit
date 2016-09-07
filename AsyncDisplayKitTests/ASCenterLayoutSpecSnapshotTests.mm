@@ -45,16 +45,10 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
                    sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
-  ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor], CGSizeMake(70, 100));
+  ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
+  foregroundNode.staticSize = {70, 100};
 
-  ASLayoutSpec *layoutSpec =
-  [ASBackgroundLayoutSpec
-   backgroundLayoutSpecWithChild:
-   [ASCenterLayoutSpec
-    centerLayoutSpecWithCenteringOptions:options
-    sizingOptions:sizingOptions
-    child:foregroundNode]
-   background:backgroundNode];
+  ASLayoutSpec *layoutSpec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:[ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:options sizingOptions:sizingOptions child:foregroundNode]background:backgroundNode];
 
   [self testLayoutSpec:layoutSpec
              sizeRange:kSize
@@ -89,23 +83,11 @@ static NSString *suffixForCenteringOptions(ASCenterLayoutSpecCenteringOptions ce
 - (void)testMinimumSizeRangeIsGivenToChildWhenNotCentering
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
-  ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor], CGSizeMake(10, 10));
+  ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
+  foregroundNode.staticSize = {10, 10};
   foregroundNode.flexGrow = YES;
   
-  ASCenterLayoutSpec *layoutSpec =
-  [ASCenterLayoutSpec
-   centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringNone
-   sizingOptions:{}
-   child:
-   [ASBackgroundLayoutSpec
-    backgroundLayoutSpecWithChild:
-    [ASStackLayoutSpec
-     stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
-     spacing:0
-     justifyContent:ASStackLayoutJustifyContentStart
-     alignItems:ASStackLayoutAlignItemsStart
-     children:@[foregroundNode]]
-    background:backgroundNode]];
+  ASCenterLayoutSpec *layoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringNone sizingOptions:{} child:[ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:[ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical spacing:0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:@[foregroundNode]] background:backgroundNode]];
 
   [self testLayoutSpec:layoutSpec sizeRange:kSize subnodes:@[backgroundNode, foregroundNode] identifier:nil];
 }

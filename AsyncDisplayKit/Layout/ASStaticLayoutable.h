@@ -8,6 +8,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <AsyncDisplayKit/ASRelativeSize.h>
+
 NS_ASSUME_NONNULL_BEGIN
 
 /**
@@ -16,8 +18,11 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ASStaticLayoutable
 
 /**
- * @abstract The position of this object within its parent spec.
+ If specified, the child's size is restricted according to this size. Fractions are resolved relative to the static layout spec.
  */
+@property (nonatomic, assign) ASRelativeSizeRange sizeRange;
+
+/** The position of this object within its parent spec. */
 @property (nonatomic, assign) CGPoint layoutPosition;
 
 @end

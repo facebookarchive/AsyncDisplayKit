@@ -240,17 +240,10 @@ static NSString * const kRate = @"rate";
   ASDN::MutexLocker l(__instanceLock__);
   CGSize calculatedSize = constrainedSize;
   
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   // if a preferredFrameSize is set, call the superclass to return that instead of using the image size.
-  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
-#if DEBUG
-    NSLog(@"Using -[ASDisplayNde preferredFrameSize] is deprecated.");
-#endif
+  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO)
     calculatedSize = self.preferredFrameSize;
-  }
-#pragma clang diagnostic pop
-  
+ 
   // Prevent crashes through if infinite width or height
   if (isinf(calculatedSize.width) || isinf(calculatedSize.height)) {
     ASDisplayNodeAssert(NO, @"Infinite width or height in ASVideoNode");
@@ -258,9 +251,8 @@ static NSString * const kRate = @"rate";
   }
   
   if (_playerNode) {
-    _playerNode.width = ASDimensionMake(calculatedSize.width);
-    _playerNode.height = ASDimensionMake(calculatedSize.height);
-    [_playerNode layoutThatFits:ASSizeRangeMake(CGSizeZero, calculatedSize)];
+    _playerNode.preferredFrameSize = calculatedSize;
+    [_playerNode measure:calculatedSize];
   }
   
   return calculatedSize;

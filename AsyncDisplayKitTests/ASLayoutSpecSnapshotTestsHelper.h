@@ -31,16 +31,17 @@
             identifier:(NSString *)identifier;
 @end
 
-__attribute__((overloadable)) static inline ASDisplayNode *ASDisplayNodeWithBackgroundColor(UIColor *backgroundColor, CGSize size) {
-  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+@interface ASStaticSizeDisplayNode : ASDisplayNode
+
+@property (nonatomic) CGSize staticSize;
+
+@end
+
+static inline ASStaticSizeDisplayNode *ASDisplayNodeWithBackgroundColor(UIColor *backgroundColor)
+{
+  ASStaticSizeDisplayNode *node = [[ASStaticSizeDisplayNode alloc] init];
   node.layerBacked = YES;
   node.backgroundColor = backgroundColor;
-  node.width = ASDimensionMakeWithPoints(size.width);
-  node.height = ASDimensionMakeWithPoints(size.height);
+  node.staticSize = CGSizeZero;
   return node;
-}
-
-__attribute__((overloadable)) static inline ASDisplayNode *ASDisplayNodeWithBackgroundColor(UIColor *backgroundColor)
-{
-  return ASDisplayNodeWithBackgroundColor(backgroundColor, CGSizeZero);
 }

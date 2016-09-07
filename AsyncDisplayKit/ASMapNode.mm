@@ -392,14 +392,21 @@
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  // FIXME: Need a better way to allow maps to take up the right amount of space in a layout (sizeRange, etc)
-  // These fallbacks protect against inheriting a constrainedSize that contains a CGFLOAT_MAX value.
-  if (!ASIsCGSizeValidForLayout(constrainedSize)) {
-    //ASDisplayNodeAssert(NO, @"Invalid width or height in ASMapNode");
-    constrainedSize = CGSizeZero;
+  CGSize size = self.preferredFrameSize;
+  if (CGSizeEqualToSize(size, CGSizeZero)) {
+    size = constrainedSize;
+    
+    // FIXME: Need a better way to allow maps to take up the right amount of space in a layout (sizeRange, etc)
+    // These fallbacks protect against inheriting a constrainedSize that contains a CGFLOAT_MAX value.
+    if (!isValidForLayout(size.width)) {
+      size.width = 100.0;
+    }
+    if (!isValidForLayout(size.height)) {
+      size.height = 100.0;
+    }
   }
-  [self setSnapshotSizeWithReloadIfNeeded:constrainedSize];
-  return constrainedSize;
+  [self setSnapshotSizeWithReloadIfNeeded:size];
+  return size;
 }
 
 - (void)calculatedLayoutDidChange

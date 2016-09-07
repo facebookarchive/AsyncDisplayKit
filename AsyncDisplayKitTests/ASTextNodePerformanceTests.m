@@ -9,7 +9,6 @@
 #import <XCTest/XCTest.h>
 #import "ASPerformanceTestContext.h"
 #import <AsyncDisplayKit/ASTextNode.h>
-#import <AsyncDisplayKit/ASLayout.h>
 #import "ASinternalHelpers.h"
 #import "ASXCTExtensions.h"
 #include "CGRect+ASConvenience.h"
@@ -72,7 +71,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
     NSAttributedString *text = data[i % data.count];
     startMeasuring();
     node.attributedText = text;
-    asdkSize = [node layoutThatFits:ASSizeRangeMake(CGSizeZero, maxSize)].size;
+    asdkSize = [node measure:maxSize];
     stopMeasuring();
   }];
   ctx.results[kTestCaseASDK].userInfo[@"size"] = NSStringFromCGSize(asdkSize);
@@ -102,7 +101,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
     ASTextNode *node = [[ASTextNode alloc] init];
     startMeasuring();
     node.attributedText = text;
-    asdkSize = [node layoutThatFits:ASSizeRangeMake(CGSizeZero, maxSize)].size;
+    asdkSize = [node measure:maxSize];
     stopMeasuring();
   }];
   ctx.results[kTestCaseASDK].userInfo[@"size"] = NSStringFromCGSize(asdkSize);
@@ -132,7 +131,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
     ASTextNode *node = [[ASTextNode alloc] init];
     startMeasuring();
     node.attributedText = text;
-    asdkSize = [node layoutThatFits:ASSizeRangeMake(CGSizeZero, maxSize)].size;
+    asdkSize = [node measure:maxSize];
     stopMeasuring();
   }];
   testCtx.results[kTestCaseASDK].userInfo[@"size"] = NSStringFromCGSize(asdkSize);
