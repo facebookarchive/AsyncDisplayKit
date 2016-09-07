@@ -1351,6 +1351,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     hasDirtyLayout = [self _hasDirtyLayout];
     calculatedLayoutSize = _calculatedLayout.size;
   }
+    
+  // Check if it's a subnode in a layout transition. In this case no measurement is needed as it's part of
+  // the layout transition
+  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
+    ASLayoutableContext context =  ASLayoutableGetCurrentContext();
+    if (ASLayoutableContextIsNull(context) || _pendingTransitionID != context.transitionID) {
+      return;
+    }
+  }
   
   // If no measure pass happened or the bounds changed between layout passes we manually trigger a measurement pass
   // for the node using a size range equal to whatever bounds were provided to the node

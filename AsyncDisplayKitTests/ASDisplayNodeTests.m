@@ -1988,7 +1988,7 @@ static bool stringContainsPointer(NSString *description, id p) {
 
 // FIXME
 // Supernode is measured, subnode isnt, transition starts, UIKit does a layout pass before measurement finishes
-- (void)DISABLED_testThatItsSafeToAutomeasureANodeMidTransition
+- (void)testThatItsSafeToAutomeasureANodeMidTransition
 {
   ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
   [supernode measure:CGSizeMake(100, 100)];
