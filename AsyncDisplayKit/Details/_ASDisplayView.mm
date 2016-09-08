@@ -15,6 +15,7 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASObjectDescriptionHelpers.h"
 
 @interface _ASDisplayView ()
 @property (nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
@@ -44,11 +45,32 @@
 
 #pragma mark - NSObject Overrides
 
+// e.g. <MYPhotoNodeView: 0xFFFFFF; node = <MYPhotoNode: 0xFFFFFE>; frame = ...>
 - (NSString *)description
 {
-  // The standard UIView description is useless for debugging because all ASDisplayNode subclasses have _ASDisplayView-type views.
-  // This allows us to at least see the name of the node subclass and get its pointer directly from [[UIWindow keyWindow] recursiveDescription].
-  return [NSString stringWithFormat:@"<%@, view = %@>", _node, [super description]];
+  NSMutableString *description = [[super description] mutableCopy];
+
+  ASDisplayNode *node = _node;
+
+  if (node != nil) {
+    NSString *classString = [NSString stringWithFormat:@"%@-", [node class]];
+    [description replaceOccurrencesOfString:@"_ASDisplay" withString:classString options:kNilOptions range:NSMakeRange(0, description.length)];
+    NSUInteger semicolon = [description rangeOfString:@";"].location;
+    if (semicolon != NSNotFound) {
+      NSString *nodeString = [NSString stringWithFormat:@"; node = %@", node];
+      [description insertString:nodeString atIndex:semicolon];
+    }
+    // Remove layer description – it never contains valuable info and it duplicates the node info. Noisy.
+    NSRange layerDescriptionRange = [description rangeOfString:@"; layer = <.*>" options:NSRegularExpressionSearch];
+    if (layerDescriptionRange.location != NSNotFound) {
+      [description replaceCharactersInRange:layerDescriptionRange withString:@""];
+      // Our regex will grab the closing angle bracket and I'm not clever enough to come up with a better one, so re-add it if needed.
+      if ([description hasSuffix:@">"] == NO) {
+        [description appendString:@">"];
+      }
+    }
+  }
+  return description;
 }
 
 #pragma mark - UIView Overrides
