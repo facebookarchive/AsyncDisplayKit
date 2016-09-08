@@ -167,8 +167,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
   // performance measurement
   ASDisplayNodePerformanceMeasurementOptions _measurementOptions;
-  NSMutableArray<NSNumber *> *_layoutSpecTimes;
-  NSMutableArray<NSNumber *> *_layoutGenerationTimes;
+  NSTimeInterval _layoutSpecTotalTime;
+  int _layoutSpecNumberOfPasses;
+  NSTimeInterval _layoutGenerationTotalTime;
+  int _layoutGenerationNumberOfPasses;
 
 #if TIME_DISPLAYNODE_OPS
 @public

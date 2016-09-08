@@ -27,8 +27,13 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodePerformanceMeasurementOptions) {
   ASDisplayNodePerformanceMeasurementOptionsLayoutGeneration = 1 << 1
 };
 
-extern NSString *const ASDisplayNodeLayoutSpecTimes;
-extern NSString *const ASDisplayNodeLayoutGenerationTimes;
+/**
+ * Keys to retrieve performance entries from the performance dictionary.
+ */
+extern NSString *const ASDisplayNodeLayoutSpecTotalTime;
+extern NSString *const ASDisplayNodeLayoutSpecNumberOfPasses;
+extern NSString *const ASDisplayNodeLayoutGenerationTotalTime;
+extern NSString *const ASDisplayNodeLayoutGenerationNumberOfPasses;
 
 @interface ASDisplayNode (Beta)
 

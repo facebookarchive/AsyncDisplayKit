@@ -37,8 +37,10 @@
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
 NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp";
-NSString * const ASDisplayNodeLayoutSpecTimes = @"ASDisplayNodeLayoutSpecTimes";
-NSString * const ASDisplayNodeLayoutGenerationTimes = @"ASDisplayNodeLayoutGenerationTimes";
+NSString * const ASDisplayNodeLayoutSpecTotalTime = @"ASDisplayNodeLayoutSpecTotalTime";
+NSString * const ASDisplayNodeLayoutSpecNumberOfPasses = @"ASDisplayNodeLayoutSpecNumberOfPasses";
+NSString * const ASDisplayNodeLayoutGenerationTotalTime = @"ASDisplayNodeLayoutGenerationTotalTime";
+NSString * const ASDisplayNodeLayoutGenerationNumberOfPasses = @"ASDisplayNodeLayoutGenerationNumberOfPasses";
 
 
 // Forward declare CALayerDelegate protocol as the iOS 10 SDK moves CALayerDelegate from a formal delegate to a protocol.
@@ -311,9 +313,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _size = ASLayoutableSizeMake();
   _preferredFrameSize = CGSizeZero;
   _environmentState = ASEnvironmentStateMakeDefault();
-  
-  _layoutSpecTimes = [[NSMutableArray alloc] init];
-  _layoutGenerationTimes = [[NSMutableArray alloc] init];
 
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
   
@@ -1176,12 +1175,14 @@ ASLayoutableSizeHelperForwarding
 - (NSDictionary *)performanceMetrics
 {
   ASDN::MutexLocker l(__instanceLock__);
-  NSMutableDictionary *requestedMetrics = [NSMutableDictionary dictionaryWithCapacity:2];
+  NSMutableDictionary *requestedMetrics = [NSMutableDictionary dictionaryWithCapacity:4];
   if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutSpec) {
-    requestedMetrics[ASDisplayNodeLayoutSpecTimes] = _layoutSpecTimes;
+    requestedMetrics[ASDisplayNodeLayoutSpecTotalTime] = @(_layoutSpecTotalTime);
+    requestedMetrics[ASDisplayNodeLayoutSpecNumberOfPasses] = @(_layoutSpecNumberOfPasses);
   }
   if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutGeneration) {
-    requestedMetrics[ASDisplayNodeLayoutGenerationTimes] = _layoutGenerationTimes;
+    requestedMetrics[ASDisplayNodeLayoutGenerationTotalTime] = @(_layoutGenerationTotalTime);
+    requestedMetrics[ASDisplayNodeLayoutGenerationNumberOfPasses] = @(_layoutGenerationNumberOfPasses);
   }
   return requestedMetrics;
 }
@@ -2376,7 +2377,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     ASLayoutSpec *layoutSpec = nil;
     // optional performance measurement for cell nodes
     if (self.measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutSpec) {
-      ASDN::ScopeTimerDataPoint t(*_layoutSpecTimes);
+      ASDN::ScopeTimerDataPoint t(_layoutSpecTotalTime);
+      _layoutSpecNumberOfPasses++;
       layoutSpec = [self layoutSpecThatFits:constrainedSize];
     } else {
       layoutSpec = [self layoutSpecThatFits:constrainedSize];
@@ -2393,7 +2395,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     ASLayout *layout = nil;
     // optional performance measurement for cell nodes
     if (self.measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutGeneration) {
-      ASDN::ScopeTimerDataPoint t(*_layoutGenerationTimes);
+      ASDN::ScopeTimerDataPoint t(_layoutGenerationTotalTime);
+      _layoutGenerationNumberOfPasses++;
       layout = [layoutSpec layoutThatFits:constrainedSize];
     } else {
       layout = [layoutSpec layoutThatFits:constrainedSize];
