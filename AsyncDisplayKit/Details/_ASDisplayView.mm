@@ -61,14 +61,14 @@
       [description insertString:nodeString atIndex:semicolon];
     }
     // Remove layer description – it never contains valuable info and it duplicates the node info. Noisy.
-	  NSRange layerDescriptionRange = [description rangeOfString:@"; layer = <.*>" options:NSRegularExpressionSearch];
-	  if (layerDescriptionRange.location != NSNotFound) {
-		  [description replaceCharactersInRange:layerDescriptionRange withString:@""];
+    NSRange layerDescriptionRange = [description rangeOfString:@"; layer = <.*>" options:NSRegularExpressionSearch];
+    if (layerDescriptionRange.location != NSNotFound) {
+      [description replaceCharactersInRange:layerDescriptionRange withString:@""];
       // Our regex will grab the closing angle bracket and I'm not clever enough to come up with a better one, so re-add it if needed.
-		  if ([description hasSuffix:@">"] == NO) {
-			  [description appendString:@">"];
-		  }
-	  }
+      if ([description hasSuffix:@">"] == NO) {
+        [description appendString:@">"];
+      }
+    }
   }
   return description;
 }

@@ -281,8 +281,8 @@
 
 - (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
 {
-	NSMutableArray *result = [super propertiesForDebugDescription];
-	
+  NSMutableArray *result = [super propertiesForDebugDescription];
+  
   UIScrollView *scrollView = self.scrollView;
   
   ASDisplayNode *owningNode = scrollView.asyncdisplaykit_node;
@@ -290,7 +290,7 @@
     [result addObject:@{ @"collectionNode" : ASObjectDescriptionMakeTiny(owningNode) }];
   } else if ([owningNode isKindOfClass:[ASTableNode class]]) {
     [result addObject:@{ @"tableNode" : ASObjectDescriptionMakeTiny(owningNode) }];
-	
+  
   } else if ([scrollView isKindOfClass:[ASCollectionView class]]) {
     NSIndexPath *ip = [(ASCollectionView *)scrollView indexPathForNode:self];
     if (ip != nil) {

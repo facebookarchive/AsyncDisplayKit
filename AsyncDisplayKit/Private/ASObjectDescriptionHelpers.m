@@ -24,7 +24,7 @@ NSString *ASGetDescriptionValueString(id object) {
       return NSStringFromCGPoint(value.CGPointValue);
     }
   } else if ([object isKindOfClass:[NSIndexSet class]]) {
-	  return [object as_smallDescription];
+    return [object as_smallDescription];
   } else if ([object isKindOfClass:[NSIndexPath class]]) {
     // index paths like (0, 7)
     NSIndexPath *indexPath = object;
