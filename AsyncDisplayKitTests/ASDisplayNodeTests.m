@@ -85,7 +85,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @end
 
 @interface ASTestDisplayNode : ASDisplayNode
-@property (nonatomic, copy) void (^willDeallocBlock)(ASTestDisplayNode *node);
+@property (nonatomic, copy) void (^willDeallocBlock)(__unsafe_unretained ASTestDisplayNode *node);
 @property (nonatomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
 @property (nonatomic) BOOL hasFetchedData;
 
@@ -1110,7 +1110,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [self executeOffThread:^{
     @autoreleasepool {
       ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
-      node.willDeallocBlock = ^(ASDisplayNode *n){
+      node.willDeallocBlock = ^(__unsafe_unretained ASDisplayNode *n){
         XCTAssertTrue([NSThread isMainThread], @"unexpected node dealloc %@ %@", n, [NSThread currentThread]);
         didDealloc = YES;
       };
