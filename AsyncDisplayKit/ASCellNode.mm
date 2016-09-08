@@ -338,8 +338,8 @@ static const CGFloat kASTextCellNodeDefaultVerticalPadding = 11.0f;
   if (self) {
     _textInsets = textInsets;
     _textAttributes = [textAttributes copy];
-    self.automaticallyManagesSubnodes = YES;
     _textNode = [[ASTextNode alloc] init];
+    [self addSubnode:_textNode];
   }
   return self;
 }
