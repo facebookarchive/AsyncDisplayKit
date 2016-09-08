@@ -215,6 +215,11 @@ static inline NSString * descriptionIndents(NSUInteger indents)
   return result;
 }
 
+- (NSString *)description
+{
+  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
+}
+
 - (NSString *)recursiveDescription
 {
   return [self _recursiveDescriptionForLayout:self level:0];
