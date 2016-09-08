@@ -118,7 +118,7 @@
   
   ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   headerSubStack.flexShrink         = YES;
-  if (_photoLocationLabel.attributedString) {
+  if (_photoLocationLabel.attributedText) {
     [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
   } else {
     [headerSubStack setChildren:@[_userNameLabel]];
