@@ -15,6 +15,7 @@
 #import "ASLayoutSpecUtilities.h"
 
 #import <queue>
+#import "ASObjectDescriptionHelpers.h"
 
 CGPoint const CGPointNull = {NAN, NAN};
 
@@ -38,7 +39,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
   return description;
 }
 
-@interface ASLayout ()
+@interface ASLayout () <ASDescriptionProvider>
 
 /**
  * A boolean describing if the current layout has been flattened.
@@ -229,10 +230,18 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
 #pragma mark - Description
 
+- (NSMutableArray <NSDictionary *> *)propertiesForDescription
+{
+  NSMutableArray *result = [NSMutableArray array];
+  [result addObject:@{ @"layoutable" : (self.layoutableObject ?: (id)kCFNull) }];
+  [result addObject:@{ @"position" : [NSValue valueWithCGPoint:self.position] }];
+  [result addObject:@{ @"size" : [NSValue valueWithCGSize:self.size] }];
+  return result;
+}
+
 - (NSString *)description
 {
-    return [NSString stringWithFormat:@"<<ASLayout: %p>, layoutable = %@, position = %@; size = %@; constrainedSizeRange = %@>",
-            self, self.layoutableObject, NSStringFromCGPoint(self.position), NSStringFromCGSize(self.size), NSStringFromASSizeRange(self.constrainedSizeRange)];
+  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
 }
 
 - (NSString *)recursiveDescription

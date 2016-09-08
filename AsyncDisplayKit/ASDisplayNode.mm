@@ -31,7 +31,7 @@
 #import "ASLayout.h"
 #import "ASLayoutSpec.h"
 #import "ASLayoutValidation.h"
-#import "ASCellNode.h"
+#import "ASCellNode+Internal.h"
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
@@ -3119,6 +3119,93 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   return self;
 }
 
+#pragma mark Debugging (Private)
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDescription
+{
+  NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+  if (self.name.length > 0) {
+    [result addObject:@{ @"name" : ASStringWithQuotesIfMultiword(self.name) }];
+  }
+  return result;
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
+{
+  NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+  
+  if (self.name.length > 0) {
+    [result addObject:@{ @"name" : ASStringWithQuotesIfMultiword(self.name)}];
+  }
+  
+  CGRect windowFrame = [self _frameInWindow];
+  if (CGRectIsNull(windowFrame) == NO) {
+    [result addObject:@{ @"frameInWindow" : [NSValue valueWithCGRect:windowFrame] }];
+  }
+  
+  if (_view != nil) {
+    [result addObject:@{ @"frame" : [NSValue valueWithCGRect:_view.frame] }];
+  } else if (_layer != nil) {
+    [result addObject:@{ @"frame" : [NSValue valueWithCGRect:_layer.frame] }];
+  } else {
+    [result addObject:@{ @"frame" : [NSValue valueWithCGRect:self.frame] }];
+  }
+  
+  // Check supernode so that if we are cell node we don't find self.
+  ASCellNode *cellNode = ASDisplayNodeFindFirstSupernodeOfClass(self.supernode, [ASCellNode class]);
+  if (cellNode != nil) {
+    [result addObject:@{ @"cellNode" : ASObjectDescriptionMakeTiny(cellNode) }];
+  }
+  
+  [result addObject:@{ @"interfaceState" : NSStringFromASInterfaceState(self.interfaceState)} ];
+  
+  if (_view != nil) {
+    [result addObject:@{ @"view" : ASObjectDescriptionMakeTiny(_view) }];
+  } else if (_layer != nil) {
+    [result addObject:@{ @"layer" : ASObjectDescriptionMakeTiny(_layer) }];
+  } else if (_viewClass != nil) {
+    [result addObject:@{ @"viewClass" : _viewClass }];
+  } else if (_layerClass != nil) {
+    [result addObject:@{ @"layerClass" : _layerClass }];
+  } else if (_viewBlock != nil) {
+    [result addObject:@{ @"viewBlock" : _viewBlock }];
+  } else if (_layerBlock != nil) {
+    [result addObject:@{ @"layerBlock" : _layerBlock }];
+  }
+  
+  return result;
+}
+
+- (NSString *)description
+{
+  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
+}
+
+- (NSString *)debugDescription
+{
+  return ASObjectDescriptionMake(self, [self propertiesForDebugDescription]);
+}
+
+// This should only be called for debugging. It's not thread safe and it doesn't assert.
+// NOTE: Returns CGRectNull if the node isn't in a hierarchy.
+- (CGRect)_frameInWindow
+{
+  if (self.isNodeLoaded == NO || self.isInHierarchy == NO) {
+    return CGRectNull;
+  }
+
+  if (self.layerBacked) {
+    CALayer *rootLayer = self.layer;
+    CALayer *nextLayer = rootLayer;
+    while ((nextLayer = rootLayer.superlayer) != nil) {
+      rootLayer = nextLayer;
+    }
+
+    return [self.layer convertRect:self.threadSafeBounds toLayer:rootLayer];
+  } else {
+    return [self.view convertRect:self.threadSafeBounds toView:nil];
+  }
+}
 
 #pragma mark - ASEnvironment
 
@@ -3219,38 +3306,6 @@ ASEnvironmentLayoutExtensibilityForwarding
 @end
 
 @implementation ASDisplayNode (Debugging)
-
-- (NSString *)description
-{
-  if (self.name) {
-    return [NSString stringWithFormat:@"<%@ %p name = %@>", self.class, self, self.name];
-  } else {
-    return [super description];
-  }
-}
-
-- (NSString *)debugDescription
-{
-  NSString *notableTargetDesc = (_flags.layerBacked ? @" [layer]" : @" [view]");
-  if (_view && _viewClass) { // Nonstandard view is loaded
-    notableTargetDesc = [NSString stringWithFormat:@" [%@ : %p]", _view.class, _view];
-  } else if (_layer && _layerClass) { // Nonstandard layer is loaded
-    notableTargetDesc = [NSString stringWithFormat:@" [%@ : %p]", _layer.class, _layer];
-  } else if (_viewClass) { // Nonstandard view class unloaded
-    notableTargetDesc = [NSString stringWithFormat:@" [%@]", _viewClass];
-  } else if (_layerClass) { // Nonstandard layer class unloaded
-    notableTargetDesc = [NSString stringWithFormat:@" [%@]", _layerClass];
-  } else if (_viewBlock) { // Nonstandard lazy view unloaded
-    notableTargetDesc = @" [block]";
-  } else if (_layerBlock) { // Nonstandard lazy layer unloaded
-    notableTargetDesc = @" [block]";
-  }
-  if (self.name) {
-    return [NSString stringWithFormat:@"<%@ %p name = %@%@>", self.class, self, self.name, notableTargetDesc];
-  } else {
-    return [NSString stringWithFormat:@"<%@ %p%@>", self.class, self, notableTargetDesc];
-  }
-}
 
 - (NSString *)descriptionForRecursiveDescription
 {
