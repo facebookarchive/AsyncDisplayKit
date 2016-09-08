@@ -22,6 +22,8 @@
 #import "ASEnvironment.h"
 #import "ASObjectDescriptionHelpers.h"
 
+#import "ASDisplayNode+Beta.h"
+
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
 @class _ASPendingState;
@@ -164,8 +166,9 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   UIBezierPath *_accessibilityPath;
 
   // performance measurement
-  NSTimeInterval _timeToSpecLayout;
-  NSTimeInterval _timeToGenerateLayout;
+  ASDisplayNodePerformanceMeasurementOptions _measurementOptions;
+  NSMutableArray<NSNumber *> *_layoutSpecTimes;
+  NSMutableArray<NSNumber *> *_layoutGenerationTimes;
 
 #if TIME_DISPLAYNODE_OPS
 @public

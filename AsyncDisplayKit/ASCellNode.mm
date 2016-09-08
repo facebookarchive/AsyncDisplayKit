@@ -23,9 +23,6 @@
 #import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 
-NSString *const kASCellNodeLayoutSpecTime = @"ASCellNodeLayoutSpecTime";
-NSString *const kASCellNodeLayoutGenerationTime = @"ASCellNodeLayoutGenerationTime";
-
 #pragma mark -
 #pragma mark ASCellNode
 
@@ -47,8 +44,6 @@ NSString *const kASCellNodeLayoutGenerationTime = @"ASCellNodeLayoutGenerationTi
 {
   if (!(self = [super init]))
     return nil;
-
-  _measurementOptions = ASCellNodePerformanceMeasurementOptionsNone;
 
   // Use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;

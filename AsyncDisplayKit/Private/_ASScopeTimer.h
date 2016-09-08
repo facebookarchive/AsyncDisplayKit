@@ -38,3 +38,32 @@ namespace ASDN {
     }
   };
 }
+
+/**
+ Must compile as c++ for this to work.
+
+ Usage:
+ // Can be an ivar or local variable. Adds a timing measurement to an existing array.
+ NSMutableArray<NSNumber *> *placeToCollectMultipleTimes = [[NSMutableArray alloc] init];
+
+ {
+ // some scope
+ ASDisplayNode::ScopeTimerDataPoint t(placeToCollectMultipleTimes);
+ DoPotentiallySlowWork();
+ MorePotentiallySlowWork();
+ }
+
+ */
+namespace ASDN {
+  struct ScopeTimerDataPoint {
+    NSTimeInterval begin;
+    NSMutableArray<NSNumber *> *outArray;
+    ScopeTimerDataPoint(NSMutableArray<NSNumber *> &outRef) : outArray(&outRef) {
+      begin = CACurrentMediaTime();
+    }
+    ~ScopeTimerDataPoint() {
+      NSTimeInterval outT = CACurrentMediaTime() - begin;
+      [outArray addObject:@(outT)];
+    }
+  };
+}

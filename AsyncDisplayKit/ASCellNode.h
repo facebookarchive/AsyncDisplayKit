@@ -43,18 +43,6 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 };
 
 /**
- * Bitmask to indicate what performance measurements the cell should record.
- */
-typedef NS_OPTIONS(NSUInteger, ASCellNodePerformanceMeasurementOptions) {
-  ASCellNodePerformanceMeasurementOptionsNone = 0,
-  ASCellNodePerformanceMeasurementOptionsLayoutSpec = 1 << 0,
-  ASCellNodePerformanceMeasurementOptionsLayoutGeneration = 1 << 1
-};
-
-extern NSString *const kASCellNodeLayoutSpecTime;
-extern NSString *const kASCellNodeLayoutGenerationTime;
-
-/**
  * Generic cell node.  Subclass this instead of `ASDisplayNode` to use with `ASTableView` and `ASCollectionView`.
  
  * @note When a cell node is contained inside a collection view (or table view),
@@ -103,17 +91,6 @@ extern NSString *const kASCellNodeLayoutGenerationTime;
  * Setting this value is equivalent to calling highlightItem / unHighlightItem on the collection or table.
  */
 @property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
-
-/**
- * A bitmask representing which actions (layout spec, layout generation) should be measured.
- */
-@property (nonatomic, assign) ASCellNodePerformanceMeasurementOptions measurementOptions;
-
-/**
- * A dictionary representing performance metrics collected.
- * @note see the constants above to retrieve relevant performance metrics
- */
-@property (nonatomic, strong, readonly) NSDictionary *performanceMetrics;
 
 /*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
