@@ -2342,8 +2342,16 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
   ASDN::MutexLocker l(__instanceLock__);
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
-    ASLayoutSpec *layoutSpec = [self layoutSpecThatFits:constrainedSize];
-    
+    ASLayoutSpec *layoutSpec = nil;
+    // optional performance measurement for cell nodes
+    if ([self isKindOfClass:[ASCellNode class]] &&
+        ((ASCellNode *)self).measurementOptions & ASCellNodePerformanceMeasurementOptionsLayoutSpec) {
+      ASDN::ScopeTimer t(_timeToSpecLayout);
+      layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    } else {
+      layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    }
+
     ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
 
     layoutSpec.parent = self; // This causes upward propogation of any non-default layoutable values.
@@ -2352,7 +2360,16 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     ASEnvironmentStatePropagateDown(layoutSpec, self.environmentTraitCollection);
     
     layoutSpec.isMutable = NO;
-    ASLayout *layout = [layoutSpec layoutThatFits:constrainedSize];
+    ASLayout *layout = nil;
+    // optional performance measurement for cell nodes
+    if ([self isKindOfClass:[ASCellNode class]] &&
+        ((ASCellNode *)self).measurementOptions & ASCellNodePerformanceMeasurementOptionsLayoutGeneration) {
+      ASDN::ScopeTimer t(_timeToGenerateLayout);
+      layout = [layoutSpec layoutThatFits:constrainedSize];
+    } else {
+      layout = [layoutSpec layoutThatFits:constrainedSize];
+    }
+
     ASDisplayNodeAssertNotNil(layout, @"[ASLayoutSpec measureWithSizeRange:] should never return nil! %@, %@", self, layoutSpec);
       
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.

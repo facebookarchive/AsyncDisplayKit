@@ -163,6 +163,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   CGPoint _accessibilityActivationPoint;
   UIBezierPath *_accessibilityPath;
 
+  // performance measurement
+  NSTimeInterval _timeToSpecLayout;
+  NSTimeInterval _timeToGenerateLayout;
+
 #if TIME_DISPLAYNODE_OPS
 @public
   NSTimeInterval _debugTimeToCreateView;
