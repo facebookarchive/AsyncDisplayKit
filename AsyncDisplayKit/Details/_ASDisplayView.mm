@@ -64,6 +64,7 @@
 	  NSRange layerDescriptionRange = [description rangeOfString:@"; layer = <.*>" options:NSRegularExpressionSearch];
 	  if (layerDescriptionRange.location != NSNotFound) {
 		  [description replaceCharactersInRange:layerDescriptionRange withString:@""];
+      // Our regex will grab the closing angle bracket and I'm not clever enough to come up with a better one, so re-add it if needed.
 		  if ([description hasSuffix:@">"] == NO) {
 			  [description appendString:@">"];
 		  }
