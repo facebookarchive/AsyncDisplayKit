@@ -2006,14 +2006,14 @@ static bool stringContainsPointer(NSString *description, id p) {
 
 - (void)testThatOnDidLoadThrowsIfCalledOnLoaded
 {
-  ASTestDisplayNode *node = [[[ASTestDisplayNode alloc] init] autorelease];
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
   [node view];
   XCTAssertThrows([node onDidLoad:^(ASDisplayNode * _Nonnull node) { }]);
 }
 
 - (void)testThatOnDidLoadWorks
 {
-  ASTestDisplayNode *node = [[[ASTestDisplayNode alloc] init] autorelease];
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
   NSMutableArray *calls = [NSMutableArray array];
   [node onDidLoad:^(ASTestDisplayNode * _Nonnull node) {
     [calls addObject:@0];
