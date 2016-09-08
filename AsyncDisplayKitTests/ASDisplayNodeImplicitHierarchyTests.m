@@ -18,6 +18,7 @@
 
 #import "ASStaticLayoutSpec.h"
 #import "ASStackLayoutSpec.h"
+#import "ASInsetLayoutSpec.h"
 
 @interface ASSpecTestDisplayNode : ASDisplayNode
 
@@ -117,9 +118,24 @@
   XCTAssertEqual(node.subnodes[2], node2);
 }
 
+- (void)testLayoutTransitionWillThrowForManualSubnodeManagement
+{
+  ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
+  node1.name = @"node1";
+  
+  ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+  node.automaticallyManagesSubnodes = YES;
+  node.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode *weakNode, ASSizeRange constrainedSize){
+    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node1]];
+  };
+  
+  XCTAssertNoThrow([node layoutThatFits:ASSizeRangeMake(CGSizeZero)]);
+  XCTAssertThrows([node1 removeFromSupernode]);
+}
+
 - (void)testLayoutTransitionMeasurementCompletionBlockIsCalledOnMainThread
 {
-  ASDisplayNode *displayNode = [ASDisplayNode new];
+  ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
   
   // Trigger explicit view creation to be able to use the Transition API
   [displayNode view];

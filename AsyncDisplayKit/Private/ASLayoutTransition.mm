@@ -98,7 +98,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
   NSUInteger i = 0;
   for (ASDisplayNode *node in _insertedSubnodes) {
     NSUInteger p = _insertedSubnodePositions[i];
-    [_node insertSubnode:node atIndex:p];
+    [_node _insertSubnode:node atIndex:p];
     i += 1;
   }
 }
@@ -108,7 +108,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
   ASDN::MutexSharedLocker l(__instanceLock__);
   [self calculateSubnodeOperationsIfNeeded];
   for (ASDisplayNode *subnode in _removedSubnodes) {
-    [subnode removeFromSupernode];
+    [subnode _removeFromSupernode];
   }
 }
 
