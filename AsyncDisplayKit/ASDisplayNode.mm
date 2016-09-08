@@ -2377,7 +2377,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     ASLayoutSpec *layoutSpec = nil;
     // optional performance measurement for cell nodes
     if (self.measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutSpec) {
-      ASDN::ScopeTimerDataPoint t(_layoutSpecTotalTime);
+      ASDN::ScopeTimerSum t(_layoutSpecTotalTime);
       _layoutSpecNumberOfPasses++;
       layoutSpec = [self layoutSpecThatFits:constrainedSize];
     } else {
@@ -2395,7 +2395,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     ASLayout *layout = nil;
     // optional performance measurement for cell nodes
     if (self.measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutGeneration) {
-      ASDN::ScopeTimerDataPoint t(_layoutGenerationTotalTime);
+      ASDN::ScopeTimerSum t(_layoutGenerationTotalTime);
       _layoutGenerationNumberOfPasses++;
       layout = [layoutSpec layoutThatFits:constrainedSize];
     } else {

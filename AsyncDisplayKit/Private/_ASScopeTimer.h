@@ -48,20 +48,20 @@ namespace ASDN {
 
  {
  // some scope
- ASDisplayNode::ScopeTimer t(placeToStoreTiming);
+ ASDisplayNode::ScopeTimerSum t(placeToStoreTiming);
  DoPotentiallySlowWork();
  MorePotentiallySlowWork();
  }
 
  */
 namespace ASDN {
-  struct ScopeTimerDataPoint {
+  struct ScopeTimerSum {
     NSTimeInterval begin;
     NSTimeInterval &outT;
-    ScopeTimerDataPoint(NSTimeInterval &outRef) : outT(outRef) {
+    ScopeTimerSum(NSTimeInterval &outRef) : outT(outRef) {
       begin = CACurrentMediaTime();
     }
-    ~ScopeTimerDataPoint() {
+    ~ScopeTimerSum() {
       outT += CACurrentMediaTime() - begin;
     }
   };
