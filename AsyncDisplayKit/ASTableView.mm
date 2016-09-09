@@ -146,6 +146,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     unsigned int asyncDataSourceNumberOfSectionsInTableView:1;
     unsigned int asyncDataSourceTableViewNodeBlockForRowAtIndexPath:1;
     unsigned int asyncDataSourceTableViewNodeForRowAtIndexPath:1;
+    unsigned int asyncDataSourceTableViewCanMoveRowAtIndexPath:1;
+    unsigned int asyncDataSourceTableViewMoveRowAtIndexPath:1;
   } _asyncDataSourceFlags;
 }
 
@@ -301,6 +303,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInTableView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInTableView:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeForRowAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)];
+    _asyncDataSourceFlags.asyncDataSourceTableViewCanMoveRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:canMoveRowAtIndexPath:)];
+    _asyncDataSourceFlags.asyncDataSourceTableViewMoveRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:moveRowAtIndexPath:toIndexPath:)];
     
     // Data source must implement tableView:nodeBlockForRowAtIndexPath: or tableView:nodeForRowAtIndexPath:
     ASDisplayNodeAssertTrue(_asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath || _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath);
@@ -658,6 +662,24 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
   return [_dataController numberOfRowsInSection:section];
+}
+
+- (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  if (_asyncDataSourceFlags.asyncDataSourceTableViewCanMoveRowAtIndexPath) {
+    return [_asyncDataSource tableView:self canMoveRowAtIndexPath:indexPath];
+  } else {
+    return NO;
+  }
+}
+
+- (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath
+{
+  if (_asyncDataSourceFlags.asyncDataSourceTableViewMoveRowAtIndexPath) {
+    [_asyncDataSource tableView:self moveRowAtIndexPath:sourceIndexPath toIndexPath:destinationIndexPath];
+  }
+  // Move node after informing data source in case they call nodeAtIndexPath:
+  [_dataController moveCompletedNodeAtIndexPath:sourceIndexPath toIndexPath:destinationIndexPath];
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
