@@ -18,6 +18,22 @@ void ASPerformBlockOnMainThread(void (^block)());
 void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
 ASDISPLAYNODE_EXTERN_C_END
 
+/**
+ * Bitmask to indicate what performance measurements the cell should record.
+ */
+typedef NS_OPTIONS(NSUInteger, ASDisplayNodePerformanceMeasurementOptions) {
+  ASDisplayNodePerformanceMeasurementOptionLayoutSpec = 1 << 0,
+  ASDisplayNodePerformanceMeasurementOptionLayoutGeneration = 1 << 1
+};
+
+/**
+ * Keys to retrieve performance entries from the performance dictionary.
+ */
+extern NSString *const ASDisplayNodeLayoutSpecTotalTimeKey;
+extern NSString *const ASDisplayNodeLayoutSpecNumberOfPassesKey;
+extern NSString *const ASDisplayNodeLayoutGenerationTotalTimeKey;
+extern NSString *const ASDisplayNodeLayoutGenerationNumberOfPassesKey;
+
 @interface ASDisplayNode (Beta)
 
 /**
@@ -56,6 +72,17 @@ ASDISPLAYNODE_EXTERN_C_END
  * @abstract allow modification of a context after the node's content is drawn
  */
 @property (nonatomic, copy, nullable) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
+
+/**
+ * @abstract A bitmask representing which actions (layout spec, layout generation) should be measured.
+ */
+@property (nonatomic, assign) ASDisplayNodePerformanceMeasurementOptions measurementOptions;
+
+/**
+ * @abstract A dictionary representing performance measurements collected.
+ * @note see the constants above to retrieve relevant performance measurements
+ */
+@property (nonatomic, strong, readonly) NSDictionary *performanceMeasurements;
 
 /** @name Layout Transitioning */
 
