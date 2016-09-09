@@ -80,7 +80,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @end
 
 @interface ASTestDisplayNode : ASDisplayNode
-@property (nonatomic, copy) void (^willDeallocBlock)(ASTestDisplayNode *node);
+@property (nonatomic, copy) void (^willDeallocBlock)(__unsafe_unretained ASTestDisplayNode *node);
 @property (nonatomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
 @property (nonatomic) BOOL hasFetchedData;
 
@@ -1044,7 +1044,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [self executeOffThread:^{
     @autoreleasepool {
       ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
-      node.willDeallocBlock = ^(ASDisplayNode *n){
+      node.willDeallocBlock = ^(__unsafe_unretained ASDisplayNode *n){
         XCTAssertTrue([NSThread isMainThread], @"unexpected node dealloc %@ %@", n, [NSThread currentThread]);
         didDealloc = YES;
       };
@@ -1988,7 +1988,7 @@ static bool stringContainsPointer(NSString *description, id p) {
 
 // FIXME
 // Supernode is measured, subnode isnt, transition starts, UIKit does a layout pass before measurement finishes
-- (void)DISABLED_testThatItsSafeToAutomeasureANodeMidTransition
+- (void)testThatItsSafeToAutomeasureANodeMidTransition
 {
   ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
   [supernode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))];
@@ -2002,6 +2002,31 @@ static bool stringContainsPointer(NSString *description, id p) {
   [supernode transitionLayoutWithAnimation:NO shouldMeasureAsync:YES measurementCompletion:nil];
 
   XCTAssertNoThrow([node.view layoutIfNeeded]);
+}
+
+- (void)testThatOnDidLoadThrowsIfCalledOnLoaded
+{
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  [node view];
+  XCTAssertThrows([node onDidLoad:^(ASDisplayNode * _Nonnull node) { }]);
+}
+
+- (void)testThatOnDidLoadWorks
+{
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  NSMutableArray *calls = [NSMutableArray array];
+  [node onDidLoad:^(ASTestDisplayNode * _Nonnull node) {
+    [calls addObject:@0];
+  }];
+  [node onDidLoad:^(ASTestDisplayNode * _Nonnull node) {
+    [calls addObject:@1];
+  }];
+  [node onDidLoad:^(ASTestDisplayNode * _Nonnull node) {
+    [calls addObject:@2];
+  }];
+  [node view];
+  NSArray *expected = @[ @0, @1, @2 ];
+  XCTAssertEqualObjects(calls, expected);
 }
 
 @end

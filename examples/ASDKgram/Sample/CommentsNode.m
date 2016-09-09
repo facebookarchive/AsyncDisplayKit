@@ -34,6 +34,8 @@
 {
   self = [super init];
   if (self) {
+    self.automaticallyManagesSubnodes = YES;
+
     _commentNodes = [[NSMutableArray alloc] init];
   }
   return self;
@@ -53,7 +55,7 @@
 - (void)updateWithCommentFeedModel:(CommentFeedModel *)feed
 {
   _commentFeed = feed;
-  [self removeCommentLabels];
+  [_commentNodes removeAllObjects];
   
   if (_commentFeed) {
     [self createCommentLabels];
@@ -64,7 +66,7 @@
     
     if (addViewAllCommentsLabel) {
       commentLabelString         = [_commentFeed viewAllCommentsAttributedString];
-      [[_commentNodes objectAtIndex:labelsIndex] setAttributedString:commentLabelString];
+      [_commentNodes[labelsIndex] setAttributedText:commentLabelString];
       labelsIndex++;
     }
     
@@ -72,7 +74,7 @@
     
     for (int feedIndex = 0; feedIndex < numCommentsInFeed; feedIndex++) {
       commentLabelString         = [[_commentFeed objectAtIndex:feedIndex] commentAttributedString];
-      [[_commentNodes objectAtIndex:labelsIndex] setAttributedString:commentLabelString];
+      [_commentNodes[labelsIndex] setAttributedText:commentLabelString];
       labelsIndex++;
     }
     
@@ -82,15 +84,6 @@
 
 
 #pragma mark - Helper Methods
-
-- (void)removeCommentLabels
-{
-  for (ASTextNode *commentLabel in _commentNodes) {
-    [commentLabel removeFromSupernode];
-  }
-  
-  [_commentNodes removeAllObjects];
-}
 
 - (void)createCommentLabels
 {
@@ -105,7 +98,6 @@
     commentLabel.maximumNumberOfLines = 3;
     
     [_commentNodes addObject:commentLabel];
-    [self addSubnode:commentLabel];
   }
 }
 

@@ -12,10 +12,13 @@
 
 #import "ASEqualityHelpers.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASTextNode.h>
+#import <AsyncDisplayKit/ASCollectionNode.h>
+#import <AsyncDisplayKit/ASTableNode.h>
 
 #import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
@@ -276,6 +279,35 @@
                   withCellFrame:cellFrame];
 }
 
+- (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
+{
+  NSMutableArray *result = [super propertiesForDebugDescription];
+  
+  UIScrollView *scrollView = self.scrollView;
+  
+  ASDisplayNode *owningNode = scrollView.asyncdisplaykit_node;
+  if ([owningNode isKindOfClass:[ASCollectionNode class]]) {
+    [result addObject:@{ @"collectionNode" : ASObjectDescriptionMakeTiny(owningNode) }];
+  } else if ([owningNode isKindOfClass:[ASTableNode class]]) {
+    [result addObject:@{ @"tableNode" : ASObjectDescriptionMakeTiny(owningNode) }];
+  
+  } else if ([scrollView isKindOfClass:[ASCollectionView class]]) {
+    NSIndexPath *ip = [(ASCollectionView *)scrollView indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
+    [result addObject:@{ @"collectionView" : ASObjectDescriptionMakeTiny(scrollView) }];
+    
+  } else if ([scrollView isKindOfClass:[ASTableView class]]) {
+    NSIndexPath *ip = [(ASTableView *)scrollView indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
+    [result addObject:@{ @"tableView" : ASObjectDescriptionMakeTiny(scrollView) }];
+  }
+
+  return result;
+}
 @end
 
 
@@ -306,8 +338,8 @@ static const CGFloat kASTextCellNodeDefaultVerticalPadding = 11.0f;
   if (self) {
     _textInsets = textInsets;
     _textAttributes = [textAttributes copy];
-    self.automaticallyManagesSubnodes = YES;
     _textNode = [[ASTextNode alloc] init];
+    [self addSubnode:_textNode];
   }
   return self;
 }
