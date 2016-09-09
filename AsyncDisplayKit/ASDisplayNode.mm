@@ -37,10 +37,10 @@
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
 NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp";
-NSString * const ASDisplayNodeLayoutSpecTotalTime = @"ASDisplayNodeLayoutSpecTotalTime";
-NSString * const ASDisplayNodeLayoutSpecNumberOfPasses = @"ASDisplayNodeLayoutSpecNumberOfPasses";
-NSString * const ASDisplayNodeLayoutGenerationTotalTime = @"ASDisplayNodeLayoutGenerationTotalTime";
-NSString * const ASDisplayNodeLayoutGenerationNumberOfPasses = @"ASDisplayNodeLayoutGenerationNumberOfPasses";
+NSString * const ASDisplayNodeLayoutSpecTotalTimeKey = @"ASDisplayNodeLayoutSpecTotalTime";
+NSString * const ASDisplayNodeLayoutSpecNumberOfPassesKey = @"ASDisplayNodeLayoutSpecNumberOfPasses";
+NSString * const ASDisplayNodeLayoutGenerationTotalTimeKey = @"ASDisplayNodeLayoutGenerationTotalTime";
+NSString * const ASDisplayNodeLayoutGenerationNumberOfPassesKey = @"ASDisplayNodeLayoutGenerationNumberOfPasses";
 
 
 // Forward declare CALayerDelegate protocol as the iOS 10 SDK moves CALayerDelegate from a formal delegate to a protocol.
@@ -313,7 +313,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _size = ASLayoutableSizeMake();
   _preferredFrameSize = CGSizeZero;
   _environmentState = ASEnvironmentStateMakeDefault();
-
+  
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
   
   _defaultLayoutTransitionDuration = 0.2;
@@ -1176,13 +1176,13 @@ ASLayoutableSizeHelperForwarding
 {
   ASDN::MutexLocker l(__instanceLock__);
   NSMutableDictionary *measurements = [NSMutableDictionary dictionaryWithCapacity:4];
-  if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutSpec) {
-    measurements[ASDisplayNodeLayoutSpecTotalTime] = @(_layoutSpecTotalTime);
-    measurements[ASDisplayNodeLayoutSpecNumberOfPasses] = @(_layoutSpecNumberOfPasses);
+  if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec) {
+    measurements[ASDisplayNodeLayoutSpecTotalTimeKey] = @(_layoutSpecTotalTime);
+    measurements[ASDisplayNodeLayoutSpecNumberOfPassesKey] = @(_layoutSpecNumberOfPasses);
   }
-  if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutGeneration) {
-    measurements[ASDisplayNodeLayoutGenerationTotalTime] = @(_layoutGenerationTotalTime);
-    measurements[ASDisplayNodeLayoutGenerationNumberOfPasses] = @(_layoutGenerationNumberOfPasses);
+  if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutGeneration) {
+    measurements[ASDisplayNodeLayoutGenerationTotalTimeKey] = @(_layoutGenerationTotalTime);
+    measurements[ASDisplayNodeLayoutGenerationNumberOfPassesKey] = @(_layoutGenerationNumberOfPasses);
   }
   return measurements;
 }
@@ -2376,7 +2376,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
     ASLayoutSpec *layoutSpec = nil;
     // optional performance measurement for cell nodes
-    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutSpec) {
+    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec) {
       ASDN::SumScopeTimer t(_layoutSpecTotalTime);
       _layoutSpecNumberOfPasses++;
       layoutSpec = [self layoutSpecThatFits:constrainedSize];
@@ -2394,7 +2394,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     layoutSpec.isMutable = NO;
     ASLayout *layout = nil;
     // optional performance measurement for cell nodes
-    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutGeneration) {
+    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutGeneration) {
       ASDN::SumScopeTimer t(_layoutGenerationTotalTime);
       _layoutGenerationNumberOfPasses++;
       layout = [layoutSpec layoutThatFits:constrainedSize];

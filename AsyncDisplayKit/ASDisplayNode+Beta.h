@@ -22,18 +22,17 @@ ASDISPLAYNODE_EXTERN_C_END
  * Bitmask to indicate what performance measurements the cell should record.
  */
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodePerformanceMeasurementOptions) {
-  ASDisplayNodePerformanceMeasurementOptionsNone = 0,
-  ASDisplayNodePerformanceMeasurementOptionsLayoutSpec = 1 << 0,
-  ASDisplayNodePerformanceMeasurementOptionsLayoutGeneration = 1 << 1
+  ASDisplayNodePerformanceMeasurementOptionLayoutSpec = 1 << 0,
+  ASDisplayNodePerformanceMeasurementOptionLayoutGeneration = 1 << 1
 };
 
 /**
  * Keys to retrieve performance entries from the performance dictionary.
  */
-extern NSString *const ASDisplayNodeLayoutSpecTotalTime;
-extern NSString *const ASDisplayNodeLayoutSpecNumberOfPasses;
-extern NSString *const ASDisplayNodeLayoutGenerationTotalTime;
-extern NSString *const ASDisplayNodeLayoutGenerationNumberOfPasses;
+extern NSString *const ASDisplayNodeLayoutSpecTotalTimeKey;
+extern NSString *const ASDisplayNodeLayoutSpecNumberOfPassesKey;
+extern NSString *const ASDisplayNodeLayoutGenerationTotalTimeKey;
+extern NSString *const ASDisplayNodeLayoutGenerationNumberOfPassesKey;
 
 @interface ASDisplayNode (Beta)
 
