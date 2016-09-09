@@ -13,7 +13,6 @@
 // These methods must never be called or overridden by other classes.
 //
 
-#import "_AS-objc-internal.h"
 #import "ASDisplayNode.h"
 #import "ASThread.h"
 

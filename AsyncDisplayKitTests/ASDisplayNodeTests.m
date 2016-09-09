@@ -26,6 +26,7 @@
 #import "ASInsetLayoutSpec.h"
 #import "ASCenterLayoutSpec.h"
 #import "ASBackgroundLayoutSpec.h"
+#import "ASInternalHelpers.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.debugName = @#n
@@ -89,6 +90,11 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @property (nonatomic, copy) void (^willDeallocBlock)(__unsafe_unretained ASTestDisplayNode *node);
 @property (nonatomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
 @property (nonatomic) BOOL hasFetchedData;
+
+@property (nonatomic, nullable) UIGestureRecognizer *gestureRecognizer;
+@property (nonatomic, nullable) id idGestureRecognizer;
+@property (nonatomic, nullable) UIImage *bigImage;
+@property (nonatomic, nullable) NSArray *randomProperty;
 
 @property (nonatomic) BOOL displayRangeStateChangedToYES;
 @property (nonatomic) BOOL displayRangeStateChangedToNO;
@@ -1046,23 +1052,47 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertNil(weakSubnode);
 }
 
-- (void)testMainThreadDealloc
+- (void)testThatUIKitDeallocationTrampoliningWorks
 {
-  __block BOOL didDealloc = NO;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak UIGestureRecognizer *weakRecognizer = nil;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak UIGestureRecognizer *weakIdRecognizer = nil;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak UIView *weakView = nil;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak CALayer *weakLayer = nil;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak UIImage *weakImage = nil;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak NSArray *weakArray = nil;
+  __block NS_VALID_UNTIL_END_OF_SCOPE ASTestDisplayNode *node = nil;
+  @autoreleasepool {
+    node = [[ASTestDisplayNode alloc] init];
+    node.gestureRecognizer = [[UIGestureRecognizer alloc] init];
+    node.idGestureRecognizer = [[UIGestureRecognizer alloc] init];
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(1000, 1000), YES, 1);
+    node.bigImage = UIGraphicsGetImageFromCurrentImageContext();
+    node.randomProperty = @[ @"Hello, world!" ];
+    UIGraphicsEndImageContext();
+    weakImage = node.bigImage;
+    weakView = node.view;
+    weakLayer = node.layer;
+    weakArray = node.randomProperty;
+    weakIdRecognizer = node.idGestureRecognizer;
+    weakRecognizer = node.gestureRecognizer;
+  }
 
   [self executeOffThread:^{
-    @autoreleasepool {
-      ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
-      node.willDeallocBlock = ^(__unsafe_unretained ASDisplayNode *n){
-        XCTAssertTrue([NSThread isMainThread], @"unexpected node dealloc %@ %@", n, [NSThread currentThread]);
-        didDealloc = YES;
-      };
-    }
+    node = nil;
   }];
 
-  // deallocation should be queued on the main runloop; give it a chance
-  ASDisplayNodeRunRunLoopUntilBlockIsTrue(^BOOL{ return didDealloc; });
-  XCTAssertTrue(didDealloc, @"unexpected node lifetime");
+  XCTAssertNotNil(weakRecognizer, @"UIGestureRecognizer ivars should be deallocated on main.");
+  XCTAssertNotNil(weakIdRecognizer, @"UIGestureRecognizer-backed 'id' ivars should be deallocated on main.");
+  XCTAssertNotNil(weakView, @"UIView ivars should be deallocated on main.");
+  XCTAssertNotNil(weakLayer, @"CALayer ivars should be deallocated on main.");
+  XCTAssertNil(weakImage, @"UIImage ivars should be deallocated normally.");
+  XCTAssertNil(weakArray, @"NSArray ivars should be deallocated normally.");
+  XCTAssertNil(node);
+  
+  [self expectationForPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nonnull evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+    return (weakRecognizer == nil && weakIdRecognizer == nil && weakView == nil);
+  }] evaluatedWithObject:(id)kCFNull handler:nil];
+  [self waitForExpectationsWithTimeout:10 handler:nil];
 }
 
 - (void)testSubnodes

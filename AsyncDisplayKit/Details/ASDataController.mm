@@ -1057,26 +1057,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   ASMoveElementInTwoDimensionalArray(_completedNodes[ASDataControllerRowNodeKind], indexPath, newIndexPath);
 }
 
-#pragma mark - Dealloc
-
-- (void)dealloc
-{
-  ASDisplayNodeAssertMainThread();
-  for (NSMutableArray *sections in [_completedNodes objectEnumerator]) {
-    for (NSArray *section in sections) {
-      for (ASCellNode *node in section) {
-        if (node.isNodeLoaded) {
-          if (node.layerBacked) {
-            [node.layer removeFromSuperlayer];
-          } else {
-            [node.view removeFromSuperview];
-          }
-        }
-      }
-    }
-  }
-}
-
 @end
 
 #if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK

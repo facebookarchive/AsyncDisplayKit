@@ -84,6 +84,48 @@ void ASPerformBackgroundDeallocation(id object)
   [[ASDeallocQueue sharedDeallocationQueue] releaseObjectInBackground:object];
 }
 
+BOOL ASClassRequiresMainThreadDeallocation(Class class)
+{
+  if (class == [UIImage class] || class == [UIColor class]) {
+    return NO;
+  }
+
+  if ([class isSubclassOfClass:[UIResponder class]]
+      || [class isSubclassOfClass:[CALayer class]]
+      || [class isSubclassOfClass:[UIGestureRecognizer class]]) {
+    return YES;
+  }
+
+  const char *name = class_getName(class);
+  if (strncmp(name, "UI", 2) == 0 || strncmp(name, "AV", 2) == 0 || strncmp(name, "CA", 2) == 0) {
+    return YES;
+  }
+
+  return NO;
+}
+
+Class _Nullable ASGetClassFromType(const char *type)
+{
+  // Class types all start with @"
+  if (strncmp(type, "@\"", 2) != 0) {
+    return nil;
+  }
+
+  // Ensure length >= 3
+  size_t typeLength = strlen(type);
+  if (typeLength < 3) {
+    ASDisplayNodeCFailAssert(@"Got invalid type-encoding: %s", type);
+    return nil;
+  }
+
+  // Copy type[2..(end-1)]. So @"UIImage" -> UIImage
+  size_t resultLength = typeLength - 3;
+  char className[resultLength + 1];
+  strncpy(className, type + 2, resultLength);
+  className[resultLength] = '\0';
+  return objc_getClass(className);
+}
+
 CGFloat ASScreenScale()
 {
   static CGFloat __scale = 0.0;
