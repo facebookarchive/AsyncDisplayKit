@@ -37,31 +37,15 @@ namespace ASDN {
       outT = CACurrentMediaTime() - begin;
     }
   };
-}
 
-/**
- Must compile as c++ for this to work.
-
- Usage:
- // Can be an ivar or local variable. Sums a timing measurement with an existing value.
- NSTimeInterval placeToStoreTiming;
-
- {
- // some scope
- ASDisplayNode::ScopeTimerSum t(placeToStoreTiming);
- DoPotentiallySlowWork();
- MorePotentiallySlowWork();
- }
-
- */
-namespace ASDN {
-  struct ScopeTimerSum {
+  // variant where repeated calls are summed
+  struct SumScopeTimer {
     NSTimeInterval begin;
     NSTimeInterval &outT;
-    ScopeTimerSum(NSTimeInterval &outRef) : outT(outRef) {
+    SumScopeTimer(NSTimeInterval &outRef) : outT(outRef) {
       begin = CACurrentMediaTime();
     }
-    ~ScopeTimerSum() {
+    ~SumScopeTimer() {
       outT += CACurrentMediaTime() - begin;
     }
   };

@@ -80,10 +80,10 @@ extern NSString *const ASDisplayNodeLayoutGenerationNumberOfPasses;
 @property (nonatomic, assign) ASDisplayNodePerformanceMeasurementOptions measurementOptions;
 
 /**
- * @abstract A dictionary representing performance metrics collected.
- * @note see the constants above to retrieve relevant performance metrics
+ * @abstract A dictionary representing performance measurements collected.
+ * @note see the constants above to retrieve relevant performance measurements
  */
-@property (nonatomic, strong, readonly) NSDictionary *performanceMetrics;
+@property (nonatomic, strong, readonly) NSDictionary *performanceMeasurements;
 
 /** @name Layout Transitioning */
 

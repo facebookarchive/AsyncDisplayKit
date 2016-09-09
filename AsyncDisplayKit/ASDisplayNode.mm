@@ -1172,19 +1172,19 @@ ASLayoutableSizeHelperForwarding
   return _measurementOptions;
 }
 
-- (NSDictionary *)performanceMetrics
+- (NSDictionary *)performanceMeasurements
 {
   ASDN::MutexLocker l(__instanceLock__);
-  NSMutableDictionary *requestedMetrics = [NSMutableDictionary dictionaryWithCapacity:4];
+  NSMutableDictionary *measurements = [NSMutableDictionary dictionaryWithCapacity:4];
   if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutSpec) {
-    requestedMetrics[ASDisplayNodeLayoutSpecTotalTime] = @(_layoutSpecTotalTime);
-    requestedMetrics[ASDisplayNodeLayoutSpecNumberOfPasses] = @(_layoutSpecNumberOfPasses);
+    measurements[ASDisplayNodeLayoutSpecTotalTime] = @(_layoutSpecTotalTime);
+    measurements[ASDisplayNodeLayoutSpecNumberOfPasses] = @(_layoutSpecNumberOfPasses);
   }
   if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutGeneration) {
-    requestedMetrics[ASDisplayNodeLayoutGenerationTotalTime] = @(_layoutGenerationTotalTime);
-    requestedMetrics[ASDisplayNodeLayoutGenerationNumberOfPasses] = @(_layoutGenerationNumberOfPasses);
+    measurements[ASDisplayNodeLayoutGenerationTotalTime] = @(_layoutGenerationTotalTime);
+    measurements[ASDisplayNodeLayoutGenerationNumberOfPasses] = @(_layoutGenerationNumberOfPasses);
   }
-  return requestedMetrics;
+  return measurements;
 }
 
 #pragma mark - Asynchronous display
@@ -2376,8 +2376,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
     ASLayoutSpec *layoutSpec = nil;
     // optional performance measurement for cell nodes
-    if (self.measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutSpec) {
-      ASDN::ScopeTimerSum t(_layoutSpecTotalTime);
+    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutSpec) {
+      ASDN::SumScopeTimer t(_layoutSpecTotalTime);
       _layoutSpecNumberOfPasses++;
       layoutSpec = [self layoutSpecThatFits:constrainedSize];
     } else {
@@ -2394,8 +2394,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     layoutSpec.isMutable = NO;
     ASLayout *layout = nil;
     // optional performance measurement for cell nodes
-    if (self.measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutGeneration) {
-      ASDN::ScopeTimerSum t(_layoutGenerationTotalTime);
+    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionsLayoutGeneration) {
+      ASDN::SumScopeTimer t(_layoutGenerationTotalTime);
       _layoutGenerationNumberOfPasses++;
       layout = [layoutSpec layoutThatFits:constrainedSize];
     } else {
