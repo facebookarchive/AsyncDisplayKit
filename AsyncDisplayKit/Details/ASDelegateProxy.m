@@ -25,6 +25,10 @@
           // handled by ASRangeController
           selector == @selector(numberOfSectionsInTableView:) ||
           selector == @selector(tableView:numberOfRowsInSection:) ||
+
+          // reordering support
+          selector == @selector(tableView:canMoveRowAtIndexPath:) ||
+          selector == @selector(tableView:moveRowAtIndexPath:toIndexPath:) ||
           
           // used for ASCellNode visibility
           selector == @selector(scrollViewDidScroll:) ||
