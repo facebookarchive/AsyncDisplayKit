@@ -127,7 +127,8 @@
 
     if (needsSupernodeUpdate) {
       // -removeFromSupernode is called by -addSubnode:, if it is needed.
-      [newSuperview.asyncdisplaykit_node addSubnode:node];
+      // FIXME: Needs rethinking if automaticallyManagesSubnodes=YES
+      [newSuperview.asyncdisplaykit_node _addSubnode:node];
     }
   }
 }
@@ -177,7 +178,8 @@
     
     if (needsSupernodeRemoval) {
       // The node will only disconnect from its supernode, not removeFromSuperview, in this condition.
-      [node removeFromSupernode];
+      // FIXME: Needs rethinking if automaticallyManagesSubnodes=YES
+      [node _removeFromSupernode];
     }
   }
 }
