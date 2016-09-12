@@ -1877,12 +1877,12 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDN::MutexLocker l(__instanceLock__);
 
   if (idx > _subnodes.count || idx < 0) {
-    NSString *reason = [NSString stringWithFormat:@"Cannot insert a subnode at index %zd. Count is %zd", idx, _subnodes.count];
-    @throw [NSException exceptionWithName:NSInvalidArgumentException reason:reason userInfo:nil];
+    ASDisplayNodeFailAssert(@"Cannot insert a subnode at index %zd. Count is %zd", idx, _subnodes.count);
+    return;
   }
-  
-  ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
-  if (!subnode) {
+
+  if (subnode == nil) {
+    ASDisplayNodeFailAssert(@"Attempt to insert a nil subnode into node %@", self);
     return;
   }
   
