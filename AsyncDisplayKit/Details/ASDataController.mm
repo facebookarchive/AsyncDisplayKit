@@ -181,37 +181,16 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     return nil;
   }
 
-  __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(nodeCount, sizeof(ASCellNode *));
-
-  dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-  ASDispatchApply(nodeCount, queue, 0, ^(size_t i) {
-    RETURN_IF_NO_DATASOURCE();
-
-    // Allocate the node.
-    ASIndexedNodeContext *context = contexts[i];
-    ASCellNode *node = [context allocateNode];
-    if (node == nil) {
-      ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
-      node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
-    }
-    
-    [self _layoutNode:node withConstrainedSize:context.constrainedSize];
-#if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
-    [ASDataController _didLayoutNode];
-#endif
-    allocatedNodeBuffer[i] = node;
-  });
-
-  BOOL canceled = _dataSource == nil;
-
-  // Create nodes array
-  NSArray *nodes = canceled ? nil : [NSArray arrayWithObjects:allocatedNodeBuffer count:nodeCount];
-  
-  // Nil out buffer indexes to allow arc to free the stored cells.
-  for (int i = 0; i < nodeCount; i++) {
-    allocatedNodeBuffer[i] = nil;
+  // Begin all the allocations.
+  for (ASIndexedNodeContext *context in contexts) {
+    [context beginMeasuringNode];
   }
-  free(allocatedNodeBuffer);
+
+  // Gather the nodes from the contexts.
+  NSMutableArray<ASCellNode *> *nodes = [NSMutableArray arrayWithCapacity:nodeCount];
+  for (ASIndexedNodeContext *context in contexts) {
+    [nodes addObject:context.node];
+  }
 
   return nodes;
 }

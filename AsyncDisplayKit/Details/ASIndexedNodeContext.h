@@ -13,22 +13,34 @@
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASEnvironment.h>
 
-@interface ASIndexedNodeContext : NSObject
+NS_ASSUME_NONNULL_BEGIN
 
-@property (nonatomic, readonly, strong) NSIndexPath *indexPath;
-@property (nonatomic, readonly, assign) ASSizeRange constrainedSize;
-@property (nonatomic, readonly, assign) ASEnvironmentTraitCollection environmentTraitCollection;
+@interface ASIndexedNodeContext : NSObject
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
                         indexPath:(NSIndexPath *)indexPath
                   constrainedSize:(ASSizeRange)constrainedSize
        environmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection;
 
+@property (nonatomic, readonly, strong) NSIndexPath *indexPath;
+
 /**
- * Returns a node allocated by executing node block. Node block will be nil out immediately.
+ * Begins measurement of the cell node, if it hasn't already begun.
  */
-- (ASCellNode *)allocateNode;
+- (void)beginMeasuringNode;
+
+/**
+ * The cell node created by this context. Begins and waits for measurement if needed.
+ */
+@property (atomic, readonly, strong) ASCellNode *node;
+
+/**
+ * The node, if measurement has already completed.
+ */
+@property (atomic, readonly, nullable, strong) ASCellNode *nodeIfMeasured;
 
 + (NSArray<NSIndexPath *> *)indexPathsFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts;
 
 @end
+
+NS_ASSUME_NONNULL_END
