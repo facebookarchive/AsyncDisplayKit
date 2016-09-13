@@ -127,6 +127,18 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   return parallelProcessorCount;
 }
 
++ (NSOperationQueue *)nodeLayoutQueue
+{
+  static NSOperationQueue *nodeLayoutQueue;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    nodeLayoutQueue = [[NSOperationQueue alloc] init];
+    nodeLayoutQueue.name = @"org.AsyncDisplayKit.ASDataController.nodeLayoutQueue";
+    nodeLayoutQueue.maxConcurrentOperationCount = [NSProcessInfo processInfo].processorCount * 2;
+  });
+  return nodeLayoutQueue;
+}
+
 #pragma mark - Cell Layout
 
 - (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts batchCompletion:(ASDataControllerCompletionBlock)batchCompletionHandler
@@ -181,37 +193,20 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     return nil;
   }
 
-  __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(nodeCount, sizeof(ASCellNode *));
-
-  dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-  ASDispatchApply(nodeCount, queue, 0, ^(size_t i) {
-    RETURN_IF_NO_DATASOURCE();
-
-    // Allocate the node.
-    ASIndexedNodeContext *context = contexts[i];
-    ASCellNode *node = [context allocateNode];
-    if (node == nil) {
-      ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
-      node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
-    }
-    
-    [self _layoutNode:node withConstrainedSize:context.constrainedSize];
-#if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
-    [ASDataController _didLayoutNode];
-#endif
-    allocatedNodeBuffer[i] = node;
-  });
-
-  BOOL canceled = _dataSource == nil;
-
-  // Create nodes array
-  NSArray *nodes = canceled ? nil : [NSArray arrayWithObjects:allocatedNodeBuffer count:nodeCount];
-  
-  // Nil out buffer indexes to allow arc to free the stored cells.
-  for (int i = 0; i < nodeCount; i++) {
-    allocatedNodeBuffer[i] = nil;
+  // Gather the allocation operations.
+  NSMutableArray<NSOperation *> *operations = [NSMutableArray arrayWithCapacity:nodeCount];
+  for (ASIndexedNodeContext *context in contexts) {
+    [operations addObject:context.nodeCreationOperation];
   }
-  free(allocatedNodeBuffer);
+
+  // Enqueue the allocation operations, and wait for them to finish.
+  [[ASDataController nodeLayoutQueue] addOperations:operations waitUntilFinished:YES];
+
+  // Gather the nodes from the contexts.
+  NSMutableArray<ASCellNode *> *nodes = [NSMutableArray arrayWithCapacity:nodeCount];
+  for (ASIndexedNodeContext *context in contexts) {
+    [nodes addObject:context.node];
+  }
 
   return nodes;
 }

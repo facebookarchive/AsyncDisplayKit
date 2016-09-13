@@ -13,11 +13,11 @@
 #import "ASIndexedNodeContext.h"
 #import "ASEnvironmentInternal.h"
 #import "ASCellNode.h"
+#import "ASLayout.h"
 
 @interface ASIndexedNodeContext ()
 
-/// Required node block used to allocate a cell node. Nil after the first execution.
-@property (nonatomic, strong) ASCellNodeBlock nodeBlock;
+@property (atomic, nullable, strong) ASCellNode *node;
 
 @end
 
@@ -31,21 +31,35 @@
   NSAssert(nodeBlock != nil && indexPath != nil, @"Node block and index path must not be nil");
   self = [super init];
   if (self) {
-    _nodeBlock = nodeBlock;
     _indexPath = indexPath;
-    _constrainedSize = constrainedSize;
-    _environmentTraitCollection = environmentTraitCollection;
+
+    __weak __typeof(self) weakSelf = self;
+    _nodeCreationOperation = [NSBlockOperation blockOperationWithBlock:^{
+      __strong ASIndexedNodeContext *self = weakSelf;
+      if (self == nil) {
+        return;
+      }
+
+      // Allocate the node.
+      ASCellNode *node = nodeBlock();
+      if (node == nil) {
+        ASDisplayNodeAssertNotNil(node, @"Node block created nil node. indexPath: %@", indexPath);
+        node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
+      }
+
+      // Propagate environment state down.
+      ASEnvironmentStatePropagateDown(node, environmentTraitCollection);
+
+      // Measure the node.
+      CGRect frame = CGRectZero;
+      frame.size = [node layoutThatFits:constrainedSize].size;
+      node.frame = frame;
+
+      // Set the resulting node on self.
+      self.node = node;
+    }];
   }
   return self;
-}
-
-- (ASCellNode *)allocateNode
-{
-  NSAssert(_nodeBlock != nil, @"Node block is gone. Should not execute it more than once");
-  ASCellNode *node = _nodeBlock();
-  _nodeBlock = nil;
-  ASEnvironmentStatePropagateDown(node, _environmentTraitCollection);
-  return node;
 }
 
 + (NSArray<NSIndexPath *> *)indexPathsFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts

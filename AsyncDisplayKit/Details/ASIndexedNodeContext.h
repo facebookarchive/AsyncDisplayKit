@@ -13,22 +13,29 @@
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASEnvironment.h>
 
-@interface ASIndexedNodeContext : NSObject
+NS_ASSUME_NONNULL_BEGIN
 
-@property (nonatomic, readonly, strong) NSIndexPath *indexPath;
-@property (nonatomic, readonly, assign) ASSizeRange constrainedSize;
-@property (nonatomic, readonly, assign) ASEnvironmentTraitCollection environmentTraitCollection;
+@interface ASIndexedNodeContext : NSObject
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
                         indexPath:(NSIndexPath *)indexPath
                   constrainedSize:(ASSizeRange)constrainedSize
        environmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection;
 
+@property (nonatomic, readonly, strong) NSIndexPath *indexPath;
+
 /**
- * Returns a node allocated by executing node block. Node block will be nil out immediately.
+ * The node created by `nodeCreationOperation`. This will be nil until the operation is finished.
  */
-- (ASCellNode *)allocateNode;
+@property (atomic, readonly, nullable, strong) ASCellNode *node;
+
+/**
+ * An operation to allocate and measure the node.
+ */
+@property (nonatomic, readonly, strong) NSBlockOperation *nodeCreationOperation;
 
 + (NSArray<NSIndexPath *> *)indexPathsFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts;
 
 @end
+
+NS_ASSUME_NONNULL_END
