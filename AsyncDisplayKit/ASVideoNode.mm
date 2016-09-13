@@ -446,7 +446,7 @@ static NSString * const kRate = @"rate";
   ASDN::MutexLocker l(__instanceLock__);
   
   if (_shouldBePlaying || _shouldAutoplay) {
-    if(_player != nil && CMTIME_IS_VALID(_lastPlaybackTime)) {
+    if (_player != nil && CMTIME_IS_VALID(_lastPlaybackTime)) {
       [_player seekToTime:_lastPlaybackTime];
     }
     [self play];
@@ -460,10 +460,10 @@ static NSString * const kRate = @"rate";
   ASDN::MutexLocker l(__instanceLock__);
   
   if (_shouldBePlaying) {
-    if(_player != nil && CMTIME_IS_VALID(_player.currentTime)) {
+    [self pause];
+    if (_player != nil && CMTIME_IS_VALID(_player.currentTime)) {
       _lastPlaybackTime = _player.currentTime;
     }
-    [self pause];
     _shouldBePlaying = YES;
   }
 }
