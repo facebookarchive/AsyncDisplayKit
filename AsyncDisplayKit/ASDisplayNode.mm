@@ -308,6 +308,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)_initializeInstance
 {
   [self _staticInitialize];
+  _eventLogHead = -1;
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   
@@ -323,6 +324,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   _flags.canClearContentsOfLayer = YES;
   _flags.canCallSetNeedsDisplayOfLayer = YES;
+  ASDisplayNodeLogEvent(self, @"init");
 }
 
 - (instancetype)init
@@ -428,7 +430,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDisplayNodeAssertMainThread();
   // Synchronous nodes may not be able to call the hierarchy notifications, so only enforce for regular nodes.
-  ASDisplayNodeAssert(_flags.synchronous || !ASInterfaceStateIncludesVisible(_interfaceState), @"Node should always be marked invisible before deallocating; interfaceState: %lu, %@", (unsigned long)_interfaceState, self);
+  ASDisplayNodeAssert(_flags.synchronous || !ASInterfaceStateIncludesVisible(_interfaceState), @"Node should always be marked invisible before deallocating. Node: %@", self);
   
   self.asyncLayer.asyncDelegate = nil;
   _view.asyncdisplaykit_node = nil;
@@ -578,6 +580,51 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [self __didLoad];
   }
 }
+
+#if ASDISPLAYNODE_EVENTLOG_ENABLE
+- (void)_logEventWithBacktrace:(NSArray<NSString *> *)backtrace format:(NSString *)format, ...
+{
+  va_list args;
+  va_start(args, format);
+  ASTraceEvent *event = [[ASTraceEvent alloc] initWithObject:self
+                                                   backtrace:backtrace
+                                                      format:format
+                                                   arguments:args];
+  va_end(args);
+
+  ASDN::MutexLocker l(__instanceLock__);
+  // Create the array if needed.
+  if (_eventLog == nil) {
+    _eventLog = [NSMutableArray arrayWithCapacity:ASDISPLAYNODE_EVENTLOG_CAPACITY];
+  }
+
+	// Increment the head index.
+  _eventLogHead = (_eventLogHead + 1) % ASDISPLAYNODE_EVENTLOG_CAPACITY;
+  if (_eventLogHead < _eventLog.count) {
+    [_eventLog replaceObjectAtIndex:_eventLogHead withObject:event];
+  } else {
+    [_eventLog insertObject:event atIndex:_eventLogHead];
+  }
+}
+
+- (NSArray<ASTraceEvent *> *)eventLog
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  NSUInteger tail = (_eventLogHead + 1);
+  NSUInteger count = _eventLog.count;
+
+  NSMutableArray<ASTraceEvent *> *result = [NSMutableArray array];
+
+  // Start from `tail` and go through array, wrapping around when we exceed end index.
+  for (NSUInteger actualIndex = 0; actualIndex < ASDISPLAYNODE_EVENTLOG_CAPACITY; actualIndex++) {
+    NSInteger ringIndex = (tail + actualIndex) % ASDISPLAYNODE_EVENTLOG_CAPACITY;
+    if (ringIndex < count) {
+      [result addObject:_eventLog[ringIndex]];
+    }
+  }
+  return result;
+}
+#endif
 
 - (UIView *)view
 {
@@ -1639,6 +1686,7 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
     _subnodes = [[NSMutableArray alloc] init];
   }
 
+  ASDisplayNodeLogEvent(self, @"%@ %@", NSStringFromSelector(_cmd), subnode);
   [_subnodes addObject:subnode];
   
   // This call will apply our .hierarchyState to the new subnode.
@@ -1694,6 +1742,7 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   
   if (!_subnodes)
     _subnodes = [[NSMutableArray alloc] init];
+  ASDisplayNodeLogEvent(self, @"%@: %@", NSStringFromSelector(_cmd), subnode);
   [_subnodes insertObject:subnode atIndex:subnodeIndex];
   [subnode __setSupernode:self];
   
@@ -1938,6 +1987,7 @@ static NSInteger incrementIfFound(NSInteger i) {
     return;
   }
 
+  ASDisplayNodeLogEvent(self, @"%@: %@", NSStringFromSelector(_cmd), subnode);
   [_subnodes removeObjectIdenticalTo:subnode];
 
   [subnode __setSupernode:nil];
@@ -2150,6 +2200,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   }
   
   if (supernodeDidChange) {
+    ASDisplayNodeLogEvent(self, @"supernodeDidChange: %@, oldValue = %@", ASObjectDescriptionMakeTiny(newSupernode), ASObjectDescriptionMakeTiny(oldSupernode));
     // Hierarchy state
     ASHierarchyState stateToEnterOrExit = (newSupernode ? newSupernode.hierarchyState
                                                         : oldSupernode.hierarchyState);
@@ -2415,11 +2466,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       ASLayoutableValidateLayout(layout);
 #endif
     }
+    ASDisplayNodeLogEvent(self, @"computedLayout: %@", layout);
     return [layout filteredNodeLayoutTree];
   } else {
     // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
     // assume that the default implementation of -calculateSizeThatFits: returns it.
     CGSize size = [self calculateSizeThatFits:constrainedSize.max];
+    ASDisplayNodeLogEvent(self, @"calculatedSize: %@", NSStringFromCGSize(size));
     return [ASLayout layoutWithLayoutable:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:nil];
   }
 }
@@ -2558,6 +2611,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(__instanceLock__);
   
+  ASDisplayNodeLogEvent(self, @"didLoad");
   for (ASDisplayNodeDidLoadBlock block in _onDidLoadBlocks) {
     block(self);
   }
@@ -2758,8 +2812,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   
   if (nowPreload != wasPreload) {
     if (nowPreload) {
+      ASDisplayNodeLogEvent(self, @"didEnterPreloadState: %@", NSStringFromASInterfaceState(newState));
       [self didEnterPreloadState];
     } else {
+      ASDisplayNodeLogEvent(self, @"didExitPreloadState: %@", NSStringFromASInterfaceState(newState));
       [self didExitPreloadState];
     }
   }
@@ -2806,8 +2862,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     }
     
     if (nowDisplay) {
+      ASDisplayNodeLogEvent(self, @"didEnterDisplayState: %@", NSStringFromASInterfaceState(newState));
       [self didEnterDisplayState];
     } else {
+      ASDisplayNodeLogEvent(self, @"didExitDisplayState: %@", NSStringFromASInterfaceState(newState));
       [self didExitDisplayState];
     }
   }
@@ -2819,8 +2877,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
   if (nowVisible != wasVisible) {
     if (nowVisible) {
+      ASDisplayNodeLogEvent(self, @"didEnterVisibleState: %@", NSStringFromASInterfaceState(newState));
       [self didEnterVisibleState];
     } else {
+      ASDisplayNodeLogEvent(self, @"didExitVisibleState: %@", NSStringFromASInterfaceState(newState));
       [self didExitVisibleState];
     }
   }
@@ -2848,6 +2908,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (interfaceState == ASInterfaceStateNone) {
     return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
   }
+  ASDisplayNodeLogEvent(self, @"%@ %@", NSStringFromSelector(_cmd), NSStringFromASInterfaceState(interfaceState));
   ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
     node.interfaceState &= (~interfaceState);
   });
@@ -2922,10 +2983,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       }
     }
   }
-  
-  if (newState != oldState) {
-    LOG(@"setHierarchyState: oldState = %lu, newState = %lu", (unsigned long)oldState, (unsigned long)newState);
-  }
+
+  ASDisplayNodeLogEvent(self, @"setHierarchyState: oldState = %@, newState = %@", NSStringFromASHierarchyState(oldState), NSStringFromASHierarchyState(newState));
 }
 
 - (void)enterHierarchyState:(ASHierarchyState)hierarchyState
@@ -2972,6 +3031,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDisplayNodeAssertMainThread();
 
+  ASDisplayNodeLogEvent(self, @"displayWillStart");
   // in case current node takes longer to display than it's subnodes, treat it as a dependent node
   [self _pendingNodeWillDisplay:self];
 
@@ -2982,6 +3042,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDisplayNodeAssertMainThread();
   
+  ASDisplayNodeLogEvent(self, @"displayDidFinish");
   [self _pendingNodeDidDisplay:self];
 
   [_supernode subnodeDisplayDidFinish:self];
@@ -3340,15 +3401,15 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   }
 
   if (self.layerBacked) {
-    CALayer *rootLayer = self.layer;
+    CALayer *rootLayer = _layer;
     CALayer *nextLayer = rootLayer;
     while ((nextLayer = rootLayer.superlayer) != nil) {
       rootLayer = nextLayer;
     }
 
-    return [self.layer convertRect:self.threadSafeBounds toLayer:rootLayer];
+    return [_layer convertRect:self.threadSafeBounds toLayer:rootLayer];
   } else {
-    return [self.view convertRect:self.threadSafeBounds toView:nil];
+    return [_view convertRect:self.threadSafeBounds toView:nil];
   }
 }
 
@@ -3398,6 +3459,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 {
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, _environmentState.environmentTraitCollection) == NO) {
     _environmentState.environmentTraitCollection = environmentTraitCollection;
+    ASDisplayNodeLogEvent(self, @"asyncTraitCollectionDidChange: %@", NSStringFromASEnvironmentTraitCollection(environmentTraitCollection));
     [self asyncTraitCollectionDidChange];
   }
 }
@@ -3413,7 +3475,7 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (void)asyncTraitCollectionDidChange
 {
-
+  // Subclass override
 }
 
 #if TARGET_OS_TV

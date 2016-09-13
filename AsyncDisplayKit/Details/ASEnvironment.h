@@ -76,7 +76,7 @@ extern ASEnvironmentTraitCollection ASEnvironmentTraitCollectionMakeDefault();
 
 extern ASEnvironmentTraitCollection ASEnvironmentTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection);
 extern BOOL ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(ASEnvironmentTraitCollection lhs, ASEnvironmentTraitCollection rhs);
-
+extern NSString *NSStringFromASEnvironmentTraitCollection(ASEnvironmentTraitCollection traits);
 #pragma mark - ASEnvironmentState
 
 typedef struct ASEnvironmentState {

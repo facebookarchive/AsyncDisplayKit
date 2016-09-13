@@ -10,7 +10,8 @@
 #import <UIKit/UIKit.h>
 #import "NSIndexSet+ASHelpers.h"
 
-NSString *ASGetDescriptionValueString(id object) {
+NSString *ASGetDescriptionValueString(id object)
+{
   if ([object isKindOfClass:[NSValue class]]) {
     // Use shortened NSValue descriptions
     NSValue *value = object;
@@ -37,18 +38,33 @@ NSString *ASGetDescriptionValueString(id object) {
   return [object description];
 }
 
-NSString *ASObjectDescriptionMake(__autoreleasing id object, NSArray<NSDictionary *> *propertyGroups) {
-  NSMutableString *str = [NSMutableString stringWithFormat:@"<%@: %p", [object class], object];
-
+NSString *_ASObjectDescriptionMakePropertyList(NSArray<NSDictionary *> * _Nullable propertyGroups)
+{
   NSMutableArray *components = [NSMutableArray array];
   for (NSDictionary *properties in propertyGroups) {
     [properties enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, id  _Nonnull obj, BOOL * _Nonnull stop) {
       [components addObject:[NSString stringWithFormat:@"%@ = %@", key, ASGetDescriptionValueString(obj)]];
     }];
   }
-  if (components.count > 0) {
-    [str appendString:@"; "];
-    [str appendString:[components componentsJoinedByString:@"; "]];
+  return [components componentsJoinedByString:@"; "];
+}
+
+NSString *ASObjectDescriptionMakeWithoutObject(NSArray<NSDictionary *> * _Nullable propertyGroups)
+{
+  return [NSString stringWithFormat:@"{ %@ }", _ASObjectDescriptionMakePropertyList(propertyGroups)];
+}
+
+NSString *ASObjectDescriptionMake(__autoreleasing id object, NSArray<NSDictionary *> *propertyGroups)
+{
+  if (object == nil) {
+    return @"(null)";
+  }
+
+  NSMutableString *str = [NSMutableString stringWithFormat:@"<%@: %p", [object class], object];
+
+  NSString *propList = _ASObjectDescriptionMakePropertyList(propertyGroups);
+  if (propList.length > 0) {
+    [str appendFormat:@"; %@", propList];
   }
   [str appendString:@">"];
   return str;

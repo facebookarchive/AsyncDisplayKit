@@ -10,6 +10,7 @@
 
 #import "ASDisplayNode.h"
 #import "ASLayoutRangeType.h"
+#import "ASTraceEvent.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,6 +18,20 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
 void ASPerformBlockOnMainThread(void (^block)());
 void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
 ASDISPLAYNODE_EXTERN_C_END
+
+#ifndef ASDISPLAYNODE_EVENTLOG_CAPACITY
+#define ASDISPLAYNODE_EVENTLOG_CAPACITY 20
+#endif
+
+#ifndef ASDISPLAYNODE_EVENTLOG_ENABLE
+#define ASDISPLAYNODE_EVENTLOG_ENABLE DEBUG
+#endif
+
+#if ASDISPLAYNODE_EVENTLOG_ENABLE
+#define ASDisplayNodeLogEvent(node, ...) [node _logEventWithBacktrace:[NSThread callStackSymbols] format:__VA_ARGS__]
+#else
+#define ASDisplayNodeLogEvent(node, ...)
+#endif
 
 /**
  * Bitmask to indicate what performance measurements the cell should record.
@@ -109,6 +124,20 @@ extern NSString *const ASDisplayNodeLayoutGenerationNumberOfPassesKey;
  * enabling .neverShowPlaceholders on ASCellNodes so that the navigation operation is blocked on redisplay completing, etc.
  */
 + (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode;
+
+#if ASDISPLAYNODE_EVENTLOG_ENABLE
+
+/**
+ * The primitive event tracing method. You shouldn't call this. Use the ASDisplayNodeLogEvent macro instead.
+ */
+- (void)_logEventWithBacktrace:(NSArray<NSString *> *)backtrace format:(NSString *)format, ... NS_FORMAT_FUNCTION(2, 3);
+
+/**
+ * @abstract The most recent trace events for this node. Max count is ASDISPLAYNODE_EVENTLOG_CAPACITY.
+ */
+@property (readonly, copy) NSArray *eventLog;
+
+#endif
 
 @end
 

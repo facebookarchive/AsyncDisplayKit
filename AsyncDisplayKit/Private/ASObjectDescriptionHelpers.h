@@ -36,12 +36,10 @@ NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
-/**
- * Returns e.g. <MYObject: 0xFFFFFFFF; name = "Object Name"; frame = (0 0; 50 50)>
- *
- * Note: `object` param is autoreleasing so that this function is dealloc-safe.
- *   No, unsafe_unretained isn't acceptable here – the optimizer may deallocate object early.
- */
+/// Useful for structs etc. Returns e.g. { position = (0 0); frame = (0 0; 50 50) }
+NSString *ASObjectDescriptionMakeWithoutObject(NSArray<NSDictionary *> * _Nullable propertyGroups);
+
+/// Returns e.g. <MYObject: 0xFFFFFFFF; name = "Object Name"; frame = (0 0; 50 50)>
 NSString *ASObjectDescriptionMake(__autoreleasing id object, NSArray<NSDictionary *> * _Nullable propertyGroups);
 
 /**
