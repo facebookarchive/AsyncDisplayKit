@@ -448,6 +448,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _layer.delegate = nil;
   _layer = nil;
 
+  // TODO: Remove this? If supernode isn't already nil, this method isn't dealloc-safe anyway.
   [self __setSupernode:nil];
   _pendingViewState = nil;
 

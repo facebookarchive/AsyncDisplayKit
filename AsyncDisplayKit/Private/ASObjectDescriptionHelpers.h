@@ -36,11 +36,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
-/// Returns e.g. <MYObject: 0xFFFFFFFF; name = "Object Name"; frame = (0 0; 50 50)>
-NSString *ASObjectDescriptionMake(id object, NSArray<NSDictionary *> * _Nullable propertyGroups);
+/**
+ * Returns e.g. <MYObject: 0xFFFFFFFF; name = "Object Name"; frame = (0 0; 50 50)>
+ *
+ * Note: `object` param is autoreleasing so that this function is dealloc-safe.
+ *   No, unsafe_unretained isn't acceptable here – the optimizer may deallocate object early.
+ */
+NSString *ASObjectDescriptionMake(__autoreleasing id object, NSArray<NSDictionary *> * _Nullable propertyGroups);
 
-/// Returns e.g. <MYObject: 0xFFFFFFFF>
-NSString *ASObjectDescriptionMakeTiny(id object);
+/**
+ * Returns e.g. <MYObject: 0xFFFFFFFF>
+ *
+ * Note: `object` param is autoreleasing so that this function is dealloc-safe.
+ *   No, unsafe_unretained isn't acceptable here – the optimizer may deallocate object early.
+ */
+NSString *ASObjectDescriptionMakeTiny(__autoreleasing id object);
 
 NSString * _Nullable ASStringWithQuotesIfMultiword(NSString * _Nullable string);
 
