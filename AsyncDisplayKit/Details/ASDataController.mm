@@ -127,18 +127,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   return parallelProcessorCount;
 }
 
-+ (NSOperationQueue *)nodeLayoutQueue
-{
-  static NSOperationQueue *nodeLayoutQueue;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    nodeLayoutQueue = [[NSOperationQueue alloc] init];
-    nodeLayoutQueue.name = @"org.AsyncDisplayKit.ASDataController.nodeLayoutQueue";
-    nodeLayoutQueue.maxConcurrentOperationCount = [NSProcessInfo processInfo].processorCount * 2;
-  });
-  return nodeLayoutQueue;
-}
-
 #pragma mark - Cell Layout
 
 - (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts batchCompletion:(ASDataControllerCompletionBlock)batchCompletionHandler
@@ -193,14 +181,10 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     return nil;
   }
 
-  // Gather the allocation operations.
-  NSMutableArray<NSOperation *> *operations = [NSMutableArray arrayWithCapacity:nodeCount];
+  // Begin all the allocations.
   for (ASIndexedNodeContext *context in contexts) {
-    [operations addObject:context.nodeCreationOperation];
+    [context beginMeasuringNode];
   }
-
-  // Enqueue the allocation operations, and wait for them to finish.
-  [[ASDataController nodeLayoutQueue] addOperations:operations waitUntilFinished:YES];
 
   // Gather the nodes from the contexts.
   NSMutableArray<ASCellNode *> *nodes = [NSMutableArray arrayWithCapacity:nodeCount];
