@@ -1,12 +1,12 @@
 //
-//  PlaygroundNode.m
+//  PhotoPostNode.m
 //  ASLayoutSpecPlayground
 //
 //  Created by Hannah Troisi on 3/11/16.
 //  Copyright © 2016 Hannah Troisi. All rights reserved.
 //
 
-#import "PlaygroundNode.h"
+#import "PhotoPostNode.h"
 #import "AsyncDisplayKit+Debug.h"
 #import "Utilities.h"
 
@@ -15,7 +15,7 @@
 #define VERTICAL_BUFFER         5
 #define FONT_SIZE               20
 
-@implementation PlaygroundNode
+@implementation PhotoPostNode
 {
   NSUInteger          _index;
   ASNetworkImageNode  *_userAvatarImageView;
@@ -47,7 +47,7 @@
     
     [_userAvatarImageView setImageModificationBlock:^UIImage *(UIImage *image) {   // FIXME: in framework autocomplete for setImageModificationBlock line seems broken
       CGSize profileImageSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
-      return [image makeCircularImageWithSize:profileImageSize];
+      return [image makeCircularImageWithSize:profileImageSize withBorderWidth:0];
     }];
     
     _userNameLabel                  = [[ASTextNode alloc] init];
@@ -69,8 +69,6 @@
     _photoDescriptionLabel                      = [[ASTextNode alloc] init];
     _photoDescriptionLabel.attributedString     = [self descriptionAttributedStringWithFontSize:FONT_SIZE];
     _photoDescriptionLabel.maximumNumberOfLines = 3;
-    
-    
   }
   
   return self;

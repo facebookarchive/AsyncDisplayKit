@@ -38,7 +38,7 @@
 
 @implementation UIImage (Additions)
 
-- (UIImage *)makeCircularImageWithSize:(CGSize)size
+- (UIImage *)makeCircularImageWithSize:(CGSize)size withBorderWidth:(CGFloat)width
 {
   // make a CGRect with the image's size
   CGRect circleRect = (CGRect) {CGPointZero, size};
@@ -52,15 +52,18 @@
   // clip to the circle
   [circle addClip];
   
+  [[UIColor whiteColor] set];
+  [circle fill];
+  
   // draw the image in the circleRect *AFTER* the context is clipped
   [self drawInRect:circleRect];
   
   // create a border (for white background pictures)
-#if StrokeRoundedImages
-  circle.lineWidth = 1;
-  [[UIColor darkGrayColor] set];
-  [circle stroke];
-#endif
+  if (width > 0) {
+    circle.lineWidth = width;
+    [[UIColor whiteColor] set];
+    [circle stroke];
+  }
   
   // get an image from the image context
   UIImage *roundedImage = UIGraphicsGetImageFromCurrentImageContext();

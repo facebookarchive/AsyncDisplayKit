@@ -20,7 +20,7 @@
 
 @interface UIImage (Additions)
 
-- (UIImage *)makeCircularImageWithSize:(CGSize)size;
+- (UIImage *)makeCircularImageWithSize:(CGSize)size withBorderWidth:(CGFloat)width;
 
 @end
 

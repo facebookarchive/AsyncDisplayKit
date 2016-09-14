@@ -7,7 +7,8 @@
 //
 
 #import "PlaygroundContainerNode.h"
-#import "PlaygroundNode.h"
+#import "LayoutExampleNodes.h"
+#import "PhotoPostNode.h"
 #import "ASLayoutableInspectorNode.h"  // FIXME: move to ASLayoutSpecDebug
 #import "AsyncDisplayKit+Debug.h"
 
@@ -15,12 +16,28 @@
 
 @implementation PlaygroundContainerNode
 {
-  PlaygroundNode *_playgroundNode;
+  ASDisplayNode  *_playgroundNode;
   ASImageNode    *_resizeHandle;
   CGPoint        _resizeStartLocation;
 }
 
 #pragma mark - Lifecycle
+
++ (NSUInteger)containerNodeCount
+{
+  return 5;
+}
+
++ (ASDisplayNode *)nodeForIndex:(NSUInteger)index
+{
+  switch (index) {
+    case 0: return [[HorizontalStackWithSpacer alloc] init];
+    case 1: return [[PhotoWithInsetTextOverlay alloc] init];
+    case 2: return [[PhotoWithOutsetIconOverlay alloc] init];
+    case 3: return [[PhotoPostNode alloc] initWithIndex:0];
+    default: return [[PhotoPostNode alloc] initWithIndex:1];
+  }
+}
 
 - (instancetype)initWithIndex:(NSUInteger)index
 {
@@ -30,7 +47,7 @@
     self.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
     self.usesImplicitHierarchyManagement = YES;
     
-    _playgroundNode = [[PlaygroundNode alloc] initWithIndex:index];
+    _playgroundNode = [[self class] nodeForIndex:index];
     
     _resizeHandle                        = [[ASImageNode alloc] init];
     _resizeHandle.image                  = [UIImage imageNamed:@"resizeHandle"];

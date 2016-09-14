@@ -218,19 +218,15 @@
 		764D83D51C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = 764D83D21C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		764D83D61C8EA515009B4FB8 /* AsyncDisplayKit+Debug.m in Sources */ = {isa = PBXBuildFile; fileRef = 764D83D31C8EA515009B4FB8 /* AsyncDisplayKit+Debug.m */; };
 		767E7F8E1C90191D0066C000 /* AsyncDisplayKit+Debug.m in Sources */ = {isa = PBXBuildFile; fileRef = 764D83D31C8EA515009B4FB8 /* AsyncDisplayKit+Debug.m */; };
-		76A64B6B1CA8CD4900967B8F /* ASLayoutableInspectorCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 76A64B691CA8CD4900967B8F /* ASLayoutableInspectorCell.h */; };
 		76A64B6C1CA8CD4900967B8F /* ASLayoutableInspectorCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 76A64B691CA8CD4900967B8F /* ASLayoutableInspectorCell.h */; };
 		76A64B6D1CA8CD4900967B8F /* ASLayoutableInspectorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 76A64B6A1CA8CD4900967B8F /* ASLayoutableInspectorCell.m */; };
 		76A64B6E1CA8CD4900967B8F /* ASLayoutableInspectorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 76A64B6A1CA8CD4900967B8F /* ASLayoutableInspectorCell.m */; };
-		76C078261C9F455F00E37AB1 /* ASLayoutSpec+Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = 76C078241C9F455E00E37AB1 /* ASLayoutSpec+Debug.h */; };
 		76C078271C9F455F00E37AB1 /* ASLayoutSpec+Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = 76C078241C9F455E00E37AB1 /* ASLayoutSpec+Debug.h */; };
 		76C078281C9F455F00E37AB1 /* ASLayoutSpec+Debug.m in Sources */ = {isa = PBXBuildFile; fileRef = 76C078251C9F455E00E37AB1 /* ASLayoutSpec+Debug.m */; };
 		76C078291C9F455F00E37AB1 /* ASLayoutSpec+Debug.m in Sources */ = {isa = PBXBuildFile; fileRef = 76C078251C9F455E00E37AB1 /* ASLayoutSpec+Debug.m */; };
-		76C0782C1C9F459C00E37AB1 /* ASLayoutableInspectorNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 76C0782A1C9F459C00E37AB1 /* ASLayoutableInspectorNode.h */; };
 		76C0782D1C9F459C00E37AB1 /* ASLayoutableInspectorNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 76C0782A1C9F459C00E37AB1 /* ASLayoutableInspectorNode.h */; };
 		76C0782E1C9F459C00E37AB1 /* ASLayoutableInspectorNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 76C0782B1C9F459C00E37AB1 /* ASLayoutableInspectorNode.m */; };
 		76C0782F1C9F459C00E37AB1 /* ASLayoutableInspectorNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 76C0782B1C9F459C00E37AB1 /* ASLayoutableInspectorNode.m */; };
-		76E5FDFA1CA8EF12000164C0 /* ASLayoutableInspectorCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 76E5FDF81CA8EF12000164C0 /* ASLayoutableInspectorCell.h */; };
 		76E5FDFB1CA8EF12000164C0 /* ASLayoutableInspectorCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 76E5FDF81CA8EF12000164C0 /* ASLayoutableInspectorCell.h */; };
 		76E5FDFC1CA8EF12000164C0 /* ASLayoutableInspectorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 76E5FDF91CA8EF12000164C0 /* ASLayoutableInspectorCell.m */; };
 		76E5FDFD1CA8EF12000164C0 /* ASLayoutableInspectorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 76E5FDF91CA8EF12000164C0 /* ASLayoutableInspectorCell.m */; };
@@ -1911,12 +1907,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 058D09D2195D04C000B7D73C /* Build configuration list for PBXNativeTarget "AsyncDisplayKitTests" */;
 			buildPhases = (
+				984076B20AEB7145F89C1603 /* 📦 Check Pods Manifest.lock */,
 				2E61B6A0DB0F436A9DDBE86F /* [CP] Check Pods Manifest.lock */,
 				058D09B8195D04C000B7D73C /* Sources */,
 				058D09B9195D04C000B7D73C /* Frameworks */,
 				058D09BA195D04C000B7D73C /* Resources */,
 				3B9D88CDF51B429C8409E4B6 /* [CP] Copy Pods Resources */,
 				B130AB1AC0A1E5162E211C19 /* [CP] Embed Pods Frameworks */,
+				7FB76552D76CCFC44DED9CBC /* 📦 Embed Pods Frameworks */,
+				C679B9DDCBA9F4DAF2104989 /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -2047,6 +2046,36 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		7FB76552D76CCFC44DED9CBC /* 📦 Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		984076B20AEB7145F89C1603 /* 📦 Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
 		B130AB1AC0A1E5162E211C19 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2060,6 +2089,21 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C679B9DDCBA9F4DAF2104989 /* 📦 Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -2251,7 +2295,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				76C078291C9F455F00E37AB1 /* ASLayoutSpec+Debug.m in Sources */,
-				DE4843DB1C93EAB100A1F33B /* ASDisplayNodeLayoutContext.mm in Sources */,
+				DE4843DB1C93EAB100A1F33B /* ASLayoutTransition.mm in Sources */,
 				9C70F2091CDABA36007D6C76 /* ASViewController.mm in Sources */,
 				8BBBAB8D1CEBAF1E00107FC6 /* ASDefaultPlaybackButton.m in Sources */,
 				DE4843DB1C93EAB100A1F33B /* ASLayoutTransition.mm in Sources */,

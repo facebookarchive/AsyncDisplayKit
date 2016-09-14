@@ -40,7 +40,7 @@
 
 - (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode
 {
-  return 2;
+  return [PlaygroundContainerNode containerNodeCount];
 }
 
 - (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index

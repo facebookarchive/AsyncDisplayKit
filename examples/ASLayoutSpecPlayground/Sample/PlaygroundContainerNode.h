@@ -18,6 +18,7 @@
 
 @property (nonatomic, weak) id<PlaygroundContainerNodeDelegate> delegate;
 
++ (NSUInteger)containerNodeCount;
 - (instancetype)initWithIndex:(NSUInteger)index;
 
 @end
