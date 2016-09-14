@@ -15,6 +15,7 @@ ASEnvironmentLayoutOptionsState ASEnvironmentLayoutOptionsStateMakeDefault()
 {
   return (ASEnvironmentLayoutOptionsState) {
     // Default values can be defined in here
+    .flexShrink = YES
   };
 }
 
