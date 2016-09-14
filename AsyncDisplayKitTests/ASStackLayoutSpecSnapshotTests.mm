@@ -55,9 +55,9 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   XCTAssertEqual(displayNode.flexShrink, YES);
   XCTAssertEqual(displayNode.flexGrow, NO);
   
-  const ASDimension unconstrainedDimension = ASDimensionUnconstrained;
+  const ASDimension unconstrainedDimension = ASDimensionAuto;
   const ASDimension flexBasis = displayNode.flexBasis;
-  XCTAssertEqual(flexBasis.type, unconstrainedDimension.type);
+  XCTAssertEqual(flexBasis.unit, unconstrainedDimension.unit);
   XCTAssertEqual(flexBasis.value, unconstrainedDimension.value);
 }
 
