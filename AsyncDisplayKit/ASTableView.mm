@@ -1164,7 +1164,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)didLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell
 {
   ASCellNode *node = tableViewCell.node;
-  if (node == nil) {
+  if (node == nil || _asyncDataSource == nil) {
     return;
   }
   
