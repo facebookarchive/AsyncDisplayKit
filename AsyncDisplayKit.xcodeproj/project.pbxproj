@@ -431,6 +431,7 @@
 		CC4C2A771D88E3BF0039ACAB /* ASTraceEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4C2A751D88E3BF0039ACAB /* ASTraceEvent.h */; };
 		CC4C2A781D88E3BF0039ACAB /* ASTraceEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4C2A761D88E3BF0039ACAB /* ASTraceEvent.m */; };
 		CC4C2A791D88E3BF0039ACAB /* ASTraceEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4C2A761D88E3BF0039ACAB /* ASTraceEvent.m */; };
+		CC4C2A7A1D8902350039ACAB /* ASTraceEvent.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CC4C2A751D88E3BF0039ACAB /* ASTraceEvent.h */; };
 		CC54A81C1D70079800296A24 /* ASDispatch.h in Headers */ = {isa = PBXBuildFile; fileRef = CC54A81B1D70077A00296A24 /* ASDispatch.h */; };
 		CC54A81E1D7008B300296A24 /* ASDispatchTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC54A81D1D7008B300296A24 /* ASDispatchTests.m */; };
 		CC7FD9DF1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; };
@@ -649,6 +650,7 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				CC4C2A7A1D8902350039ACAB /* ASTraceEvent.h in CopyFiles */,
 				CC88F7AE1D80AF5E000D6D4E /* ASObjectDescriptionHelpers.h in CopyFiles */,
 				F7CE6C981D2CDB5800BE4C15 /* ASInternalHelpers.h in CopyFiles */,
 				F7CE6CB71D2CE2D000BE4C15 /* ASLayoutableExtensibility.h in CopyFiles */,
