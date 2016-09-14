@@ -182,6 +182,15 @@ NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *multidimensiona
   return res;
 }
 
+void ASMoveElementInTwoDimensionalArray(NSMutableArray *mutableArray, NSIndexPath *sourceIndexPath, NSIndexPath *destinationIndexPath)
+{
+  NSMutableArray *oldSection = mutableArray[sourceIndexPath.section];
+  NSInteger oldItem = sourceIndexPath.item;
+  id object = oldSection[oldItem];
+  [oldSection removeObjectAtIndex:oldItem];
+  [mutableArray[destinationIndexPath.section] insertObject:object atIndex:destinationIndexPath.item];
+}
+
 NSArray<NSIndexPath *> *ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths(NSArray *multidimensionalArray, NSArray<NSIndexPath *> *indexPaths)
 {
   NSMutableArray *res = [NSMutableArray array];
