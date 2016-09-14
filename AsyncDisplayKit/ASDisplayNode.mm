@@ -1406,6 +1406,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   CGSize calculatedLayoutSize = CGSizeZero;
   {
     ASDN::MutexLocker l(__instanceLock__);
+    supportsRangeManagedInterfaceState = [self supportsRangeManagedInterfaceState];
     hasDirtyLayout = [self _hasDirtyLayout];
     calculatedLayoutSize = _calculatedLayout.size;
   }
