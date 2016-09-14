@@ -92,8 +92,6 @@
 
 - (void)layout
 {
-  [super layout];
-  
   CGSize boundsSize = self.bounds.size;
   CGSize textSize = _textNode.calculatedSize;
   CGRect textRect = CGRectMake(roundf((boundsSize.width - textSize.width) / 2.0),

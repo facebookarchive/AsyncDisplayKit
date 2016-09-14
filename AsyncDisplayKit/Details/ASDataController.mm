@@ -155,7 +155,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 - (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
 {
   CGRect frame = CGRectZero;
-  frame.size = [node layoutThatFits:constrainedSize].size;
+  frame.size = [node measureWithSizeRange:constrainedSize].size;
   node.frame = frame;
 }
 

@@ -34,7 +34,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
     layout = queue.front();
     queue.pop();
     
-    if (layout.layoutable.canLayoutAsynchronous == NO) {
+    if (layout.layoutableObject.canLayoutAsynchronous == NO) {
       return NO;
     }
     
@@ -58,8 +58,8 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 }
 
 - (instancetype)initWithNode:(ASDisplayNode *)node
-               pendingLayout:(std::shared_ptr<ASDisplayNodeLayout>)pendingLayout
-              previousLayout:(std::shared_ptr<ASDisplayNodeLayout>)previousLayout
+               pendingLayout:(ASLayout *)pendingLayout
+              previousLayout:(ASLayout *)previousLayout
 {
   self = [super init];
   if (self) {
@@ -72,16 +72,10 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
   return self;
 }
 
-- (instancetype)init
-{
-  ASDisplayNodeAssert(NO, @"Use the designated initializer");
-  return [self init];
-}
-
 - (BOOL)isSynchronous
 {
   ASDN::MutexSharedLocker l(__instanceLock__);
-  return !ASLayoutCanTransitionAsynchronous(_pendingLayout->layout);
+  return !ASLayoutCanTransitionAsynchronous(_pendingLayout);
 }
 
 - (void)commitTransition
@@ -118,27 +112,23 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
   if (_calculatedSubnodeOperations) {
     return;
   }
-  
-  ASLayout *previousLayout = _previousLayout->layout;
-  ASLayout *pendingLayout = _pendingLayout->layout;
-
-  if (previousLayout) {
+  if (_previousLayout) {
     NSIndexSet *insertions, *deletions;
-    [previousLayout.sublayouts asdk_diffWithArray:pendingLayout.sublayouts
-                                       insertions:&insertions
-                                        deletions:&deletions
-                                     compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
-                                       return ASObjectIsEqual(lhs.layoutable, rhs.layoutable);
-                                     }];
-    findNodesInLayoutAtIndexes(pendingLayout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
-    findNodesInLayoutAtIndexesWithFilteredNodes(previousLayout,
-                                                deletions,
-                                                _insertedSubnodes,
-                                                &_removedSubnodes,
-                                                &_removedSubnodePositions);
+    [_previousLayout.sublayouts asdk_diffWithArray:_pendingLayout.sublayouts
+                                                 insertions:&insertions
+                                                  deletions:&deletions
+                                               compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
+                                                 return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
+                                               }];
+    findNodesInLayoutAtIndexes(_pendingLayout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
+    findNodesInLayoutAtIndexesWithFilteredNodes(_previousLayout,
+                                                      deletions,
+                                                      _insertedSubnodes,
+                                                      &_removedSubnodes,
+                                                      &_removedSubnodePositions);
   } else {
-    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [pendingLayout.sublayouts count])];
-    findNodesInLayoutAtIndexes(pendingLayout, indexes, &_insertedSubnodes, &_insertedSubnodePositions);
+    NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_pendingLayout.sublayouts count])];
+    findNodesInLayoutAtIndexes(_pendingLayout, indexes, &_insertedSubnodes, &_insertedSubnodePositions);
     _removedSubnodes = nil;
   }
   _calculatedSubnodeOperations = YES;
@@ -170,9 +160,9 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 {
   ASDN::MutexSharedLocker l(__instanceLock__);
   if ([key isEqualToString:ASTransitionContextFromLayoutKey]) {
-    return _previousLayout->layout;
+    return _previousLayout;
   } else if ([key isEqualToString:ASTransitionContextToLayoutKey]) {
-    return _pendingLayout->layout;
+    return _pendingLayout;
   } else {
     return nil;
   }
@@ -182,9 +172,9 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 {
   ASDN::MutexSharedLocker l(__instanceLock__);
   if ([key isEqualToString:ASTransitionContextFromLayoutKey]) {
-    return _previousLayout->constrainedSize;
+    return _previousLayout.constrainedSizeRange;
   } else if ([key isEqualToString:ASTransitionContextToLayoutKey]) {
-    return _pendingLayout->constrainedSize;
+    return _pendingLayout.constrainedSizeRange;
   } else {
     return ASSizeRangeMake(CGSizeZero, CGSizeZero);
   }
@@ -222,7 +212,7 @@ static inline void findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
   for (ASLayout *sublayout in layout.sublayouts) {
     if (idx > lastIndex) { break; }
     if (idx >= firstIndex && [indexes containsIndex:idx]) {
-      ASDisplayNode *node = (ASDisplayNode *)sublayout.layoutable;
+      ASDisplayNode *node = (ASDisplayNode *)sublayout.layoutableObject;
       ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
       // Ignore the odd case in which a non-node sublayout is accessed and the type cast fails
       if (node != nil) {

@@ -14,12 +14,10 @@
 
 #import "_ASDisplayLayer.h"
 #import "ASAssert.h"
-#import "ASDimension.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+Beta.h"
-#import "ASLayout.h"
 #import "ASTextNode.h"
 #import "ASImageNode+AnimatedImagePrivate.h"
 
@@ -188,23 +186,13 @@ struct ASImageNodeDrawParameters {
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   ASDN::MutexLocker l(__instanceLock__);
-  
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  // If a preferredFrameSize is set, call the superclass to return that instead of using the image size.
-  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
-#if DEBUG
-    NSLog(@"Using -[ASDisplayNode preferredFrameSize] is deprecated.");
-#endif
-    return self.preferredFrameSize;
-  }
-#pragma clang diagnostic pop
-  
-  if (_image == nil) {
-      return constrainedSize;
-  }
-
-  return _image.size;
+  // if a preferredFrameSize is set, call the superclass to return that instead of using the image size.
+  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO)
+    return [super calculateSizeThatFits:constrainedSize];
+  else if (_image)
+    return _image.size;
+  else
+    return CGSizeZero;
 }
 
 #pragma mark - Setter / Getter
@@ -657,7 +645,7 @@ static ASDN::Mutex cacheLock;
   
   if (_debugLabelNode) {
     CGSize boundsSize        = self.bounds.size;
-    CGSize debugLabelSize    = [_debugLabelNode layoutThatFits:ASSizeRangeMake(CGSizeZero, boundsSize)].size;
+    CGSize debugLabelSize    = [_debugLabelNode measure:boundsSize];
     CGPoint debugLabelOrigin = CGPointMake(boundsSize.width - debugLabelSize.width,
                                            boundsSize.height - debugLabelSize.height);
     _debugLabelNode.frame    = (CGRect) {debugLabelOrigin, debugLabelSize};

@@ -11,7 +11,6 @@
 #import "ASLayoutSpec.h"
 
 #import "ASAssert.h"
-#import "ASInternalHelpers.h"
 #import "ASEnvironmentInternal.h"
 
 #import "ASLayout.h"
@@ -25,38 +24,18 @@
 typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASChildMap;
 
 @interface ASLayoutSpec() {
-  ASDN::RecursiveMutex __instanceLock__;
-  ASLayoutableSize _size;
   ASEnvironmentState _environmentState;
+  ASDN::RecursiveMutex __instanceLock__;
   ASChildMap _children;
 }
 @end
 
 @implementation ASLayoutSpec
 
-// Dynamic properties for ASLayoutables
-@dynamic layoutableType, size;
-// Dynamic properties for sizing
-@dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
-// Dynamic properties for stack spec
-@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender;
-// Dynamic properties for static spec
-@dynamic layoutPosition;
-
+// these dynamic properties all defined in ASLayoutOptionsPrivate.m
+@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis,
+         alignSelf, ascender, descender, sizeRange, layoutPosition, layoutableType;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
-
-#pragma mark - Class
-
-+ (void)initialize
-{
-  [super initialize];
-  if (self != [ASLayoutSpec class]) {
-    ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASLayoutSpec class], self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange: method. Instead overwrite calculateLayoutThatFits:", NSStringFromClass(self));
-  }
-}
-
-
-#pragma mark - Lifecycle
 
 - (instancetype)init
 {
@@ -64,7 +43,6 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
     return nil;
   }
   _isMutable = YES;
-  _size = ASLayoutableSizeMake();
   _environmentState = ASEnvironmentStateMakeDefault();
   return self;
 }
@@ -79,54 +57,13 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   return YES;
 }
 
-
-#pragma mark - Sizing
-
-- (ASLayoutableSize)size
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _size;
-}
-
-- (void)setSize:(ASLayoutableSize)size
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _size = size;
-}
-
-ASLayoutableSizeForwarding
-ASLayoutableSizeHelperForwarding
-
-
 #pragma mark - Layout
 
-// Deprecated
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
-    return [self layoutThatFits:constrainedSize];
-}
-
-- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
-{
-  return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];
-}
-
-- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
-{
-  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:_size relativeToParentSize:parentSize];
-}
-
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASLayoutableSize)size
-                 relativeToParentSize:(CGSize)parentSize
-{
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutableSizeResolve(_size, parentSize));
-  return [self calculateLayoutThatFits:resolvedRange];
-}
-
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-{
-  return [ASLayout layoutWithLayoutable:self size:constrainedSize.min];
+  return [ASLayout layoutWithLayoutableObject:self
+                         constrainedSizeRange:constrainedSize
+                                         size:constrainedSize.min];
 }
 
 - (id<ASLayoutable>)finalLayoutable
@@ -295,37 +232,6 @@ ASEnvironmentLayoutExtensibilityForwarding
 }
 
 @end
-
-
-#pragma mark - ASWrapperLayoutSpec
-
-@implementation ASWrapperLayoutSpec
-
-+ (instancetype)wrapperWithLayoutable:(id<ASLayoutable>)layoutable
-{
-  return [[self alloc] initWithLayoutable:layoutable];
-}
-
-- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable
-{
-  self = [super init];
-  if (self) {
-    self.child = layoutable;
-  }
-  return self;
-}
-
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-{
-  ASLayout *sublayout = [self.child layoutThatFits:constrainedSize parentSize:constrainedSize.max];
-  sublayout.position = CGPointZero;
-  return [ASLayout layoutWithLayoutable:self size:sublayout.size sublayouts:@[sublayout]];
-}
-
-@end
-
-
-#pragma mark - ASLayoutSpec (Debugging)
 
 @implementation ASLayoutSpec (Debugging)
 

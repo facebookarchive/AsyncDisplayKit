@@ -63,7 +63,7 @@ static const NSInteger kImageHeight = 200;
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
     self.collectionNode.position = CGPointZero;
-    [self.collectionNode setSizeWithCGSize:constrainedSize.max];
+    self.collectionNode.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
     return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.collectionNode]];
 }
 

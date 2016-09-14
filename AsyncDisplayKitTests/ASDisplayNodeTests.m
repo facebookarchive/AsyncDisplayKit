@@ -1991,7 +1991,7 @@ static bool stringContainsPointer(NSString *description, id p) {
 - (void)testThatItsSafeToAutomeasureANodeMidTransition
 {
   ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
-  [supernode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))];
+  [supernode measure:CGSizeMake(100, 100)];
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
   node.bounds = CGRectMake(0, 0, 50, 50);
   [supernode addSubnode:node];

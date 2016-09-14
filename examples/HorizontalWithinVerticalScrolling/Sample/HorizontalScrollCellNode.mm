@@ -64,7 +64,6 @@ static const CGFloat kInnerPadding = 10.0f;
 - (void)didLoad
 {
   [super didLoad];
-  
   _collectionNode.view.asyncDelegate = self;
   _collectionNode.view.asyncDataSource = self;
 }
@@ -76,22 +75,21 @@ static const CGFloat kInnerPadding = 10.0f;
 
 - (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  CGSize elementSize = _elementSize;
   return ^{
     RandomCoreGraphicsNode *elementNode = [[RandomCoreGraphicsNode alloc] init];
-    [elementNode setSizeWithCGSize:elementSize];
+    elementNode.preferredFrameSize = _elementSize;
     return elementNode;
   };
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  CGSize collectionNodeSize = CGSizeMake(constrainedSize.max.width, _elementSize.height);
-  [_collectionNode setSizeWithCGSize:collectionNodeSize];
+  _collectionNode.preferredFrameSize = CGSizeMake(self.bounds.size.width, _elementSize.height);
   
   ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
   insetSpec.insets = UIEdgeInsetsMake(kOuterPadding, 0.0, kOuterPadding, 0.0);
   insetSpec.child = _collectionNode;
+  
   return insetSpec;
 }
 

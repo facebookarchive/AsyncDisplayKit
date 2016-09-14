@@ -13,9 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-/**
- * A layout spec is an immutable object that describes a layout, loosely inspired by React.
- */
+/** A layout spec is an immutable object that describes a layout, loosely inspired by React. */
 @interface ASLayoutSpec : NSObject <ASLayoutable>
 
 /** 
@@ -87,28 +85,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @param index An identifier associated withe the child.
  */
 - (nullable id<ASLayoutable>)childForIndex:(NSUInteger)index;
-
-@end
-
-/**
- * An ASLayoutSpec subclass that can wrap a ASLayoutable and calculates the layout of the child.
- */
-@interface ASWrapperLayoutSpec : ASLayoutSpec
-
-/*
- * Returns an ASWrapperLayoutSpec object with the given layoutable as child
- */
-+ (instancetype)wrapperWithLayoutable:(id<ASLayoutable>)layoutable;
-
-/*
- * Returns an ASWrapperLayoutSpec object initialized with the given layoutable as child
- */
-- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable NS_DESIGNATED_INITIALIZER;;
-
-/*
- * Init not available for ASWrapperLayoutSpec
- */
-- (instancetype)init __unavailable;
 
 @end
 

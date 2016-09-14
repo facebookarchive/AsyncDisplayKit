@@ -24,7 +24,8 @@ static const ASSizeRange kSize = {{320, 320}, {320, 320}};
 - (void)testBackground
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
-  ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor blackColor], {20, 20});
+  ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor blackColor]);
+  foregroundNode.staticSize = {20, 20};
   
   ASLayoutSpec *layoutSpec =
   [ASBackgroundLayoutSpec

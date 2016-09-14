@@ -30,12 +30,24 @@
 
 @implementation AsyncTableViewController
 
-#pragma mark - UIViewController.
+#pragma mark -
+#pragma mark UIViewController.
 
 - (instancetype)init
 {
   if (!(self = [super init]))
     return nil;
+
+  _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
+  _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
+  _tableView.asyncDataSource = self;
+  _tableView.asyncDelegate = self;
+  
+  ASRangeTuningParameters tuningParameters;
+  tuningParameters.leadingBufferScreenfuls = 0.5;
+  tuningParameters.trailingBufferScreenfuls = 1.0;
+  [_tableView setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypePreload];
+  [_tableView setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
   
   self.tabBarItem = [[UITabBarItem alloc] initWithTabBarSystemItem:UITabBarSystemItemFeatured tag:0];
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRedo
@@ -54,30 +66,22 @@
 {
   [super viewDidLoad];
 
-  _tableView = [[ASTableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain];
-  _tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-  _tableView.asyncDataSource = self;
-  _tableView.asyncDelegate = self;
-  
-  ASRangeTuningParameters tuningParameters;
-  tuningParameters.leadingBufferScreenfuls = 0.5;
-  tuningParameters.trailingBufferScreenfuls = 1.0;
-  [_tableView setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypePreload];
-  [_tableView setTuningParameters:tuningParameters forRangeType:ASLayoutRangeTypeRender];
-  
   [self.view addSubview:_tableView];
 }
 
-#pragma mark - ASTableView.
-
-- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)viewWillLayoutSubviews
 {
-  return ^{
-    RandomCoreGraphicsNode *elementNode = [[RandomCoreGraphicsNode alloc] init];
-    elementNode.size = ASRelativeSizeRangeMakeWithExactCGSize(CGSizeMake(320, 100));
-    return elementNode;
-  };
+  _tableView.frame = self.view.bounds;
+}
+
+#pragma mark -
+#pragma mark ASTableView.
+
+- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  RandomCoreGraphicsNode *elementNode = [[RandomCoreGraphicsNode alloc] init];
+  elementNode.preferredFrameSize = CGSizeMake(320, 100);
+  return elementNode;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
