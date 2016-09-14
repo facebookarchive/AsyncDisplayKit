@@ -1573,12 +1573,6 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
 
 - (void)addSubnode:(ASDisplayNode *)subnode
 {
-  ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually add subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
-  [self _addSubnode:subnode];
-}
-
-- (void)_addSubnode:(ASDisplayNode *)subnode
-{
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
 
@@ -1593,7 +1587,7 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   if (isMovingEquivalentParents) {
     [subnode __incrementVisibilityNotificationsDisabled];
   }
-  [subnode _removeFromSupernode];
+  [subnode removeFromSupernode];
 
   if (!_subnodes) {
     _subnodes = [[NSMutableArray alloc] init];
@@ -1649,8 +1643,8 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
     [subnode __incrementVisibilityNotificationsDisabled];
   }
   
-  [subnode _removeFromSupernode];
-  [oldSubnode _removeFromSupernode];
+  [subnode removeFromSupernode];
+  [oldSubnode removeFromSupernode];
   
   if (!_subnodes)
     _subnodes = [[NSMutableArray alloc] init];
@@ -1687,12 +1681,6 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
 
 - (void)replaceSubnode:(ASDisplayNode *)oldSubnode withSubnode:(ASDisplayNode *)replacementSubnode
 {
-  ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually replace old node with replacement node to node with automaticallyManagesSubnodes=YES. Old Node: %@, replacement node: %@", oldSubnode, replacementSubnode);
-  [self _replaceSubnode:oldSubnode withSubnode:replacementSubnode];
-}
-
-- (void)_replaceSubnode:(ASDisplayNode *)oldSubnode withSubnode:(ASDisplayNode *)replacementSubnode
-{
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
 
@@ -1722,12 +1710,6 @@ static NSInteger incrementIfFound(NSInteger i) {
 }
 
 - (void)insertSubnode:(ASDisplayNode *)subnode belowSubnode:(ASDisplayNode *)below
-{
-  ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
-  [self _insertSubnode:subnode belowSubnode:below];
-}
-
-- (void)_insertSubnode:(ASDisplayNode *)subnode belowSubnode:(ASDisplayNode *)below
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
@@ -1773,12 +1755,6 @@ static NSInteger incrementIfFound(NSInteger i) {
 }
 
 - (void)insertSubnode:(ASDisplayNode *)subnode aboveSubnode:(ASDisplayNode *)above
-{
-  ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
-  [self _insertSubnode:subnode aboveSubnode:above];
-}
-
-- (void)_insertSubnode:(ASDisplayNode *)subnode aboveSubnode:(ASDisplayNode *)above
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
@@ -1827,12 +1803,6 @@ static NSInteger incrementIfFound(NSInteger i) {
 }
 
 - (void)insertSubnode:(ASDisplayNode *)subnode atIndex:(NSInteger)idx
-{
-  ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
-  [self _insertSubnode:subnode atIndex:idx];
-}
-
-- (void)_insertSubnode:(ASDisplayNode *)subnode atIndex:(NSInteger)idx
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
@@ -1903,18 +1873,10 @@ static NSInteger incrementIfFound(NSInteger i) {
   [subnode __setSupernode:nil];
 }
 
+// NOTE: You must not called this method while holding the receiver's property lock. This may cause deadlocks.
 - (void)removeFromSupernode
 {
-  ASDisplayNodeAssert(self.supernode.automaticallyManagesSubnodes == NO, @"Attempt to manually remove subnode from node with automaticallyManagesSubnodes=YES. Node: %@", self);
-    
-  [self _removeFromSupernode];
-}
-
-// NOTE: You must not called this method while holding the receiver's property lock. This may cause deadlocks.
-- (void)_removeFromSupernode
-{
   ASDisplayNodeAssertThreadAffinity(self);
-  
   __instanceLock__.lock();
     __weak ASDisplayNode *supernode = _supernode;
     __weak UIView *view = _view;
