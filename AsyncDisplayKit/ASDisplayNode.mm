@@ -448,6 +448,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _layer.delegate = nil;
   _layer = nil;
 
+  // TODO: Remove this? If supernode isn't already nil, this method isn't dealloc-safe anyway.
   [self __setSupernode:nil];
   _pendingViewState = nil;
 
@@ -3291,12 +3292,12 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
     [result addObject:@{ @"frame" : [NSValue valueWithCGRect:_view.frame] }];
   } else if (_layer != nil) {
     [result addObject:@{ @"frame" : [NSValue valueWithCGRect:_layer.frame] }];
-  } else {
-    [result addObject:@{ @"frame" : [NSValue valueWithCGRect:self.frame] }];
+  } else if (_pendingViewState != nil) {
+    [result addObject:@{ @"frame" : [NSValue valueWithCGRect:_pendingViewState.frame] }];
   }
   
   // Check supernode so that if we are cell node we don't find self.
-  ASCellNode *cellNode = ASDisplayNodeFindFirstSupernodeOfClass(self.supernode, [ASCellNode class]);
+  ASCellNode *cellNode = ASDisplayNodeFindFirstSupernodeOfClass([self _deallocSafeSupernode], [ASCellNode class]);
   if (cellNode != nil) {
     [result addObject:@{ @"cellNode" : ASObjectDescriptionMakeTiny(cellNode) }];
   }

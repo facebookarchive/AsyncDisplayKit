@@ -37,7 +37,7 @@ NSString *ASGetDescriptionValueString(id object) {
   return [object description];
 }
 
-NSString *ASObjectDescriptionMake(id object, NSArray<NSDictionary *> *propertyGroups) {
+NSString *ASObjectDescriptionMake(__autoreleasing id object, NSArray<NSDictionary *> *propertyGroups) {
   NSMutableString *str = [NSMutableString stringWithFormat:@"<%@: %p", [object class], object];
 
   NSMutableArray *components = [NSMutableArray array];
@@ -54,7 +54,7 @@ NSString *ASObjectDescriptionMake(id object, NSArray<NSDictionary *> *propertyGr
   return str;
 }
 
-NSString *ASObjectDescriptionMakeTiny(id object) {
+NSString *ASObjectDescriptionMakeTiny(__autoreleasing id object) {
   return ASObjectDescriptionMake(object, nil);
 }
 
