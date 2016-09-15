@@ -2994,14 +2994,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)setHitTestSlop:(UIEdgeInsets)hitTestSlop
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
   _hitTestSlop = hitTestSlop;
 }
 
 - (UIEdgeInsets)hitTestSlop
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
   return _hitTestSlop;
 }
@@ -3105,7 +3103,6 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 
 - (BOOL)displaySuspended
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
   return _flags.displaySuspended;
 }
@@ -3141,14 +3138,12 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 
 - (BOOL)shouldAnimateSizeChanges
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
   return _flags.shouldAnimateSizeChanges;
 }
 
 - (void)setShouldAnimateSizeChanges:(BOOL)shouldAnimateSizeChanges
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
   _flags.shouldAnimateSizeChanges = shouldAnimateSizeChanges;
 }
@@ -3180,16 +3175,12 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 - (BOOL)isInHierarchy
 {
-  ASDisplayNodeAssertThreadAffinity(self);
-
   ASDN::MutexLocker l(__instanceLock__);
   return _flags.isInHierarchy;
 }
 
 - (void)setInHierarchy:(BOOL)inHierarchy
 {
-  ASDisplayNodeAssertThreadAffinity(self);
-
   ASDN::MutexLocker l(__instanceLock__);
   _flags.isInHierarchy = inHierarchy;
 }
