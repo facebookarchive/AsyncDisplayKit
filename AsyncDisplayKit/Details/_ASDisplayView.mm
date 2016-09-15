@@ -330,12 +330,6 @@
 }
 #endif
 
-- (void)asyncdisplaykit_asyncTransactionContainerStateDidChange
-{
-  ASDisplayNode *node = _asyncdisplaykit_node; // Create strong reference to weak ivar.
-  [node asyncdisplaykit_asyncTransactionContainerStateDidChange];
-}
-
 - (void)tintColorDidChange
 {
     ASDisplayNode *node = _asyncdisplaykit_node; // Create strong reference to weak ivar.

@@ -47,12 +47,6 @@ typedef NS_ENUM(NSUInteger, ASAsyncTransactionContainerState) {
  */
 - (void)asyncdisplaykit_cancelAsyncTransactions;
 
-/**
- @summary Invoked when the asyncdisplaykit_asyncTransactionContainerState property changes.
- @desc You may want to override this in a CALayer or UIView subclass to take appropriate action (such as hiding content while it renders).
- */
-- (void)asyncdisplaykit_asyncTransactionContainerStateDidChange;
-
 @end
 
 @interface CALayer (ASDisplayNodeAsyncTransactionContainer) <ASDisplayNodeAsyncTransactionContainer>

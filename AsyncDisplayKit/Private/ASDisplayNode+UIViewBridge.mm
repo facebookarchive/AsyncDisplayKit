@@ -962,8 +962,4 @@ nodeProperty = nodeValueExpr; _setToViewOnly(viewAndPendingViewStateProperty, vi
   [_layer asyncdisplaykit_cancelAsyncTransactions];
 }
 
-- (void)asyncdisplaykit_asyncTransactionContainerStateDidChange
-{
-}
-
 @end
