@@ -1964,6 +1964,25 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertNoThrow([nodeView removeFromSuperview]);
 }
 
+// Running on main thread
+// Cause retain count of node to fall to zero synchronously on a background thread (pausing main thread)
+// ASDealloc2MainObject queues actual call to -dealloc to occur on the main thread
+// Continue execution on main, before the dealloc can run, to dealloc the host view
+// Node is in an invalid state (about to dealloc, not valid to retain) but accesses to sublayer delegates
+// causes attempted retain — unless weak variable works correctly
+- (void)testThatLayerDelegateDoesntDangleAndCauseCrash
+{
+  NS_VALID_UNTIL_END_OF_SCOPE UIView *host = [[UIView alloc] init];
+
+  __block NS_VALID_UNTIL_END_OF_SCOPE ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.layerBacked = YES;
+
+  [host addSubnode:node];
+  [self executeOffThread:^{
+    node = nil;
+  }];
+  host = nil; // <- Would crash here, when UIView accesses its sublayers' delegates in -dealloc.
+}
 
 - (void)testThatSubnodeGetsInterfaceStateSetIfRasterized
 {

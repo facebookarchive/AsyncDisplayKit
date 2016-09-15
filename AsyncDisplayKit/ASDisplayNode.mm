@@ -407,8 +407,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   _view = nil;
   _subnodes = nil;
-  if (_flags.layerBacked)
-    _layer.delegate = nil;
   _layer = nil;
 
   [self __setSupernode:nil];
@@ -423,7 +421,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)__unloadNode
 {
-  ASDisplayNodeAssertThreadAffinity(self);
+  ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self isNodeLoaded], @"Implementation shouldn't call __unloadNode if not loaded: %@", self);
   ASDN::MutexLocker l(__instanceLock__);
 
@@ -519,8 +517,17 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (isLayerBacked) {
     TIME_SCOPED(_debugTimeToCreateView);
     _layer = [self _layerToLoad];
-    // Surpress warning for Base SDK > 10.0
-    _layer.delegate = (id<CALayerDelegate>)self;
+    static int ASLayerDelegateAssociationKey;
+
+    /**
+     * CALayer's .delegate property is documented to be weak, but the implementation is actually assign.
+     * Because our layer may survive longer than the node (e.g. if someone else retains it, or if the node
+     * begins deallocation on a background thread and it waiting for the -dealloc call to reach main), the only
+     * way to avoid a dangling pointer is to use a weak proxy.
+     */
+    ASWeakProxy *instance = [ASWeakProxy weakProxyWithTarget:self];
+    _layer.delegate = (id<CALayerDelegate>)instance;
+    objc_setAssociatedObject(_layer, &ASLayerDelegateAssociationKey, instance, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
   } else {
     TIME_SCOPED(_debugTimeToCreateView);
     _view = [self _viewToLoad];
