@@ -444,8 +444,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   _view = nil;
   _subnodes = nil;
-  if (_flags.layerBacked)
-    _layer.delegate = nil;
   _layer = nil;
 
   // TODO: Remove this? If supernode isn't already nil, this method isn't dealloc-safe anyway.
@@ -461,7 +459,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)__unloadNode
 {
-  ASDisplayNodeAssertThreadAffinity(self);
+  ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert([self isNodeLoaded], @"Implementation shouldn't call __unloadNode if not loaded: %@", self);
   ASDisplayNodeAssert(_flags.synchronous == NO, @"Node created using -initWithViewBlock:/-initWithLayerBlock: cannot be unloaded. Node: %@", self);
   ASDN::MutexLocker l(__instanceLock__);
@@ -553,8 +551,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (isLayerBacked) {
     TIME_SCOPED(_debugTimeToCreateView);
     _layer = [self _layerToLoad];
-    // Surpress warning for Base SDK > 10.0
-    _layer.delegate = (id<CALayerDelegate>)self;
+    static int ASLayerDelegateAssociationKey;
+
+    // We cannot make self the layer's delegate directly, because the delegate is
+    // actually `assign` though the docs say weak.
+    ASWeakProxy *instance = [ASWeakProxy weakProxyWithTarget:self];
+    _layer.delegate = (id<CALayerDelegate>)instance;
+    objc_setAssociatedObject(_layer, &ASLayerDelegateAssociationKey, instance, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
   } else {
     TIME_SCOPED(_debugTimeToCreateView);
     _view = [self _viewToLoad];
