@@ -2070,4 +2070,24 @@ static bool stringContainsPointer(NSString *description, id p) {
 #pragma clang diagnostic pop
 }
 
+- (void)testSubnodesFastEnumeration
+{
+  DeclareNodeNamed(parentNode);
+  DeclareNodeNamed(a);
+  DeclareNodeNamed(b);
+  DeclareNodeNamed(c);
+  DeclareViewNamed(d);
+
+  NSArray *subnodes = @[a, b, c, d];  
+  for (ASDisplayNode *node in subnodes) {
+    [parentNode addSubnode:node];
+  }
+  
+  NSInteger i = 0;
+  for (ASDisplayNode *subnode in parentNode.subnodes) {
+    XCTAssertEqualObjects(subnode, subnodes[i]);
+    i++;
+  }
+}
+
 @end
