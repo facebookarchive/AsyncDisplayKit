@@ -58,4 +58,30 @@
             @"Contents should be 100 x 100 by contents scale.");
 }
 
+- (void)testTintColorBlock
+{
+  UIImage *test = [self testImage];
+  UIImage *tinted = ASImageNodeTintColorModificationBlock([UIColor redColor])(test);
+  ASImageNode *node = [[ASImageNode alloc] init];
+  node.image = tinted;
+  [node layoutThatFits:ASSizeRangeMake(test.size)];
+  
+  ASSnapshotVerifyNode(node, nil);
+}
+
+- (void)testRoundedCornerBlock
+{
+  UIGraphicsBeginImageContext(CGSizeMake(100, 100));
+  [[UIColor blueColor] setFill];
+  UIRectFill(CGRectMake(0, 0, 100, 100));
+  UIImage *result = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  UIImage *rounded = ASImageNodeRoundBorderModificationBlock(2, [UIColor redColor])(result);
+  ASImageNode *node = [[ASImageNode alloc] init];
+  node.image = rounded;
+  [node layoutThatFits:ASSizeRangeMake(rounded.size)];
+  
+  ASSnapshotVerifyNode(node, nil);
+}
+
 @end

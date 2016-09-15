@@ -14,6 +14,7 @@
 #import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASInternalHelpers.h"
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>
 @end
@@ -113,7 +114,9 @@
       if (displayBlock) {
         UIImage *image = (UIImage *)displayBlock();
         if (image) {
-          [image drawInRect:bounds];
+          BOOL opaque = ASImageAlphaInfoIsOpaque(CGImageGetAlphaInfo(image.CGImage));
+          CGBlendMode blendMode = opaque ? kCGBlendModeCopy : kCGBlendModeNormal;
+          [image drawInRect:bounds blendMode:blendMode alpha:1];
         }
       }
     };
