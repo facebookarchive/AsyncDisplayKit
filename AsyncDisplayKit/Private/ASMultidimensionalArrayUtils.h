@@ -52,6 +52,11 @@ extern NSArray *ASFindElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray
 extern NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *multidimensionalArray, NSIndexSet *indexSet);
 
 /**
+ * Moves the object at `sourceIndexPath` to `destinationIndexPath`.
+ */
+extern void ASMoveElementInTwoDimensionalArray(NSMutableArray *mutableArray, NSIndexPath *sourceIndexPath, NSIndexPath *destinationIndexPath);
+
+/**
  * Return the index paths of the given multidimensional array that are present in the given index paths array.
  */
 extern NSArray<NSIndexPath *> *ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths(NSArray *multidimensionalArray, NSArray<NSIndexPath *> *indexPaths);

@@ -898,6 +898,13 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   return _externalCompletedNodes ? : _completedNodes[ASDataControllerRowNodeKind];
 }
 
+- (void)moveCompletedNodeAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
+{
+  ASDisplayNodeAssertMainThread();
+  ASMoveElementInTwoDimensionalArray(_externalCompletedNodes, indexPath, newIndexPath);
+  ASMoveElementInTwoDimensionalArray(_completedNodes[ASDataControllerRowNodeKind], indexPath, newIndexPath);
+}
+
 #pragma mark - Dealloc
 
 - (void)dealloc
