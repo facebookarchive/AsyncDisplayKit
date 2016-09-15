@@ -188,20 +188,9 @@ struct ASImageNodeDrawParameters {
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   ASDN::MutexLocker l(__instanceLock__);
-  
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  // If a preferredFrameSize is set, call the superclass to return that instead of using the image size.
-  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
-#if DEBUG
-    NSLog(@"Using -[ASDisplayNode preferredFrameSize] is deprecated.");
-#endif
-    return self.preferredFrameSize;
-  }
-#pragma clang diagnostic pop
-  
+
   if (_image == nil) {
-      return constrainedSize;
+    return constrainedSize;
   }
 
   return _image.size;

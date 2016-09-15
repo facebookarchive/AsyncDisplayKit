@@ -107,7 +107,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASDisplayNode * __weak _supernode;
   
   ASLayoutableStyle *_style;
-  CGSize _preferredFrameSize;
+  ASLayoutableSize _size;
 
   ASSentinel *_displaySentinel;
 

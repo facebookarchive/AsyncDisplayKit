@@ -2048,4 +2048,25 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertEqualObjects(calls, expected);
 }
 
+- (void)testPreferredFrameSizeDeprecated
+{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+  ASDisplayNode *node = [ASDisplayNode new];
+  
+  // Default auto preferred frame size will be CGSizeZero
+  XCTAssert(CGSizeEqualToSize(node.preferredFrameSize, CGSizeZero));
+  
+  // Set a specific preferredFrameSize
+  node.preferredFrameSize = CGSizeMake(100, 100);
+  XCTAssert(CGSizeEqualToSize(node.preferredFrameSize, CGSizeMake(100, 100)));
+  
+  // Throw if requesting a preferred size if widht or height is of unit type fraction
+  node.style.width = ASDimensionMakeWithFraction(0.5);
+  XCTAssertThrows(node.preferredFrameSize);
+  
+#pragma clang diagnostic pop
+}
+
 @end
