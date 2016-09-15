@@ -1964,6 +1964,23 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertNoThrow([nodeView removeFromSuperview]);
 }
 
+/**
+ * CALayer.delegate is actually `assign` not weak. This test demonstrates how the layer.delegate
+ * pointer dangling can cause crashes.
+ */
+- (void)testThatLayerDelegateDoesntDangleAndCauseCrash
+{
+  NS_VALID_UNTIL_END_OF_SCOPE UIView *host = [[UIView alloc] init];
+
+  __block NS_VALID_UNTIL_END_OF_SCOPE ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.layerBacked = YES;
+
+  [host addSubnode:node];
+  [self executeOffThread:^{
+    node = nil;
+  }];
+  host = nil; // <- Will crash here
+}
 
 - (void)testThatSubnodeGetsInterfaceStateSetIfRasterized
 {
