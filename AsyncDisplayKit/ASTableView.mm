@@ -304,7 +304,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeForRowAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewCanMoveRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:canMoveRowAtIndexPath:)];
-    _asyncDataSourceFlags.asyncDataSourceTableViewMoveRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:moveRowAtIndexPath:toIndexPath:)];
+    _asyncDataSourceFlags.asyncDataSourceTableViewMoveRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:moveRowAtIndexPath:toIndexPath:)];
     
     // Data source must implement tableView:nodeBlockForRowAtIndexPath: or tableView:nodeForRowAtIndexPath:
     ASDisplayNodeAssertTrue(_asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath || _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath);
