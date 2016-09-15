@@ -901,20 +901,8 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 - (void)moveCompletedNodeAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
   ASDisplayNodeAssertMainThread();
-  if (_externalCompletedNodes != nil) {
-    NSMutableArray *oldSection = _externalCompletedNodes[indexPath.section];
-    ASCellNode *node = oldSection[indexPath.item];
-    [oldSection removeObjectAtIndex:indexPath.item];
-    [_externalCompletedNodes[newIndexPath.section] insertObject:node atIndex:newIndexPath.item];
-  }
-
-  NSMutableArray *internalCompletedNodes = _completedNodes[ASDataControllerRowNodeKind];
-  if (internalCompletedNodes != nil) {
-    NSMutableArray *oldSection = internalCompletedNodes[indexPath.section];
-    ASCellNode *node = oldSection[indexPath.item];
-    [oldSection removeObjectAtIndex:indexPath.item];
-    [internalCompletedNodes[newIndexPath.section] insertObject:node atIndex:newIndexPath.item];
-  }
+  ASMoveElementInTwoDimensionalArray(_externalCompletedNodes, indexPath, newIndexPath);
+  ASMoveElementInTwoDimensionalArray(_completedNodes[ASDataControllerRowNodeKind], indexPath, newIndexPath);
 }
 
 #pragma mark - Dealloc
