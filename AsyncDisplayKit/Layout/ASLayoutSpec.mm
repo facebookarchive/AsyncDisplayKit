@@ -9,28 +9,8 @@
 //
 
 #import "ASLayoutSpec.h"
-
-#import "ASAssert.h"
-#import "ASInternalHelpers.h"
-#import "ASEnvironmentInternal.h"
-
-#import "ASLayout.h"
-#import "ASThread.h"
-#import "ASTraitCollection.h"
-
-#import <objc/runtime.h>
-#import <map>
-#import <vector>
-
-typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASChildMap;
-
-@interface ASLayoutSpec() {
-  ASDN::RecursiveMutex __instanceLock__;
-  ASChildMap _children;
-  ASEnvironmentState _environmentState;
-  ASLayoutableStyle *_style;
-}
-@end
+#import "ASLayoutSpecPrivate.h"
+#import "ASLayoutSpec+Subclasses.h"
 
 @implementation ASLayoutSpec
 
@@ -60,6 +40,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
   _style = [[ASLayoutableStyle alloc] init];
+  _childrenArray = [[NSMutableArray alloc] init];
   
   return self;
 }
@@ -72,6 +53,13 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 - (BOOL)canLayoutAsynchronous
 {
   return YES;
+}
+
+#pragma mark - Final Layoutable
+
+- (id<ASLayoutable>)finalLayoutable
+{
+  return self;
 }
 
 #pragma mark - Style
@@ -113,44 +101,8 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   return [ASLayout layoutWithLayoutable:self size:constrainedSize.min];
 }
 
-- (id<ASLayoutable>)finalLayoutable
-{
-  return self;
-}
 
-- (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
-{
-  if (self.isFinalLayoutable == NO) {
-    
-    // If you are getting recursion crashes here after implementing finalLayoutable, make sure
-    // that you are setting isFinalLayoutable flag to YES. This must be one BEFORE adding a child
-    // to the new ASLayoutable.
-    //
-    // For example:
-    //- (id<ASLayoutable>)finalLayoutable
-    //{
-    //  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
-    //  insetSpec.insets = UIEdgeInsetsMake(10,10,10,10);
-    //  insetSpec.isFinalLayoutable = YES;
-    //  [insetSpec setChild:self];
-    //  return insetSpec;
-    //}
-
-    id<ASLayoutable> finalLayoutable = [child finalLayoutable];
-    if (finalLayoutable != child) {
-      if (ASEnvironmentStatePropagationEnabled()) {
-        ASEnvironmentStatePropagateUp(finalLayoutable, child.environmentState.layoutOptionsState);
-      } else {
-        // If state propagation is not enabled the layout options state needs to be copied manually
-        ASEnvironmentState finalLayoutableEnvironmentState = finalLayoutable.environmentState;
-        finalLayoutableEnvironmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
-        finalLayoutable.environmentState = finalLayoutableEnvironmentState;
-      }
-      return finalLayoutable;
-    }
-  }
-  return child;
-}
+#pragma mark - Parent
 
 - (void)setParent:(id<ASLayoutable>)parent
 {
@@ -162,67 +114,56 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   }
 }
 
+
+#pragma mark - Child
+
 - (void)setChild:(id<ASLayoutable>)child
 {
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");;
+  ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
+  
   if (child) {
     id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
     if (finalLayoutable) {
-      _children[0] = finalLayoutable;
+      _childrenArray[0] = finalLayoutable;
       [self propagateUpLayoutable:finalLayoutable];
     }
   } else {
-    _children.erase(0);
+    if (_childrenArray.count) {
+      [_childrenArray removeObjectAtIndex:0];
+    }
   }
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIndex:(NSUInteger)index
+- (id<ASLayoutable>)child
 {
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  if (child) {
-    id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-    _children[index] = finalLayoutable;
-  } else {
-    _children.erase(index);
+  ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
+  
+  if (_childrenArray.count) {
+    return _childrenArray[0];
   }
-  // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
-  //       layout options and one child will overwrite values from another child
-  // [self propagateUpLayoutable:finalLayoutable];
+  
+  return nil;
 }
+
+#pragma mark - Children
 
 - (void)setChildren:(NSArray<id<ASLayoutable>> *)children
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
-  _children.clear();
+  [_childrenArray removeAllObjects];
+  
   NSUInteger i = 0;
   for (id<ASLayoutable> child in children) {
-    _children[i] = [self layoutableToAddFromLayoutable:child];
+    _childrenArray[i] = [self layoutableToAddFromLayoutable:child];
     i += 1;
   }
 }
 
-- (id<ASLayoutable>)childForIndex:(NSUInteger)index
-{
-  if (index < _children.size()) {
-    return _children[index];
-  }
-  return nil;
-}
-
-- (id<ASLayoutable>)child
-{
-  return _children[0];
-}
-
 - (NSArray *)children
 {
-  std::vector<ASLayout *> children;
-  for (ASChildMap::iterator it = _children.begin(); it != _children.end(); ++it ) {
-    children.push_back(it->second);
-  }
-  
-  return [NSArray arrayWithObjects:&children[0] count:children.size()];
+  return [_childrenArray copy];
 }
 
 #pragma mark - ASEnvironment
@@ -276,6 +217,18 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 }
 
 ASEnvironmentLayoutExtensibilityForwarding
+
+@end
+
+
+#pragma mark - ASNullLayoutSpec
+
+@implementation ASNullLayoutSpec : ASLayoutSpec
+
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+{
+  return [ASLayout layoutWithLayoutable:self size:CGSizeZero];
+}
 
 @end
 

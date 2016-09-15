@@ -17,8 +17,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface ASOverlayLayoutSpec : ASLayoutSpec
 
+/**
+ * Overlay layoutable of this layout spec
+ */
 @property (nullable, nonatomic, strong) id<ASLayoutable> overlay;
 
+/**
+ * Creates and returns an ASOverlayLayoutSpec object with a given child and an layoutable that act as overlay.
+ *
+ * @param child A child that is laid out to determine the size of this spec.
+ * @param overlay A layoutable object that is laid out over the child. If this is nil, the overlay is omitted.
+ */
 + (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(nullable id<ASLayoutable>)overlay;
 
 @end
