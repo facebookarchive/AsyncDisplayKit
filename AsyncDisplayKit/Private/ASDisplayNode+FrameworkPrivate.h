@@ -50,14 +50,45 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
   ASHierarchyStateLayoutPending           = 1 << 3
 };
 
-inline BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyState)
+ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyState)
 {
   return ((hierarchyState & ASHierarchyStateLayoutPending) == ASHierarchyStateLayoutPending);
 }
 
-inline BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState)
+ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState)
 {
     return ((hierarchyState & ASHierarchyStateRangeManaged) == ASHierarchyStateRangeManaged);
+}
+
+ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesRasterized(ASHierarchyState hierarchyState)
+{
+	return ((hierarchyState & ASHierarchyStateRasterized) == ASHierarchyStateRasterized);
+}
+
+ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesTransitioningSupernodes(ASHierarchyState hierarchyState)
+{
+	return ((hierarchyState & ASHierarchyStateTransitioningSupernodes) == ASHierarchyStateTransitioningSupernodes);
+}
+
+__unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyState hierarchyState)
+{
+	NSMutableArray *states = [NSMutableArray array];
+	if (hierarchyState == ASHierarchyStateNormal) {
+		[states addObject:@"Normal"];
+	}
+	if (ASHierarchyStateIncludesRangeManaged(hierarchyState)) {
+		[states addObject:@"RangeManaged"];
+	}
+	if (ASHierarchyStateIncludesLayoutPending(hierarchyState)) {
+		[states addObject:@"LayoutPending"];
+	}
+	if (ASHierarchyStateIncludesRasterized(hierarchyState)) {
+		[states addObject:@"Rasterized"];
+	}
+	if (ASHierarchyStateIncludesTransitioningSupernodes(hierarchyState)) {
+		[states addObject:@"TransitioningSupernodes"];
+	}
+	return [NSString stringWithFormat:@"{ %@ }", [states componentsJoinedByString:@" | "]];
 }
 
 @interface ASDisplayNode ()

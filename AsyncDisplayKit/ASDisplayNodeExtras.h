@@ -36,7 +36,7 @@ ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesMeasureLayout(ASInterfaceState
   return ((interfaceState & ASInterfaceStateMeasureLayout) == ASInterfaceStateMeasureLayout);
 }
 
-ASDISPLAYNODE_INLINE NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfaceState)
+__unused static NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfaceState)
 {
   NSMutableArray *states = [NSMutableArray array];
   if (interfaceState == ASInterfaceStateNone) {

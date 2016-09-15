@@ -428,6 +428,10 @@
 		CC446A311D80AAE00071FD03 /* ASObjectDescriptionHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = CC446A2E1D80AAE00071FD03 /* ASObjectDescriptionHelpers.m */; };
 		CC4981B31D1A02BE004E13CC /* ASTableViewThrashTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4981B21D1A02BE004E13CC /* ASTableViewThrashTests.m */; };
 		CC4981BD1D1C7F65004E13CC /* NSIndexSet+ASHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4981BB1D1C7F65004E13CC /* NSIndexSet+ASHelpers.m */; };
+		CC4C2A771D88E3BF0039ACAB /* ASTraceEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4C2A751D88E3BF0039ACAB /* ASTraceEvent.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CC4C2A781D88E3BF0039ACAB /* ASTraceEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4C2A761D88E3BF0039ACAB /* ASTraceEvent.m */; };
+		CC4C2A791D88E3BF0039ACAB /* ASTraceEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4C2A761D88E3BF0039ACAB /* ASTraceEvent.m */; };
+		CC4C2A7A1D8902350039ACAB /* ASTraceEvent.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CC4C2A751D88E3BF0039ACAB /* ASTraceEvent.h */; };
 		CC54A81C1D70079800296A24 /* ASDispatch.h in Headers */ = {isa = PBXBuildFile; fileRef = CC54A81B1D70077A00296A24 /* ASDispatch.h */; };
 		CC54A81E1D7008B300296A24 /* ASDispatchTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC54A81D1D7008B300296A24 /* ASDispatchTests.m */; };
 		CC7FD9DF1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m in Sources */ = {isa = PBXBuildFile; fileRef = CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */; };
@@ -646,6 +650,7 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				CC4C2A7A1D8902350039ACAB /* ASTraceEvent.h in CopyFiles */,
 				CC88F7AE1D80AF5E000D6D4E /* ASObjectDescriptionHelpers.h in CopyFiles */,
 				F7CE6C981D2CDB5800BE4C15 /* ASInternalHelpers.h in CopyFiles */,
 				F7CE6CB71D2CE2D000BE4C15 /* ASLayoutableExtensibility.h in CopyFiles */,
@@ -1111,6 +1116,8 @@
 		CC4981B21D1A02BE004E13CC /* ASTableViewThrashTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTableViewThrashTests.m; sourceTree = "<group>"; };
 		CC4981BA1D1C7F65004E13CC /* NSIndexSet+ASHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSIndexSet+ASHelpers.h"; sourceTree = "<group>"; };
 		CC4981BB1D1C7F65004E13CC /* NSIndexSet+ASHelpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSIndexSet+ASHelpers.m"; sourceTree = "<group>"; };
+		CC4C2A751D88E3BF0039ACAB /* ASTraceEvent.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASTraceEvent.h; sourceTree = "<group>"; };
+		CC4C2A761D88E3BF0039ACAB /* ASTraceEvent.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTraceEvent.m; sourceTree = "<group>"; };
 		CC54A81B1D70077A00296A24 /* ASDispatch.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ASDispatch.h; sourceTree = "<group>"; };
 		CC54A81D1D7008B300296A24 /* ASDispatchTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDispatchTests.m; sourceTree = "<group>"; };
 		CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPhotosFrameworkImageRequest.h; sourceTree = "<group>"; };
@@ -1428,6 +1435,8 @@
 		058D09E1195D050800B7D73C /* Details */ = {
 			isa = PBXGroup;
 			children = (
+				CC4C2A751D88E3BF0039ACAB /* ASTraceEvent.h */,
+				CC4C2A761D88E3BF0039ACAB /* ASTraceEvent.m */,
 				058D09E2195D050800B7D73C /* _ASDisplayLayer.h */,
 				058D09E3195D050800B7D73C /* _ASDisplayLayer.mm */,
 				058D09E4195D050800B7D73C /* _ASDisplayView.h */,
@@ -1860,6 +1869,7 @@
 				34EFC7701B701CFA00AD841F /* ASStackLayoutDefines.h in Headers */,
 				764D83D51C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h in Headers */,
 				E5711A2C1C840C81009619D4 /* ASIndexedNodeContext.h in Headers */,
+				CC4C2A771D88E3BF0039ACAB /* ASTraceEvent.h in Headers */,
 				254C6B7B1BF94DF4003EC431 /* ASTextKitRenderer+Positioning.h in Headers */,
 				CC7FD9E21BB603FF005CCB2B /* ASPhotosFrameworkImageRequest.h in Headers */,
 				DE4843DC1C93EAC100A1F33B /* ASLayoutTransition.h in Headers */,
@@ -2183,6 +2193,7 @@
 				257754AE1BEE44CD00737CA5 /* ASTextKitRenderer+Positioning.mm in Sources */,
 				ACF6ED2E1B17843500DA7C62 /* ASRatioLayoutSpec.mm in Sources */,
 				AC47D9461B3BB41900AAEE9D /* ASRelativeSize.mm in Sources */,
+				CC4C2A781D88E3BF0039ACAB /* ASTraceEvent.m in Sources */,
 				205F0E121B371BD7007741D0 /* ASScrollDirection.m in Sources */,
 				9C8898BB1C738B9800D6B02E /* ASTextKitFontSizeAdjuster.mm in Sources */,
 				D785F6631A74327E00291744 /* ASScrollNode.m in Sources */,
@@ -2365,6 +2376,7 @@
 				B35062271B010EFD0018CF92 /* ASRangeController.mm in Sources */,
 				0442850A1BAA63FE00D16268 /* ASBatchFetching.m in Sources */,
 				68FC85E61CE29B9400EDD713 /* ASNavigationController.m in Sources */,
+				CC4C2A791D88E3BF0039ACAB /* ASTraceEvent.m in Sources */,
 				34EFC76F1B701CF700AD841F /* ASRatioLayoutSpec.mm in Sources */,
 				254C6B8B1BF94F8A003EC431 /* ASTextKitShadower.mm in Sources */,
 				34EFC7661B701CD200AD841F /* ASRelativeSize.mm in Sources */,
