@@ -43,31 +43,6 @@
   ASXCTAssertEqualSizes(buttonNode.calculatedSize, nodeSize, @"Automatic measurement pass should have happened in layout pass");
 }
 
-- (void)testMeasureOnLayoutIfNotHappenedBeforeForRangeManagedNodes
-{
-  CGSize nodeSize = CGSizeMake(100, 100);
-  
-  ASStaticSizeDisplayNode *displayNode = [ASStaticSizeDisplayNode new];
-  displayNode.staticSize  = nodeSize;
-  
-  ASButtonNode *buttonNode = [ASButtonNode new];
-  [displayNode addSubnode:buttonNode];
-  
-  [displayNode enterHierarchyState:ASHierarchyStateRangeManaged];
-  
-  displayNode.frame = {.size = nodeSize};
-  buttonNode.frame = {.size = nodeSize};
-  
-  ASXCTAssertEqualSizes(displayNode.calculatedSize, CGSizeZero, @"Calculated size before measurement and layout should be 0");
-  ASXCTAssertEqualSizes(buttonNode.calculatedSize, CGSizeZero, @"Calculated size before measurement and layout should be 0");
-  
-  // Trigger layout pass without a maeasurment pass before
-  [displayNode.view layoutIfNeeded];
-  
-  ASXCTAssertEqualSizes(displayNode.calculatedSize, nodeSize, @"Automatic measurement pass should have happened in layout pass");
-  ASXCTAssertEqualSizes(buttonNode.calculatedSize, nodeSize, @"Automatic measurement pass should have happened in layout pass");
-}
-
 #if DEBUG
 - (void)testNotAllowAddingSubnodesInLayoutSpecThatFits
 {
