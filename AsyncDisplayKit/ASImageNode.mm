@@ -665,7 +665,7 @@ extern asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(
     [roundOutline addClip];
 
     // Draw the original image
-    [originalImage drawAtPoint:CGPointZero];
+    [originalImage drawAtPoint:CGPointZero blendMode:kCGBlendModeCopy alpha:1];
 
     // Draw a border on top.
     if (borderWidth > 0.0) {
@@ -688,7 +688,7 @@ extern asimagenode_modification_block_t ASImageNodeTintColorModificationBlock(UI
     // Set color and render template
     [color setFill];
     UIImage *templateImage = [originalImage imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-    [templateImage drawAtPoint:CGPointZero];
+    [templateImage drawAtPoint:CGPointZero blendMode:kCGBlendModeCopy alpha:1];
     
     UIImage *modifiedImage = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
