@@ -79,14 +79,6 @@ static const char *ASAsyncTransactionIsContainerKey = "ASTransactionIsContainer"
   }
 }
 
-- (void)asyncdisplaykit_asyncTransactionContainerStateDidChange
-{
-  id delegate = self.delegate;
-  if ([delegate respondsToSelector:@selector(asyncdisplaykit_asyncTransactionContainerStateDidChange)]) {
-    [delegate asyncdisplaykit_asyncTransactionContainerStateDidChange];
-  }
-}
-
 - (_ASAsyncTransaction *)asyncdisplaykit_asyncTransaction
 {
   _ASAsyncTransaction *transaction = self.asyncdisplaykit_currentAsyncLayerTransaction;
@@ -96,19 +88,18 @@ static const char *ASAsyncTransactionIsContainerKey = "ASTransactionIsContainer"
       transactions = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];
       self.asyncdisplaykit_asyncLayerTransactions = transactions;
     }
+    __weak CALayer *weakSelf = self;
     transaction = [[_ASAsyncTransaction alloc] initWithCallbackQueue:dispatch_get_main_queue() completionBlock:^(_ASAsyncTransaction *completedTransaction, BOOL cancelled) {
+      __strong CALayer *self = weakSelf;
+      if (self == nil) {
+        return;
+      }
       [transactions removeObject:completedTransaction];
       [self asyncdisplaykit_asyncTransactionContainerDidCompleteTransaction:completedTransaction];
-      if ([transactions count] == 0) {
-        [self asyncdisplaykit_asyncTransactionContainerStateDidChange];
-      }
     }];
     [transactions addObject:transaction];
     self.asyncdisplaykit_currentAsyncLayerTransaction = transaction;
     [self asyncdisplaykit_asyncTransactionContainerWillBeginTransaction:transaction];
-    if ([transactions count] == 1) {
-      [self asyncdisplaykit_asyncTransactionContainerStateDidChange];
-    }
   }
   [[_ASAsyncTransactionGroup mainTransactionGroup] addTransactionContainer:self];
   return transaction;
