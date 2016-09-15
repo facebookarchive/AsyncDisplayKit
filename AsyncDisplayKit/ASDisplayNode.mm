@@ -553,8 +553,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _layer = [self _layerToLoad];
     static int ASLayerDelegateAssociationKey;
 
-    // We cannot make self the layer's delegate directly, because the delegate is
-    // actually `assign` though the docs say weak.
+    /**
+     * CALayer's .delegate property is documented to be weak, but the implementation is actually assign.
+     * Because our layer may survive longer than the node (e.g. if someone else retains it, or if the node
+     * begins deallocation on a background thread and it waiting for the -dealloc call to reach main), the only
+     * way to avoid a dangling pointer is to use a weak proxy.
+     */
     ASWeakProxy *instance = [ASWeakProxy weakProxyWithTarget:self];
     _layer.delegate = (id<CALayerDelegate>)instance;
     objc_setAssociatedObject(_layer, &ASLayerDelegateAssociationKey, instance, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
