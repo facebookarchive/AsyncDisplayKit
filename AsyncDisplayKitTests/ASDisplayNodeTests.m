@@ -1979,7 +1979,7 @@ static bool stringContainsPointer(NSString *description, id p) {
   [self executeOffThread:^{
     node = nil;
   }];
-  host = nil; // <- Will crash here
+  host = nil; // <- Would crash here, when UIView accesses its sublayers' delegates in -dealloc.
 }
 
 - (void)testThatSubnodeGetsInterfaceStateSetIfRasterized
