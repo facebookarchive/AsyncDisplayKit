@@ -100,7 +100,12 @@
   // If not, we need to update the traits and propagate them.
   if (CGSizeEqualToSize(self.node.environmentTraitCollection.containerSize, self.view.bounds.size) == NO) {
     [UIView performWithoutAnimation:^{
-      ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
+      ASEnvironmentTraitCollection environmentTraitCollection;
+      if (AS_AT_LEAST_IOS8) {
+        environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
+      } else {
+        environmentTraitCollection = ASEnvironmentTraitCollectionMakeDefault();
+      }
       environmentTraitCollection.containerSize = self.view.bounds.size;
       // this method will call measure
       [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
