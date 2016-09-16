@@ -44,11 +44,11 @@
   imageNode.image = [self testImage];
   
   // Snapshot testing requires that node is formally laid out.
-  [imageNode setSizeWithCGSize:forcedImageSize];
+  [imageNode.style setSizeWithCGSize:forcedImageSize];
   [imageNode layoutThatFits:ASSizeRangeMake(CGSizeZero, forcedImageSize)];
   ASSnapshotVerifyNode(imageNode, @"first");
   
-  [imageNode setSizeWithCGSize:CGSizeMake(200, 200)];
+  [imageNode.style setSizeWithCGSize:CGSizeMake(200, 200)];
   [imageNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(200, 200))];
   
   ASSnapshotVerifyNode(imageNode, @"second");

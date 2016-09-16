@@ -34,10 +34,10 @@
 - (void)testChildrenMeasuredWithAutoMaxSize
 {
   ASDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor], (CGSize){50, 50});
-  firstChild.layoutPosition = CGPointMake(0, 0);
+  firstChild.style.layoutPosition = CGPointMake(0, 0);
   
   ASDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor], (CGSize){100, 100});
-  secondChild.layoutPosition = CGPointMake(10, 60);
+  secondChild.style.layoutPosition = CGPointMake(10, 60);
 
   ASSizeRange sizeRange = ASSizeRangeMake(CGSizeMake(10, 10), CGSizeMake(110, 160));
   [self testWithChildren:@[firstChild, secondChild] sizeRange:sizeRange identifier:nil];
@@ -46,10 +46,10 @@
 - (void)testWithSizeRange:(ASSizeRange)sizeRange identifier:(NSString *)identifier
 {
   ASDisplayNode *firstChild = ASDisplayNodeWithBackgroundColor([UIColor redColor], (CGSize){50, 50});
-  firstChild.layoutPosition = CGPointMake(0, 0);
+  firstChild.style.layoutPosition = CGPointMake(0, 0);
   
   ASDisplayNode *secondChild = ASDisplayNodeWithBackgroundColor([UIColor blueColor], (CGSize){100, 100});
-  secondChild.layoutPosition = CGPointMake(0, 50);
+  secondChild.style.layoutPosition = CGPointMake(0, 50);
   
   [self testWithChildren:@[firstChild, secondChild] sizeRange:sizeRange identifier:identifier];
 }

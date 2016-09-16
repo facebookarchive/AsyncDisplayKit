@@ -70,14 +70,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 @implementation ASDisplayNode
 
-// Dynamic properties for ASLayoutables
-@dynamic layoutableType, size;
-// Dynamic properties for sizing
-@dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
-// Dynamic properties for stack spec
-@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender;
-// Dynamic properties for static spec
-@dynamic layoutPosition;
+@dynamic layoutableType;
 
 @synthesize name = _name;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
@@ -307,7 +300,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   
-  _size = ASLayoutableSizeMake();
+  _style = [[ASLayoutableStyleDeclaration alloc] init];
   _preferredFrameSize = CGSizeZero;
   _environmentState = ASEnvironmentStateMakeDefault();
   
@@ -728,25 +721,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _flags.layerBacked;
 }
 
-#pragma mark - Layout measurement and sizing
+#pragma mark - Style
 
-- (ASLayoutableSize)size
+- (ASLayoutableStyleDeclaration *)style
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return _size;
+  return _style;
 }
 
-- (void)setSize:(ASLayoutableSize)size
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  if (ASLayoutableSizeEqualToLayoutableSize(_size, size) == NO) {
-    _size = size;
-    [self invalidateCalculatedLayout];
-  }
-}
-
-ASLayoutableSizeForwarding
-ASLayoutableSizeHelperForwarding
+#pragma mark - Layout
 
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
 {
@@ -770,7 +753,7 @@ ASLayoutableSizeHelperForwarding
   // Prepare for layout transition
   auto previousLayout = _calculatedDisplayNodeLayout;
   auto pendingLayout = std::make_shared<ASDisplayNodeLayout>(
-    [self calculateLayoutThatFits:constrainedSize restrictedToSize:_size relativeToParentSize:parentSize],
+    [self calculateLayoutThatFits:constrainedSize restrictedToSize:_style.size relativeToParentSize:parentSize],
     constrainedSize,
     parentSize
   );
@@ -887,7 +870,7 @@ ASLayoutableSizeHelperForwarding
       BOOL automaticallyManagesSubnodesDisabled = (self.automaticallyManagesSubnodes == NO);
       self.automaticallyManagesSubnodes = YES; // Temporary flag for 1.9.x
       newLayout = [self calculateLayoutThatFits:constrainedSize
-                               restrictedToSize:_size
+                               restrictedToSize:_style.size
                            relativeToParentSize:constrainedSize.max];
       if (automaticallyManagesSubnodesDisabled) {
         self.automaticallyManagesSubnodes = NO; // Temporary flag for 1.9.x
@@ -2418,7 +2401,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
                      restrictedToSize:(ASLayoutableSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutableSizeResolve(_size, parentSize));
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutableSizeResolve(_style.size, parentSize));
   return [self calculateLayoutThatFits:resolvedRange];
 }
 
@@ -2572,8 +2555,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (! CGSizeEqualToSize(_preferredFrameSize, preferredFrameSize)) {
     _preferredFrameSize = preferredFrameSize;
     
-    self.width = ASDimensionMake(preferredFrameSize.width);
-    self.height = ASDimensionMake(preferredFrameSize.height);
+    self.style.width = ASDimensionMake(preferredFrameSize.width);
+    self.style.height = ASDimensionMake(preferredFrameSize.height);
 
     [self invalidateCalculatedLayout];
   }
@@ -3460,9 +3443,6 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   }
 }
 
-ASEnvironmentLayoutOptionsForwarding
-ASEnvironmentLayoutExtensibilityForwarding
-
 - (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(__instanceLock__);
@@ -3473,6 +3453,8 @@ ASEnvironmentLayoutExtensibilityForwarding
 {
   // Subclass override
 }
+
+ASEnvironmentLayoutExtensibilityForwarding
 
 #if TARGET_OS_TV
 #pragma mark - UIFocusEnvironment Protocol (tvOS)

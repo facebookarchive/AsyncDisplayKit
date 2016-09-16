@@ -78,7 +78,7 @@
       // of the button node to add a touch handler.
     [_titleNode setLayerBacked:YES];
 #endif
-    [_titleNode setFlexShrink:YES];
+    _titleNode.style.flexShrink = YES;
   }
   return _titleNode;
 }
@@ -517,8 +517,8 @@
 #if DEBUG
     NSLog(@"Using -[ASDisplayNde preferredFrameSize] is deprecated.");
 #endif
-    stack.width = ASDimensionMake(ASDimensionUnitPoints, self.preferredFrameSize.width);
-    stack.height = ASDimensionMake(ASDimensionUnitPoints, self.preferredFrameSize.height);
+    stack.style.width = ASDimensionMake(ASDimensionUnitPoints, self.preferredFrameSize.width);
+    stack.style.height = ASDimensionMake(ASDimensionUnitPoints, self.preferredFrameSize.height);
     spec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack]];
   }
 #pragma clang diagnostic pop

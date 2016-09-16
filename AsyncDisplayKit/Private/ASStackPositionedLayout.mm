@@ -19,7 +19,7 @@ static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
                            const ASStackUnpositionedItem &l,
                            const CGFloat crossSize)
 {
-  switch (alignment(l.child.alignSelf, style.alignItems)) {
+  switch (alignment(l.child.style.alignSelf, style.alignItems)) {
     case ASStackLayoutAlignItemsEnd:
       return crossSize - crossDimension(style.direction, l.layout.size);
     case ASStackLayoutAlignItemsCenter:
@@ -66,14 +66,14 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
   
   auto stackedChildren = AS::map(unpositionedLayout.items, [&](const ASStackUnpositionedItem &l) -> ASLayout *{
     offset = (l.child == lastChild) ? lastChildOffset : 0;
-    p = p + directionPoint(style.direction, l.child.spacingBefore + offset, 0);
+    p = p + directionPoint(style.direction, l.child.style.spacingBefore + offset, 0);
     if (!first) {
       p = p + directionPoint(style.direction, style.spacing + extraSpacing, 0);
     }
     first = NO;
     l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize));
     
-    p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.spacingAfter, 0);
+    p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.style.spacingAfter, 0);
     return l.layout;
   });
   return {stackedChildren, crossSize};

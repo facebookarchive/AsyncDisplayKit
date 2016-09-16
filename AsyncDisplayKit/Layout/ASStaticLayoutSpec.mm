@@ -46,13 +46,13 @@
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:children.count];
 
   for (id<ASLayoutable> child in children) {
-    CGPoint layoutPosition = child.layoutPosition;
+    CGPoint layoutPosition = child.style.layoutPosition;
     CGSize autoMaxSize = {
       constrainedSize.max.width  - layoutPosition.x,
       constrainedSize.max.height - layoutPosition.y
     };
 
-    const ASSizeRange childConstraint = ASLayoutableSizeResolveAutoSize(child.size, size, {{0,0}, autoMaxSize});
+    const ASSizeRange childConstraint = ASLayoutableSizeResolveAutoSize(child.style.size, size, {{0,0}, autoMaxSize});
     
     ASLayout *sublayout = [child layoutThatFits:childConstraint parentSize:size];
     sublayout.position = layoutPosition;

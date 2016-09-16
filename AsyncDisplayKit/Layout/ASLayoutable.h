@@ -50,7 +50,9 @@ NS_ASSUME_NONNULL_BEGIN
  * access to the options via convenience properties. If you are creating custom layout spec, then you can
  * extend the backing layout options class to accommodate any new layout options.
  */
-@protocol ASLayoutable <ASEnvironment, ASStackLayoutable, ASStaticLayoutable, ASLayoutablePrivate, ASLayoutableExtensibility>
+@protocol ASLayoutable <ASEnvironment, ASLayoutablePrivate, ASLayoutableExtensibility>
+
+#pragma mark - Getter
 
 /**
  * @abstract Returns type of layoutable
@@ -62,63 +64,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) BOOL canLayoutAsynchronous;
 
-#pragma mark - Sizing
-
 /**
- * @abstract The width property specifies the height of the content area of an ASLayoutable.
- * The minWidth and maxWidth properties override width.
- * Defaults to ASRelativeDimensionTypeAuto
+ * @abstract A size constraint that should apply to this ASLayoutable.
  */
-@property (nonatomic, assign, readwrite) ASDimension width;
-
-/**
- * @abstract The height property specifies the height of the content area of an ASLayoutable
- * The minHeight and maxHeight properties override height.
- * Defaults to ASDimensionTypeAuto
- */
-@property (nonatomic, assign, readwrite) ASDimension height;
-
-/**
- * @abstract The minHeight property is used to set the minimum height of a given element. It prevents the used value
- * of the height property from becoming smaller than the value specified for minHeight.
- * The value of minHeight overrides both maxHeight and height.
- * Defaults to ASDimensionTypeAuto
- */
-@property (nonatomic, assign, readwrite) ASDimension minHeight;
-
-/**
- * @abstract The maxHeight property is used to set the maximum height of an element. It prevents the used value of the
- * height property from becoming larger than the value specified for maxHeight.
- * The value of maxHeight overrides height, but minHeight overrides maxHeight.
- * Defaults to ASDimensionTypeAuto
- */
-@property (nonatomic, assign, readwrite) ASDimension maxHeight;
-
-/**
- * @abstract The minWidth property is used to set the minimum width of a given element. It prevents the used value of
- * the width property from becoming smaller than the value specified for minWidth.
- * The value of minWidth overrides both maxWidth and width.
- * Defaults to ASDimensionTypeAuto
- */
-@property (nonatomic, assign, readwrite) ASDimension minWidth;
-
-/**
- * @abstract The maxWidth property is used to set the maximum width of a given element. It prevents the used value of
- * the width property from becoming larger than the value specified for maxWidth.
- * The value of maxWidth overrides width, but minWidth overrides maxWidth.
- * Defaults to ASDimensionTypeAuto
- */
-@property (nonatomic, assign, readwrite) ASDimension maxWidth;
-
-/**
- * @abstract Set max and width properties from given size
- */
-- (void)setSizeWithCGSize:(CGSize)size;
-
-/**
- * @abstract Set minHeight, maxHeight and minWidth, maxWidth properties from given size
- */
-- (void)setExactSizeWithCGSize:(CGSize)size;
+@property (nonatomic, assign, readonly) ASLayoutableStyleDeclaration *style;
 
 
 #pragma mark - Calculate layout
@@ -187,67 +136,6 @@ NS_ASSUME_NONNULL_BEGIN
                  relativeToParentSize:(CGSize)parentSize;
 
 
-
-#pragma mark - Layout options from the Layoutable Protocols
-
-
-#pragma mark - ASStackLayoutable
-/**
- * @abstract Additional space to place before this object in the stacking direction.
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) CGFloat spacingBefore;
-
-/**
- * @abstract Additional space to place after this object in the stacking direction.
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) CGFloat spacingAfter;
-
-/**
- * @abstract If the sum of childrens' stack dimensions is less than the minimum size, should this object grow?
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) BOOL flexGrow;
-
-/**
- * @abstract If the sum of childrens' stack dimensions is greater than the maximum size, should this object shrink?
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) BOOL flexShrink;
-
-/**
- * @abstract Specifies the initial size in the stack dimension for this object.
- * Default to ASRelativeDimensionAuto
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) ASDimension flexBasis;
-
-/**
- * @abstract Orientation of the object along cross axis, overriding alignItems
- * Used when attached to a stack layout.
- */
-@property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;
-
-/**
- *  @abstract Used for baseline alignment. The distance from the top of the object to its baseline.
- */
-@property (nonatomic, readwrite) CGFloat ascender;
-
-/**
- *  @abstract Used for baseline alignment. The distance from the baseline of the object to its bottom.
- */
-@property (nonatomic, readwrite) CGFloat descender;
-
-
-#pragma mark - ASStaticLayoutable
-
-/**
- * @abstract The position of this object within its parent spec.
- */
-@property (nonatomic, assign) CGPoint layoutPosition;
-
-
 #pragma mark - Deprecated
 
 /**
@@ -260,6 +148,135 @@ NS_ASSUME_NONNULL_BEGIN
  * @deprecated Deprecated in version 2.0: Use ASCalculateRootLayout or ASCalculateLayout instead
  */
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize ASDISPLAYNODE_DEPRECATED;
+
+@end
+
+#pragma mark - ASLayoutableStyleDeclaration
+
+@interface ASLayoutableStyleDeclaration : NSObject <ASStackLayoutable, ASStaticLayoutable>
+
+
+#pragma mark - Sizing
+
+// TODO: Move to internal method?
+/**
+ * @abstract A size constraint that should apply to this ASLayoutable.
+ */
+@property (nonatomic, assign, readwrite) ASLayoutableSize size;
+
+/**
+ * @abstract The width property specifies the height of the content area of an ASLayoutable.
+ * The minWidth and maxWidth properties override width.
+ * Defaults to ASRelativeDimensionTypeAuto
+ */
+@property (nonatomic, assign, readwrite) ASDimension width;
+
+/**
+ * @abstract The height property specifies the height of the content area of an ASLayoutable
+ * The minHeight and maxHeight properties override height.
+ * Defaults to ASDimensionTypeAuto
+ */
+@property (nonatomic, assign, readwrite) ASDimension height;
+
+/**
+ * @abstract The minHeight property is used to set the minimum height of a given element. It prevents the used value
+ * of the height property from becoming smaller than the value specified for minHeight.
+ * The value of minHeight overrides both maxHeight and height.
+ * Defaults to ASDimensionTypeAuto
+ */
+@property (nonatomic, assign, readwrite) ASDimension minHeight;
+
+/**
+ * @abstract The maxHeight property is used to set the maximum height of an element. It prevents the used value of the
+ * height property from becoming larger than the value specified for maxHeight.
+ * The value of maxHeight overrides height, but minHeight overrides maxHeight.
+ * Defaults to ASDimensionTypeAuto
+ */
+@property (nonatomic, assign, readwrite) ASDimension maxHeight;
+
+/**
+ * @abstract The minWidth property is used to set the minimum width of a given element. It prevents the used value of
+ * the width property from becoming smaller than the value specified for minWidth.
+ * The value of minWidth overrides both maxWidth and width.
+ * Defaults to ASDimensionTypeAuto
+ */
+@property (nonatomic, assign, readwrite) ASDimension minWidth;
+
+/**
+ * @abstract The maxWidth property is used to set the maximum width of a given element. It prevents the used value of
+ * the width property from becoming larger than the value specified for maxWidth.
+ * The value of maxWidth overrides width, but minWidth overrides maxWidth.
+ * Defaults to ASDimensionTypeAuto
+ */
+@property (nonatomic, assign, readwrite) ASDimension maxWidth;
+
+/**
+ * @abstract Set max and width properties from given size
+ */
+- (void)setSizeWithCGSize:(CGSize)size;
+
+/**
+ * @abstract Set minHeight, maxHeight and minWidth, maxWidth properties from given size
+ */
+- (void)setExactSizeWithCGSize:(CGSize)size;
+
+
+#pragma mark - ASStackLayoutable
+
+/**
+ * @abstract Additional space to place before this object in the stacking direction.
+ * Used when attached to a stack layout.
+ */
+@property (nonatomic, assign) CGFloat spacingBefore;
+
+/**
+ * @abstract Additional space to place after this object in the stacking direction.
+ * Used when attached to a stack layout.
+ */
+@property (nonatomic, assign) CGFloat spacingAfter;
+
+/**
+ * @abstract If the sum of childrens' stack dimensions is less than the minimum size, should this object grow?
+ * Used when attached to a stack layout.
+ */
+@property (nonatomic, assign) BOOL flexGrow;
+
+/**
+ * @abstract If the sum of childrens' stack dimensions is greater than the maximum size, should this object shrink?
+ * Used when attached to a stack layout.
+ */
+@property (nonatomic, assign) BOOL flexShrink;
+
+/**
+ * @abstract Specifies the initial size in the stack dimension for this object.
+ * Default to ASRelativeDimensionAuto
+ * Used when attached to a stack layout.
+ */
+@property (nonatomic, assign) ASDimension flexBasis;
+
+/**
+ * @abstract Orientation of the object along cross axis, overriding alignItems
+ * Used when attached to a stack layout.
+ */
+@property (nonatomic, assign) ASStackLayoutAlignSelf alignSelf;
+
+/**
+ *  @abstract Used for baseline alignment. The distance from the top of the object to its baseline.
+ */
+@property (nonatomic, assign) CGFloat ascender;
+
+/**
+ *  @abstract Used for baseline alignment. The distance from the baseline of the object to its bottom.
+ */
+@property (nonatomic, assign) CGFloat descender;
+
+
+#pragma mark - ASStaticLayoutable
+
+/**
+ * @abstract The position of this object within its parent spec.
+ */
+@property (nonatomic, assign) CGPoint layoutPosition;
 
 @end
 

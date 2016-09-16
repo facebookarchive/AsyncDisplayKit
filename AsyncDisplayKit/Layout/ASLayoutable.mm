@@ -13,6 +13,7 @@
 #import "ASLayoutablePrivate.h"
 #import "ASEnvironmentInternal.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASThread.h"
 
 #import <map>
 
@@ -82,3 +83,114 @@ void ASLayoutableClearCurrentContext()
   ASDN::StaticMutexLocker l(_layoutableContextLock);
   layoutableContextMap.erase(key);
 }
+
+#pragma mark - ASLayoutableStyleDeclaration
+
+@implementation ASLayoutableStyleDeclaration {
+  ASDN::RecursiveMutex __instanceLock__;
+}
+
+@dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
+
+- (instancetype)init
+{
+  self = [super init];
+  if (self) {
+    _size = ASLayoutableSizeMake();
+    _flexShrink = YES;
+  }
+  return self;
+}
+
+
+#pragma mark - ASLayoutableSizeForwarding
+
+- (ASDimension)width
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.width;
+}
+
+- (void)setWidth:(ASDimension)width
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.width = width;
+}
+
+- (ASDimension)height
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.height;
+}
+
+- (void)setHeight:(ASDimension)height
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.height = height;
+}
+
+- (ASDimension)minWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.minWidth;
+}
+
+- (void)setMinWidth:(ASDimension)minWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.minWidth = minWidth;
+}
+
+- (ASDimension)maxWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.maxWidth;
+}
+
+- (void)setMaxWidth:(ASDimension)maxWidth
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.maxWidth = maxWidth;
+}
+
+- (ASDimension)minHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.minHeight;
+}
+
+- (void)setMinHeight:(ASDimension)minHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.minHeight = minHeight;
+}
+
+- (ASDimension)maxHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size.maxHeight;
+}
+
+- (void)setMaxHeight:(ASDimension)maxHeight
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.maxHeight = maxHeight;
+}
+
+#pragma mark - Layout measurement and sizing
+
+- (void)setSizeWithCGSize:(CGSize)size
+{
+  self.width = ASDimensionMakeWithPoints(size.width);
+  self.height = ASDimensionMakeWithPoints(size.height);
+}
+
+- (void)setExactSizeWithCGSize:(CGSize)size
+{
+  self.minWidth = ASDimensionMakeWithPoints(size.width);
+  self.minHeight = ASDimensionMakeWithPoints(size.height);
+  self.maxWidth = ASDimensionMakeWithPoints(size.width);
+  self.maxHeight = ASDimensionMakeWithPoints(size.height);
+}
+
+@end
