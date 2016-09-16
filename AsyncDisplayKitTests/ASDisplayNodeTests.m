@@ -10,6 +10,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "ASXCTExtensions.h"
 #import <XCTest/XCTest.h>
 
 #import "_ASDisplayLayer.h"
@@ -2060,7 +2061,7 @@ static bool stringContainsPointer(NSString *description, id p) {
   
   // Set a specific preferredFrameSize
   node.preferredFrameSize = CGSizeMake(100, 100);
-  XCTAssert(CGSizeEqualToSize(node.preferredFrameSize, CGSizeMake(100, 100)));
+  ASXCTAssertEqualSizes(node.preferredFrameSize, CGSizeMake(100, 100));
   
   // Throw if requesting a preferred size if widht or height is of unit type fraction
   node.style.width = ASDimensionMakeWithFraction(0.5);
