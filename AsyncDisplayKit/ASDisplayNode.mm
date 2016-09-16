@@ -2316,7 +2316,16 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     ASEnvironmentStatePropagateDown(layoutSpec, self.environmentTraitCollection);
     
     layoutSpec.isMutable = NO;
-    ASLayout *layout = [layoutSpec measureWithSizeRange:constrainedSize];
+    ASLayout *layout = nil;
+    // optional performance measurement for cell nodes
+    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutGeneration) {
+      ASDN::SumScopeTimer t(_layoutGenerationTotalTime);
+      _layoutGenerationNumberOfPasses++;
+      layout = [layoutSpec measureWithSizeRange:constrainedSize];
+    } else {
+      layout = [layoutSpec measureWithSizeRange:constrainedSize];
+    }
+
     ASDisplayNodeAssertNotNil(layout, @"[ASLayoutSpec measureWithSizeRange:] should never return nil! %@, %@", self, layoutSpec);
       
     // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
