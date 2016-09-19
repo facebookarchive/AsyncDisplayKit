@@ -62,6 +62,7 @@
     _contentHorizontalAlignment = ASHorizontalAlignmentMiddle;
     _contentVerticalAlignment = ASVerticalAlignmentCenter;
     _contentEdgeInsets = UIEdgeInsetsZero;
+    _imageAlignment = ASButtonNodeImageAlignmentLeft;
     self.accessibilityTraits = UIAccessibilityTraitButton;
   }
   return self;
@@ -480,7 +481,11 @@
   }
   
   if (_titleNode.attributedText.length > 0) {
-    [children addObject:_titleNode];
+    if (_imageAlignment == ASButtonNodeImageAlignmentLeft) {
+      [children addObject:_titleNode];
+    } else {
+      [children insertObject:_titleNode atIndex:0];
+    }
   }
   
   stack.children = children;

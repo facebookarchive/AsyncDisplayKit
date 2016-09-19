@@ -11,6 +11,16 @@
 #import <AsyncDisplayKit/ASTextNode.h>
 #import <AsyncDisplayKit/ASImageNode.h>
 
+/**
+ Image alignment defines where the image will be placed relative to the text.
+ */
+typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
+  /** Places the image at the left side of the text. */
+  ASButtonNodeImageAlignmentLeft  = 0,
+  /** Places the image at the right side of the text. */
+  ASButtonNodeImageAlignmentRight = 1 << 0
+};
+
 @interface ASButtonNode : ASControlNode
 
 @property (nonatomic, readonly) ASTextNode  * _Nonnull titleNode;
@@ -43,6 +53,11 @@
  * @discussion The insets used around the title and image node
  */
 @property (nonatomic, assign) UIEdgeInsets contentEdgeInsets;
+
+/**
+ * @discusstion Whether the image is left or right aligned. Default is `ASButtonNodeImageAlignmentLeft`.
+ */
+@property (nonatomic, assign) ASButtonNodeImageAlignment imageAlignment;
 
 /**
  *  Returns the styled title associated with the specified state.
