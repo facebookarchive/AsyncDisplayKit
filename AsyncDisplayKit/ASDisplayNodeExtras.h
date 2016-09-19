@@ -82,16 +82,16 @@ extern ASDisplayNode * _Nullable ASViewToDisplayNode(UIView * _Nullable view);
 extern ASDisplayNode *ASDisplayNodeUltimateParentOfNode(ASDisplayNode *node);
 
 /**
- This function will walk the layer hierarchy, spanning discontinuous sections of the node hierarchy (e.g. the layers
- of UIKit intermediate views in UIViewControllers, UITableView, UICollectionView).
+ If traverseSublayers == YES, this function will walk the layer hierarchy, spanning discontinuous sections of the node hierarchy\
+ (e.g. the layers of UIKit intermediate views in UIViewControllers, UITableView, UICollectionView).
  In the event that a node's backing layer is not created yet, the function will only walk the direct subnodes instead
  of forcing the layer hierarchy to be created.
  */
-extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
+extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, BOOL traverseSublayers, void(^block)(ASDisplayNode *node));
 
 /**
  This function will walk the node hierarchy in a breadth first fashion. It does run the block on the node provided
- directly to the function call.
+ directly to the function call.  It does NOT traverse sublayers.
  */
 extern void ASDisplayNodePerformBlockOnEveryNodeBFS(ASDisplayNode *node, void(^block)(ASDisplayNode *node));
 
@@ -99,7 +99,7 @@ extern void ASDisplayNodePerformBlockOnEveryNodeBFS(ASDisplayNode *node, void(^b
  Identical to ASDisplayNodePerformBlockOnEveryNode, except it does not run the block on the
  node provided directly to the function call - only on all descendants.
  */
-extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^block)(ASDisplayNode *node));
+extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, BOOL traverseSublayers, void(^block)(ASDisplayNode *node));
 
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node that passes block.
