@@ -15,10 +15,10 @@
  Image alignment defines where the image will be placed relative to the text.
  */
 typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
-  /** Places the image at the left side of the text. */
-  ASButtonNodeImageAlignmentLeft  = 0,
-  /** Places the image at the right side of the text. */
-  ASButtonNodeImageAlignmentRight = 1 << 0
+  /** Places the image before the text. */
+  ASButtonNodeImageAlignmentBeginning  = 0,
+  /** Places the image after the text. */
+  ASButtonNodeImageAlignmentEnd = 1 << 0
 };
 
 @interface ASButtonNode : ASControlNode
