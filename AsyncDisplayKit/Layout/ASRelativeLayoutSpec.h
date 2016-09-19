@@ -36,15 +36,28 @@ typedef NS_OPTIONS(NSUInteger, ASRelativeLayoutSpecSizingOption) {
 
 NS_ASSUME_NONNULL_BEGIN
 
-/** Lays out a single layoutable child and positions it within the layout bounds according to vertical and horizontal positional specifiers.
- *  Can position the child at any of the 4 corners, or the middle of any of the 4 edges, as well as the center - similar to "9-part" image areas.
- */
-@interface ASRelativeLayoutSpec : ASLayoutSpec
+#pragma mark - ASRelativeLayoutSpecStyleDeclaration
+
+@interface ASRelativeLayoutSpecStyleDeclaration : ASLayoutableStyleDeclaration
 
 // You may create a spec with alloc / init, then set any non-default properties; or use a convenience initialize that accepts all properties.
 @property (nonatomic, assign) ASRelativeLayoutSpecPosition horizontalPosition;
 @property (nonatomic, assign) ASRelativeLayoutSpecPosition verticalPosition;
 @property (nonatomic, assign) ASRelativeLayoutSpecSizingOption sizingOption;
+
+@end
+
+#pragma mark - ASRelativeLayoutSpec
+
+/** Lays out a single layoutable child and positions it within the layout bounds according to vertical and horizontal positional specifiers.
+ *  Can position the child at any of the 4 corners, or the middle of any of the 4 edges, as well as the center - similar to "9-part" image areas.
+ */
+@interface ASRelativeLayoutSpec : ASLayoutSpec
+
+/**
+ * @abstract A size constraint that should apply to this ASStackLayoutSpec.
+ */
+@property (nonatomic, assign, readonly) ASRelativeLayoutSpecStyleDeclaration *style;
 
 /*!
  * @discussion convenience constructor for a ASRelativeLayoutSpec

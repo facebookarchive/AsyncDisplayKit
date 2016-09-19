@@ -11,52 +11,22 @@
 #import "ASCenterLayoutSpec.h"
 
 #import "ASLayout.h"
+#import "ASThread.h"
 
-@implementation ASCenterLayoutSpec
-{
-  ASCenterLayoutSpecCenteringOptions _centeringOptions;
-  ASCenterLayoutSpecSizingOptions _sizingOptions;
-}
 
-- (instancetype)initWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
-                           sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
-                                   child:(id<ASLayoutable>)child;
+#pragma mark - Helper
+
+static ASRelativeLayoutSpecPosition ASCenterLayoutSpecVerticalPositionFromCenteringOptions(ASCenterLayoutSpecCenteringOptions centeringOptions)
 {
-  ASRelativeLayoutSpecPosition verticalPosition = [self verticalPositionFromCenteringOptions:centeringOptions];
-  ASRelativeLayoutSpecPosition horizontalPosition = [self horizontalPositionFromCenteringOptions:centeringOptions];
-  
-  if (!(self = [super initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOptions child:child])) {
-    return nil;
+  BOOL centerY = (centeringOptions & ASCenterLayoutSpecCenteringY) != 0;
+  if (centerY) {
+    return ASRelativeLayoutSpecPositionCenter;
+  } else {
+    return ASRelativeLayoutSpecPositionStart;
   }
-  _centeringOptions = centeringOptions;
-  _sizingOptions = sizingOptions;
-  return self;
 }
 
-+ (instancetype)centerLayoutSpecWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
-                                       sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
-                                               child:(id<ASLayoutable>)child
-{
-  return [[self alloc] initWithCenteringOptions:centeringOptions sizingOptions:sizingOptions child:child];
-}
-
-- (void)setCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
-{
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _centeringOptions = centeringOptions;
-  
-  [self setHorizontalPosition:[self horizontalPositionFromCenteringOptions:centeringOptions]];
-  [self setVerticalPosition:[self verticalPositionFromCenteringOptions:centeringOptions]];
-}
-
-- (void)setSizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
-{
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _sizingOptions = sizingOptions;
-  [self setSizingOption:sizingOptions];
-}
-
-- (ASRelativeLayoutSpecPosition)horizontalPositionFromCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
+static ASRelativeLayoutSpecPosition ASCenterLayoutSpecHorizontalPositionFromCenteringOptions(ASCenterLayoutSpecCenteringOptions centeringOptions)
 {
   BOOL centerX =  (centeringOptions & ASCenterLayoutSpecCenteringX) != 0;
   if (centerX) {
@@ -66,14 +36,71 @@
   }
 }
 
-- (ASRelativeLayoutSpecPosition)verticalPositionFromCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
+
+#pragma mark - ASCenterLayoutSpecStyleDeclaration
+
+@implementation ASCenterLayoutSpecStyleDeclaration
+
+- (void)setCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
 {
-  BOOL centerY =  (centeringOptions & ASCenterLayoutSpecCenteringY) != 0;
-  if (centerY) {
-    return ASRelativeLayoutSpecPositionCenter;
-  } else {
-    return ASRelativeLayoutSpecPositionStart;
+  _centeringOptions = centeringOptions;
+  
+  self.verticalPosition = ASCenterLayoutSpecVerticalPositionFromCenteringOptions(centeringOptions);
+  self.horizontalPosition = ASCenterLayoutSpecHorizontalPositionFromCenteringOptions(centeringOptions);
+}
+
+- (void)setSizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
+{
+  _sizingOptions = sizingOptions;
+  [super setSizingOption:sizingOptions];
+}
+
+@end
+
+
+#pragma mark - ASCenterLayoutSpec
+
+@implementation ASCenterLayoutSpec {
+  ASDN::RecursiveMutex __instanceLock__;
+  ASCenterLayoutSpecStyleDeclaration *_style;
+}
+
+#pragma mark - Class
+
++ (instancetype)centerLayoutSpecWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
+                                       sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
+                                               child:(id<ASLayoutable>)child
+{
+  return [[self alloc] initWithCenteringOptions:centeringOptions sizingOptions:sizingOptions child:child];
+}
+
+#pragma mark - Lifecycle
+
+- (instancetype)initWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
+                           sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
+                                   child:(id<ASLayoutable>)child;
+{
+  ASRelativeLayoutSpecPosition verticalPosition = ASCenterLayoutSpecVerticalPositionFromCenteringOptions(centeringOptions);
+  ASRelativeLayoutSpecPosition horizontalPosition = ASCenterLayoutSpecHorizontalPositionFromCenteringOptions(centeringOptions);
+  
+  self = [super initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOptions child:child];
+  if (self == nil) {
+    return nil;
   }
+  
+  _style = [[ASCenterLayoutSpecStyleDeclaration alloc] init];
+  _style.centeringOptions = centeringOptions;
+  _style.sizingOptions = sizingOptions;
+  
+  return self;
+}
+
+#pragma mark - Getter / Setter
+
+- (ASRelativeLayoutSpecStyleDeclaration *)style
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _style;
 }
 
 @end

@@ -13,6 +13,17 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+#pragma mark - ASRatioLayoutSpecStyleDescription
+
+@interface ASRatioLayoutSpecStyleDescription : ASLayoutableStyleDeclaration
+
+@property (nonatomic, assign) CGFloat ratio;
+
+@end
+
+
+#pragma mark - ASRatioLayoutSpec
+
 /**
  Ratio layout spec
  For when the content should respect a certain inherent ratio but can be scaled (think photos or videos)
@@ -33,7 +44,10 @@ NS_ASSUME_NONNULL_BEGIN
  **/
 @interface ASRatioLayoutSpec : ASLayoutSpec
 
-@property (nonatomic, assign) CGFloat ratio;
+/**
+ * @abstract A size constraint that should apply to this ASStackLayoutSpec.
+ */
+@property (nonatomic, assign, readonly) ASRatioLayoutSpecStyleDescription *style;
 
 + (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child;
 

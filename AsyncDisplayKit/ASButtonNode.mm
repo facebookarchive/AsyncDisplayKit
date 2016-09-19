@@ -481,10 +481,10 @@
   ASStackLayoutSpec *stack = [[ASStackLayoutSpec alloc] init];
   {
     ASDN::MutexLocker l(__instanceLock__);
-    stack.direction = _laysOutHorizontally ? ASStackLayoutDirectionHorizontal : ASStackLayoutDirectionVertical;
-    stack.spacing = _contentSpacing;
-    stack.horizontalAlignment = _contentHorizontalAlignment;
-    stack.verticalAlignment = _contentVerticalAlignment;
+    stack.style.direction = _laysOutHorizontally ? ASStackLayoutDirectionHorizontal : ASStackLayoutDirectionVertical;
+    stack.style.spacing = _contentSpacing;
+    stack.style.horizontalAlignment = _contentHorizontalAlignment;
+    stack.style.verticalAlignment = _contentVerticalAlignment;
     
     contentEdgeInsets = _contentEdgeInsets;
     imageAlignment = _imageAlignment;

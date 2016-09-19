@@ -18,21 +18,30 @@ static NSUInteger const kOverlayChildIndex = 1;
 
 @implementation ASOverlayLayoutSpec
 
-- (instancetype)initWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
-{
-  if (!(self = [super init])) {
-    return nil;
-  }
-  ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
-  self.overlay = overlay;
-  [self setChild:child forIndex:kUnderlayChildIndex];
-  return self;
-}
+#pragma mark - Class
 
 + (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
 {
-  return [[self alloc] initWithChild:child overlay:overlay];
+    return [[self alloc] initWithChild:child overlay:overlay];
 }
+
+#pragma mark - Lifecycle
+
+- (instancetype)initWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
+{
+  ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
+  
+  if (!(self = [super init])) {
+    return nil;
+  }
+  
+  self.overlay = overlay;
+  [self setChild:child forIndex:kUnderlayChildIndex];
+  
+  return self;
+}
+
+#pragma mark - Setter / Getter
 
 - (void)setOverlay:(id<ASLayoutable>)overlay
 {
@@ -43,6 +52,8 @@ static NSUInteger const kOverlayChildIndex = 1;
 {
   return [super childForIndex:kOverlayChildIndex];
 }
+
+#pragma mark - ASLayoutSpec
 
 /**
  First layout the contents, then fit the overlay on top of it.
