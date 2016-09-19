@@ -38,16 +38,16 @@ ASDISPLAYNODE_EXTERN_C_END
  */
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodePerformanceMeasurementOptions) {
   ASDisplayNodePerformanceMeasurementOptionLayoutSpec = 1 << 0,
-  ASDisplayNodePerformanceMeasurementOptionLayoutGeneration = 1 << 1
+  ASDisplayNodePerformanceMeasurementOptionLayoutComputation = 1 << 1
 };
 
-/**
- * Keys to retrieve performance entries from the performance dictionary.
- */
-extern NSString *const ASDisplayNodeLayoutSpecTotalTimeKey;
-extern NSString *const ASDisplayNodeLayoutSpecNumberOfPassesKey;
-extern NSString *const ASDisplayNodeLayoutGenerationTotalTimeKey;
-extern NSString *const ASDisplayNodeLayoutGenerationNumberOfPassesKey;
+struct ASDisplayNodePerformanceMeasurements
+{
+  CFTimeInterval layoutSpecTotalTime;
+  NSInteger layoutSpecNumberOfPasses;
+  CFTimeInterval layoutComputationTotalTime;
+  NSInteger layoutComputationNumberOfPasses;
+};
 
 @interface ASDisplayNode (Beta)
 
@@ -94,10 +94,9 @@ extern NSString *const ASDisplayNodeLayoutGenerationNumberOfPassesKey;
 @property (nonatomic, assign) ASDisplayNodePerformanceMeasurementOptions measurementOptions;
 
 /**
- * @abstract A dictionary representing performance measurements collected.
- * @note see the constants above to retrieve relevant performance measurements
+ * @abstract A simple struct representing performance measurements collected.
  */
-@property (nonatomic, strong, readonly) NSDictionary *performanceMeasurements;
+@property (nonatomic, assign, readonly) struct ASDisplayNodePerformanceMeasurements performanceMeasurements;
 
 /** @name Layout Transitioning */
 
