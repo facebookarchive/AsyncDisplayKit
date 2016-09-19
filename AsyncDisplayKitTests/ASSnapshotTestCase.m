@@ -19,7 +19,7 @@
 {
   ASDisplayNodeAssertNotNil(node.calculatedLayout, @"Node %@ must be measured before it is rendered.", node);
   node.bounds = (CGRect) { .size = node.calculatedSize };
-  ASDisplayNodePerformBlockOnEveryNode(nil, node, ^(ASDisplayNode * _Nonnull node) {
+  ASDisplayNodePerformBlockOnEveryNode(nil, node, YES, ^(ASDisplayNode * _Nonnull node) {
     [node.layer setNeedsDisplay];
   });
   [node recursivelyEnsureDisplaySynchronously:YES];

@@ -39,7 +39,7 @@ extern ASDisplayNode *ASViewToDisplayNode(UIView *view)
   return view.asyncdisplaykit_node;
 }
 
-extern void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *node, void(^block)(ASDisplayNode *node))
+extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, BOOL traverseSublayers, void(^block)(ASDisplayNode *node))
 {
   if (!node) {
     ASDisplayNodeCAssertNotNil(layer, @"Cannot recursively perform with nil node and nil layer");
@@ -50,19 +50,19 @@ extern void ASDisplayNodePerformBlockOnEveryNode(CALayer *layer, ASDisplayNode *
   if (node) {
     block(node);
   }
-  if (!layer && [node isNodeLoaded] && ASDisplayNodeThreadIsMain()) {
+  if (traverseSublayers && !layer && [node isNodeLoaded] && ASDisplayNodeThreadIsMain()) {
     layer = node.layer;
   }
   
-  if (layer && node.shouldRasterizeDescendants == NO) {
+  if (traverseSublayers && layer && node.shouldRasterizeDescendants == NO) {
     /// NOTE: The docs say `sublayers` returns a copy, but it does not.
     /// See: http://stackoverflow.com/questions/14854480/collection-calayerarray-0x1ed8faa0-was-mutated-while-being-enumerated
     for (CALayer *sublayer in [[layer sublayers] copy]) {
-      ASDisplayNodePerformBlockOnEveryNode(sublayer, nil, block);
+      ASDisplayNodePerformBlockOnEveryNode(sublayer, nil, traverseSublayers, block);
     }
   } else if (node) {
     for (ASDisplayNode *subnode in [node subnodes]) {
-      ASDisplayNodePerformBlockOnEveryNode(nil, subnode, block);
+      ASDisplayNodePerformBlockOnEveryNode(nil, subnode, traverseSublayers, block);
     }
   }
 }
@@ -86,10 +86,10 @@ extern void ASDisplayNodePerformBlockOnEveryNodeBFS(ASDisplayNode *node, void(^b
   }
 }
 
-extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, void(^block)(ASDisplayNode *node))
+extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, BOOL traverseSublayers, void(^block)(ASDisplayNode *node))
 {
   for (ASDisplayNode *subnode in node.subnodes) {
-    ASDisplayNodePerformBlockOnEveryNode(nil, subnode, block);
+    ASDisplayNodePerformBlockOnEveryNode(nil, subnode, YES, block);
   }
 }
 

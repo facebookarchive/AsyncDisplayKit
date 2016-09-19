@@ -873,12 +873,11 @@ ASLayoutableSizeHelperForwarding
   int32_t transitionID = [self _startNewTransition];
   
   // Move all subnodes in a pending state
-  ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
+  ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode * _Nonnull node) {
     ASDisplayNodeAssert([node _isTransitionInProgress] == NO, @"Can't start a transition when one of the subnodes is performing one.");
     node.hierarchyState |= ASHierarchyStateLayoutPending;
     node.pendingTransitionID = transitionID;
   });
-  
   
   void (^transitionBlock)(void) = ^{
     if ([self _shouldAbortTransitionWithID:transitionID]) {
@@ -925,7 +924,7 @@ ASLayoutableSizeHelperForwarding
       [self setCalculatedDisplayNodeLayout:pendingLayout];
       
       // Apply complete layout transitions for all subnodes
-      ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
+      ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode * _Nonnull node) {
         [node _completePendingLayoutTransition];
         node.hierarchyState &= (~ASHierarchyStateLayoutPending);
       });
@@ -969,7 +968,7 @@ ASLayoutableSizeHelperForwarding
     [self _finishOrCancelTransition];
       
     // Tell subnodes to exit layout pending state and clear related properties
-    ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
+    ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode * _Nonnull node) {
       node.hierarchyState &= (~ASHierarchyStateLayoutPending);
     });
   }
@@ -1305,7 +1304,7 @@ ASLayoutableSizeHelperForwarding
     // while the newly materialized subtree finishes rendering.  Then destroy placeholderImage to save memory.
     [self recursivelyClearContents];
     
-    ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode *node) {
+    ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode *node) {
       if (shouldRasterize) {
         [node enterHierarchyState:ASHierarchyStateRasterized];
         [node __unloadNode];
@@ -1327,7 +1326,7 @@ ASLayoutableSizeHelperForwarding
       [self recursivelyDisplayImmediately];
     }
   } else {
-    ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode *node) {
+    ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode *node) {
       if (shouldRasterize) {
         [node enterHierarchyState:ASHierarchyStateRasterized];
       } else {
@@ -2233,7 +2232,7 @@ static NSInteger incrementIfFound(NSInteger i) {
             _pendingTransitionID = pendingTransitionId;
             
             // Propagate down the new pending transition id
-            ASDisplayNodePerformBlockOnEverySubnode(self, ^(ASDisplayNode * _Nonnull node) {
+            ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode * _Nonnull node) {
               node.pendingTransitionID = _pendingTransitionID;
             });
           }
@@ -2687,7 +2686,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)recursivelyClearContents
 {
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
     [node clearContents];
   });
 }
@@ -2706,7 +2705,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)recursivelyFetchData
 {
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
     [node fetchData];
   });
 }
@@ -2718,7 +2717,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)recursivelyClearFetchedData
 {
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode * _Nonnull node) {
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
     [node clearFetchedData];
   });
 }
@@ -2905,7 +2904,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (interfaceState == ASInterfaceStateNone) {
     return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
   }
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode *node) {
     node.interfaceState |= interfaceState;
   });
 }
@@ -2916,7 +2915,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
   }
   ASDisplayNodeLogEvent(self, @"%@ %@", NSStringFromSelector(_cmd), NSStringFromASInterfaceState(interfaceState));
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode *node) {
     node.interfaceState &= (~interfaceState);
   });
 }
@@ -2927,7 +2926,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // setInterfaceState: skips this when handling range-managed nodes (our whole subtree has this set).
   // If our range manager intends for us to be displayed right now, and didn't before, get started!
   BOOL shouldScheduleDisplay = [self supportsRangeManagedInterfaceState] && [self shouldScheduleDisplayWithNewInterfaceState:newInterfaceState];
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode *node) {
     node.interfaceState = newInterfaceState;
   });
   if (shouldScheduleDisplay) {
@@ -2999,7 +2998,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (hierarchyState == ASHierarchyStateNormal) {
     return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
   }
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, NO, ^(ASDisplayNode *node) {
     node.hierarchyState |= hierarchyState;
   });
 }
@@ -3009,7 +3009,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (hierarchyState == ASHierarchyStateNormal) {
     return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
   }
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, NO, ^(ASDisplayNode *node) {
     node.hierarchyState &= (~hierarchyState);
   });
 }
@@ -3076,7 +3076,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)recursivelySetNeedsDisplayAtScale:(CGFloat)contentsScale
 {
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, ^(ASDisplayNode *node) {
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode *node) {
     [node setNeedsDisplayAtScale:contentsScale];
   });
 }
