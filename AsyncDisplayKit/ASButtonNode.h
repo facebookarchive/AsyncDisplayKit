@@ -55,7 +55,7 @@ typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
 @property (nonatomic, assign) UIEdgeInsets contentEdgeInsets;
 
 /**
- * @discusstion Whether the image is left or right aligned. Default is `ASButtonNodeImageAlignmentLeft`.
+ * @discusstion Whether the image should be aligned at the beginning or at the end of node. Default is `ASButtonNodeImageAlignmentBeginning`.
  */
 @property (nonatomic, assign) ASButtonNodeImageAlignment imageAlignment;
 
