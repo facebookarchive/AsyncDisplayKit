@@ -82,7 +82,7 @@
                                              color:(nullable UIColor *)color firstWordColor:(nullable UIColor *)firstWordColor
 {
   NSDictionary *attributes                    = @{NSForegroundColorAttributeName: color ? : [UIColor blackColor],
-                                                  NSFontAttributeName: [UIFont systemFontOfSize:size]};
+                                                  NSFontAttributeName: [UIFont boldSystemFontOfSize:size]};
   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:string];
   [attributedString addAttributes:attributes range:NSMakeRange(0, string.length)];
   

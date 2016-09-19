@@ -34,7 +34,8 @@
     case 0: return [[HorizontalStackWithSpacer alloc] init];
     case 1: return [[PhotoWithInsetTextOverlay alloc] init];
     case 2: return [[PhotoWithOutsetIconOverlay alloc] init];
-    case 3: return [[PhotoPostNode alloc] initWithIndex:0];
+    case 3: return [[FlexibleSeparatorSurroundingContent alloc] init];
+    case 4: return [[PhotoPostNode alloc] initWithIndex:0];
     default: return [[PhotoPostNode alloc] initWithIndex:1];
   }
 }
@@ -44,7 +45,7 @@
   self = [super init];
   
   if (self) {
-    self.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
+    self.backgroundColor = [UIColor whiteColor]; //[UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
     self.usesImplicitHierarchyManagement = YES;
     
     _playgroundNode = [[self class] nodeForIndex:index];
@@ -52,7 +53,7 @@
     _resizeHandle                        = [[ASImageNode alloc] init];
     _resizeHandle.image                  = [UIImage imageNamed:@"resizeHandle"];
     _resizeHandle.userInteractionEnabled = YES;
-    [self addSubnode:_resizeHandle];
+//    [self addSubnode:_resizeHandle];
     
     [ASLayoutableInspectorNode sharedInstance].flexBasis = ASRelativeDimensionMakeWithPercent(1.0);
     [ASLayoutableInspectorNode sharedInstance].vizNodeInsetSize = 10.0;

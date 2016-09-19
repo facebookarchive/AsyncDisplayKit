@@ -8,6 +8,7 @@
 
 #import "LayoutExampleNodes.h"
 #import "Utilities.h"
+#import "UIImage+ASConvenience.h"
 
 #define USER_IMAGE_HEIGHT       60
 #define HORIZONTAL_BUFFER       10
@@ -21,7 +22,7 @@
   self = [super init];
   if (self) {
     self.usesImplicitHierarchyManagement = YES;
-    self.shouldVisualizeLayoutSpecs = YES;
+    self.shouldVisualizeLayoutSpecs = NO;
     self.shouldCacheLayoutSpec = YES;
     self.backgroundColor = [UIColor whiteColor];
   }
@@ -81,11 +82,15 @@
   self = [super init];
   
   if (self) {
-    _usernameTextNode                  = [[ASTextNode alloc] init];
-    _usernameTextNode.attributedString = [self usernameAttributedStringWithFontSize:FONT_SIZE];
+    _usernameNode = [[ASTextNode alloc] init];
+    _usernameNode.attributedString = [self usernameAttributedStringWithFontSize:FONT_SIZE];
     
-    _postTimeTextNode                  = [[ASTextNode alloc] init];
-    _postTimeTextNode.attributedString = [self uploadDateAttributedStringWithFontSize:FONT_SIZE];
+    _postLocationNode = [[ASTextNode alloc] init];
+    _postLocationNode.maximumNumberOfLines = 1;
+    _postLocationNode.attributedString = [self locationAttributedStringWithFontSize:FONT_SIZE];
+    
+    _postTimeNode = [[ASTextNode alloc] init];
+    _postTimeNode.attributedString = [self uploadDateAttributedStringWithFontSize:FONT_SIZE];
   }
   
   return self;
@@ -93,25 +98,36 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _usernameTextNode.flexShrink = YES;
+  _usernameNode.flexShrink = YES;
+  _postLocationNode.flexShrink = YES;
+
+  ASStackLayoutSpec *verticalStackSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
+  verticalStackSpec.flexShrink = YES;
   
-  ASLayoutSpec *spacer               = [[ASLayoutSpec alloc] init];
-  spacer.flexGrow                    = YES;
-  spacer.flexShrink                  = YES;
+  // if fetching post location data from server, check if it is available yet
+  if (_postLocationNode.attributedString) {
+    [verticalStackSpec setChildren:@[_usernameNode, _postLocationNode]];
+  } else {
+    [verticalStackSpec setChildren:@[_usernameNode]];
+  }
+  
+  ASLayoutSpec *spacerSpec = [[ASLayoutSpec alloc] init];
+  spacerSpec.flexGrow = YES;
+  spacerSpec.flexShrink = YES;
   
   // horizontal stack
-  ASStackLayoutSpec *headerStackSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
-  headerStackSpec.alignItems             = ASStackLayoutAlignItemsCenter;                     // center items vertically in horizontal stack
-  headerStackSpec.justifyContent         = ASStackLayoutJustifyContentStart;                  // justify content to the left side of the header stack
-  headerStackSpec.flexShrink             = YES;
-  headerStackSpec.flexGrow               = YES;
-  [headerStackSpec setChildren:@[_usernameTextNode, spacer, _postTimeTextNode]];
+  ASStackLayoutSpec *horizontalStackSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
+  horizontalStackSpec.alignItems = ASStackLayoutAlignItemsCenter; // center items vertically in horiz stack
+  horizontalStackSpec.justifyContent = ASStackLayoutJustifyContentStart; // justify content to left
+  horizontalStackSpec.flexShrink = YES;
+  horizontalStackSpec.flexGrow = YES;
+  [horizontalStackSpec setChildren:@[verticalStackSpec, spacerSpec, _postTimeNode]];
   
   // inset horizontal stack
-  UIEdgeInsets insets                = UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER);
-  ASInsetLayoutSpec *headerInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:headerStackSpec];
-  headerInsetSpec.flexShrink         = YES;
-  headerInsetSpec.flexGrow           = YES;
+  UIEdgeInsets insets = UIEdgeInsetsMake(0, 10, 0, 10);
+  ASInsetLayoutSpec *headerInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:horizontalStackSpec];
+  headerInsetSpec.flexShrink = YES;
+  headerInsetSpec.flexGrow = YES;
   
   return headerInsetSpec;
 }
@@ -126,19 +142,19 @@
   self = [super init];
   
   if (self) {
-    _avatarImageNode     = [[ASNetworkImageNode alloc] init];
-    _avatarImageNode.URL = [NSURL URLWithString:@"https://s-media-cache-ak0.pinimg.com/avatars/503h_1458880322_140.jpg"];
+    _photoNode = [[ASNetworkImageNode alloc] init];
+    _photoNode.URL = [NSURL URLWithString:@"http://asyncdisplaykit.org/static/images/layout-examples-photo-with-inset-text-overlay-photo.png"];
     
-    _usernameTextNode                      = [[ASTextNode alloc] init];
-    _usernameTextNode.maximumNumberOfLines = 2;
-    _usernameTextNode.truncationAttributedString = [NSAttributedString attributedStringWithString:@"..."
-                                                                         fontSize:12
+    _titleNode = [[ASTextNode alloc] init];
+    _titleNode.maximumNumberOfLines = 2;
+    _titleNode.truncationAttributedString = [NSAttributedString attributedStringWithString:@"..."
+                                                                                  fontSize:16
                                                                             color:[UIColor whiteColor]
                                                                    firstWordColor:nil];
-    _usernameTextNode.attributedString = [NSAttributedString attributedStringWithString:@"this is a long text description for an image"
-                                                                         fontSize:FONT_SIZE/2.0
-                                                                            color:[UIColor whiteColor]
-                                                                   firstWordColor:nil];
+    _titleNode.attributedString = [NSAttributedString attributedStringWithString:@"family fall hikes"
+                                                                        fontSize:16
+                                                                           color:[UIColor whiteColor]
+                                                                  firstWordColor:nil];
   }
   
   return self;
@@ -146,15 +162,16 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _avatarImageNode.preferredFrameSize           = CGSizeMake(USER_IMAGE_HEIGHT*2, USER_IMAGE_HEIGHT*2);
-  ASStaticLayoutSpec *backgroundImageStaticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_avatarImageNode]];
+  _photoNode.preferredFrameSize = CGSizeMake(USER_IMAGE_HEIGHT*2, USER_IMAGE_HEIGHT*2);
+  ASStaticLayoutSpec *backgroundImageStaticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_photoNode]];
 
   UIEdgeInsets insets = UIEdgeInsetsMake(INFINITY, 12, 12, 12);
-  ASInsetLayoutSpec *textInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_usernameTextNode];
+  ASInsetLayoutSpec *textInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_titleNode];
 
-  ASOverlayLayoutSpec *textOverlay = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:backgroundImageStaticSpec overlay:textInset];
+  ASOverlayLayoutSpec *textOverlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:backgroundImageStaticSpec
+                                                                                 overlay:textInsetSpec];
   
-  return textOverlay;
+  return textOverlaySpec;
 }
 
 @end
@@ -168,13 +185,13 @@
   
   if (self) {
 
-    _photoImageNode     = [[ASNetworkImageNode alloc] init];
-    _photoImageNode.URL = [NSURL URLWithString:@"http://farm4.static.flickr.com/3691/10155174895_8c815250a0_m.jpg"];
+    _photoNode = [[ASNetworkImageNode alloc] init];
+    _photoNode.URL = [NSURL URLWithString:@"http://asyncdisplaykit.org/static/images/layout-examples-photo-with-outset-icon-overlay-photo.png"];
     
-    _plusIconImageNode     = [[ASNetworkImageNode alloc] init];
-    _plusIconImageNode.URL = [NSURL URLWithString:@"http://www.icon100.com/up/3327/256/32-PLus-button.png"];
+    _iconNode = [[ASNetworkImageNode alloc] init];
+    _iconNode.URL = [NSURL URLWithString:@"http://asyncdisplaykit.org/static/images/layout-examples-photo-with-outset-icon-overlay-icon.png"];
     
-    [_plusIconImageNode setImageModificationBlock:^UIImage *(UIImage *image) {   // FIXME: in framework autocomplete for setImageModificationBlock line seems broken
+    [_iconNode setImageModificationBlock:^UIImage *(UIImage *image) {   // FIXME: in framework autocomplete for setImageModificationBlock line seems broken
       CGSize profileImageSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
       return [image makeCircularImageWithSize:profileImageSize withBorderWidth:10];
     }];
@@ -185,18 +202,69 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _plusIconImageNode.preferredFrameSize = CGSizeMake(40, 40);
-  _photoImageNode.preferredFrameSize = CGSizeMake(150, 150);
+  _iconNode.preferredFrameSize = CGSizeMake(40, 40);
+  _photoNode.preferredFrameSize = CGSizeMake(150, 150);
 
-  CGFloat x = _photoImageNode.preferredFrameSize.width;
+  CGFloat x = _photoNode.preferredFrameSize.width;
   CGFloat y = 0;
   
-  _plusIconImageNode.layoutPosition = CGPointMake(x, y);
-  _photoImageNode.layoutPosition = CGPointMake(_plusIconImageNode.preferredFrameSize.height/2.0, _plusIconImageNode.preferredFrameSize.height/2.0);
+  _iconNode.layoutPosition = CGPointMake(x, y);
+  _photoNode.layoutPosition = CGPointMake(_iconNode.preferredFrameSize.height/2.0, _iconNode.preferredFrameSize.height/2.0);
   
-  ASStaticLayoutSpec *staticLayoutSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_photoImageNode, _plusIconImageNode]];
+  ASStaticLayoutSpec *staticLayoutSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_photoNode, _iconNode]];
   
   return staticLayoutSpec;
+}
+
+@end
+
+
+@implementation FlexibleSeparatorSurroundingContent
+
+- (instancetype)init
+{
+  self = [super init];
+  
+  if (self) {
+  
+    self.backgroundColor = [UIColor cyanColor];
+
+    _topSeparator = [[ASImageNode alloc] init];
+    _topSeparator.image = [UIImage as_resizableRoundedImageWithCornerRadius:1.0
+                                                                cornerColor:[UIColor blackColor]
+                                                                  fillColor:[UIColor blackColor]];
+    
+    _textNode = [[ASTextNode alloc] init];
+    _textNode.attributedString = [NSAttributedString attributedStringWithString:@"this is a long text node"
+                                                                       fontSize:16
+                                                                          color:[UIColor blackColor]
+                                                                 firstWordColor:nil];
+    
+    _bottomSeparator = [[ASImageNode alloc] init];
+    _bottomSeparator.image = [UIImage as_resizableRoundedImageWithCornerRadius:1.0
+                                                                   cornerColor:[UIColor blackColor]
+                                                                     fillColor:[UIColor blackColor]];
+  }
+  
+  return self;
+}
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  _topSeparator.flexGrow = YES;
+  _bottomSeparator.flexGrow = YES;
+
+  UIEdgeInsets contentInsets = UIEdgeInsetsMake(10, 10, 10, 10);
+  ASInsetLayoutSpec *insetContentSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentInsets
+                                                                               child:_textNode];
+  // final vertical stack
+  ASStackLayoutSpec *verticalStackSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
+  verticalStackSpec.direction = ASStackLayoutDirectionVertical;
+  verticalStackSpec.justifyContent = ASStackLayoutJustifyContentCenter;
+  verticalStackSpec.alignItems = ASStackLayoutAlignItemsStretch;
+  verticalStackSpec.children = @[_topSeparator, insetContentSpec, _bottomSeparator];
+
+  return verticalStackSpec;
 }
 
 @end
