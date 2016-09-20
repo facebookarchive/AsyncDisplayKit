@@ -159,6 +159,20 @@
 
 @implementation ASTableViewTests
 
+- (void)testDataSourceImplementsNecessaryMethods
+{
+  ASTestTableView *tableView = [[ASTestTableView alloc] __initWithFrame:CGRectMake(0, 0, 100, 400)
+                                                                  style:UITableViewStylePlain];
+  
+  
+  
+  ASTableViewFilledDataSource *dataSource = (ASTableViewFilledDataSource *)[NSObject new];
+  XCTAssertThrows((tableView.asyncDataSource = dataSource));
+  
+  dataSource = [ASTableViewFilledDataSource new];
+  XCTAssertNoThrow((tableView.asyncDataSource = dataSource));
+}
+
 - (void)testConstrainedSizeForRowAtIndexPath
 {
   // Initial width of the table view is non-zero and all nodes are measured with this size.
