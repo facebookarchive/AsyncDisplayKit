@@ -11,6 +11,16 @@
 #import <AsyncDisplayKit/ASTextNode.h>
 #import <AsyncDisplayKit/ASImageNode.h>
 
+/**
+ Image alignment defines where the image will be placed relative to the text.
+ */
+typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
+  /** Places the image before the text. */
+  ASButtonNodeImageAlignmentBeginning  = 0,
+  /** Places the image after the text. */
+  ASButtonNodeImageAlignmentEnd = 1 << 0
+};
+
 @interface ASButtonNode : ASControlNode
 
 @property (nonatomic, readonly) ASTextNode  * _Nonnull titleNode;
@@ -43,6 +53,11 @@
  * @discussion The insets used around the title and image node
  */
 @property (nonatomic, assign) UIEdgeInsets contentEdgeInsets;
+
+/**
+ * @discusstion Whether the image should be aligned at the beginning or at the end of node. Default is `ASButtonNodeImageAlignmentBeginning`.
+ */
+@property (nonatomic, assign) ASButtonNodeImageAlignment imageAlignment;
 
 /**
  *  Returns the styled title associated with the specified state.
