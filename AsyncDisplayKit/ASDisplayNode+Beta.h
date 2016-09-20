@@ -41,13 +41,12 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodePerformanceMeasurementOptions) {
   ASDisplayNodePerformanceMeasurementOptionLayoutComputation = 1 << 1
 };
 
-struct ASDisplayNodePerformanceMeasurements
-{
+typedef struct {
   CFTimeInterval layoutSpecTotalTime;
   NSInteger layoutSpecNumberOfPasses;
   CFTimeInterval layoutComputationTotalTime;
   NSInteger layoutComputationNumberOfPasses;
-};
+} ASDisplayNodePerformanceMeasurements;
 
 @interface ASDisplayNode (Beta)
 
@@ -96,7 +95,7 @@ struct ASDisplayNodePerformanceMeasurements
 /**
  * @abstract A simple struct representing performance measurements collected.
  */
-@property (nonatomic, assign, readonly) struct ASDisplayNodePerformanceMeasurements performanceMeasurements;
+@property (nonatomic, assign, readonly) ASDisplayNodePerformanceMeasurements performanceMeasurements;
 
 /** @name Layout Transitioning */
 
