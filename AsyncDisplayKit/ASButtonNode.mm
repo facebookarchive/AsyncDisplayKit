@@ -48,6 +48,7 @@
 @synthesize contentVerticalAlignment = _contentVerticalAlignment;
 @synthesize contentHorizontalAlignment = _contentHorizontalAlignment;
 @synthesize contentEdgeInsets = _contentEdgeInsets;
+@synthesize imageAlignment = _imageAlignment;
 @synthesize titleNode = _titleNode;
 @synthesize imageNode = _imageNode;
 @synthesize backgroundImageNode = _backgroundImageNode;
@@ -282,6 +283,18 @@
   _contentEdgeInsets = contentEdgeInsets;
 }
 
+- (ASButtonNodeImageAlignment)imageAlignment
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _imageAlignment;
+}
+
+- (void)setImageAlignment:(ASButtonNodeImageAlignment)imageAlignment
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _imageAlignment = imageAlignment;
+}
+
 
 #if TARGET_OS_IOS
 - (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(ASControlState)state
@@ -463,6 +476,7 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   UIEdgeInsets contentEdgeInsets;
+  ASButtonNodeImageAlignment imageAlignment;
   ASLayoutSpec *spec;
   ASStackLayoutSpec *stack = [[ASStackLayoutSpec alloc] init];
   {
@@ -473,6 +487,7 @@
     stack.verticalAlignment = _contentVerticalAlignment;
     
     contentEdgeInsets = _contentEdgeInsets;
+    imageAlignment = _imageAlignment;
   }
   
   NSMutableArray *children = [[NSMutableArray alloc] initWithCapacity:2];
@@ -481,7 +496,7 @@
   }
   
   if (_titleNode.attributedText.length > 0) {
-    if (_imageAlignment == ASButtonNodeImageAlignmentBeginning) {
+    if (imageAlignment == ASButtonNodeImageAlignmentBeginning) {
       [children addObject:_titleNode];
     } else {
       [children insertObject:_titleNode atIndex:0];
