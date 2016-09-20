@@ -91,8 +91,8 @@ static CGFloat kTextPadding = 10.0f;
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASCenterLayoutSpec *centerSpec = [[ASCenterLayoutSpec alloc] init];
-  centerSpec.centeringOptions = ASCenterLayoutSpecCenteringX;
-  centerSpec.sizingOptions = ASCenterLayoutSpecSizingOptionMinimumY;
+  centerSpec.style.centeringOptions = ASCenterLayoutSpecCenteringX;
+  centerSpec.style.sizingOptions = ASCenterLayoutSpecSizingOptionMinimumY;
   centerSpec.child = _textNode;
   
   UIEdgeInsets padding =UIEdgeInsetsMake(kTextPadding, kTextPadding, kTextPadding, kTextPadding);
