@@ -2429,14 +2429,15 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
   ASDN::MutexLocker l(__instanceLock__);
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
-    ASLayoutSpec *layoutSpec = nil;
-    // optional performance measurement for cell nodes
-    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec) {
-      ASDN::SumScopeTimer t(_layoutSpecTotalTime);
-      layoutSpec = [self layoutSpecThatFits:constrainedSize];
-    } else {
-      layoutSpec = [self layoutSpecThatFits:constrainedSize];
+    BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
+    if (measureLayoutSpec) {
+      _layoutSpecNumberOfPasses++;
     }
+
+    ASLayoutSpec *layoutSpec = ({
+      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+      [self layoutSpecThatFits:constrainedSize];
+    });
 
     ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
 
@@ -2444,21 +2445,20 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     
     // manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
     {
-      ASDN::SumScopeTimer t(_layoutSpecTotalTime);
-      _layoutSpecNumberOfPasses++;  // we add to the total twice, but only increase the pass count once
+      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
       ASEnvironmentStatePropagateDown(layoutSpec, self.environmentTraitCollection);
     }
     
     layoutSpec.isMutable = NO;
-    ASLayout *layout = nil;
-    // optional performance measurement for cell nodes
-    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation) {
-      ASDN::SumScopeTimer t(_layoutComputationTotalTime);
+    BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
+    if (measureLayoutComputation) {
       _layoutComputationNumberOfPasses++;
-      layout = [layoutSpec layoutThatFits:constrainedSize];
-    } else {
-      layout = [layoutSpec layoutThatFits:constrainedSize];
     }
+
+    ASLayout *layout = ({
+      ASDN::SumScopeTimer t(_layoutComputationTotalTime, measureLayoutComputation);
+      [layoutSpec layoutThatFits:constrainedSize];
+    });
 
     ASDisplayNodeAssertNotNil(layout, @"[ASLayoutSpec measureWithSizeRange:] should never return nil! %@, %@", self, layoutSpec);
       
