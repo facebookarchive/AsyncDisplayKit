@@ -89,11 +89,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 ASOVERLOADABLE ASDISPLAYNODE_INLINE ASDimension ASDimensionMake(ASDimensionUnit unit, CGFloat value)
 {
-  if (unit == ASDimensionUnitPoints) {
+  if (unit == ASDimensionUnitAuto ) {
+    ASDisplayNodeCAssert(value == 0, @"ASDimension auto value must be 0.");
+  } else if (unit == ASDimensionUnitPoints) {
     ASDisplayNodeCAssertPositiveReal(@"Points", value);
   } else if (unit == ASDimensionUnitFraction) {
-    // TODO: Enable this assertion for 2.0.  Check that there is no use case for using a larger value, e.g. to layout for a clipsToBounds = NO element.
-    // ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASDimension fraction value (%f) must be between 0 and 1.", value);
+    ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASDimension fraction value (%f) must be between 0 and 1.", value);
   }
   ASDimension dimension;
   dimension.unit = unit;
