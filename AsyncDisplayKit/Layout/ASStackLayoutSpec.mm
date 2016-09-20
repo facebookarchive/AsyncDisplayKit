@@ -135,18 +135,23 @@
   if (!(self = [super init])) {
     return nil;
   }
-    
-  _style = [[ASStackLayoutSpecStyleDeclaration alloc] init];
+
   _style.direction = direction;
   _style.spacing = spacing;
   _style.alignItems = alignItems;
   _style.justifyContent = justifyContent;
-  
-  [self setChildren:children];
+
+  self.children = children;
+
   return self;
 }
 
-#pragma mark - Setter / Getter
+#pragma mark - Style
+
+- (void)loadStyle
+{
+  _style = [[ASStackLayoutSpecStyleDeclaration alloc] init];
+}
 
 - (ASStackLayoutSpecStyleDeclaration *)style
 {

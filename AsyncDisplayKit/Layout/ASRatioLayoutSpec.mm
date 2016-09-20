@@ -50,15 +50,19 @@
     return nil;
   }
   
-  _style = [[ASRatioLayoutSpecStyleDescription alloc] init];
   _style.ratio = ratio;
-  
+
   self.child = child;
 
   return self;
 }
 
-#pragma mark - Getter / Setter
+#pragma mark - Style
+
+- (void)loadStyle
+{
+  _style = [[ASRatioLayoutSpecStyleDescription alloc] init];
+}
 
 - (ASRatioLayoutSpecStyleDescription *)style
 {

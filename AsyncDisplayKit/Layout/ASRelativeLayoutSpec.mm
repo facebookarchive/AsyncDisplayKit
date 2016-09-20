@@ -60,7 +60,6 @@ ASDISPLAYNODE_INLINE CGFloat ASRelativeLayoutSpecProportionOfAxisForAxisPosition
     return nil;
   }
   
-  _style = [[ASRelativeLayoutSpecStyleDeclaration alloc] init];
   _style.horizontalPosition = horizontalPosition;
   _style.verticalPosition = verticalPosition;
   _style.sizingOption = sizingOption;
@@ -71,6 +70,11 @@ ASDISPLAYNODE_INLINE CGFloat ASRelativeLayoutSpecProportionOfAxisForAxisPosition
 }
 
 #pragma mark - Getter / Setter
+
+- (void)loadStyle
+{
+  _style = [[ASRelativeLayoutSpecStyleDeclaration alloc] init];
+}
 
 - (ASRelativeLayoutSpecStyleDeclaration *)style
 {

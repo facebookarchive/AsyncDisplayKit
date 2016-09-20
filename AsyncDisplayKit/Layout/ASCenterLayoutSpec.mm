@@ -88,14 +88,18 @@ static ASRelativeLayoutSpecPosition ASCenterLayoutSpecHorizontalPositionFromCent
     return nil;
   }
   
-  _style = [[ASCenterLayoutSpecStyleDeclaration alloc] init];
   _style.centeringOptions = centeringOptions;
   _style.sizingOptions = sizingOptions;
   
   return self;
 }
 
-#pragma mark - Getter / Setter
+#pragma mark - Style
+
+- (void)loadStyle
+{
+  _style = [[ASCenterLayoutSpecStyleDeclaration alloc] init];
+}
 
 - (ASRelativeLayoutSpecStyleDeclaration *)style
 {

@@ -300,9 +300,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   
-  _style = [[ASLayoutableStyleDeclaration alloc] init];
   _preferredFrameSize = CGSizeZero;
   _environmentState = ASEnvironmentStateMakeDefault();
+  [self loadStyle];
   
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
   
@@ -722,6 +722,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 }
 
 #pragma mark - Style
+
+- (void)loadStyle
+{
+  _style = [[ASLayoutableStyleDeclaration alloc] init];
+}
 
 - (ASLayoutableStyleDeclaration *)style
 {
