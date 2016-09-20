@@ -37,11 +37,6 @@
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
 NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp";
-NSString * const ASDisplayNodeLayoutSpecTotalTimeKey = @"ASDisplayNodeLayoutSpecTotalTime";
-NSString * const ASDisplayNodeLayoutSpecNumberOfPassesKey = @"ASDisplayNodeLayoutSpecNumberOfPasses";
-NSString * const ASDisplayNodeLayoutGenerationTotalTimeKey = @"ASDisplayNodeLayoutGenerationTotalTime";
-NSString * const ASDisplayNodeLayoutGenerationNumberOfPassesKey = @"ASDisplayNodeLayoutGenerationNumberOfPasses";
-
 
 // Forward declare CALayerDelegate protocol as the iOS 10 SDK moves CALayerDelegate from a formal delegate to a protocol.
 // We have to forward declare the protocol as this place otherwise it will not compile compiling with an Base SDK < iOS 10
@@ -1143,17 +1138,17 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _measurementOptions;
 }
 
-- (NSDictionary *)performanceMeasurements
+- (ASDisplayNodePerformanceMeasurements)performanceMeasurements
 {
   ASDN::MutexLocker l(__instanceLock__);
-  NSMutableDictionary *measurements = [NSMutableDictionary dictionaryWithCapacity:4];
+  ASDisplayNodePerformanceMeasurements measurements = { .layoutSpecNumberOfPasses = -1, .layoutSpecTotalTime = NAN, .layoutComputationNumberOfPasses = -1, .layoutComputationTotalTime = NAN };
   if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec) {
-    measurements[ASDisplayNodeLayoutSpecTotalTimeKey] = @(_layoutSpecTotalTime);
-    measurements[ASDisplayNodeLayoutSpecNumberOfPassesKey] = @(_layoutSpecNumberOfPasses);
+    measurements.layoutSpecNumberOfPasses = _layoutSpecNumberOfPasses;
+    measurements.layoutSpecTotalTime = _layoutSpecTotalTime;
   }
-  if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutGeneration) {
-    measurements[ASDisplayNodeLayoutGenerationTotalTimeKey] = @(_layoutGenerationTotalTime);
-    measurements[ASDisplayNodeLayoutGenerationNumberOfPassesKey] = @(_layoutGenerationNumberOfPasses);
+  if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation) {
+    measurements.layoutComputationNumberOfPasses = _layoutComputationNumberOfPasses;
+    measurements.layoutComputationTotalTime = _layoutComputationTotalTime;
   }
   return measurements;
 }
@@ -2300,29 +2295,32 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
   ASDN::MutexLocker l(__instanceLock__);
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
-    ASLayoutSpec *layoutSpec = nil;
-    // optional performance measurement for cell nodes
-    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec) {
-      ASDN::SumScopeTimer t(_layoutSpecTotalTime);
+    BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
+    if (measureLayoutSpec) {
       _layoutSpecNumberOfPasses++;
-      layoutSpec = [self layoutSpecThatFits:constrainedSize];
-    } else {
-      layoutSpec = [self layoutSpecThatFits:constrainedSize];
     }
+
+    ASLayoutSpec *layoutSpec = ({
+      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+      [self layoutSpecThatFits:constrainedSize];
+    });
 
     ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
 
     layoutSpec.parent = self; // This causes upward propogation of any non-default layoutable values.
     
     // manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
-    ASEnvironmentStatePropagateDown(layoutSpec, self.environmentTraitCollection);
+    {
+      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+      ASEnvironmentStatePropagateDown(layoutSpec, self.environmentTraitCollection);
+    }
     
     layoutSpec.isMutable = NO;
     ASLayout *layout = nil;
     // optional performance measurement for cell nodes
-    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutGeneration) {
-      ASDN::SumScopeTimer t(_layoutGenerationTotalTime);
-      _layoutGenerationNumberOfPasses++;
+    if (_measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation) {
+      ASDN::SumScopeTimer t(_layoutComputationTotalTime);
+      _layoutComputationNumberOfPasses++;
       layout = [layoutSpec measureWithSizeRange:constrainedSize];
     } else {
       layout = [layoutSpec measureWithSizeRange:constrainedSize];
