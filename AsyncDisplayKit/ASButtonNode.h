@@ -16,9 +16,9 @@
  */
 typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
   /** Places the image before the text. */
-  ASButtonNodeImageAlignmentBeginning  = 0,
+  ASButtonNodeImageAlignmentBeginning,
   /** Places the image after the text. */
-  ASButtonNodeImageAlignmentEnd = 1 << 0
+  ASButtonNodeImageAlignmentEnd
 };
 
 @interface ASButtonNode : ASControlNode
