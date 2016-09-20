@@ -42,11 +42,16 @@ namespace ASDN {
   struct SumScopeTimer {
     NSTimeInterval begin;
     NSTimeInterval &outT;
-    SumScopeTimer(NSTimeInterval &outRef) : outT(outRef) {
-      begin = CACurrentMediaTime();
+    BOOL enable;
+    SumScopeTimer(NSTimeInterval &outRef, BOOL enable = YES) : outT(outRef), enable(enable) {
+      if (enable) {
+        begin = CACurrentMediaTime();
+      }
     }
     ~SumScopeTimer() {
-      outT += CACurrentMediaTime() - begin;
+      if (enable) {
+        outT += CACurrentMediaTime() - begin;
+      }
     }
   };
 }
