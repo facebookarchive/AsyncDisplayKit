@@ -84,9 +84,9 @@ void ASLayoutableClearCurrentContext()
   layoutableContextMap.erase(key);
 }
 
-#pragma mark - ASLayoutableStyleDeclaration
+#pragma mark - ASLayoutableStyle
 
-@implementation ASLayoutableStyleDeclaration {
+@implementation ASLayoutableStyle {
   ASDN::RecursiveMutex __instanceLock__;
 }
 

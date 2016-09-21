@@ -11,7 +11,7 @@
 #import "ASDimension.h"
 
 @protocol ASLayoutable;
-@class ASLayoutableStyleDeclaration;
+@class ASLayoutableStyle;
 
 struct ASLayoutableContext {
   int32_t transitionID;

@@ -67,7 +67,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @abstract A size constraint that should apply to this ASLayoutable.
  */
-@property (nonatomic, assign, readonly) ASLayoutableStyleDeclaration *style;
+@property (nonatomic, assign, readonly) ASLayoutableStyle *style;
 
 
 #pragma mark - Calculate layout
@@ -151,9 +151,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-#pragma mark - ASLayoutableStyleDeclaration
+#pragma mark - ASLayoutableStyle
 
-@interface ASLayoutableStyleDeclaration : NSObject <ASStackLayoutable, ASStaticLayoutable>
+@interface ASLayoutableStyle : NSObject <ASStackLayoutable, ASStaticLayoutable>
 
 
 #pragma mark - Sizing

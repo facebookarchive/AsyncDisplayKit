@@ -28,7 +28,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   ASDN::RecursiveMutex __instanceLock__;
   ASChildMap _children;
   ASEnvironmentState _environmentState;
-  ASLayoutableStyleDeclaration *_style;
+  ASLayoutableStyle *_style;
 }
 @end
 
@@ -58,7 +58,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   }
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
-  _style = [[ASLayoutableStyleDeclaration alloc] init];
+  _style = [[ASLayoutableStyle alloc] init];
   return self;
 }
 
@@ -72,7 +72,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   return YES;
 }
 
-- (ASLayoutableStyleDeclaration *)style
+- (ASLayoutableStyle *)style
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _style;
