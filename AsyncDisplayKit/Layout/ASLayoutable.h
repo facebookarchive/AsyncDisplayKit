@@ -64,17 +64,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) BOOL canLayoutAsynchronous;
 
-#pragma mark - Style
-
 /**
  * @abstract A size constraint that should apply to this ASLayoutable.
  */
 @property (nonatomic, assign, readonly) ASLayoutableStyleDeclaration *style;
-
-/**
- * @abstract This is where subclasses should create their custom style. Should never be called directly.
- */
-- (void)loadStyle;
 
 
 #pragma mark - Calculate layout

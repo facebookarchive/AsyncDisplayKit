@@ -68,18 +68,15 @@ ASDISPLAYNODE_INLINE CGFloat centerInset(CGFloat outer, CGFloat inner)
     return nil;
   }
   
+  _style = [[ASInsetLayoutSpecStyleDescription alloc] init];
   _style.insets = insets;
+  
   self.child = child;
   
   return self;
 }
 
-#pragma mark - Style
-
-- (void)loadStyle
-{
-  _style = [[ASInsetLayoutSpecStyleDescription alloc] init];
-}
+#pragma mark - Getter / Setter
 
 - (ASInsetLayoutSpecStyleDescription *)style
 {

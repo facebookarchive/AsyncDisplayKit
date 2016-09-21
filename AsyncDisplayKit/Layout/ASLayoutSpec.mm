@@ -48,6 +48,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   }
 }
 
+
 #pragma mark - Lifecycle
 
 - (instancetype)init
@@ -55,11 +56,9 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   if (!(self = [super init])) {
     return nil;
   }
-  
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
-  [self loadStyle];
-  
+  _style = [[ASLayoutableStyleDeclaration alloc] init];
   return self;
 }
 
@@ -73,17 +72,10 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   return YES;
 }
 
-#pragma mark - Style
-
 - (ASLayoutableStyleDeclaration *)style
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _style;
-}
-
-- (void)loadStyle
-{
-  _style = [[ASLayoutableStyleDeclaration alloc] init];
 }
 
 #pragma mark - Layout
