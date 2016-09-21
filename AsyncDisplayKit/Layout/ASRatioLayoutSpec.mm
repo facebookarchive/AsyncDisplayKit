@@ -10,6 +10,7 @@
 
 #import "ASRatioLayoutSpec.h"
 
+#import <algorithm>
 #import <tgmath.h>
 #import <vector>
 
@@ -17,81 +18,56 @@
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-#import "ASThread.h"
 
-#pragma mark - ASRatioLayoutSpecStyleDescription
-
-@implementation ASRatioLayoutSpecStyleDescription
-
-@end
-
-#pragma mark - ASRatioLayoutSpec
-
-@implementation ASRatioLayoutSpec {
-  ASDN::RecursiveMutex __instanceLock__;
-  ASRatioLayoutSpecStyleDescription *_style;
+@implementation ASRatioLayoutSpec
+{
+  CGFloat _ratio;
 }
-
-#pragma mark - Class
 
 + (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child
 {
   return [[self alloc] initWithRatio:ratio child:child];
 }
 
-#pragma mark - Lifecycle
-
 - (instancetype)initWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child;
 {
-  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-  ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
-  
   if (!(self = [super init])) {
     return nil;
   }
-  
-  _style = [[ASRatioLayoutSpecStyleDescription alloc] init];
-  _style.ratio = ratio;
-  
-  self.child = child;
-
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
+  _ratio = ratio;
+  [self setChild:child];
   return self;
 }
 
-#pragma mark - Getter / Setter
-
-- (ASRatioLayoutSpecStyleDescription *)style
+- (void)setRatio:(CGFloat)ratio
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _style;
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _ratio = ratio;
 }
-
-
-#pragma mark - ASLayoutSpec
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  CGFloat ratio = _style.ratio;
-  
   std::vector<CGSize> sizeOptions;
   // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
   if (!isinf(constrainedSize.max.width) && ASPointsAreValidForLayout(constrainedSize.max.width)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
       constrainedSize.max.width,
-      ASFloorPixelValue(ratio * constrainedSize.max.width)
+      ASFloorPixelValue(_ratio * constrainedSize.max.width)
     }));
   }
   // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
   if (!isinf(constrainedSize.max.height) && ASPointsAreValidForLayout(constrainedSize.max.width)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
-      ASFloorPixelValue(constrainedSize.max.height / ratio),
+      ASFloorPixelValue(constrainedSize.max.height / _ratio),
       constrainedSize.max.height
     }));
   }
 
   // Choose the size closest to the desired ratio.
   const auto &bestSize = std::max_element(sizeOptions.begin(), sizeOptions.end(), [&](const CGSize &a, const CGSize &b){
-    return std::fabs((a.height / a.width) - ratio) > std::fabs((b.height / b.width) - ratio);
+    return std::fabs((a.height / a.width) - _ratio) > std::fabs((b.height / b.width) - _ratio);
   });
 
   // If there is no max size in *either* dimension, we can't apply the ratio, so just pass our size range through.
@@ -110,7 +86,7 @@
 
 - (NSString *)asciiArtName
 {
-  return [NSString stringWithFormat:@"%@ (%.1f)", NSStringFromClass([self class]), self.style.ratio];
+  return [NSString stringWithFormat:@"%@ (%.1f)", NSStringFromClass([self class]), self.ratio];
 }
 
 @end

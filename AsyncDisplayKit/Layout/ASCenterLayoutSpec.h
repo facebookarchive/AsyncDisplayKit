@@ -36,33 +36,22 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
 
 NS_ASSUME_NONNULL_BEGIN
 
-#pragma mark - ASCenterLayoutSpecStyleDeclaration
-
-@interface ASCenterLayoutSpecStyleDeclaration : ASRelativeLayoutSpecStyleDeclaration
-
-@property (nonatomic, assign) ASCenterLayoutSpecCenteringOptions centeringOptions;
-@property (nonatomic, assign) ASCenterLayoutSpecSizingOptions sizingOptions;
-
-@end
-
-
-/**
- * Lays out a single layoutable child and position it so that it is centered into the layout bounds.
- * NOTE: ASRelativeLayoutSpec offers all of the capabilities of Center, and more.
- * Check it out if you would like to be able to position the child at any corner or the middle of an edge.
+/** Lays out a single layoutable child and position it so that it is centered into the layout bounds.
+  * NOTE: ASRelativeLayoutSpec offers all of the capabilities of Center, and more.
+  * Check it out if you would like to be able to position the child at any corner or the middle of an edge.
  */
 @interface ASCenterLayoutSpec : ASRelativeLayoutSpec
 
-/**
- * @abstract A size constraint that should apply to this ASCenterLayoutSpecStyleDeclaration.
- */
-@property (nonatomic, assign, readonly) ASCenterLayoutSpecStyleDeclaration *style;
+@property (nonatomic, assign) ASCenterLayoutSpecCenteringOptions centeringOptions;
+@property (nonatomic, assign) ASCenterLayoutSpecSizingOptions sizingOptions;
 
 /**
  * Initializer.
  *
  * @param centeringOptions How the child is centered.
+ *
  * @param sizingOptions How much space will be taken up.
+ *
  * @param child The child to center.
  */
 + (instancetype)centerLayoutSpecWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions

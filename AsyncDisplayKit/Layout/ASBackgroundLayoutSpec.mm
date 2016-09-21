@@ -21,42 +21,22 @@ static NSUInteger const kBackgroundChildIndex = 1;
 
 @implementation ASBackgroundLayoutSpec
 
-#pragma mark - Class
+- (instancetype)initWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
+{
+  if (!(self = [super init])) {
+    return nil;
+  }
+  
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  [self setChild:child forIndex:kForegroundChildIndex];
+  self.background = background;
+  return self;
+}
 
 + (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
 {
   return [[self alloc] initWithChild:child background:background];
 }
-
-#pragma mark - Lifecycle
-
-- (instancetype)initWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
-{
-  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-  
-  if (!(self = [super init])) {
-    return nil;
-  }
-  
-  [self setChild:child forIndex:kForegroundChildIndex];
-  self.background = background;
-  
-  return self;
-}
-
-#pragma mark - Setter / Getter
-
-- (void)setBackground:(id<ASLayoutable>)background
-{
-  [super setChild:background forIndex:kBackgroundChildIndex];
-}
-
-- (id<ASLayoutable>)background
-{
-  return [super childForIndex:kBackgroundChildIndex];
-}
-
-#pragma mark - ASLayoutSpec
 
 /**
  * First layout the contents, then fit the background image.
@@ -79,6 +59,16 @@ static NSUInteger const kBackgroundChildIndex = 1;
   [sublayouts addObject:contentsLayout];
 
   return [ASLayout layoutWithLayoutable:self size:contentsLayout.size sublayouts:sublayouts];
+}
+
+- (void)setBackground:(id<ASLayoutable>)background
+{
+  [super setChild:background forIndex:kBackgroundChildIndex];
+}
+
+- (id<ASLayoutable>)background
+{
+  return [super childForIndex:kBackgroundChildIndex];
 }
 
 @end

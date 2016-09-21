@@ -12,19 +12,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-#pragma mark - ASInsetLayoutSpecStyleDescription
-
-@interface ASInsetLayoutSpecStyleDescription : ASLayoutableStyleDeclaration
-
-/**
- * The distances the edges of child are inset from the parent.
- */
-@property (nonatomic, assign) UIEdgeInsets insets;
-
-@end
-
-#pragma mark - ASInsetLayoutSpec
-
 /**
  A layout spec that wraps another layoutable child, applying insets around it.
 
@@ -44,10 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface ASInsetLayoutSpec : ASLayoutSpec
 
-/**
- * @abstract A size constraint that should apply to this ASLayoutable.
- */
-@property (nonatomic, assign, readonly) ASInsetLayoutSpecStyleDescription *style;
+@property (nonatomic, assign) UIEdgeInsets insets;
 
 /**
  @param insets The amount of space to inset on each side.

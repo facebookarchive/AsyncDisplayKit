@@ -84,10 +84,10 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, NO);
   
   ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init];
-  stackLayoutSpec.style.direction = direction;
-  stackLayoutSpec.style.horizontalAlignment = horizontalAlignment;
-  stackLayoutSpec.style.verticalAlignment = verticalAlignment;
+  stackLayoutSpec.direction = direction;
   stackLayoutSpec.children = subnodes;
+  stackLayoutSpec.horizontalAlignment = horizontalAlignment;
+  stackLayoutSpec.verticalAlignment = verticalAlignment;
   
   CGSize exactSize = CGSizeMake(200, 200);
   static ASSizeRange kSize = ASSizeRangeMake(exactSize, exactSize);
@@ -628,14 +628,14 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 - (void)testDirectionChangeAfterSettingHorizontalAndVerticalAlignments
 {
   ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init]; // Default direction is horizontal
-  stackLayoutSpec.style.horizontalAlignment = ASHorizontalAlignmentRight;
-  stackLayoutSpec.style.verticalAlignment = ASVerticalAlignmentCenter;
-  XCTAssertEqual(stackLayoutSpec.style.alignItems, ASStackLayoutAlignItemsCenter);
-  XCTAssertEqual(stackLayoutSpec.style.justifyContent, ASStackLayoutJustifyContentEnd);
+  stackLayoutSpec.horizontalAlignment = ASHorizontalAlignmentRight;
+  stackLayoutSpec.verticalAlignment = ASVerticalAlignmentCenter;
+  XCTAssertEqual(stackLayoutSpec.alignItems, ASStackLayoutAlignItemsCenter);
+  XCTAssertEqual(stackLayoutSpec.justifyContent, ASStackLayoutJustifyContentEnd);
   
-  stackLayoutSpec.style.direction = ASStackLayoutDirectionVertical;
-  XCTAssertEqual(stackLayoutSpec.style.alignItems, ASStackLayoutAlignItemsEnd);
-  XCTAssertEqual(stackLayoutSpec.style.justifyContent, ASStackLayoutJustifyContentCenter);
+  stackLayoutSpec.direction = ASStackLayoutDirectionVertical;
+  XCTAssertEqual(stackLayoutSpec.alignItems, ASStackLayoutAlignItemsEnd);
+  XCTAssertEqual(stackLayoutSpec.justifyContent, ASStackLayoutJustifyContentCenter);
 }
 
 - (void)testAlignItemsAndJustifyContentRestrictionsIfHorizontalAndVerticalAlignmentsAreUsed
@@ -643,26 +643,26 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init];
 
   // No assertions should be thrown here because alignments are not used
-  stackLayoutSpec.style.alignItems = ASStackLayoutAlignItemsEnd;
-  stackLayoutSpec.style.justifyContent = ASStackLayoutJustifyContentEnd;
+  stackLayoutSpec.alignItems = ASStackLayoutAlignItemsEnd;
+  stackLayoutSpec.justifyContent = ASStackLayoutJustifyContentEnd;
 
   // Set alignments and assert that assertions are thrown
-  stackLayoutSpec.style.horizontalAlignment = ASHorizontalAlignmentMiddle;
-  stackLayoutSpec.style.verticalAlignment = ASVerticalAlignmentCenter;
-  XCTAssertThrows(stackLayoutSpec.style.alignItems = ASStackLayoutAlignItemsEnd);
-  XCTAssertThrows(stackLayoutSpec.style.justifyContent = ASStackLayoutJustifyContentEnd);
+  stackLayoutSpec.horizontalAlignment = ASHorizontalAlignmentMiddle;
+  stackLayoutSpec.verticalAlignment = ASVerticalAlignmentCenter;
+  XCTAssertThrows(stackLayoutSpec.alignItems = ASStackLayoutAlignItemsEnd);
+  XCTAssertThrows(stackLayoutSpec.justifyContent = ASStackLayoutJustifyContentEnd);
 
   // Unset alignments. alignItems and justifyContent should not be changed
-  stackLayoutSpec.style.horizontalAlignment = ASHorizontalAlignmentNone;
-  stackLayoutSpec.style.verticalAlignment = ASVerticalAlignmentNone;
-  XCTAssertEqual(stackLayoutSpec.style.alignItems, ASStackLayoutAlignItemsCenter);
-  XCTAssertEqual(stackLayoutSpec.style.justifyContent, ASStackLayoutJustifyContentCenter);
+  stackLayoutSpec.horizontalAlignment = ASHorizontalAlignmentNone;
+  stackLayoutSpec.verticalAlignment = ASVerticalAlignmentNone;
+  XCTAssertEqual(stackLayoutSpec.alignItems, ASStackLayoutAlignItemsCenter);
+  XCTAssertEqual(stackLayoutSpec.justifyContent, ASStackLayoutJustifyContentCenter);
 
   // Now that alignments are none, setting alignItems and justifyContent should be allowed again
-  stackLayoutSpec.style.alignItems = ASStackLayoutAlignItemsEnd;
-  stackLayoutSpec.style.justifyContent = ASStackLayoutJustifyContentEnd;
-  XCTAssertEqual(stackLayoutSpec.style.alignItems, ASStackLayoutAlignItemsEnd);
-  XCTAssertEqual(stackLayoutSpec.style.justifyContent, ASStackLayoutJustifyContentEnd);
+  stackLayoutSpec.alignItems = ASStackLayoutAlignItemsEnd;
+  stackLayoutSpec.justifyContent = ASStackLayoutJustifyContentEnd;
+  XCTAssertEqual(stackLayoutSpec.alignItems, ASStackLayoutAlignItemsEnd);
+  XCTAssertEqual(stackLayoutSpec.justifyContent, ASStackLayoutJustifyContentEnd);
 }
 
 @end

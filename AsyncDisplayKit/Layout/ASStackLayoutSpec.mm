@@ -17,25 +17,54 @@
 #import "ASStackBaselinePositionedLayout.h"
 #import "ASThread.h"
 
-
-#pragma mark - ASStackLayoutSpecStyleDeclaration
-
-@implementation ASStackLayoutSpecStyleDeclaration
+@implementation ASStackLayoutSpec
+{
+  ASDN::RecursiveMutex __instanceLock__;
+}
 
 - (instancetype)init
+{
+  return [self initWithDirection:ASStackLayoutDirectionHorizontal spacing:0.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStretch children:nil];
+}
+
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
+{
+  return [[self alloc] initWithDirection:direction spacing:spacing justifyContent:justifyContent alignItems:alignItems children:children];
+}
+
++ (instancetype)verticalStackLayoutSpec
+{
+  ASStackLayoutSpec *stackLayoutSpec = [[self alloc] init];
+  stackLayoutSpec.direction = ASStackLayoutDirectionVertical;
+  return stackLayoutSpec;
+}
+
++ (instancetype)horizontalStackLayoutSpec
+{
+  ASStackLayoutSpec *stackLayoutSpec = [[self alloc] init];
+  stackLayoutSpec.direction = ASStackLayoutDirectionHorizontal;
+  return stackLayoutSpec;
+}
+
+- (instancetype)initWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
 {
   if (!(self = [super init])) {
     return nil;
   }
-  
+  _direction = direction;
+  _spacing = spacing;
   _horizontalAlignment = ASHorizontalAlignmentNone;
   _verticalAlignment = ASVerticalAlignmentNone;
+  _alignItems = alignItems;
+  _justifyContent = justifyContent;
   
+  [self setChildren:children];
   return self;
 }
 
 - (void)setDirection:(ASStackLayoutDirection)direction
 {
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   if (_direction != direction) {
     _direction = direction;
     [self resolveHorizontalAlignment];
@@ -45,6 +74,7 @@
 
 - (void)setHorizontalAlignment:(ASHorizontalAlignment)horizontalAlignment
 {
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   if (_horizontalAlignment != horizontalAlignment) {
     _horizontalAlignment = horizontalAlignment;
     [self resolveHorizontalAlignment];
@@ -53,6 +83,7 @@
 
 - (void)setVerticalAlignment:(ASVerticalAlignment)verticalAlignment
 {
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   if (_verticalAlignment != verticalAlignment) {
     _verticalAlignment = verticalAlignment;
     [self resolveVerticalAlignment];
@@ -61,6 +92,7 @@
 
 - (void)setAlignItems:(ASStackLayoutAlignItems)alignItems
 {
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   ASDisplayNodeAssert(_horizontalAlignment == ASHorizontalAlignmentNone, @"Cannot set this property directly because horizontalAlignment is being used");
   ASDisplayNodeAssert(_verticalAlignment == ASVerticalAlignmentNone, @"Cannot set this property directly because verticalAlignment is being used");
   _alignItems = alignItems;
@@ -68,11 +100,67 @@
 
 - (void)setJustifyContent:(ASStackLayoutJustifyContent)justifyContent
 {
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   ASDisplayNodeAssert(_horizontalAlignment == ASHorizontalAlignmentNone, @"Cannot set this property directly because horizontalAlignment is being used");
   ASDisplayNodeAssert(_verticalAlignment == ASVerticalAlignmentNone, @"Cannot set this property directly because verticalAlignment is being used");
   _justifyContent = justifyContent;
 }
 
+- (void)setSpacing:(CGFloat)spacing
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _spacing = spacing;
+}
+
+- (void)setBaselineRelativeArrangement:(BOOL)baselineRelativeArrangement
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _baselineRelativeArrangement = baselineRelativeArrangement;
+}
+
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+{
+  std::vector<id<ASLayoutable>> stackChildren;
+  for (id<ASLayoutable> child in self.children) {
+    stackChildren.push_back(child);
+  }
+  
+  if (stackChildren.empty()) {
+    return [ASLayout layoutWithLayoutable:self size:constrainedSize.min];
+  }
+  
+  ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
+  BOOL needsBaselinePass = _baselineRelativeArrangement || _alignItems == ASStackLayoutAlignItemsBaselineFirst || _alignItems == ASStackLayoutAlignItemsBaselineLast;
+  
+  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
+  const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, style, constrainedSize);
+  
+  CGSize finalSize = CGSizeZero;
+  NSArray *sublayouts = nil;
+  
+  // regardless of whether or not this stack aligns to baseline, we should let ASStackBaselinePositionedLayout::compute find the max ascender
+  // and min descender in case this spec is a child in another spec that wants to align to a baseline.
+  const auto baselinePositionedLayout = ASStackBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
+  if (self.direction == ASStackLayoutDirectionVertical) {
+    ASDN::MutexLocker l(__instanceLock__);
+    self.style.ascender = stackChildren.front().style.ascender;
+    self.style.descender = stackChildren.back().style.descender;
+  } else {
+    ASDN::MutexLocker l(__instanceLock__);
+    self.style.ascender = baselinePositionedLayout.ascender;
+    self.style.descender = baselinePositionedLayout.descender;
+  }
+  
+  if (needsBaselinePass) {
+    finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, baselinePositionedLayout.crossSize);
+    sublayouts = [NSArray arrayWithObjects:&baselinePositionedLayout.sublayouts[0] count:baselinePositionedLayout.sublayouts.size()];
+  } else {
+    finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
+    sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];
+  }
+  
+  return [ASLayout layoutWithLayoutable:self size:ASSizeRangeClamp(constrainedSize, finalSize) sublayouts:sublayouts];
+}
 
 - (void)resolveHorizontalAlignment
 {
@@ -94,121 +182,6 @@
 
 @end
 
-
-#pragma mark - ASStackLayoutSpec
-
-@implementation ASStackLayoutSpec {
-  ASDN::RecursiveMutex __instanceLock__;
-  ASStackLayoutSpecStyleDeclaration *_style;
-}
-
-#pragma mark - Class
-
-+ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
-{
-  return [[self alloc] initWithDirection:direction spacing:spacing justifyContent:justifyContent alignItems:alignItems children:children];
-}
-
-+ (instancetype)verticalStackLayoutSpec
-{
-  ASStackLayoutSpec *stackLayoutSpec = [[self alloc] init];
-  stackLayoutSpec.style.direction = ASStackLayoutDirectionVertical;
-  return stackLayoutSpec;
-}
-
-+ (instancetype)horizontalStackLayoutSpec
-{
-  ASStackLayoutSpec *stackLayoutSpec = [[self alloc] init];
-  stackLayoutSpec.style.direction = ASStackLayoutDirectionHorizontal;
-  return stackLayoutSpec;
-}
-
-#pragma mark - Class
-
-- (instancetype)init
-{
-  return [self initWithDirection:ASStackLayoutDirectionHorizontal spacing:0.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStretch children:nil];
-}
-
-- (instancetype)initWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray *)children
-{
-  if (!(self = [super init])) {
-    return nil;
-  }
-    
-  _style = [[ASStackLayoutSpecStyleDeclaration alloc] init];
-  _style.direction = direction;
-  _style.spacing = spacing;
-  _style.alignItems = alignItems;
-  _style.justifyContent = justifyContent;
-  
-  [self setChildren:children];
-  return self;
-}
-
-#pragma mark - Setter / Getter
-
-- (ASStackLayoutSpecStyleDeclaration *)style
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _style;
-}
-
-#pragma mark - ASLayoutSpec
-
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-{
-  std::vector<id<ASLayoutable>> stackChildren;
-  for (id<ASLayoutable> child in self.children) {
-    stackChildren.push_back(child);
-  }
-  
-  if (stackChildren.empty()) {
-    return [ASLayout layoutWithLayoutable:self size:constrainedSize.min];
-  }
-  
-  ASStackLayoutSpecStyleDeclaration *styleDeclaration = self.style;
-  ASStackLayoutSpecStyle style = {
-    .direction = styleDeclaration.direction,
-    .spacing = styleDeclaration.spacing,
-    .justifyContent = styleDeclaration.justifyContent,
-    .alignItems = styleDeclaration.alignItems,
-    .baselineRelativeArrangement = styleDeclaration.baselineRelativeArrangement
-  };
-  BOOL needsBaselinePass = styleDeclaration.baselineRelativeArrangement
-                            || styleDeclaration.alignItems == ASStackLayoutAlignItemsBaselineFirst
-                            || styleDeclaration.alignItems == ASStackLayoutAlignItemsBaselineLast;
-  
-  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
-  const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, style, constrainedSize);
-  
-  CGSize finalSize = CGSizeZero;
-  NSArray *sublayouts = nil;
-  
-  // regardless of whether or not this stack aligns to baseline, we should let ASStackBaselinePositionedLayout::compute find the max ascender
-  // and min descender in case this spec is a child in another spec that wants to align to a baseline.
-  const auto baselinePositionedLayout = ASStackBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
-  if (styleDeclaration.direction == ASStackLayoutDirectionVertical) {
-    self.style.ascender = stackChildren.front().style.ascender;
-    self.style.descender = stackChildren.back().style.descender;
-  } else {
-    self.style.ascender = baselinePositionedLayout.ascender;
-    self.style.descender = baselinePositionedLayout.descender;
-  }
-  
-  if (needsBaselinePass) {
-    finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, baselinePositionedLayout.crossSize);
-    sublayouts = [NSArray arrayWithObjects:&baselinePositionedLayout.sublayouts[0] count:baselinePositionedLayout.sublayouts.size()];
-  } else {
-    finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
-    sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];
-  }
-  
-  return [ASLayout layoutWithLayoutable:self size:ASSizeRangeClamp(constrainedSize, finalSize) sublayouts:sublayouts];
-}
-
-@end
-
 @implementation ASStackLayoutSpec (ASEnvironment)
 
 - (BOOL)supportsUpwardPropagation
@@ -224,7 +197,7 @@
 
 - (NSString *)asciiArtString
 {
-  return [ASLayoutSpec asciiArtStringForChildren:self.children parentName:[self asciiArtName] direction:self.style.direction];
+  return [ASLayoutSpec asciiArtStringForChildren:self.children parentName:[self asciiArtName] direction:self.direction];
 }
 
 @end

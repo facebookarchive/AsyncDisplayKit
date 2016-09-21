@@ -14,71 +14,43 @@
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-#import "ASThread.h"
 
-#pragma mark - Helper
+@implementation ASRelativeLayoutSpec
 
-ASDISPLAYNODE_INLINE CGFloat ASRelativeLayoutSpecProportionOfAxisForAxisPosition(ASRelativeLayoutSpecPosition position)
+- (instancetype)initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
 {
-  if ((position & ASRelativeLayoutSpecPositionCenter) != 0) {
-    return 0.5f;
-  } else if ((position & ASRelativeLayoutSpecPositionEnd) != 0) {
-    return 1.0f;
-  } else {
-    return 0.0f;
+  if (!(self = [super init])) {
+    return nil;
   }
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  _horizontalPosition = horizontalPosition;
+  _verticalPosition = verticalPosition;
+  _sizingOption = sizingOption;
+  [self setChild:child];
+  return self;
 }
-
-#pragma mark - ASRelativeLayoutSpecStyleDeclaration
-
-@implementation ASRelativeLayoutSpecStyleDeclaration
-
-@end
-
-
-#pragma mark - ASRelativeLayoutSpec
-
-@implementation ASRelativeLayoutSpec {
-  ASDN::RecursiveMutex __instanceLock__;
-  ASRelativeLayoutSpecStyleDeclaration *_style;
-}
-
-#pragma mark - Class
 
 + (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
 {
   return [[self alloc] initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOption child:child];
 }
 
-#pragma mark - Lifecycle
-
-- (instancetype)initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
+- (void)setHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
 {
-  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-  
-  if (!(self = [super init])) {
-    return nil;
-  }
-  
-  _style = [[ASRelativeLayoutSpecStyleDeclaration alloc] init];
-  _style.horizontalPosition = horizontalPosition;
-  _style.verticalPosition = verticalPosition;
-  _style.sizingOption = sizingOption;
-  
-  self.child = child;
-  
-  return self;
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _horizontalPosition = horizontalPosition;
 }
 
-#pragma mark - Getter / Setter
-
-- (ASRelativeLayoutSpecStyleDeclaration *)style
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _style;
+- (void)setVerticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition {
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _verticalPosition = verticalPosition;
 }
 
-#pragma mark - ASLayoutSpec
+- (void)setSizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption
+{
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _sizingOption = sizingOption;
+}
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
@@ -91,11 +63,11 @@ ASDISPLAYNODE_INLINE CGFloat ASRelativeLayoutSpecProportionOfAxisForAxisPosition
     isinf(constrainedSize.max.height) || !ASPointsAreValidForLayout(constrainedSize.max.height) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.height
   };
   
-  BOOL reduceWidth = (self.style.horizontalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||
-  (self.style.horizontalPosition & ASRelativeLayoutSpecPositionEnd) != 0;
+  BOOL reduceWidth = (_horizontalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||
+  (_horizontalPosition & ASRelativeLayoutSpecPositionEnd) != 0;
   
-  BOOL reduceHeight = (self.style.verticalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||
-  (self.style.verticalPosition & ASRelativeLayoutSpecPositionEnd) != 0;
+  BOOL reduceHeight = (_verticalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||
+  (_verticalPosition & ASRelativeLayoutSpecPositionEnd) != 0;
   
   // Layout the child
   const CGSize minChildSize = {
@@ -114,13 +86,13 @@ ASDISPLAYNODE_INLINE CGFloat ASRelativeLayoutSpecProportionOfAxisForAxisPosition
   
   // If minimum size options are set, attempt to shrink the size to the size of the child
   size = ASSizeRangeClamp(constrainedSize, {
-    MIN(size.width, (self.style.sizingOption & ASRelativeLayoutSpecSizingOptionMinimumWidth) != 0 ? sublayout.size.width : size.width),
-    MIN(size.height, (self.style.sizingOption & ASRelativeLayoutSpecSizingOptionMinimumHeight) != 0 ? sublayout.size.height : size.height)
+    MIN(size.width, (_sizingOption & ASRelativeLayoutSpecSizingOptionMinimumWidth) != 0 ? sublayout.size.width : size.width),
+    MIN(size.height, (_sizingOption & ASRelativeLayoutSpecSizingOptionMinimumHeight) != 0 ? sublayout.size.height : size.height)
   });
   
   // Compute the position for the child on each axis according to layout parameters
-  CGFloat xPosition = ASRelativeLayoutSpecProportionOfAxisForAxisPosition(self.style.horizontalPosition);
-  CGFloat yPosition = ASRelativeLayoutSpecProportionOfAxisForAxisPosition(self.style.verticalPosition);
+  CGFloat xPosition = [self proportionOfAxisForAxisPosition:_horizontalPosition];
+  CGFloat yPosition = [self proportionOfAxisForAxisPosition:_verticalPosition];
   
   sublayout.position = {
     ASRoundPixelValue((size.width - sublayout.size.width) * xPosition),
@@ -128,6 +100,17 @@ ASDISPLAYNODE_INLINE CGFloat ASRelativeLayoutSpecProportionOfAxisForAxisPosition
   };
   
   return [ASLayout layoutWithLayoutable:self size:size sublayouts:@[sublayout]];
+}
+
+- (CGFloat)proportionOfAxisForAxisPosition:(ASRelativeLayoutSpecPosition)position
+{
+  if ((position & ASRelativeLayoutSpecPositionCenter) != 0) {
+    return 0.5f;
+  } else if ((position & ASRelativeLayoutSpecPositionEnd) != 0) {
+    return 1.0f;
+  } else {
+    return 0.0f;
+  }
 }
 
 @end

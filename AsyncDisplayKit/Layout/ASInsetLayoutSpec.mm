@@ -14,77 +14,54 @@
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-#import "ASThread.h"
 
-#pragma mark - Helper
+@interface ASInsetLayoutSpec ()
+{
+  UIEdgeInsets _insets;
+}
+@end
 
 /* Returns f if f is finite, substitute otherwise */
-ASDISPLAYNODE_INLINE CGFloat finite(CGFloat f, CGFloat substitute)
+static CGFloat finite(CGFloat f, CGFloat substitute)
 {
   return isinf(f) ? substitute : f;
 }
 
 /* Returns f if f is finite, 0 otherwise */
-ASDISPLAYNODE_INLINE CGFloat finiteOrZero(CGFloat f)
+static CGFloat finiteOrZero(CGFloat f)
 {
   return finite(f, 0);
 }
 
 /* Returns the inset required to center 'inner' in 'outer' */
-ASDISPLAYNODE_INLINE CGFloat centerInset(CGFloat outer, CGFloat inner)
+static CGFloat centerInset(CGFloat outer, CGFloat inner)
 {
   return ASRoundPixelValue((outer - inner) / 2);
 }
 
+@implementation ASInsetLayoutSpec
 
-#pragma mark - ASInsetLayoutSpecStyleDescription
-
-@implementation ASInsetLayoutSpecStyleDescription
-
-@end
-
-
-#pragma mark - ASInsetLayoutSpec
-
-@implementation ASInsetLayoutSpec {
-  ASDN::RecursiveMutex __instanceLock__;
-  ASInsetLayoutSpecStyleDescription *_style;
+- (instancetype)initWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child;
+{
+  if (!(self = [super init])) {
+    return nil;
+  }
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  _insets = insets;
+  [self setChild:child];
+  return self;
 }
-
-#pragma mark - Class
 
 + (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child
 {
   return [[self alloc] initWithInsets:insets child:child];
 }
 
-#pragma mark - Lifecycle
-
-- (instancetype)initWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child;
+- (void)setInsets:(UIEdgeInsets)insets
 {
-  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-
-  if (!(self = [super init])) {
-    return nil;
-  }
-  
-  _style = [[ASInsetLayoutSpecStyleDescription alloc] init];
-  _style.insets = insets;
-  
-  self.child = child;
-  
-  return self;
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  _insets = insets;
 }
-
-#pragma mark - Getter / Setter
-
-- (ASInsetLayoutSpecStyleDescription *)style
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _style;
-}
-
-#pragma mark - ASLayoutSpec
 
 /**
  Inset will compute a new constrained size for it's child after applying insets and re-positioning
@@ -99,15 +76,13 @@ ASDISPLAYNODE_INLINE CGFloat centerInset(CGFloat outer, CGFloat inner)
     return [ASLayout layoutWithLayoutable:self size:CGSizeZero];
   }
   
-  UIEdgeInsets insets = _style.insets;
-  
-  const CGFloat insetsX = (finiteOrZero(insets.left) + finiteOrZero(insets.right));
-  const CGFloat insetsY = (finiteOrZero(insets.top) + finiteOrZero(insets.bottom));
+  const CGFloat insetsX = (finiteOrZero(_insets.left) + finiteOrZero(_insets.right));
+  const CGFloat insetsY = (finiteOrZero(_insets.top) + finiteOrZero(_insets.bottom));
 
   // if either x-axis inset is infinite, let child be intrinsic width
-  const CGFloat minWidth = (isinf(insets.left) || isinf(insets.right)) ? 0 : constrainedSize.min.width;
+  const CGFloat minWidth = (isinf(_insets.left) || isinf(_insets.right)) ? 0 : constrainedSize.min.width;
   // if either y-axis inset is infinite, let child be intrinsic height
-  const CGFloat minHeight = (isinf(insets.top) || isinf(insets.bottom)) ? 0 : constrainedSize.min.height;
+  const CGFloat minHeight = (isinf(_insets.top) || isinf(_insets.bottom)) ? 0 : constrainedSize.min.height;
 
   const ASSizeRange insetConstrainedSize = {
     {
@@ -128,17 +103,17 @@ ASDISPLAYNODE_INLINE CGFloat centerInset(CGFloat outer, CGFloat inner)
   ASLayout *sublayout = [self.child layoutThatFits:insetConstrainedSize parentSize:insetParentSize];
 
   const CGSize computedSize = ASSizeRangeClamp(constrainedSize, {
-    finite(sublayout.size.width + insets.left + insets.right, constrainedSize.max.width),
-    finite(sublayout.size.height + insets.top + insets.bottom, constrainedSize.max.height),
+    finite(sublayout.size.width + _insets.left + _insets.right, constrainedSize.max.width),
+    finite(sublayout.size.height + _insets.top + _insets.bottom, constrainedSize.max.height),
   });
 
-  const CGFloat x = finite(insets.left, constrainedSize.max.width -
-                           (finite(insets.right,
+  const CGFloat x = finite(_insets.left, constrainedSize.max.width -
+                           (finite(_insets.right,
                                    centerInset(constrainedSize.max.width, sublayout.size.width)) + sublayout.size.width));
 
-  const CGFloat y = finite(insets.top,
+  const CGFloat y = finite(_insets.top,
                            constrainedSize.max.height -
-                           (finite(insets.bottom,
+                           (finite(_insets.bottom,
                                    centerInset(constrainedSize.max.height, sublayout.size.height)) + sublayout.size.height));
   
   sublayout.position = CGPointMake(x, y);
