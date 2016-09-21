@@ -300,7 +300,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   
-  _style = [[ASLayoutableStyle alloc] init];
+  _style = [[[[self class] styleClass] alloc] init];
   _preferredFrameSize = CGSizeZero;
   _environmentState = ASEnvironmentStateMakeDefault();
   
@@ -722,6 +722,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 }
 
 #pragma mark - Style
+
++ (Class)styleClass
+{
+  return [ASLayoutableStyle class];
+}
 
 - (ASLayoutableStyle *)style
 {

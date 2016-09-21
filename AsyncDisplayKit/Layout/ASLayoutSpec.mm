@@ -56,9 +56,11 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   if (!(self = [super init])) {
     return nil;
   }
+  
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
-  _style = [[ASLayoutableStyle alloc] init];
+  _style = [[[[self class] styleClass] alloc] init];
+  
   return self;
 }
 
@@ -70,6 +72,13 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 - (BOOL)canLayoutAsynchronous
 {
   return YES;
+}
+
+#pragma mark - Style
+
++ (Class)styleClass
+{
+  return [ASLayoutableStyle class];
 }
 
 - (ASLayoutableStyle *)style

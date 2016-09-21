@@ -69,6 +69,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) ASLayoutableStyle *style;
 
+/**
+* @discussion This property contains the ASLayoutableStyle class object by default. Subclasses can use this property to
+* return a different size class as needed. For example, if your layoutable would like extend the style object to support
+* more properties you might want to set this property to a custom subclass of ASLayoutableStyle.
+*
+* This property is set only once early in the creation of the layoutable to create the corresponding style object.
+*/
+@property (class, nonatomic, readonly) Class styleClass;
+
 
 #pragma mark - Calculate layout
 
