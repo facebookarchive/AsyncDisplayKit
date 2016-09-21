@@ -75,8 +75,8 @@ const CGFloat kSoldOutGBHeight = 50.0;
   
   self.titleLabel = [[ASTextNode alloc] init];
   self.titleLabel.maximumNumberOfLines = 2;
-  self.titleLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
-  self.titleLabel.style.flexGrow = YES;
+  self.titleLabel.alignSelf = ASStackLayoutAlignSelfStart;
+  self.titleLabel.flexGrow = YES;
   self.titleLabel.layerBacked = YES;
   
   self.firstInfoLabel = [[ASTextNode alloc] init];
@@ -107,14 +107,14 @@ const CGFloat kSoldOutGBHeight = 50.0;
   self.soldOutLabelFlat.layerBacked = YES;
 
   self.soldOutLabelBackground = [[ASDisplayNode alloc] init];
-  self.soldOutLabelBackground.style.width = ASDimensionMakeWithFraction(1.0);
-  self.soldOutLabelBackground.style.height = ASDimensionMakeWithPoints(kSoldOutGBHeight);
+  self.soldOutLabelBackground.width = ASDimensionMakeWithFraction(1.0);
+  self.soldOutLabelBackground.height = ASDimensionMakeWithPoints(kSoldOutGBHeight);
   self.soldOutLabelBackground.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.9];
-  self.soldOutLabelBackground.style.flexGrow = YES;
+  self.soldOutLabelBackground.flexGrow = YES;
   self.soldOutLabelBackground.layerBacked = YES;
   
   self.soldOutOverlay = [[ASDisplayNode alloc] init];
-  self.soldOutOverlay.style.flexGrow = YES;
+  self.soldOutOverlay.flexGrow = YES;
   self.soldOutOverlay.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
   self.soldOutOverlay.layerBacked = YES;
   
@@ -135,18 +135,18 @@ const CGFloat kSoldOutGBHeight = 50.0;
   self.soldOutLabelFlat.hidden = YES;
   
   if ([ItemNode isRTL]) {
-    self.titleLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
-    self.firstInfoLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
-    self.distanceLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
-    self.secondInfoLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
-    self.originalPriceLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
-    self.finalPriceLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
+    self.titleLabel.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.firstInfoLabel.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.distanceLabel.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.secondInfoLabel.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.originalPriceLabel.alignSelf = ASStackLayoutAlignSelfStart;
+    self.finalPriceLabel.alignSelf = ASStackLayoutAlignSelfStart;
   } else {
-    self.firstInfoLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
-    self.distanceLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
-    self.secondInfoLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
-    self.originalPriceLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
-    self.finalPriceLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.firstInfoLabel.alignSelf = ASStackLayoutAlignSelfStart;
+    self.distanceLabel.alignSelf = ASStackLayoutAlignSelfStart;
+    self.secondInfoLabel.alignSelf = ASStackLayoutAlignSelfStart;
+    self.originalPriceLabel.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.finalPriceLabel.alignSelf = ASStackLayoutAlignSelfEnd;
   }
 }
 
@@ -257,13 +257,13 @@ const CGFloat kSoldOutGBHeight = 50.0;
   UIEdgeInsets textInsets = UIEdgeInsetsMake(kInsetTop, kInsetHorizontal, kInsetBottom, kInsetHorizontal);
   
   ASLayoutSpec *verticalSpacer = [[ASLayoutSpec alloc] init];
-  verticalSpacer.style.flexGrow = YES;
+  verticalSpacer.flexGrow = YES;
   
   ASLayoutSpec *horizontalSpacer1 = [[ASLayoutSpec alloc] init];
-  horizontalSpacer1.style.flexGrow = YES;
+  horizontalSpacer1.flexGrow = YES;
   
   ASLayoutSpec *horizontalSpacer2 = [[ASLayoutSpec alloc] init];
-  horizontalSpacer2.style.flexGrow = YES;
+  horizontalSpacer2.flexGrow = YES;
   
   NSArray *info1Children = @[self.firstInfoLabel, self.distanceLabel, horizontalSpacer1, self.originalPriceLabel];
   NSArray *info2Children = @[self.secondInfoLabel, horizontalSpacer2, self.finalPriceLabel];
@@ -279,7 +279,7 @@ const CGFloat kSoldOutGBHeight = 50.0;
   ASStackLayoutSpec *textStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical spacing:0.0 justifyContent:ASStackLayoutJustifyContentEnd alignItems:ASStackLayoutAlignItemsStretch children:@[self.titleLabel, verticalSpacer, info1Stack, info2Stack]];
   
   ASInsetLayoutSpec *textWrapper = [ASInsetLayoutSpec insetLayoutSpecWithInsets:textInsets child:textStack];
-  textWrapper.style.flexGrow = YES;
+  textWrapper.flexGrow = YES;
   
   return textWrapper;
 }
@@ -289,12 +289,12 @@ const CGFloat kSoldOutGBHeight = 50.0;
   
   ASRatioLayoutSpec *imagePlace = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:imageRatio child:self.dealImageView];
   
-  self.badge.style.layoutPosition = CGPointMake(0, constrainedSize.max.height - kFixedLabelsAreaHeight - kBadgeHeight);
-  self.badge.style.height = ASDimensionMakeWithPoints(kBadgeHeight);
+  self.badge.layoutPosition = CGPointMake(0, constrainedSize.max.height - kFixedLabelsAreaHeight - kBadgeHeight);
+  self.badge.height = ASDimensionMakeWithPoints(kBadgeHeight);
   ASStaticLayoutSpec *badgePosition = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.badge]];
   
   ASOverlayLayoutSpec *badgeOverImage = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:imagePlace overlay:badgePosition];
-  badgeOverImage.style.flexGrow = YES;
+  badgeOverImage.flexGrow = YES;
   
   return badgeOverImage;
 }

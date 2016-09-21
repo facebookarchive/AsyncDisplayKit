@@ -138,8 +138,8 @@
   ASInsetLayoutSpec *avatarInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
 
   ASStackLayoutSpec *headerStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
-  headerStack.style.alignItems   = ASStackLayoutAlignItemsCenter;                     // center items vertically in horizontal stack
-  headerStack.style.justifyContent   = ASStackLayoutJustifyContentStart;                  // justify content to the left side of the header stack
+  headerStack.alignItems         = ASStackLayoutAlignItemsCenter;                     // center items vertically in horizontal stack
+  headerStack.justifyContent     = ASStackLayoutJustifyContentStart;                  // justify content to the left side of the header stack
   [headerStack setChildren:@[avatarInset, headerSubStack, spacer, _photoTimeIntervalSincePostLabel]];
   
   // header inset stack
@@ -148,7 +148,7 @@
   
   // footer stack
   ASStackLayoutSpec *footerStack     = [ASStackLayoutSpec verticalStackLayoutSpec];
-  footerStack.style.spacing          = VERTICAL_BUFFER;
+  footerStack.spacing                = VERTICAL_BUFFER;
   [footerStack setChildren:@[_photoLikesLabel, _photoDescriptionLabel, _photoCommentsView]];
   
   // footer inset stack
@@ -163,7 +163,7 @@
   _photoImageView.style.height = ASDimensionMakeWithPoints(cellWidth);
   
   ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
-  verticalStack.style.alignItems     = ASStackLayoutAlignItemsStretch;  // stretch headerStack to fill horizontal space
+  verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;                // stretch headerStack to fill horizontal space
   [verticalStack setChildren:@[headerWithInset, _photoImageView, footerWithInset]];
 
   return verticalStack;

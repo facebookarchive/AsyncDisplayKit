@@ -53,7 +53,7 @@ static CGFloat kFixedHeight = 200.0f;
     [spinner startAnimating];
     return spinner;
   }];
-  [_loadingSpinner.style setSizeWithCGSize:CGSizeMake(50, 50)];
+  [_loadingSpinner setSizeWithCGSize:CGSizeMake(50, 50)];
     
   // add it as a subnode, and we're done
   [self addSubnode:_loadingSpinner];
@@ -68,8 +68,8 @@ static CGFloat kFixedHeight = 200.0f;
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASCenterLayoutSpec *centerSpec = [[ASCenterLayoutSpec alloc] init];
-  centerSpec.style.centeringOptions = ASCenterLayoutSpecCenteringXY;
-  centerSpec.style.sizingOptions = ASCenterLayoutSpecSizingOptionDefault;
+  centerSpec.centeringOptions = ASCenterLayoutSpecCenteringXY;
+  centerSpec.sizingOptions = ASCenterLayoutSpecSizingOptionDefault;
   centerSpec.child = _loadingSpinner;
   
   return centerSpec;

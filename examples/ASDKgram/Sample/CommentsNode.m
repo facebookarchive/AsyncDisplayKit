@@ -44,7 +44,7 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  verticalStack.style.spacing      = INTER_COMMENT_SPACING;
+  verticalStack.spacing            = INTER_COMMENT_SPACING;
   [verticalStack setChildren:_commentNodes];
   
   return verticalStack;
