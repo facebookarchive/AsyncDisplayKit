@@ -441,4 +441,38 @@
   [[UIDevice currentDevice] setValue:@(oldDeviceOrientation) forKey:@"orientation"];
 }
 
+- (void)testThatNestedBatchCompletionsAreCalledInOrder
+{
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+
+  ASCollectionView *cv = testController.collectionView;
+
+  XCTestExpectation *inner0 = [self expectationWithDescription:@"Inner completion 0 is called"];
+  XCTestExpectation *inner1 = [self expectationWithDescription:@"Inner completion 1 is called"];
+  XCTestExpectation *outer = [self expectationWithDescription:@"Outer completion is called"];
+
+  NSMutableArray<XCTestExpectation *> *completions = [NSMutableArray array];
+
+  [cv performBatchUpdates:^{
+    [cv performBatchUpdates:^{
+
+    } completion:^(BOOL finished) {
+      [completions addObject:inner0];
+      [inner0 fulfill];
+    }];
+    [cv performBatchUpdates:^{
+
+    } completion:^(BOOL finished) {
+      [completions addObject:inner1];
+      [inner1 fulfill];
+    }];
+  } completion:^(BOOL finished) {
+    [completions addObject:outer];
+    [outer fulfill];
+  }];
+
+  [self waitForExpectationsWithTimeout:5 handler:nil];
+  XCTAssertEqualObjects(completions, (@[ outer, inner0, inner1 ]), @"Expected completion order to be correct");
+}
+
 @end
