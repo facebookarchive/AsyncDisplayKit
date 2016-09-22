@@ -49,9 +49,12 @@
   if (_changeSetBatchUpdateCounter == 0) {
     [self invalidateDataSourceItemCounts];
     [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
+    void (^batchCompletion)(BOOL finished) = _changeSet.completionHandler;
 
     if (!self.initialReloadDataHasBeenCalled) {
-      _changeSet.completionHandler(YES);
+      if (batchCompletion != nil) {
+        batchCompletion(YES);
+      }
       _changeSet = nil;
       return;
     }
@@ -74,7 +77,7 @@
       [super insertRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
 
-    [super endUpdatesAnimated:animated completion:_changeSet.completionHandler];
+    [super endUpdatesAnimated:animated completion:batchCompletion];
     
     _changeSet = nil;
   }

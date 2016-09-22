@@ -115,7 +115,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   self = [super init];
   if (self) {
     _oldItemCounts = oldItemCounts;
-    _completionHandler = ^(BOOL finished) {};
     
     _originalInsertItemChanges = [[NSMutableArray alloc] init];
     _insertItemChanges = [[NSMutableArray alloc] init];
@@ -137,9 +136,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 - (void(^)(BOOL finished))completionHandler
 {
   [self _ensureCompleted];
-  ASDisplayNodeAssertNotNil(_completionHandler, @"Attempt to read the `completionHandler` property multiple times.");
 
-  // Read our ivar and nil it out as soon as possible.
   id completionHandler = _completionHandler;
   _completionHandler = nil;
   return completionHandler;
@@ -154,7 +151,9 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
   void (^oldCompletionHandler)(BOOL finished) = _completionHandler;
   _completionHandler = ^(BOOL finished) {
-    oldCompletionHandler(finished);
+    if (oldCompletionHandler != nil) {
+    	oldCompletionHandler(finished);
+    }
     completion(finished);
   };
 }
