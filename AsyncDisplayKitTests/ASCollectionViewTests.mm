@@ -441,6 +441,17 @@
   [[UIDevice currentDevice] setValue:@(oldDeviceOrientation) forKey:@"orientation"];
 }
 
+/**
+ * See corresponding test in ASUICollectionViewTests
+ *
+ * @discussion Currently, we do not replicate UICollectionView's call order (outer, inner0, inner1, ...)
+ *   and instead call (inner0, inner1, outer, ...). This is because we primarily provide a
+ *   beginUpdates/endUpdatesWithCompletion: interface (like UITableView). With UICollectionView's
+ *   performBatchUpdates:completion:, the completion block is enqueued at -beginUpdates time.
+ *   With our tableView-like scheme, the completion block is provided at -endUpdates time
+ *   and it is naturally enqueued at this time. It is assumed that this is an acceptable deviation,
+ *   and that developers do not expect a particular completion order guarantee.
+ */
 - (void)testThatNestedBatchCompletionsAreCalledInOrder
 {
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
@@ -472,7 +483,7 @@
   }];
 
   [self waitForExpectationsWithTimeout:5 handler:nil];
-  XCTAssertEqualObjects(completions, (@[ outer, inner0, inner1 ]), @"Expected completion order to be correct");
+  XCTAssertEqualObjects(completions, (@[ inner0, inner1, outer ]), @"Expected completion order to be correct");
 }
 
 @end

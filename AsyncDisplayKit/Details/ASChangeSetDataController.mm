@@ -20,6 +20,11 @@
   _ASHierarchyChangeSet *_changeSet;
 }
 
+- (void)dealloc
+{
+  ASDisplayNodeCAssert(_changeSetBatchUpdateCounter == 0, @"ASChangeSetDataController deallocated in the middle of a batch update.");
+}
+
 #pragma mark - Batching (External API)
 
 - (void)beginUpdates
@@ -40,17 +45,16 @@
   // Prevent calling endUpdatesAnimated:completion: in an unbalanced way
   NSAssert(_changeSetBatchUpdateCounter >= 0, @"endUpdatesAnimated:completion: called without having a balanced beginUpdates call");
   
+  [_changeSet addCompletionHandler:completion];
   if (_changeSetBatchUpdateCounter == 0) {
+    [self invalidateDataSourceItemCounts];
+    [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
+
     if (!self.initialReloadDataHasBeenCalled) {
-      if (completion) {
-        completion(YES);
-      }
+      _changeSet.completionHandler(YES);
       _changeSet = nil;
       return;
     }
-    
-    [self invalidateDataSourceItemCounts];
-    [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
     
     [super beginUpdates];
     
@@ -70,7 +74,7 @@
       [super insertRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
 
-    [super endUpdatesAnimated:animated completion:completion];
+    [super endUpdatesAnimated:animated completion:_changeSet.completionHandler];
     
     _changeSet = nil;
   }

@@ -94,6 +94,20 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 
 - (instancetype)initWithOldData:(std::vector<NSInteger>)oldItemCounts NS_DESIGNATED_INITIALIZER;
 
+
+/**
+ * The combined completion handler.
+ *
+ * @precondition The change set must be completed.
+ * @precondition This property must be read exactly once. It is discarded after reading because
+ *   the combined completion block may have captured significant resources that we would like to 
+ *   reclaim as soon as possible. It is an error to read this property twice.
+ */
+@property (nonatomic, copy, readonly) void(^completionHandler)(BOOL finished);
+
+/// @precondition The change set must not be completed.
+- (void)addCompletionHandler:(nullable void(^)(BOOL finished))completion;
+
 /// @precondition The change set must be completed.
 @property (nonatomic, strong, readonly) NSIndexSet *deletedSections;
 /// @precondition The change set must be completed.

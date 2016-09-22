@@ -101,6 +101,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 @implementation _ASHierarchyChangeSet {
   std::vector<NSInteger> _oldItemCounts;
   std::vector<NSInteger> _newItemCounts;
+  void (^_completionHandler)(BOOL finished);
 }
 
 - (instancetype)init
@@ -114,6 +115,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   self = [super init];
   if (self) {
     _oldItemCounts = oldItemCounts;
+    _completionHandler = ^(BOOL finished) {};
     
     _originalInsertItemChanges = [[NSMutableArray alloc] init];
     _insertItemChanges = [[NSMutableArray alloc] init];
@@ -131,6 +133,31 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 }
 
 #pragma mark External API
+
+- (void(^)(BOOL finished))completionHandler
+{
+  [self _ensureCompleted];
+  ASDisplayNodeAssertNotNil(_completionHandler, @"Attempt to read the `completionHandler` property multiple times.");
+
+  // Read our ivar and nil it out as soon as possible.
+  id completionHandler = _completionHandler;
+  _completionHandler = nil;
+  return completionHandler;
+}
+
+- (void)addCompletionHandler:(void (^)(BOOL))completion
+{
+  [self _ensureNotCompleted];
+  if (completion == nil) {
+    return;
+  }
+
+  void (^oldCompletionHandler)(BOOL finished) = _completionHandler;
+  _completionHandler = ^(BOOL finished) {
+    oldCompletionHandler(finished);
+    completion(finished);
+  };
+}
 
 - (void)markCompletedWithNewItemCounts:(std::vector<NSInteger>)newItemCounts
 {
