@@ -97,7 +97,6 @@ void ASLayoutableClearCurrentContext()
   self = [super init];
   if (self) {
     _size = ASLayoutableSizeMake();
-    _flexShrink = YES;
   }
   return self;
 }

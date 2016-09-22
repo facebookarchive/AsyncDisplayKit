@@ -52,7 +52,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
   ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
   
-  XCTAssertEqual(displayNode.style.flexShrink, YES);
+  XCTAssertEqual(displayNode.style.flexShrink, NO);
   XCTAssertEqual(displayNode.style.flexGrow, NO);
   
   const ASDimension unconstrainedDimension = ASDimensionAuto;
