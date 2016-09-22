@@ -10,6 +10,39 @@
 #import "ASLayoutSpec.h"
 #import "ASLayoutSpecPrivate.h"
 
+#pragma mark - ASNullLayoutSpec
+
+@interface ASNullLayoutSpec : ASLayoutSpec
+- (instancetype)init __unavailable;
++ (ASNullLayoutSpec *)null;
+@end
+
+@implementation ASNullLayoutSpec : ASLayoutSpec
+
++ (ASNullLayoutSpec *)null
+{
+  static ASNullLayoutSpec *sharedNullLayoutSpec = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    sharedNullLayoutSpec = [[self alloc] init];
+  });
+  return sharedNullLayoutSpec;
+}
+
+- (BOOL)isMutable
+{
+  return NO;
+}
+
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+{
+  return [ASLayout layoutWithLayoutable:self size:CGSizeZero];
+}
+
+@end
+
+
+#pragma mark - ASLayoutSpec (Subclassing)
 
 @implementation ASLayoutSpec (Subclassing)
 
@@ -40,14 +73,14 @@
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
-  id<ASLayoutable> layoutable = child ? [self layoutableToAddFromLayoutable:child] : [[ASNullLayoutSpec alloc] init];
+  id<ASLayoutable> layoutable = child ? [self layoutableToAddFromLayoutable:child] : [ASNullLayoutSpec null];
   
   if (child) {
     if (_childrenArray.count < index) {
-      // Fill up the array with null objects until index to fill gaps
+      // Fill up the array with null objects until the index
       NSInteger i = _childrenArray.count;
       while (i < index) {
-        _childrenArray[i] = [[ASNullLayoutSpec alloc] init];
+        _childrenArray[i] = [ASNullLayoutSpec null];
         i++;
       }
     }
@@ -68,8 +101,9 @@
     layoutable = _childrenArray[index];
   }
   
-  // Assert if it's a null layoutable
-  ASDisplayNodeAssert([layoutable isKindOfClass:[ASNullLayoutSpec class]] == NO, @"Access child at index without set a child at that index");
+  // Null layoutable should not be accessed
+  ASDisplayNodeAssert(layoutable != [ASNullLayoutSpec null], @"Access child at index without set a child at that index");
+
   return layoutable;
 }
 

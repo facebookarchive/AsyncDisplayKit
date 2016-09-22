@@ -227,19 +227,6 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 @end
 
-
-#pragma mark - ASNullLayoutSpec
-
-@implementation ASNullLayoutSpec : ASLayoutSpec
-
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-{
-  return [ASLayout layoutWithLayoutable:self size:CGSizeZero];
-}
-
-@end
-
-
 #pragma mark - ASWrapperLayoutSpec
 
 @implementation ASWrapperLayoutSpec

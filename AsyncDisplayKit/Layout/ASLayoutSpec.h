@@ -62,10 +62,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface ASNullLayoutSpec : ASLayoutSpec
-
-@end
-
 /**
  * An ASLayoutSpec subclass that can wrap a ASLayoutable and calculates the layout of the child.
  */
