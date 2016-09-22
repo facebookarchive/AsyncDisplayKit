@@ -143,12 +143,12 @@
   const auto baselinePositionedLayout = ASStackBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
   if (self.direction == ASStackLayoutDirectionVertical) {
     ASDN::MutexLocker l(__instanceLock__);
-    self.ascender = [stackChildren.front() ascender];
-    self.descender = [stackChildren.back() descender];
+    self.style.ascender = stackChildren.front().style.ascender;
+    self.style.descender = stackChildren.back().style.descender;
   } else {
     ASDN::MutexLocker l(__instanceLock__);
-    self.ascender = baselinePositionedLayout.ascender;
-    self.descender = baselinePositionedLayout.descender;
+    self.style.ascender = baselinePositionedLayout.ascender;
+    self.style.descender = baselinePositionedLayout.descender;
   }
   
   if (needsBaselinePass) {

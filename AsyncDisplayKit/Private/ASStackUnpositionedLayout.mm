@@ -26,7 +26,7 @@ static ASLayout *crossChildLayout(const id<ASLayoutable> child,
                                   const CGFloat crossMax,
                                   const CGSize size)
 {
-  const ASStackLayoutAlignItems alignItems = alignment(child.alignSelf, style.alignItems);
+  const ASStackLayoutAlignItems alignItems = alignment(child.style.alignSelf, style.alignItems);
   // stretched children will have a cross dimension of at least crossMin
   const CGFloat childCrossMin = alignItems == ASStackLayoutAlignItemsStretch ? crossMin : 0;
   const ASSizeRange childSizeRange = directionSizeRange(style.direction, stackMin, stackMax, childCrossMin, crossMax);
@@ -79,7 +79,7 @@ static void stretchChildrenAlongCrossDimension(std::vector<ASStackUnpositionedIt
 
   const CGFloat childCrossMax = it == layouts.end() ? 0 : crossDimension(style.direction, it->layout.size);
   for (auto &l : layouts) {
-    const ASStackLayoutAlignItems alignItems = alignment(l.child.alignSelf, style.alignItems);
+    const ASStackLayoutAlignItems alignItems = alignment(l.child.style.alignSelf, style.alignItems);
 
     const CGFloat cross = crossDimension(style.direction, l.layout.size);
     const CGFloat stack = stackDimension(style.direction, l.layout.size);
@@ -116,7 +116,7 @@ static CGFloat computeStackDimensionSum(const std::vector<ASStackUnpositionedIte
                                                   children.empty() ? 0 : style.spacing * (children.size() - 1),
                                                   [&](CGFloat x, const ASStackUnpositionedItem &l) {
                                                     const id<ASLayoutable> child = l.child;
-                                                    return x + child.spacingBefore + child.spacingAfter;
+                                                    return x + child.style.spacingBefore + child.style.spacingAfter;
                                                   });
 
   // Sum up the childrens' dimensions (including spacing) in the stack direction.
@@ -185,15 +185,15 @@ static std::function<BOOL(const ASStackUnpositionedItem &)> isFlexibleInViolatio
   if (std::fabs(violation) < kViolationEpsilon) {
     return [](const ASStackUnpositionedItem &l) { return NO; };
   } else if (violation > 0) {
-    return [](const ASStackUnpositionedItem &l) { return l.child.flexGrow; };
+    return [](const ASStackUnpositionedItem &l) { return l.child.style.flexGrow; };
   } else {
-    return [](const ASStackUnpositionedItem &l) { return l.child.flexShrink; };
+    return [](const ASStackUnpositionedItem &l) { return l.child.style.flexShrink; };
   }
 }
 
 ASDISPLAYNODE_INLINE BOOL isFlexibleInBothDirections(id<ASLayoutable> child)
 {
-  return child.flexGrow && child.flexShrink;
+  return child.style.flexGrow && child.style.flexShrink;
 }
 
 /**
@@ -309,8 +309,8 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
         child,
         crossChildLayout(child,
                          style,
-                         ASDimensionResolve(child.flexBasis, stackDimension(style.direction, size), 0),
-                         ASDimensionResolve(child.flexBasis, stackDimension(style.direction, size), INFINITY),
+                         ASDimensionResolve(child.style.flexBasis, stackDimension(style.direction, size), 0),
+                         ASDimensionResolve(child.style.flexBasis, stackDimension(style.direction, size), INFINITY),
                          minCrossDimension,
                          maxCrossDimension,
                          size)

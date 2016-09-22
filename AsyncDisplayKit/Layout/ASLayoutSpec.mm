@@ -26,23 +26,16 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 
 @interface ASLayoutSpec() {
   ASDN::RecursiveMutex __instanceLock__;
-  ASLayoutableSize _size;
-  ASEnvironmentState _environmentState;
   ASChildMap _children;
+  ASEnvironmentState _environmentState;
+  ASLayoutableStyle *_style;
 }
 @end
 
 @implementation ASLayoutSpec
 
 // Dynamic properties for ASLayoutables
-@dynamic layoutableType, size;
-// Dynamic properties for sizing
-@dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
-// Dynamic properties for stack spec
-@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender;
-// Dynamic properties for static spec
-@dynamic layoutPosition;
-
+@dynamic layoutableType;
 @synthesize isFinalLayoutable = _isFinalLayoutable;
 
 #pragma mark - Class
@@ -63,9 +56,11 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   if (!(self = [super init])) {
     return nil;
   }
+  
   _isMutable = YES;
-  _size = ASLayoutableSizeMake();
   _environmentState = ASEnvironmentStateMakeDefault();
+  _style = [[[[self class] styleClass] alloc] init];
+  
   return self;
 }
 
@@ -79,24 +74,18 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   return YES;
 }
 
+#pragma mark - Style
 
-#pragma mark - Sizing
-
-- (ASLayoutableSize)size
++ (Class)styleClass
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _size;
+  return [ASLayoutableStyle class];
 }
 
-- (void)setSize:(ASLayoutableSize)size
+- (ASLayoutableStyle *)style
 {
   ASDN::MutexLocker l(__instanceLock__);
-  _size = size;
+  return _style;
 }
-
-ASLayoutableSizeForwarding
-ASLayoutableSizeHelperForwarding
-
 
 #pragma mark - Layout
 
@@ -113,14 +102,14 @@ ASLayoutableSizeHelperForwarding
 
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
 {
-  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:_size relativeToParentSize:parentSize];
+  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:_style.size relativeToParentSize:parentSize];
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
                      restrictedToSize:(ASLayoutableSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutableSizeResolve(_size, parentSize));
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutableSizeResolve(_style.size, parentSize));
   return [self calculateLayoutThatFits:resolvedRange];
 }
 
@@ -285,14 +274,13 @@ ASLayoutableSizeHelperForwarding
   _environmentState.environmentTraitCollection = environmentTraitCollection;
 }
 
-ASEnvironmentLayoutOptionsForwarding
-ASEnvironmentLayoutExtensibilityForwarding
-
 - (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(__instanceLock__);
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
 }
+
+ASEnvironmentLayoutExtensibilityForwarding
 
 @end
 

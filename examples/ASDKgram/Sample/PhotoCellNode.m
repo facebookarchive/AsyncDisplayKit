@@ -113,11 +113,11 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   // username / photo location header vertical stack
-  _photoLocationLabel.flexShrink    = YES;
-  _userNameLabel.flexShrink         = YES;
+  _photoLocationLabel.style.flexShrink    = YES;
+  _userNameLabel.style.flexShrink         = YES;
   
   ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  headerSubStack.flexShrink         = YES;
+  headerSubStack.style.flexShrink         = YES;
   if (_photoLocationLabel.attributedText) {
     [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
   } else {
@@ -127,12 +127,12 @@
   // header stack
   
   // constrain avatar image frame size
-  _userAvatarImageView.width = ASDimensionMakeWithPoints(USER_IMAGE_HEIGHT);
-  _userAvatarImageView.height = ASDimensionMakeWithPoints(USER_IMAGE_HEIGHT);
-  _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER;                                    // to remove double spaces around spacer
+  _userAvatarImageView.style.width = ASDimensionMakeWithPoints(USER_IMAGE_HEIGHT);
+  _userAvatarImageView.style.height = ASDimensionMakeWithPoints(USER_IMAGE_HEIGHT);
+  _photoTimeIntervalSincePostLabel.style.spacingBefore = HORIZONTAL_BUFFER;                                    // to remove double spaces around spacer
   
   ASLayoutSpec *spacer           = [[ASLayoutSpec alloc] init];    // FIXME: long locations overflow post time - set max size?
-  spacer.flexGrow                = YES;
+  spacer.style.flexGrow          = YES;
   
   UIEdgeInsets avatarInsets      = UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
   ASInsetLayoutSpec *avatarInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
@@ -159,8 +159,8 @@
   CGFloat cellWidth                  = constrainedSize.max.width;
   
   // constrain photo frame size
-  _photoImageView.width = ASDimensionMakeWithPoints(cellWidth);
-  _photoImageView.height = ASDimensionMakeWithPoints(cellWidth);
+  _photoImageView.style.width = ASDimensionMakeWithPoints(cellWidth);
+  _photoImageView.style.height = ASDimensionMakeWithPoints(cellWidth);
   
   ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;                // stretch headerStack to fill horizontal space

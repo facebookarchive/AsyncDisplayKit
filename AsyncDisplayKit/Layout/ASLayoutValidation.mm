@@ -72,7 +72,7 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
     Class stackContainerClass = [ASStaticLayoutSpec class];
     
     // Check for default layoutPosition
-    if (!CGPointEqualToPoint(sublayoutLayoutable.layoutPosition, CGPointZero)) {
+    if (!CGPointEqualToPoint(sublayoutLayoutable.style.layoutPosition, CGPointZero)) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(layoutPosition), sublayoutLayoutable, stackContainerClass);
     }
     
@@ -104,17 +104,17 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
     Class stackContainerClass = [ASStackLayoutSpec class];
     
     // Check if default values related to ASStackLayoutSpec have changed
-    if (sublayoutLayoutable.spacingBefore != 0) {
+    if (sublayoutLayoutable.style.spacingBefore != 0) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(spacingBefore), sublayoutLayoutable, stackContainerClass);
-    } else if (sublayoutLayoutable.spacingAfter != 0) {
+    } else if (sublayoutLayoutable.style.spacingAfter != 0) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(spacingAfter), sublayoutLayoutable, stackContainerClass);
-    } else if (sublayoutLayoutable.flexGrow == YES) {
+    } else if (sublayoutLayoutable.style.flexGrow == YES) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexGrow), sublayoutLayoutable, stackContainerClass);
-    } else if (sublayoutLayoutable.flexShrink == YES) {
+    } else if (sublayoutLayoutable.style.flexShrink == YES) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexShrink), sublayoutLayoutable, stackContainerClass);
-    } else if (!ASDimensionEqualToDimension(sublayoutLayoutable.flexBasis, ASDimensionAuto) ) {
+    } else if (!ASDimensionEqualToDimension(sublayoutLayoutable.style.flexBasis, ASDimensionAuto) ) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexBasis), sublayoutLayoutable, stackContainerClass);
-    } else if (sublayoutLayoutable.alignSelf != ASStackLayoutAlignSelfAuto) {
+    } else if (sublayoutLayoutable.style.alignSelf != ASStackLayoutAlignSelfAuto) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(alignSelf), sublayoutLayoutable, stackContainerClass);
     }
     
