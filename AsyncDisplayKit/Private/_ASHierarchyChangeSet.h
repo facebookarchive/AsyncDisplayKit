@@ -99,7 +99,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
  * The combined completion handler.
  *
  * @precondition The change set must be completed.
- * @precondition The completion block is discarded after reading because it may have captured
+ * @warning The completion block is discarded after reading because it may have captured
  *   significant resources that we would like to reclaim as soon as possible.
  */
 @property (nonatomic, copy, readonly, nullable) void(^completionHandler)(BOOL finished);
