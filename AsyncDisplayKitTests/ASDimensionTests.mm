@@ -18,6 +18,18 @@
 
 @implementation ASDimensionTests
 
+- (void)testCreatingDimensionUnitAutos
+{
+  XCTAssertNoThrow(ASDimensionMake(ASDimensionUnitAuto, 0));
+  XCTAssertThrows(ASDimensionMake(ASDimensionUnitAuto, 100));
+}
+
+- (void)testCreatingDimensionUnitFraction
+{
+  XCTAssertNoThrow(ASDimensionMake(ASDimensionUnitFraction, 0.5));
+  XCTAssertThrows(ASDimensionMake(ASDimensionUnitAuto, 100));
+}
+
 - (void)testIntersectingOverlappingSizeRangesReturnsTheirIntersection
 {
   //  range: |---------|
