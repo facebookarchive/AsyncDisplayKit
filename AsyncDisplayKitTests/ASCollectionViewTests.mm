@@ -120,6 +120,18 @@
 
 @implementation ASCollectionViewTests
 
+- (void)testDataSourceImplementsNecessaryMethods
+{
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+  
+  id dataSource = [NSObject new];
+  XCTAssertThrows((collectionView.asyncDataSource = dataSource));
+  
+  dataSource = [OCMockObject niceMockForProtocol:@protocol(ASCollectionDataSource)];
+  XCTAssertNoThrow((collectionView.asyncDataSource = dataSource));
+}
+
 - (void)testThatItSetsALayoutInspectorForFlowLayouts
 {
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
