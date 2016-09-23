@@ -208,7 +208,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
     CGSize imageNetworkImageNodeSize = (CGSize){imageNode.image.size.width / 7, imageNode.image.size.height / 7};
     
-    [imageNode setSizeWithCGSize:imageNetworkImageNodeSize];
+    [imageNode.style setSizeWithCGSize:imageNetworkImageNodeSize];
     
     parentNode = [self centeringParentNodeWithChild:imageNode];
     parentNode.entryTitle = @"ASImageNode";
@@ -218,7 +218,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 #pragma mark ASNetworkImageNode
     ASNetworkImageNode *networkImageNode = [ASNetworkImageNode new];
     networkImageNode.URL = [NSURL URLWithString:@"http://i.imgur.com/FjOR9kX.jpg"];
-    [networkImageNode setSizeWithCGSize:imageNetworkImageNodeSize];
+    [networkImageNode.style setSizeWithCGSize:imageNetworkImageNodeSize];
     
     parentNode = [self centeringParentNodeWithChild:networkImageNode];
     parentNode.entryTitle = @"ASNetworkImageNode";
@@ -227,7 +227,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark ASMapNode
     ASMapNode *mapNode = [ASMapNode new];
-    [mapNode setSizeWithCGSize:(CGSize){300.0, 300.0}];
+    [mapNode.style setSizeWithCGSize:CGSizeMake(300.0, 300.0)];
     
     // San Francisco
     CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(37.7749, -122.4194);
@@ -240,7 +240,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark ASVideoNode
     ASVideoNode *videoNode = [ASVideoNode new];
-    [videoNode setSizeWithCGSize:(CGSize){300.0, 400.0}];
+    [videoNode.style setSizeWithCGSize:CGSizeMake(300.0, 400.0)];
     
     AVAsset *asset = [AVAsset assetWithURL:[NSURL URLWithString:@"http://www.w3schools.com/html/mov_bbb.mp4"]];
     videoNode.asset = asset;
@@ -254,7 +254,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     UIImage *scrollNodeImage = [UIImage imageNamed:@"image"];
     
     ASScrollNode *scrollNode = [ASScrollNode new];
-    [scrollNode setSizeWithCGSize:(CGSize){300.0, 400.0}];
+    [scrollNode.style setSizeWithCGSize:CGSizeMake(300.0, 400.0)];
     
     UIScrollView *scrollNodeView = scrollNode.view;
     [scrollNodeView addSubview:[[UIImageView alloc] initWithImage:scrollNodeImage]];
@@ -362,7 +362,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 #pragma mark ASStaticLayoutSpec
     childNode = [self childNode];
     // Add a layout position to the child node that the static layout spec will pick up and place it on that position
-    childNode.layoutPosition = CGPointMake(10.0, 10.0);
+    childNode.style.layoutPosition = CGPointMake(10.0, 10.0);
     
     parentNode = [self parentNodeWithChild:childNode];
     parentNode.entryTitle = @"ASStaticLayoutSpec";
@@ -387,8 +387,8 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     // If we just would add the childrent to the stack layout the layout would be to tall and run out of the edge of
     // the node as 50+50+50 = 150 but the parent node is only 100 height. To prevent that we set flexShrink on 2 of the
     // children to let the stack layout know it should shrink these children in case the layout will run over the edge
-    childNode2.flexShrink = YES;
-    childNode3.flexShrink = YES;
+    childNode2.style.flexShrink = YES;
+    childNode3.style.flexShrink = YES;
     
     parentNode = [self parentNodeWithChild:childNode];
     parentNode.entryTitle = @"Vertical ASStackLayoutSpec";
@@ -406,17 +406,17 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
 #pragma mark Horizontal ASStackLayoutSpec
     childNode1 = [ASDisplayNode new];
-    [childNode1 setSizeWithCGSize:(CGSize){10.0, 20.0}];
-    childNode1.flexGrow = YES;
+    [childNode1.style setSizeWithCGSize:CGSizeMake(10.0, 20.0)];
+    childNode1.style.flexGrow = YES;
     childNode1.backgroundColor = [UIColor greenColor];
     
     childNode2 = [ASDisplayNode new];
-    [childNode2 setSizeWithCGSize:(CGSize){10.0, 20.0}];
-    childNode2.alignSelf = ASStackLayoutAlignSelfStretch;
+    [childNode2.style setSizeWithCGSize:CGSizeMake(10.0, 20.0)];
+    childNode2.style.alignSelf = ASStackLayoutAlignSelfStretch;
     childNode2.backgroundColor = [UIColor blueColor];
     
     childNode3 = [ASDisplayNode new];
-    [childNode3 setSizeWithCGSize:(CGSize){10.0, 20.0}];
+    [childNode3.style setSizeWithCGSize:CGSizeMake(10.0, 20.0)];
     childNode3.backgroundColor = [UIColor yellowColor];
     
     parentNode = [self parentNodeWithChild:childNode];
@@ -431,8 +431,8 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
         horizontalStackSpec.spacing = 5.0; // Spacing between children
         
         // Layout the stack layout with 100% width and 100% height of the parent node
-        horizontalStackSpec.height = ASDimensionMakeWithFraction(1.0);
-        horizontalStackSpec.width = ASDimensionMakeWithFraction(1.0);
+        horizontalStackSpec.style.height = ASDimensionMakeWithFraction(1.0);
+        horizontalStackSpec.style.width = ASDimensionMakeWithFraction(1.0);
         
         // Add a bit of inset
         return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0.0, 5.0, 0.0, 5.0) child:horizontalStackSpec];
@@ -467,7 +467,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 - (OverviewDisplayNodeWithSizeBlock *)parentNodeWithChild:(ASDisplayNode *)child
 {
     OverviewDisplayNodeWithSizeBlock *parentNode = [OverviewDisplayNodeWithSizeBlock new];
-    [parentNode setSizeWithCGSize:(CGSize){100, 100}];
+    [parentNode.style setSizeWithCGSize:CGSizeMake(100, 100)];
     parentNode.backgroundColor = [UIColor redColor];
     return parentNode;
 }
@@ -491,7 +491,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 - (ASDisplayNode *)childNode
 {
     ASDisplayNode *childNode = [ASDisplayNode new];
-    [childNode setSizeWithCGSize:(CGSize){50, 50}];
+    [childNode.style setSizeWithCGSize:CGSizeMake(50, 50)];
     childNode.backgroundColor = [UIColor blueColor];
     return childNode;
 }

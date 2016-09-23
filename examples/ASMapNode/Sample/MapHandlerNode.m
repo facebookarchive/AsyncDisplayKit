@@ -117,20 +117,20 @@
 #define HEIGHT 30
   CGSize nodeSize = CGSizeMake(constrainedSize.max.width * 0.3, HEIGHT);
 
-  [_latEditableNode setSizeWithCGSize:nodeSize];
-  [_lonEditableNode setSizeWithCGSize:nodeSize];
+  [_latEditableNode.style setSizeWithCGSize:nodeSize];
+  [_lonEditableNode.style setSizeWithCGSize:nodeSize];
   
-  [_deltaLatEditableNode setSizeWithCGSize:nodeSize];
-  [_deltaLonEditableNode setSizeWithCGSize:nodeSize];
+  [_deltaLatEditableNode.style setSizeWithCGSize:nodeSize];
+  [_deltaLonEditableNode.style setSizeWithCGSize:nodeSize];
   
-  [_updateRegionButton setSizeWithCGSize:nodeSize];
-  [_liveMapToggleButton setSizeWithCGSize:nodeSize];
+  [_updateRegionButton.style setSizeWithCGSize:nodeSize];
+  [_liveMapToggleButton.style setSizeWithCGSize:nodeSize];
 
-  _latEditableNode.flexGrow = _lonEditableNode.flexGrow = YES;
-  _deltaLatEditableNode.flexGrow = _deltaLonEditableNode.flexGrow = YES;
-  _updateRegionButton.flexGrow = _liveMapToggleButton.flexGrow = YES;
+  _latEditableNode.style.flexGrow = _lonEditableNode.style.flexGrow = YES;
+  _deltaLatEditableNode.style.flexGrow = _deltaLonEditableNode.style.flexGrow = YES;
+  _updateRegionButton.style.flexGrow = _liveMapToggleButton.style.flexGrow = YES;
 
-  _mapNode.flexGrow = YES;
+  _mapNode.style.flexGrow = YES;
 
   ASStackLayoutSpec *lonlatSpec =
     [ASStackLayoutSpec
@@ -139,7 +139,7 @@
      justifyContent:ASStackLayoutJustifyContentStart
      alignItems:ASStackLayoutAlignItemsCenter
      children:@[_latEditableNode, _lonEditableNode]];
-  lonlatSpec.flexGrow = true;
+  lonlatSpec.style.flexGrow = true;
 
   ASStackLayoutSpec *deltaLonlatSpec =
     [ASStackLayoutSpec
@@ -148,7 +148,7 @@
      justifyContent:ASStackLayoutJustifyContentStart
      alignItems:ASStackLayoutAlignItemsCenter
      children:@[_deltaLatEditableNode, _deltaLonEditableNode]];
-  deltaLonlatSpec.flexGrow = true;
+  deltaLonlatSpec.style.flexGrow = true;
 
   ASStackLayoutSpec *lonlatConfigSpec =
     [ASStackLayoutSpec
@@ -157,7 +157,7 @@
      justifyContent:ASStackLayoutJustifyContentStart
      alignItems:ASStackLayoutAlignItemsStretch
      children:@[lonlatSpec, deltaLonlatSpec]];
-  lonlatConfigSpec.flexGrow = true;
+  lonlatConfigSpec.style.flexGrow = true;
 
   ASStackLayoutSpec *buttonsSpec =
     [ASStackLayoutSpec
@@ -166,7 +166,7 @@
      justifyContent:ASStackLayoutJustifyContentStart
      alignItems:ASStackLayoutAlignItemsStretch
      children:@[_updateRegionButton, _liveMapToggleButton]];
-  buttonsSpec.flexGrow = true;
+  buttonsSpec.style.flexGrow = true;
 
   ASStackLayoutSpec *dashboardSpec =
     [ASStackLayoutSpec
@@ -175,7 +175,7 @@
      justifyContent:ASStackLayoutJustifyContentStart
      alignItems:ASStackLayoutAlignItemsStretch
      children:@[lonlatConfigSpec, buttonsSpec]];
-  dashboardSpec.flexGrow = true;
+  dashboardSpec.style.flexGrow = true;
 
   ASInsetLayoutSpec *insetSpec =
     [ASInsetLayoutSpec
