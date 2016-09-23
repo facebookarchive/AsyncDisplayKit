@@ -98,13 +98,13 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASTextNode *nextTextNode = self.enabled ? self.textNodeTwo : self.textNodeOne;
-  nextTextNode.flexGrow = YES;
-  nextTextNode.flexShrink = YES;
+  nextTextNode.style.flexGrow = YES;
+  nextTextNode.style.flexShrink = YES;
   
   ASStackLayoutSpec *horizontalStackLayout = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStackLayout.children = @[nextTextNode];
   
-  self.buttonNode.alignSelf = ASStackLayoutAlignSelfCenter;
+  self.buttonNode.style.alignSelf = ASStackLayoutAlignSelfCenter;
   
   ASStackLayoutSpec *verticalStackLayout = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStackLayout.spacing = 10.0;
