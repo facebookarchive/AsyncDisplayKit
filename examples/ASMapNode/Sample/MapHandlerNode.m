@@ -117,14 +117,14 @@
 #define HEIGHT 30
   CGSize nodeSize = CGSizeMake(constrainedSize.max.width * 0.3, HEIGHT);
 
-  _latEditableNode.style.size = ASLayoutableSizeMakeFromCGSize(nodeSize);
-  _lonEditableNode.style.size = ASLayoutableSizeMakeFromCGSize(nodeSize);
+  [_latEditableNode.style setSizeWithCGSize:nodeSize];
+  [_lonEditableNode.style setSizeWithCGSize:nodeSize];
   
-  _deltaLatEditableNode.style.size = ASLayoutableSizeMakeFromCGSize(nodeSize);
-  _deltaLonEditableNode.style.size = ASLayoutableSizeMakeFromCGSize(nodeSize);
+  [_deltaLatEditableNode.style setSizeWithCGSize:nodeSize];
+  [_deltaLonEditableNode.style setSizeWithCGSize:nodeSize];
   
-  _updateRegionButton.style.size = ASLayoutableSizeMakeFromCGSize(nodeSize);
-  _liveMapToggleButton.style.size = ASLayoutableSizeMakeFromCGSize(nodeSize);
+  [_updateRegionButton.style setSizeWithCGSize:nodeSize];
+  [_liveMapToggleButton.style setSizeWithCGSize:nodeSize];
 
   _latEditableNode.style.flexGrow = _lonEditableNode.style.flexGrow = YES;
   _deltaLatEditableNode.style.flexGrow = _deltaLonEditableNode.style.flexGrow = YES;
