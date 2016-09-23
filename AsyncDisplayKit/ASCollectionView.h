@@ -443,17 +443,18 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
- * Informs the delegate that the collection view will add the node
+ * Informs the delegate that the collection view will add the given node
  * at the given index path to the view hierarchy.
  *
  * @param collectionView The sender.
+ * @param node The node that will be displayed.
  * @param indexPath The index path of the item that will be displayed.
  *
  * @warning AsyncDisplayKit processes collection view edits asynchronously. The index path
  *   passed into this method may not correspond to the same item in your data source
  *   if your data source has been updated since the last edit was processed.
  */
-- (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath;
+- (void)collectionView:(ASCollectionView *)collectionView willDisplayNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Informs the delegate that the collection view did remove the provided node from the view hierarchy.
@@ -509,6 +510,21 @@ NS_ASSUME_NONNULL_BEGIN
  * This method is deprecated. Use @c collectionView:didEndDisplayingNode:forItemAtIndexPath: instead.
  */
 - (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Informs the delegate that the collection view will add the node
+ * at the given index path to the view hierarchy.
+ *
+ * @param collectionView The sender.
+ * @param indexPath The index path of the item that will be displayed.
+ *
+ * @warning AsyncDisplayKit processes collection view edits asynchronously. The index path
+ *   passed into this method may not correspond to the same item in your data source
+ *   if your data source has been updated since the last edit was processed.
+ *
+ * This method is deprecated. Use @c collectionView:willDisplayNode:forItemAtIndexPath: instead.
+ */
+- (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
 
 @end
 
