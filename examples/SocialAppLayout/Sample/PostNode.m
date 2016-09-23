@@ -60,7 +60,7 @@
         // Username node
         _usernameNode = [[ASTextNode alloc] init];
         _usernameNode.attributedText = [[NSAttributedString alloc] initWithString:_post.username attributes:[TextStyles usernameStyle]];
-        _usernameNode.flexShrink = YES; //if name and username don't fit to cell width, allow username shrink
+        _usernameNode.style.flexShrink = YES; //if name and username don't fit to cell width, allow username shrink
         _usernameNode.truncationMode = NSLineBreakByTruncatingTail;
         _usernameNode.maximumNumberOfLines = 1;
         [self addSubnode:_usernameNode];
@@ -137,8 +137,8 @@
         // User pic
         _avatarNode = [[ASNetworkImageNode alloc] init];
         _avatarNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
-        _avatarNode.width = ASDimensionMakeWithPoints(44);
-        _avatarNode.height = ASDimensionMakeWithPoints(44);
+        _avatarNode.style.width = ASDimensionMakeWithPoints(44);
+        _avatarNode.style.height = ASDimensionMakeWithPoints(44);
         _avatarNode.cornerRadius = 22.0;
         _avatarNode.URL = [NSURL URLWithString:_post.photo];
         _avatarNode.imageModificationBlock = ^UIImage *(UIImage *image) {
@@ -211,7 +211,7 @@
 {
     // Flexible spacer between username and time
     ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
-    spacer.flexGrow = YES;
+    spacer.style.flexGrow = YES;
   
     // NOTE: This inset is not actually required by the layout, but is an example of the upward propogation of layoutable
     // properties.  Specifically, .flexGrow from the child is transferred to the inset spec so they can expand together.
@@ -235,7 +235,7 @@
      justifyContent:ASStackLayoutJustifyContentStart
      alignItems:ASStackLayoutAlignItemsCenter
      children:layoutSpecChildren];
-    nameStack.alignSelf = ASStackLayoutAlignSelfStretch;
+    nameStack.style.alignSelf = ASStackLayoutAlignSelfStretch;
     
     // bottom controls horizontal stack
     ASStackLayoutSpec *controlsStack =
@@ -247,8 +247,8 @@
      children:@[_likesNode, _commentsNode, _optionsNode]];
     
     // Add more gaps for control line
-    controlsStack.spacingAfter = 3.0;
-    controlsStack.spacingBefore = 3.0;
+    controlsStack.style.spacingAfter = 3.0;
+    controlsStack.style.spacingBefore = 3.0;
     
     NSMutableArray *mainStackContent = [[NSMutableArray alloc] init];
     [mainStackContent addObject:nameStack];
@@ -264,8 +264,8 @@
             [ASRatioLayoutSpec
              ratioLayoutSpecWithRatio:imageRatio
              child:_mediaNode];
-            imagePlace.spacingAfter = 3.0;
-            imagePlace.spacingBefore = 3.0;
+            imagePlace.style.spacingAfter = 3.0;
+            imagePlace.style.spacingBefore = 3.0;
             
             [mainStackContent addObject:imagePlace];
         }
@@ -280,7 +280,7 @@
      justifyContent:ASStackLayoutJustifyContentStart
      alignItems:ASStackLayoutAlignItemsStretch
      children:mainStackContent];
-    contentSpec.flexShrink = YES;
+    contentSpec.style.flexShrink = YES;
     
     // Horizontal spec for avatar
     ASStackLayoutSpec *avatarContentSpec =
