@@ -120,6 +120,14 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  */
 - (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
 
+/**
+ * @abstract Notifies the cell node of certain visibility events, such as changing visible rect.
+ *
+ * @warning In cases where an ASCellNode is used as a plain node – i.e. not returned from the
+ *   nodeBlockForItemAtIndexPath/nodeForItemAtIndexPath data source methods – this method will
+ *   deliver only the `Visible` and `Invisible` events, `scrollView` will be nil, and
+ *   `cellFrame` will be the zero rect.
+ */
 - (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event inScrollView:(nullable UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
 
 @end
