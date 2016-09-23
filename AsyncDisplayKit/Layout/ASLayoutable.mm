@@ -110,12 +110,27 @@ do {\
   [_delegate style:self propertyDidChange:propertyName];\
 } while(0)
 
+@interface ASLayoutableStyle ()
+@property (nullable, nonatomic, weak) id<ASLayoutableStyleDelegate> delegate;
+@end
+
 @implementation ASLayoutableStyle {
   ASDN::RecursiveMutex __instanceLock__;
   ASLayoutableSize _size;
 }
 
 @dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
+
+#pragma mark - Lifecycle
+
+- (instancetype)initWithDelegate:(id<ASLayoutableStyleDelegate>)delegate
+{
+  self = [self init];
+  if (self) {
+    _delegate = delegate;
+  }
+  return self;
+}
 
 - (instancetype)init
 {
@@ -125,7 +140,6 @@ do {\
   }
   return self;
 }
-
 
 #pragma mark - ASLayoutableSizeForwarding
 

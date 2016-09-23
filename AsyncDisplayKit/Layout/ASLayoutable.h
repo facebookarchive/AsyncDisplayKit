@@ -181,11 +181,16 @@ extern NSString * const ASLayoutableStyleLayoutPositionProperty;
 #pragma mark - Delegate
 
 /**
+ * @abstract Initializes the layoutable style with a specified delegate
+ */
+- (instancetype)initWithDelegate:(id<ASLayoutableStyleDelegate>)delegate;
+
+/**
  * @abstract The object that acts as the delegate of the style.
  *
  * @discussion The delegate must adopt the ASLayoutableStyleDelegate protocol. The delegate is not retained.
  */
-@property (nullable, nonatomic, weak, readwrite) id<ASLayoutableStyleDelegate> delegate;
+@property (nullable, nonatomic, weak, readonly) id<ASLayoutableStyleDelegate> delegate;
 
 /**
  * @abstract A size constraint that should apply to this ASLayoutable.
