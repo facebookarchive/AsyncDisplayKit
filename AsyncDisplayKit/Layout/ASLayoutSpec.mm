@@ -59,7 +59,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
-  _style = [[[[self class] styleClass] alloc] init];
+  _style = [[ASLayoutableStyle alloc] init];
   
   return self;
 }
@@ -75,11 +75,6 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 }
 
 #pragma mark - Style
-
-+ (Class)styleClass
-{
-  return [ASLayoutableStyle class];
-}
 
 - (ASLayoutableStyle *)style
 {
