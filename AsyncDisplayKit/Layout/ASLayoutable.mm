@@ -94,8 +94,8 @@ NSString * const ASLayoutableStyleHeightProperty = @"ASLayoutableStyleHeightProp
 NSString * const ASLayoutableStyleMinHeightProperty = @"ASLayoutableStyleMinHeightProperty";
 NSString * const ASLayoutableStyleMaxHeightProperty = @"ASLayoutableStyleMaxHeightProperty";
 
-NSString * const ASLayoutableStyleSpacingBeforeProperty = @"ASLayoutableStyleMaxHeightProperty";
-NSString * const ASLayoutableStyleSpacingAfterProperty = @"ASLayoutableStyleMaxHeightProperty";
+NSString * const ASLayoutableStyleSpacingBeforeProperty = @"ASLayoutableStyleSpacingBeforeProperty";
+NSString * const ASLayoutableStyleSpacingAfterProperty = @"ASLayoutableStyleSpacingAfterProperty";
 NSString * const ASLayoutableStyleFlexGrowProperty = @"ASLayoutableStyleFlexGrowProperty";
 NSString * const ASLayoutableStyleFlexShrinkProperty = @"ASLayoutableStyleFlexShrinkProperty";
 NSString * const ASLayoutableStyleFlexBasisProperty = @"ASLayoutableStyleFlexBasisProperty";
