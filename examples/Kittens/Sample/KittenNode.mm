@@ -145,10 +145,10 @@ static const CGFloat kInnerPadding = 10.0f;
 {
   // Set an intrinsic size for the image node
   CGSize imageSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize) : CGSizeMake(kImageSize, kImageSize);
-  [_imageNode setSizeWithCGSize:imageSize];
+  _imageNode.style.size = ASLayoutableSizeMakeFromCGSize(imageSize);
   
   // Shrink the text node in case the image + text gonna be too wide
-  _textNode.flexShrink = YES;
+  _textNode.style.flexShrink = YES;
 
   // Configure stack
   ASStackLayoutSpec *stackLayoutSpec =
