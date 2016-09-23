@@ -86,8 +86,33 @@ void ASLayoutableClearCurrentContext()
 
 #pragma mark - ASLayoutableStyle
 
+NSString * const ASLayoutableStyleWidthProperty = @"ASLayoutableStyleWidthProperty";
+NSString * const ASLayoutableStyleMinWidthProperty = @"ASLayoutableStyleMinWidthProperty";
+NSString * const ASLayoutableStyleMaxWidthProperty = @"ASLayoutableStyleMaxWidthProperty";
+
+NSString * const ASLayoutableStyleHeightProperty = @"ASLayoutableStyleHeightProperty";
+NSString * const ASLayoutableStyleMinHeightProperty = @"ASLayoutableStyleMinHeightProperty";
+NSString * const ASLayoutableStyleMaxHeightProperty = @"ASLayoutableStyleMaxHeightProperty";
+
+NSString * const ASLayoutableStyleSpacingBeforeProperty = @"ASLayoutableStyleMaxHeightProperty";
+NSString * const ASLayoutableStyleSpacingAfterProperty = @"ASLayoutableStyleMaxHeightProperty";
+NSString * const ASLayoutableStyleFlexGrowProperty = @"ASLayoutableStyleFlexGrowProperty";
+NSString * const ASLayoutableStyleFlexShrinkProperty = @"ASLayoutableStyleFlexShrinkProperty";
+NSString * const ASLayoutableStyleFlexBasisProperty = @"ASLayoutableStyleFlexBasisProperty";
+NSString * const ASLayoutableStyleAlignSelfProperty = @"ASLayoutableStyleAlignSelfProperty";
+NSString * const ASLayoutableStyleAscenderProperty = @"ASLayoutableStyleAscenderProperty";
+NSString * const ASLayoutableStyleDescenderProperty = @"ASLayoutableStyleDescenderProperty";
+
+NSString * const ASLayoutableStyleLayoutPositionProperty = @"ASLayoutableStyleLayoutPositionProperty";
+
+#define ASLayoutableStyleCallDelegate(propertyName)\
+do {\
+  [_delegate style:self propertyDidChange:propertyName];\
+} while(0)
+
 @implementation ASLayoutableStyle {
   ASDN::RecursiveMutex __instanceLock__;
+  ASLayoutableSize _size;
 }
 
 @dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
@@ -114,6 +139,7 @@ void ASLayoutableClearCurrentContext()
 {
   ASDN::MutexLocker l(__instanceLock__);
   _size.width = width;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleWidthProperty);
 }
 
 - (ASDimension)height
@@ -126,6 +152,7 @@ void ASLayoutableClearCurrentContext()
 {
   ASDN::MutexLocker l(__instanceLock__);
   _size.height = height;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleHeightProperty);
 }
 
 - (ASDimension)minWidth
@@ -138,6 +165,7 @@ void ASLayoutableClearCurrentContext()
 {
   ASDN::MutexLocker l(__instanceLock__);
   _size.minWidth = minWidth;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleMinWidthProperty);
 }
 
 - (ASDimension)maxWidth
@@ -150,6 +178,7 @@ void ASLayoutableClearCurrentContext()
 {
   ASDN::MutexLocker l(__instanceLock__);
   _size.maxWidth = maxWidth;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleMaxWidthProperty);
 }
 
 - (ASDimension)minHeight
@@ -162,6 +191,7 @@ void ASLayoutableClearCurrentContext()
 {
   ASDN::MutexLocker l(__instanceLock__);
   _size.minHeight = minHeight;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleMinHeightProperty);
 }
 
 - (ASDimension)maxHeight
@@ -174,9 +204,8 @@ void ASLayoutableClearCurrentContext()
 {
   ASDN::MutexLocker l(__instanceLock__);
   _size.maxHeight = maxHeight;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleMaxHeightProperty);
 }
-
-#pragma mark - Layout measurement and sizing
 
 - (void)setSizeWithCGSize:(CGSize)size
 {
@@ -190,6 +219,64 @@ void ASLayoutableClearCurrentContext()
   self.minHeight = ASDimensionMakeWithPoints(size.height);
   self.maxWidth = ASDimensionMakeWithPoints(size.width);
   self.maxHeight = ASDimensionMakeWithPoints(size.height);
+}
+
+#pragma mark - ASStackLayoutable
+
+- (void)setSpacingBefore:(CGFloat)spacingBefore
+{
+  _spacingBefore = spacingBefore;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleSpacingBeforeProperty);
+}
+
+- (void)setSpacingAfter:(CGFloat)spacingAfter
+{
+  _spacingAfter = spacingAfter;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleSpacingAfterProperty);
+}
+
+- (void)setFlexGrow:(BOOL)flexGrow
+{
+  _flexGrow = flexGrow;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleFlexGrowProperty);
+}
+
+- (void)setFlexShrink:(BOOL)flexShrink
+{
+  _flexShrink = flexShrink;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleFlexShrinkProperty);
+}
+
+- (void)setFlexBasis:(ASDimension)flexBasis
+{
+  _flexBasis = flexBasis;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleFlexBasisProperty);
+}
+
+- (void)setAlignSelf:(ASStackLayoutAlignSelf)alignSelf
+{
+  _alignSelf = alignSelf;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleAlignSelfProperty);
+}
+
+- (void)setAscender:(CGFloat)ascender
+{
+  _ascender = ascender;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleAscenderProperty);
+}
+
+- (void)setDescender:(CGFloat)descender
+{
+  _descender = descender;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleDescenderProperty);
+}
+
+#pragma mark - ASStaticLayoutable
+
+- (void)setLayoutPosition:(CGPoint)layoutPosition
+{
+  _layoutPosition = layoutPosition;
+  ASLayoutableStyleCallDelegate(ASLayoutableStyleLayoutPositionProperty);
 }
 
 @end

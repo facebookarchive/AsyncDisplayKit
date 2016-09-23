@@ -150,18 +150,47 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+
 #pragma mark - ASLayoutableStyle
+
+extern NSString * const ASLayoutableStyleWidthProperty;
+extern NSString * const ASLayoutableStyleMinWidthProperty;
+extern NSString * const ASLayoutableStyleMaxWidthProperty;
+
+extern NSString * const ASLayoutableStyleHeightProperty;
+extern NSString * const ASLayoutableStyleMinHeightProperty;
+extern NSString * const ASLayoutableStyleMaxHeightProperty;
+
+extern NSString * const ASLayoutableStyleSpacingBeforeProperty;
+extern NSString * const ASLayoutableStyleSpacingAfterProperty;
+extern NSString * const ASLayoutableStyleFlexGrowProperty;
+extern NSString * const ASLayoutableStyleFlexShrinkProperty;
+extern NSString * const ASLayoutableStyleFlexBasisProperty;
+extern NSString * const ASLayoutableStyleAlignSelfProperty;
+extern NSString * const ASLayoutableStyleAscenderProperty;
+extern NSString * const ASLayoutableStyleDescenderProperty;
+
+extern NSString * const ASLayoutableStyleLayoutPositionProperty;
+
+@protocol ASLayoutableStyleDelegate <NSObject>
+- (void)style:(id)style propertyDidChange:(NSString *)propertyName;
+@end
 
 @interface ASLayoutableStyle : NSObject <ASStackLayoutable, ASStaticLayoutable>
 
+#pragma mark - Delegate
 
-#pragma mark - Sizing
+/**
+ * @abstract The object that acts as the delegate of the style.
+ *
+ * @discussion The delegate must adopt the ASLayoutableStyleDelegate protocol. The delegate is not retained.
+ */
+@property (nullable, nonatomic, weak, readwrite) id<ASLayoutableStyleDelegate> delegate;
 
-// TODO: Move to internal method?
 /**
  * @abstract A size constraint that should apply to this ASLayoutable.
  */
-@property (nonatomic, assign, readwrite) ASLayoutableSize size;
+@property (nonatomic, assign, readonly) ASLayoutableSize size;
 
 /**
  * @abstract The width property specifies the height of the content area of an ASLayoutable.
