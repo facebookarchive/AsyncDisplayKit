@@ -221,6 +221,7 @@
 		69E1006F1CA89CB600D88C1B /* ASEnvironmentInternal.mm in Sources */ = {isa = PBXBuildFile; fileRef = 69E1006A1CA89CB600D88C1B /* ASEnvironmentInternal.mm */; };
 		69E100701CA89CB600D88C1B /* ASEnvironmentInternal.mm in Sources */ = {isa = PBXBuildFile; fileRef = 69E1006A1CA89CB600D88C1B /* ASEnvironmentInternal.mm */; };
 		69F10C871C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = 69F10C851C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		69FEE53D1D95A9AF0086F066 /* ASLayoutableStyleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 69FEE53C1D95A9AF0086F066 /* ASLayoutableStyleTests.m */; };
 		7630FFA81C9E267E007A7C0E /* ASVideoNode.h in Headers */ = {isa = PBXBuildFile; fileRef = AEEC47DF1C20C2DD00EC1693 /* ASVideoNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		764D83D51C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = 764D83D21C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		764D83D61C8EA515009B4FB8 /* AsyncDisplayKit+Debug.m in Sources */ = {isa = PBXBuildFile; fileRef = 764D83D31C8EA515009B4FB8 /* AsyncDisplayKit+Debug.m */; };
@@ -996,6 +997,7 @@
 		69E100691CA89CB600D88C1B /* ASEnvironmentInternal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASEnvironmentInternal.h; sourceTree = "<group>"; };
 		69E1006A1CA89CB600D88C1B /* ASEnvironmentInternal.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASEnvironmentInternal.mm; sourceTree = "<group>"; };
 		69F10C851C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASRangeControllerUpdateRangeProtocol+Beta.h"; sourceTree = "<group>"; };
+		69FEE53C1D95A9AF0086F066 /* ASLayoutableStyleTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASLayoutableStyleTests.m; sourceTree = "<group>"; };
 		6BDC61F51978FEA400E50D21 /* AsyncDisplayKit.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; path = AsyncDisplayKit.h; sourceTree = "<group>"; };
 		764D83D21C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AsyncDisplayKit+Debug.h"; sourceTree = "<group>"; };
 		764D83D31C8EA515009B4FB8 /* AsyncDisplayKit+Debug.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AsyncDisplayKit+Debug.m"; sourceTree = "<group>"; };
@@ -1419,6 +1421,7 @@
 				058D09C6195D04C000B7D73C /* Supporting Files */,
 				052EE06A1A15A0D8002C6279 /* TestResources */,
 				2538B6F21BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m */,
+				69FEE53C1D95A9AF0086F066 /* ASLayoutableStyleTests.m */,
 			);
 			path = AsyncDisplayKitTests;
 			sourceTree = "<group>";
@@ -2251,6 +2254,7 @@
 				CCB2F34D1D63CCC6004E6DE9 /* ASDisplayNodeSnapshotTests.m in Sources */,
 				058D0A3A195D057000B7D73C /* ASDisplayNodeTests.m in Sources */,
 				696FCB311D6E46050093471E /* ASBackgroundLayoutSpecSnapshotTests.mm in Sources */,
+				69FEE53D1D95A9AF0086F066 /* ASLayoutableStyleTests.m in Sources */,
 				CC4981B31D1A02BE004E13CC /* ASTableViewThrashTests.m in Sources */,
 				CC54A81E1D7008B300296A24 /* ASDispatchTests.m in Sources */,
 				058D0A3B195D057000B7D73C /* ASDisplayNodeTestsHelper.m in Sources */,
