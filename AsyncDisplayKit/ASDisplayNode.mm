@@ -3488,11 +3488,11 @@ ASEnvironmentLayoutExtensibilityForwarding
 {
   ASDN::MutexLocker l(__instanceLock__);
   
-  // We don't support fractions in preferredFrameSize
-  ASDisplayNodeAssert(_style.width.unit != ASDimensionUnitFraction, @"preferredFrameSize.width cannot be of unit type ASDimensionUnitFraction");
-  ASDisplayNodeAssert(_style.height.unit != ASDimensionUnitFraction, @"preferredFrameSize.height cannot be of unit type ASDimensionUnitFraction");
+  if (_style.width.unit == ASDimensionUnitPoints && _style.height.unit == ASDimensionUnitPoints) {
+    return CGSizeMake(_style.width.value, _style.height.value);
+  }
 
-  return CGSizeMake(_style.width.value, _style.height.value);
+  return CGSizeZero;
 }
 
 @end

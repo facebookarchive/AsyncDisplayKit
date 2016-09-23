@@ -2063,9 +2063,9 @@ static bool stringContainsPointer(NSString *description, id p) {
   node.preferredFrameSize = CGSizeMake(100, 100);
   ASXCTAssertEqualSizes(node.preferredFrameSize, CGSizeMake(100, 100));
   
-  // Throw if requesting a preferred size if widht or height is of unit type fraction
+  // CGSizeZero should be returned if width or height is not of unit type points
   node.style.width = ASDimensionMakeWithFraction(0.5);
-  XCTAssertThrows(node.preferredFrameSize);
+  ASXCTAssertEqualSizes(node.preferredFrameSize, CGSizeZero);
   
 #pragma clang diagnostic pop
 }
