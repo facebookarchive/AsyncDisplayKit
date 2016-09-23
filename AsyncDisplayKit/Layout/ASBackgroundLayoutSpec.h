@@ -13,17 +13,17 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- Lays out a single layoutable child, then lays out a background layoutable instance behind it stretched to its size.
+ Lays out a single layoutElement child, then lays out a background layoutElement instance behind it stretched to its size.
  */
 @interface ASBackgroundLayoutSpec : ASLayoutSpec
 
-@property (nullable, nonatomic, strong) id<ASLayoutable> background;
+@property (nullable, nonatomic, strong) id<ASLayoutElement> background;
 
 /**
  @param child A child that is laid out to determine the size of this spec.
- @param background A layoutable object that is laid out behind the child. If this is nil, the background is omitted.
+ @param background A layoutElement object that is laid out behind the child. If this is nil, the background is omitted.
  */
-+ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(nullable id<ASLayoutable>)background;
++ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutElement>)child background:(nullable id<ASLayoutElement>)background;
 
 @end
 

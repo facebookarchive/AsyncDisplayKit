@@ -705,7 +705,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     ASDisplayNodeAssert(NO, @"Infinite width or height in ASVideoPlayerNode");
     maxSize = CGSizeZero;
   }
-  _videoNode.style.size = ASLayoutableSizeMakeFromCGSize(maxSize);
+  _videoNode.style.size = ASLayoutElementSizeMakeFromCGSize(maxSize);
 
   ASLayoutSpec *layoutSpec;
   if (_delegateFlags.delegateLayoutSpecForControls) {
@@ -718,15 +718,15 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   if (_spinnerNode) {
     ASCenterLayoutSpec *centerLayoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_spinnerNode];
-    centerLayoutSpec.style.size = ASLayoutableSizeMakeFromCGSize(maxSize);
+    centerLayoutSpec.style.size = ASLayoutElementSizeMakeFromCGSize(maxSize);
     [children addObject:centerLayoutSpec];
   }
 
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
-  overlaySpec.style.size = ASLayoutableSizeMakeFromCGSize(maxSize);
+  overlaySpec.style.size = ASLayoutElementSizeMakeFromCGSize(maxSize);
   [children addObject:overlaySpec];
 
-  return [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
+  return [ASAbsoluteLayoutSpec staticLayoutSpecWithChildren:children];
 }
 
 - (ASLayoutSpec *)defaultLayoutSpecThatFits:(CGSize)maxSize

@@ -1,5 +1,5 @@
 //
-//  ASLayoutable.mm
+//  ASLayoutElement.mm
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 3/27/16.
@@ -10,22 +10,22 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASLayoutablePrivate.h"
+#import "ASLayoutElementPrivate.h"
 #import "ASEnvironmentInternal.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASThread.h"
 
 #import <map>
 
-CGFloat const ASLayoutableParentDimensionUndefined = NAN;
-CGSize const ASLayoutableParentSizeUndefined = {ASLayoutableParentDimensionUndefined, ASLayoutableParentDimensionUndefined};
+CGFloat const ASLayoutElementParentDimensionUndefined = NAN;
+CGSize const ASLayoutElementParentSizeUndefined = {ASLayoutElementParentDimensionUndefined, ASLayoutElementParentDimensionUndefined};
 
-int32_t const ASLayoutableContextInvalidTransitionID = 0;
-int32_t const ASLayoutableContextDefaultTransitionID = ASLayoutableContextInvalidTransitionID + 1;
+int32_t const ASLayoutElementContextInvalidTransitionID = 0;
+int32_t const ASLayoutElementContextDefaultTransitionID = ASLayoutElementContextInvalidTransitionID + 1;
 
-static inline ASLayoutableContext _ASLayoutableContextMake(int32_t transitionID, BOOL needsVisualizeNode)
+static inline ASLayoutElementContext _ASLayoutElementContextMake(int32_t transitionID, BOOL needsVisualizeNode)
 {
-  struct ASLayoutableContext context;
+  struct ASLayoutElementContext context;
   context.transitionID = transitionID;
   context.needsVisualizeNode = needsVisualizeNode;
   return context;
@@ -33,60 +33,60 @@ static inline ASLayoutableContext _ASLayoutableContextMake(int32_t transitionID,
 
 static inline BOOL _IsValidTransitionID(int32_t transitionID)
 {
-  return transitionID > ASLayoutableContextInvalidTransitionID;
+  return transitionID > ASLayoutElementContextInvalidTransitionID;
 }
 
-struct ASLayoutableContext const ASLayoutableContextNull = _ASLayoutableContextMake(ASLayoutableContextInvalidTransitionID, NO);
+struct ASLayoutElementContext const ASLayoutElementContextNull = _ASLayoutElementContextMake(ASLayoutElementContextInvalidTransitionID, NO);
 
-BOOL ASLayoutableContextIsNull(struct ASLayoutableContext context)
+BOOL ASLayoutElementContextIsNull(struct ASLayoutElementContext context)
 {
   return !_IsValidTransitionID(context.transitionID);
 }
 
-ASLayoutableContext ASLayoutableContextMake(int32_t transitionID, BOOL needsVisualizeNode)
+ASLayoutElementContext ASLayoutElementContextMake(int32_t transitionID, BOOL needsVisualizeNode)
 {
   NSCAssert(_IsValidTransitionID(transitionID), @"Invalid transition ID");
-  return _ASLayoutableContextMake(transitionID, needsVisualizeNode);
+  return _ASLayoutElementContextMake(transitionID, needsVisualizeNode);
 }
 
 // Note: This is a non-recursive static lock. If it needs to be recursive, use ASDISPLAYNODE_MUTEX_RECURSIVE_INITIALIZER
-static ASDN::StaticMutex _layoutableContextLock = ASDISPLAYNODE_MUTEX_INITIALIZER;
-static std::map<mach_port_t, ASLayoutableContext> layoutableContextMap;
+static ASDN::StaticMutex _layoutElementContextLock = ASDISPLAYNODE_MUTEX_INITIALIZER;
+static std::map<mach_port_t, ASLayoutElementContext> layoutElementContextMap;
 
-static inline mach_port_t ASLayoutableGetCurrentContextKey()
+static inline mach_port_t ASLayoutElementGetCurrentContextKey()
 {
   return pthread_mach_thread_np(pthread_self());
 }
 
-void ASLayoutableSetCurrentContext(struct ASLayoutableContext context)
+void ASLayoutElementSetCurrentContext(struct ASLayoutElementContext context)
 {
-  const mach_port_t key = ASLayoutableGetCurrentContextKey();
-  ASDN::StaticMutexLocker l(_layoutableContextLock);
-  layoutableContextMap[key] = context;
+  const mach_port_t key = ASLayoutElementGetCurrentContextKey();
+  ASDN::StaticMutexLocker l(_layoutElementContextLock);
+  layoutElementContextMap[key] = context;
 }
 
-struct ASLayoutableContext ASLayoutableGetCurrentContext()
+struct ASLayoutElementContext ASLayoutElementGetCurrentContext()
 {
-  const mach_port_t key = ASLayoutableGetCurrentContextKey();
-  ASDN::StaticMutexLocker l(_layoutableContextLock);
-  const auto it = layoutableContextMap.find(key);
-  if (it != layoutableContextMap.end()) {
+  const mach_port_t key = ASLayoutElementGetCurrentContextKey();
+  ASDN::StaticMutexLocker l(_layoutElementContextLock);
+  const auto it = layoutElementContextMap.find(key);
+  if (it != layoutElementContextMap.end()) {
     // Found an interator with above key. "it->first" is the key itself, "it->second" is the context value.
     return it->second;
   }
-  return ASLayoutableContextNull;
+  return ASLayoutElementContextNull;
 }
 
-void ASLayoutableClearCurrentContext()
+void ASLayoutElementClearCurrentContext()
 {
-  const mach_port_t key = ASLayoutableGetCurrentContextKey();
-  ASDN::StaticMutexLocker l(_layoutableContextLock);
-  layoutableContextMap.erase(key);
+  const mach_port_t key = ASLayoutElementGetCurrentContextKey();
+  ASDN::StaticMutexLocker l(_layoutElementContextLock);
+  layoutElementContextMap.erase(key);
 }
 
-#pragma mark - ASLayoutableStyle
+#pragma mark - ASLayoutElementStyle
 
-@implementation ASLayoutableStyle {
+@implementation ASLayoutElementStyle {
   ASDN::RecursiveMutex __instanceLock__;
 }
 
@@ -96,13 +96,13 @@ void ASLayoutableClearCurrentContext()
 {
   self = [super init];
   if (self) {
-    _size = ASLayoutableSizeMake();
+    _size = ASLayoutElementSizeMake();
   }
   return self;
 }
 
 
-#pragma mark - ASLayoutableSizeForwarding
+#pragma mark - ASLayoutElementSizeForwarding
 
 - (ASDimension)width
 {

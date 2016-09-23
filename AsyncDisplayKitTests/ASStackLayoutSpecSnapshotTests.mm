@@ -48,7 +48,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   node.style.height = ASDimensionMakeWithPoints(size.height);
 }
 
-- (void)testDefaultStackLayoutableFlexProperties
+- (void)testDefaultStackLayoutElementFlexProperties
 {
   ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
   

@@ -24,12 +24,12 @@
   CGFloat _ratio;
 }
 
-+ (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child
++ (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutElement>)child
 {
   return [[self alloc] initWithRatio:ratio child:child];
 }
 
-- (instancetype)initWithRatio:(CGFloat)ratio child:(id<ASLayoutable>)child;
+- (instancetype)initWithRatio:(CGFloat)ratio child:(id<ASLayoutElement>)child;
 {
   if (!(self = [super init])) {
     return nil;
@@ -72,17 +72,17 @@
 
   // If there is no max size in *either* dimension, we can't apply the ratio, so just pass our size range through.
   const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeMake(*bestSize, *bestSize);
-  const CGSize parentSize = (bestSize == sizeOptions.end()) ? ASLayoutableParentSizeUndefined : *bestSize;
+  const CGSize parentSize = (bestSize == sizeOptions.end()) ? ASLayoutElementParentSizeUndefined : *bestSize;
   ASLayout *sublayout = [self.child layoutThatFits:childRange parentSize:parentSize];
   sublayout.position = CGPointZero;
-  return [ASLayout layoutWithLayoutable:self size:sublayout.size sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutElement:self size:sublayout.size sublayouts:@[sublayout]];
 }
 
 @end
 
 @implementation ASRatioLayoutSpec (Debugging)
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutElementAsciiArtProtocol
 
 - (NSString *)asciiArtName
 {

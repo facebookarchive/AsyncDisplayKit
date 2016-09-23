@@ -12,7 +12,7 @@
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASAssert.h>
-#import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASLayoutElement.h>
 #import <AsyncDisplayKit/ASDimension.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -24,11 +24,11 @@ extern CGPoint const CGPointNull;
 extern BOOL CGPointIsNull(CGPoint point);
 
 /**
- * Safely calculates the layout of the given root layoutable by guarding against nil nodes.
- * @param rootLayoutable The root node to calculate the layout for.
+ * Safely calculates the layout of the given root layoutElement by guarding against nil nodes.
+ * @param rootLayoutElement The root node to calculate the layout for.
  * @param sizeRange The size range to calculate the root layout within.
  */
-extern ASLayout *ASCalculateRootLayout(id<ASLayoutable> rootLayoutable, const ASSizeRange sizeRange);
+extern ASLayout *ASCalculateRootLayout(id<ASLayoutElement> rootLayoutElement, const ASSizeRange sizeRange);
 
 /**
  * Safely computes the layout of the given node by guarding against nil nodes.
@@ -36,24 +36,24 @@ extern ASLayout *ASCalculateRootLayout(id<ASLayoutable> rootLayoutable, const AS
  * @param sizeRange The size range to calculate the node layout within.
  * @param parentSize The parent size of the node to calculate the layout for.
  */
-extern ASLayout *ASCalculateLayout(id<ASLayoutable> layoutable, const ASSizeRange sizeRange, const CGSize parentSize);
+extern ASLayout *ASCalculateLayout(id<ASLayoutElement> layoutElement, const ASSizeRange sizeRange, const CGSize parentSize);
 
 ASDISPLAYNODE_EXTERN_C_END
 
 /**
- * A node in the layout tree that represents the size and position of the object that created it (ASLayoutable).
+ * A node in the layout tree that represents the size and position of the object that created it (ASLayoutElement).
  */
 @interface ASLayout : NSObject
 
 /**
  * The underlying object described by this layout
  */
-@property (nonatomic, weak, readonly) id<ASLayoutable> layoutable;
+@property (nonatomic, weak, readonly) id<ASLayoutElement> layoutElement;
 
 /**
- * The type of ASLayoutable that created this layout
+ * The type of ASLayoutElement that created this layout
  */
-@property (nonatomic, assign, readonly) ASLayoutableType type;
+@property (nonatomic, assign, readonly) ASLayoutElementType type;
 
 /**
  * Size of the current layout
@@ -81,7 +81,7 @@ ASDISPLAYNODE_EXTERN_C_END
 /**
  * Designated initializer
  */
-- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable
+- (instancetype)initWithLayoutElement:(id<ASLayoutElement>)layoutElement
                               size:(CGSize)size
                           position:(CGPoint)position
                         sublayouts:(nullable NSArray<ASLayout *> *)sublayouts NS_DESIGNATED_INITIALIZER;
@@ -89,12 +89,12 @@ ASDISPLAYNODE_EXTERN_C_END
 /**
  * Convenience class initializer for layout construction.
  *
- * @param layoutable The backing ASLayoutable object.
+ * @param layoutElement The backing ASLayoutElement object.
  * @param size             The size of this layout.
  * @param position         The position of this layout within its parent (if available).
  * @param sublayouts       Sublayouts belong to the new layout.
  */
-+ (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
++ (instancetype)layoutWithLayoutElement:(id<ASLayoutElement>)layoutElement
                                 size:(CGSize)size
                             position:(CGPoint)position
                           sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
@@ -105,11 +105,11 @@ ASDISPLAYNODE_EXTERN_C_END
  * or for ASLayoutSpec subclasses that are referencing the "self" level in the layout tree,
  * or for creating a sublayout of which the position is yet to be determined.
  *
- * @param layoutable  The backing ASLayoutable object.
+ * @param layoutElement  The backing ASLayoutElement object.
  * @param size              The size of this layout.
  * @param sublayouts        Sublayouts belong to the new layout.
  */
-+ (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
++ (instancetype)layoutWithLayoutElement:(id<ASLayoutElement>)layoutElement
                                 size:(CGSize)size
                           sublayouts:(nullable NSArray<ASLayout *> *)sublayouts;
 
@@ -118,10 +118,10 @@ ASDISPLAYNODE_EXTERN_C_END
  * Best used for creating a layout that has no sublayouts, and is either a root one
  * or a sublayout of which the position is yet to be determined.
  *
- * @param layoutable The backing ASLayoutable object.
+ * @param layoutElement The backing ASLayoutElement object.
  * @param size             The size of this layout.
  */
-+ (instancetype)layoutWithLayoutable:(id<ASLayoutable>)layoutable
++ (instancetype)layoutWithLayoutElement:(id<ASLayoutElement>)layoutElement
                                 size:(CGSize)size;
 /**
  * Convenience initializer that creates a layout based on the values of the given layout, with a new position

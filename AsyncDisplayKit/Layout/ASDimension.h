@@ -56,15 +56,15 @@ typedef struct {
 } ASSizeRange;
 
 /**
- * A struct specifying a ASLayoutable's size. Example:
+ * A struct specifying a ASLayoutElement's size. Example:
  *
- *  ASLayoutableSize size = (ASLayoutableSize){
+ *  ASLayoutElementSize size = (ASLayoutElementSize){
  *    .width = ASDimensionMakeWithFraction(0.25),
  *    .maxWidth = ASDimensionMakeWithPoints(200),
  *    .minHeight = ASDimensionMakeWithFraction(0.50)
  *  };
  *
- *  Description: <ASLayoutableSize: exact={25%, Auto}, min={Auto, 50%}, max={200pt, Auto}>
+ *  Description: <ASLayoutElementSize: exact={25%, Auto}, min={Auto, 50%}, max={200pt, Auto}>
  *
  */
 typedef struct {
@@ -74,7 +74,7 @@ typedef struct {
   ASDimension maxWidth;
   ASDimension minHeight;
   ASDimension maxHeight;
-} ASLayoutableSize;
+} ASLayoutElementSize;
 
 extern ASDimension const ASDimensionAuto;
 
@@ -230,14 +230,14 @@ ASDISPLAYNODE_INLINE BOOL ASSizeRangeEqualToSizeRange(ASSizeRange lhs, ASSizeRan
 extern NSString *NSStringFromASSizeRange(ASSizeRange sizeRange);
 
 
-#pragma mark - ASLayoutableSize
+#pragma mark - ASLayoutElementSize
 
 /**
- * Returns an ASLayoutableSize with default values.
+ * Returns an ASLayoutElementSize with default values.
  */
-ASDISPLAYNODE_INLINE ASLayoutableSize ASLayoutableSizeMake()
+ASDISPLAYNODE_INLINE ASLayoutElementSize ASLayoutElementSizeMake()
 {
-  return (ASLayoutableSize){
+  return (ASLayoutElementSize){
     .width = ASDimensionAuto,
     .height = ASDimensionAuto,
     .minWidth = ASDimensionAuto,
@@ -248,11 +248,11 @@ ASDISPLAYNODE_INLINE ASLayoutableSize ASLayoutableSizeMake()
 }
 
 /**
- * Returns an ASLayoutableSize with the specified CGSize values as width and height.
+ * Returns an ASLayoutElementSize with the specified CGSize values as width and height.
  */
-ASDISPLAYNODE_INLINE ASLayoutableSize ASLayoutableSizeMakeFromCGSize(CGSize size)
+ASDISPLAYNODE_INLINE ASLayoutElementSize ASLayoutElementSizeMakeFromCGSize(CGSize size)
 {
-  ASLayoutableSize s = ASLayoutableSizeMake();
+  ASLayoutElementSize s = ASLayoutElementSizeMake();
   s.width = ASDimensionMakeWithPoints(size.width);
   s.height = ASDimensionMakeWithPoints(size.height);
   return s;
@@ -261,7 +261,7 @@ ASDISPLAYNODE_INLINE ASLayoutableSize ASLayoutableSizeMakeFromCGSize(CGSize size
 /**
  * Returns whether two sizes are equal.
  */
-ASDISPLAYNODE_INLINE BOOL ASLayoutableSizeEqualToLayoutableSize(ASLayoutableSize lhs, ASLayoutableSize rhs)
+ASDISPLAYNODE_INLINE BOOL ASLayoutElementSizeEqualToLayoutElementSize(ASLayoutElementSize lhs, ASLayoutElementSize rhs)
 {
   return (ASDimensionEqualToDimension(lhs.width, rhs.width)
   && ASDimensionEqualToDimension(lhs.height, rhs.height)
@@ -272,9 +272,9 @@ ASDISPLAYNODE_INLINE BOOL ASLayoutableSizeEqualToLayoutableSize(ASLayoutableSize
 }
 
 /**
- * Returns a string formatted to contain the data from an ASLayoutableSize.
+ * Returns a string formatted to contain the data from an ASLayoutElementSize.
  */
-extern NSString *NSStringFromASLayoutableSize(ASLayoutableSize size);
+extern NSString *NSStringFromASLayoutElementSize(ASLayoutElementSize size);
 
 /**
  * Resolve the given size relative to a parent size and an auto size.
@@ -283,15 +283,15 @@ extern NSString *NSStringFromASLayoutableSize(ASLayoutableSize size);
  * dimension with unit ASDimensionUnitAuto the given autoASSizeRange value will be used.
  * Based on the calculated exact, min and max size constraints the final size range will be calculated.
  */
-extern ASSizeRange ASLayoutableSizeResolveAutoSize(ASLayoutableSize size, const CGSize parentSize, ASSizeRange autoASSizeRange);
+extern ASSizeRange ASLayoutElementSizeResolveAutoSize(ASLayoutElementSize size, const CGSize parentSize, ASSizeRange autoASSizeRange);
 
 /**
- * Resolve the given size to a parent size. Uses internally ASLayoutableSizeResolveAutoSize with {INFINITY, INFINITY} as
- * as autoASSizeRange. For more information look at ASLayoutableSizeResolveAutoSize.
+ * Resolve the given size to a parent size. Uses internally ASLayoutElementSizeResolveAutoSize with {INFINITY, INFINITY} as
+ * as autoASSizeRange. For more information look at ASLayoutElementSizeResolveAutoSize.
  */
-ASDISPLAYNODE_INLINE ASSizeRange ASLayoutableSizeResolve(ASLayoutableSize size, const CGSize parentSize)
+ASDISPLAYNODE_INLINE ASSizeRange ASLayoutElementSizeResolve(ASLayoutElementSize size, const CGSize parentSize)
 {
-  return ASLayoutableSizeResolveAutoSize(size, parentSize, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
+  return ASLayoutElementSizeResolveAutoSize(size, parentSize, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
 }
 
 

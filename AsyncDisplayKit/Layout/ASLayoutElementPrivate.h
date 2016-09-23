@@ -1,5 +1,5 @@
 //
-//  ASLayoutablePrivate.h
+//  ASLayoutElementPrivate.h
 //  AsyncDisplayKit
 //
 //  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
@@ -10,58 +10,58 @@
 
 #import "ASDimension.h"
 
-@protocol ASLayoutable;
-@class ASLayoutableStyle;
+@protocol ASLayoutElement;
+@class ASLayoutElementStyle;
 
-struct ASLayoutableContext {
+struct ASLayoutElementContext {
   int32_t transitionID;
   BOOL needsVisualizeNode;
 };
 
-extern int32_t const ASLayoutableContextInvalidTransitionID;
+extern int32_t const ASLayoutElementContextInvalidTransitionID;
 
-extern int32_t const ASLayoutableContextDefaultTransitionID;
+extern int32_t const ASLayoutElementContextDefaultTransitionID;
 
-extern struct ASLayoutableContext const ASLayoutableContextNull;
+extern struct ASLayoutElementContext const ASLayoutElementContextNull;
 
-extern BOOL ASLayoutableContextIsNull(struct ASLayoutableContext context);
+extern BOOL ASLayoutElementContextIsNull(struct ASLayoutElementContext context);
 
-extern struct ASLayoutableContext ASLayoutableContextMake(int32_t transitionID, BOOL needsVisualizeNode);
+extern struct ASLayoutElementContext ASLayoutElementContextMake(int32_t transitionID, BOOL needsVisualizeNode);
 
-extern void ASLayoutableSetCurrentContext(struct ASLayoutableContext context);
+extern void ASLayoutElementSetCurrentContext(struct ASLayoutElementContext context);
 
-extern struct ASLayoutableContext ASLayoutableGetCurrentContext();
+extern struct ASLayoutElementContext ASLayoutElementGetCurrentContext();
 
-extern void ASLayoutableClearCurrentContext();
+extern void ASLayoutElementClearCurrentContext();
 
 /**
- *  The base protocol for ASLayoutable. Generally the methods/properties in this class do not need to be
+ *  The base protocol for ASLayoutElement. Generally the methods/properties in this class do not need to be
  *  called by the end user and are only called internally. However, there may be a case where the methods are useful.
  */
-@protocol ASLayoutablePrivate <NSObject>
+@protocol ASLayoutElementPrivate <NSObject>
 
 /**
- *  @abstract This method can be used to give the user a chance to wrap an ASLayoutable in an ASLayoutSpec 
+ *  @abstract This method can be used to give the user a chance to wrap an ASLayoutElement in an ASLayoutSpec 
  *  just before it is added to a parent ASLayoutSpec. For example, if you wanted an ASTextNode that was always 
- *  inside of an ASInsetLayoutSpec, you could subclass ASTextNode and implement finalLayoutable so that it wraps
+ *  inside of an ASInsetLayoutSpec, you could subclass ASTextNode and implement finalLayoutElement so that it wraps
  *  itself in an inset spec.
  *
- *  Note that any ASLayoutable other than self that is returned MUST set isFinalLayoutable to YES. Make sure
- *  to do this BEFORE adding a child to the ASLayoutable.
+ *  Note that any ASLayoutElement other than self that is returned MUST set isFinalLayoutElement to YES. Make sure
+ *  to do this BEFORE adding a child to the ASLayoutElement.
  *
- *  @return The layoutable that will be added to the parent layout spec. Defaults to self.
+ *  @return The layoutElement that will be added to the parent layout spec. Defaults to self.
  */
-- (id<ASLayoutable>)finalLayoutable;
+- (id<ASLayoutElement>)finalLayoutElement;
 
 /**
- *  A flag to indicate that this ASLayoutable was created in finalLayoutable. This MUST be set to YES
- *  before adding a child to this layoutable.
+ *  A flag to indicate that this ASLayoutElement was created in finalLayoutElement. This MUST be set to YES
+ *  before adding a child to this layoutElement.
  */
-@property (nonatomic, assign) BOOL isFinalLayoutable;
+@property (nonatomic, assign) BOOL isFinalLayoutElement;
 
 @end
 
-#pragma mark - ASLayoutableExtensibility
+#pragma mark - ASLayoutElementExtensibility
 
 #define ASEnvironmentLayoutExtensibilityForwarding \
 - (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx\
