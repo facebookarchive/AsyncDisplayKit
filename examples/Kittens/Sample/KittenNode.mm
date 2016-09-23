@@ -145,7 +145,7 @@ static const CGFloat kInnerPadding = 10.0f;
 {
   // Set an intrinsic size for the image node
   CGSize imageSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize) : CGSizeMake(kImageSize, kImageSize);
-  _imageNode.style.size = ASLayoutableSizeMakeFromCGSize(imageSize);
+  [_imageNode.style setSizeWithCGSize:imageSize];
   
   // Shrink the text node in case the image + text gonna be too wide
   _textNode.style.flexShrink = YES;

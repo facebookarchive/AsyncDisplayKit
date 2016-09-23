@@ -68,7 +68,7 @@
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   RandomCoreGraphicsNode *elementNode = [[RandomCoreGraphicsNode alloc] init];
-  elementNode.style.size = ASLayoutableSizeMakeFromCGSize(_elementSize);
+  [elementNode.style setSizeWithCGSize:_elementSize];
   elementNode.indexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:_pageNumber];
   return elementNode;
 }
