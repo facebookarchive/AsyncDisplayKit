@@ -133,11 +133,11 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 #pragma mark External API
 
-- (void(^)(BOOL finished))completionHandler
+- (void (^)(BOOL finished))completionHandler
 {
   [self _ensureCompleted];
 
-  id completionHandler = _completionHandler;
+  void (^completionHandler)(BOOL) = _completionHandler;
   _completionHandler = nil;
   return completionHandler;
 }
