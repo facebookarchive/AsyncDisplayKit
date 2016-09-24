@@ -12,7 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol ASLayoutableAsciiArtProtocol <NSObject>
+@protocol ASLayoutElementAsciiArtProtocol <NSObject>
 /**
  *  Returns an ascii-art representation of this object and its children.
  *  For example, an ASInsetSpec may return something like this:

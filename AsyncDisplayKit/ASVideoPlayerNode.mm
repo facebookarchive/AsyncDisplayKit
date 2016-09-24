@@ -705,6 +705,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     ASDisplayNodeAssert(NO, @"Infinite width or height in ASVideoPlayerNode");
     maxSize = CGSizeZero;
   }
+
   [_videoNode.style setSizeWithCGSize:maxSize];
 
   ASLayoutSpec *layoutSpec;

@@ -14,9 +14,9 @@
 
 @implementation ASLayoutSpec
 
-// Dynamic properties for ASLayoutables
-@dynamic layoutableType;
-@synthesize isFinalLayoutable = _isFinalLayoutable;
+// Dynamic properties for ASLayoutElements
+@dynamic layoutElementType;
+@synthesize isFinalLayoutElement = _isFinalLayoutElement;
 
 #pragma mark - Class
 
@@ -39,15 +39,15 @@
   
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
-  _style = [[ASLayoutableStyle alloc] init];
+  _style = [[ASLayoutElementStyle alloc] init];
   _childrenArray = [[NSMutableArray alloc] init];
   
   return self;
 }
 
-- (ASLayoutableType)layoutableType
+- (ASLayoutElementType)layoutElementType
 {
-  return ASLayoutableTypeLayoutSpec;
+  return ASLayoutElementTypeLayoutSpec;
 }
 
 - (BOOL)canLayoutAsynchronous
@@ -57,14 +57,14 @@
 
 #pragma mark - Final Layoutable
 
-- (id<ASLayoutable>)finalLayoutable
+- (id<ASLayoutElement>)finalLayoutElement
 {
   return self;
 }
 
 #pragma mark - Style
 
-- (ASLayoutableStyle *)style
+- (ASLayoutElementStyle *)style
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _style;
@@ -89,22 +89,22 @@
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASLayoutableSize)size
+                     restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutableSizeResolve(_style.size, parentSize));
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutElementSizeResolve(_style.size, parentSize));
   return [self calculateLayoutThatFits:resolvedRange];
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  return [ASLayout layoutWithLayoutable:self size:constrainedSize.min];
+  return [ASLayout layoutWithLayoutElement:self size:constrainedSize.min];
 }
 
 
 #pragma mark - Parent
 
-- (void)setParent:(id<ASLayoutable>)parent
+- (void)setParent:(id<ASLayoutElement>)parent
 {
   // FIXME: Locking should be evaluated here.  _parent is not widely used yet, though.
   _parent = parent;
@@ -114,19 +114,18 @@
   }
 }
 
-
 #pragma mark - Child
 
-- (void)setChild:(id<ASLayoutable>)child
+- (void)setChild:(id<ASLayoutElement>)child
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");;
   ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
   
   if (child) {
-    id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-    if (finalLayoutable) {
-      _childrenArray[0] = finalLayoutable;
-      [self propagateUpLayoutable:finalLayoutable];
+    id<ASLayoutElement> finalLayoutElement = [self layoutableToAddFromLayoutable:child];
+    if (finalLayoutElement) {
+      _childrenArray[0] = finalLayoutElement;
+      [self propagateUpLayoutElement:finalLayoutElement];
     }
   } else {
     if (_childrenArray.count) {
@@ -135,7 +134,7 @@
   }
 }
 
-- (id<ASLayoutable>)child
+- (id<ASLayoutElement>)child
 {
   ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
   
@@ -148,14 +147,15 @@
 
 #pragma mark - Children
 
-- (void)setChildren:(NSArray<id<ASLayoutable>> *)children
+- (void)setChildren:(NSArray<id<ASLayoutElement>> *)children
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
   [_childrenArray removeAllObjects];
   
   NSUInteger i = 0;
-  for (id<ASLayoutable> child in children) {
+  for (id<ASLayoutElement> child in children) {
+    ASDisplayNodeAssert([child conformsToProtocol:NSProtocolFromString(@"ASLayoutElement")], @"Child %@ of spec %@ is not an ASLayoutElement!", child, self);
     _childrenArray[i] = [self layoutableToAddFromLayoutable:child];
     i += 1;
   }
@@ -198,12 +198,12 @@
   return ASEnvironmentStateTraitCollectionPropagationEnabled();
 }
 
-- (void)propagateUpLayoutable:(id<ASLayoutable>)layoutable
+- (void)propagateUpLayoutElement:(id<ASLayoutElement>)layoutElement
 {
-  if ([layoutable isKindOfClass:[ASLayoutSpec class]]) {
-    [(ASLayoutSpec *)layoutable setParent:self]; // This will trigger upward propogation if needed.
+  if ([layoutElement isKindOfClass:[ASLayoutSpec class]]) {
+    [(ASLayoutSpec *)layoutElement setParent:self]; // This will trigger upward propogation if needed.
   } else if ([self supportsUpwardPropagation]) {
-    ASEnvironmentStatePropagateUp(self, layoutable.environmentState.layoutOptionsState); // Probably an ASDisplayNode
+    ASEnvironmentStatePropagateUp(self, layoutElement.environmentState.layoutOptionsState); // Probably an ASDisplayNode
   }
 }
 
@@ -231,16 +231,16 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 @implementation ASWrapperLayoutSpec
 
-+ (instancetype)wrapperWithLayoutable:(id<ASLayoutable>)layoutable
++ (instancetype)wrapperWithLayoutElement:(id<ASLayoutElement>)layoutElement
 {
-  return [[self alloc] initWithLayoutable:layoutable];
+  return [[self alloc] initWithLayoutElement:layoutElement];
 }
 
-- (instancetype)initWithLayoutable:(id<ASLayoutable>)layoutable
+- (instancetype)initWithLayoutElement:(id<ASLayoutElement>)layoutElement
 {
   self = [super init];
   if (self) {
-    self.child = layoutable;
+    self.child = layoutElement;
   }
   return self;
 }
@@ -249,7 +249,7 @@ ASEnvironmentLayoutExtensibilityForwarding
 {
   ASLayout *sublayout = [self.child layoutThatFits:constrainedSize parentSize:constrainedSize.max];
   sublayout.position = CGPointZero;
-  return [ASLayout layoutWithLayoutable:self size:sublayout.size sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutElement:self size:sublayout.size sublayouts:@[sublayout]];
 }
 
 @end
@@ -259,12 +259,12 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 @implementation ASLayoutSpec (Debugging)
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutElementAsciiArtProtocol
 
 + (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction
 {
   NSMutableArray *childStrings = [NSMutableArray array];
-  for (id<ASLayoutableAsciiArtProtocol> layoutChild in children) {
+  for (id<ASLayoutElementAsciiArtProtocol> layoutChild in children) {
     NSString *childString = [layoutChild asciiArtString];
     if (childString) {
       [childStrings addObject:childString];

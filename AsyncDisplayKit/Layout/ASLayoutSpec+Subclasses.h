@@ -17,10 +17,10 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @warning If you are getting recursion crashes here after implementing finalLayoutable, make sure
  * that you are setting isFinalLayoutable flag to YES. This must be one BEFORE adding a child
- * to the new ASLayoutable.
+ * to the new ASLayoutElement.
  *
  * For example:
- * - (id<ASLayoutable>)finalLayoutable
+ * - (id<ASLayoutElement>)finalLayoutable
  * {
  *   ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
  *   insetSpec.insets = UIEdgeInsetsMake(10,10,10,10);
@@ -31,7 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @see finalLayoutable
  */
-- (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child;
+- (id<ASLayoutElement>)layoutableToAddFromLayoutable:(id<ASLayoutElement>)child;
 
 /**
  * Adds a child with the given identifier to this layout spec.
@@ -50,14 +50,14 @@ NS_ASSUME_NONNULL_BEGIN
  * setChild:forIndex: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
  * property that behind the scenes is calling setChild:forIndex:.
  */
-- (void)setChild:(id<ASLayoutable>)child atIndex:(NSUInteger)index;
+- (void)setChild:(id<ASLayoutElement>)child atIndex:(NSUInteger)index;
 
 /**
  * Returns the child added to this layout spec using the given index.
  *
  * @param index An identifier associated with the the child.
  */
-- (nullable id<ASLayoutable>)childAtIndex:(NSUInteger)index;
+- (nullable id<ASLayoutElement>)childAtIndex:(NSUInteger)index;
 
 @end
 

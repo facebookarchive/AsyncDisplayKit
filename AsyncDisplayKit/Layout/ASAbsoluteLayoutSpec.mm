@@ -38,21 +38,21 @@
 {
   // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
   CGSize size = {
-    (isinf(constrainedSize.max.width) || !ASPointsAreValidForLayout(constrainedSize.max.width)) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.width,
-    (isinf(constrainedSize.max.height) || !ASPointsAreValidForLayout(constrainedSize.max.height)) ? ASLayoutableParentDimensionUndefined : constrainedSize.max.height
+    (isinf(constrainedSize.max.width) || !ASPointsAreValidForLayout(constrainedSize.max.width)) ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.width,
+    (isinf(constrainedSize.max.height) || !ASPointsAreValidForLayout(constrainedSize.max.height)) ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.height
   };
   
   NSArray *children = self.children;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:children.count];
 
-  for (id<ASLayoutable> child in children) {
+  for (id<ASLayoutElement> child in children) {
     CGPoint layoutPosition = child.style.layoutPosition;
     CGSize autoMaxSize = {
       constrainedSize.max.width  - layoutPosition.x,
       constrainedSize.max.height - layoutPosition.y
     };
 
-    const ASSizeRange childConstraint = ASLayoutableSizeResolveAutoSize(child.style.size, size, {{0,0}, autoMaxSize});
+    const ASSizeRange childConstraint = ASLayoutElementSizeResolveAutoSize(child.style.size, size, {{0,0}, autoMaxSize});
     
     ASLayout *sublayout = [child layoutThatFits:childConstraint parentSize:size];
     sublayout.position = layoutPosition;
@@ -73,7 +73,7 @@
     }
   }
   
-  return [ASLayout layoutWithLayoutable:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutElement:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:sublayouts];
 }
 
 @end
@@ -89,7 +89,7 @@
 
 @implementation ASAbsoluteLayoutSpec (Debugging)
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutElementAsciiArtProtocol
 
 - (NSString *)debugBoxString
 {

@@ -1,5 +1,5 @@
 //
-//  ASLayoutableStyleTests.mm
+//  ASLayoutElementStyleTests.mm
 //  AsyncDisplayKit
 //
 //  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
@@ -9,15 +9,15 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ASLayoutable.h"
+#import "ASLayoutElement.h"
 
-#pragma mark - ASLayoutableStyleTestsDelegate
+#pragma mark - ASLayoutElementStyleTestsDelegate
 
-@interface ASLayoutableStyleTestsDelegate : NSObject<ASLayoutableStyleDelegate>
+@interface ASLayoutElementStyleTestsDelegate : NSObject<ASLayoutElementStyleDelegate>
 @property (copy, nonatomic) NSString *propertyNameChanged;
 @end
 
-@implementation ASLayoutableStyleTestsDelegate
+@implementation ASLayoutElementStyleTestsDelegate
 
 - (void)style:(id)style propertyDidChange:(NSString *)propertyName
 {
@@ -26,17 +26,17 @@
 
 @end
 
-#pragma mark - ASLayoutableStyleTests
+#pragma mark - ASLayoutElementStyleTests
 
-@interface ASLayoutableStyleTests : XCTestCase
+@interface ASLayoutElementStyleTests : XCTestCase
 
 @end
 
-@implementation ASLayoutableStyleTests
+@implementation ASLayoutElementStyleTests
 
 - (void)testSettingSizeProperties
 {
-  ASLayoutableStyle *style = [ASLayoutableStyle new];
+  ASLayoutElementStyle *style = [ASLayoutElementStyle new];
   style.width = ASDimensionMake(100);
   style.height = ASDimensionMake(100);
   
@@ -46,7 +46,7 @@
 
 - (void)testSettingSizeViaHelper
 {
-  ASLayoutableStyle *style = [ASLayoutableStyle new];
+  ASLayoutElementStyle *style = [ASLayoutElementStyle new];
   [style setSizeWithCGSize:CGSizeMake(100, 100)];
   
   XCTAssertTrue(ASDimensionEqualToDimension(style.width, ASDimensionMake(100)));
@@ -55,7 +55,7 @@
 
 - (void)testSettingExactSize
 {
-  ASLayoutableStyle *style = [ASLayoutableStyle new];
+  ASLayoutElementStyle *style = [ASLayoutElementStyle new];
   [style setExactSizeWithCGSize:CGSizeMake(100, 100)];
   
   XCTAssertTrue(ASDimensionEqualToDimension(style.minWidth, ASDimensionMake(100)));
@@ -66,12 +66,12 @@
   
 - (void)testSettingPropertiesWillCallDelegate
 {
-  ASLayoutableStyleTestsDelegate *delegate = [ASLayoutableStyleTestsDelegate new];
-  ASLayoutableStyle *style = [[ASLayoutableStyle alloc] initWithDelegate:delegate];
+  ASLayoutElementStyleTestsDelegate *delegate = [ASLayoutElementStyleTestsDelegate new];
+  ASLayoutElementStyle *style = [[ASLayoutElementStyle alloc] initWithDelegate:delegate];
   XCTAssertTrue(ASDimensionEqualToDimension(style.width, ASDimensionAuto));
   style.width = ASDimensionMake(100);
   XCTAssertTrue(ASDimensionEqualToDimension(style.width, ASDimensionMake(100)));
-  XCTAssertTrue([delegate.propertyNameChanged isEqualToString:ASLayoutableStyleWidthProperty]);
+  XCTAssertTrue([delegate.propertyNameChanged isEqualToString:ASLayoutElementStyleWidthProperty]);
 }
 
 @end

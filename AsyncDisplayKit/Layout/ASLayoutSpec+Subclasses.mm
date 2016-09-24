@@ -36,7 +36,7 @@
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  return [ASLayout layoutWithLayoutable:self size:CGSizeZero];
+  return [ASLayout layoutWithLayoutElement:self size:CGSizeZero];
 }
 
 @end
@@ -48,20 +48,20 @@
 
 #pragma mark - Final layoutable
 
-- (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
+- (id<ASLayoutElement>)layoutableToAddFromLayoutable:(id<ASLayoutElement>)child
 {
-  if (self.isFinalLayoutable == NO) {
-    id<ASLayoutable> finalLayoutable = [child finalLayoutable];
-    if (finalLayoutable != child) {
+  if (self.isFinalLayoutElement == NO) {
+    id<ASLayoutElement> finalLayoutElement = [child finalLayoutElement];
+    if (finalLayoutElement != child) {
       if (ASEnvironmentStatePropagationEnabled()) {
-        ASEnvironmentStatePropagateUp(finalLayoutable, child.environmentState.layoutOptionsState);
+        ASEnvironmentStatePropagateUp(finalLayoutElement, child.environmentState.layoutOptionsState);
       } else {
         // If state propagation is not enabled the layout options state needs to be copied manually
-        ASEnvironmentState finalLayoutableEnvironmentState = finalLayoutable.environmentState;
-        finalLayoutableEnvironmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
-        finalLayoutable.environmentState = finalLayoutableEnvironmentState;
+        ASEnvironmentState finalLayoutElementEnvironmentState = finalLayoutElement.environmentState;
+        finalLayoutElementEnvironmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
+        finalLayoutElement.environmentState = finalLayoutElementEnvironmentState;
       }
-      return finalLayoutable;
+      return finalLayoutElement;
     }
   }
   return child;
@@ -69,11 +69,11 @@
 
 #pragma mark - Child with index
 
-- (void)setChild:(id<ASLayoutable>)child atIndex:(NSUInteger)index
+- (void)setChild:(id<ASLayoutElement>)child atIndex:(NSUInteger)index
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
-  id<ASLayoutable> layoutable = child ? [self layoutableToAddFromLayoutable:child] : [ASNullLayoutSpec null];
+  id<ASLayoutElement> layoutable = child ? [self layoutableToAddFromLayoutable:child] : [ASNullLayoutSpec null];
   
   if (child) {
     if (_childrenArray.count < index) {
@@ -91,12 +91,12 @@
   
   // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
-  // [self propagateUpLayoutable:finalLayoutable];
+  // [self propagateUpLayoutable:finalLayoutElement];
 }
 
-- (id<ASLayoutable>)childAtIndex:(NSUInteger)index
+- (id<ASLayoutElement>)childAtIndex:(NSUInteger)index
 {
-  id<ASLayoutable> layoutable = nil;
+  id<ASLayoutElement> layoutable = nil;
   if (index < _childrenArray.count) {
     layoutable = _childrenArray[index];
   }

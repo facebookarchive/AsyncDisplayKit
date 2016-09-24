@@ -21,14 +21,14 @@ static NSUInteger const kBackgroundChildIndex = 1;
 
 #pragma mark - Class
 
-+ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
++ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutElement>)child background:(id<ASLayoutElement>)background;
 {
   return [[self alloc] initWithChild:child background:background];
 }
 
 #pragma mark - Lifecycle
 
-- (instancetype)initWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
+- (instancetype)initWithChild:(id<ASLayoutElement>)child background:(id<ASLayoutElement>)background
 {
   if (!(self = [super init])) {
     return nil;
@@ -46,7 +46,7 @@ static NSUInteger const kBackgroundChildIndex = 1;
  * First layout the contents, then fit the background image.
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASLayoutableSize)size
+                     restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
   ASLayout *contentsLayout = [[super childAtIndex:kForegroundChildIndex] layoutThatFits:constrainedSize parentSize:parentSize];
@@ -62,17 +62,17 @@ static NSUInteger const kBackgroundChildIndex = 1;
   contentsLayout.position = CGPointZero;
   [sublayouts addObject:contentsLayout];
 
-  return [ASLayout layoutWithLayoutable:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutElement:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
 #pragma mark - Background
 
-- (void)setBackground:(id<ASLayoutable>)background
+- (void)setBackground:(id<ASLayoutElement>)background
 {
   [super setChild:background atIndex:kBackgroundChildIndex];
 }
 
-- (id<ASLayoutable>)background
+- (id<ASLayoutElement>)background
 {
   return [super childAtIndex:kBackgroundChildIndex];
 }
