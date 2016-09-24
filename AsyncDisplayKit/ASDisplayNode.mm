@@ -2465,8 +2465,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
-    
-  ASDN::MutexLocker l(__instanceLock__);
+
   return CGSizeZero;
 }
 

@@ -827,7 +827,7 @@ NS_ASSUME_NONNULL_BEGIN
  * size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
  * image size.
  *
- * @return Try to create a CGSize for preferredFrameSize of this node from the width and height property of this node. It will throw if the dimension unit of width or height is of type ASDimensionUnitFraction.
+ * @return Try to create a CGSize for preferredFrameSize of this node from the width and height property of this node. It will return CGSizeZero if widht and height dimensions are not of type ASDimensionUnitPoints.
  *
  * @deprecated Deprecated in version 2.0: Just calls through to set the height and width property of the node. Convert to use sizing properties instead: height, minHeight, maxHeight, width, minWidth, maxWidth.
  */
