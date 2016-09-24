@@ -15,7 +15,7 @@
 
 @implementation ASAbsoluteLayoutSpec
 
-+ (instancetype)staticLayoutSpecWithChildren:(NSArray *)children
++ (instancetype)absoluteLayoutSpecWithChildren:(NSArray *)children
 {
   return [[self alloc] initWithChildren:children];
 }

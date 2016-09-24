@@ -291,7 +291,7 @@ const CGFloat kSoldOutGBHeight = 50.0;
   
   self.badge.style.layoutPosition = CGPointMake(0, constrainedSize.max.height - kFixedLabelsAreaHeight - kBadgeHeight);
   self.badge.style.height = ASDimensionMakeWithPoints(kBadgeHeight);
-  ASStaticLayoutSpec *badgePosition = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.badge]];
+  ASAbsoluteLayoutSpec *badgePosition = [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[self.badge]];
   
   ASOverlayLayoutSpec *badgeOverImage = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:imagePlace overlay:badgePosition];
   badgeOverImage.style.flexGrow = YES;
