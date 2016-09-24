@@ -18,6 +18,7 @@
 
 @class ASLayout;
 @class ASLayoutSpec;
+@protocol ASLayoutElementStyleProvider;
 
 /** A constant that indicates that the parent's size is not yet determined in a given dimension. */
 extern CGFloat const ASLayoutElementParentDimensionUndefined;
@@ -40,16 +41,12 @@ NS_ASSUME_NONNULL_BEGIN
  * recursion is driven by parents requesting layouts from their children in order to determine their 
  * size, followed by the parents setting the position of the children once the size is known
  *
- * The protocol also implements a "family" of LayoutElement protocols. These protocols contain layout 
+ * The protocol also implements a "family" of LayoutElement protocols. These protocols contain layout
  * options that can be used for specific layout specs. For example, ASStackLayoutSpec has options
  * defining how a layoutElement should shrink or grow based upon available space.
- *
- * These layout options are all stored in an ASLayoutOptions class (that is defined in ASLayoutElementPrivate).
- * Generally you needn't worry about the layout options class, as the layoutElement protocols allow all direct
- * access to the options via convenience properties. If you are creating custom layout spec, then you can
- * extend the backing layout options class to accommodate any new layout options.
  */
-@protocol ASLayoutElement <ASEnvironment, ASLayoutElementPrivate, ASLayoutElementExtensibility, NSFastEnumeration>
+
+@protocol ASLayoutElement <ASEnvironment, ASLayoutElementPrivate, ASLayoutElementStyleProvider, NSFastEnumeration>
 
 #pragma mark - Getter
 
@@ -156,6 +153,15 @@ extern NSString * const ASLayoutElementStyleMaxWidthProperty;
 extern NSString * const ASLayoutElementStyleHeightProperty;
 extern NSString * const ASLayoutElementStyleMinHeightProperty;
 extern NSString * const ASLayoutElementStyleMaxHeightProperty;
+
+#pragma mark - ASLayoutElementStyleProvider
+
+@protocol ASLayoutElementStyleProvider <NSObject>
+@property (strong, nonatomic, readonly) ASLayoutElementStyle *style;
+@end
+
+
+#pragma mark - ASLayoutableStyle
 
 extern NSString * const ASLayoutElementStyleSpacingBeforeProperty;
 extern NSString * const ASLayoutElementStyleSpacingAfterProperty;

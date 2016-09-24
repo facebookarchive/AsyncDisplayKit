@@ -60,36 +60,3 @@ extern void ASLayoutElementClearCurrentContext();
 @property (nonatomic, assign) BOOL isFinalLayoutElement;
 
 @end
-
-#pragma mark - ASLayoutElementExtensibility
-
-#define ASEnvironmentLayoutExtensibilityForwarding \
-- (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx\
-{\
-  _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(self, idx, value);\
-}\
-\
-- (BOOL)layoutOptionExtensionBoolAtIndex:(int)idx\
-{\
-  return _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(self, idx);\
-}\
-\
-- (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx\
-{\
-  _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(self, idx, value);\
-}\
-\
-- (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx\
-{\
-  return _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(self, idx);\
-}\
-\
-- (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx\
-{\
-  _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(self, idx, value);\
-}\
-\
-- (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx\
-{\
-  return _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(self, idx);\
-}\
