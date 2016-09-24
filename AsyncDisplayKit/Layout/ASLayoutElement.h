@@ -14,7 +14,6 @@
 #import <AsyncDisplayKit/ASAbsoluteLayoutElement.h>
 #import <AsyncDisplayKit/ASLayoutElementPrivate.h>
 #import <AsyncDisplayKit/ASEnvironment.h>
-#import <AsyncDisplayKit/ASLayoutElementExtensibility.h>
 
 @class ASLayout;
 @class ASLayoutSpec;
