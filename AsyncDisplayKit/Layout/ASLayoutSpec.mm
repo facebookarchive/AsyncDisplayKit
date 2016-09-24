@@ -35,7 +35,7 @@ typedef std::map<unsigned long, id<ASLayoutElement>, std::less<unsigned long>> A
 @implementation ASLayoutSpec
 
 // Dynamic properties for ASLayoutElements
-@dynamic layoutElementType;
+@dynamic layoutElementType, style;
 @synthesize isFinalLayoutElement = _isFinalLayoutElement;
 
 #pragma mark - Class
@@ -59,7 +59,7 @@ typedef std::map<unsigned long, id<ASLayoutElement>, std::less<unsigned long>> A
   
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
-  _style = [[ASLayoutableStyle alloc] init];
+  _style = [[ASLayoutElementStyle alloc] init];
   
   return self;
 }
@@ -72,6 +72,12 @@ typedef std::map<unsigned long, id<ASLayoutElement>, std::less<unsigned long>> A
 - (BOOL)canLayoutAsynchronous
 {
   return YES;
+}
+
+- (ASLayoutElementStyle *)style
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _style;
 }
 
 #pragma mark - Style

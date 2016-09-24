@@ -70,7 +70,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 @implementation ASDisplayNode
 
-@dynamic layoutElementType;
+@dynamic layoutElementType, style;
 
 @synthesize name = _name;
 @synthesize isFinalLayoutElement = _isFinalLayoutElement;
@@ -300,7 +300,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   
-  _style = [[ASLayoutableStyle alloc] init];
+  _style = [[ASLayoutElementStyle alloc] init];
   _preferredFrameSize = CGSizeZero;
   _environmentState = ASEnvironmentStateMakeDefault();
   
@@ -795,6 +795,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (BOOL)canLayoutAsynchronous
 {
   return !self.isNodeLoaded;
+}
+
+- (ASLayoutElementStyle *)style
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _style;
 }
 
 #pragma mark - Automatic Hierarchy
