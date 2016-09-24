@@ -12,17 +12,17 @@
 #import "ASLayout.h"
 #import "ASDisplayNode.h"
 
-#import "ASStaticLayoutSpec.h"
+#import "ASAbsoluteLayoutSpec.h"
 #import "ASStackLayoutSpec.h"
 
 #import <queue>
 
 #pragma mark - Layout Validation
 
-void ASLayoutableValidateLayout(ASLayout *layout) {
-    ASLayoutableValidation *validation = [[ASLayoutableValidation alloc] init];
-    [validation registerValidator:[[ASLayoutableStaticValidator alloc] init]];
-    [validation registerValidator:[[ASLayoutableStackValidator alloc] init]];
+void ASLayoutElementValidateLayout(ASLayout *layout) {
+    ASLayoutElementValidation *validation = [[ASLayoutElementValidation alloc] init];
+    [validation registerValidator:[[ASLayoutElementStaticValidator alloc] init]];
+    [validation registerValidator:[[ASLayoutElementStackValidator alloc] init]];
     [validation validateLayout:layout];
 }
 
@@ -32,13 +32,13 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
   return [NSString stringWithFormat:@"%@ was set on %@. It is either unecessary or the node needs to be wrapped in a %@", NSStringFromSelector(selector), obj, NSStringFromClass(cl)];
 }
 
-#pragma mark - ASLayoutableBlockValidator
+#pragma mark - ASLayoutElementBlockValidator
 
-@implementation ASLayoutableBlockValidator
+@implementation ASLayoutElementBlockValidator
 
 #pragma mark Lifecycle
 
-- (instancetype)initWithBlock:(ASLayoutableBlockValidatorBlock)block
+- (instancetype)initWithBlock:(ASLayoutElementBlockValidatorBlock)block
 {
   self = [super init];
   if (self) {
@@ -47,7 +47,7 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
   return self;
 }
 
-#pragma mark <ASLayoutableValidator>
+#pragma mark <ASLayoutElementValidator>
 
 - (void)validateLayout:(ASLayout *)layout
 {
@@ -58,26 +58,26 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
 
 @end
 
-#pragma mark - ASLayoutableStaticValidator
+#pragma mark - ASLayoutElementStaticValidator
 
-@implementation ASLayoutableStaticValidator
+@implementation ASLayoutElementStaticValidator
 
 - (void)validateLayout:(ASLayout *)layout
 {
   for (ASLayout *sublayout in layout.sublayouts) {
-    id<ASLayoutable> layoutable = layout.layoutable;
-    id<ASLayoutable> sublayoutLayoutable = sublayout.layoutable;
+    id<ASLayoutElement> layoutElement = layout.layoutElement;
+    id<ASLayoutElement> sublayoutLayoutElement = sublayout.layoutElement;
     
     NSString *assertMessage = nil;
-    Class stackContainerClass = [ASStaticLayoutSpec class];
+    Class stackContainerClass = [ASAbsoluteLayoutSpec class];
     
     // Check for default layoutPosition
-    if (!CGPointEqualToPoint(sublayoutLayoutable.style.layoutPosition, CGPointZero)) {
-      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(layoutPosition), sublayoutLayoutable, stackContainerClass);
+    if (!CGPointEqualToPoint(sublayoutLayoutElement.style.layoutPosition, CGPointZero)) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(layoutPosition), sublayoutLayoutElement, stackContainerClass);
     }
     
-    // Sublayout layoutable should be wrapped in a ASStaticLayoutSpec
-    if (assertMessage == nil || [layoutable isKindOfClass:stackContainerClass]) {
+    // Sublayout layoutElement should be wrapped in a ASAbsoluteLayoutSpec
+    if (assertMessage == nil || [layoutElement isKindOfClass:stackContainerClass]) {
       continue;
     }
     
@@ -88,38 +88,38 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
 @end
 
 
-#pragma mark - ASLayoutableStackValidator
+#pragma mark - ASLayoutElementStackValidator
 
-@implementation ASLayoutableStackValidator
+@implementation ASLayoutElementStackValidator
 
-#pragma mark <ASLayoutableValidator>
+#pragma mark <ASLayoutElementValidator>
 
 - (void)validateLayout:(ASLayout *)layout
 {
-  id<ASLayoutable> layoutable = layout.layoutable;
+  id<ASLayoutElement> layoutElement = layout.layoutElement;
   for (ASLayout *sublayout in layout.sublayouts) {
-    id<ASLayoutable> sublayoutLayoutable = sublayout.layoutable;
+    id<ASLayoutElement> sublayoutLayoutElement = sublayout.layoutElement;
     
     NSString *assertMessage = nil;
     Class stackContainerClass = [ASStackLayoutSpec class];
     
     // Check if default values related to ASStackLayoutSpec have changed
-    if (sublayoutLayoutable.style.spacingBefore != 0) {
-      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(spacingBefore), sublayoutLayoutable, stackContainerClass);
-    } else if (sublayoutLayoutable.style.spacingAfter != 0) {
-      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(spacingAfter), sublayoutLayoutable, stackContainerClass);
-    } else if (sublayoutLayoutable.style.flexGrow == YES) {
-      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexGrow), sublayoutLayoutable, stackContainerClass);
-    } else if (sublayoutLayoutable.style.flexShrink == YES) {
-      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexShrink), sublayoutLayoutable, stackContainerClass);
-    } else if (!ASDimensionEqualToDimension(sublayoutLayoutable.style.flexBasis, ASDimensionAuto) ) {
-      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexBasis), sublayoutLayoutable, stackContainerClass);
-    } else if (sublayoutLayoutable.style.alignSelf != ASStackLayoutAlignSelfAuto) {
-      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(alignSelf), sublayoutLayoutable, stackContainerClass);
+    if (sublayoutLayoutElement.style.spacingBefore != 0) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(spacingBefore), sublayoutLayoutElement, stackContainerClass);
+    } else if (sublayoutLayoutElement.style.spacingAfter != 0) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(spacingAfter), sublayoutLayoutElement, stackContainerClass);
+    } else if (sublayoutLayoutElement.style.flexGrow == YES) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexGrow), sublayoutLayoutElement, stackContainerClass);
+    } else if (sublayoutLayoutElement.style.flexShrink == YES) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexShrink), sublayoutLayoutElement, stackContainerClass);
+    } else if (!ASDimensionEqualToDimension(sublayoutLayoutElement.style.flexBasis, ASDimensionAuto) ) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(flexBasis), sublayoutLayoutElement, stackContainerClass);
+    } else if (sublayoutLayoutElement.style.alignSelf != ASStackLayoutAlignSelfAuto) {
+      assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(alignSelf), sublayoutLayoutElement, stackContainerClass);
     }
     
-    // Sublayout layoutable should be wrapped in a ASStackLayoutSpec
-    if (assertMessage == nil || [layoutable isKindOfClass:stackContainerClass]) {
+    // Sublayout layoutElement should be wrapped in a ASStackLayoutSpec
+    if (assertMessage == nil || [layoutElement isKindOfClass:stackContainerClass]) {
       continue;
     }
     
@@ -129,11 +129,11 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
 
 @end
 
-#pragma mark ASLayoutablePreferredSizeValidator
+#pragma mark ASLayoutElementPreferredSizeValidator
 
-@implementation ASLayoutablePreferredSizeValidator
+@implementation ASLayoutElementPreferredSizeValidator
 
-#pragma mark <ASLayoutableValidator>
+#pragma mark <ASLayoutElementValidator>
 
 - (void)validateLayout:(ASLayout *)layout
 {
@@ -143,12 +143,12 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
 @end
 
 
-#pragma mark - ASLayoutableValidation
+#pragma mark - ASLayoutElementValidation
 
-@interface ASLayoutableValidation ()
+@interface ASLayoutElementValidation ()
 @end
 
-@implementation ASLayoutableValidation {
+@implementation ASLayoutElementValidation {
   NSMutableArray *_validators;
 }
 
@@ -165,24 +165,24 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
 
 #pragma mark Validator Management
 
-- (NSArray<id<ASLayoutableValidator>> *)validators
+- (NSArray<id<ASLayoutElementValidator>> *)validators
 {
   return [_validators copy];
 }
 
-- (void)registerValidator:(id<ASLayoutableValidator>)validator
+- (void)registerValidator:(id<ASLayoutElementValidator>)validator
 {
   [_validators addObject:validator];
 }
 
-- (id<ASLayoutableValidator>)registerValidatorWithBlock:(ASLayoutableBlockValidatorBlock)block
+- (id<ASLayoutElementValidator>)registerValidatorWithBlock:(ASLayoutElementBlockValidatorBlock)block
 {
-  ASLayoutableBlockValidator *blockValidator = [[ASLayoutableBlockValidator alloc] initWithBlock:block];
+  ASLayoutElementBlockValidator *blockValidator = [[ASLayoutElementBlockValidator alloc] initWithBlock:block];
   [_validators addObject:blockValidator];
   return blockValidator;
 }
 
-- (void)unregisterValidator:(id<ASLayoutableValidator>)validator
+- (void)unregisterValidator:(id<ASLayoutElementValidator>)validator
 {
   [_validators removeObject:validator];
 }
@@ -200,7 +200,7 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
     queue.pop();
     
     // Validate layout with all registered validators
-    for (id<ASLayoutableValidator> validator in self.validators) {
+    for (id<ASLayoutElementValidator> validator in self.validators) {
       [validator validateLayout:layout];
     }
     

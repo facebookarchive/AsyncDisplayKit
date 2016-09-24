@@ -1,5 +1,5 @@
 //
-//  ASLayoutable.h
+//  ASLayoutElement.h
 //  AsyncDisplayKit
 //
 //  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
@@ -10,64 +10,73 @@
 
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
-#import <AsyncDisplayKit/ASStackLayoutable.h>
-#import <AsyncDisplayKit/ASStaticLayoutable.h>
+#import <AsyncDisplayKit/ASStackLayoutElement.h>
+#import <AsyncDisplayKit/ASAbsoluteLayoutElement.h>
 
-#import <AsyncDisplayKit/ASLayoutablePrivate.h>
+#import <AsyncDisplayKit/ASLayoutElementPrivate.h>
 #import <AsyncDisplayKit/ASEnvironment.h>
-#import <AsyncDisplayKit/ASLayoutableExtensibility.h>
+#import <AsyncDisplayKit/ASLayoutElementExtensibility.h>
 
 @class ASLayout;
 @class ASLayoutSpec;
 
 /** A constant that indicates that the parent's size is not yet determined in a given dimension. */
-extern CGFloat const ASLayoutableParentDimensionUndefined;
+extern CGFloat const ASLayoutElementParentDimensionUndefined;
 
 /** A constant that indicates that the parent's size is not yet determined in either dimension. */
-extern CGSize const ASLayoutableParentSizeUndefined;
+extern CGSize const ASLayoutElementParentSizeUndefined;
 
-/** Type of ASLayoutable  */
-typedef NS_ENUM(NSUInteger, ASLayoutableType) {
-  ASLayoutableTypeLayoutSpec,
-  ASLayoutableTypeDisplayNode
+/** Type of ASLayoutElement  */
+typedef NS_ENUM(NSUInteger, ASLayoutElementType) {
+  ASLayoutElementTypeLayoutSpec,
+  ASLayoutElementTypeDisplayNode
 };
 
 NS_ASSUME_NONNULL_BEGIN
 
 /** 
- * The ASLayoutable protocol declares a method for measuring the layout of an object. A layout
+ * The ASLayoutElement protocol declares a method for measuring the layout of an object. A layout
  * is defined by an ASLayout return value, and must specify 1) the size (but not position) of the
- * layoutable object, and 2) the size and position of all of its immediate child objects. The tree 
+ * layoutElement object, and 2) the size and position of all of its immediate child objects. The tree 
  * recursion is driven by parents requesting layouts from their children in order to determine their 
  * size, followed by the parents setting the position of the children once the size is known
  *
- * The protocol also implements a "family" of Layoutable protocols. These protocols contain layout 
+ * The protocol also implements a "family" of LayoutElement protocols. These protocols contain layout 
  * options that can be used for specific layout specs. For example, ASStackLayoutSpec has options
- * defining how a layoutable should shrink or grow based upon available space.
+ * defining how a layoutElement should shrink or grow based upon available space.
  *
- * These layout options are all stored in an ASLayoutOptions class (that is defined in ASLayoutablePrivate).
- * Generally you needn't worry about the layout options class, as the layoutable protocols allow all direct
+ * These layout options are all stored in an ASLayoutOptions class (that is defined in ASLayoutElementPrivate).
+ * Generally you needn't worry about the layout options class, as the layoutElement protocols allow all direct
  * access to the options via convenience properties. If you are creating custom layout spec, then you can
  * extend the backing layout options class to accommodate any new layout options.
  */
-@protocol ASLayoutable <ASEnvironment, ASLayoutablePrivate, ASLayoutableExtensibility>
+@protocol ASLayoutElement <ASEnvironment, ASLayoutElementPrivate, ASLayoutElementExtensibility>
 
 #pragma mark - Getter
 
 /**
- * @abstract Returns type of layoutable
+ * @abstract Returns type of layoutElement
  */
-@property (nonatomic, assign, readonly) ASLayoutableType layoutableType;
+@property (nonatomic, assign, readonly) ASLayoutElementType layoutElementType;
 
 /**
- * @abstract Returns if the layoutable can be used to layout in an asynchronous way on a background thread.
+ * @abstract Returns if the layoutElement can be used to layout in an asynchronous way on a background thread.
  */
 @property (nonatomic, assign, readonly) BOOL canLayoutAsynchronous;
 
 /**
- * @abstract A size constraint that should apply to this ASLayoutable.
+ * @abstract A size constraint that should apply to this ASLayoutElement.
  */
-@property (nonatomic, assign, readonly) ASLayoutableStyle *style;
+@property (nonatomic, assign, readonly) ASLayoutElementStyle *style;
+
+/**
+* @discussion This property contains the ASLayoutElementStyle class object by default. Subclasses can use this property to
+* return a different size class as needed. For example, if your layoutElement would like extend the style object to support
+* more properties you might want to set this property to a custom subclass of ASLayoutElementStyle.
+*
+* This property is set only once early in the creation of the layoutElement to create the corresponding style object.
+*/
+@property (class, nonatomic, readonly) Class styleClass;
 
 #pragma mark - Calculate layout
 
@@ -89,14 +98,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize;
 
 /**
- * Call this on children layoutables to compute their layouts within your implementation of -calculateLayoutThatFits:.
+ * Call this on children layoutElements to compute their layouts within your implementation of -calculateLayoutThatFits:.
  *
  * @warning You may not override this method. Override -calculateLayoutThatFits: instead.
  * @warning In almost all cases, prefer the use of ASCalculateLayout in ASLayout
  *
  * @param constrainedSize Specifies a minimum and maximum size. The receiver must choose a size that is in this range.
  * @param parentSize The parent node's size. If the parent component does not have a final size in a given dimension,
- *                  then it should be passed as ASLayoutableParentDimensionUndefined (for example, if the parent's width
+ *                  then it should be passed as ASLayoutElementParentDimensionUndefined (for example, if the parent's width
  *                  depends on the child's size).
  *
  * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
@@ -107,7 +116,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize;
 
 /**
- * Override this method to compute your layoutable's layout.
+ * Override this method to compute your layoutElement's layout.
  *
  * @discussion Why do you need to override -calculateLayoutThatFits: instead of -layoutThatFits:parentSize:?
  * The base implementation of -layoutThatFits:parentSize: does the following for you:
@@ -125,13 +134,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * In certain advanced cases, you may want to override this method. Overriding this method allows you to receive the
- * layoutable's size, parentSize, and constrained size. With these values you could calculate the final constrained size
+ * layoutElement's size, parentSize, and constrained size. With these values you could calculate the final constrained size
  * and call -calculateLayoutThatFits: with the result.
  *
  * @warning Overriding this method should be done VERY rarely.
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASLayoutableSize)size
+                     restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize;
 
 
@@ -150,28 +159,28 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-#pragma mark - ASLayoutableStyle
+#pragma mark - ASLayoutElementStyle
 
-@interface ASLayoutableStyle : NSObject <ASStackLayoutable, ASStaticLayoutable>
+@interface ASLayoutElementStyle : NSObject <ASStackLayoutElement, ASAbsoluteLayoutElement>
 
 
 #pragma mark - Sizing
 
 // TODO: Move to internal method?
 /**
- * @abstract A size constraint that should apply to this ASLayoutable.
+ * @abstract A size constraint that should apply to this ASLayoutElement.
  */
-@property (nonatomic, assign, readwrite) ASLayoutableSize size;
+@property (nonatomic, assign, readwrite) ASLayoutElementSize size;
 
 /**
- * @abstract The width property specifies the height of the content area of an ASLayoutable.
+ * @abstract The width property specifies the height of the content area of an ASLayoutElement.
  * The minWidth and maxWidth properties override width.
  * Defaults to ASRelativeDimensionTypeAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension width;
 
 /**
- * @abstract The height property specifies the height of the content area of an ASLayoutable
+ * @abstract The height property specifies the height of the content area of an ASLayoutElement
  * The minHeight and maxHeight properties override height.
  * Defaults to ASDimensionTypeAuto
  */
@@ -220,7 +229,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setExactSizeWithCGSize:(CGSize)size;
 
 
-#pragma mark - ASStackLayoutable
+#pragma mark - ASStackLayoutElement
 
 /**
  * @abstract Additional space to place before this object in the stacking direction.
@@ -270,7 +279,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) CGFloat descender;
 
 
-#pragma mark - ASStaticLayoutable
+#pragma mark - ASAbsoluteLayoutElement
 
 /**
  * @abstract The position of this object within its parent spec.

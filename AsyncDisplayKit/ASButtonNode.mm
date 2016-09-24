@@ -14,7 +14,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
-#import "ASStaticLayoutSpec.h"
+#import "ASAbsoluteLayoutSpec.h"
 
 @interface ASButtonNode ()
 {
@@ -519,7 +519,7 @@
 #endif
     stack.style.width = ASDimensionMake(ASDimensionUnitPoints, self.preferredFrameSize.width);
     stack.style.height = ASDimensionMake(ASDimensionUnitPoints, self.preferredFrameSize.height);
-    spec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack]];
+    spec = [ASAbsoluteLayoutSpec staticLayoutSpecWithChildren:@[stack]];
   }
 #pragma clang diagnostic pop
   

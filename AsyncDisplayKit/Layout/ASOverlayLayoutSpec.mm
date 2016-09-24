@@ -18,7 +18,7 @@ static NSUInteger const kOverlayChildIndex = 1;
 
 @implementation ASOverlayLayoutSpec
 
-- (instancetype)initWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
+- (instancetype)initWithChild:(id<ASLayoutElement>)child overlay:(id<ASLayoutElement>)overlay
 {
   if (!(self = [super init])) {
     return nil;
@@ -29,17 +29,17 @@ static NSUInteger const kOverlayChildIndex = 1;
   return self;
 }
 
-+ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutable>)child overlay:(id<ASLayoutable>)overlay
++ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutElement>)child overlay:(id<ASLayoutElement>)overlay
 {
   return [[self alloc] initWithChild:child overlay:overlay];
 }
 
-- (void)setOverlay:(id<ASLayoutable>)overlay
+- (void)setOverlay:(id<ASLayoutElement>)overlay
 {
   [super setChild:overlay forIndex:kOverlayChildIndex];
 }
 
-- (id<ASLayoutable>)overlay
+- (id<ASLayoutElement>)overlay
 {
   return [super childForIndex:kOverlayChildIndex];
 }
@@ -48,7 +48,7 @@ static NSUInteger const kOverlayChildIndex = 1;
  First layout the contents, then fit the overlay on top of it.
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASLayoutableSize)size
+                     restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
   ASLayout *contentsLayout = [self.child layoutThatFits:constrainedSize parentSize:parentSize];
@@ -61,14 +61,14 @@ static NSUInteger const kOverlayChildIndex = 1;
     [sublayouts addObject:overlayLayout];
   }
   
-  return [ASLayout layoutWithLayoutable:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutElement:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
 @end
 
 @implementation ASOverlayLayoutSpec (Debugging)
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutElementAsciiArtProtocol
 
 - (NSString *)debugBoxString
 {

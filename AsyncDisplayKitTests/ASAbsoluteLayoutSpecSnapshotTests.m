@@ -1,5 +1,5 @@
 //
-//  ASStaticLayoutSpecSnapshotTests.m
+//  ASAbsoluteLayoutSpecSnapshotTests.m
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 18/10/15.
@@ -12,13 +12,13 @@
 
 #import "ASLayoutSpecSnapshotTestsHelper.h"
 
-#import "ASStaticLayoutSpec.h"
+#import "ASAbsoluteLayoutSpec.h"
 #import "ASBackgroundLayoutSpec.h"
 
-@interface ASStaticLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
+@interface ASAbsoluteLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end
 
-@implementation ASStaticLayoutSpecSnapshotTests
+@implementation ASAbsoluteLayoutSpecSnapshotTests
 
 - (void)testSizingBehaviour
 {
@@ -64,7 +64,7 @@
   ASLayoutSpec *layoutSpec =
   [ASBackgroundLayoutSpec
    backgroundLayoutSpecWithChild:
-   [ASStaticLayoutSpec
+   [ASAbsoluteLayoutSpec
     staticLayoutSpecWithChildren:children]
    background:backgroundNode];
   

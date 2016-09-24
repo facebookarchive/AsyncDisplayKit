@@ -18,7 +18,7 @@
 /**
  Sizes the child given the parameters specified, and returns the computed layout.
  */
-static ASLayout *crossChildLayout(const id<ASLayoutable> child,
+static ASLayout *crossChildLayout(const id<ASLayoutElement> child,
                                   const ASStackLayoutSpecStyle style,
                                   const CGFloat stackMin,
                                   const CGFloat stackMax,
@@ -32,7 +32,7 @@ static ASLayout *crossChildLayout(const id<ASLayoutable> child,
   const ASSizeRange childSizeRange = directionSizeRange(style.direction, stackMin, stackMax, childCrossMin, crossMax);
   ASLayout *layout = [child layoutThatFits:childSizeRange parentSize:size];
   ASDisplayNodeCAssertNotNil(layout, @"ASLayout returned from measureWithSizeRange: must not be nil: %@", child);
-  return layout ? : [ASLayout layoutWithLayoutable:child size:{0, 0}];
+  return layout ? : [ASLayout layoutWithLayoutElement:child size:{0, 0}];
 }
 
 /**
@@ -115,7 +115,7 @@ static CGFloat computeStackDimensionSum(const std::vector<ASStackUnpositionedIte
                                                   // Start from default spacing between each child:
                                                   children.empty() ? 0 : style.spacing * (children.size() - 1),
                                                   [&](CGFloat x, const ASStackUnpositionedItem &l) {
-                                                    const id<ASLayoutable> child = l.child;
+                                                    const id<ASLayoutElement> child = l.child;
                                                     return x + child.style.spacingBefore + child.style.spacingAfter;
                                                   });
 
@@ -191,7 +191,7 @@ static std::function<BOOL(const ASStackUnpositionedItem &)> isFlexibleInViolatio
   }
 }
 
-ASDISPLAYNODE_INLINE BOOL isFlexibleInBothDirections(id<ASLayoutable> child)
+ASDISPLAYNODE_INLINE BOOL isFlexibleInBothDirections(id<ASLayoutElement> child)
 {
   return child.style.flexGrow && child.style.flexShrink;
 }
@@ -200,7 +200,7 @@ ASDISPLAYNODE_INLINE BOOL isFlexibleInBothDirections(id<ASLayoutable> child)
  If we have a single flexible (both shrinkable and growable) child, and our allowed size range is set to a specific
  number then we may avoid the first "intrinsic" size calculation.
  */
-ASDISPLAYNODE_INLINE BOOL useOptimizedFlexing(const std::vector<id<ASLayoutable>> &children,
+ASDISPLAYNODE_INLINE BOOL useOptimizedFlexing(const std::vector<id<ASLayoutElement>> &children,
                                               const ASStackLayoutSpecStyle &style,
                                               const ASSizeRange &sizeRange)
 {
@@ -220,7 +220,7 @@ static void layoutFlexibleChildrenAtZeroSize(std::vector<ASStackUnpositionedItem
                                              const CGSize size)
 {
   for (ASStackUnpositionedItem &item : items) {
-    const id<ASLayoutable> child = item.child;
+    const id<ASLayoutElement> child = item.child;
     if (isFlexibleInBothDirections(child)) {
       item.layout = crossChildLayout(child,
                                      style,
@@ -293,7 +293,7 @@ static void flexChildrenAlongStackDimension(std::vector<ASStackUnpositionedItem>
  Performs the first unconstrained layout of the children, generating the unpositioned items that are then flexed and
  stretched.
  */
-static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStackDimension(const std::vector<id<ASLayoutable>> &children,
+static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStackDimension(const std::vector<id<ASLayoutElement>> &children,
                                                                                            const ASStackLayoutSpecStyle &style,
                                                                                            const ASSizeRange &sizeRange,
                                                                                            const CGSize size,
@@ -301,9 +301,9 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
 {
   const CGFloat minCrossDimension = crossDimension(style.direction, sizeRange.min);
   const CGFloat maxCrossDimension = crossDimension(style.direction, sizeRange.max);
-  return AS::map(children, [&](id<ASLayoutable> child) -> ASStackUnpositionedItem {
+  return AS::map(children, [&](id<ASLayoutElement> child) -> ASStackUnpositionedItem {
     if (useOptimizedFlexing && isFlexibleInBothDirections(child)) {
-      return { child, [ASLayout layoutWithLayoutable:child size:{0, 0}] };
+      return { child, [ASLayout layoutWithLayoutElement:child size:{0, 0}] };
     } else {
       return {
         child,
@@ -319,15 +319,15 @@ static std::vector<ASStackUnpositionedItem> layoutChildrenAlongUnconstrainedStac
   });
 }
 
-ASStackUnpositionedLayout ASStackUnpositionedLayout::compute(const std::vector<id<ASLayoutable>> &children,
+ASStackUnpositionedLayout ASStackUnpositionedLayout::compute(const std::vector<id<ASLayoutElement>> &children,
                                                              const ASStackLayoutSpecStyle &style,
                                                              const ASSizeRange &sizeRange)
 {
   // If we have a fixed size in either dimension, pass it to children so they can resolve percentages against it.
-  // Otherwise, we pass ASLayoutableParentDimensionUndefined since it will depend on the content.
+  // Otherwise, we pass ASLayoutElementParentDimensionUndefined since it will depend on the content.
   const CGSize size = {
-    (sizeRange.min.width == sizeRange.max.width) ? sizeRange.min.width : ASLayoutableParentDimensionUndefined,
-    (sizeRange.min.height == sizeRange.max.height) ? sizeRange.min.height : ASLayoutableParentDimensionUndefined,
+    (sizeRange.min.width == sizeRange.max.width) ? sizeRange.min.width : ASLayoutElementParentDimensionUndefined,
+    (sizeRange.min.height == sizeRange.max.height) ? sizeRange.min.height : ASLayoutElementParentDimensionUndefined,
   };
 
   // We may be able to avoid some redundant layout passes
