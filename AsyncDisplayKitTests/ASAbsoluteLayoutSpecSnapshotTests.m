@@ -62,10 +62,8 @@
   [subnodes insertObject:backgroundNode atIndex:0];
 
   ASLayoutSpec *layoutSpec =
-  [ASBackgroundLayoutSpec
-   backgroundLayoutSpecWithChild:
-   [ASAbsoluteLayoutSpec
-    staticLayoutSpecWithChildren:children]
+  [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:
+   [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:children]
    background:backgroundNode];
   
   [self testLayoutSpec:layoutSpec sizeRange:sizeRange subnodes:subnodes identifier:identifier];
