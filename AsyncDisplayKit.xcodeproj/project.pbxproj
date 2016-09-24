@@ -151,8 +151,8 @@
 		34EFC7701B701CFA00AD841F /* ASStackLayoutDefines.h in Headers */ = {isa = PBXBuildFile; fileRef = AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		34EFC7711B701CFF00AD841F /* ASStackLayoutSpec.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED161B17843500DA7C62 /* ASStackLayoutSpec.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		34EFC7721B701D0300AD841F /* ASStackLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED171B17843500DA7C62 /* ASStackLayoutSpec.mm */; };
-		34EFC7731B701D0700AD841F /* ASStaticLayoutSpec.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED181B17843500DA7C62 /* ASStaticLayoutSpec.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		34EFC7741B701D0A00AD841F /* ASStaticLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED191B17843500DA7C62 /* ASStaticLayoutSpec.mm */; };
+		34EFC7731B701D0700AD841F /* ASAbsoluteLayoutSpec.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED181B17843500DA7C62 /* ASAbsoluteLayoutSpec.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		34EFC7741B701D0A00AD841F /* ASAbsoluteLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED191B17843500DA7C62 /* ASAbsoluteLayoutSpec.mm */; };
 		34EFC7751B701D2400AD841F /* ASStackPositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED471B17847A00DA7C62 /* ASStackPositionedLayout.h */; };
 		34EFC7761B701D2A00AD841F /* ASStackPositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED481B17847A00DA7C62 /* ASStackPositionedLayout.mm */; };
 		34EFC7771B701D2D00AD841F /* ASStackUnpositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED491B17847A00DA7C62 /* ASStackUnpositionedLayout.h */; };
@@ -267,7 +267,7 @@
 		9C55866A1BD549CB00B50E3A /* ASAsciiArtBoxCreator.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C5586681BD549CB00B50E3A /* ASAsciiArtBoxCreator.m */; };
 		9C55866B1BD54A1900B50E3A /* ASAsciiArtBoxCreator.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C5586681BD549CB00B50E3A /* ASAsciiArtBoxCreator.m */; };
 		9C55866C1BD54A3000B50E3A /* ASAsciiArtBoxCreator.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5586671BD549CB00B50E3A /* ASAsciiArtBoxCreator.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		9C6BB3B31B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9C6BB3B31B8CC9C200F13F52 /* ASAbsoluteLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASAbsoluteLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C70F2041CDA4EFA007D6C76 /* ASTraitCollection.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C70F2021CDA4EFA007D6C76 /* ASTraitCollection.m */; };
 		9C70F2051CDA4F06007D6C76 /* ASTraitCollection.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C70F2021CDA4EFA007D6C76 /* ASTraitCollection.m */; };
 		9C70F2061CDA4F0C007D6C76 /* ASTraitCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C70F2011CDA4EFA007D6C76 /* ASTraitCollection.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -293,7 +293,7 @@
 		9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.mm */; };
 		A2763D7A1CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = A2763D771CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h */; };
 		A37320101C571B740011FC94 /* ASTextNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = A373200E1C571B050011FC94 /* ASTextNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		AC026B581BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AC026B571BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m */; };
+		AC026B581BD3F61800BBC17E /* ASAbsoluteLayoutSpecSnapshotTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AC026B571BD3F61800BBC17E /* ASAbsoluteLayoutSpecSnapshotTests.m */; };
 		AC026B6A1BD57D6F00BBC17E /* ASChangeSetDataController.h in Headers */ = {isa = PBXBuildFile; fileRef = AC026B671BD57D6F00BBC17E /* ASChangeSetDataController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC026B6B1BD57D6F00BBC17E /* ASChangeSetDataController.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC026B681BD57D6F00BBC17E /* ASChangeSetDataController.mm */; };
 		AC026B6C1BD57D6F00BBC17E /* ASChangeSetDataController.mm in Sources */ = {isa = PBXBuildFile; fileRef = AC026B681BD57D6F00BBC17E /* ASChangeSetDataController.mm */; };
@@ -314,7 +314,7 @@
 		ACF6ED2C1B17843500DA7C62 /* ASOverlayLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED131B17843500DA7C62 /* ASOverlayLayoutSpec.mm */; };
 		ACF6ED2E1B17843500DA7C62 /* ASRatioLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED151B17843500DA7C62 /* ASRatioLayoutSpec.mm */; };
 		ACF6ED301B17843500DA7C62 /* ASStackLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED171B17843500DA7C62 /* ASStackLayoutSpec.mm */; };
-		ACF6ED321B17843500DA7C62 /* ASStaticLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED191B17843500DA7C62 /* ASStaticLayoutSpec.mm */; };
+		ACF6ED321B17843500DA7C62 /* ASAbsoluteLayoutSpec.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED191B17843500DA7C62 /* ASAbsoluteLayoutSpec.mm */; };
 		ACF6ED4C1B17847A00DA7C62 /* ASInternalHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED441B17847A00DA7C62 /* ASInternalHelpers.m */; };
 		ACF6ED501B17847A00DA7C62 /* ASStackPositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED481B17847A00DA7C62 /* ASStackPositionedLayout.mm */; };
 		ACF6ED521B17847A00DA7C62 /* ASStackUnpositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED4A1B17847A00DA7C62 /* ASStackUnpositionedLayout.mm */; };
@@ -571,8 +571,8 @@
 		F7CE6C681D2CDB3E00BE4C15 /* ASStackLayoutable.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */; };
 		F7CE6C691D2CDB3E00BE4C15 /* ASStackLayoutDefines.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */; };
 		F7CE6C6A1D2CDB3E00BE4C15 /* ASStackLayoutSpec.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = ACF6ED161B17843500DA7C62 /* ASStackLayoutSpec.h */; };
-		F7CE6C6B1D2CDB3E00BE4C15 /* ASStaticLayoutable.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */; };
-		F7CE6C6C1D2CDB3E00BE4C15 /* ASStaticLayoutSpec.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = ACF6ED181B17843500DA7C62 /* ASStaticLayoutSpec.h */; };
+		F7CE6C6B1D2CDB3E00BE4C15 /* ASAbsoluteLayoutable.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASAbsoluteLayoutable.h */; };
+		F7CE6C6C1D2CDB3E00BE4C15 /* ASAbsoluteLayoutSpec.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = ACF6ED181B17843500DA7C62 /* ASAbsoluteLayoutSpec.h */; };
 		F7CE6C6D1D2CDB3E00BE4C15 /* ASTextKitComponents.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 257754BA1BEE458E00737CA5 /* ASTextKitComponents.h */; };
 		F7CE6C6E1D2CDB3E00BE4C15 /* ASTextNodeWordKerner.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 257754B91BEE458E00737CA5 /* ASTextNodeWordKerner.h */; };
 		F7CE6C6F1D2CDB3E00BE4C15 /* ASTextNodeTypes.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 257754BC1BEE458E00737CA5 /* ASTextNodeTypes.h */; };
@@ -743,8 +743,8 @@
 				F7CE6C681D2CDB3E00BE4C15 /* ASStackLayoutable.h in CopyFiles */,
 				F7CE6C691D2CDB3E00BE4C15 /* ASStackLayoutDefines.h in CopyFiles */,
 				F7CE6C6A1D2CDB3E00BE4C15 /* ASStackLayoutSpec.h in CopyFiles */,
-				F7CE6C6B1D2CDB3E00BE4C15 /* ASStaticLayoutable.h in CopyFiles */,
-				F7CE6C6C1D2CDB3E00BE4C15 /* ASStaticLayoutSpec.h in CopyFiles */,
+				F7CE6C6B1D2CDB3E00BE4C15 /* ASAbsoluteLayoutable.h in CopyFiles */,
+				F7CE6C6C1D2CDB3E00BE4C15 /* ASAbsoluteLayoutSpec.h in CopyFiles */,
 				F7CE6C6D1D2CDB3E00BE4C15 /* ASTextKitComponents.h in CopyFiles */,
 				F7CE6C6E1D2CDB3E00BE4C15 /* ASTextNodeWordKerner.h in CopyFiles */,
 				F7CE6C6F1D2CDB3E00BE4C15 /* ASTextNodeTypes.h in CopyFiles */,
@@ -1033,7 +1033,7 @@
 		9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStackLayoutable.h; path = AsyncDisplayKit/Layout/ASStackLayoutable.h; sourceTree = "<group>"; };
 		9C5586671BD549CB00B50E3A /* ASAsciiArtBoxCreator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASAsciiArtBoxCreator.h; path = AsyncDisplayKit/Layout/ASAsciiArtBoxCreator.h; sourceTree = "<group>"; };
 		9C5586681BD549CB00B50E3A /* ASAsciiArtBoxCreator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASAsciiArtBoxCreator.m; path = AsyncDisplayKit/Layout/ASAsciiArtBoxCreator.m; sourceTree = "<group>"; };
-		9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStaticLayoutable.h; path = AsyncDisplayKit/Layout/ASStaticLayoutable.h; sourceTree = "<group>"; };
+		9C6BB3B01B8CC9C200F13F52 /* ASAbsoluteLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASAbsoluteLayoutable.h; path = AsyncDisplayKit/Layout/ASAbsoluteLayoutable.h; sourceTree = "<group>"; };
 		9C70F2011CDA4EFA007D6C76 /* ASTraitCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASTraitCollection.h; sourceTree = "<group>"; };
 		9C70F2021CDA4EFA007D6C76 /* ASTraitCollection.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTraitCollection.m; sourceTree = "<group>"; };
 		9C8221931BA237B80037F19A /* ASStackBaselinePositionedLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASStackBaselinePositionedLayout.h; sourceTree = "<group>"; };
@@ -1048,7 +1048,7 @@
 		A2763D781CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASPINRemoteImageDownloader.m; path = Details/ASPINRemoteImageDownloader.m; sourceTree = "<group>"; };
 		A32FEDD31C501B6A004F642A /* ASTextKitFontSizeAdjuster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASTextKitFontSizeAdjuster.h; path = TextKit/ASTextKitFontSizeAdjuster.h; sourceTree = "<group>"; };
 		A373200E1C571B050011FC94 /* ASTextNode+Beta.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "ASTextNode+Beta.h"; sourceTree = "<group>"; };
-		AC026B571BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASStaticLayoutSpecSnapshotTests.m; sourceTree = "<group>"; };
+		AC026B571BD3F61800BBC17E /* ASAbsoluteLayoutSpecSnapshotTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASAbsoluteLayoutSpecSnapshotTests.m; sourceTree = "<group>"; };
 		AC026B671BD57D6F00BBC17E /* ASChangeSetDataController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASChangeSetDataController.h; sourceTree = "<group>"; };
 		AC026B681BD57D6F00BBC17E /* ASChangeSetDataController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASChangeSetDataController.mm; sourceTree = "<group>"; };
 		AC026B6D1BD57DBF00BBC17E /* _ASHierarchyChangeSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _ASHierarchyChangeSet.h; sourceTree = "<group>"; };
@@ -1081,8 +1081,8 @@
 		ACF6ED151B17843500DA7C62 /* ASRatioLayoutSpec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; name = ASRatioLayoutSpec.mm; path = AsyncDisplayKit/Layout/ASRatioLayoutSpec.mm; sourceTree = "<group>"; };
 		ACF6ED161B17843500DA7C62 /* ASStackLayoutSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStackLayoutSpec.h; path = AsyncDisplayKit/Layout/ASStackLayoutSpec.h; sourceTree = "<group>"; };
 		ACF6ED171B17843500DA7C62 /* ASStackLayoutSpec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASStackLayoutSpec.mm; path = AsyncDisplayKit/Layout/ASStackLayoutSpec.mm; sourceTree = "<group>"; };
-		ACF6ED181B17843500DA7C62 /* ASStaticLayoutSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStaticLayoutSpec.h; path = AsyncDisplayKit/Layout/ASStaticLayoutSpec.h; sourceTree = "<group>"; };
-		ACF6ED191B17843500DA7C62 /* ASStaticLayoutSpec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; name = ASStaticLayoutSpec.mm; path = AsyncDisplayKit/Layout/ASStaticLayoutSpec.mm; sourceTree = "<group>"; };
+		ACF6ED181B17843500DA7C62 /* ASAbsoluteLayoutSpec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASAbsoluteLayoutSpec.h; path = AsyncDisplayKit/Layout/ASAbsoluteLayoutSpec.h; sourceTree = "<group>"; };
+		ACF6ED191B17843500DA7C62 /* ASAbsoluteLayoutSpec.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; name = ASAbsoluteLayoutSpec.mm; path = AsyncDisplayKit/Layout/ASAbsoluteLayoutSpec.mm; sourceTree = "<group>"; };
 		ACF6ED431B17847A00DA7C62 /* ASInternalHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASInternalHelpers.h; sourceTree = "<group>"; };
 		ACF6ED441B17847A00DA7C62 /* ASInternalHelpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASInternalHelpers.m; sourceTree = "<group>"; };
 		ACF6ED451B17847A00DA7C62 /* ASLayoutSpecUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLayoutSpecUtilities.h; sourceTree = "<group>"; };
@@ -1396,7 +1396,7 @@
 				696FCB301D6E46050093471E /* ASBackgroundLayoutSpecSnapshotTests.mm */,
 				ACF6ED5A1B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm */,
 				ACF6ED5B1B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm */,
-				AC026B571BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m */,
+				AC026B571BD3F61800BBC17E /* ASAbsoluteLayoutSpecSnapshotTests.m */,
 				81E95C131D62639600336598 /* ASTextNodeSnapshotTests.m */,
 				ACF6ED571B178DC700DA7C62 /* ASLayoutSpecSnapshotTestsHelper.h */,
 				ACF6ED581B178DC700DA7C62 /* ASLayoutSpecSnapshotTestsHelper.m */,
@@ -1707,9 +1707,9 @@
 				AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */,
 				ACF6ED161B17843500DA7C62 /* ASStackLayoutSpec.h */,
 				ACF6ED171B17843500DA7C62 /* ASStackLayoutSpec.mm */,
-				9C6BB3B01B8CC9C200F13F52 /* ASStaticLayoutable.h */,
-				ACF6ED181B17843500DA7C62 /* ASStaticLayoutSpec.h */,
-				ACF6ED191B17843500DA7C62 /* ASStaticLayoutSpec.mm */,
+				9C6BB3B01B8CC9C200F13F52 /* ASAbsoluteLayoutable.h */,
+				ACF6ED181B17843500DA7C62 /* ASAbsoluteLayoutSpec.h */,
+				ACF6ED191B17843500DA7C62 /* ASAbsoluteLayoutSpec.mm */,
 			);
 			name = Layout;
 			path = ..;
@@ -1896,8 +1896,8 @@
 				34EFC7751B701D2400AD841F /* ASStackPositionedLayout.h in Headers */,
 				69E1006E1CA89CB600D88C1B /* ASEnvironmentInternal.h in Headers */,
 				34EFC7771B701D2D00AD841F /* ASStackUnpositionedLayout.h in Headers */,
-				9C6BB3B31B8CC9C200F13F52 /* ASStaticLayoutable.h in Headers */,
-				34EFC7731B701D0700AD841F /* ASStaticLayoutSpec.h in Headers */,
+				9C6BB3B31B8CC9C200F13F52 /* ASAbsoluteLayoutable.h in Headers */,
+				34EFC7731B701D0700AD841F /* ASAbsoluteLayoutSpec.h in Headers */,
 				CC446A2F1D80AAE00071FD03 /* ASObjectDescriptionHelpers.h in Headers */,
 				254C6B781BF94DF4003EC431 /* ASTextKitContext.h in Headers */,
 				B350620A1B010EFD0018CF92 /* ASTableView.h in Headers */,
@@ -1955,12 +1955,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 058D09D2195D04C000B7D73C /* Build configuration list for PBXNativeTarget "AsyncDisplayKitTests" */;
 			buildPhases = (
+				D03848B30EFBD77CA805C258 /* 📦 Check Pods Manifest.lock */,
 				2E61B6A0DB0F436A9DDBE86F /* [CP] Check Pods Manifest.lock */,
 				058D09B8195D04C000B7D73C /* Sources */,
 				058D09B9195D04C000B7D73C /* Frameworks */,
 				058D09BA195D04C000B7D73C /* Resources */,
 				3B9D88CDF51B429C8409E4B6 /* [CP] Copy Pods Resources */,
 				B130AB1AC0A1E5162E211C19 /* [CP] Embed Pods Frameworks */,
+				8F04C65981B095A7B88BC774 /* 📦 Embed Pods Frameworks */,
+				C0FD47294835C5E0D82246C8 /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -2091,6 +2094,21 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		8F04C65981B095A7B88BC774 /* 📦 Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 		B130AB1AC0A1E5162E211C19 /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2104,6 +2122,36 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		C0FD47294835C5E0D82246C8 /* 📦 Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		D03848B30EFBD77CA805C258 /* 📦 Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -2227,7 +2275,7 @@
 				81EE38501C8E94F000456208 /* ASRunLoopQueue.mm in Sources */,
 				9C70F2041CDA4EFA007D6C76 /* ASTraitCollection.m in Sources */,
 				92074A691CC8BADA00918F75 /* ASControlNode+tvOS.m in Sources */,
-				ACF6ED321B17843500DA7C62 /* ASStaticLayoutSpec.mm in Sources */,
+				ACF6ED321B17843500DA7C62 /* ASAbsoluteLayoutSpec.mm in Sources */,
 				AC026B6B1BD57D6F00BBC17E /* ASChangeSetDataController.mm in Sources */,
 				68355B311CB5799E001D4E68 /* ASImageNode+AnimatedImage.mm in Sources */,
 				9CFFC6C01CCAC73C006A6476 /* ASViewController.mm in Sources */,
@@ -2273,7 +2321,7 @@
 				058D0A3B195D057000B7D73C /* ASDisplayNodeTestsHelper.m in Sources */,
 				83A7D95E1D446A6E00BF333E /* ASWeakMapTests.m in Sources */,
 				056D21551ABCEF50001107EF /* ASImageNodeSnapshotTests.m in Sources */,
-				AC026B581BD3F61800BBC17E /* ASStaticLayoutSpecSnapshotTests.m in Sources */,
+				AC026B581BD3F61800BBC17E /* ASAbsoluteLayoutSpecSnapshotTests.m in Sources */,
 				ACF6ED5E1B178DC700DA7C62 /* ASInsetLayoutSpecSnapshotTests.mm in Sources */,
 				ACF6ED601B178DC700DA7C62 /* ASLayoutSpecSnapshotTestsHelper.m in Sources */,
 				CC7FD9E11BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m in Sources */,
@@ -2413,7 +2461,7 @@
 				DE84918E1C8FFF9F003D89E9 /* ASRunLoopQueue.mm in Sources */,
 				68FC85E51CE29B7E00EDD713 /* ASTabBarController.m in Sources */,
 				AC026B6C1BD57D6F00BBC17E /* ASChangeSetDataController.mm in Sources */,
-				34EFC7741B701D0A00AD841F /* ASStaticLayoutSpec.mm in Sources */,
+				34EFC7741B701D0A00AD841F /* ASAbsoluteLayoutSpec.mm in Sources */,
 				92074A6A1CC8BADA00918F75 /* ASControlNode+tvOS.m in Sources */,
 				DB78412E1C6BCE1600A9E2B4 /* _ASTransitionContext.m in Sources */,
 				B350620B1B010EFD0018CF92 /* ASTableView.mm in Sources */,

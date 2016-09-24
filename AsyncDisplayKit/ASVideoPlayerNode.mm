@@ -726,7 +726,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [overlaySpec.style setSizeWithCGSize:maxSize];
   [children addObject:overlaySpec];
 
-  return [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
+  return [ASAbsoluteLayoutSpec staticLayoutSpecWithChildren:children];
 }
 
 - (ASLayoutSpec *)defaultLayoutSpecThatFits:(CGSize)maxSize

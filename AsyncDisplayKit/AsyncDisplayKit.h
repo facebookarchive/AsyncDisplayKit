@@ -56,7 +56,7 @@
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 #import <AsyncDisplayKit/ASOverlayLayoutSpec.h>
 #import <AsyncDisplayKit/ASRatioLayoutSpec.h>
-#import <AsyncDisplayKit/ASStaticLayoutSpec.h>
+#import <AsyncDisplayKit/ASAbsoluteLayoutSpec.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
 #import <AsyncDisplayKit/ASStackLayoutSpec.h>
 

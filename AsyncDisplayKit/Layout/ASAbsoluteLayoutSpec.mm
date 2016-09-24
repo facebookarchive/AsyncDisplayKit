@@ -1,5 +1,5 @@
 //
-//  ASStaticLayoutSpec.mm
+//  ASAbsoluteLayoutSpec.mm
 //  AsyncDisplayKit
 //
 //  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
@@ -8,12 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASStaticLayoutSpec.h"
+#import "ASAbsoluteLayoutSpec.h"
 
 #import "ASLayoutSpecUtilities.h"
 #import "ASLayout.h"
 
-@implementation ASStaticLayoutSpec
+@implementation ASAbsoluteLayoutSpec
 
 + (instancetype)staticLayoutSpecWithChildren:(NSArray *)children
 {
@@ -78,7 +78,7 @@
 
 @end
 
-@implementation ASStaticLayoutSpec (ASEnvironment)
+@implementation ASAbsoluteLayoutSpec (ASEnvironment)
 
 - (BOOL)supportsUpwardPropagation
 {
@@ -87,7 +87,7 @@
 
 @end
 
-@implementation ASStaticLayoutSpec (Debugging)
+@implementation ASAbsoluteLayoutSpec (Debugging)
 
 #pragma mark - ASLayoutableAsciiArtProtocol
 

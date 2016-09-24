@@ -1,5 +1,5 @@
 //
-//  ASStaticLayoutSpec.h
+//  ASAbsoluteLayoutSpec.h
 //  AsyncDisplayKit
 //
 //  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
@@ -17,12 +17,12 @@ NS_ASSUME_NONNULL_BEGIN
  * 
  * Computes a size that is the union of all childrens' frames.
  */
-@interface ASStaticLayoutSpec : ASLayoutSpec
+@interface ASAbsoluteLayoutSpec : ASLayoutSpec
 
 /**
- @param children Children to be positioned at fixed positions, each conforms to ASStaticLayoutable
+ @param children Children to be positioned at fixed positions, each conforms to ASAbsoluteLayoutable
  */
-+ (instancetype)staticLayoutSpecWithChildren:(NSArray<id<ASStaticLayoutable>> *)children;
++ (instancetype)staticLayoutSpecWithChildren:(NSArray<id<ASAbsoluteLayoutable>> *)children;
 
 @end
 
