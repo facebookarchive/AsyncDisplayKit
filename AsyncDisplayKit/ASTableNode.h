@@ -14,6 +14,8 @@
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol ASTableDataSource;
 @protocol ASTableDelegate;
 @class ASTableView;
@@ -34,3 +36,5 @@
 @property (weak, nonatomic) id <ASTableDataSource> dataSource;
 
 @end
+
+NS_ASSUME_NONNULL_END

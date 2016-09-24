@@ -13,9 +13,11 @@
 #import <UIKit/UIImage.h>
 #import <UIKit/UIBezierPath.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 // High-performance flat-colored, rounded-corner resizable images
 //
-// For "Baked-in Opaque" corners, set cornerColor equal to the color behind the rounded image object, e.g. the background color.
+// For "Baked-in Opaque" corners, set cornerColor equal to the color behind the rounded image object, i.e. the background color.
 // For "Baked-in Alpha" corners, set cornerColor = [UIColor clearColor]
 //
 // See http://asyncdisplaykit.org/docs/corner-rounding.html for an explanation.
@@ -45,7 +47,7 @@
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
                                           cornerColor:(UIColor *)cornerColor
                                             fillColor:(UIColor *)fillColor
-                                          borderColor:(UIColor *)borderColor
+                                          borderColor:(nullable UIColor *)borderColor
                                           borderWidth:(CGFloat)borderWidth;
 
 /**
@@ -62,10 +64,11 @@
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
                                           cornerColor:(UIColor *)cornerColor
                                             fillColor:(UIColor *)fillColor
-                                          borderColor:(UIColor *)borderColor
+                                          borderColor:(nullable UIColor *)borderColor
                                           borderWidth:(CGFloat)borderWidth
                                        roundedCorners:(UIRectCorner)roundedCorners
                                                 scale:(CGFloat)scale;
 
 @end
 
+NS_ASSUME_NONNULL_END
