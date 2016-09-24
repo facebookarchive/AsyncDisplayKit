@@ -20,17 +20,17 @@
 #define ASDK_UNBOX_NUMBER(NUMBER, PROPERTY_TYPE) \
 const char *objCType = [NUMBER objCType]; \
 if (strcmp(objCType, @encode(BOOL)) == 0) { \
-    return (PROPERTY_TYPE)[obj boolValue]; \
+  return (PROPERTY_TYPE)[obj boolValue]; \
 } else if (strcmp(objCType, @encode(int)) == 0) { \
-    return (PROPERTY_TYPE)[obj intValue]; \
+  return (PROPERTY_TYPE)[obj intValue]; \
 } else if (strcmp(objCType, @encode(NSInteger)) == 0) { \
-    return (PROPERTY_TYPE)[obj integerValue]; \
+  return (PROPERTY_TYPE)[obj integerValue]; \
 } else if (strcmp(objCType, @encode(NSUInteger)) == 0) { \
-    return (PROPERTY_TYPE)[obj unsignedIntegerValue]; \
+  return (PROPERTY_TYPE)[obj unsignedIntegerValue]; \
 } else if (strcmp(objCType, @encode(CGFloat)) == 0) { \
-    return (PROPERTY_TYPE)[obj floatValue]; \
+  return (PROPERTY_TYPE)[obj floatValue]; \
 } else { \
-    NSAssert(NO, @"Data type not supported"); \
+  NSAssert(NO, @"Data type not supported"); \
 } \
 
 /*
@@ -40,12 +40,12 @@ if (strcmp(objCType, @encode(BOOL)) == 0) { \
 @dynamic PROPERTY_NAME; \
 - (PROPERTY_TYPE)PROPERTY_NAME \
 { \
-    return (PROPERTY_TYPE)objc_getAssociatedObject(self, @selector(PROPERTY_NAME)); \
+  return (PROPERTY_TYPE)objc_getAssociatedObject(self, @selector(PROPERTY_NAME)); \
 } \
 \
 - (void)SETTER_NAME:(PROPERTY_TYPE)PROPERTY_NAME \
 { \
-    objc_setAssociatedObject(self, @selector(PROPERTY_NAME), PROPERTY_NAME, OBJC_ASSOCIATION_RETAIN); \
+  objc_setAssociatedObject(self, @selector(PROPERTY_NAME), PROPERTY_NAME, OBJC_ASSOCIATION_RETAIN); \
 } \
 
 /*
@@ -55,18 +55,18 @@ if (strcmp(objCType, @encode(BOOL)) == 0) { \
 @dynamic PROPERTY_NAME; \
 - (PROPERTY_TYPE)PROPERTY_NAME \
 { \
-    id obj = objc_getAssociatedObject(self, @selector(PROPERTY_NAME)); \
-    \
-    if (obj != nil) { \
-        ASDK_UNBOX_NUMBER(obj, PROPERTY_TYPE); \
-    } \
-    \
-    return DEFAULT_VALUE;\
+  id obj = objc_getAssociatedObject(self, @selector(PROPERTY_NAME)); \
+  \
+  if (obj != nil) { \
+    ASDK_UNBOX_NUMBER(obj, PROPERTY_TYPE); \
+  } \
+  \
+  return DEFAULT_VALUE;\
 } \
 \
 - (void)SETTER_NAME:(PROPERTY_TYPE)PROPERTY_NAME \
 { \
-    objc_setAssociatedObject(self, @selector(PROPERTY_NAME), @(PROPERTY_NAME), OBJC_ASSOCIATION_RETAIN); \
+  objc_setAssociatedObject(self, @selector(PROPERTY_NAME), @(PROPERTY_NAME), OBJC_ASSOCIATION_RETAIN); \
 } \
 
 /*
@@ -76,14 +76,14 @@ if (strcmp(objCType, @encode(BOOL)) == 0) { \
 @dynamic PROPERTY_NAME; \
 - (PROPERTY_TYPE)PROPERTY_NAME \
 { \
-    id obj = objc_getAssociatedObject(self, @selector(PROPERTY_NAME)); \
-    if (obj == nil) { \
-        return DEFAULT_STRUCT; \
-    } \
-    PROPERTY_TYPE PROPERTY_NAME; [obj getValue:&PROPERTY_NAME]; return PROPERTY_NAME; \
+  id obj = objc_getAssociatedObject(self, @selector(PROPERTY_NAME)); \
+  if (obj == nil) { \
+    return DEFAULT_STRUCT; \
+  } \
+  PROPERTY_TYPE PROPERTY_NAME; [obj getValue:&PROPERTY_NAME]; return PROPERTY_NAME; \
 } \
 \
 - (void)SETTER_NAME:(PROPERTY_TYPE)PROPERTY_NAME \
 { \
-    objc_setAssociatedObject(self, @selector(PROPERTY_NAME), [NSValue value:&PROPERTY_NAME withObjCType:@encode(PROPERTY_TYPE)], OBJC_ASSOCIATION_RETAIN_NONATOMIC);\
+  objc_setAssociatedObject(self, @selector(PROPERTY_NAME), [NSValue value:&PROPERTY_NAME withObjCType:@encode(PROPERTY_TYPE)], OBJC_ASSOCIATION_RETAIN_NONATOMIC);\
 } \
