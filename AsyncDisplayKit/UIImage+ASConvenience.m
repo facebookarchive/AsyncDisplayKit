@@ -12,11 +12,10 @@
 
 #import "UIImage+ASConvenience.h"
 #import <UIKit/UIKit.h>
+#import "ASInternalHelpers.h"
+#import "ASAssert.h"
 
 @implementation UIImage (ASDKAdditions)
-
-
-
 
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
                                           cornerColor:(UIColor *)cornerColor
@@ -70,41 +69,35 @@
   CGFloat dimension = (cornerRadius * 2) + 1;
   CGRect bounds = CGRectMake(0, 0, dimension, dimension);
   
-  // This is a hack to make one NSNumber key out of the corners and cornerRadius
-  if (roundedCorners == UIRectCornerAllCorners) {
-    // UIRectCornerAllCorners is ~0, but below is equivalent and we can pack it into half an NSUInteger
-    roundedCorners = UIRectCornerTopLeft | UIRectCornerTopRight | UIRectCornerBottomLeft | UIRectCornerBottomRight;
-  }
-  // Left half of NSUInteger is roundedCorners, right half is cornerRadius
-  UInt64 pathKeyNSUInteger = (UInt64)roundedCorners << sizeof(Float32) * 8;
-  Float32 floatCornerRadius = cornerRadius;
-  pathKeyNSUInteger |= (NSUInteger)floatCornerRadius;
-  
-  NSNumber *pathKey = [NSNumber numberWithUnsignedLongLong:pathKeyNSUInteger];
-  
-  UIBezierPath *path = nil;
-  CGSize cornerRadii = CGSizeMake(cornerRadius, cornerRadius);
-  
-  @synchronized(__pathCache) {
-    path = [__pathCache objectForKey:pathKey];
-    if (!path) {
-      path = [UIBezierPath bezierPathWithRoundedRect:bounds byRoundingCorners:roundedCorners cornerRadii:cornerRadii];
-      [__pathCache setObject:path forKey:pathKey];
-    }
+  typedef struct {
+    UIRectCorner corners;
+    CGFloat radius;
+  } PathKey;
+  PathKey key = { roundedCorners, cornerRadius };
+  NSValue *pathKeyObject = [[NSValue alloc] initWithBytes:&key objCType:@encode(PathKey)];
+
+  UIBezierPath *path = [__pathCache objectForKey:pathKeyObject];
+  if (path == nil) {
+    CGSize cornerRadii = CGSizeMake(cornerRadius, cornerRadius);
+    path = [UIBezierPath bezierPathWithRoundedRect:bounds byRoundingCorners:roundedCorners cornerRadii:cornerRadii];
+    [__pathCache setObject:path forKey:pathKeyObject];
   }
   
   // We should probably check if the background color has any alpha component but that
   // might be expensive due to needing to check mulitple color spaces.
   UIGraphicsBeginImageContextWithOptions(bounds.size, cornerColor != nil, scale);
   
+  BOOL contextIsClean = YES;
   if (cornerColor) {
+    contextIsClean = NO;
     [cornerColor setFill];
     // Copy "blend" mode is extra fast because it disregards any value currently in the buffer and overwrites directly.
     UIRectFillUsingBlendMode(bounds, kCGBlendModeCopy);
   }
   
+  BOOL canUseCopy = contextIsClean || (CGColorGetAlpha(fillColor.CGColor) == 1);
   [fillColor setFill];
-  [path fill];
+  [path fillWithBlendMode:(canUseCopy ? kCGBlendModeCopy : kCGBlendModeNormal) alpha:1];
   
   if (borderColor) {
     [borderColor setStroke];
@@ -116,7 +109,8 @@
     // size calculated by cornerRadius, so we won't bother caching this path.  Profiling validates this decision.
     UIBezierPath *strokePath = [UIBezierPath bezierPathWithRoundedRect:strokeRect cornerRadius:cornerRadius];
     [strokePath setLineWidth:borderWidth];
-    [strokePath stroke];
+    BOOL canUseCopy = (CGColorGetAlpha(borderColor.CGColor) == 1);
+    [strokePath strokeWithBlendMode:(canUseCopy ? kCGBlendModeCopy : kCGBlendModeNormal) alpha:1];
   }
   
   UIImage *result = UIGraphicsGetImageFromCurrentImageContext();
