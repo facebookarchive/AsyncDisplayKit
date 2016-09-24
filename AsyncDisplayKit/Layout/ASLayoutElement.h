@@ -10,8 +10,8 @@
 
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
-#import <AsyncDisplayKit/ASStackLayoutable.h>
-#import <AsyncDisplayKit/ASAbsoluteLayoutable.h>
+#import <AsyncDisplayKit/ASStackLayoutElement.h>
+#import <AsyncDisplayKit/ASAbsoluteLayoutElement.h>
 #import <AsyncDisplayKit/ASLayoutElementPrivate.h>
 #import <AsyncDisplayKit/ASEnvironment.h>
 #import <AsyncDisplayKit/ASLayoutElementExtensibility.h>
@@ -174,7 +174,9 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 - (void)style:(__kindof ASLayoutElementStyle *)style propertyDidChange:(NSString *)propertyName;
 @end
 
-@interface ASLayoutElementStyle : NSObject <ASStackLayoutable, ASAbsoluteLayoutable>
+@interface ASLayoutElementStyle : NSObject <ASStackLayoutElement, ASAbsoluteLayoutElement>
+
+#pragma mark - Delegate
 
 /**
  * @abstract Initializes the layoutable style with a specified delegate
@@ -252,7 +254,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 - (void)setExactSizeWithCGSize:(CGSize)size;
 
 
-#pragma mark - ASStackLayoutable
+#pragma mark - ASStackLayoutElement
 
 /**
  * @abstract Additional space to place before this object in the stacking direction.

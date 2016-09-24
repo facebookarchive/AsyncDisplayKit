@@ -260,7 +260,7 @@
 		92DD2FEA1BF4D49B0074C9DD /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92DD2FE51BF4D05E0074C9DD /* MapKit.framework */; };
 		9B92C8851BC2EB6E00EE46B2 /* ASCollectionDataController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF31BBB3D690087C538 /* ASCollectionDataController.mm */; };
 		9B92C8861BC2EB7600EE46B2 /* ASCollectionViewFlowLayoutInspector.m in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF51BBB3D690087C538 /* ASCollectionViewFlowLayoutInspector.m */; };
-		9C49C3701B853961000B0DD5 /* ASStackLayoutable.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		9C49C3701B853961000B0DD5 /* ASStackLayoutElement.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C49C36E1B853957000B0DD5 /* ASStackLayoutElement.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C55866A1BD549CB00B50E3A /* ASAsciiArtBoxCreator.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C5586681BD549CB00B50E3A /* ASAsciiArtBoxCreator.m */; };
 		9C55866B1BD54A1900B50E3A /* ASAsciiArtBoxCreator.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C5586681BD549CB00B50E3A /* ASAsciiArtBoxCreator.m */; };
 		9C55866C1BD54A3000B50E3A /* ASAsciiArtBoxCreator.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5586671BD549CB00B50E3A /* ASAsciiArtBoxCreator.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -565,7 +565,7 @@
 		F7CE6C651D2CDB3E00BE4C15 /* ASRatioLayoutSpec.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = ACF6ED141B17843500DA7C62 /* ASRatioLayoutSpec.h */; };
 		F7CE6C661D2CDB3E00BE4C15 /* ASRelativeLayoutSpec.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7A06A7391C35F08800FE8DAA /* ASRelativeLayoutSpec.h */; };
 		F7CE6C671D2CDB3E00BE4C15 /* ASRelativeSize.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */; };
-		F7CE6C681D2CDB3E00BE4C15 /* ASStackLayoutable.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */; };
+		F7CE6C681D2CDB3E00BE4C15 /* ASStackLayoutElement.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9C49C36E1B853957000B0DD5 /* ASStackLayoutElement.h */; };
 		F7CE6C691D2CDB3E00BE4C15 /* ASStackLayoutDefines.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */; };
 		F7CE6C6A1D2CDB3E00BE4C15 /* ASStackLayoutSpec.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = ACF6ED161B17843500DA7C62 /* ASStackLayoutSpec.h */; };
 		F7CE6C6B1D2CDB3E00BE4C15 /* ASAbsoluteLayoutable.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 9C6BB3B01B8CC9C200F13F52 /* ASAbsoluteLayoutable.h */; };
@@ -736,7 +736,7 @@
 				F7CE6C651D2CDB3E00BE4C15 /* ASRatioLayoutSpec.h in CopyFiles */,
 				F7CE6C661D2CDB3E00BE4C15 /* ASRelativeLayoutSpec.h in CopyFiles */,
 				F7CE6C671D2CDB3E00BE4C15 /* ASRelativeSize.h in CopyFiles */,
-				F7CE6C681D2CDB3E00BE4C15 /* ASStackLayoutable.h in CopyFiles */,
+				F7CE6C681D2CDB3E00BE4C15 /* ASStackLayoutElement.h in CopyFiles */,
 				F7CE6C691D2CDB3E00BE4C15 /* ASStackLayoutDefines.h in CopyFiles */,
 				F7CE6C6A1D2CDB3E00BE4C15 /* ASStackLayoutSpec.h in CopyFiles */,
 				F7CE6C6B1D2CDB3E00BE4C15 /* ASAbsoluteLayoutable.h in CopyFiles */,
@@ -1023,7 +1023,7 @@
 		92DD2FE11BF4B97E0074C9DD /* ASMapNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMapNode.h; sourceTree = "<group>"; };
 		92DD2FE21BF4B97E0074C9DD /* ASMapNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASMapNode.mm; sourceTree = "<group>"; };
 		92DD2FE51BF4D05E0074C9DD /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
-		9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStackLayoutable.h; path = AsyncDisplayKit/Layout/ASStackLayoutable.h; sourceTree = "<group>"; };
+		9C49C36E1B853957000B0DD5 /* ASStackLayoutElement.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASStackLayoutElement.h; path = AsyncDisplayKit/Layout/ASStackLayoutElement.h; sourceTree = "<group>"; };
 		9C5586671BD549CB00B50E3A /* ASAsciiArtBoxCreator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASAsciiArtBoxCreator.h; path = AsyncDisplayKit/Layout/ASAsciiArtBoxCreator.h; sourceTree = "<group>"; };
 		9C5586681BD549CB00B50E3A /* ASAsciiArtBoxCreator.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASAsciiArtBoxCreator.m; path = AsyncDisplayKit/Layout/ASAsciiArtBoxCreator.m; sourceTree = "<group>"; };
 		9C6BB3B01B8CC9C200F13F52 /* ASAbsoluteLayoutable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASAbsoluteLayoutable.h; path = AsyncDisplayKit/Layout/ASAbsoluteLayoutable.h; sourceTree = "<group>"; };
@@ -1694,7 +1694,7 @@
 				7A06A7381C35F08800FE8DAA /* ASRelativeLayoutSpec.mm */,
 				AC47D9431B3BB41900AAEE9D /* ASRelativeSize.h */,
 				AC47D9441B3BB41900AAEE9D /* ASRelativeSize.mm */,
-				9C49C36E1B853957000B0DD5 /* ASStackLayoutable.h */,
+				9C49C36E1B853957000B0DD5 /* ASStackLayoutElement.h */,
 				AC21EC0F1B3D0BF600C8B19A /* ASStackLayoutDefines.h */,
 				ACF6ED161B17843500DA7C62 /* ASStackLayoutSpec.h */,
 				ACF6ED171B17843500DA7C62 /* ASStackLayoutSpec.mm */,
@@ -1869,7 +1869,7 @@
 				B35062551B010EFD0018CF92 /* ASSentinel.h in Headers */,
 				9C8221961BA237B80037F19A /* ASStackBaselinePositionedLayout.h in Headers */,
 				9C70F20E1CDBE9E5007D6C76 /* NSArray+Diffing.h in Headers */,
-				9C49C3701B853961000B0DD5 /* ASStackLayoutable.h in Headers */,
+				9C49C3701B853961000B0DD5 /* ASStackLayoutElement.h in Headers */,
 				DE040EF91C2B40AC004692FF /* ASCollectionViewFlowLayoutInspector.h in Headers */,
 				34EFC7701B701CFA00AD841F /* ASStackLayoutDefines.h in Headers */,
 				764D83D51C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h in Headers */,
@@ -1945,12 +1945,15 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 058D09D2195D04C000B7D73C /* Build configuration list for PBXNativeTarget "AsyncDisplayKitTests" */;
 			buildPhases = (
+				009C195FB97B08F38591CEB0 /* 📦 Check Pods Manifest.lock */,
 				2E61B6A0DB0F436A9DDBE86F /* [CP] Check Pods Manifest.lock */,
 				058D09B8195D04C000B7D73C /* Sources */,
 				058D09B9195D04C000B7D73C /* Frameworks */,
 				058D09BA195D04C000B7D73C /* Resources */,
 				3B9D88CDF51B429C8409E4B6 /* [CP] Copy Pods Resources */,
 				B130AB1AC0A1E5162E211C19 /* [CP] Embed Pods Frameworks */,
+				717530AB2AB785296FD393B6 /* 📦 Embed Pods Frameworks */,
+				78E9ECD9B1F429EFFC374B59 /* 📦 Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -2051,6 +2054,21 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		009C195FB97B08F38591CEB0 /* 📦 Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Check Pods Manifest.lock";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			showEnvVarsInLog = 0;
+		};
 		2E61B6A0DB0F436A9DDBE86F /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -2074,6 +2092,36 @@
 			inputPaths = (
 			);
 			name = "[CP] Copy Pods Resources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		717530AB2AB785296FD393B6 /* 📦 Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Embed Pods Frameworks";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		78E9ECD9B1F429EFFC374B59 /* 📦 Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "📦 Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
