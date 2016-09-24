@@ -174,7 +174,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 - (void)style:(__kindof ASLayoutElementStyle *)style propertyDidChange:(NSString *)propertyName;
 @end
 
-@interface ASLayoutElementStyle : NSObject <ASStackLayoutable, ASAbsoluteLayoutable>
+@interface ASLayoutElementStyle : NSObject <ASStackLayoutElement, ASAbsoluteLayoutable>
 
 /**
  * @abstract Initializes the layoutable style with a specified delegate
@@ -187,6 +187,8 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  * @discussion The delegate must adopt the ASLayoutElementStyleDelegate protocol. The delegate is not retained.
  */
 @property (nullable, nonatomic, weak, readonly) id<ASLayoutElementStyleDelegate> delegate;
+
+#pragma mark - Sizing
 
 /**
  * @abstract A size constraint that should apply to this ASLayoutElement.
@@ -250,7 +252,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 - (void)setExactSizeWithCGSize:(CGSize)size;
 
 
-#pragma mark - ASStackLayoutable
+#pragma mark - ASStackLayoutElement
 
 /**
  * @abstract Additional space to place before this object in the stacking direction.
