@@ -90,7 +90,7 @@ static NSString *suffixForCenteringOptions(ASCenterLayoutSpecCenteringOptions ce
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
   ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor], CGSizeMake(10, 10));
-  foregroundNode.style.flexGrow = YES;
+  foregroundNode.style.flexGrow = 1;
   
   ASCenterLayoutSpec *layoutSpec =
   [ASCenterLayoutSpec
