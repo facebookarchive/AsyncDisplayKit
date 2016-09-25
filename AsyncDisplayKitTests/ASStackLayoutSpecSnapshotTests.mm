@@ -347,8 +347,8 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
 
-  ASDisplayNode * subnode1 = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
-  ASDisplayNode * subnode2 = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});
+  ASDisplayNode *subnode1 = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
+  ASDisplayNode *subnode2 = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});
   
   ASRatioLayoutSpec *child1 = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.5 child:subnode1];
   child1.style.flexBasis = ASDimensionMakeWithFraction(1);
@@ -366,13 +366,13 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
     .alignItems = ASStackLayoutAlignItemsCenter
   };
 
-  ASDisplayNode *subnode1 = ASDisplayNodeWithBackgroundColor([UIColor redColor], {100, 100});
-  subnode1.style.flexShrink = 1;
+  NSArray<ASDisplayNode *> *subnodes = @[
+    ASDisplayNodeWithBackgroundColor([UIColor redColor], {100, 100}),
+    ASDisplayNodeWithBackgroundColor([UIColor blueColor], {50, 50})
+  ];
+  subnodes[0].style.flexShrink = 1;
+  subnodes[1].style.flexShrink = 1;
 
-  ASDisplayNode *subnode2 = ASDisplayNodeWithBackgroundColor([UIColor blueColor], {50, 50});
-  subnode2.style.flexShrink = 1;
-
-  NSArray<ASDisplayNode *> *subnodes = @[subnode1, subnode2];
   static ASSizeRange kFixedWidth = {{150, 0}, {150, 100}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kFixedWidth subnodes:subnodes identifier:nil];
 }
@@ -592,27 +592,216 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   [self testLayoutSpec:layoutSpec sizeRange:kSize subnodes:subnodes identifier:nil];
 }
 
-- (void)testViolationIsDistributedEquallyAmongFlexibleChildren
+- (void)testPositiveViolationIsDistributedEquallyAmongFlexibleChildren
 {
   ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
   
-  NSArray<ASDisplayNode *> *subnodes = defaultSubnodes();
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, 0);
+  subnodes[0].style.flexGrow = 0;
+  subnodes[2].style.flexGrow = 0;
 
-  setCGSizeToNode({300, 50}, subnodes[0]);
-  setCGSizeToNode({100, 50}, subnodes[1]);
-  setCGSizeToNode({200, 50}, subnodes[2]);
+  // In this scenario a width of 350 results in a positive violation of 200.
+  // Due to each flexible subnode specifying a flex grow factor of 1 the violation will be distributed evenly.
+  static ASSizeRange kSize = {{350, 350}, {350, 350}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+- (void)testPositiveViolationIsDistributedProportionallyAmongFlexibleChildren
+{
+  ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionVertical};
+
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, 0);
+  subnodes[0].style.flexGrow = 1;
+  subnodes[1].style.flexGrow = 2;
+  subnodes[2].style.flexGrow = 1;
+
+  // In this scenario a width of 350 results in a positive violation of 200.
+  // The first and third subnodes specify a flex grow factor of 1 and will flex by 50.
+  // The second subnode specifies a flex grow factor of 2 and will flex by 100.
+  static ASSizeRange kSize = {{350, 350}, {350, 350}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+- (void)testPositiveViolationIsDistributedEquallyAmongGrowingAndShrinkingFlexibleChildren
+{
+  ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
+  
+  const CGSize kSubnodeSize = {50, 50};
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize(kSubnodeSize, 0);
+  subnodes = [subnodes arrayByAddingObject:ASDisplayNodeWithBackgroundColor([UIColor yellowColor], kSubnodeSize)];
+  
+  subnodes[0].style.flexShrink = 1;
+  subnodes[1].style.flexGrow = 1;
+  subnodes[2].style.flexShrink = 0;
+  subnodes[3].style.flexGrow = 1;
+  
+  // In this scenario a width of 400 results in a positive violation of 200.
+  // The first and third subnode specify a flex shrink factor of 1 and 0, respectively. They won't flex.
+  // The second and fourth subnode specify a flex grow factor of 1 and will flex by 100.
+  static ASSizeRange kSize = {{400, 400}, {400, 400}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+- (void)testPositiveViolationIsDistributedProportionallyAmongGrowingAndShrinkingFlexibleChildren
+{
+  ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionVertical};
+  
+  const CGSize kSubnodeSize = {50, 50};
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize(kSubnodeSize, 0);
+  subnodes = [subnodes arrayByAddingObject:ASDisplayNodeWithBackgroundColor([UIColor yellowColor], kSubnodeSize)];
+  
+  subnodes[0].style.flexShrink = 1;
+  subnodes[1].style.flexGrow = 3;
+  subnodes[2].style.flexShrink = 0;
+  subnodes[3].style.flexGrow = 1;
+  
+  // In this scenario a width of 400 results in a positive violation of 200.
+  // The first and third subnodes specify a flex shrink factor of 1 and 0, respectively. They won't flex.
+  // The second child subnode specifies a flex grow factor of 3 and will flex by 150.
+  // The fourth child subnode specifies a flex grow factor of 1 and will flex by 50.
+  static ASSizeRange kSize = {{400, 400}, {400, 400}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+- (void)testRemainingViolationIsAppliedProperlyToFirstFlexibleChild
+{
+  ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionVertical};
+  
+  NSArray<ASDisplayNode *> *subnodes = @[
+    ASDisplayNodeWithBackgroundColor([UIColor greenColor], {50, 25}),
+    ASDisplayNodeWithBackgroundColor([UIColor blueColor], {50, 0}),
+    ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 100})
+  ];
+
+  subnodes[0].style.flexGrow = 0;
+  subnodes[1].style.flexGrow = 1;
+  subnodes[2].style.flexGrow = 1;
+  
+  // In this scenario a width of 300 results in a positive violation of 175.
+  // The second and third subnodes specify a flex grow factor of 1 and will flex by 88 and 87, respectively.
+  static ASSizeRange kSize = {{300, 300}, {300, 300}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+- (void)testNegativeViolationIsDistributedProportionallyBasedOnSizeAmongFlexibleChildren
+{
+  ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
+  
+  NSArray<ASDisplayNode *> *subnodes = @[
+    ASDisplayNodeWithBackgroundColor([UIColor greenColor], {300, 50}),
+    ASDisplayNodeWithBackgroundColor([UIColor blueColor], {100, 50}),
+    ASDisplayNodeWithBackgroundColor([UIColor redColor], {200, 50})
+  ];
   
   subnodes[0].style.flexShrink = 1;
   subnodes[1].style.flexShrink = 0;
   subnodes[2].style.flexShrink = 1;
-  
-  // A width of 400px results in a violation of 200px. This is distributed equally among each flexible child,
-  // causing both of them to be shrunk by 100px, resulting in widths of 300px, 100px, and 50px.
-  // In the W3 flexbox standard, flexible children are shrunk proportionate to their original sizes,
-  // resulting in widths of 180px, 100px, and 120px.
-  // This test verifies the current behavior--the snapshot contains widths 300px, 100px, and 50px.
-  static ASSizeRange kSize = {{400, 0}, {400, 150}};
+
+  // In this scenario a width of 400 results in a negative violation of 200.
+  // The first and third subnodes specify a flex shrink factor of 1 and will flex by -120 and -80, respectively.
+  static ASSizeRange kSize = {{400, 400}, {400, 400}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+- (void)testNegativeViolationIsDistributedProportionallyBasedOnSizeAndFlexFactorAmongFlexibleChildren
+{
+  ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionVertical};
+  
+  NSArray<ASDisplayNode *> *subnodes = @[
+    ASDisplayNodeWithBackgroundColor([UIColor greenColor], {50, 300}),
+    ASDisplayNodeWithBackgroundColor([UIColor blueColor], {50, 100}),
+    ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 200})
+  ];
+  
+  subnodes[0].style.flexShrink = 2;
+  subnodes[1].style.flexShrink = 1;
+  subnodes[2].style.flexShrink = 2;
+
+  // In this scenario a width of 400 results in a negative violation of 200.
+  // The first and third subnodes specify a flex shrink factor of 2 and will flex by -109 and -72, respectively.
+  // The second subnode specifies a flex shrink factor of 1 and will flex by -18.
+  static ASSizeRange kSize = {{400, 400}, {400, 400}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+- (void)testNegativeViolationIsDistributedProportionallyBasedOnSizeAmongGrowingAndShrinkingFlexibleChildren
+{
+  ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
+  
+  const CGSize kSubnodeSize = {150, 50};
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize(kSubnodeSize, 0);
+  subnodes = [subnodes arrayByAddingObject:ASDisplayNodeWithBackgroundColor([UIColor yellowColor], kSubnodeSize)];
+  
+  subnodes[0].style.flexGrow = 1;
+  subnodes[1].style.flexShrink = 1;
+  subnodes[2].style.flexGrow = 0;
+  subnodes[3].style.flexShrink = 1;
+  
+  // In this scenario a width of 400 results in a negative violation of 200.
+  // The first and third subnodes specify a flex grow factor of 1 and 0, respectively. They won't flex.
+  // The second and fourth subnodes specify a flex grow factor of 1 and will flex by -100.
+  static ASSizeRange kSize = {{400, 400}, {400, 400}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+- (void)testNegativeViolationIsDistributedProportionallyBasedOnSizeAndFlexFactorAmongGrowingAndShrinkingFlexibleChildren
+{
+  ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionVertical};
+  
+  NSArray<ASDisplayNode *> *subnodes = @[
+    ASDisplayNodeWithBackgroundColor([UIColor greenColor], {50, 150}),
+    ASDisplayNodeWithBackgroundColor([UIColor blueColor], {50, 100}),
+    ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 150}),
+    ASDisplayNodeWithBackgroundColor([UIColor yellowColor], {50, 200})
+  ];
+  
+  subnodes[0].style.flexGrow = 1;
+  subnodes[1].style.flexShrink = 1;
+  subnodes[2].style.flexGrow = 0;
+  subnodes[3].style.flexShrink = 3;
+  
+  // In this scenario a width of 400 results in a negative violation of 200.
+  // The first and third subnodes specify a flex grow factor of 1 and 0, respectively. They won't flex.
+  // The second subnode specifies a flex grow factor of 1 and will flex by -28.
+  // The fourth subnode specifies a flex grow factor of 3 and will flex by -171.
+  static ASSizeRange kSize = {{400, 400}, {400, 400}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+- (void)testNegativeViolationIsDistributedProportionallyBasedOnSizeAndFlexFactorDoesNotShrinkToZeroWidth
+{
+  ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
+  
+  NSArray<ASDisplayNode *> *subnodes = @[
+    ASDisplayNodeWithBackgroundColor([UIColor greenColor], {300, 50}),
+    ASDisplayNodeWithBackgroundColor([UIColor blueColor], {100, 50}),
+    ASDisplayNodeWithBackgroundColor([UIColor redColor], {200, 50})
+  ];
+  
+  subnodes[0].style.flexShrink = 1;
+  subnodes[1].style.flexShrink = 2;
+  subnodes[2].style.flexShrink = 1;
+  
+  // In this scenario a width of 400 results in a negative violation of 200.
+  // The first and third subnodes specify a flex shrink factor of 1 and will flex by 50.
+  // The second subnode specifies a flex shrink factor of 2 and will flex by -57. It will have a width of 43.
+  static ASSizeRange kSize = {{400, 400}, {400, 400}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+
+- (void)testNestedStackLayoutStretchDoesNotViolateWidth
+{
+  ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init]; // Default direction is horizontal
+  stackLayoutSpec.direction = ASStackLayoutDirectionHorizontal;
+  stackLayoutSpec.alignItems = ASStackLayoutAlignItemsStretch;
+  [stackLayoutSpec.style setSizeWithCGSize:{100, 100}];
+  
+  ASDisplayNode *child = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});
+  stackLayoutSpec.children = @[child];
+  
+  static ASSizeRange kSize = {{0, 0}, {300, INFINITY}};
+  [self testLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:@[child] identifier:nil];
 }
 
 - (void)testHorizontalAndVerticalAlignments
