@@ -15,6 +15,31 @@
 
 #import "ASLayoutSpecUtilities.h"
 
+static CGFloat resolveCrossDimensionMaxForStretchChild(const ASStackLayoutSpecStyle &style,
+                                                       const id<ASLayoutable>child,
+                                                       const CGFloat stackMax,
+                                                       const CGFloat crossMax)
+{
+  // stretched children may have a cross direction max that is smaller than the minimum size constraint of the parent.
+    
+  const CGFloat computedMax = (style.direction == ASStackLayoutDirectionVertical ?
+                               ASLayoutableSizeResolve(child.style.size, ASLayoutableParentSizeUndefined).max.width :
+                               ASLayoutableSizeResolve(child.style.size, ASLayoutableParentSizeUndefined).max.height);
+  return computedMax == INFINITY ? crossMax : computedMax;
+}
+
+static CGFloat resolveCrossDimensionMinForStretchChild(const ASStackLayoutSpecStyle &style,
+                                                       const id<ASLayoutable>child,
+                                                       const CGFloat stackMax,
+                                                       const CGFloat crossMin)
+{
+  // stretched children will have a cross dimension of at least crossMin, unless they explicitly define a child size
+  // that is smaller than the constraint of the parent.
+  return (style.direction == ASStackLayoutDirectionVertical ?
+          ASLayoutableSizeResolve(child.style.size, ASLayoutableParentSizeUndefined).min.width :
+          ASLayoutableSizeResolve(child.style.size, ASLayoutableParentSizeUndefined).min.height) ?: crossMin;
+}
+
 /**
  Sizes the child given the parameters specified, and returns the computed layout.
  */
@@ -28,8 +53,11 @@ static ASLayout *crossChildLayout(const id<ASLayoutable> child,
 {
   const ASStackLayoutAlignItems alignItems = alignment(child.style.alignSelf, style.alignItems);
   // stretched children will have a cross dimension of at least crossMin
-  const CGFloat childCrossMin = alignItems == ASStackLayoutAlignItemsStretch ? crossMin : 0;
-  const ASSizeRange childSizeRange = directionSizeRange(style.direction, stackMin, stackMax, childCrossMin, crossMax);
+  const CGFloat childCrossMin = (alignItems == ASStackLayoutAlignItemsStretch ? resolveCrossDimensionMinForStretchChild(style, child, stackMax, crossMin) : 0);
+  const CGFloat childCrossMax = (alignItems == ASStackLayoutAlignItemsStretch ?
+                                 resolveCrossDimensionMaxForStretchChild(style, child, stackMax, crossMax) :
+                                 crossMax);
+  const ASSizeRange childSizeRange = directionSizeRange(style.direction, stackMin, stackMax, childCrossMin, childCrossMax);
   ASLayout *layout = [child layoutThatFits:childSizeRange parentSize:size];
   ASDisplayNodeCAssertNotNil(layout, @"ASLayout returned from measureWithSizeRange: must not be nil: %@", child);
   return layout ? : [ASLayout layoutWithLayoutable:child size:{0, 0}];

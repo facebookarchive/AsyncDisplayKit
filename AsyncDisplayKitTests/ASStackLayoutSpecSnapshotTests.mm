@@ -561,13 +561,18 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 
 - (void)testCrossAxisStretchingOccursAfterStackAxisFlexing
 {
+  // If cross axis stretching occurred *before* flexing, then the blue child would be stretched to 3000 points tall.
+  // Instead it should be stretched to 300 points tall, matching the red child and not overlapping the green inset.
+
   NSArray<ASDisplayNode *> *subnodes = @[
-    ASDisplayNodeWithBackgroundColor([UIColor greenColor]),
-    ASDisplayNodeWithBackgroundColor([UIColor blueColor], {10, 0}),
-    ASDisplayNodeWithBackgroundColor([UIColor redColor], {3000, 3000})
+    ASDisplayNodeWithBackgroundColor([UIColor greenColor]),           // Inset background node
+    ASDisplayNodeWithBackgroundColor([UIColor blueColor]),            // child1 of stack
+    ASDisplayNodeWithBackgroundColor([UIColor redColor], {500, 500})  // child2 of stack
   ];
   
-  ASRatioLayoutSpec *child2 = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.0 child:subnodes[2]];
+  subnodes[1].style.width = ASDimensionMake(10);
+  
+  ASDisplayNode *child2 = subnodes[2];
   child2.style.flexGrow = 1;
   child2.style.flexShrink = 1;
 
@@ -789,7 +794,6 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
 }
 
-
 - (void)testNestedStackLayoutStretchDoesNotViolateWidth
 {
   ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init]; // Default direction is horizontal
@@ -801,7 +805,7 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   stackLayoutSpec.children = @[child];
   
   static ASSizeRange kSize = {{0, 0}, {300, INFINITY}};
-  [self testLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:@[child] identifier:nil];
+  [self testStackLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:@[child] identifier:nil];
 }
 
 - (void)testHorizontalAndVerticalAlignments
