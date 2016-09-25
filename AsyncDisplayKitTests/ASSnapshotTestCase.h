@@ -12,17 +12,22 @@
 
 @class ASDisplayNode;
 
+NSOrderedSet *ASSnapshotTestCaseDefaultSuffixes(void);
+
 #define ASSnapshotVerifyNode(node__, identifier__) \
 { \
   [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:node__]; \
-  FBSnapshotVerifyLayer(node__.layer, identifier__); \
+  FBSnapshotVerifyLayerWithOptions(node__.layer, identifier__, ASSnapshotTestCaseDefaultSuffixes(), 0) \
   [node__ setShouldRasterizeDescendants:YES]; \
   [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:node__]; \
-  FBSnapshotVerifyLayer(node__.layer, identifier__); \
+  FBSnapshotVerifyLayerWithOptions(node__.layer, identifier__, ASSnapshotTestCaseDefaultSuffixes(), 0) \
   [node__ setShouldRasterizeDescendants:NO]; \
   [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:node__]; \
-  FBSnapshotVerifyLayer(node__.layer, identifier__); \
+  FBSnapshotVerifyLayerWithOptions(node__.layer, identifier__, ASSnapshotTestCaseDefaultSuffixes(), 0) \
 }
+
+#define ASSnapshotVerifyLayer(layer__, identifier__) \
+  FBSnapshotVerifyLayerWithOptions(layer__, identifier__, ASSnapshotTestCaseDefaultSuffixes(), 0);
 
 @interface ASSnapshotTestCase : FBSnapshotTestCase
 
