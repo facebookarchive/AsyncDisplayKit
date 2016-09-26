@@ -150,7 +150,7 @@
     }
     
     NSUInteger scaleIndex = 0;
-    NSAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
+    NSMutableAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
 
     // find the longest word and make sure it fits in the constrained width
     if ([longestWordNeedingResize length] > 0) {
@@ -196,7 +196,6 @@
           
           if ([self lineCountForString:scaledString] <= _attributes.maximumNumberOfLines) {
             // we fit! we are done
-            [[self class] adjustFontSizeForAttributeString:scaledString withScaleFactor:adjustedScale];
             break;
           }
         }
