@@ -185,6 +185,10 @@
       if (numberOfLines > _attributes.maximumNumberOfLines) {
         
         for (NSUInteger index = scaleIndex; index < scaleFactors.count; index++) {
+          // we are going to have to scale the string more. Reset it so we apply the scale factor to the full font size, not the scaled font size
+          // e.g., Say we scaled 90% of the original 16pt font so the longest word will fit. scaledString now has a font size of 14.4. If 14.4pt is
+          // still too large to fit in our max number of lines we will scale by the next factor, say 80%. We don't want to multiple 14.4 * .8, but
+          // the original 16pt * .8 to get a point size of 12.8
           scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
           
           // save away this scale factor. Even if we don't fit completely we should still scale down
@@ -206,6 +210,7 @@
     CGSize stringSize = [scaledString boundingRectWithSize:CGSizeMake(_constrainedSize.width, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
     if (stringSize.height > _constrainedSize.height) {
       for (NSUInteger index = scaleIndex; index < scaleFactors.count; index++) {
+        // we are going to have to scale the string more. Reset it so we apply the scale factor to the full font size, not the scaled font size
         scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
         
         // save away this scale factor. Even if we don't fit completely we should still scale down
