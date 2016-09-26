@@ -120,16 +120,16 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
                                                compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
                                                  return ASObjectIsEqual(lhs.layoutableObject, rhs.layoutableObject);
                                                }];
-    findNodesInLayoutAtIndexes(_pendingLayout, insertions, &_insertedSubnodes, &_insertedSubnodePositions);
-    findNodesInLayoutAtIndexesWithFilteredNodes(_previousLayout,
+    _insertedSubnodePositions = findNodesInLayoutAtIndexes(_pendingLayout, insertions, &_insertedSubnodes);
+    _removedSubnodePositions = findNodesInLayoutAtIndexesWithFilteredNodes(_previousLayout,
                                                       deletions,
                                                       _insertedSubnodes,
-                                                      &_removedSubnodes,
-                                                      &_removedSubnodePositions);
+                                                      &_removedSubnodes);
   } else {
     NSIndexSet *indexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, [_pendingLayout.sublayouts count])];
-    findNodesInLayoutAtIndexes(_pendingLayout, indexes, &_insertedSubnodes, &_insertedSubnodePositions);
+    _insertedSubnodePositions = findNodesInLayoutAtIndexes(_pendingLayout, indexes, &_insertedSubnodes);
     _removedSubnodes = nil;
+    _removedSubnodePositions.clear();
   }
   _calculatedSubnodeOperations = YES;
 }
@@ -185,26 +185,25 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 /**
  * @abstract Stores the nodes at the given indexes in the `storedNodes` array, storing indexes in a `storedPositions` c++ vector.
  */
-static inline void findNodesInLayoutAtIndexes(ASLayout *layout,
-                                              NSIndexSet *indexes,
-                                              NSArray<ASDisplayNode *> * __strong *storedNodes,
-                                              std::vector<NSUInteger> *storedPositions)
+static inline std::vector<NSUInteger> findNodesInLayoutAtIndexes(ASLayout *layout,
+                                                                 NSIndexSet *indexes,
+                                                                 NSArray<ASDisplayNode *> * __strong *storedNodes)
 {
-  findNodesInLayoutAtIndexesWithFilteredNodes(layout, indexes, nil, storedNodes, storedPositions);
+  return findNodesInLayoutAtIndexesWithFilteredNodes(layout, indexes, nil, storedNodes);
 }
 
 /**
  * @abstract Stores the nodes at the given indexes in the `storedNodes` array, storing indexes in a `storedPositions` c++ vector.
  * @discussion If the node exists in the `filteredNodes` array, the node is not added to `storedNodes`.
  */
-static inline void findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
-                                                               NSIndexSet *indexes,
-                                                               NSArray<ASDisplayNode *> *filteredNodes,
-                                                               NSArray<ASDisplayNode *> * __strong *storedNodes,
-                                                               std::vector<NSUInteger> *storedPositions)
+static inline std::vector<NSUInteger> findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
+                                                                                  NSIndexSet *indexes,
+                                                                                  NSArray<ASDisplayNode *> *filteredNodes,
+                                                                                  NSArray<ASDisplayNode *> * __strong *storedNodes)
 {
   NSMutableArray<ASDisplayNode *> *nodes = [NSMutableArray arrayWithCapacity:indexes.count];
   std::vector<NSUInteger> positions = std::vector<NSUInteger>();
+  
   // From inspection, this is how enumerateObjectsAtIndexes: works under the hood
   NSUInteger firstIndex = indexes.firstIndex;
   NSUInteger lastIndex = indexes.lastIndex;
@@ -226,7 +225,8 @@ static inline void findNodesInLayoutAtIndexesWithFilteredNodes(ASLayout *layout,
     idx += 1;
   }
   *storedNodes = nodes;
-  *storedPositions = positions;
+  
+  return positions;
 }
 
 @end
