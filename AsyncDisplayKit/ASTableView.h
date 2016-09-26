@@ -383,18 +383,17 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 
 /**
- * Informs the delegate that the table view will add the given node
+ * Informs the delegate that the table view will add the node
  * at the given index path to the view hierarchy.
  *
  * @param tableView The sender.
- * @param node The node that will be displayed.
  * @param indexPath The index path of the row that will be displayed.
  *
  * @warning AsyncDisplayKit processes table view edits asynchronously. The index path
  *   passed into this method may not correspond to the same item in your data source
  *   if your data source has been updated since the last edit was processed.
  */
-- (void)tableView:(ASTableView *)tableView willDisplayNode:(ASCellNode *)node forRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void)tableView:(ASTableView *)tableView willDisplayNodeForRowAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Informs the delegate that the table view did remove the provided node from the view hierarchy.
@@ -404,10 +403,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @param tableView The sender.
  * @param node The node which was removed from the view hierarchy.
  * @param indexPath The index path at which the node was located before the removal.
- *
- * @warning AsyncDisplayKit processes table view edits asynchronously. The index path
- *   passed into this method may not correspond to the same item in your data source
- *   if your data source has been updated since the last edit was processed.
  */
 - (void)tableView:(ASTableView *)tableView didEndDisplayingNode:(ASCellNode *)node forRowAtIndexPath:(NSIndexPath *)indexPath;
 
@@ -461,21 +456,6 @@ NS_ASSUME_NONNULL_BEGIN
  * This method is deprecated. Use @c tableView:didEndDisplayingNode:forRowAtIndexPath: instead.
  */
 - (void)tableView:(ASTableView *)tableView didEndDisplayingNodeForRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
-
-/**
- * Informs the delegate that the table view will add the node
- * at the given index path to the view hierarchy.
- *
- * @param tableView The sender.
- * @param indexPath The index path of the row that will be displayed.
- *
- * @warning AsyncDisplayKit processes table view edits asynchronously. The index path
- *   passed into this method may not correspond to the same item in your data source
- *   if your data source has been updated since the last edit was processed.
- *
- * This method is deprecated. Use @c tableView:willDisplayNode:forRowAtIndexPath: instead.
- */
-- (void)tableView:(ASTableView *)tableView willDisplayNodeForRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
 
 @end
 
