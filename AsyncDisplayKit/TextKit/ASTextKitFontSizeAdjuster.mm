@@ -150,6 +150,7 @@
     }
     
     NSUInteger scaleIndex = 0;
+    NSAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
 
     // find the longest word and make sure it fits in the constrained width
     if ([longestWordNeedingResize length] > 0) {
@@ -171,6 +172,7 @@
           
           if (std::ceil(longestWordSize.width * [scaleFactor floatValue])  <= _constrainedSize.width) {
             // we fit! we are done
+            [[self class] adjustFontSizeForAttributeString:scaledString withScaleFactor:adjustedScale];
             break;
           }
         }
@@ -179,23 +181,43 @@
     
     if (_attributes.maximumNumberOfLines > 0) {
       // get the number of lines in our possibly scaled string
-      NSUInteger numberOfLines = [self lineCountForString:textStorage];
+      NSUInteger numberOfLines = [self lineCountForString:scaledString];
       if (numberOfLines > _attributes.maximumNumberOfLines) {
         
         for (NSUInteger index = scaleIndex; index < scaleFactors.count; index++) {
-          NSMutableAttributedString *entireAttributedString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
-          [[self class] adjustFontSizeForAttributeString:entireAttributedString withScaleFactor:[scaleFactors[index] floatValue]];
-          
+          scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
           
           // save away this scale factor. Even if we don't fit completely we should still scale down
           adjustedScale = [scaleFactors[index] floatValue];
+          [[self class] adjustFontSizeForAttributeString:scaledString withScaleFactor:adjustedScale];
           
-          if ([self lineCountForString:entireAttributedString] <= _attributes.maximumNumberOfLines) {
+          // adjust here so we start at the proper place in our scale array if we are too tall
+          scaleIndex++;
+          
+          if ([self lineCountForString:scaledString] <= _attributes.maximumNumberOfLines) {
             // we fit! we are done
+            [[self class] adjustFontSizeForAttributeString:scaledString withScaleFactor:adjustedScale];
             break;
           }
         }
+      }
+    }
+    
+    // check to see if the string's height is greater that the constrained height
+    CGSize stringSize = [scaledString boundingRectWithSize:CGSizeMake(_constrainedSize.width, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
+    if (stringSize.height > _constrainedSize.height) {
+      for (NSUInteger index = scaleIndex; index < scaleFactors.count; index++) {
+        scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
         
+        // save away this scale factor. Even if we don't fit completely we should still scale down
+        adjustedScale = [scaleFactors[index] floatValue];
+        [[self class] adjustFontSizeForAttributeString:scaledString withScaleFactor:adjustedScale];
+        
+        stringSize = [scaledString boundingRectWithSize:CGSizeMake(_constrainedSize.width, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
+        if (stringSize.height <= _constrainedSize.height) {
+          // we fit! we are done
+          break;
+        }
       }
     }
     
