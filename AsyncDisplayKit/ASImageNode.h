@@ -11,6 +11,7 @@
 #import <AsyncDisplayKit/ASControlNode.h>
 
 #import "ASImageProtocols.h"
+#import "ASBaseDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -120,7 +121,7 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
  * `displaySuspended` is YES, `displayCompletionBlock` is will be
  * performed immediately and `YES` will be passed for `canceled`.
  */
-- (void)setNeedsDisplayWithCompletion:(void (^ _Nullable)(BOOL canceled))displayCompletionBlock;
+- (void)setNeedsDisplayWithCompletion:(nullable void (^)(BOOL canceled))displayCompletionBlock;
 
 #if TARGET_OS_TV
 /** 
@@ -164,9 +165,9 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
 
 @interface ASImageNode (Unavailable)
 
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock AS_UNAVAILABLE();
 
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock AS_UNAVAILABLE();
 
 @end
 
