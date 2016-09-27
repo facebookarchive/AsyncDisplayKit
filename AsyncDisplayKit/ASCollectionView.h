@@ -128,7 +128,7 @@ NS_ASSUME_NONNULL_BEGIN
  *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or 
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
-- (void)performBatchAnimated:(BOOL)animated updates:(void (^ _Nullable)())updates completion:(void (^ _Nullable)(BOOL))completion;
+- (void)performBatchAnimated:(BOOL)animated updates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
 
 /**
  *  Perform a batch of updates asynchronously.  This method must be called from the main thread.
@@ -139,7 +139,7 @@ NS_ASSUME_NONNULL_BEGIN
  *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
-- (void)performBatchUpdates:(void (^ _Nullable)())updates completion:(void (^ _Nullable)(BOOL))completion;
+- (void)performBatchUpdates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
@@ -148,7 +148,7 @@ NS_ASSUME_NONNULL_BEGIN
  * the main thread.
  * @warning This method is substantially more expensive than UICollectionView's version.
  */
-- (void)reloadDataWithCompletion:(void (^ _Nullable)())completion;
+- (void)reloadDataWithCompletion:(nullable void (^)())completion;
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.

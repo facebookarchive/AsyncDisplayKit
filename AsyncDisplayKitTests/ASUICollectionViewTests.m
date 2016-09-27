@@ -34,6 +34,45 @@
   [self _testSupplementaryNodeAtIndexPath:[NSIndexPath indexPathWithIndex:3] sectionCount:2 expectException:NO];
 }
 
+- (void)testThatNestedBatchCompletionsAreCalledInOrder
+{
+  UICollectionViewLayout *layout = [[UICollectionViewLayout alloc] init];
+  id layoutMock = [OCMockObject partialMockForObject:layout];
+
+  UICollectionView *cv = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, 100, 100) collectionViewLayout:layoutMock];
+  id dataSource = [OCMockObject niceMockForProtocol:@protocol(UICollectionViewDataSource)];
+  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] collectionView:cv numberOfItemsInSection:0];
+
+  cv.dataSource = dataSource;
+
+  XCTestExpectation *inner0 = [self expectationWithDescription:@"Inner completion 0 is called"];
+  XCTestExpectation *inner1 = [self expectationWithDescription:@"Inner completion 1 is called"];
+  XCTestExpectation *outer = [self expectationWithDescription:@"Outer completion is called"];
+
+  NSMutableArray<XCTestExpectation *> *completions = [NSMutableArray array];
+
+  [cv performBatchUpdates:^{
+    [cv performBatchUpdates:^{
+
+    } completion:^(BOOL finished) {
+      [completions addObject:inner0];
+      [inner0 fulfill];
+    }];
+    [cv performBatchUpdates:^{
+
+    } completion:^(BOOL finished) {
+      [completions addObject:inner1];
+      [inner1 fulfill];
+    }];
+  } completion:^(BOOL finished) {
+    [completions addObject:outer];
+    [outer fulfill];
+  }];
+
+  [self waitForExpectationsWithTimeout:5 handler:nil];
+  XCTAssertEqualObjects(completions, (@[ outer, inner0, inner1 ]), @"Expected completion order to be correct");
+}
+
 - (void)_testSupplementaryNodeAtIndexPath:(NSIndexPath *)indexPath sectionCount:(NSInteger)sectionCount expectException:(BOOL)shouldFail
 {
   UICollectionViewLayoutAttributes *attr = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:@"SuppKind" withIndexPath:indexPath];

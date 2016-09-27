@@ -101,6 +101,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 @implementation _ASHierarchyChangeSet {
   std::vector<NSInteger> _oldItemCounts;
   std::vector<NSInteger> _newItemCounts;
+  void (^_completionHandler)(BOOL finished);
 }
 
 - (instancetype)init
@@ -131,6 +132,31 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 }
 
 #pragma mark External API
+
+- (void (^)(BOOL finished))completionHandler
+{
+  [self _ensureCompleted];
+
+  void (^completionHandler)(BOOL) = _completionHandler;
+  _completionHandler = nil;
+  return completionHandler;
+}
+
+- (void)addCompletionHandler:(void (^)(BOOL))completion
+{
+  [self _ensureNotCompleted];
+  if (completion == nil) {
+    return;
+  }
+
+  void (^oldCompletionHandler)(BOOL finished) = _completionHandler;
+  _completionHandler = ^(BOOL finished) {
+    if (oldCompletionHandler != nil) {
+    	oldCompletionHandler(finished);
+    }
+    completion(finished);
+  };
+}
 
 - (void)markCompletedWithNewItemCounts:(std::vector<NSInteger>)newItemCounts
 {

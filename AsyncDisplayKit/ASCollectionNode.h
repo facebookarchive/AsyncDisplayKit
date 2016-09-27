@@ -91,7 +91,7 @@ NS_ASSUME_NONNULL_BEGIN
  * the main thread.
  * @warning This method is substantially more expensive than UICollectionView's version.
  */
-- (void)reloadDataWithCompletion:(void (^)())completion;
+- (void)reloadDataWithCompletion:(nullable void (^)())completion;
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
