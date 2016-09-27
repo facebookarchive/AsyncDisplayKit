@@ -14,6 +14,8 @@
 
 #import "ASBaseDefines.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class UIViewController;
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
@@ -106,3 +108,5 @@ ASDISPLAYNODE_EXTERN_C_END
   _parentManagesVisibilityDepth = NO; \
   [self visibilityDepthDidChange]; \
 }
+
+NS_ASSUME_NONNULL_END

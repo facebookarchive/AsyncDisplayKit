@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
  @abstract An array of descending scale factors that will be applied to this text node to try to make it fit within its constrained size
  @default nil (no scaling)
  */
-@property (nullable, nonatomic, copy) NSArray *pointSizeScaleFactors;
+@property (nullable, nonatomic, copy) NSArray<NSNumber *> *pointSizeScaleFactors;
 
 /**
  @abstract Text margins for text laid out in the text node.

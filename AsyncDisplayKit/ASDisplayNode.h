@@ -18,6 +18,8 @@
 #import <AsyncDisplayKit/ASLayoutable.h>
 #import <AsyncDisplayKit/ASContextTransitioning.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 #define ASDisplayNodeLoggingEnabled 0
 
 @class ASDisplayNode;
@@ -40,12 +42,12 @@ typedef CALayer * _Nonnull(^ASDisplayNodeLayerBlock)();
 /**
  * ASDisplayNode loaded callback block. This block is called BEFORE the -didLoad method and is always called on the main thread.
  */
-typedef void (^ASDisplayNodeDidLoadBlock)(__kindof ASDisplayNode * _Nonnull node);
+typedef void (^ASDisplayNodeDidLoadBlock)(__kindof ASDisplayNode * node);
 
 /**
  * ASDisplayNode will / did render node content in context.
  */
-typedef void (^ASDisplayNodeContextModifier)(_Nonnull CGContextRef context);
+typedef void (^ASDisplayNodeContextModifier)(CGContextRef context);
 
 /**
  * ASDisplayNode layout spec block. This block can be used instead of implementing layoutSpecThatFits: in subclass
@@ -102,7 +104,6 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  */
 
-NS_ASSUME_NONNULL_BEGIN
 @interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
 
 
