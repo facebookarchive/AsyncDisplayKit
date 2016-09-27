@@ -3364,6 +3364,13 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   }
 }
 
+#pragma mark - NSFastEnumeration
+
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id __unsafe_unretained _Nullable [_Nonnull])buffer count:(NSUInteger)len
+{
+  return [self.subnodes countByEnumeratingWithState:state objects:buffer count:len];
+}
+
 #pragma mark - ASEnvironment
 
 - (ASEnvironmentState)environmentState

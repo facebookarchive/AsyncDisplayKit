@@ -9,6 +9,7 @@
 //
 
 #import "ASBackgroundLayoutSpec.h"
+#import "ASLayoutSpec+Subclasses.h"
 
 #import "ASAssert.h"
 #import "ASLayout.h"
@@ -16,10 +17,16 @@
 static NSUInteger const kForegroundChildIndex = 0;
 static NSUInteger const kBackgroundChildIndex = 1;
 
-@interface ASBackgroundLayoutSpec ()
-@end
-
 @implementation ASBackgroundLayoutSpec
+
+#pragma mark - Class
+
++ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
+{
+  return [[self alloc] initWithChild:child background:background];
+}
+
+#pragma mark - Lifecycle
 
 - (instancetype)initWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
 {
@@ -28,15 +35,12 @@ static NSUInteger const kBackgroundChildIndex = 1;
   }
   
   ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-  [self setChild:child forIndex:kForegroundChildIndex];
+  [self setChild:child atIndex:kForegroundChildIndex];
   self.background = background;
   return self;
 }
 
-+ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
-{
-  return [[self alloc] initWithChild:child background:background];
-}
+#pragma mark - ASLayoutSpec
 
 /**
  * First layout the contents, then fit the background image.
@@ -45,7 +49,7 @@ static NSUInteger const kBackgroundChildIndex = 1;
                      restrictedToSize:(ASLayoutableSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  ASLayout *contentsLayout = [self.child layoutThatFits:constrainedSize parentSize:parentSize];
+  ASLayout *contentsLayout = [[super childAtIndex:kForegroundChildIndex] layoutThatFits:constrainedSize parentSize:parentSize];
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:2];
   if (self.background) {
@@ -61,14 +65,16 @@ static NSUInteger const kBackgroundChildIndex = 1;
   return [ASLayout layoutWithLayoutable:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
+#pragma mark - Background
+
 - (void)setBackground:(id<ASLayoutable>)background
 {
-  [super setChild:background forIndex:kBackgroundChildIndex];
+  [super setChild:background atIndex:kBackgroundChildIndex];
 }
 
 - (id<ASLayoutable>)background
 {
-  return [super childForIndex:kBackgroundChildIndex];
+  return [super childAtIndex:kBackgroundChildIndex];
 }
 
 @end
