@@ -1944,6 +1944,36 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertEqual(contentsAfterRedisplay, node.contents);
 }
 
+// Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
+- (void)DISABLED_testThatNodesAreMarkedInvisibleWhenRemovedFromAVisibleRasterizedHierarchy
+{
+  ASCellNode *supernode = [[ASCellNode alloc] init];
+  supernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  [supernode addSubnode:node];
+  [window addSubnode:supernode];
+  [window makeKeyAndVisible];
+  XCTAssertTrue(node.isVisible);
+  [node removeFromSupernode];
+  XCTAssertFalse(node.isVisible);
+}
+
+// Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
+- (void)DISABLED_testThatNodesAreMarkedVisibleWhenAddedToARasterizedHierarchyAlreadyOnscreen
+{
+  ASCellNode *supernode = [[ASCellNode alloc] init];
+  supernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  [window addSubnode:supernode];
+  [window makeKeyAndVisible];
+  [supernode addSubnode:node];
+  XCTAssertTrue(node.isVisible);
+  [node removeFromSupernode];
+  XCTAssertFalse(node.isVisible);
+}
+
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2011
 - (void)testThatLayerBackedSubnodesAreMarkedInvisibleBeforeDeallocWhenSupernodesViewIsRemovedFromHierarchyWhileBeingRetained
 {
