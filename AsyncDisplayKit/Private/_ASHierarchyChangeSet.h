@@ -104,7 +104,14 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
  */
 @property (nonatomic, copy, readonly, nullable) void(^completionHandler)(BOOL finished);
 
-/// @precondition The change set must not be completed.
+/**
+ * Append the given completion handler to the combined @c completionHandler.
+ *
+ * @discussion Since batch updates can be nested, we have to support multiple
+ * completion handlers per update.
+ *
+ * @precondition The change set must not be completed.
+ */
 - (void)addCompletionHandler:(nullable void(^)(BOOL finished))completion;
 
 /// @precondition The change set must be completed.
