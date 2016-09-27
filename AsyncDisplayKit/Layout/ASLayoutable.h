@@ -173,7 +173,7 @@ extern NSString * const ASLayoutableStyleDescenderProperty;
 extern NSString * const ASLayoutableStyleLayoutPositionProperty;
 
 @protocol ASLayoutableStyleDelegate <NSObject>
-- (void)style:(id)style propertyDidChange:(NSString *)propertyName;
+- (void)style:(__kindof ASLayoutableStyle *)style propertyDidChange:(NSString *)propertyName;
 @end
 
 @interface ASLayoutableStyle : NSObject <ASStackLayoutable, ASStaticLayoutable>

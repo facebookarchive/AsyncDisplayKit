@@ -239,48 +239,56 @@ do {\
 
 - (void)setSpacingBefore:(CGFloat)spacingBefore
 {
+  ASDN::MutexLocker l(__instanceLock__);
   _spacingBefore = spacingBefore;
   ASLayoutableStyleCallDelegate(ASLayoutableStyleSpacingBeforeProperty);
 }
 
 - (void)setSpacingAfter:(CGFloat)spacingAfter
 {
+  ASDN::MutexLocker l(__instanceLock__);
   _spacingAfter = spacingAfter;
   ASLayoutableStyleCallDelegate(ASLayoutableStyleSpacingAfterProperty);
 }
 
 - (void)setFlexGrow:(BOOL)flexGrow
 {
+  ASDN::MutexLocker l(__instanceLock__);
   _flexGrow = flexGrow;
   ASLayoutableStyleCallDelegate(ASLayoutableStyleFlexGrowProperty);
 }
 
 - (void)setFlexShrink:(BOOL)flexShrink
 {
+  ASDN::MutexLocker l(__instanceLock__);
   _flexShrink = flexShrink;
   ASLayoutableStyleCallDelegate(ASLayoutableStyleFlexShrinkProperty);
 }
 
 - (void)setFlexBasis:(ASDimension)flexBasis
 {
+  ASDN::MutexLocker l(__instanceLock__);
   _flexBasis = flexBasis;
   ASLayoutableStyleCallDelegate(ASLayoutableStyleFlexBasisProperty);
 }
 
 - (void)setAlignSelf:(ASStackLayoutAlignSelf)alignSelf
 {
+  ASDN::MutexLocker l(__instanceLock__);
   _alignSelf = alignSelf;
   ASLayoutableStyleCallDelegate(ASLayoutableStyleAlignSelfProperty);
 }
 
 - (void)setAscender:(CGFloat)ascender
 {
+  ASDN::MutexLocker l(__instanceLock__);
   _ascender = ascender;
   ASLayoutableStyleCallDelegate(ASLayoutableStyleAscenderProperty);
 }
 
 - (void)setDescender:(CGFloat)descender
 {
+  ASDN::MutexLocker l(__instanceLock__);
   _descender = descender;
   ASLayoutableStyleCallDelegate(ASLayoutableStyleDescenderProperty);
 }
@@ -289,6 +297,7 @@ do {\
 
 - (void)setLayoutPosition:(CGPoint)layoutPosition
 {
+  ASDN::MutexLocker l(__instanceLock__);
   _layoutPosition = layoutPosition;
   ASLayoutableStyleCallDelegate(ASLayoutableStyleLayoutPositionProperty);
 }
