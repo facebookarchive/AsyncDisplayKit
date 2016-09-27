@@ -94,6 +94,26 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 
 - (instancetype)initWithOldData:(std::vector<NSInteger>)oldItemCounts NS_DESIGNATED_INITIALIZER;
 
+
+/**
+ * The combined completion handler.
+ *
+ * @precondition The change set must be completed.
+ * @warning The completion block is discarded after reading because it may have captured
+ *   significant resources that we would like to reclaim as soon as possible.
+ */
+@property (nonatomic, copy, readonly, nullable) void(^completionHandler)(BOOL finished);
+
+/**
+ * Append the given completion handler to the combined @c completionHandler.
+ *
+ * @discussion Since batch updates can be nested, we have to support multiple
+ * completion handlers per update.
+ *
+ * @precondition The change set must not be completed.
+ */
+- (void)addCompletionHandler:(nullable void(^)(BOOL finished))completion;
+
 /// @precondition The change set must be completed.
 @property (nonatomic, strong, readonly) NSIndexSet *deletedSections;
 /// @precondition The change set must be completed.
