@@ -1943,7 +1943,7 @@ static bool stringContainsPointer(NSString *description, id p) {
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
-- (void)testThatNodesAreMarkedInvisibleWhenRemovedFromAVisibleRasterizedHierarchy
+- (void)DISABLED_testThatNodesAreMarkedInvisibleWhenRemovedFromAVisibleRasterizedHierarchy
 {
   ASCellNode *supernode = [[ASCellNode alloc] init];
   supernode.shouldRasterizeDescendants = YES;
@@ -1958,7 +1958,7 @@ static bool stringContainsPointer(NSString *description, id p) {
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
-- (void)testThatNodesAreMarkedVisibleWhenAddedToARasterizedHierarchyAlreadyOnscreen
+- (void)DISABLED_testThatNodesAreMarkedVisibleWhenAddedToARasterizedHierarchyAlreadyOnscreen
 {
   ASCellNode *supernode = [[ASCellNode alloc] init];
   supernode.shouldRasterizeDescendants = YES;
