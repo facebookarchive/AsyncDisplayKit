@@ -301,7 +301,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _displaySentinel = [[ASSentinel alloc] init];
   
   _style = [[ASLayoutableStyle alloc] init];
-  _preferredFrameSize = CGSizeZero;
+  _size = ASLayoutableSizeMake();
   _environmentState = ASEnvironmentStateMakeDefault();
   
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
@@ -2456,8 +2456,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     ASDisplayNodeLogEvent(self, @"computedLayout: %@", layout);
     return [layout filteredNodeLayoutTree];
   } else {
-    // If neither -layoutSpecThatFits: nor -calculateSizeThatFits: is overridden by subclassses, preferredFrameSize should be used,
-    // assume that the default implementation of -calculateSizeThatFits: returns it.
     CGSize size = [self calculateSizeThatFits:constrainedSize.max];
     ASDisplayNodeLogEvent(self, @"calculatedSize: %@", NSStringFromCGSize(size));
     return [ASLayout layoutWithLayoutable:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:nil];
@@ -2467,13 +2465,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
-    
-  ASDN::MutexLocker l(__instanceLock__);
-    
-  // Handle deprecated preferred frame size.
-  if (CGSizeEqualToSize(_preferredFrameSize, CGSizeZero) == NO) {
-    return _preferredFrameSize;
-  }
 
   return CGSizeZero;
 }
@@ -2547,25 +2538,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _pendingTransitionID;
-}
-
-- (void)setPreferredFrameSize:(CGSize)preferredFrameSize
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  if (! CGSizeEqualToSize(_preferredFrameSize, preferredFrameSize)) {
-    _preferredFrameSize = preferredFrameSize;
-    
-    self.style.width = ASDimensionMake(preferredFrameSize.width);
-    self.style.height = ASDimensionMake(preferredFrameSize.height);
-
-    [self invalidateCalculatedLayout];
-  }
-}
-
-- (CGSize)preferredFrameSize
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _preferredFrameSize;
 }
 
 - (CGRect)threadSafeBounds
@@ -3499,6 +3471,27 @@ ASEnvironmentLayoutExtensibilityForwarding
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];
+}
+
+- (void)setPreferredFrameSize:(CGSize)preferredFrameSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+
+  // Deprecated preferredFrameSize just calls through to set width and height
+  _style.width = ASDimensionMake(preferredFrameSize.width);
+  _style.height = ASDimensionMake(preferredFrameSize.height);
+  [self invalidateCalculatedLayout];
+}
+
+- (CGSize)preferredFrameSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  if (_style.width.unit == ASDimensionUnitPoints && _style.height.unit == ASDimensionUnitPoints) {
+    return CGSizeMake(_style.width.value, _style.height.value);
+  }
+
+  return CGSizeZero;
 }
 
 @end

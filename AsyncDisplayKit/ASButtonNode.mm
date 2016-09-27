@@ -510,19 +510,7 @@
   if (UIEdgeInsetsEqualToEdgeInsets(UIEdgeInsetsZero, contentEdgeInsets) == NO) {
     spec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentEdgeInsets child:spec];
   }
-  
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
-#if DEBUG
-    NSLog(@"Using -[ASDisplayNde preferredFrameSize] is deprecated.");
-#endif
-    stack.style.width = ASDimensionMake(ASDimensionUnitPoints, self.preferredFrameSize.width);
-    stack.style.height = ASDimensionMake(ASDimensionUnitPoints, self.preferredFrameSize.height);
-    spec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack]];
-  }
-#pragma clang diagnostic pop
-  
+
   if (_backgroundImageNode.image) {
     spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec background:_backgroundImageNode];
   }
