@@ -27,8 +27,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 @interface ASNetworkImageNode ()
 {
-  __weak id<ASImageCacheProtocol, ASImageCacheProtocolDeprecated> _cache;
-  __weak id<ASImageDownloaderProtocol, ASImageDownloaderProtocolDeprecated> _downloader;
+  __weak id<ASImageCacheProtocol> _cache;
+  __weak id<ASImageDownloaderProtocol> _downloader;
 
   // Only access any of these with __instanceLock__.
   __weak id<ASNetworkImageNodeDelegate> _delegate;
@@ -60,7 +60,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   } _downloaderFlags;
 
   struct {
-    unsigned int cacheSupportsNewProtocol:1;
+    unsigned int cacheSupportsCachedImage:1;
     unsigned int cacheSupportsClearing:1;
     unsigned int cacheSupportsSynchronousFetch:1;
   } _cacheFlags;
@@ -74,20 +74,20 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   if (!(self = [super init]))
     return nil;
 
-  _cache = (id<ASImageCacheProtocol, ASImageCacheProtocolDeprecated>)cache;
-  _downloader = (id<ASImageDownloaderProtocol, ASImageDownloaderProtocolDeprecated>)downloader;
+  _cache = (id<ASImageCacheProtocol>)cache;
+  _downloader = (id<ASImageDownloaderProtocol>)downloader;
   
-  ASDisplayNodeAssert([downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)] || [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:)], @"downloader must respond to either downloadImageWithURL:callbackQueue:downloadProgress:completion: or downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:.");
+  ASDisplayNodeAssert([downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)], @"downloader must respond to either downloadImageWithURL:callbackQueue:downloadProgress:completion:.");
   
   _downloaderFlags.downloaderSupportsNewProtocol = [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)];
   
-  ASDisplayNodeAssert(cache == nil || [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] || [cache respondsToSelector:@selector(fetchCachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion: or fetchCachedImageWithURL:callbackQueue:completion:");
+  ASDisplayNodeAssert(cache == nil || [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion:");
   
   _downloaderFlags.downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)];
   _downloaderFlags.downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)];
   _downloaderFlags.downloaderImplementsAnimatedImage = [downloader respondsToSelector:@selector(animatedImageWithData:)];
   
-  _cacheFlags.cacheSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
+  _cacheFlags.cacheSupportsCachedImage = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
   _cacheFlags.cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
   _cacheFlags.cacheSupportsSynchronousFetch = [cache respondsToSelector:@selector(synchronouslyFetchedCachedImageWithURL:)];
   
@@ -421,18 +421,6 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
                                                        finished(imageContainer, error, downloadIdentifier);
                                                      }
                                                    }];
-    } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-      _downloadIdentifier = [_downloader downloadImageWithURL:_URL
-                                                callbackQueue:dispatch_get_main_queue()
-                                        downloadProgressBlock:NULL
-                                                   completion:^(CGImageRef responseImage, NSError *error) {
-                                                     if (finished != NULL) {
-                                                       finished([UIImage imageWithCGImage:responseImage], error, nil);
-                                                     }
-                                                   }];
-#pragma clang diagnostic pop
     }
   
     [self _updateProgressImageBlockOnDownloaderIfNeeded];
@@ -561,19 +549,10 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           }
         };
         
-        if (_cacheFlags.cacheSupportsNewProtocol) {
+        if (_cacheFlags.cacheSupportsCachedImage) {
           [_cache cachedImageWithURL:_URL
                        callbackQueue:dispatch_get_main_queue()
                           completion:cacheCompletion];
-        } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-          [_cache fetchCachedImageWithURL:_URL
-                            callbackQueue:dispatch_get_main_queue()
-                               completion:^(CGImageRef image) {
-                                 cacheCompletion([UIImage imageWithCGImage:image]);
-                               }];
-#pragma clang diagnostic pop
         }
       } else {
         [self _downloadImageWithCompletion:finished];

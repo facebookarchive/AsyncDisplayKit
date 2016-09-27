@@ -400,26 +400,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
-/**
- * Indicator to lock the data source for data fetching in async mode.
- * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistency or exception
- * due to the data access in async mode.
- *
- * @param collectionView The sender.
- * @deprecated The data source is always accessed on the main thread, and this method will not be called.
- */
-- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
-
-/**
- * Indicator to unlock the data source for data fetching in async mode.
- * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistency or exception
- * due to the data access in async mode.
- *
- * @param collectionView The sender.
- * @deprecated The data source is always accessed on the main thread, and this method will not be called.
- */
-- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
-
 @end
 
 
@@ -499,33 +479,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView;
 
-/**
- * Informs the delegate that the collection view did remove the node which was previously
- * at the given index path from the view hierarchy.
- *
- * @warning AsyncDisplayKit processes collection view edits asynchronously. The index path
- *   passed into this method may not correspond to the same item in your data source
- *   if your data source has been updated since the last edit was processed.
- *
- * This method is deprecated. Use @c collectionView:didEndDisplayingNode:forItemAtIndexPath: instead.
- */
-- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
-
-/**
- * Informs the delegate that the collection view will add the node
- * at the given index path to the view hierarchy.
- *
- * @param collectionView The sender.
- * @param indexPath The index path of the item that will be displayed.
- *
- * @warning AsyncDisplayKit processes collection view edits asynchronously. The index path
- *   passed into this method may not correspond to the same item in your data source
- *   if your data source has been updated since the last edit was processed.
- *
- * This method is deprecated. Use @c collectionView:willDisplayNode:forItemAtIndexPath: instead.
- */
-- (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
-
 @end
 
 /**
@@ -536,17 +489,6 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 
 /**
- * @discussion This method is deprecated and does nothing from 1.9.7 and up
- * Previously it applies the section inset to every cells within the corresponding section.
- * The expected behavior is to apply the section inset to the whole section rather than
- * shrinking each cell individually.
- * If you want this behavior, you can integrate your insets calculation into
- * `constrainedSizeForNodeAtIndexPath`
- * please file a github issue if you would like this to be restored.
- */
-- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section __deprecated_msg("This method does nothing for 1.9.7+ due to incorrect implementation previously, see the header file for more information.");
-
-/**
  * Asks the delegate for the size of the header in the specified section.
  */
 - (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section;
@@ -555,12 +497,6 @@ NS_ASSUME_NONNULL_BEGIN
  * Asks the delegate for the size of the footer in the specified section.
  */
 - (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section;
-
-@end
-
-@interface ASCollectionView (Deprecated)
-
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled ASDISPLAYNODE_DEPRECATED;
 
 @end
 
