@@ -11,6 +11,7 @@
 //
 
 #import <UIKit/UIGeometry.h>
+#import <objc/runtime.h>
 
 #pragma mark - Dynamic Properties
 
