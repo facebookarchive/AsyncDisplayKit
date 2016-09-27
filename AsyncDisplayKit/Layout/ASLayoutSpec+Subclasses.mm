@@ -69,7 +69,7 @@
 
 #pragma mark - Child with index
 
-- (void)setChild:(id<ASLayoutable>)child forIndex:(NSUInteger)index
+- (void)setChild:(id<ASLayoutable>)child atIndex:(NSUInteger)index
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
@@ -94,7 +94,7 @@
   // [self propagateUpLayoutable:finalLayoutable];
 }
 
-- (id<ASLayoutable>)childForIndex:(NSUInteger)index
+- (id<ASLayoutable>)childAtIndex:(NSUInteger)index
 {
   id<ASLayoutable> layoutable = nil;
   if (index < _childrenArray.count) {
