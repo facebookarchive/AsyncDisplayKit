@@ -40,7 +40,7 @@
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
   _style = [[ASLayoutableStyle alloc] init];
-  _childrenArray = [NSPointerArray strongObjectsPointerArray];
+  _childrenArray = [[NSMutableArray alloc] init];
   
   return self;
 }
@@ -119,18 +119,18 @@
 
 - (void)setChild:(id<ASLayoutable>)child
 {
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");;
   ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
   
   if (child) {
     id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
     if (finalLayoutable) {
-      [_childrenArray insertPointer:(__bridge void *)finalLayoutable atIndex:0];
+      _childrenArray[0] = finalLayoutable;
       [self propagateUpLayoutable:finalLayoutable];
     }
   } else {
     if (_childrenArray.count) {
-      [_childrenArray removePointerAtIndex:0];
+      [_childrenArray removeObjectAtIndex:0];
     }
   }
 }
@@ -138,7 +138,12 @@
 - (id<ASLayoutable>)child
 {
   ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
-  return(__bridge id<ASLayoutable>) [_childrenArray pointerAtIndex:0];
+  
+  if (_childrenArray.count) {
+    return _childrenArray[0];
+  }
+  
+  return nil;
 }
 
 #pragma mark - Children
@@ -146,14 +151,13 @@
 - (void)setChildren:(NSArray<id<ASLayoutable>> *)children
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-
-  NSUInteger count = _childrenArray.count;
-  for (NSUInteger i = 0; i < count; i++) {
-    [_childrenArray removePointerAtIndex:i];
-  }
-    
+  
+  [_childrenArray removeAllObjects];
+  
+  NSUInteger i = 0;
   for (id<ASLayoutable> child in children) {
-    [_childrenArray addPointer:(__bridge void *)[self layoutableToAddFromLayoutable:child]];
+    _childrenArray[i] = [self layoutableToAddFromLayoutable:child];
+    i += 1;
   }
 }
 
