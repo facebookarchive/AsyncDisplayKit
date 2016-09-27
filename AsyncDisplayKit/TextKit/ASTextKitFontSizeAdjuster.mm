@@ -135,7 +135,10 @@
   
   __block CGFloat adjustedScale = 1.0;
   
+  // We add the scale factor of 1 to our scaleFactors array so that in the first iteration of the loop below, we are
+  // actually determining if we need to scale at all. If something doesn't fit, we will continue to iterate our scale factors.
   NSArray *scaleFactors = [@[@(1)] arrayByAddingObjectsFromArray:_attributes.pointSizeScaleFactors];
+  
   [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     
     // Check for two different situations (and correct for both)
@@ -161,7 +164,7 @@
     
     if (longestWordFits == NO || maxLinesFits == NO || heightFits == NO) {
       // we may need to shrink for some reason, so let's iterate through our scale factors to see if we actually need to shrink
-      // Note: the first scale factor is the array is 1.0 so will make sure that things don't fit without shrinking
+      // Note: the first scale factor in the array is 1.0 so will make sure that things don't fit without shrinking
       for (NSUInteger index = 0; index < scaleFactors.count && (longestWordFits == NO || maxLinesFits == NO || heightFits == NO); index++) {
         
         adjustedScale = [scaleFactors[index] floatValue];

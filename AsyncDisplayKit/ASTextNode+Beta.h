@@ -16,6 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  @abstract An array of descending scale factors that will be applied to this text node to try to make it fit within its constrained size
+ @discussion This array should be in descending order and NOT contain the scale factor 1.0. For example, it could return @[@(.9), @(.85), @(.8)];
  @default nil (no scaling)
  */
 @property (nullable, nonatomic, copy) NSArray *pointSizeScaleFactors;
