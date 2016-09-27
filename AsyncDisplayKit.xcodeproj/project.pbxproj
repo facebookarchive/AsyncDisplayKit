@@ -199,6 +199,7 @@
 		68FC85EA1CE29C7D00EDD713 /* ASVisibilityProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = 68FC85E71CE29C7D00EDD713 /* ASVisibilityProtocols.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		68FC85EB1CE29C7D00EDD713 /* ASVisibilityProtocols.m in Sources */ = {isa = PBXBuildFile; fileRef = 68FC85E81CE29C7D00EDD713 /* ASVisibilityProtocols.m */; };
 		68FC85EC1CE29C7D00EDD713 /* ASVisibilityProtocols.m in Sources */ = {isa = PBXBuildFile; fileRef = 68FC85E81CE29C7D00EDD713 /* ASVisibilityProtocols.m */; };
+		692BA72F1D9AEC130050ABCF /* ASLayoutSpecTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 692BA72E1D9AEC130050ABCF /* ASLayoutSpecTests.m */; };
 		6959433E1D70815300B0EE1F /* ASDisplayNodeLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6959433C1D70815300B0EE1F /* ASDisplayNodeLayout.mm */; };
 		6959433F1D70815300B0EE1F /* ASDisplayNodeLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6959433C1D70815300B0EE1F /* ASDisplayNodeLayout.mm */; };
 		695943401D70815300B0EE1F /* ASDisplayNodeLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 6959433D1D70815300B0EE1F /* ASDisplayNodeLayout.h */; };
@@ -979,6 +980,7 @@
 		68FC85E11CE29B7E00EDD713 /* ASTabBarController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTabBarController.m; sourceTree = "<group>"; };
 		68FC85E71CE29C7D00EDD713 /* ASVisibilityProtocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASVisibilityProtocols.h; sourceTree = "<group>"; };
 		68FC85E81CE29C7D00EDD713 /* ASVisibilityProtocols.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASVisibilityProtocols.m; sourceTree = "<group>"; };
+		692BA72E1D9AEC130050ABCF /* ASLayoutSpecTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASLayoutSpecTests.m; sourceTree = "<group>"; };
 		6959433C1D70815300B0EE1F /* ASDisplayNodeLayout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASDisplayNodeLayout.mm; sourceTree = "<group>"; };
 		6959433D1D70815300B0EE1F /* ASDisplayNodeLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDisplayNodeLayout.h; sourceTree = "<group>"; };
 		696FCB301D6E46050093471E /* ASBackgroundLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASBackgroundLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
@@ -1393,6 +1395,7 @@
 				81E95C131D62639600336598 /* ASTextNodeSnapshotTests.m */,
 				ACF6ED571B178DC700DA7C62 /* ASLayoutSpecSnapshotTestsHelper.h */,
 				ACF6ED581B178DC700DA7C62 /* ASLayoutSpecSnapshotTestsHelper.m */,
+				692BA72E1D9AEC130050ABCF /* ASLayoutSpecTests.m */,
 				242995D21B29743C00090100 /* ASBasicImageDownloaderTests.m */,
 				29CDC2E11AAE70D000833CA4 /* ASBasicImageDownloaderContextTests.m */,
 				CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */,
@@ -2272,6 +2275,7 @@
 				697B315A1CFE4B410049936F /* ASEditableTextNodeTests.m in Sources */,
 				ACF6ED611B178DC700DA7C62 /* ASOverlayLayoutSpecSnapshotTests.mm in Sources */,
 				CC8B05D61D73836400F54286 /* ASPerformanceTestContext.m in Sources */,
+				692BA72F1D9AEC130050ABCF /* ASLayoutSpecTests.m in Sources */,
 				CC0AEEA41D66316E005D1C78 /* ASUICollectionViewTests.m in Sources */,
 				69B225671D72535E00B25B22 /* ASDisplayNodeLayoutTests.mm in Sources */,
 				ACF6ED621B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm in Sources */,
