@@ -50,14 +50,14 @@ NS_ASSUME_NONNULL_BEGIN
  * setChild:forIndex: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
  * property that behind the scenes is calling setChild:forIndex:.
  */
-- (void)setChild:(id<ASLayoutable>)child forIndex:(NSUInteger)index;
+- (void)setChild:(id<ASLayoutable>)child atIndex:(NSUInteger)index;
 
 /**
  * Returns the child added to this layout spec using the given index.
  *
  * @param index An identifier associated with the the child.
  */
-- (nullable id<ASLayoutable>)childForIndex:(NSUInteger)index;
+- (nullable id<ASLayoutable>)childAtIndex:(NSUInteger)index;
 
 @end
 

@@ -19,7 +19,7 @@
   ASDN::RecursiveMutex __instanceLock__;
   ASEnvironmentState _environmentState;
   ASLayoutableStyle *_style;
-  NSMutableArray *_childrenArray;
+  NSPointerArray *_childrenArray;
 }
 @end
 

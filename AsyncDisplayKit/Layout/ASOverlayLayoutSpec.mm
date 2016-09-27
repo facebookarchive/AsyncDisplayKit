@@ -34,7 +34,7 @@ static NSUInteger const kOverlayChildIndex = 1;
     return nil;
   }
   ASDisplayNodeAssertNotNil(child, @"Child that will be overlayed on shouldn't be nil");
-  [self setChild:child forIndex:kUnderlayChildIndex];
+  [self setChild:child atIndex:kUnderlayChildIndex];
   self.overlay = overlay;
   return self;
 }
@@ -43,12 +43,12 @@ static NSUInteger const kOverlayChildIndex = 1;
 
 - (void)setOverlay:(id<ASLayoutable>)overlay
 {
-  [super setChild:overlay forIndex:kOverlayChildIndex];
+  [super setChild:overlay atIndex:kOverlayChildIndex];
 }
 
 - (id<ASLayoutable>)overlay
 {
-  return [super childForIndex:kOverlayChildIndex];
+  return [super childAtIndex:kOverlayChildIndex];
 }
 
 #pragma mark - ASLayoutSpec
@@ -60,7 +60,7 @@ static NSUInteger const kOverlayChildIndex = 1;
                      restrictedToSize:(ASLayoutableSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  ASLayout *contentsLayout = [[super childForIndex:kUnderlayChildIndex] layoutThatFits:constrainedSize parentSize:parentSize];
+  ASLayout *contentsLayout = [[super childAtIndex:kUnderlayChildIndex] layoutThatFits:constrainedSize parentSize:parentSize];
   contentsLayout.position = CGPointZero;
   NSMutableArray *sublayouts = [NSMutableArray arrayWithObject:contentsLayout];
   if (self.overlay) {
