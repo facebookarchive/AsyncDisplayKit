@@ -31,7 +31,6 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutSpec.h"
-#import "ASLayoutValidation.h"
 #import "ASCellNode+Internal.h"
 #import "ASWeakProxy.h"
 
@@ -2449,9 +2448,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     if (isFinalLayoutable) {
       layout.position = CGPointZero;
       layout = [ASLayout layoutWithLayoutable:self size:layout.size sublayouts:@[layout]];
-#if LAYOUT_VALIDATION
-      ASLayoutableValidateLayout(layout);
-#endif
     }
     ASDisplayNodeLogEvent(self, @"computedLayout: %@", layout);
     return [layout filteredNodeLayoutTree];
