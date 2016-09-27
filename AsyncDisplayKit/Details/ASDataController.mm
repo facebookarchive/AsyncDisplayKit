@@ -392,7 +392,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   ASDisplayNodeAssertMainThread();
 
   _initialReloadDataHasBeenCalled = YES;
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
 
   [self invalidateDataSourceItemCounts];
   NSUInteger sectionCount = [self itemCountsFromDataSource].size();
@@ -506,8 +505,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 - (void)beginUpdates
 {
   ASDisplayNodeAssertMainThread();
-  // TODO: make this -waitUntilAllUpdatesAreCommitted?
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
 
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     [_mainSerialQueue performBlockOnMainThread:^{
@@ -553,8 +550,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   if (!_initialReloadDataHasBeenCalled) {
     return;
   }
-
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
   NSArray<ASIndexedNodeContext *> *contexts = [self _populateFromDataSourceWithSectionIndexSet:sections];
 
@@ -583,7 +578,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     return;
   }
 
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     [self willDeleteSections:sections];
 
@@ -610,7 +604,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     return;
   }
 
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     [self willMoveSection:section toSection:newSection];
 
@@ -697,8 +690,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   }
 
   LOG(@"Edit Command - insertRows: %@", indexPaths);
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
-
   // Sort indexPath to avoid messing up the index when inserting in several batches
   NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
   NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
@@ -734,8 +725,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   }
 
   LOG(@"Edit Command - deleteRows: %@", indexPaths);
-
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
   // Sort indexPath in order to avoid messing up the index when deleting in several batches.
   // FIXME: Shouldn't deletes be sorted in descending order?
@@ -764,8 +753,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   }
 
   LOG(@"Edit Command - relayoutRows");
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
-
   // Can't relayout right away because _completedNodes may not be up-to-date,
   // i.e there might be some nodes that were measured using the old constrained size but haven't been added to _completedNodes
   // (see _layoutNodes:atIndexPaths:withAnimationOptions:).
@@ -808,7 +795,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   }
 
   LOG(@"Edit Command - moveRow: %@ > %@", indexPath, newIndexPath);
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     LOG(@"Edit Transaction - moveRow: %@ > %@", indexPath, newIndexPath);
