@@ -189,6 +189,7 @@
 				TargetAttributes = {
 					050E7C6D19D22E19004363C2 = {
 						CreatedOnToolsVersion = 6.0.1;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -368,6 +369,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.AsyncDisplayKit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Debug;
 		};
@@ -380,6 +382,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.AsyncDisplayKit.$(PRODUCT_NAME:rfc1034identifier)";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "";
+				SWIFT_VERSION = 2.3;
 			};
 			name = Release;
 		};
