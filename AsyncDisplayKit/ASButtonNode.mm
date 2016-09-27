@@ -78,7 +78,7 @@
       // of the button node to add a touch handler.
     [_titleNode setLayerBacked:YES];
 #endif
-    _titleNode.style.flexShrink = YES;
+    _titleNode.style.flexShrink = 1;
   }
   return _titleNode;
 }

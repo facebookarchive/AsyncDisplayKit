@@ -251,14 +251,14 @@ do {\
   ASLayoutableStyleCallDelegate(ASLayoutableStyleSpacingAfterProperty);
 }
 
-- (void)setFlexGrow:(BOOL)flexGrow
+- (void)setFlexGrow:(CGFloat)flexGrow
 {
   ASDN::MutexLocker l(__instanceLock__);
   _flexGrow = flexGrow;
   ASLayoutableStyleCallDelegate(ASLayoutableStyleFlexGrowProperty);
 }
 
-- (void)setFlexShrink:(BOOL)flexShrink
+- (void)setFlexShrink:(CGFloat)flexShrink
 {
   ASDN::MutexLocker l(__instanceLock__);
   _flexShrink = flexShrink;

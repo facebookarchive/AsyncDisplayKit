@@ -406,7 +406,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       return slider;
     }];
 
-    _scrubberNode.style.flexShrink = YES;
+    _scrubberNode.style.flexShrink = 1;
 
     [_cachedControls setObject:_scrubberNode forKey:@(ASVideoPlayerNodeControlTypeScrubber)];
   }
@@ -418,7 +418,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_controlFlexGrowSpacerSpec == nil) {
     _controlFlexGrowSpacerSpec = [[ASStackLayoutSpec alloc] init];
-    _controlFlexGrowSpacerSpec.style.flexGrow = YES;
+    _controlFlexGrowSpacerSpec.style.flexGrow = 1;
   }
 
   [_cachedControls setObject:_controlFlexGrowSpacerSpec forKey:@(ASVideoPlayerNodeControlTypeFlexGrowSpacer)];
@@ -735,7 +735,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _scrubberNode.style.height = ASDimensionMakeWithPoints(44.0);
 
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
-  spacer.style.flexGrow = YES;
+  spacer.style.flexGrow = 1;
 
   ASStackLayoutSpec *controlbarSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
                                                                             spacing:10.0

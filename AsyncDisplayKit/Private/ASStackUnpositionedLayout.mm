@@ -15,6 +15,31 @@
 
 #import "ASLayoutSpecUtilities.h"
 
+static CGFloat resolveCrossDimensionMaxForStretchChild(const ASStackLayoutSpecStyle &style,
+                                                       const id<ASLayoutable>child,
+                                                       const CGFloat stackMax,
+                                                       const CGFloat crossMax)
+{
+  // stretched children may have a cross direction max that is smaller than the minimum size constraint of the parent.
+    
+  const CGFloat computedMax = (style.direction == ASStackLayoutDirectionVertical ?
+                               ASLayoutableSizeResolve(child.style.size, ASLayoutableParentSizeUndefined).max.width :
+                               ASLayoutableSizeResolve(child.style.size, ASLayoutableParentSizeUndefined).max.height);
+  return computedMax == INFINITY ? crossMax : computedMax;
+}
+
+static CGFloat resolveCrossDimensionMinForStretchChild(const ASStackLayoutSpecStyle &style,
+                                                       const id<ASLayoutable>child,
+                                                       const CGFloat stackMax,
+                                                       const CGFloat crossMin)
+{
+  // stretched children will have a cross dimension of at least crossMin, unless they explicitly define a child size
+  // that is smaller than the constraint of the parent.
+  return (style.direction == ASStackLayoutDirectionVertical ?
+          ASLayoutableSizeResolve(child.style.size, ASLayoutableParentSizeUndefined).min.width :
+          ASLayoutableSizeResolve(child.style.size, ASLayoutableParentSizeUndefined).min.height) ?: crossMin;
+}
+
 /**
  Sizes the child given the parameters specified, and returns the computed layout.
  */
@@ -28,8 +53,11 @@ static ASLayout *crossChildLayout(const id<ASLayoutable> child,
 {
   const ASStackLayoutAlignItems alignItems = alignment(child.style.alignSelf, style.alignItems);
   // stretched children will have a cross dimension of at least crossMin
-  const CGFloat childCrossMin = alignItems == ASStackLayoutAlignItemsStretch ? crossMin : 0;
-  const ASSizeRange childSizeRange = directionSizeRange(style.direction, stackMin, stackMax, childCrossMin, crossMax);
+  const CGFloat childCrossMin = (alignItems == ASStackLayoutAlignItemsStretch ? resolveCrossDimensionMinForStretchChild(style, child, stackMax, crossMin) : 0);
+  const CGFloat childCrossMax = (alignItems == ASStackLayoutAlignItemsStretch ?
+                                 resolveCrossDimensionMaxForStretchChild(style, child, stackMax, crossMax) :
+                                 crossMax);
+  const ASSizeRange childSizeRange = directionSizeRange(style.direction, stackMin, stackMax, childCrossMin, childCrossMax);
   ASLayout *layout = [child layoutThatFits:childSizeRange parentSize:size];
   ASDisplayNodeCAssertNotNil(layout, @"ASLayout returned from measureWithSizeRange: must not be nil: %@", child);
   return layout ? : [ASLayout layoutWithLayoutable:child size:{0, 0}];
@@ -89,6 +117,120 @@ static void stretchChildrenAlongCrossDimension(std::vector<ASStackUnpositionedIt
     // they are forced to choose the same width as all the other children.
     if (alignItems == ASStackLayoutAlignItemsStretch && std::fabs(cross - childCrossMax) > 0.01) {
       l.layout = crossChildLayout(l.child, style, stack, stack, childCrossMax, childCrossMax, size);
+    }
+  }
+}
+
+/** The threshold that determines if a violation has actually occurred. */
+static const CGFloat kViolationEpsilon = 0.01;
+
+/**
+ Returns a lambda that computes the relevant flex factor based on the given violation.
+ @param violation The amount that the stack layout violates its size range.  See header for sign interpretation.
+ */
+static std::function<CGFloat(const ASStackUnpositionedItem &)> flexFactorInViolationDirection(const CGFloat violation)
+{
+  if (fabs(violation) < kViolationEpsilon) {
+    return [](const ASStackUnpositionedItem &item) { return 0; };
+  } else if (violation > 0) {
+    return [](const ASStackUnpositionedItem &item) { return item.child.style.flexGrow; };
+  } else {
+    return [](const ASStackUnpositionedItem &item) { return item.child.style.flexShrink; };
+  }
+}
+
+static inline CGFloat scaledFlexShrinkFactor(const ASStackUnpositionedItem &item, const ASStackLayoutSpecStyle &style)
+{
+  return stackDimension(style.direction, item.layout.size) * item.child.style.flexShrink;
+}
+
+/**
+ Returns a lambda that computes a flex shrink adjustment for a given item based on the provided violation.
+ @param items The unpositioned items from the original unconstrained layout pass.
+ @param style The layout style to be applied to all children.
+ @param violation The amount that the stack layout violates its size range.
+ @return A lambda capable of computing the flex shrink adjustment, if any, for a particular item.
+ */
+static std::function<CGFloat(const ASStackUnpositionedItem &, BOOL)> flexShrinkAdjustment(const std::vector<ASStackUnpositionedItem> &items,
+                                                                                          const ASStackLayoutSpecStyle &style,
+                                                                                          const CGFloat violation)
+{
+  const CGFloat scaledFlexShrinkFactorSum = std::accumulate(items.begin(), items.end(), 0, [&](CGFloat x, const ASStackUnpositionedItem &item) {
+    return x + scaledFlexShrinkFactor(item, style);
+  });
+  return [style, scaledFlexShrinkFactorSum, violation](const ASStackUnpositionedItem &item, BOOL isFirstFlex) {
+    const CGFloat scaledFlexShrinkFactorRatio = scaledFlexShrinkFactor(item, style) / scaledFlexShrinkFactorSum;
+    // The item should shrink proportionally to the scaled flex shrink factor ratio computed above.
+    // Unlike the flex grow adjustment the flex shrink adjustment needs to take the size of each item into account.
+    return -fabs(scaledFlexShrinkFactorRatio * violation);
+  };
+}
+
+/**
+ Returns a lambda that computes a flex grow adjustment for a given item based on the provided violation.
+ @param items The unpositioned items from the original unconstrained layout pass.
+ @param violation The amount that the stack layout violates its size range.
+ @param flexFactorSum The sum of each item's flex factor as determined by the provided violation.
+ @return A lambda capable of computing the flex grow adjustment, if any, for a particular item.
+ */
+static std::function<CGFloat(const ASStackUnpositionedItem &, BOOL)> flexGrowAdjustment(const std::vector<ASStackUnpositionedItem> &items,
+                                                                                        const CGFloat violation,
+                                                                                        const CGFloat flexFactorSum)
+{
+  const CGFloat violationPerFlexFactor = floorf(violation / flexFactorSum);
+  const CGFloat remainingViolation = violation - (violationPerFlexFactor * flexFactorSum);
+  // To compute the flex grow adjustment distribute the violation proportionally based on each item's flex grow factor.
+  // If there happens to be a violation remaining make sure it is allocated to the first flexible child.
+  return [violationPerFlexFactor, remainingViolation](const ASStackUnpositionedItem &item, BOOL isFirstFlex) {
+    // Only apply the remaining violation for the first flexible child that has a flex grow factor.
+    return violationPerFlexFactor * item.child.style.flexGrow + (isFirstFlex && item.child.style.flexGrow > 0 ? remainingViolation : 0);
+  };
+}
+
+/**
+ Returns a lambda that computes a flex adjustment for a given item based on the provided violation.
+ @param items The unpositioned items from the original unconstrained layout pass.
+ @param style The layout style to be applied to all children.
+ @param violation The amount that the stack layout violates its size range.
+ @param flexFactorSum The sum of each item's flex factor as determined by the provided violation.
+ @return A lambda capable of computing the flex adjustment for a particular item.
+ */
+static std::function<CGFloat(const ASStackUnpositionedItem &, BOOL)> flexAdjustmentInViolationDirection(const std::vector<ASStackUnpositionedItem> &items,
+                                                                                                        const ASStackLayoutSpecStyle &style,
+                                                                                                        const CGFloat violation,
+                                                                                                        const CGFloat flexFactorSum)
+{
+  if (violation > 0) {
+    return flexGrowAdjustment(items, violation, flexFactorSum);
+  } else {
+    return flexShrinkAdjustment(items, style, violation);
+  }
+}
+
+ASDISPLAYNODE_INLINE BOOL isFlexibleInBothDirections(id<ASLayoutable> child)
+{
+    return child.style.flexGrow > 0 && child.style.flexShrink > 0;
+}
+
+/**
+ The flexible children may have been left not laid out in the initial layout pass, so we may have to go through and size
+ these children at zero size so that the children layouts are at least present.
+ */
+static void layoutFlexibleChildrenAtZeroSize(std::vector<ASStackUnpositionedItem> &items,
+                                             const ASStackLayoutSpecStyle &style,
+                                             const ASSizeRange &sizeRange,
+                                             const CGSize size)
+{
+  for (ASStackUnpositionedItem &item : items) {
+    const id<ASLayoutable> child = item.child;
+    if (isFlexibleInBothDirections(child)) {
+      item.layout = crossChildLayout(child,
+                                     style,
+                                     0,
+                                     0,
+                                     crossDimension(style.direction, sizeRange.min),
+                                     crossDimension(style.direction, sizeRange.max),
+                                     size);
     }
   }
 }
@@ -172,30 +314,6 @@ static CGFloat computeViolation(const CGFloat stackDimensionSum,
   return 0;
 }
 
-/** The threshold that determines if a violation has actually occurred. */
-static const CGFloat kViolationEpsilon = 0.01;
-
-/**
- Returns a lambda that determines if the given unpositioned item's child is flexible in the direction of the violation.
-
- @param violation the amount that the stack layout violates its size range.  See header for sign interpretation.
- */
-static std::function<BOOL(const ASStackUnpositionedItem &)> isFlexibleInViolationDirection(const CGFloat violation)
-{
-  if (std::fabs(violation) < kViolationEpsilon) {
-    return [](const ASStackUnpositionedItem &l) { return NO; };
-  } else if (violation > 0) {
-    return [](const ASStackUnpositionedItem &l) { return l.child.style.flexGrow; };
-  } else {
-    return [](const ASStackUnpositionedItem &l) { return l.child.style.flexShrink; };
-  }
-}
-
-ASDISPLAYNODE_INLINE BOOL isFlexibleInBothDirections(id<ASLayoutable> child)
-{
-  return child.style.flexGrow && child.style.flexShrink;
-}
-
 /**
  If we have a single flexible (both shrinkable and growable) child, and our allowed size range is set to a specific
  number then we may avoid the first "intrinsic" size calculation.
@@ -211,29 +329,6 @@ ASDISPLAYNODE_INLINE BOOL useOptimizedFlexing(const std::vector<id<ASLayoutable>
 }
 
 /**
- The flexible children may have been left not laid out in the initial layout pass, so we may have to go through and size
- these children at zero size so that the children layouts are at least present.
- */
-static void layoutFlexibleChildrenAtZeroSize(std::vector<ASStackUnpositionedItem> &items,
-                                             const ASStackLayoutSpecStyle &style,
-                                             const ASSizeRange &sizeRange,
-                                             const CGSize size)
-{
-  for (ASStackUnpositionedItem &item : items) {
-    const id<ASLayoutable> child = item.child;
-    if (isFlexibleInBothDirections(child)) {
-      item.layout = crossChildLayout(child,
-                                     style,
-                                     0,
-                                     0,
-                                     crossDimension(style.direction, sizeRange.min),
-                                     crossDimension(style.direction, sizeRange.max),
-                                     size);
-    }
-  }
-}
-
-/**
  Flexes children in the stack axis to resolve a min or max stack size violation. First, determines which children are
  flexible (see computeViolation and isFlexibleInViolationDirection). Then computes how much to flex each flexible child
  and performs re-layout. Note that there may still be a non-zero violation even after flexing.
@@ -243,7 +338,8 @@ static void layoutFlexibleChildrenAtZeroSize(std::vector<ASStackUnpositionedItem
 
  @param items Reference to unpositioned items from the original, unconstrained layout pass; modified in-place
  @param style layout style to be applied to all children
- @param sizeRange the range of allowable sizes for the stack layout spec
+ @param sizeRange the range of allowable sizes for the stack layout component
+ @param size Size of the stack layout component. May be undefined in either or both directions.
  */
 static void flexChildrenAlongStackDimension(std::vector<ASStackUnpositionedItem> &items,
                                             const ASStackLayoutSpecStyle &style,
@@ -251,32 +347,32 @@ static void flexChildrenAlongStackDimension(std::vector<ASStackUnpositionedItem>
                                             const CGSize size,
                                             const BOOL useOptimizedFlexing)
 {
-  const CGFloat stackDimensionSum = computeStackDimensionSum(items, style);
-  const CGFloat violation = computeViolation(stackDimensionSum, style, sizeRange);
-
-  // We count the number of children which are flexible in the direction of the violation
-  std::function<BOOL(const ASStackUnpositionedItem &)> isFlex = isFlexibleInViolationDirection(violation);
-  const NSUInteger flexibleChildren = std::count_if(items.begin(), items.end(), isFlex);
-  if (flexibleChildren == 0) {
-    // If optimized flexing was used then we have to clean up the unsized children, and lay them out at zero size
+  const CGFloat violation = computeViolation(computeStackDimensionSum(items, style), style, sizeRange);
+  std::function<CGFloat(const ASStackUnpositionedItem &)> flexFactor = flexFactorInViolationDirection(violation);
+  // The flex factor sum is needed to determine if flexing is necessary.
+  // This value is also needed if the violation is positive and flexible children need to grow, so keep it around.
+  const CGFloat flexFactorSum = std::accumulate(items.begin(), items.end(), 0, [&](CGFloat x, const ASStackUnpositionedItem &item) {
+    return x + flexFactor(item);
+  });
+  // If no children are able to flex then there is nothing left to do. Bail.
+  if (flexFactorSum == 0) {
+    // If optimized flexing was used then we have to clean up the unsized children and lay them out at zero size.
     if (useOptimizedFlexing) {
       layoutFlexibleChildrenAtZeroSize(items, style, sizeRange, size);
     }
     return;
   }
-
-  // Each flexible child along the direction of the violation is expanded or contracted equally
-  const CGFloat violationPerFlexChild = std::floor(violation / flexibleChildren);
-  // If the floor operation above left a remainder we may have a remainder after deducting the adjustments from all the
-  // contributions of the flexible children.
-  const CGFloat violationRemainder = violation - (violationPerFlexChild * flexibleChildren);
-
+  std::function<CGFloat(const ASStackUnpositionedItem &, BOOL)> flexAdjustment = flexAdjustmentInViolationDirection(items,
+                                                                                                                    style,
+                                                                                                                    violation,
+                                                                                                                    flexFactorSum);
   BOOL isFirstFlex = YES;
   for (ASStackUnpositionedItem &item : items) {
-    if (isFlex(item)) {
+    const CGFloat currentFlexAdjustment = flexAdjustment(item, isFirstFlex);
+    // Children are consider inflexible if they do not need to make a flex adjustment.
+    if (currentFlexAdjustment != 0) {
       const CGFloat originalStackSize = stackDimension(style.direction, item.layout.size);
-      // The first flexible child is given the additional violation remainder
-      const CGFloat flexedStackSize = originalStackSize + violationPerFlexChild + (isFirstFlex ? violationRemainder : 0);
+      const CGFloat flexedStackSize = originalStackSize + currentFlexAdjustment;
       item.layout = crossChildLayout(item.child,
                                      style,
                                      MAX(flexedStackSize, 0),
