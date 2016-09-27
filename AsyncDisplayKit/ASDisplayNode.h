@@ -653,6 +653,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign)           BOOL clipsToBounds;                    // default==NO
 @property (nonatomic, getter=isOpaque)  BOOL opaque;                           // default==YES
 
+@property (nonatomic, assign)           BOOL allowsGroupOpacity;
 @property (nonatomic, assign)           BOOL allowsEdgeAntialiasing;
 @property (nonatomic, assign)           unsigned int edgeAntialiasingMask;     // default==all values from CAEdgeAntialiasingMask
 
