@@ -38,17 +38,47 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASCollectionView : UICollectionView
 
 /**
- * Initializer.
+ * Initializes an ASCollectionView
+ *
+ * @discussion Initializes and returns a newly allocated collection view object with the specified layout.
  *
  * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
  */
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
+
+/**
+ * Initializes an ASCollectionView
+ *
+ * @discussion Initializes and returns a newly allocated collection view object with the specified frame and layout.
+ *
+ * @param frame The frame rectangle for the collection view, measured in points. The origin of the frame is relative to the superview in which you plan to add it. This frame is passed to the superclass during initialization.
+ * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
+ */
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
 
-// The corresponding ASCollectionNode, which exists even if directly allocating & handling the view class.
+/**
+ * Returns the corresponding ASCollectionNode
+ *
+ * @return collectionNode The cooresponding ASCollectionNode which exists even if directly allocating & handling the view class.
+ */
 @property (nonatomic, weak, readonly) ASCollectionNode *collectionNode;
 
+/**
+ * The object that acts as the asynchronous delegate of the collection view
+ *
+ * @discussion The delegate must adopt the ASCollectionDelegate protocol. The collection view maintains a weak reference to the delegate object.
+ *
+ * The delegate object is responsible for providing size constraints for nodes and indicating whether batch fetching should begin.
+ */
 @property (nonatomic, weak) id<ASCollectionDelegate>   asyncDelegate;
+
+/**
+ * The object that acts as the asynchronous data source of the collection view
+ *
+ * @discussion The datasource must adopt the ASCollectionDataSource protocol. The collection view maintains a weak reference to the datasource object.
+ *
+ * The datasource object is responsible for providing nodes or node creation blocks to the collection view.
+ */
 @property (nonatomic, weak) id<ASCollectionDataSource> asyncDataSource;
 
 /**
@@ -168,6 +198,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Triggers a relayout of all nodes.
  *
+ * @discussion This method invalidates and lays out every cell node in the collection view.
  */
 - (void)relayoutItems;
 
