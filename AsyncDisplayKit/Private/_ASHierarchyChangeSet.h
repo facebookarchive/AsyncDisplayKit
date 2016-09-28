@@ -123,7 +123,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
  Get the section index after the update for the given section before the update.
  
  @precondition The change set must be completed.
- @returns The new section index, or NSNotFound if the given section was deleted.
+ @return The new section index, or NSNotFound if the given section was deleted.
  */
 - (NSUInteger)newSectionForOldSection:(NSUInteger)oldSection;
 
