@@ -61,7 +61,7 @@
   UIImage *tinted = ASImageNodeTintColorModificationBlock([UIColor redColor])(test);
   ASImageNode *node = [[ASImageNode alloc] init];
   node.image = tinted;
-  [node layoutThatFits:ASSizeRangeMake(test.size)];
+  [node measure:test.size];
   
   ASSnapshotVerifyNode(node, nil);
 }
@@ -76,7 +76,7 @@
   UIImage *rounded = ASImageNodeRoundBorderModificationBlock(2, [UIColor redColor])(result);
   ASImageNode *node = [[ASImageNode alloc] init];
   node.image = rounded;
-  [node layoutThatFits:ASSizeRangeMake(rounded.size)];
+  [node measure:rounded.size];
   
   ASSnapshotVerifyNode(node, nil);
 }
