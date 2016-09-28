@@ -536,7 +536,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)waitForUpdatesDuringNextLayoutPass
 {
   ASDisplayNodeAssertMainThread();
-  [self setNeedsLayout];
   _waitsForUpdatesDuringNextLayout = YES;
 }
 
