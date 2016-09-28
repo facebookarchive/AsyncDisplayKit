@@ -56,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param rangeType The range type to get the tuning parameters for.
  *
- * @returns A tuning parameter value for the given range type in full mode.
+ * @return A tuning parameter value for the given range type in full mode.
  *
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
@@ -80,7 +80,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param rangeMode The range mode to get the running parameters for.
  * @param rangeType The range type to get the tuning parameters for.
  *
- * @returns A tuning parameter value for the given range type in the given mode.
+ * @return A tuning parameter value for the given range type in the given mode.
  *
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
@@ -277,7 +277,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param indexPath The index path of the requested node.
  *
- * @returns a node for display at this indexpath or nil
+ * @return a node for display at this indexpath or nil
  */
 - (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
@@ -288,7 +288,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param elementKind The kind of supplementary node to locate.
  * @param indexPath The index path of the requested supplementary node.
  *
- * @returns The specified supplementary node or nil
+ * @return The specified supplementary node or nil
  */
 - (nullable ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath;
 
@@ -297,14 +297,14 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param cellNode a cellNode part of the table view
  *
- * @returns an indexPath for this cellNode
+ * @return an indexPath for this cellNode
  */
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
 
 /**
  * Similar to -visibleCells.
  *
- * @returns an array containing the nodes being displayed on screen.
+ * @return an array containing the nodes being displayed on screen.
  */
 - (NSArray<ASCellNode *> *)visibleNodes;
 
@@ -318,14 +318,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Determines collection view's current scroll direction. Supports 2-axis collection views.
  *
- * @returns a bitmask of ASScrollDirection values.
+ * @return a bitmask of ASScrollDirection values.
  */
 - (ASScrollDirection)scrollDirection;
 
 /**
  * Determines collection view's scrollable directions.
  *
- * @returns a bitmask of ASScrollDirection values.
+ * @return a bitmask of ASScrollDirection values.
  */
 - (ASScrollDirection)scrollableDirections;
 
@@ -371,7 +371,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param indexPath The index path of the requested node.
  *
- * @returns a node for display at this indexpath. This will be called on the main thread and should
+ * @return a node for display at this indexpath. This will be called on the main thread and should
  *   not implement reuse (it will be called once per row).  Unlike UICollectionView's version,
  *   this method is not called when the row is about to display.
  */
@@ -385,7 +385,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param indexPath The index path of the requested node.
  *
- * @returns a block that creates the node for display at this indexpath.
+ * @return a block that creates the node for display at this indexpath.
  *   Must be thread-safe (can be called on the main thread or a background
  *   queue) and should not implement reuse (it will be called once per row).
  */
@@ -438,7 +438,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param indexPath The index path of the node.
  *
- * @returns A constrained size range for layout the node at this index path.
+ * @return A constrained size range for layout the node at this index path.
  */
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
 

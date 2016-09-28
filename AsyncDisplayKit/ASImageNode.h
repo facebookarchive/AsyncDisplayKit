@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param image The image to be displayed.
  *
- * @returns A transformed image.
+ * @return A transformed image.
  */
 typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
 
@@ -180,7 +180,7 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
  *
  * @see <imageModificationBlock>
  *
- * @returns An ASImageNode image modification block.
+ * @return An ASImageNode image modification block.
  */
 asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat borderWidth, UIColor * _Nullable borderColor);
 
@@ -192,7 +192,7 @@ asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat
  *
  * @see <imageModificationBlock>
  *
- * @returns An ASImageNode image modification block.
+ * @return An ASImageNode image modification block.
  */
 asimagenode_modification_block_t ASImageNodeTintColorModificationBlock(UIColor *color);
 
