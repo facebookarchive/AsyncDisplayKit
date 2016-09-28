@@ -154,9 +154,6 @@
       }
     }
     
-    NSUInteger scaleIndex = 0;
-    NSMutableAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
-    
     // check to see if we may need to shrink for any of these things
     BOOL longestWordFits = [longestWordNeedingResize length] ? NO : YES;
     BOOL maxLinesFits = _attributes.maximumNumberOfLines > 0 ? NO : YES;
