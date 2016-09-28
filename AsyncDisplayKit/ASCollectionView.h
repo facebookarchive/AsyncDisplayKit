@@ -26,14 +26,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Asynchronous UICollectionView with Intelligent Preloading capabilities.
  *
- * ASCollectionNode is recommended over ASCollectionView.  This class exists for adoption convenience.
- *
- * ASCollectionView is a true subclass of UICollectionView, meaning it is pointer-compatible
+ * @discussion ASCollectionView is a true subclass of UICollectionView, meaning it is pointer-compatible
  * with code that currently uses UICollectionView.
  *
  * The main difference is that asyncDataSource expects -nodeForItemAtIndexPath, an ASCellNode, and
  * the sizeForItemAtIndexPath: method is eliminated (as are the performance problems caused by it).
  * This is made possible because ASCellNodes can calculate their own size, and preload ahead of time.
+ *
+ * @note ASCollectionNode is recommended over ASCollectionView.  This class exists for adoption convenience.
  */
 @interface ASCollectionView : UICollectionView
 
