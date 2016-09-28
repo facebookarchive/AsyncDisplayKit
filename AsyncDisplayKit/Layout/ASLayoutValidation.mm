@@ -12,7 +12,7 @@
 #import "ASLayout.h"
 #import "ASDisplayNode.h"
 
-#import "ASStaticLayoutSpec.h"
+#import "ASAbsoluteLayoutSpec.h"
 #import "ASStackLayoutSpec.h"
 
 #import <queue>
@@ -69,14 +69,14 @@ static NSString *ASLayoutValidationWrappingAssertMessage(SEL selector, id obj, C
     id<ASLayoutable> sublayoutLayoutable = sublayout.layoutable;
     
     NSString *assertMessage = nil;
-    Class stackContainerClass = [ASStaticLayoutSpec class];
+    Class stackContainerClass = [ASAbsoluteLayoutSpec class];
     
     // Check for default layoutPosition
     if (!CGPointEqualToPoint(sublayoutLayoutable.style.layoutPosition, CGPointZero)) {
       assertMessage = ASLayoutValidationWrappingAssertMessage(@selector(layoutPosition), sublayoutLayoutable, stackContainerClass);
     }
     
-    // Sublayout layoutable should be wrapped in a ASStaticLayoutSpec
+    // Sublayout layoutable should be wrapped in a ASAbsoluteLayoutSpec
     if (assertMessage == nil || [layoutable isKindOfClass:stackContainerClass]) {
       continue;
     }

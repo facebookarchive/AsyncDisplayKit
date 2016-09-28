@@ -40,7 +40,7 @@
 {
     self.imageNode.position = CGPointZero;
     [self.imageNode.style setSizeWithCGSize:constrainedSize.max];
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.imageNode]];
+    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[self.imageNode]];
 }
 
 - (void)layoutDidFinish

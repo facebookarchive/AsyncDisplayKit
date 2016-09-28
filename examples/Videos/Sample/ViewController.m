@@ -66,7 +66,7 @@
     [hlsVideoNode.style setSizeWithCGSize:CGSizeMake(mainScreenBoundsSize.width / 2.0, mainScreenBoundsSize.height / 3.0)];
     hlsVideoNode.style.layoutPosition = CGPointMake(0.0, mainScreenBoundsSize.height / 3.0);
     
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode, hlsVideoNode]];
+    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode, hlsVideoNode]];
   };
   
   [self.view addSubnode:_rootNode];

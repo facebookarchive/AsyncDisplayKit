@@ -39,8 +39,8 @@ typedef void (^ASLayoutableBlockValidatorBlock)(id layout);
 @end
 
 /*
- * ASLayoutables that have sizeRange or layoutPosition set needs to be wrapped into a ASStaticLayoutSpec. This
- * validator checks if sublayouts has sizeRange or layoutPosition set and is wrapped in a ASStaticLayoutSpec
+ * ASLayoutables that have sizeRange or layoutPosition set needs to be wrapped into a ASAbsoluteLayoutSpec. This
+ * validator checks if sublayouts has sizeRange or layoutPosition set and is wrapped in a ASAbsoluteLayoutSpec
  */
 @interface ASLayoutableStaticValidator : NSObject<ASLayoutableValidator>
 

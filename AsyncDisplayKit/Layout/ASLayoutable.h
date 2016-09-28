@@ -11,7 +11,7 @@
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
 #import <AsyncDisplayKit/ASStackLayoutable.h>
-#import <AsyncDisplayKit/ASStaticLayoutable.h>
+#import <AsyncDisplayKit/ASAbsoluteLayoutable.h>
 
 #import <AsyncDisplayKit/ASLayoutablePrivate.h>
 #import <AsyncDisplayKit/ASEnvironment.h>
@@ -176,7 +176,7 @@ extern NSString * const ASLayoutableStyleLayoutPositionProperty;
 - (void)style:(__kindof ASLayoutableStyle *)style propertyDidChange:(NSString *)propertyName;
 @end
 
-@interface ASLayoutableStyle : NSObject <ASStackLayoutable, ASStaticLayoutable>
+@interface ASLayoutableStyle : NSObject <ASStackLayoutable, ASAbsoluteLayoutable>
 
 #pragma mark - Delegate
 
@@ -306,7 +306,7 @@ extern NSString * const ASLayoutableStyleLayoutPositionProperty;
 @property (nonatomic, assign) CGFloat descender;
 
 
-#pragma mark - ASStaticLayoutable
+#pragma mark - ASAbsoluteLayoutable
 
 /**
  * @abstract The position of this object within its parent spec.

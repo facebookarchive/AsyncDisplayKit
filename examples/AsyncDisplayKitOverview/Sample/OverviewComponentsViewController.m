@@ -359,16 +359,16 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     [parentNode addSubnode:childNode];
     [mutableLayoutSpecData addObject:parentNode];
 
-#pragma mark ASStaticLayoutSpec
+#pragma mark ASAbsoluteLayoutSpec
     childNode = [self childNode];
-    // Add a layout position to the child node that the static layout spec will pick up and place it on that position
+    // Add a layout position to the child node that the absolute layout spec will pick up and place it on that position
     childNode.style.layoutPosition = CGPointMake(10.0, 10.0);
     
     parentNode = [self parentNodeWithChild:childNode];
-    parentNode.entryTitle = @"ASStaticLayoutSpec";
+    parentNode.entryTitle = @"ASAbsoluteLayoutSpec";
     parentNode.entryDescription = @"Allows positioning children at fixed offsets.";
     parentNode.sizeThatFitsBlock = ^ASLayoutSpec *(ASSizeRange constrainedSize) {
-        return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[childNode]];
+        return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[childNode]];
     };
     [parentNode addSubnode:childNode];
     [mutableLayoutSpecData addObject:parentNode];
