@@ -129,20 +129,29 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Triggers a relayout of all nodes.
  *
+ * @discussion This method invalidates and lays out every cell node in the table view.
  */
 - (void)relayoutItems;
 
 /**
- *  begins a batch of insert, delete reload and move operations. This method must be called from the main thread.
+ *  Begins a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
+ *  
+ *  @discussion You call this method to bracket a series of method calls that ends with endUpdates and that consists of operations
+ *  to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
+ *  the operations simultaneously. It's important to remember that the ASTableView will be processing the updates asynchronously after this call is completed.
+ *
+ *  @warning This method must be called from the main thread.
  */
 - (void)beginUpdates;
 
 /**
  *  Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
- *  You call this method to bracket a series of method calls that begins with beginUpdates and that consists of operations
+ *
+ *  @discussion You call this method to bracket a series of method calls that begins with beginUpdates and that consists of operations
  *  to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
- *  the operations simultaneously. This method is must be called from the main thread. It's important to remember that the ASTableView will
- *  be processing the updates asynchronously after this call is completed.
+ *  the operations simultaneously. It's important to remember that the ASTableView will be processing the updates asynchronously after this call is completed.
+ *
+ *  @warning This method is must be called from the main thread.
  */
 - (void)endUpdates;
 
