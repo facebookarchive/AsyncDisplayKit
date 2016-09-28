@@ -347,6 +347,26 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath;
 
+/**
+ * Indicator to lock the data source for data fetching in async mode.
+ * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistency or exception
+ * due to the data access in async mode.
+ *
+ * @param tableView The sender.
+ * @deprecated The data source is always accessed on the main thread, and this method will not be called.
+ */
+- (void)tableViewLockDataSource:(ASTableView *)tableView ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Indicator to unlock the data source for data fetching in asyn mode.
+ * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistency or exception
+ * due to the data access in async mode.
+ *
+ * @param tableView The sender.
+ * @deprecated The data source is always accessed on the main thread, and this method will not be called.
+ */
+- (void)tableViewUnlockDataSource:(ASTableView *)tableView ASDISPLAYNODE_DEPRECATED;
+
 @end
 
 @protocol ASTableViewDataSource <ASTableDataSource>
@@ -429,6 +449,21 @@ NS_ASSUME_NONNULL_BEGIN
  * @returns A constrained size range for layout the node at this index path.
  */
 - (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForRowAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Informs the delegate that the table view will add the node
+ * at the given index path to the view hierarchy.
+ *
+ * @param tableView The sender.
+ * @param indexPath The index path of the row that will be displayed.
+ *
+ * @warning AsyncDisplayKit processes table view edits asynchronously. The index path
+ *   passed into this method may not correspond to the same item in your data source
+ *   if your data source has been updated since the last edit was processed.
+ *
+ * This method is deprecated. Use @c tableView:willDisplayNode:forRowAtIndexPath: instead.
+ */
+- (void)tableView:(ASTableView *)tableView willDisplayNodeForRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
 
 @end
 
