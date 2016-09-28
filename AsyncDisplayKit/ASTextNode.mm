@@ -82,16 +82,16 @@ ASDISPLAYNODE_INLINE NSUInteger ASHashFromCGSize(CGSize size)
 
 @end
 
-static NSCache *sharedRendererCache()
-{ 
- static dispatch_once_t onceToken;
- static NSCache *__rendererCache = nil;
- dispatch_once(&onceToken, ^{
-   __rendererCache = [[NSCache alloc] init];
-   __rendererCache.totalCostLimit = 500; // 500 renders cache
- });
- return __rendererCache;
-}
+//static NSCache *sharedRendererCache()
+//{ 
+// static dispatch_once_t onceToken;
+// static NSCache *__rendererCache = nil;
+// dispatch_once(&onceToken, ^{
+//   __rendererCache = [[NSCache alloc] init];
+//   __rendererCache.totalCostLimit = 500; // 500 renders cache
+// });
+// return __rendererCache;
+//}
 
 /**
  The concept here is that neither the node nor layout should ever have a strong reference to the renderer object.
@@ -99,23 +99,28 @@ static NSCache *sharedRendererCache()
  we maintain a LRU renderer cache that is queried via stack-allocated keys.
  */
 
+// Disabled renderer cache for now
+//static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, CGSize constrainedSize)
+//{
+//  NSCache *cache = sharedRendererCache();
+//  
+//  ASTextNodeRendererKey *key = [[ASTextNodeRendererKey alloc] init];
+//  key.attributes = attributes;
+//  key.constrainedSize = constrainedSize;
+//
+//  ASTextKitRenderer *renderer = [cache objectForKey:key];
+//  if (renderer == nil) {
+//    renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes constrainedSize:constrainedSize];
+//    [cache setObject:renderer forKey:key cost:1];
+//  }
+//  
+//  return renderer;
+//}
+
 static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, CGSize constrainedSize)
 {
-  NSCache *cache = sharedRendererCache();
-  
-  ASTextNodeRendererKey *key = [[ASTextNodeRendererKey alloc] init];
-  key.attributes = attributes;
-  key.constrainedSize = constrainedSize;
-
-  ASTextKitRenderer *renderer = [cache objectForKey:key];
-  if (renderer == nil) {
-    renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes constrainedSize:constrainedSize];
-    [cache setObject:renderer forKey:key cost:1];
-  }
-  
-  return renderer;
+  return [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes constrainedSize:constrainedSize];
 }
-
 
 #pragma mark - ASTextNode
 
