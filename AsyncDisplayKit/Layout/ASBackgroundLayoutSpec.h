@@ -18,7 +18,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASBackgroundLayoutSpec : ASLayoutSpec
 
 /**
- * Background layoutable for this layout spec
+ * Background layoutElement for this layout spec
  */
 @property (nullable, nonatomic, strong) id<ASLayoutElement> background;
 
