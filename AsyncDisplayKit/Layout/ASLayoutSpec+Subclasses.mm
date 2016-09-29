@@ -46,9 +46,9 @@
 
 @implementation ASLayoutSpec (Subclassing)
 
-#pragma mark - Final layoutable
+#pragma mark - Final layoutElement
 
-- (id<ASLayoutElement>)layoutableToAddFromLayoutable:(id<ASLayoutElement>)child
+- (id<ASLayoutElement>)layoutElementToAddFromLayoutElement:(id<ASLayoutElement>)child
 {
   if (self.isFinalLayoutElement == NO) {
     id<ASLayoutElement> finalLayoutElement = [child finalLayoutElement];
@@ -73,7 +73,7 @@
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   
-  id<ASLayoutElement> layoutable = child ? [self layoutableToAddFromLayoutable:child] : [ASNullLayoutSpec null];
+  id<ASLayoutElement> layoutElement = child ? [self layoutElementToAddFromLayoutElement:child] : [ASNullLayoutSpec null];
   
   if (child) {
     if (_childrenArray.count < index) {
@@ -86,25 +86,25 @@
     }
   }
   
-  // Replace object at the given index with the layoutable
-  _childrenArray[index] = layoutable;
+  // Replace object at the given index with the layoutElement
+  _childrenArray[index] = layoutElement;
   
-  // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
+  // TODO: Should we propagate up the layoutElement at it could happen that multiple children will propagated up their
   //       layout options and one child will overwrite values from another child
-  // [self propagateUpLayoutable:finalLayoutElement];
+  // [self propagateUpLayoutElement:finalLayoutElement];
 }
 
 - (id<ASLayoutElement>)childAtIndex:(NSUInteger)index
 {
-  id<ASLayoutElement> layoutable = nil;
+  id<ASLayoutElement> layoutElement = nil;
   if (index < _childrenArray.count) {
-    layoutable = _childrenArray[index];
+    layoutElement = _childrenArray[index];
   }
   
-  // Null layoutable should not be accessed
-  ASDisplayNodeAssert(layoutable != [ASNullLayoutSpec null], @"Access child at index without set a child at that index");
+  // Null layoutElement should not be accessed
+  ASDisplayNodeAssert(layoutElement != [ASNullLayoutSpec null], @"Access child at index without set a child at that index");
 
-  return layoutable;
+  return layoutElement;
 }
 
 @end

@@ -13,25 +13,25 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASLayoutSpec (Subclassing)
 
 /**
- * Helper method for finalLayoutable support
+ * Helper method for finalLayoutElement support
  *
- * @warning If you are getting recursion crashes here after implementing finalLayoutable, make sure
- * that you are setting isFinalLayoutable flag to YES. This must be one BEFORE adding a child
+ * @warning If you are getting recursion crashes here after implementing finalLayoutElement, make sure
+ * that you are setting isFinalLayoutElement flag to YES. This must be one BEFORE adding a child
  * to the new ASLayoutElement.
  *
  * For example:
- * - (id<ASLayoutElement>)finalLayoutable
+ * - (id<ASLayoutElement>)finalLayoutElement
  * {
  *   ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
  *   insetSpec.insets = UIEdgeInsetsMake(10,10,10,10);
- *   insetSpec.isFinalLayoutable = YES;
+ *   insetSpec.isFinalLayoutElement = YES;
  *   [insetSpec setChild:self];
  *   return insetSpec;
  * }
  *
- * @see finalLayoutable
+ * @see finalLayoutElement
  */
-- (id<ASLayoutElement>)layoutableToAddFromLayoutable:(id<ASLayoutElement>)child;
+- (id<ASLayoutElement>)layoutElementToAddFromLayoutElement:(id<ASLayoutElement>)child;
 
 /**
  * Adds a child with the given identifier to this layout spec.

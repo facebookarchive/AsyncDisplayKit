@@ -179,7 +179,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 #pragma mark - Delegate
 
 /**
- * @abstract Initializes the layoutable style with a specified delegate
+ * @abstract Initializes the layoutElement style with a specified delegate
  */
 - (instancetype)initWithDelegate:(id<ASLayoutElementStyleDelegate>)delegate;
 
@@ -305,7 +305,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  */
 @property (nonatomic, assign) CGFloat descender;
 
-#pragma mark - ASAbsoluteLayoutable
+#pragma mark - ASAbsoluteLayoutElement
 
 /**
  * @abstract The position of this object within its parent spec.

@@ -235,7 +235,7 @@ do {\
   self.maxHeight = ASDimensionMakeWithPoints(size.height);
 }
 
-#pragma mark - ASStackLayoutable
+#pragma mark - ASStackLayoutElement
 
 - (void)setSpacingBefore:(CGFloat)spacingBefore
 {
@@ -293,7 +293,7 @@ do {\
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleDescenderProperty);
 }
 
-#pragma mark - ASStaticLayoutable
+#pragma mark - ASAbsoluteLayoutElement
 
 - (void)setLayoutPosition:(CGPoint)layoutPosition
 {
