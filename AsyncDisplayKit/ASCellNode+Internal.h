@@ -12,6 +12,8 @@
 
 #import "ASCellNode.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol ASCellNodeInteractionDelegate <NSObject>
 
 /**
@@ -49,4 +51,13 @@
 - (void)__setSelectedFromUIKit:(BOOL)selected;
 - (void)__setHighlightedFromUIKit:(BOOL)highlighted;
 
+/**
+ * @note This could be declared @c copy, but since this is only settable internally, we can ensure
+ *   that it's always safe simply to retain it, and copy if needed. Since @c UICollectionViewLayoutAttributes
+ *   is always mutable, @c copy is never "free" like it is for e.g. NSString.
+ */
+@property (nonatomic, strong, nullable) UICollectionViewLayoutAttributes *layoutAttributes;
+
 @end
+
+NS_ASSUME_NONNULL_END
