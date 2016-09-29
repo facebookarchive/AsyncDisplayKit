@@ -47,12 +47,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 @interface _ASCollectionViewCell : UICollectionViewCell
 @property (nonatomic, weak) ASCellNode *node;
+@property (nonatomic, strong) UICollectionViewLayoutAttributes *layoutAttributes;
 @end
 
 @implementation _ASCollectionViewCell
 
 - (void)setNode:(ASCellNode *)node
 {
+  ASDisplayNodeAssertMainThread();
+  node.layoutAttributes = _layoutAttributes;
   _node = node;
   [node __setSelectedFromUIKit:self.selected];
   [node __setHighlightedFromUIKit:self.highlighted];
@@ -72,14 +75,25 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)prepareForReuse
 {
+  _layoutAttributes = nil;
+  _node.layoutAttributes = nil;
+
   // Need to clear node pointer before UIKit calls setSelected:NO / setHighlighted:NO on its cells
   self.node = nil;
   [super prepareForReuse];
 }
 
+/**
+ * In the initial case, this is called by UICollectionView during cell dequeueing, before
+ *   we get a chance to assign a node to it, so we must be sure to set these layout attributes
+ *   on our node when one is next assigned to us in @c setNode: . Since there may be cases when we _do_ already
+ *   have our node assigned e.g. during a layout update for existing cells, we also attempt
+ *   to update it now.
+ */
 - (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
 {
-  [_node applyLayoutAttributes:layoutAttributes];
+  _layoutAttributes = layoutAttributes;
+  _node.layoutAttributes = layoutAttributes;
 }
 
 @end
