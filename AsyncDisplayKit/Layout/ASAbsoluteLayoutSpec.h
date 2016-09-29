@@ -20,9 +20,9 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASAbsoluteLayoutSpec : ASLayoutSpec
 
 /**
- @param children Children to be positioned at fixed positions, each conforms to ASAbsoluteLayoutable
+ @param children Children to be positioned at fixed positions, each conforms to ASAbsoluteLayoutElement
  */
-+ (instancetype)absoluteLayoutSpecWithChildren:(NSArray<id<ASAbsoluteLayoutable>> *)children;
++ (instancetype)absoluteLayoutSpecWithChildren:(NSArray<id<ASAbsoluteLayoutElement>> *)children;
 
 @end
 
