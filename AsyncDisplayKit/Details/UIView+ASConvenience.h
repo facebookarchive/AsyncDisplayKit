@@ -36,6 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, getter = isOpaque) BOOL opaque;
 @property (nonatomic, strong) __attribute__((NSObject)) CGColorRef borderColor;
 @property (nonatomic, strong) __attribute__((NSObject)) CGColorRef backgroundColor;
+@property (nonatomic, assign) BOOL allowsGroupOpacity;
 @property (nonatomic, assign) BOOL allowsEdgeAntialiasing;
 @property (nonatomic, assign) unsigned int edgeAntialiasingMask;
 

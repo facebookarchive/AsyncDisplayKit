@@ -695,6 +695,18 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   _setToLayer(borderColor, colorValue);
 }
 
+- (BOOL)allowsGroupOpacity
+{
+  _bridge_prologue_read;
+  return _getFromLayer(allowsGroupOpacity);
+}
+
+- (void)setAllowsGroupOpacity:(BOOL)allowsGroupOpacity
+{
+  _bridge_prologue_write;
+  _setToLayer(allowsGroupOpacity, allowsGroupOpacity);
+}
+
 - (BOOL)allowsEdgeAntialiasing
 {
   _bridge_prologue_read;
