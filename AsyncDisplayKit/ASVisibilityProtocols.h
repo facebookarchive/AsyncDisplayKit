@@ -59,9 +59,9 @@ ASDISPLAYNODE_EXTERN_C_END
  * If implemented by a view controller container, use this method to notify child view controllers that their view
  * depth has changed @see ASNavigationController.m
  *
- * If implemented on an ASViewController, use this method to clear out reduce or increase the resources that your
+ * If implemented on an ASViewController, use this method to reduce or increase the resources that your
  * view controller uses. A higher visibility depth view controller should decrease it's resource usage, a lower
- * visibility depth controller should prewarm resources in preperation for a display at 0 depth.
+ * visibility depth controller should pre-warm resources in preperation for a display at 0 depth.
  *
  * ASViewController implements this method and reduces / increases range mode of supporting nodes (such as ASCollectionNode
  * and ASTableNode).
@@ -76,7 +76,7 @@ ASDISPLAYNODE_EXTERN_C_END
  * ASManagesChildVisibilityDepth
  *
  * @discussion A protocol which should be implemented by container view controllers to allow proper
- * propegation of visibility depth
+ * propagation of visibility depth
  *
  * @see ASVisibilityDepth
  */
