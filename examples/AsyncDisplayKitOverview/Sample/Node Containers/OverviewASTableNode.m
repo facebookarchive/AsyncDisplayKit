@@ -45,7 +45,7 @@
     // 100% of container
     _node.style.width = ASDimensionMakeWithFraction(1.0);
     _node.style.height = ASDimensionMakeWithFraction(1.0);
-    return [ASWrapperLayoutSpec wrapperWithLayoutable:_node];
+    return [ASWrapperLayoutSpec wrapperWithLayoutElement:_node];
 }
 
 

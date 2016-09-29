@@ -18,7 +18,7 @@
 @interface ASLayoutSpec() {
   ASDN::RecursiveMutex __instanceLock__;
   ASEnvironmentState _environmentState;
-  ASLayoutableStyle *_style;
+  ASLayoutElementStyle *_style;
   NSMutableArray *_childrenArray;
 }
 @end

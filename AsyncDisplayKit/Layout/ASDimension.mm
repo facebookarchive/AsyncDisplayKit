@@ -111,18 +111,18 @@ ASDISPLAYNODE_INLINE NSString *NSStringFromASRelativeSize(ASRelativeSize size)
 }
 
 
-#pragma mark - ASLayoutableSize
+#pragma mark - ASLayoutElementSize
 
-NSString *NSStringFromASLayoutableSize(ASLayoutableSize size)
+NSString *NSStringFromASLayoutElementSize(ASLayoutElementSize size)
 {
   return [NSString stringWithFormat:
-          @"<ASLayoutableSize: exact=%@, min=%@, max=%@>",
+          @"<ASLayoutElementSize: exact=%@, min=%@, max=%@>",
           NSStringFromASRelativeSize(ASRelativeSizeMake(size.width, size.height)),
           NSStringFromASRelativeSize(ASRelativeSizeMake(size.minWidth, size.minHeight)),
           NSStringFromASRelativeSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight))];
 }
 
-ASDISPLAYNODE_INLINE void ASLayoutableSizeConstrain(CGFloat minVal, CGFloat exactVal, CGFloat maxVal, CGFloat *outMin, CGFloat *outMax)
+ASDISPLAYNODE_INLINE void ASLayoutElementSizeConstrain(CGFloat minVal, CGFloat exactVal, CGFloat maxVal, CGFloat *outMin, CGFloat *outMax)
 {
     NSCAssert(!isnan(minVal), @"minVal must not be NaN");
     NSCAssert(!isnan(maxVal), @"maxVal must not be NaN");
@@ -154,15 +154,15 @@ ASDISPLAYNODE_INLINE void ASLayoutableSizeConstrain(CGFloat minVal, CGFloat exac
     }
 }
 
-ASSizeRange ASLayoutableSizeResolveAutoSize(ASLayoutableSize size, const CGSize parentSize, ASSizeRange autoASSizeRange)
+ASSizeRange ASLayoutElementSizeResolveAutoSize(ASLayoutElementSize size, const CGSize parentSize, ASSizeRange autoASSizeRange)
 {
   CGSize resolvedExact = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.width, size.height), parentSize, {NAN, NAN});
   CGSize resolvedMin = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.minWidth, size.minHeight), parentSize, autoASSizeRange.min);
   CGSize resolvedMax = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight), parentSize, autoASSizeRange.max);
   
   CGSize rangeMin, rangeMax;
-  ASLayoutableSizeConstrain(resolvedMin.width, resolvedExact.width, resolvedMax.width, &rangeMin.width, &rangeMax.width);
-  ASLayoutableSizeConstrain(resolvedMin.height, resolvedExact.height, resolvedMax.height, &rangeMin.height, &rangeMax.height);
+  ASLayoutElementSizeConstrain(resolvedMin.width, resolvedExact.width, resolvedMax.width, &rangeMin.width, &rangeMax.width);
+  ASLayoutElementSizeConstrain(resolvedMin.height, resolvedExact.height, resolvedMax.height, &rangeMin.height, &rangeMax.height);
   return {rangeMin, rangeMax};
 }
 

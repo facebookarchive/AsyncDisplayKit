@@ -128,7 +128,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @warning Overriding this method should be done VERY rarely.
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASLayoutableSize)size
+                     restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize;
 
 /**

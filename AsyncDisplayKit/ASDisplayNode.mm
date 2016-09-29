@@ -69,10 +69,10 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 @implementation ASDisplayNode
 
-@dynamic layoutableType;
+@dynamic layoutElementType;
 
 @synthesize name = _name;
-@synthesize isFinalLayoutable = _isFinalLayoutable;
+@synthesize isFinalLayoutElement = _isFinalLayoutElement;
 @synthesize threadSafeBounds = _threadSafeBounds;
 @synthesize layoutSpecBlock = _layoutSpecBlock;
 
@@ -299,8 +299,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   _displaySentinel = [[ASSentinel alloc] init];
   
-  _style = [[ASLayoutableStyle alloc] init];
-  _size = ASLayoutableSizeMake();
+  // TODO: We should lazily initialize the style object.
+  _style = [[ASLayoutElementStyle alloc] init];
   _environmentState = ASEnvironmentStateMakeDefault();
   
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
@@ -722,7 +722,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Style
 
-- (ASLayoutableStyle *)style
+- (ASLayoutElementStyle *)style
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _style;
@@ -744,7 +744,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   if ([self shouldCalculateLayoutWithConstrainedSize:constrainedSize parentSize:parentSize] == NO) {
     ASDisplayNodeAssertNotNil(_calculatedDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _layout should not be nil! %@", self);
-    return _calculatedDisplayNodeLayout->layout ? : [ASLayout layoutWithLayoutable:self size:{0, 0}];
+    return _calculatedDisplayNodeLayout->layout ? : [ASLayout layoutWithLayoutElement:self size:{0, 0}];
   }
   
   [self cancelLayoutTransition];
@@ -777,8 +777,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   // Don't remeasure if in layout pending state and a new transition already started
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
-    ASLayoutableContext context =  ASLayoutableGetCurrentContext();
-    if (ASLayoutableContextIsNull(context) || _pendingTransitionID != context.transitionID) {
+    ASLayoutElementContext context =  ASLayoutElementGetCurrentContext();
+    if (ASLayoutElementContextIsNull(context) || _pendingTransitionID != context.transitionID) {
       return NO;
     }
   }
@@ -787,9 +787,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _calculatedDisplayNodeLayout->isValidForConstrainedSizeParentSize(constrainedSize, parentSize) == NO;
 }
 
-- (ASLayoutableType)layoutableType
+- (ASLayoutElementType)layoutElementType
 {
-  return ASLayoutableTypeDisplayNode;
+  return ASLayoutElementTypeDisplayNode;
 }
 
 - (BOOL)canLayoutAsynchronous
@@ -863,7 +863,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     
     ASLayout *newLayout;
     {
-      ASLayoutableSetCurrentContext(ASLayoutableContextMake(transitionID, NO));
+      ASLayoutElementSetCurrentContext(ASLayoutElementContextMake(transitionID, NO));
 
       ASDN::MutexLocker l(__instanceLock__);
       BOOL automaticallyManagesSubnodesDisabled = (self.automaticallyManagesSubnodes == NO);
@@ -875,7 +875,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         self.automaticallyManagesSubnodes = NO; // Temporary flag for 1.9.x
       }
       
-      ASLayoutableClearCurrentContext();
+      ASLayoutElementClearCurrentContext();
     }
     
     if ([self _shouldAbortTransitionWithID:transitionID]) {
@@ -1484,8 +1484,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // Check if it's a subnode in a layout transition. In this case no measurement is needed as it's part of
   // the layout transition
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
-    ASLayoutableContext context =  ASLayoutableGetCurrentContext();
-    if (ASLayoutableContextIsNull(context) || _pendingTransitionID != context.transitionID) {
+    ASLayoutElementContext context =  ASLayoutElementGetCurrentContext();
+    if (ASLayoutElementContextIsNull(context) || _pendingTransitionID != context.transitionID) {
       return;
     }
   }
@@ -2203,7 +2203,7 @@ static NSInteger incrementIfFound(NSInteger i) {
       // is in fly
       if (ASHierarchyStateIncludesLayoutPending(stateToEnterOrExit)) {
         int32_t pendingTransitionId = newSupernode.pendingTransitionID;
-        if (pendingTransitionId != ASLayoutableContextInvalidTransitionID) {
+        if (pendingTransitionId != ASLayoutElementContextInvalidTransitionID) {
           {
             ASDN::MutexLocker l(__instanceLock__);
             _pendingTransitionID = pendingTransitionId;
@@ -2397,10 +2397,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 #pragma mark - For Subclasses
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASLayoutableSize)size
+                     restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutableSizeResolve(_style.size, parentSize));
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutElementSizeResolve(_style.size, parentSize));
   return [self calculateLayoutThatFits:resolvedRange];
 }
 
@@ -2422,7 +2422,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
     ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
 
-    layoutSpec.parent = self; // This causes upward propogation of any non-default layoutable values.
+    layoutSpec.parent = self; // This causes upward propogation of any non-default layoutElement values.
     
     // manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
     {
@@ -2443,18 +2443,18 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
     ASDisplayNodeAssertNotNil(layout, @"[ASLayoutSpec measureWithSizeRange:] should never return nil! %@, %@", self, layoutSpec);
       
-    // Make sure layoutableObject of the root layout is `self`, so that the flattened layout will be structurally correct.
-    BOOL isFinalLayoutable = (layout.layoutable != self);
-    if (isFinalLayoutable) {
+    // Make sure layoutElementObject of the root layout is `self`, so that the flattened layout will be structurally correct.
+    BOOL isFinalLayoutElement = (layout.layoutElement != self);
+    if (isFinalLayoutElement) {
       layout.position = CGPointZero;
-      layout = [ASLayout layoutWithLayoutable:self size:layout.size sublayouts:@[layout]];
+      layout = [ASLayout layoutWithLayoutElement:self size:layout.size sublayouts:@[layout]];
     }
     ASDisplayNodeLogEvent(self, @"computedLayout: %@", layout);
     return [layout filteredNodeLayoutTree];
   } else {
     CGSize size = [self calculateSizeThatFits:constrainedSize.max];
     ASDisplayNodeLogEvent(self, @"calculatedSize: %@", NSStringFromCGSize(size));
-    return [ASLayout layoutWithLayoutable:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:nil];
+    return [ASLayout layoutWithLayoutElement:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:nil];
   }
 }
 
@@ -2504,7 +2504,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDN::MutexLocker l(__instanceLock__);
   
-  ASDisplayNodeAssertTrue(displayNodeLayout->layout.layoutable == self);
+  ASDisplayNodeAssertTrue(displayNodeLayout->layout.layoutElement == self);
   ASDisplayNodeAssertTrue(displayNodeLayout->layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(displayNodeLayout->layout.size.height >= 0.0);
   
@@ -2933,7 +2933,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       // Leaving layout pending state, reset related properties
       {
         ASDN::MutexLocker l(__instanceLock__);
-        _pendingTransitionID = ASLayoutableContextInvalidTransitionID;
+        _pendingTransitionID = ASLayoutElementContextInvalidTransitionID;
         _pendingLayoutTransition = nil;
       }
     }
@@ -2977,7 +2977,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)__layoutSublayouts
 {
   for (ASLayout *subnodeLayout in _calculatedDisplayNodeLayout->layout.sublayouts) {
-    ((ASDisplayNode *)subnodeLayout.layoutable).frame = subnodeLayout.frame;
+    ((ASDisplayNode *)subnodeLayout.layoutElement).frame = subnodeLayout.frame;
   }
 }
 
@@ -3267,7 +3267,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   _flags.isInHierarchy = inHierarchy;
 }
 
-- (id<ASLayoutable>)finalLayoutable
+- (id<ASLayoutElement>)finalLayoutElement
 {
   return self;
 }
@@ -3525,7 +3525,7 @@ ASEnvironmentLayoutExtensibilityForwarding
   return subtree;
 }
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutElementAsciiArtProtocol
 
 - (NSString *)asciiArtString
 {

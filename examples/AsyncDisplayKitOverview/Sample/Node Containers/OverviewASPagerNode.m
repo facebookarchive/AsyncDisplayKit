@@ -37,7 +37,7 @@ static UIColor *OverViewASPagerNodeRandomColor() {
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-    return [ASLayout layoutWithLayoutable:self size:constrainedSize.max];
+    return [ASLayout layoutWithLayoutElement:self size:constrainedSize.max];
 }
 
 @end
@@ -70,7 +70,7 @@ static UIColor *OverViewASPagerNodeRandomColor() {
     // 100% of container
     _node.style.width = ASDimensionMakeWithFraction(1.0);
     _node.style.height = ASDimensionMakeWithFraction(1.0);
-    return [ASWrapperLayoutSpec wrapperWithLayoutable:_node];
+    return [ASWrapperLayoutSpec wrapperWithLayoutElement:_node];
 }
 
 - (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode

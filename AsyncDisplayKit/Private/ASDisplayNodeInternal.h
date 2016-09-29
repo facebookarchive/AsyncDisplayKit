@@ -106,8 +106,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 @protected
   ASDisplayNode * __weak _supernode;
   
-  ASLayoutableStyle *_style;
-  ASLayoutableSize _size;
+  ASLayoutElementStyle *_style;
 
   ASSentinel *_displaySentinel;
 

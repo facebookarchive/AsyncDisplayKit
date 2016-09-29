@@ -15,7 +15,7 @@
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
-#import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASLayoutElement.h>
 #import <AsyncDisplayKit/ASContextTransitioning.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -104,8 +104,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  */
 
-@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
-
+@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutElement>
 
 /** @name Initializing a node object */
 
@@ -608,7 +607,7 @@ extern NSInteger const ASDefaultDrawingPriority;
 /**
  * Convenience methods for debugging.
  */
-@interface ASDisplayNode (Debugging) <ASLayoutableAsciiArtProtocol>
+@interface ASDisplayNode (Debugging) <ASLayoutElementAsciiArtProtocol>
 
 /**
  * @abstract Return a description of the node hierarchy.

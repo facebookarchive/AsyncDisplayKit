@@ -22,7 +22,7 @@
 #import "ASEqualityHelpers.h"
 
 /**
- * Search the whole layout stack if at least one layout has a layoutable object that can not be layed out asynchronous.
+ * Search the whole layout stack if at least one layout has a layoutElement object that can not be layed out asynchronous.
  * This can be the case for example if a node was already loaded
  */
 static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
@@ -34,7 +34,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
     layout = queue.front();
     queue.pop();
     
-    if (layout.layoutable.canLayoutAsynchronous == NO) {
+    if (layout.layoutElement.canLayoutAsynchronous == NO) {
       return NO;
     }
     
@@ -128,7 +128,7 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
                                        insertions:&insertions
                                         deletions:&deletions
                                      compareBlock:^BOOL(ASLayout *lhs, ASLayout *rhs) {
-                                       return ASObjectIsEqual(lhs.layoutable, rhs.layoutable);
+                                       return ASObjectIsEqual(lhs.layoutElement, rhs.layoutElement);
                                      }];
     _insertedSubnodePositions = findNodesInLayoutAtIndexes(pendingLayout, insertions, &_insertedSubnodes);
     _removedSubnodePositions = findNodesInLayoutAtIndexesWithFilteredNodes(previousLayout,
@@ -221,7 +221,7 @@ static inline std::vector<NSUInteger> findNodesInLayoutAtIndexesWithFilteredNode
   for (ASLayout *sublayout in layout.sublayouts) {
     if (idx > lastIndex) { break; }
     if (idx >= firstIndex && [indexes containsIndex:idx]) {
-      ASDisplayNode *node = (ASDisplayNode *)sublayout.layoutable;
+      ASDisplayNode *node = (ASDisplayNode *)sublayout.layoutElement;
       ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
       // Ignore the odd case in which a non-node sublayout is accessed and the type cast fails
       if (node != nil) {
