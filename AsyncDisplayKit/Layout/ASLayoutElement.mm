@@ -293,7 +293,7 @@ do {\
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleDescenderProperty);
 }
 
-#pragma mark - ASStaticLayoutElement
+#pragma mark - ASAbsoluteLayoutElement
 
 - (void)setLayoutPosition:(CGPoint)layoutPosition
 {
