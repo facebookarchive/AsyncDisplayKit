@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
  * the sizeForItemAtIndexPath: method is eliminated (as are the performance problems caused by it).
  * This is made possible because ASCellNodes can calculate their own size, and preload ahead of time.
  *
- * @note ASCollectionNode is recommended over ASCollectionView.  This class exists for adoption convenience.
+ * @note ASCollectionNode is strongly recommended over ASCollectionView.  This class exists for adoption convenience.
  */
 @interface ASCollectionView : UICollectionView
 
@@ -59,7 +59,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Returns the corresponding ASCollectionNode
  *
- * @return collectionNode The cooresponding ASCollectionNode which exists even if directly allocating & handling the view class.
+ * @return collectionNode The corresponding ASCollectionNode which exists even if directly allocating & handling the view class.
  */
 @property (nonatomic, weak, readonly) ASCollectionNode *collectionNode;
 
