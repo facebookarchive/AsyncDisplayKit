@@ -50,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Returns the corresponding ASCollectionView
  *
- * @return view The cooresponding ASCollectionView.
+ * @return view The corresponding ASCollectionView.
  */
 @property (strong, nonatomic, readonly) ASCollectionView *view;
 
