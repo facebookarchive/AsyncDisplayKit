@@ -23,14 +23,14 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Asynchronous UITableView with Intelligent Preloading capabilities.
  *
- * ASTableNode is recommended over ASTableView.  This class is provided for adoption convenience.
- *
- * ASTableView is a true subclass of UITableView, meaning it is pointer-compatible with code that
+ * @discussion ASTableView is a true subclass of UITableView, meaning it is pointer-compatible with code that
  * currently uses UITableView
  *
  * The main difference is that asyncDataSource expects -nodeForRowAtIndexPath, an ASCellNode, and
  * the heightForRowAtIndexPath: method is eliminated (as are the performance problems caused by it).
  * This is made possible because ASCellNodes can calculate their own size, and preload ahead of time.
+ *
+ * @note ASTableNode is strongly recommended over ASTableView.  This class is provided for adoption convenience.
  */
 @interface ASTableView : UITableView
 
