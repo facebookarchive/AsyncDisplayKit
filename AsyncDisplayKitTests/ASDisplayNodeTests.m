@@ -304,6 +304,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(NO, node.clipsToBounds, @"default clipsToBounds broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.opaque, @"default opaque broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.needsDisplayOnBoundsChange, @"default needsDisplayOnBoundsChange broken %@", hasLoadedView);
+  XCTAssertEqual(YES, node.allowsGroupOpacity, @"default allowsEdgeAntialiasing broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.allowsEdgeAntialiasing, @"default allowsEdgeAntialiasing broken %@", hasLoadedView);
   XCTAssertEqual((unsigned int)(kCALayerLeftEdge | kCALayerRightEdge | kCALayerBottomEdge | kCALayerTopEdge), node.edgeAntialiasingMask, @"default edgeAntialisingMask broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.hidden, @"default hidden broken %@", hasLoadedView);
@@ -401,6 +402,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(YES, node.clipsToBounds, @"clipsToBounds broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.opaque, @"opaque broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.needsDisplayOnBoundsChange, @"needsDisplayOnBoundsChange broken %@", hasLoadedView);
+  XCTAssertEqual(NO, node.allowsGroupOpacity, @"allowsEdgeAntialiasing broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.allowsEdgeAntialiasing, @"allowsEdgeAntialiasing broken %@", hasLoadedView);
   XCTAssertTrue((unsigned int)(kCALayerLeftEdge | kCALayerTopEdge) == node.edgeAntialiasingMask, @"edgeAntialiasingMask broken: %@", hasLoadedView);
   XCTAssertEqual(YES, node.hidden, @"hidden broken %@", hasLoadedView);
@@ -459,6 +461,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
     node.clipsToBounds = YES;
     node.opaque = NO;
     node.needsDisplayOnBoundsChange = YES;
+    node.allowsGroupOpacity = NO;
     node.allowsEdgeAntialiasing = YES;
     node.edgeAntialiasingMask = (kCALayerLeftEdge | kCALayerTopEdge);
     node.hidden = YES;
