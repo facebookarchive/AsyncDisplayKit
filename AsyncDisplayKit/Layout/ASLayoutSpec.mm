@@ -55,7 +55,7 @@
   return YES;
 }
 
-#pragma mark - Final Layoutable
+#pragma mark - Final LayoutElement
 
 - (id<ASLayoutElement>)finalLayoutElement
 {
@@ -122,7 +122,7 @@
   ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
   
   if (child) {
-    id<ASLayoutElement> finalLayoutElement = [self layoutableToAddFromLayoutable:child];
+    id<ASLayoutElement> finalLayoutElement = [self layoutElementToAddFromLayoutElement:child];
     if (finalLayoutElement) {
       _childrenArray[0] = finalLayoutElement;
       [self propagateUpLayoutElement:finalLayoutElement];
@@ -156,7 +156,7 @@
   NSUInteger i = 0;
   for (id<ASLayoutElement> child in children) {
     ASDisplayNodeAssert([child conformsToProtocol:NSProtocolFromString(@"ASLayoutElement")], @"Child %@ of spec %@ is not an ASLayoutElement!", child, self);
-    _childrenArray[i] = [self layoutableToAddFromLayoutable:child];
+    _childrenArray[i] = [self layoutElementToAddFromLayoutElement:child];
     i += 1;
   }
 }
