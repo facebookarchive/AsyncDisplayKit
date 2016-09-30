@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
  * and resources if you need to download images outside of an @c ASNetworkImageNode or 
  * @c ASMultiplexImageNode
  *
- * @return sharedPINRemoteImageManager an instance of a @c PINRemoteImageManager
+ * @return An instance of a @c PINRemoteImageManager
  */
 - (PINRemoteImageManager *)sharedPINRemoteImageManager;
 
