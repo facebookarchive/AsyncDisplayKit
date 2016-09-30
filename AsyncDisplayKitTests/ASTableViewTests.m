@@ -482,6 +482,66 @@
   }];
 }
 
+- (void)testWaitForUpdatesBeforeFirstLayout
+{
+  CGSize tableViewSize = CGSizeMake(100, 500);
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
+                                                                style:UITableViewStylePlain];
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  XCTAssertFalse(CGRectIsEmpty(tableView.bounds));
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  XCTAssertNil([tableView nodeForRowAtIndexPath:indexPath]);
+  XCTAssertEqual([tableView rectForRowAtIndexPath:indexPath].size.height, 0);
+  [tableView waitUntilAllUpdatesAreCommitted];
+  XCTAssertNotNil([tableView nodeForRowAtIndexPath:indexPath]);
+  // NOTE: rectForRow still returns 0 because the table view hasn't laid out subviews.
+  XCTAssertEqual([tableView rectForRowAtIndexPath:indexPath].size.height, 0);
+}
+
+- (void)testWaitForUpdatesDuringNextLayoutFirstLoad
+{
+  CGSize tableViewSize = CGSizeMake(100, 500);
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
+                                                                style:UITableViewStylePlain];
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  [tableView waitForUpdatesDuringNextLayoutPass];
+  XCTAssertFalse(CGRectIsEmpty(tableView.bounds));
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  XCTAssertNil([tableView nodeForRowAtIndexPath:indexPath]);
+  XCTAssertEqual([tableView rectForRowAtIndexPath:indexPath].size.height, 0);
+  [tableView layoutIfNeeded];
+  XCTAssertNotNil([tableView nodeForRowAtIndexPath:indexPath]);
+  XCTAssertGreaterThan([tableView rectForRowAtIndexPath:indexPath].size.height, 0);
+}
+
+- (void)testInitialDataLoadIsAsync
+{
+  CGSize tableViewSize = CGSizeMake(100, 500);
+  ASTestTableView *tableView = [[ASTestTableView alloc] initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
+                                                                style:UITableViewStylePlain];
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  
+  tableView.asyncDelegate = dataSource;
+  tableView.asyncDataSource = dataSource;
+  
+  XCTAssertFalse(CGRectIsEmpty(tableView.bounds));
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  XCTAssertNil([tableView nodeForRowAtIndexPath:indexPath]);
+  XCTAssertEqual([tableView rectForRowAtIndexPath:indexPath].size.height, 0);
+  [tableView layoutIfNeeded];
+  XCTAssertNil([tableView nodeForRowAtIndexPath:indexPath]);
+  XCTAssertEqual([tableView rectForRowAtIndexPath:indexPath].size.height, 0);
+}
+
+
 - (void)triggerFirstLayoutMeasurementForTableView:(ASTableView *)tableView{
   XCTestExpectation *reloadDataExpectation = [self expectationWithDescription:@"reloadData"];
   [tableView reloadDataWithCompletion:^{

@@ -52,6 +52,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<ASCollectionDataSource> asyncDataSource;
 
 /**
+ * Tell the collection view that, during the next layoutSubviews pass, it should block the
+ * main thread and wait for all items to be up-to-date.
+ *
+ * @discussion This is useful when you want to ensure that the user never sees an empty
+ * collection view. It is better to call this than to explicitly wait using `waitUntilAllUpdatesAreCommitted`
+ * because the collection view's size may not be correct until the layout pass.
+ */
+- (void)waitForUpdatesDuringNextLayoutPass;
+
+/**
  * Tuning parameters for a range type in full mode.
  *
  * @param rangeType The range type to get the tuning parameters for.

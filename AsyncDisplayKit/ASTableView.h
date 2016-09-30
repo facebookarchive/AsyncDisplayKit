@@ -48,6 +48,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style;
 
 /**
+ * Tell the table view that, during the next layoutSubviews pass, it should block the
+ * main thread and wait for all rows to be up-to-date.
+ *
+ * @discussion This is useful when you want to ensure that the user never sees an empty
+ * table view. It is better to call this than to explicitly wait using `waitUntilAllUpdatesAreCommitted`
+ * because the table view's size may not be correct until the layout pass.
+ */
+- (void)waitForUpdatesDuringNextLayoutPass;
+
+/**
  * Tuning parameters for a range type in full mode.
  *
  * @param rangeType The range type to get the tuning parameters for.
@@ -162,7 +172,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL completed))completion;
 
 /**
- *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
+ * Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
  */
 - (void)waitUntilAllUpdatesAreCommitted;
 
