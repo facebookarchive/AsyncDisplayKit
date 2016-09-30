@@ -110,25 +110,31 @@
 
 - (void)setEnabled:(BOOL)enabled
 {
-  [super setEnabled:enabled];
-  if (enabled) {
-    self.accessibilityTraits = UIAccessibilityTraitButton;
-  } else {
-    self.accessibilityTraits = UIAccessibilityTraitButton | UIAccessibilityTraitNotEnabled;
+  if (self.enabled != enabled) {
+    [super setEnabled:enabled];
+    if (enabled) {
+      self.accessibilityTraits = UIAccessibilityTraitButton;
+    } else {
+      self.accessibilityTraits = UIAccessibilityTraitButton | UIAccessibilityTraitNotEnabled;
+    }
+    [self updateButtonContent];
   }
-  [self updateButtonContent];
 }
 
 - (void)setHighlighted:(BOOL)highlighted
 {
-  [super setHighlighted:highlighted];
-  [self updateButtonContent];
+  if (self.highlighted != highlighted) {
+    [super setHighlighted:highlighted];
+    [self updateButtonContent];
+  }
 }
 
 - (void)setSelected:(BOOL)selected
 {
-  [super setSelected:selected];
-  [self updateButtonContent];
+  if (self.selected != selected) {
+    [super setSelected:selected];
+    [self updateButtonContent];
+  }
 }
 
 - (void)updateButtonContent
