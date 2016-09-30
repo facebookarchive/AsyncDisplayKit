@@ -81,13 +81,12 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 @property (nonatomic, readonly, assign) NSUInteger lineCount;
 
 /**
- * An array of path objects representing the regions where text is not displayed in the text container.
+ * An array of path objects representing the regions where text is not displayed.
  *
- * @discussion The default value of this property is an empty array. Depending on the platform, you can
- * assign an array of NSBezierPath or UIBezierPath objects to exclude text from one or more regions in
- * the text container’s bounds. When the layout manager proposes a line fragment rectangle intersecting
- * one of the regions defined by the exclusion paths, the text container returns an adjusted line fragment
- * rectangle excluding that region.
+ * @discussion The default value of this property is an empty array. You can
+ * assign an array of UIBezierPath objects to exclude text from one or more regions in
+ * the text node's bounds. You can use this property to have text wrap around images,
+ * shapes or other text like a fancy magazine.
  */
 @property (nullable, nonatomic, strong) NSArray<UIBezierPath *> *exclusionPaths;
 
