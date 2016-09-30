@@ -241,16 +241,6 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  */
 @property (nonatomic, assign, readwrite) ASDimension maxWidth;
 
-/**
- * @abstract Set max and width properties from given size
- */
-- (void)setSizeWithCGSize:(CGSize)size;
-
-/**
- * @abstract Set minHeight, maxHeight and minWidth, maxWidth properties from given size
- */
-- (void)setExactSizeWithCGSize:(CGSize)size;
-
 
 #pragma mark - ASStackLayoutElement
 

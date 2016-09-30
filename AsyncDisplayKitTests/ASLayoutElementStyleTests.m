@@ -47,7 +47,8 @@
 - (void)testSettingSizeViaHelper
 {
   ASLayoutElementStyle *style = [ASLayoutElementStyle new];
-  [style setSizeWithCGSize:CGSizeMake(100, 100)];
+  style.width = ASDimensionMake(100);
+  style.height = ASDimensionMake(100);
   
   XCTAssertTrue(ASDimensionEqualToDimension(style.width, ASDimensionMake(100)));
   XCTAssertTrue(ASDimensionEqualToDimension(style.height, ASDimensionMake(100)));
@@ -56,7 +57,8 @@
 - (void)testSettingExactSize
 {
   ASLayoutElementStyle *style = [ASLayoutElementStyle new];
-  [style setExactSizeWithCGSize:CGSizeMake(100, 100)];
+  style.width = ASDimensionMake(100);
+  style.height = ASDimensionMake(100);
   
   XCTAssertTrue(ASDimensionEqualToDimension(style.minWidth, ASDimensionMake(100)));
   XCTAssertTrue(ASDimensionEqualToDimension(style.minHeight, ASDimensionMake(100)));

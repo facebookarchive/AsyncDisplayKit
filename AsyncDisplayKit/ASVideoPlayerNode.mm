@@ -706,7 +706,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     maxSize = CGSizeZero;
   }
 
-  [_videoNode.style setSizeWithCGSize:maxSize];
+  _videoNode.style.width = ASDimensionMake(maxSize.width);
+  _videoNode.style.height = ASDimensionMake(maxSize.height);
 
   ASLayoutSpec *layoutSpec;
   if (_delegateFlags.delegateLayoutSpecForControls) {
@@ -719,12 +720,14 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   if (_spinnerNode) {
     ASCenterLayoutSpec *centerLayoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_spinnerNode];
-    [centerLayoutSpec.style setSizeWithCGSize:maxSize];
+    centerLayoutSpec.style.width = ASDimensionMake(maxSize.width);
+    centerLayoutSpec.style.height = ASDimensionMake(maxSize.height);
     [children addObject:centerLayoutSpec];
   }
 
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
-  [overlaySpec.style setSizeWithCGSize:maxSize];
+  overlaySpec.style.width = ASDimensionMake(maxSize.width);
+  overlaySpec.style.height = ASDimensionMake(maxSize.height);
   [children addObject:overlaySpec];
 
   return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:children];

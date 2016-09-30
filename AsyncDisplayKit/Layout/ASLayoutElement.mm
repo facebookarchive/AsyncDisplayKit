@@ -221,20 +221,6 @@ do {\
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMaxHeightProperty);
 }
 
-- (void)setSizeWithCGSize:(CGSize)size
-{
-  self.width = ASDimensionMakeWithPoints(size.width);
-  self.height = ASDimensionMakeWithPoints(size.height);
-}
-
-- (void)setExactSizeWithCGSize:(CGSize)size
-{
-  self.minWidth = ASDimensionMakeWithPoints(size.width);
-  self.minHeight = ASDimensionMakeWithPoints(size.height);
-  self.maxWidth = ASDimensionMakeWithPoints(size.width);
-  self.maxHeight = ASDimensionMakeWithPoints(size.height);
-}
-
 #pragma mark - ASStackLayoutElement
 
 - (void)setSpacingBefore:(CGFloat)spacingBefore

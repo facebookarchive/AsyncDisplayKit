@@ -799,7 +799,8 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init]; // Default direction is horizontal
   stackLayoutSpec.direction = ASStackLayoutDirectionHorizontal;
   stackLayoutSpec.alignItems = ASStackLayoutAlignItemsStretch;
-  [stackLayoutSpec.style setSizeWithCGSize:{100, 100}];
+  stackLayoutSpec.style.width = ASDimensionMake(100);
+  stackLayoutSpec.style.height = ASDimensionMake(100);
   
   ASDisplayNode *child = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});
   stackLayoutSpec.children = @[child];
