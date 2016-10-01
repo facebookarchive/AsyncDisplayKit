@@ -32,6 +32,7 @@
 #import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
 #import <AsyncDisplayKit/ASCollectionViewLayoutFacilitatorProtocol.h>
 #import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASSectionContext.h>
 
 #import <AsyncDisplayKit/ASScrollNode.h>
 

@@ -20,6 +20,7 @@
 @protocol ASCollectionDataSource;
 @protocol ASCollectionDelegate;
 @protocol ASCollectionViewLayoutInspecting;
+@protocol ASSectionContext;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -230,6 +231,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
+- (nullable id<ASSectionContext>)contextForSection:(NSInteger)section;
+
 /**
  * Inserts items at the locations identified by an array of index paths.
  *
@@ -419,6 +422,8 @@ NS_ASSUME_NONNULL_BEGIN
  * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
 - (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+
+- (nullable id<ASSectionContext>)collectionView:(ASCollectionView *)collectionView contextForSection:(NSInteger)section;
 
 @end
 
