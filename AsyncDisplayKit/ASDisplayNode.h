@@ -856,7 +856,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  * ASDisplayNode participates in ASAsyncTransactions, so you can determine when your subnodes are done rendering.
  * See: -(void)asyncdisplaykit_asyncTransactionContainerStateDidChange in ASDisplayNodeSubclass.h
  */
-@interface ASDisplayNode (ASDisplayNodeAsyncTransactionContainer) <ASDisplayNodeAsyncTransactionContainer>
+@interface ASDisplayNode (ASAsyncTransactionContainer) <ASAsyncTransactionContainer>
 @end
 
 /** UIVIew(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to an UIView. */
