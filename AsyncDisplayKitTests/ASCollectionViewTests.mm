@@ -15,6 +15,7 @@
 #import "ASCellNode.h"
 #import "ASCollectionNode.h"
 #import "ASDisplayNode+Beta.h"
+#import "ASSectionContext.h"
 #import <vector>
 #import <OCMock/OCMock.h>
 
@@ -40,7 +41,22 @@
 
 @end
 
+@interface ASTestSectionContext : NSObject <ASSectionContext>
+
+@property (nonatomic, assign) NSInteger sectionIndex;
+@property (nonatomic, assign) NSInteger sectionGeneration;
+
+@end
+
+@implementation ASTestSectionContext
+
+@synthesize sectionName = _sectionName, collectionView = _collectionView;
+
+@end
+
 @interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionViewDelegate>
+
+@property (nonatomic, assign) NSInteger sectionGeneration;
 
 @end
 
@@ -54,6 +70,7 @@
     for (NSInteger i = 0; i < numberOfSections; i++) {
       _itemCounts.push_back(numberOfItemsInSection);
     }
+    _sectionGeneration = 1;
   }
 
   return self;
@@ -91,6 +108,14 @@
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
   return _itemCounts[section];
+}
+
+- (id<ASSectionContext>)collectionView:(ASCollectionView *)collectionView contextForSection:(NSInteger)section
+{
+  ASTestSectionContext *context = [[ASTestSectionContext alloc] init];
+  context.sectionGeneration = _sectionGeneration;
+  context.sectionIndex = section;
+  return context;
 }
 
 @end
@@ -528,6 +553,83 @@
 
   [self waitForExpectationsWithTimeout:5 handler:nil];
   XCTAssertEqualObjects(completions, (@[ inner0, inner1, outer ]), @"Expected completion order to be correct");
+}
+
+#pragma mark - ASSectionContext tests
+
+- (void)testThatSectionContextsAreCorrectAfterTheInitialLayout
+{
+  updateValidationTestPrologue
+  NSInteger sectionCount = del->_itemCounts.size();
+  for (NSInteger section = 0; section < sectionCount; section++) {
+    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    XCTAssertNotNil(context);
+    XCTAssertEqual(context.sectionGeneration, 1);
+    XCTAssertEqual(context.sectionIndex, section);
+  }
+}
+
+- (void)testThatSectionContextsAreCorrectAfterSectionMove
+{
+  updateValidationTestPrologue
+  NSInteger sectionCount = del->_itemCounts.size();
+  NSInteger originalSection = sectionCount - 1;
+  NSInteger toSection = 0;
+
+  del.sectionGeneration++;
+  [cv moveSection:originalSection toSection:toSection];
+  [cv waitUntilAllUpdatesAreCommitted];
+  
+  // Only test left moving
+  XCTAssertTrue(toSection < originalSection);
+  ASTestSectionContext *movedSectionContext = (ASTestSectionContext *)[cv contextForSection:toSection];
+  XCTAssertNotNil(movedSectionContext);
+  // ASCollectionView currently uses ASChangeSetDataController which splits a move operation to a pair of delete and insert ones.
+  // So this movedSectionContext is newly loaded and thus is second generation.
+  XCTAssertEqual(movedSectionContext.sectionGeneration, 2);
+  XCTAssertEqual(movedSectionContext.sectionIndex, toSection);
+  
+  for (NSInteger section = toSection + 1; section <= originalSection && section < sectionCount; section++) {
+    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    XCTAssertNotNil(context);
+    XCTAssertEqual(context.sectionGeneration, 1);
+    // This section context was shifted to the right
+    XCTAssertEqual(context.sectionIndex, (section - 1));
+  }
+}
+
+- (void)testThatSectionContextsAreCorrectAfterReloadData
+{
+  updateValidationTestPrologue
+  
+  del.sectionGeneration++;
+  [cv reloadDataImmediately];
+  
+  NSInteger sectionCount = del->_itemCounts.size();
+  for (NSInteger section = 0; section < sectionCount; section++) {
+    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    XCTAssertNotNil(context);
+    XCTAssertEqual(context.sectionGeneration, 2);
+    XCTAssertEqual(context.sectionIndex, section);
+  }
+}
+
+- (void)testThatSectionContextsAreCorrectAfterReloadASection
+{
+  updateValidationTestPrologue
+  NSInteger sectionToReload = 0;
+  
+  del.sectionGeneration++;
+  [cv reloadSections:[NSIndexSet indexSetWithIndex:sectionToReload]];
+  [cv waitUntilAllUpdatesAreCommitted];
+  
+  NSInteger sectionCount = del->_itemCounts.size();
+  for (NSInteger section = 0; section < sectionCount; section++) {
+    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    XCTAssertNotNil(context);
+    XCTAssertEqual(context.sectionGeneration, section != sectionToReload ? 1 : 2);
+    XCTAssertEqual(context.sectionIndex, section);
+  }
 }
 
 @end

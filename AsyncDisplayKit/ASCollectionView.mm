@@ -24,6 +24,7 @@
 #import "ASCollectionNode.h"
 #import "_ASDisplayLayer.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
+#import "ASSectionContext.h"
 
 
 /// What, if any, invalidation should we perform during the next -layoutSubviews.
@@ -168,6 +169,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     unsigned int asyncDataSourceNodeForItemAtIndexPath:1;
     unsigned int asyncDataSourceNodeBlockForItemAtIndexPath:1;
     unsigned int asyncDataSourceNumberOfSectionsInCollectionView:1;
+    unsigned int asyncDataSourceContextForSection:1;
   } _asyncDataSourceFlags;
   
   struct {
@@ -369,6 +371,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForItemAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInCollectionView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
+    _asyncDataSourceFlags.asyncDataSourceContextForSection = [_asyncDataSource respondsToSelector:@selector(collectionView:contextForSection:)];
 
     ASDisplayNodeAssert(_asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath
                         || _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath, @"Data source must implement collectionView:nodeForItemAtIndexPath: or collectionView:nodeBlockForItemAtIndexPath:");
@@ -606,6 +609,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   ASDisplayNodeAssertMainThread();
   [_dataController moveSection:section toSection:newSection withAnimationOptions:kASCollectionViewAnimationNone];
+}
+
+- (id<ASSectionContext>)contextForSection:(NSInteger)section
+{
+  ASDisplayNodeAssertMainThread();
+  return [_dataController contextForSection:section];
 }
 
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
@@ -1014,7 +1023,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return self.strongCollectionNode;
 }
 
-#pragma mark - ASCollectionViewDataControllerSource Supplementary view support
+#pragma mark - ASCollectionViewDataControllerSource
 
 - (ASCellNode *)dataController:(ASCollectionDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
@@ -1036,6 +1045,21 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
   return [self.layoutInspector collectionView:self supplementaryNodesOfKind:kind inSection:section];
+}
+
+- (id<ASSectionContext>)dataController:(ASDataController *)dataController contextForSection:(NSInteger)section
+{
+  ASDisplayNodeAssertMainThread();
+  id<ASSectionContext> context = nil;
+  
+  if (_asyncDataSourceFlags.asyncDataSourceContextForSection) {
+    context = [_asyncDataSource collectionView:self contextForSection:section];
+  }
+  
+  if (context != nil) {
+    context.collectionView = self;
+  }
+  return context;
 }
 
 #pragma mark - ASRangeControllerDataSource
