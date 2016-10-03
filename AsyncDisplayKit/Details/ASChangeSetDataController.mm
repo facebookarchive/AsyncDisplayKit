@@ -47,10 +47,14 @@
   
   [_changeSet addCompletionHandler:completion];
   if (_changeSetBatchUpdateCounter == 0) {
-    [self invalidateDataSourceItemCounts];
-    [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
     void (^batchCompletion)(BOOL finished) = _changeSet.completionHandler;
-
+    
+    /**
+     * If the initial reloadData has not been called, just bail because we don't have
+     * our old data source counts.
+     * See ASUICollectionViewTests.testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
+     * For the issue that UICollectionView has that we're choosing to workaround.
+     */
     if (!self.initialReloadDataHasBeenCalled) {
       if (batchCompletion != nil) {
         batchCompletion(YES);
@@ -58,6 +62,9 @@
       _changeSet = nil;
       return;
     }
+
+    [self invalidateDataSourceItemCounts];
+    [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
     
     [super beginUpdates];
     

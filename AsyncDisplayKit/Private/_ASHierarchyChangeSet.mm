@@ -135,8 +135,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 - (void (^)(BOOL finished))completionHandler
 {
-  [self _ensureCompleted];
-
   void (^completionHandler)(BOOL) = _completionHandler;
   _completionHandler = nil;
   return completionHandler;

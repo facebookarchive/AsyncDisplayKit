@@ -576,4 +576,20 @@
   }
 }
 
+/// See the same test in ASUICollectionViewTests for the reference behavior.
+- (void)testThatIssuingAnUpdateBeforeInitialReloadIsAcceptable
+{
+  ASCollectionViewTestDelegate *del = [[ASCollectionViewTestDelegate alloc] initWithNumberOfSections:0 numberOfItemsInSection:0];
+  ASCollectionView *cv = [[ASCollectionView alloc] initWithCollectionViewLayout:[UICollectionViewFlowLayout new]];
+  cv.asyncDataSource = del;
+  cv.asyncDelegate = del;
+
+  // Add a section to the data source
+  del->_itemCounts.push_back(0);
+  // Attempt to insert section into collection view. We ignore it to workaround
+  // the bug demonstrated by
+  // ASUICollectionViewTests.testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
+  XCTAssertNoThrow([cv insertSections:[NSIndexSet indexSetWithIndex:0]]);
+}
+
 @end
