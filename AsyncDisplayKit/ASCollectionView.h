@@ -505,18 +505,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView;
 
 /**
- * Informs the delegate that the collection view did remove the node which was previously
- * at the given index path from the view hierarchy.
- *
- * @warning AsyncDisplayKit processes collection view edits asynchronously. The index path
- *   passed into this method may not correspond to the same item in your data source
- *   if your data source has been updated since the last edit was processed.
- *
- * This method is deprecated. Use @c collectionView:didEndDisplayingNode:forItemAtIndexPath: instead.
- */
-- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
-
-/**
  * Informs the delegate that the collection view will add the node
  * at the given index path to the view hierarchy.
  *
@@ -560,12 +548,6 @@ NS_ASSUME_NONNULL_BEGIN
  * Asks the delegate for the size of the footer in the specified section.
  */
 - (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section;
-
-@end
-
-@interface ASCollectionView (Deprecated)
-
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled ASDISPLAYNODE_DEPRECATED;
 
 @end
 
