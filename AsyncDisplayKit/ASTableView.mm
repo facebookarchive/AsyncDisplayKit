@@ -136,7 +136,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     unsigned int asyncDelegateTableViewWillDisplayNodeForRowAtIndexPath:1;
     unsigned int asyncDelegateTableViewWillDisplayNodeForRowAtIndexPathDeprecated:1;
     unsigned int asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPath:1;
-    unsigned int asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPathDeprecated:1;
     unsigned int asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset:1;
     unsigned int asyncDelegateTableViewWillBeginBatchFetchWithContext:1;
     unsigned int asyncDelegateShouldBatchFetchForTableView:1;
@@ -217,12 +216,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 }
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
-{
-  return [self _initWithFrame:frame style:style dataControllerClass:nil ownedByNode:NO];
-}
-
-// FIXME: This method is deprecated and will probably be removed in or shortly after 2.0.
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
   return [self _initWithFrame:frame style:style dataControllerClass:nil ownedByNode:NO];
 }
@@ -337,7 +330,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
       _asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPathDeprecated = [_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)];
     }
     _asyncDelegateFlags.asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNode:forRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPathDeprecated = [_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNodeForRowAtIndexPath:)];
     _asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
     _asyncDelegateFlags.asyncDelegateTableViewWillBeginBatchFetchWithContext = [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
     _asyncDelegateFlags.asyncDelegateShouldBatchFetchForTableView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)];
@@ -727,13 +719,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 
   [_cellsForVisibilityUpdates removeObject:cell];
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  if (_asyncDelegateFlags.asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPathDeprecated) {
-    [_asyncDelegate tableView:self didEndDisplayingNodeForRowAtIndexPath:indexPath];
-  }
-#pragma clang diagnostic pop
   
   cellNode.scrollView = nil;
 }

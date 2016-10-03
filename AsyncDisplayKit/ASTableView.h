@@ -451,18 +451,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForRowAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
- * Informs the delegate that the table view did remove the node which was previously
- * at the given index path from the view hierarchy.
- *
- * @warning AsyncDisplayKit processes table view edits asynchronously. The index path
- *   passed into this method may not correspond to the same item in your data source
- *   if your data source has been updated since the last edit was processed.
- *
- * This method is deprecated. Use @c tableView:didEndDisplayingNode:forRowAtIndexPath: instead.
- */
-- (void)tableView:(ASTableView *)tableView didEndDisplayingNodeForRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
-
-/**
  * Informs the delegate that the table view will add the node
  * at the given index path to the view hierarchy.
  *
@@ -480,12 +468,6 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @protocol ASTableViewDelegate <ASTableDelegate>
-@end
-
-@interface ASTableView (Deprecated)
-
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled ASDISPLAYNODE_DEPRECATED;
-
 @end
 
 NS_ASSUME_NONNULL_END

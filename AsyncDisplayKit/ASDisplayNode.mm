@@ -3514,24 +3514,4 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   self.automaticallyManagesSubnodes = enabled;
 }
 
-- (void)setPlaceholderFadesOut:(BOOL)placeholderFadesOut
-{
-  self.placeholderFadeDuration = placeholderFadesOut ? 0.1 : 0.0;
-}
-
-- (BOOL)placeholderFadesOut
-{
-  return self.placeholderFadeDuration > 0.0;
-}
-
-- (void)reclaimMemory
-{
-  [self clearContents];
-}
-
-- (void)recursivelyReclaimMemory
-{
-  [self recursivelyClearContents];
-}
-
 @end
