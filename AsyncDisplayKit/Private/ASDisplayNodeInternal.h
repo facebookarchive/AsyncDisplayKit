@@ -13,9 +13,9 @@
 // These methods must never be called or overridden by other classes.
 //
 
+#import <atomic>
 #import "_AS-objc-internal.h"
 #import "ASDisplayNode.h"
-#import "ASSentinel.h"
 #import "ASThread.h"
 #import "_ASTransitionContext.h"
 #import "ASLayoutTransition.h"
@@ -108,7 +108,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   
   ASLayoutElementStyle *_style;
 
-  ASSentinel *_displaySentinel;
+  std::atomic_uint _displaySentinel;
 
   int32_t _transitionID;
   BOOL _transitionInProgress;

@@ -15,7 +15,6 @@
 
 #import "_AS-objc-internal.h"
 #import "ASDisplayNode.h"
-#import "ASSentinel.h"
 #import "ASThread.h"
 
 NS_ASSUME_NONNULL_BEGIN
