@@ -158,44 +158,49 @@
     BOOL longestWordFits = [longestWordNeedingResize length] ? NO : YES;
     BOOL maxLinesFits = _attributes.maximumNumberOfLines > 0 ? NO : YES;
     BOOL heightFits = isinf(_constrainedSize.height) ? YES : NO;
+
+    CGSize longestWordSize = CGSizeZero;
+    if (longestWordFits == NO) {
+        NSRange longestWordRange = [str rangeOfString:longestWordNeedingResize];
+        NSAttributedString *attrString = [textStorage attributedSubstringFromRange:longestWordRange];
+        longestWordSize = [attrString boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
+    }
     
-    if (longestWordFits == NO || maxLinesFits == NO || heightFits == NO) {
-      // we may need to shrink for some reason, so let's iterate through our scale factors to see if we actually need to shrink
-      // Note: the first scale factor in the array is 1.0 so will make sure that things don't fit without shrinking
-      for (NSUInteger index = 0; index < scaleFactors.count && (longestWordFits == NO || maxLinesFits == NO || heightFits == NO); index++) {
+    // we may need to shrink for some reason, so let's iterate through our scale factors to see if we actually need to shrink
+    // Note: the first scale factor in the array is 1.0 so will make sure that things don't fit without shrinking
+    for (NSNumber *adjustedScaleObj in scaleFactors) {
+      if (longestWordFits && maxLinesFits && heightFits) {
+        break;
+      }
+      
+      adjustedScale = [adjustedScaleObj floatValue];
+      
+      if (longestWordFits == NO) {
+        // we need to check the longest word to make sure it fits
+        longestWordFits = std::ceil((longestWordSize.width * adjustedScale)  <= _constrainedSize.width);
+      }
+      
+      // if the longest word fits, go ahead and check max line and height. If it didn't fit continue to the next scale factor
+      if (longestWordFits == YES) {
         
-        adjustedScale = [scaleFactors[index] floatValue];
+        // scale our string by the current scale factor
+        NSMutableAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
+        [[self class] adjustFontSizeForAttributeString:scaledString withScaleFactor:adjustedScale];
         
-        if (longestWordFits == NO) {
-          // we need to check the longest word to make sure it fits
-          NSRange longestWordRange = [str rangeOfString:longestWordNeedingResize];
-          NSMutableAttributedString *attrString = [textStorage attributedSubstringFromRange:longestWordRange].mutableCopy;
-          CGSize longestWordSize = [attrString boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
-          longestWordFits = std::ceil((longestWordSize.width * adjustedScale)  <= _constrainedSize.width);
+        // check to see if this scaled string fit in the max lines
+        if (maxLinesFits == NO) {
+          maxLinesFits = ([self lineCountForString:scaledString] <= _attributes.maximumNumberOfLines);
         }
         
-        // if the longest word fits, go ahead and check max line and height. If it didn't fit continue to the next scale factor
-        if (longestWordFits == YES) {
-          
-          // scale our string by the current scale factor
-          NSMutableAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
-          [[self class] adjustFontSizeForAttributeString:scaledString withScaleFactor:adjustedScale];
-          
-          // check to see if this scaled string fit in the max lines
-          if (maxLinesFits == NO) {
-            maxLinesFits = ([self lineCountForString:scaledString] <= _attributes.maximumNumberOfLines);
-          }
-          
-          // if max lines still doesn't fit, continue without checking that we fit in the constrained height
-          if (maxLinesFits == YES && heightFits == NO) {
-            // max lines fit so make sure that we fit in the constrained height.
-            CGSize stringSize = [scaledString boundingRectWithSize:CGSizeMake(_constrainedSize.width, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
-            heightFits = (stringSize.height <= _constrainedSize.height);
-          }
+        // if max lines still doesn't fit, continue without checking that we fit in the constrained height
+        if (maxLinesFits == YES && heightFits == NO) {
+          // max lines fit so make sure that we fit in the constrained height.
+          CGSize stringSize = [scaledString boundingRectWithSize:CGSizeMake(_constrainedSize.width, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
+          heightFits = (stringSize.height <= _constrainedSize.height);
         }
       }
     }
-    
+   
   }];
   _measured = YES;
   _scaleFactor = adjustedScale;
