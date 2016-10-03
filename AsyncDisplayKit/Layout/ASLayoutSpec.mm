@@ -12,6 +12,8 @@
 #import "ASLayoutSpecPrivate.h"
 #import "ASLayoutSpec+Subclasses.h"
 
+#import "ASLayoutElementStylePrivate.h"
+
 @implementation ASLayoutSpec
 
 // Dynamic properties for ASLayoutElements

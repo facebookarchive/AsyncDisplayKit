@@ -172,6 +172,32 @@ ASDISPLAYNODE_INLINE CGFloat ASDimensionResolve(ASDimension dimension, CGFloat p
 @end
 
 
+#pragma mark - ASRelativeSize
+
+/**
+ * Expresses a size with relative dimensions. Only used for calculations internally in ASDimension.h
+ */
+typedef struct {
+  ASDimension width;
+  ASDimension height;
+} ASRelativeSize;
+
+/*
+ * Creates an ASRelativeSize with provided min and max dimensions.
+ */
+ASDISPLAYNODE_INLINE ASRelativeSize ASRelativeSizeMake(ASDimension width, ASDimension height)
+{
+  ASRelativeSize size;
+  size.width = width;
+  size.height = height;
+  return size;
+}
+
+/*
+ * Returns a string representation of a relative size.
+ */
+ASDISPLAYNODE_INLINE NSString *NSStringFromASRelativeSize(ASRelativeSize size);
+
 #pragma mark - ASSizeRange
 
 /**
@@ -217,7 +243,7 @@ ASDISPLAYNODE_INLINE CGSize ASSizeRangeClamp(ASSizeRange sizeRange, CGSize size)
 extern ASSizeRange ASSizeRangeIntersect(ASSizeRange sizeRange, ASSizeRange otherSizeRange);
 
 /**
- * Returns whether two size ranges are equal in min and max size
+ * Returns whether two size ranges are equal in min and max size.
  */
 ASDISPLAYNODE_INLINE BOOL ASSizeRangeEqualToSizeRange(ASSizeRange lhs, ASSizeRange rhs)
 {

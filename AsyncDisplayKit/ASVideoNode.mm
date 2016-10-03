@@ -250,8 +250,7 @@ static NSString * const kRate = @"rate";
   }
   
   if (_playerNode) {
-    _playerNode.style.width = ASDimensionMake(calculatedSize.width);
-    _playerNode.style.height = ASDimensionMake(calculatedSize.height);
+    _playerNode.style.preferredSize = calculatedSize;
     [_playerNode layoutThatFits:ASSizeRangeMake(CGSizeZero, calculatedSize)];
   }
   

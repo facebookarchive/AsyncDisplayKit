@@ -10,10 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASLayoutElementPrivate.h"
-#import "ASEnvironmentInternal.h"
 #import "ASDisplayNodeInternal.h"
-#import "ASThread.h"
 
 #import <map>
 
@@ -110,16 +107,13 @@ do {\
   [_delegate style:self propertyDidChange:propertyName];\
 } while(0)
 
-@interface ASLayoutElementStyle ()
-@property (nullable, nonatomic, weak) id<ASLayoutElementStyleDelegate> delegate;
-@end
-
 @implementation ASLayoutElementStyle {
   ASDN::RecursiveMutex __instanceLock__;
   ASLayoutElementSize _size;
 }
 
 @dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
+@dynamic preferredSize, minSize, maxSize, preferredRelativeSize, minRelativeSize, maxRelativeSize;
 
 #pragma mark - Lifecycle
 
@@ -141,7 +135,21 @@ do {\
   return self;
 }
 
-#pragma mark - ASLayoutElementSizeForwarding
+#pragma mark - ASLayoutElementStyleSize
+
+- (ASLayoutElementSize)size
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _size;
+}
+
+- (void)setSize:(ASLayoutElementSize)size
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _size = size;
+}
+
+#pragma mark - ASLayoutElementStyleSizeForwarding
 
 - (ASDimension)width
 {
@@ -220,6 +228,64 @@ do {\
   _size.maxHeight = maxHeight;
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMaxHeightProperty);
 }
+
+
+#pragma mark - ASLayoutElementStyleSizeHelpers
+
+- (void)setPreferredSize:(CGSize)preferredSize
+{
+  self.width = ASDimensionMakeWithPoints(preferredSize.width);
+  self.height = ASDimensionMakeWithPoints(preferredSize.height);
+}
+
+- (void)setMinSize:(CGSize)minSize
+{
+  self.minWidth = ASDimensionMakeWithPoints(minSize.width);
+  self.minHeight = ASDimensionMakeWithPoints(minSize.height);
+}
+
+- (void)setMaxSize:(CGSize)maxSize
+{
+  self.maxWidth = ASDimensionMakeWithPoints(maxSize.width);
+  self.maxHeight = ASDimensionMakeWithPoints(maxSize.height);
+}
+
+- (ASRelativeSize)preferredRelativeSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASRelativeSizeMake(_size.width, _size.height);
+}
+
+- (void)setPreferredRelativeSize:(ASRelativeSize)preferredRelativeSize
+{
+  self.width = preferredRelativeSize.width;
+  self.height = preferredRelativeSize.height;
+}
+
+- (ASRelativeSize)minRelativeSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASRelativeSizeMake(_size.minWidth, _size.minHeight);
+}
+
+- (void)setMinRelativeSize:(ASRelativeSize)minRelativeSize
+{
+  self.minWidth = minRelativeSize.width;
+  self.minHeight = minRelativeSize.height;
+}
+
+- (ASRelativeSize)maxRelativeSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASRelativeSizeMake(_size.maxWidth, _size.maxHeight);
+}
+
+- (void)setMaxRelativeSize:(ASRelativeSize)maxRelativeSize
+{
+  self.maxWidth = maxRelativeSize.width;
+  self.maxHeight = maxRelativeSize.height;
+}
+
 
 #pragma mark - ASStackLayoutElement
 

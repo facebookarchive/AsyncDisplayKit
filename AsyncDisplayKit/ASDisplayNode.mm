@@ -27,6 +27,7 @@
 #import "ASRunLoopQueue.h"
 #import "ASEnvironmentInternal.h"
 #import "ASDimension.h"
+#import "ASLayoutElementStylePrivate.h"
 
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
@@ -3481,8 +3482,7 @@ ASEnvironmentLayoutExtensibilityForwarding
   ASDN::MutexLocker l(__instanceLock__);
 
   // Deprecated preferredFrameSize just calls through to set width and height
-  _style.width = ASDimensionMake(preferredFrameSize.width);
-  _style.height = ASDimensionMake(preferredFrameSize.height);
+  _style.preferredSize = preferredFrameSize;
   [self invalidateCalculatedLayout];
 }
 

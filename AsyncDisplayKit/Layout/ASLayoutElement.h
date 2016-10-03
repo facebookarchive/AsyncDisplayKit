@@ -68,6 +68,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) ASLayoutElementStyle *style;
 
+
 #pragma mark - Calculate layout
 
 /**
@@ -188,12 +189,8 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  */
 @property (nullable, nonatomic, weak, readonly) id<ASLayoutElementStyleDelegate> delegate;
 
-#pragma mark - Sizing
 
-/**
- * @abstract A size constraint that should apply to this ASLayoutElement.
- */
-@property (nonatomic, assign, readwrite) ASLayoutElementSize size;
+#pragma mark - Sizing
 
 /**
  * @abstract The width property specifies the height of the content area of an ASLayoutElement.
@@ -240,6 +237,42 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  * Defaults to ASDimensionTypeAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension maxWidth;
+
+
+#pragma mark - ASLayoutElementStyleSizeHelpers
+
+/**
+ * @abstract
+ */
+@property (nonatomic, assign) CGSize preferredSize;
+- (CGSize)preferredSize UNAVAILABLE_ATTRIBUTE;
+
+/**
+ * @abstract Bla
+ */
+@property (nonatomic, assign) CGSize minSize;
+- (CGSize)minSize UNAVAILABLE_ATTRIBUTE;
+
+/**
+ * @abstract Bla
+ */
+@property (nonatomic, assign) CGSize maxSize;
+- (CGSize)maxSize UNAVAILABLE_ATTRIBUTE;
+
+/**
+ * @abstract Bla
+ */
+@property (nonatomic, assign, readwrite) ASRelativeSize preferredRelativeSize;
+
+/**
+ * @abstract Bla
+ */
+@property (nonatomic, assign, readwrite) ASRelativeSize minRelativeSize;
+
+/**
+ * @abstract Bla
+ */
+@property (nonatomic, assign, readwrite) ASRelativeSize maxRelativeSize;
 
 
 #pragma mark - ASStackLayoutElement
@@ -292,6 +325,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  *  @abstract Used for baseline alignment. The distance from the baseline of the object to its bottom.
  */
 @property (nonatomic, assign) CGFloat descender;
+
 
 #pragma mark - ASAbsoluteLayoutElement
 
