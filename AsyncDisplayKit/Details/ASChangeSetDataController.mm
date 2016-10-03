@@ -47,8 +47,6 @@
   
   [_changeSet addCompletionHandler:completion];
   if (_changeSetBatchUpdateCounter == 0) {
-    [self invalidateDataSourceItemCounts];
-    [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
     void (^batchCompletion)(BOOL finished) = _changeSet.completionHandler;
 
     if (!self.initialReloadDataHasBeenCalled) {
@@ -58,6 +56,9 @@
       _changeSet = nil;
       return;
     }
+
+    [self invalidateDataSourceItemCounts];
+    [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
     
     [super beginUpdates];
     
