@@ -726,6 +726,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   [_cellsForVisibilityUpdates removeObject:cell];
   
   cellNode.scrollView = nil;
+  cellNode.layoutAttributes = nil;
 }
 
 
