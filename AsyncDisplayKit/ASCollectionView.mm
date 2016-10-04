@@ -1312,7 +1312,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
  */
 - (void)layer:(CALayer *)layer didChangeBoundsWithOldValue:(CGRect)oldBounds newValue:(CGRect)newBounds
 {
-  if (CGSizeEqualToSize(_lastBoundsSizeUsedForMeasuringNodes, newBounds.size)) {
+  CGSize lastUsedSize = _lastBoundsSizeUsedForMeasuringNodes;
+  if (CGSizeEqualToSize(lastUsedSize, newBounds.size)) {
     return;
   }
   _lastBoundsSizeUsedForMeasuringNodes = newBounds.size;
@@ -1322,15 +1323,31 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_ignoreNextBoundsSizeChangeForMeasuringNodes) {
     _ignoreNextBoundsSizeChangeForMeasuringNodes = NO;
   } else {
-    // This actually doesn't perform an animation, but prevents the transaction block from being processed in the
-    // data controller's prevent animation block that would interrupt an interrupted relayout happening in an animation block
-    // ie. ASCollectionView bounds change on rotation or multi-tasking split view resize.
-    [self performBatchAnimated:YES updates:^{
-      [_dataController relayoutAllNodes];
-    } completion:nil];
-    // We need to ensure the size requery is done before we update our layout.
-    [self waitUntilAllUpdatesAreCommitted];
-    [self.collectionViewLayout invalidateLayout];
+    // Laying out all nodes is expensive, and performing an empty update may be unsafe
+    // if the data source has pending changes that it hasn't reported yet – the collection
+    // view will requery the new counts and expect them to match the previous counts.
+    //
+    // We only need to do this if the bounds changed in the non-scrollable direction.
+    // If, for example, a vertical flow layout has its height changed due to a status bar
+    // appearance update, we do not need to relayout all nodes.
+    // For a more permanent fix to the unsafety mentioned above, see https://github.com/facebook/AsyncDisplayKit/pull/2182
+    ASScrollDirection scrollDirection = self.scrollableDirections;
+    BOOL fixedVertically = (ASScrollDirectionContainsVerticalDirection(scrollDirection) == NO);
+    BOOL fixedHorizontally = (ASScrollDirectionContainsHorizontalDirection(scrollDirection) == NO);
+
+    BOOL changedInNonScrollingDirection = (fixedHorizontally && newBounds.size.width != lastUsedSize.width) || (fixedVertically && newBounds.size.height != lastUsedSize.height);
+
+    if (changedInNonScrollingDirection) {
+      // This actually doesn't perform an animation, but prevents the transaction block from being processed in the
+      // data controller's prevent animation block that would interrupt an interrupted relayout happening in an animation block
+      // ie. ASCollectionView bounds change on rotation or multi-tasking split view resize.
+      [self performBatchAnimated:YES updates:^{
+        [_dataController relayoutAllNodes];
+      } completion:nil];
+      // We need to ensure the size requery is done before we update our layout.
+      [self waitUntilAllUpdatesAreCommitted];
+      [self.collectionViewLayout invalidateLayout];
+    }
   }
 }
 
