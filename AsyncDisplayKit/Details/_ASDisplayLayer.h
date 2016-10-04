@@ -10,8 +10,6 @@
 
 #import <UIKit/UIKit.h>
 
-
-@class ASSentinel;
 @protocol _ASDisplayLayerDelegate;
 
 // Type for the cancellation checker block passed into the async display blocks. YES means the operation has been cancelled, NO means continue.
@@ -40,8 +38,6 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
  @desc This is exposed here for tests only.
  */
 + (dispatch_queue_t)displayQueue;
-
-@property (nonatomic, strong, readonly) ASSentinel *displaySentinel;
 
 /**
  @summary Delegate for asynchronous display of the layer.

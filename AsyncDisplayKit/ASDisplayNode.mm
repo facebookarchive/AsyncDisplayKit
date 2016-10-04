@@ -297,7 +297,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self _staticInitialize];
   _eventLogHead = -1;
   _contentsScaleForDisplay = ASScreenScale();
-  _displaySentinel = [[ASSentinel alloc] init];
   
   // TODO: We should lazily initialize the style object.
   _style = [[ASLayoutElementStyle alloc] init];
@@ -438,8 +437,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // TODO: Remove this? If supernode isn't already nil, this method isn't dealloc-safe anyway.
   [self __setSupernode:nil];
   _pendingViewState = nil;
-
-  _displaySentinel = nil;
 
   _pendingDisplayNodes = nil;
 }
