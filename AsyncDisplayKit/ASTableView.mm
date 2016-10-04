@@ -1125,10 +1125,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 
   ASCellNodeBlock block = [_asyncDataSource tableView:self nodeBlockForRowAtIndexPath:indexPath];
+  ASDisplayNodeAssertNotNil(block, @"Invalid block, expected nonnull ASCellNodeBlock");
   __weak __typeof__(self) weakSelf = self;
   ASCellNodeBlock configuredNodeBlock = ^{
     __typeof__(self) strongSelf = weakSelf;
-    ASCellNode *node = block();
+    ASCellNode *node = (block != nil ? block() : [[ASCellNode alloc] init]);
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
     if (node.interactionDelegate == nil) {
       node.interactionDelegate = strongSelf;
