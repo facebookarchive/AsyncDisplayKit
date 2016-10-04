@@ -965,7 +965,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return ^{
     __typeof__(self) strongSelf = weakSelf;
 
-    ASCellNode *node = block();
+    ASCellNode *node = (block != nil ? block() : [[ASCellNode alloc] init]);
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
     if (node.interactionDelegate == nil) {
       node.interactionDelegate = strongSelf;
