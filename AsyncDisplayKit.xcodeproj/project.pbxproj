@@ -220,6 +220,7 @@
 		69E100701CA89CB600D88C1B /* ASEnvironmentInternal.mm in Sources */ = {isa = PBXBuildFile; fileRef = 69E1006A1CA89CB600D88C1B /* ASEnvironmentInternal.mm */; };
 		69EEA0A11D9AB43900B46420 /* ASLayoutSpecPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 69EEA0A01D9AB43900B46420 /* ASLayoutSpecPrivate.h */; };
 		69F10C871C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = 69F10C851C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		69F381A51DA4630D00CF2278 /* NSArray+Diffing.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */; };
 		69FEE53D1D95A9AF0086F066 /* ASLayoutElementStyleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 69FEE53C1D95A9AF0086F066 /* ASLayoutElementStyleTests.m */; };
 		7630FFA81C9E267E007A7C0E /* ASVideoNode.h in Headers */ = {isa = PBXBuildFile; fileRef = AEEC47DF1C20C2DD00EC1693 /* ASVideoNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		764D83D51C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = 764D83D21C8EA515009B4FB8 /* AsyncDisplayKit+Debug.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -649,6 +650,7 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				69F381A51DA4630D00CF2278 /* NSArray+Diffing.h in CopyFiles */,
 				CC4C2A7A1D8902350039ACAB /* ASTraceEvent.h in CopyFiles */,
 				CC88F7AE1D80AF5E000D6D4E /* ASObjectDescriptionHelpers.h in CopyFiles */,
 				ACE87A331D73726300D7FF06 /* ASSectionContext.h in CopyFiles */,
