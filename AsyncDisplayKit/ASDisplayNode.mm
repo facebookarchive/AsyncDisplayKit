@@ -191,8 +191,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [super initialize];
   if (self != [ASDisplayNode class]) {
     
-    // Subclasses should never override these
-    NSString *classString = NSStringFromClass(self);
+    // Subclasses should never override these. Use unused to prevent warnings
+    __unused NSString *classString = NSStringFromClass(self);
     
     ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", classString);
     ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", classString);

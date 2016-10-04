@@ -275,12 +275,12 @@
   if (asynchronously) {
     uint displaySentinelValue = ++_displaySentinel;
     __weak ASDisplayNode *weakSelf = self;
-    isCancelledBlock = ^{
+    isCancelledBlock = ^BOOL{
       __strong ASDisplayNode *self = weakSelf;
       return self == nil || (displaySentinelValue != self->_displaySentinel.load());
     };
   } else {
-    isCancelledBlock = ^{
+    isCancelledBlock = ^BOOL{
       return NO;
     };
   }
