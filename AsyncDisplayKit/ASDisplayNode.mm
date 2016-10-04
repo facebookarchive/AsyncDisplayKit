@@ -3429,8 +3429,6 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   // Subclass override
 }
 
-ASEnvironmentLayoutExtensibilityForwarding
-
 #if TARGET_OS_TV
 #pragma mark - UIFocusEnvironment Protocol (tvOS)
 

@@ -223,8 +223,6 @@
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
 }
 
-ASEnvironmentLayoutExtensibilityForwarding
-
 @end
 
 #pragma mark - ASWrapperLayoutSpec
