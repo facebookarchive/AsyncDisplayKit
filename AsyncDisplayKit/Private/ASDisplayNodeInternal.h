@@ -21,6 +21,7 @@
 #import "ASLayoutTransition.h"
 #import "ASEnvironment.h"
 #import "ASObjectDescriptionHelpers.h"
+#import "ASWeakSet.h"
 
 #import "ASDisplayNode+Beta.h"
 
@@ -143,7 +144,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   CALayer *_placeholderLayer;
 
   // keeps track of nodes/subnodes that have not finished display, used with placeholders
-  NSMutableSet *_pendingDisplayNodes;
+  ASWeakSet *_pendingDisplayNodes;
 
   ASDisplayNodeContextModifier _willDisplayNodeContentWithRenderingContext;
   ASDisplayNodeContextModifier _didDisplayNodeContentWithRenderingContext;
