@@ -55,7 +55,7 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
   if (!(self = [super init]))
     return nil;
 
-  _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain asyncDataFetching:YES];
+  _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
   _tableView.separatorStyle = UITableViewCellSeparatorStyleNone; // KittenNode has its own separator
   _tableView.asyncDataSource = self;
   _tableView.asyncDelegate = self;
