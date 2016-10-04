@@ -14,6 +14,7 @@
 #import <numeric>
 
 #import "ASLayoutSpecUtilities.h"
+#import "ASLayoutElementStylePrivate.h"
 
 static CGFloat resolveCrossDimensionMaxForStretchChild(const ASStackLayoutSpecStyle &style,
                                                        const id<ASLayoutElement>child,

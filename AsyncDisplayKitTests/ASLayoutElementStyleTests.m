@@ -34,34 +34,68 @@
 
 @implementation ASLayoutElementStyleTests
 
-- (void)testSettingSizeProperties
+- (void)testSettingSize
 {
   ASLayoutElementStyle *style = [ASLayoutElementStyle new];
+  
   style.width = ASDimensionMake(100);
   style.height = ASDimensionMake(100);
+  XCTAssertTrue(ASDimensionEqualToDimension(style.width, ASDimensionMake(100)));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.height, ASDimensionMake(100)));
   
+  style.minWidth = ASDimensionMake(100);
+  style.minHeight = ASDimensionMake(100);
+  XCTAssertTrue(ASDimensionEqualToDimension(style.width, ASDimensionMake(100)));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.height, ASDimensionMake(100)));
+  
+  style.maxWidth = ASDimensionMake(100);
+  style.maxHeight = ASDimensionMake(100);
   XCTAssertTrue(ASDimensionEqualToDimension(style.width, ASDimensionMake(100)));
   XCTAssertTrue(ASDimensionEqualToDimension(style.height, ASDimensionMake(100)));
 }
 
-- (void)testSettingSizeViaHelper
+- (void)testSettingSizeViaCGSize
 {
   ASLayoutElementStyle *style = [ASLayoutElementStyle new];
-  [style setSizeWithCGSize:CGSizeMake(100, 100)];
   
-  XCTAssertTrue(ASDimensionEqualToDimension(style.width, ASDimensionMake(100)));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.height, ASDimensionMake(100)));
+  CGSize size = CGSizeMake(100, 100);
+  
+  style.preferredSize = size;
+  XCTAssertTrue(ASDimensionEqualToDimension(style.width, ASDimensionMakeWithPoints(size.width)));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.height, ASDimensionMakeWithPoints(size.height)));
+  
+  style.minSize = size;
+  XCTAssertTrue(ASDimensionEqualToDimension(style.minWidth, ASDimensionMakeWithPoints(size.width)));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.minHeight, ASDimensionMakeWithPoints(size.height)));
+  
+  style.maxSize = size;
+  XCTAssertTrue(ASDimensionEqualToDimension(style.maxWidth, ASDimensionMakeWithPoints(size.width)));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.maxHeight, ASDimensionMakeWithPoints(size.height)));
 }
 
-- (void)testSettingExactSize
+- (void)setSettingSizeViaRelativeSize
 {
   ASLayoutElementStyle *style = [ASLayoutElementStyle new];
-  [style setExactSizeWithCGSize:CGSizeMake(100, 100)];
   
-  XCTAssertTrue(ASDimensionEqualToDimension(style.minWidth, ASDimensionMake(100)));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.minHeight, ASDimensionMake(100)));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.maxWidth, ASDimensionMake(100)));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.maxHeight, ASDimensionMake(100)));
+  ASRelativeSize relativeSize = ASRelativeSizeMake(ASDimensionMake(100), ASDimensionMake(100));
+  
+  style.preferredRelativeSize = relativeSize;
+  XCTAssertTrue(ASDimensionEqualToDimension(style.width, relativeSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.height, relativeSize.height));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.preferredRelativeSize.width, relativeSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.preferredRelativeSize.height, relativeSize.height));
+  
+  style.minRelativeSize = relativeSize;
+  XCTAssertTrue(ASDimensionEqualToDimension(style.minWidth, relativeSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.minHeight, relativeSize.height));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.minRelativeSize.width, relativeSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.minRelativeSize.height, relativeSize.height));
+  
+  style.maxRelativeSize = relativeSize;
+  XCTAssertTrue(ASDimensionEqualToDimension(style.maxWidth, relativeSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.maxHeight, relativeSize.height));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.maxRelativeSize.width, relativeSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.maxRelativeSize.height, relativeSize.height));
 }
   
 - (void)testSettingPropertiesWillCallDelegate

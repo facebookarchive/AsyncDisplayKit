@@ -68,6 +68,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) ASLayoutElementStyle *style;
 
+
 #pragma mark - Calculate layout
 
 /**
@@ -188,12 +189,8 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  */
 @property (nullable, nonatomic, weak, readonly) id<ASLayoutElementStyleDelegate> delegate;
 
-#pragma mark - Sizing
 
-/**
- * @abstract A size constraint that should apply to this ASLayoutElement.
- */
-@property (nonatomic, assign, readwrite) ASLayoutElementSize size;
+#pragma mark - Sizing
 
 /**
  * @abstract The width property specifies the height of the content area of an ASLayoutElement.
@@ -241,15 +238,68 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  */
 @property (nonatomic, assign, readwrite) ASDimension maxWidth;
 
-/**
- * @abstract Set max and width properties from given size
- */
-- (void)setSizeWithCGSize:(CGSize)size;
+
+#pragma mark - ASLayoutElementStyleSizeHelpers
 
 /**
- * @abstract Set minHeight, maxHeight and minWidth, maxWidth properties from given size
+ * @abstract Provides a suggested size for a layout element. If the optional minSize or maxSize are provided, 
+ * and the preferredSize exceeds these, the minSize or maxSize will be enforced. If this optional value is not 
+ * provided, the layout element’s size will default to it’s intrinsic content size provided calculateSizeThatFits:
+ * 
+ * @discussion This method is optional, but one of either preferredSize or preferredRelativeSize is required 
+ * for nodes that either have no intrinsic content size or 
+ * should be laid out at a different size than its intrinsic content size. For example, this property could be 
+ * set on an ASImageNode to display at a size different from the underlying image size. 
  */
-- (void)setExactSizeWithCGSize:(CGSize)size;
+@property (nonatomic, assign) CGSize preferredSize;
+- (CGSize)preferredSize UNAVAILABLE_ATTRIBUTE;
+
+ /**
+ * @abstract An optional property that provides a minimum size bound for a layout element. If provided, this restriction will 
+ * always be enforced. If a parent layout element’s minimum size is smaller than its child’s minimum size, the child’s  
+ * minimum size will be enforced and its size will extend out of the layout spec’s.  
+ * 
+ * @discussion For example, if you set a preferred relative width of 50% and a minimum width of 200 points on an
+ * element in a full screen container, this would result in a width of 160 points on an iPhone screen. However, 
+ * since 160 pts is lower than the minimum width of 200 pts, the minimum width would be used.
+ */
+@property (nonatomic, assign) CGSize minSize;
+- (CGSize)minSize UNAVAILABLE_ATTRIBUTE;
+
+/**
+ * @abstract An optional property that provides a maximum size bound for a layout element. If provided, this restriction will 
+ * always be enforced.  If a child layout element’s maximum size is smaller than its parent, the child’s maximum size will 
+ * be enforced and its size will extend out of the layout spec’s.  
+ * 
+ * @discussion For example, if you set a preferred relative width of 50% and a maximum width of 120 points on an
+ * element in a full screen container, this would result in a width of 160 points on an iPhone screen. However, 
+ * since 160 pts is higher than the maximum width of 120 pts, the maximum width would be used.
+ */
+@property (nonatomic, assign) CGSize maxSize;
+- (CGSize)maxSize UNAVAILABLE_ATTRIBUTE;
+
+/**
+ * @abstract Provides a suggested RELATIVE size for a layout element. An ASRelativeSize uses percentages rather 
+ * than points to specify layout. E.g. width should be 50% of the parent’s width. If the optional minRelativeSize or 
+ * maxRelativeSize are provided, and the preferredRelativeSize exceeds these, the minRelativeSize or maxRelativeSize 
+ * will be enforced. If this optional value is not provided, the layout element’s size will default to its intrinsic content size 
+ * provided calculateSizeThatFits:
+ */
+@property (nonatomic, assign, readwrite) ASRelativeSize preferredRelativeSize;
+
+/**
+ * @abstract An optional property that provides a minimum RELATIVE size bound for a layout element. If provided, this
+ * restriction will always be enforced. If a parent layout element’s minimum relative size is smaller than its child’s minimum
+ * relative size, the child’s minimum relative size will be enforced and its size will extend out of the layout spec’s.
+ */
+@property (nonatomic, assign, readwrite) ASRelativeSize minRelativeSize;
+
+/**
+ * @abstract An optional property that provides a maximum RELATIVE size bound for a layout element. If provided, this
+ * restriction will always be enforced. If a parent layout element’s maximum relative size is smaller than its child’s maximum
+ * relative size, the child’s maximum relative size will be enforced and its size will extend out of the layout spec’s.
+ */
+@property (nonatomic, assign, readwrite) ASRelativeSize maxRelativeSize;
 
 
 #pragma mark - ASStackLayoutElement
@@ -302,6 +352,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  *  @abstract Used for baseline alignment. The distance from the baseline of the object to its bottom.
  */
 @property (nonatomic, assign) CGFloat descender;
+
 
 #pragma mark - ASAbsoluteLayoutElement
 

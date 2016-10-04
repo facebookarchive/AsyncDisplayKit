@@ -20,7 +20,6 @@
 #import "TextStyles.h"
 #import "LikesNode.h"
 #import "CommentsNode.h"
-#import "ASRelativeSize.h"
 
 #define PostNodeDividerColor [UIColor lightGrayColor]
 

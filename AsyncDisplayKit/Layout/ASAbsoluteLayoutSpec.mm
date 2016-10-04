@@ -12,6 +12,7 @@
 
 #import "ASLayoutSpecUtilities.h"
 #import "ASLayout.h"
+#import "ASLayoutElementStylePrivate.h"
 
 @implementation ASAbsoluteLayoutSpec
 

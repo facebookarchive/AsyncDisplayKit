@@ -324,8 +324,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_playbackButtonNode == nil) {
     _playbackButtonNode = [[ASDefaultPlaybackButton alloc] init];
-    _playbackButtonNode.style.width = ASDimensionMakeWithPoints(16.0);
-    _playbackButtonNode.style.height = ASDimensionMakeWithPoints(22.0);
+    _playbackButtonNode.style.preferredSize = CGSizeMake(16.0, 22.0);
 
     if (_delegateFlags.delegatePlaybackButtonTint) {
       _playbackButtonNode.tintColor = [_delegate videoPlayerNodePlaybackButtonTint:self];
@@ -601,8 +600,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       return spinnnerView;
     }];
     
-    _spinnerNode.style.width = ASDimensionMakeWithPoints(44.0);
-    _spinnerNode.style.height = ASDimensionMakeWithPoints(44.0);
+    _spinnerNode.style.preferredSize = CGSizeMake(44.0, 44.0);
 
     [self addSubnode:_spinnerNode];
     [self setNeedsLayout];
@@ -706,7 +704,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     maxSize = CGSizeZero;
   }
 
-  [_videoNode.style setSizeWithCGSize:maxSize];
+  _videoNode.style.preferredSize = maxSize;
 
   ASLayoutSpec *layoutSpec;
   if (_delegateFlags.delegateLayoutSpecForControls) {
@@ -719,12 +717,12 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   if (_spinnerNode) {
     ASCenterLayoutSpec *centerLayoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_spinnerNode];
-    [centerLayoutSpec.style setSizeWithCGSize:maxSize];
+    centerLayoutSpec.style.preferredSize = maxSize;
     [children addObject:centerLayoutSpec];
   }
 
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
-  [overlaySpec.style setSizeWithCGSize:maxSize];
+  overlaySpec.style.preferredSize = maxSize;
   [children addObject:overlaySpec];
 
   return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:children];
@@ -732,8 +730,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (ASLayoutSpec *)defaultLayoutSpecThatFits:(CGSize)maxSize
 {
-  _scrubberNode.style.width = ASDimensionMakeWithPoints(maxSize.width);
-  _scrubberNode.style.height = ASDimensionMakeWithPoints(44.0);
+  _scrubberNode.style.preferredSize = CGSizeMake(maxSize.width, 44.0);
 
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
   spacer.style.flexGrow = 1;

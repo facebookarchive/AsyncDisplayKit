@@ -80,7 +80,8 @@
   CGSize nodeSize = CGSizeMake(100, 100);
   
   ASDisplayNode *displayNode = [ASDisplayNode new];
-  [displayNode.style setSizeWithCGSize:nodeSize];
+  displayNode.style.width = ASDimensionMake(nodeSize.width);
+  displayNode.style.height = ASDimensionMake(nodeSize.height);
   
   ASButtonNode *buttonNode = [ASButtonNode new];
   [displayNode addSubnode:buttonNode];

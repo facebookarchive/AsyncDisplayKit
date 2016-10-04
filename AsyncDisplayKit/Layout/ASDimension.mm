@@ -79,22 +79,6 @@ NSString *NSStringFromASDimension(ASDimension dimension)
 
 #pragma mark - ASRelativeSize
 
-/**
- * Expresses a size with relative dimensions. Only used for calculations internally in ASDimension.h 
- */
-typedef struct {
-  ASDimension width;
-  ASDimension height;
-} ASRelativeSize;
-
-ASDISPLAYNODE_INLINE ASRelativeSize ASRelativeSizeMake(ASDimension width, ASDimension height)
-{
-  ASRelativeSize size;
-  size.width = width;
-  size.height = height;
-  return size;
-}
-
 // ** Resolve this relative size relative to a parent size. */
 ASDISPLAYNODE_INLINE CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize, CGSize autoSize)
 {
