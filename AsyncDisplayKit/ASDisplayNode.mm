@@ -2235,7 +2235,7 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDisplayNodeAssertMainThread();
 
   if (!_pendingDisplayNodes) {
-    _pendingDisplayNodes = [[NSMutableSet alloc] init];
+    _pendingDisplayNodes = [[ASWeakSet alloc] init];
   }
 
   [_pendingDisplayNodes addObject:node];
