@@ -2147,7 +2147,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 
   [_pendingDisplayNodes removeObject:node];
 
-  if (_pendingDisplayNodes.count == 0) {
+  if (_pendingDisplayNodes.isEmpty) {
     [self hierarchyDisplayDidFinish];
     
     if (_placeholderLayer.superlayer && ![self placeholderShouldPersist]) {
