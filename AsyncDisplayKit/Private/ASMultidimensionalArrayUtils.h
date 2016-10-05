@@ -71,5 +71,10 @@ extern NSArray *ASIndexPathsForTwoDimensionalArray(NSArray <NSArray *>* twoDimen
  */
 extern NSArray *ASIndexPathsForMultidimensionalArray(NSArray *MultidimensionalArray) AS_WARN_UNUSED_RESULT;
 
+/**
+ * Attempt to get the object at the given index path. Returns @c nil if the index path is out of bounds.
+ */
+extern id ASGetElementInTwoDimensionalArray(NSArray *array, NSIndexPath *indexPath) AS_WARN_UNUSED_RESULT;
+
 
 ASDISPLAYNODE_EXTERN_C_END

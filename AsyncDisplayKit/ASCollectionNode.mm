@@ -18,6 +18,9 @@
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
 #import "AsyncDisplayKit+Debug.h"
+#import "ASSectionContext.h"
+#import "ASCollectionDataController.h"
+#import "ASCollectionView+Undeprecated.h"
 
 #pragma mark - _ASCollectionPendingState
 
@@ -106,18 +109,6 @@
   return [self initWithFrame:CGRectZero collectionViewLayout:layout];
 }
 
-- (instancetype)_initWithCollectionView:(ASCollectionView *)collectionView
-{
-  ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{ return collectionView; };
-  
-  if (self = [super initWithViewBlock:collectionViewBlock]) {
-    // ASCollectionView created directly by the app.  Trigger -loadView to set up collectionNode pointer.
-    __unused ASCollectionView *collectionView = [self view];
-    return self;
-  }
-  return nil;
-}
-
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
   return [self initWithFrame:frame collectionViewLayout:layout layoutFacilitator:nil];
@@ -126,13 +117,19 @@
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator ownedByNode:YES];
+    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator];
   };
-  
+
   if (self = [super initWithViewBlock:collectionViewBlock]) {
     return self;
   }
   return nil;
+}
+
+- (void)dealloc
+{
+  self.delegate = nil;
+  self.dataSource = nil;
 }
 
 #pragma mark ASDisplayNode
@@ -149,6 +146,7 @@
     self.pendingState      = nil;
     view.asyncDelegate     = pendingState.delegate;
     view.asyncDataSource   = pendingState.dataSource;
+
     if (pendingState.rangeMode != ASLayoutRangeModeCount) {
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
     }
@@ -163,13 +161,13 @@
 - (void)clearContents
 {
   [super clearContents];
-  [self.view clearContents];
+  [self.rangeController clearContents];
 }
 
 - (void)clearFetchedData
 {
   [super clearFetchedData];
-  [self.view clearFetchedData];
+  [self.rangeController clearFetchedData];
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
@@ -193,6 +191,18 @@
 #endif
 
 #pragma mark Setter / Getter
+
+// TODO: Implement this without the view.
+- (ASCollectionDataController *)dataController
+{
+  return (ASCollectionDataController *)self.view.dataController;
+}
+
+// TODO: Implement this without the view.
+- (ASRangeController *)rangeController
+{
+  return self.view.rangeController;
+}
 
 - (_ASCollectionPendingState *)pendingState
 {
@@ -241,26 +251,76 @@
   }
 }
 
-#pragma mark ASCollectionView Forwards
+#pragma mark - Range Tuning
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  return [self.view.rangeController tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+  return [self.rangeController tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  [self.view.rangeController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+  [self.rangeController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  return [self.view.rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
+  return [self.rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  return [self.view.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+  return [self.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+}
+
+#pragma mark - Querying Data
+
+- (NSInteger)numberOfItemsInSection:(NSInteger)section
+{
+  return [self.dataController numberOfRowsInSection:section];
+}
+
+- (NSInteger)numberOfSections
+{
+  return [self.dataController numberOfSections];
+}
+
+- (NSArray<__kindof ASCellNode *> *)visibleNodes
+{
+  return [self.view visibleNodes];
+}
+
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
+{
+  return [self.dataController indexPathForNode:cellNode];
+}
+
+- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [self.dataController nodeAtIndexPath:indexPath];
+}
+
+- (id<ASSectionContext>)contextForSection:(NSInteger)section
+{
+  ASDisplayNodeAssertMainThread();
+  return [self.dataController contextForSection:section];
+}
+
+#pragma mark - Editing
+
+- (void)registerSupplementaryNodeOfKind:(NSString *)elementKind
+{
+  [self.view registerSupplementaryNodeOfKind:elementKind];
+}
+
+- (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
+{
+  [self.view performBatchAnimated:animated updates:updates completion:completion];
+}
+
+- (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
+{
+  [self.view performBatchUpdates:updates completion:completion];
 }
 
 - (void)reloadDataWithCompletion:(void (^)())completion
@@ -280,7 +340,7 @@
 
 - (void)beginUpdates
 {
-  [self.view.dataController beginUpdates];
+  [self.dataController beginUpdates];
 }
 
 - (void)endUpdatesAnimated:(BOOL)animated
@@ -290,7 +350,47 @@
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
-  [self.view.dataController endUpdatesAnimated:animated completion:completion];
+  [self.dataController endUpdatesAnimated:animated completion:completion];
+}
+
+- (void)insertSections:(NSIndexSet *)sections
+{
+  [self.view insertSections:sections];
+}
+
+- (void)deleteSections:(NSIndexSet *)sections
+{
+  [self.view deleteSections:sections];
+}
+
+- (void)reloadSections:(NSIndexSet *)sections
+{
+  [self.view reloadSections:sections];
+}
+
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
+{
+  [self.view moveSection:section toSection:newSection];
+}
+
+- (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
+{
+  [self.view insertItemsAtIndexPaths:indexPaths];
+}
+
+- (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
+{
+  [self.view deleteItemsAtIndexPaths:indexPaths];
+}
+
+- (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
+{
+  [self.view reloadItemsAtIndexPaths:indexPaths];
+}
+
+- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
+{
+  [self.view moveItemAtIndexPath:indexPath toIndexPath:newIndexPath];
 }
 
 #pragma mark - ASRangeControllerUpdateRangeProtocol
@@ -300,7 +400,7 @@
   if ([self pendingState]) {
     _pendingState.rangeMode = rangeMode;
   } else {
-    [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+    [self.rangeController updateCurrentRangeWithMode:rangeMode];
   }
 }
 

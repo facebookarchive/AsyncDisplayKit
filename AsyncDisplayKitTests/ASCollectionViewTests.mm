@@ -18,6 +18,7 @@
 #import "ASSectionContext.h"
 #import <vector>
 #import <OCMock/OCMock.h>
+#import "ASCollectionView+Undeprecated.h"
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 
@@ -54,7 +55,7 @@
 
 @end
 
-@interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionViewDelegate>
+@interface ASCollectionViewTestDelegate : NSObject <ASCollectionDataSource, ASCollectionDelegate, UICollectionViewDelegateFlowLayout>
 
 @property (nonatomic, assign) NSInteger sectionGeneration;
 
@@ -110,12 +111,22 @@
   return _itemCounts[section];
 }
 
-- (id<ASSectionContext>)collectionView:(ASCollectionView *)collectionView contextForSection:(NSInteger)section
+- (id<ASSectionContext>)collectionNode:(ASCollectionNode *)collectionNode contextForSection:(NSInteger)section
 {
   ASTestSectionContext *context = [[ASTestSectionContext alloc] init];
   context.sectionGeneration = _sectionGeneration;
   context.sectionIndex = section;
   return context;
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
+{
+  return CGSizeMake(100, 100);
+}
+
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  return [[ASCellNode alloc] init];
 }
 
 @end
@@ -124,6 +135,7 @@
 
 @property (nonatomic, strong) ASCollectionViewTestDelegate *asyncDelegate;
 @property (nonatomic, strong) ASCollectionView *collectionView;
+@property (nonatomic, strong) ASCollectionNode *collectionNode;
 
 @end
 
@@ -136,12 +148,13 @@
     self.asyncDelegate = [[ASCollectionViewTestDelegate alloc] initWithNumberOfSections:10 numberOfItemsInSection:10];
     id realLayout = [UICollectionViewFlowLayout new];
     id mockLayout = [OCMockObject partialMockForObject:realLayout];
-    self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds
-                                             collectionViewLayout:mockLayout];
+    self.collectionNode = [[ASCollectionNode alloc] initWithFrame:self.view.bounds collectionViewLayout:mockLayout];
+    self.collectionView = self.collectionNode.view;
     self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.collectionView.asyncDataSource = self.asyncDelegate;
-    self.collectionView.asyncDelegate = self.asyncDelegate;
+    self.collectionNode.dataSource = self.asyncDelegate;
+    self.collectionNode.delegate = self.asyncDelegate;
     
+    [self.collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
     [self.view addSubview:self.collectionView];
   }
   return self;
@@ -303,6 +316,7 @@
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];\
   __unused ASCollectionViewTestDelegate *del = testController.asyncDelegate;\
   __unused ASCollectionView *cv = testController.collectionView;\
+  __unused ASCollectionNode *cn = testController.collectionNode;\
   UIWindow *window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];\
   [window makeKeyAndVisible]; \
   window.rootViewController = testController;\
@@ -404,7 +418,7 @@
 - (void)testCellNodeLayoutAttributes
 {
   updateValidationTestPrologue
-  NSSet *nodeBatch1 = [NSSet setWithArray:[cv visibleNodes]];
+  NSSet *nodeBatch1 = [NSSet setWithArray:[cn visibleNodes]];
   XCTAssertGreaterThan(nodeBatch1.count, 0);
 
   // Expect all visible nodes get 1 applyLayoutAttributes and have a non-nil value.
@@ -419,7 +433,7 @@
   [cv layoutIfNeeded];
 
   // Ensure we scrolled far enough that all the old ones are offscreen.
-  NSSet *nodeBatch2 = [NSSet setWithArray:[cv visibleNodes]];
+  NSSet *nodeBatch2 = [NSSet setWithArray:[cn visibleNodes]];
   XCTAssertFalse([nodeBatch1 intersectsSet:nodeBatch2], @"Expected to scroll far away enough that all nodes are replaced.");
 
   // Now the nodes are no longer visible, expect their layout attributes are nil but not another applyLayoutAttributes call.
@@ -438,7 +452,8 @@
 {
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UICollectionViewLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *cv = [[ASCollectionView alloc] initWithFrame:window.bounds collectionViewLayout:layout];
+  ASCollectionNode *cn = [[ASCollectionNode alloc] initWithFrame:window.bounds collectionViewLayout:layout];
+  ASCollectionView *cv = cn.view;
 
 
   __unused NSMutableSet *keepaliveNodes = [NSMutableSet set];
@@ -455,7 +470,7 @@
     layerBacked.name = [NSString stringWithFormat:@"Subnode #%d", thisNodeIdx];
     [suppNode addSubnode:layerBacked];
     [invocation setReturnValue:&suppNode];
-  }] collectionView:cv nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];
+  }] collectionNode:cn nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];
   [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] numberOfSectionsInCollectionView:cv];
   cv.asyncDataSource = dataSource;
 
@@ -483,14 +498,14 @@
 {
   updateValidationTestPrologue
   id layout = cv.collectionViewLayout;
-  CGSize initialItemSize = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  CGSize initialItemSize = [cv nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]].calculatedSize;
   CGSize initialCVSize = cv.bounds.size;
 
   // Capture the node size before first call to prepareLayout after frame change.
   __block CGSize itemSizeAtFirstLayout = CGSizeZero;
   __block CGSize boundsSizeAtFirstLayout = CGSizeZero;
   [[[[layout expect] andDo:^(NSInvocation *) {
-    itemSizeAtFirstLayout = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+    itemSizeAtFirstLayout = [cv nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]].calculatedSize;
     boundsSizeAtFirstLayout = [cv bounds].size;
   }] andForwardToRealObject] prepareLayout];
 
@@ -498,7 +513,7 @@
   UIDeviceOrientation oldDeviceOrientation = [[UIDevice currentDevice] orientation];
   [[UIDevice currentDevice] setValue:@(UIDeviceOrientationLandscapeLeft) forKey:@"orientation"];
 
-  CGSize finalItemSize = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  CGSize finalItemSize = [cv nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]].calculatedSize;
   CGSize finalCVSize = cv.bounds.size;
   XCTAssertNotEqualObjects(NSStringFromCGSize(initialItemSize),  NSStringFromCGSize(itemSizeAtFirstLayout));
   XCTAssertNotEqualObjects(NSStringFromCGSize(initialCVSize),  NSStringFromCGSize(boundsSizeAtFirstLayout));
@@ -562,7 +577,7 @@
   updateValidationTestPrologue
   NSInteger sectionCount = del->_itemCounts.size();
   for (NSInteger section = 0; section < sectionCount; section++) {
-    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    ASTestSectionContext *context = (ASTestSectionContext *)[cn contextForSection:section];
     XCTAssertNotNil(context);
     XCTAssertEqual(context.sectionGeneration, 1);
     XCTAssertEqual(context.sectionIndex, section);
@@ -582,7 +597,7 @@
   
   // Only test left moving
   XCTAssertTrue(toSection < originalSection);
-  ASTestSectionContext *movedSectionContext = (ASTestSectionContext *)[cv contextForSection:toSection];
+  ASTestSectionContext *movedSectionContext = (ASTestSectionContext *)[cn contextForSection:toSection];
   XCTAssertNotNil(movedSectionContext);
   // ASCollectionView currently uses ASChangeSetDataController which splits a move operation to a pair of delete and insert ones.
   // So this movedSectionContext is newly loaded and thus is second generation.
@@ -590,7 +605,7 @@
   XCTAssertEqual(movedSectionContext.sectionIndex, toSection);
   
   for (NSInteger section = toSection + 1; section <= originalSection && section < sectionCount; section++) {
-    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    ASTestSectionContext *context = (ASTestSectionContext *)[cn contextForSection:section];
     XCTAssertNotNil(context);
     XCTAssertEqual(context.sectionGeneration, 1);
     // This section context was shifted to the right
@@ -607,7 +622,7 @@
   
   NSInteger sectionCount = del->_itemCounts.size();
   for (NSInteger section = 0; section < sectionCount; section++) {
-    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    ASTestSectionContext *context = (ASTestSectionContext *)[cn contextForSection:section];
     XCTAssertNotNil(context);
     XCTAssertEqual(context.sectionGeneration, 2);
     XCTAssertEqual(context.sectionIndex, section);
@@ -625,7 +640,7 @@
   
   NSInteger sectionCount = del->_itemCounts.size();
   for (NSInteger section = 0; section < sectionCount; section++) {
-    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    ASTestSectionContext *context = (ASTestSectionContext *)[cn contextForSection:section];
     XCTAssertNotNil(context);
     XCTAssertEqual(context.sectionGeneration, section != sectionToReload ? 1 : 2);
     XCTAssertEqual(context.sectionIndex, section);
@@ -646,6 +661,41 @@
   // the bug demonstrated by
   // ASUICollectionViewTests.testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
   XCTAssertNoThrow([cv insertSections:[NSIndexSet indexSetWithIndex:0]]);
+}
+
+- (void)testThatNodeAtIndexPathIsCorrectImmediatelyAfterSubmittingUpdate
+{
+  updateValidationTestPrologue
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+
+  // Insert an item and assert nodeForItemAtIndexPath: immediately returns new node
+  ASCellNode *oldNode = [cn nodeForItemAtIndexPath:indexPath];
+  XCTAssertNotNil(oldNode);
+  del->_itemCounts[0] += 1;
+  [cv insertItemsAtIndexPaths:@[ indexPath ]];
+  ASCellNode *newNode = [cn nodeForItemAtIndexPath:indexPath];
+  XCTAssertNotNil(newNode);
+  XCTAssertNotEqualObjects(oldNode, newNode);
+
+  // Delete all sections and assert nodeForItemAtIndexPath: immediately returns nil
+  NSIndexSet *sections = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, del->_itemCounts.size())];
+  del->_itemCounts.clear();
+  [cv deleteSections:sections];
+  XCTAssertNil([cn nodeForItemAtIndexPath:indexPath]);
+}
+
+- (void)DISABLED_testThatSupplementaryNodeAtIndexPathIsCorrectImmediatelyAfterSubmittingUpdate
+{
+  updateValidationTestPrologue
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  ASCellNode *oldHeader = [cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:indexPath];
+  XCTAssertNotNil(oldHeader);
+
+  // Reload the section and ensure that the new header is loaded
+  [cv reloadSections:[NSIndexSet indexSetWithIndex:0]];
+  ASCellNode *newHeader = [cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:indexPath];
+  XCTAssertNotNil(newHeader);
+  XCTAssertNotEqualObjects(oldHeader, newHeader);
 }
 
 @end

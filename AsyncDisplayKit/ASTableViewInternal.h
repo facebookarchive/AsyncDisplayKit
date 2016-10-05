@@ -31,10 +31,8 @@
  * @param style A constant that specifies the style of the table view. See UITableViewStyle for descriptions of valid constants.
  *
  * @param dataControllerClass A controller class injected to and used to create a data controller for the table view.
- *
- * @param ownedByNode Indicates whether the tableView is owned by an ASTableNode.
  */
-- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass ownedByNode:(BOOL)ownedByNode;
+- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass;
 
 /// Set YES and we'll log every time we call [super insertRows…] etc
 @property (nonatomic) BOOL test_enableSuperUpdateCallLogging;

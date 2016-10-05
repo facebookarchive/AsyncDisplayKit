@@ -223,3 +223,19 @@ NSArray *ASIndexPathsForMultidimensionalArray(NSArray *multidimensionalArray)
   ASRecursivelyFindIndexPathsForMultidimensionalArray(multidimensionalArray, [[NSIndexPath alloc] init], res);
   return res;
 }
+
+id ASGetElementInTwoDimensionalArray(NSArray *array, NSIndexPath *indexPath)
+{
+  ASDisplayNodeCAssert(indexPath.length == 2, @"Expected index path of length 2. Index path: %@", indexPath);
+  NSInteger section = indexPath.section;
+  if (array.count <= section) {
+    return nil;
+  }
+
+  NSArray *innerArray = array[section];
+  NSInteger item = indexPath.item;
+  if (innerArray.count <= item) {
+    return nil;
+  }
+  return innerArray[item];
+}

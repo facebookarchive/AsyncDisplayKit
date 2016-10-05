@@ -17,6 +17,7 @@
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
 #import "AsyncDisplayKit+Debug.h"
+#import "ASTableView+Undeprecated.h"
 
 #pragma mark - _ASTablePendingState
 
@@ -70,7 +71,7 @@
 - (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
 {
   ASDisplayNodeViewBlock tableViewBlock = ^UIView *{
-    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass ownedByNode:YES];
+    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass];
   };
 
   if (self = [super initWithViewBlock:tableViewBlock]) {
@@ -109,6 +110,12 @@
   }
 }
 
+- (void)dealloc
+{
+  self.delegate = nil;
+  self.dataSource = nil;
+}
+
 - (ASTableView *)view
 {
   return (ASTableView *)[super view];
@@ -117,13 +124,13 @@
 - (void)clearContents
 {
   [super clearContents];
-  [self.view clearContents];
+  [self.rangeController clearContents];
 }
 
 - (void)clearFetchedData
 {
   [super clearFetchedData];
-  [self.view clearFetchedData];
+  [self.rangeController clearFetchedData];
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
@@ -147,6 +154,18 @@
 #endif
 
 #pragma mark Setter / Getter
+
+// TODO: Implement this without the view.
+- (ASDataController *)dataController
+{
+  return self.view.dataController;
+}
+
+// TODO: Implement this without the view.
+- (ASRangeController *)rangeController
+{
+  return self.view.rangeController;
+}
 
 - (_ASTablePendingState *)pendingState
 {
@@ -191,6 +210,7 @@
   if ([self pendingState]) {
     return _pendingState.dataSource;
   } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
     return self.view.asyncDataSource;
   }
 }
@@ -203,12 +223,115 @@
     _pendingState.rangeMode = rangeMode;
   } else {
     ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
-    [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+    [self.rangeController updateCurrentRangeWithMode:rangeMode];
   }
 }
 
 #pragma mark ASEnvironment
 
 ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
+
+#pragma mark - Range Tuning
+
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.rangeController tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
+{
+  [self.rangeController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+}
+
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+}
+
+#pragma mark - Querying Data
+
+- (NSInteger)numberOfRowsInSection:(NSInteger)section
+{
+  return [self.dataController numberOfRowsInSection:section];
+}
+
+- (NSInteger)numberOfSections
+{
+  return [self.dataController numberOfSections];
+}
+
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
+{
+  return [self.dataController indexPathForNode:cellNode];
+}
+
+- (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [self.dataController nodeAtIndexPath:indexPath];
+}
+
+#pragma mark - Editing
+
+- (void)reloadDataWithCompletion:(void (^)())completion
+{
+  [self.view reloadDataWithCompletion:completion];
+}
+
+- (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
+{
+  [self.view beginUpdates];
+  updates();
+  [self.view endUpdatesAnimated:animated completion:completion];
+}
+
+- (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view insertSections:sections withRowAnimation:animation];
+}
+
+- (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view deleteSections:sections withRowAnimation:animation];
+}
+
+- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view reloadSections:sections withRowAnimation:animation];
+}
+
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
+{
+  [self.view moveSection:section toSection:newSection];
+}
+
+- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view insertRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+}
+
+- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view deleteRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+}
+
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view reloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+}
+
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
+{
+  [self.view moveRowAtIndexPath:indexPath toIndexPath:newIndexPath];
+}
+
+- (void)waitUntilAllUpdatesAreCommitted
+{
+  [self.view waitUntilAllUpdatesAreCommitted];
+}
 
 @end
