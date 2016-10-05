@@ -8,7 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+// We need this import for UITrackingRunLoopMode
 #import <UIKit/UIApplication.h>
+
 #import "_ASAsyncTransaction.h"
 #import "_ASAsyncTransactionGroup.h"
 
