@@ -19,16 +19,6 @@ static const char *ASDisplayNodeAssociatedCurrentTransactionKey = "ASAssociatedC
 
 @implementation CALayer (ASAsyncTransactionContainerTransactions)
 
-- (_ASAsyncTransaction *)asyncdisplaykit_currentAsyncLayerTransaction
-{
-  return objc_getAssociatedObject(self, ASDisplayNodeAssociatedCurrentTransactionKey);
-}
-
-- (void)asyncdisplaykit_setCurrentAsyncLayerTransaction:(_ASAsyncTransaction *)transaction
-{
-  objc_setAssociatedObject(self, ASDisplayNodeAssociatedCurrentTransactionKey, transaction, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
-}
-
 - (NSHashTable *)asyncdisplaykit_asyncLayerTransactions
 {
   return objc_getAssociatedObject(self, ASDisplayNodeAssociatedTransactionsKey);
@@ -46,7 +36,17 @@ static const char *ASDisplayNodeAssociatedCurrentTransactionKey = "ASAssociatedC
 
 static const char *ASAsyncTransactionIsContainerKey = "ASTransactionIsContainer";
 
-@implementation CALayer (ASDisplayNodeAsyncTransactionContainer)
+@implementation CALayer (ASAsyncTransactionContainer)
+
+- (_ASAsyncTransaction *)asyncdisplaykit_currentAsyncTransaction
+{
+  return objc_getAssociatedObject(self, ASDisplayNodeAssociatedCurrentTransactionKey);
+}
+
+- (void)asyncdisplaykit_setCurrentAsyncTransaction:(_ASAsyncTransaction *)transaction
+{
+  objc_setAssociatedObject(self, ASDisplayNodeAssociatedCurrentTransactionKey, transaction, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+}
 
 - (BOOL)asyncdisplaykit_isAsyncTransactionContainer
 {
@@ -70,9 +70,9 @@ static const char *ASAsyncTransactionIsContainerKey = "ASTransactionIsContainer"
   // If there was an open transaction, commit and clear the current transaction. Otherwise:
   // (1) The run loop observer will try to commit a canceled transaction which is not allowed
   // (2) We leave the canceled transaction attached to the layer, dooming future operations
-  _ASAsyncTransaction *currentTransaction = self.asyncdisplaykit_currentAsyncLayerTransaction;
+  _ASAsyncTransaction *currentTransaction = self.asyncdisplaykit_currentAsyncTransaction;
   [currentTransaction commit];
-  self.asyncdisplaykit_currentAsyncLayerTransaction = nil;
+  self.asyncdisplaykit_currentAsyncTransaction = nil;
 
   for (_ASAsyncTransaction *transaction in [self.asyncdisplaykit_asyncLayerTransactions copy]) {
     [transaction cancel];
@@ -81,7 +81,7 @@ static const char *ASAsyncTransactionIsContainerKey = "ASTransactionIsContainer"
 
 - (_ASAsyncTransaction *)asyncdisplaykit_asyncTransaction
 {
-  _ASAsyncTransaction *transaction = self.asyncdisplaykit_currentAsyncLayerTransaction;
+  _ASAsyncTransaction *transaction = self.asyncdisplaykit_currentAsyncTransaction;
   if (transaction == nil) {
     NSHashTable *transactions = self.asyncdisplaykit_asyncLayerTransactions;
     if (transactions == nil) {
@@ -98,7 +98,7 @@ static const char *ASAsyncTransactionIsContainerKey = "ASTransactionIsContainer"
       [self asyncdisplaykit_asyncTransactionContainerDidCompleteTransaction:completedTransaction];
     }];
     [transactions addObject:transaction];
-    self.asyncdisplaykit_currentAsyncLayerTransaction = transaction;
+    self.asyncdisplaykit_currentAsyncTransaction = transaction;
     [self asyncdisplaykit_asyncTransactionContainerWillBeginTransaction:transaction];
   }
   [[_ASAsyncTransactionGroup mainTransactionGroup] addTransactionContainer:self];
@@ -116,7 +116,7 @@ static const char *ASAsyncTransactionIsContainerKey = "ASTransactionIsContainer"
 
 @end
 
-@implementation UIView (ASDisplayNodeAsyncTransactionContainer)
+@implementation UIView (ASAsyncTransactionContainer)
 
 - (BOOL)asyncdisplaykit_isAsyncTransactionContainer
 {
@@ -141,6 +141,16 @@ static const char *ASAsyncTransactionIsContainerKey = "ASTransactionIsContainer"
 - (void)asyncdisplaykit_asyncTransactionContainerStateDidChange
 {
   // No-op in the base class.
+}
+
+- (void)asyncdisplaykit_setCurrentAsyncTransaction:(_ASAsyncTransaction *)transaction
+{
+  self.layer.asyncdisplaykit_currentAsyncTransaction = transaction;
+}
+
+- (_ASAsyncTransaction *)asyncdisplaykit_currentAsyncTransaction
+{
+  return self.layer.asyncdisplaykit_currentAsyncTransaction;
 }
 
 @end

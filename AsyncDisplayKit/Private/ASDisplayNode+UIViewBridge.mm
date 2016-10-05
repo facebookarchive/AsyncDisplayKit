@@ -974,4 +974,14 @@ nodeProperty = nodeValueExpr; _setToViewOnly(viewAndPendingViewStateProperty, vi
   [_layer asyncdisplaykit_cancelAsyncTransactions];
 }
 
+- (void)asyncdisplaykit_setCurrentAsyncTransaction:(_ASAsyncTransaction *)transaction
+{
+  _layer.asyncdisplaykit_currentAsyncTransaction = transaction;
+}
+
+- (_ASAsyncTransaction *)asyncdisplaykit_currentAsyncTransaction
+{
+  return _layer.asyncdisplaykit_currentAsyncTransaction;
+}
+
 @end

@@ -8,19 +8,20 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <UIKit/UIKit.h>
-
+NS_ASSUME_NONNULL_BEGIN
 
 @class _ASAsyncTransaction;
+@protocol ASAsyncTransactionContainer;
 
-/// A group of transaction container layers, for which the current transactions are committed together at the end of the next runloop tick.
+/// A group of transaction containers, for which the current transactions are committed together at the end of the next runloop tick.
 @interface _ASAsyncTransactionGroup : NSObject
 /// The main transaction group is scheduled to commit on every tick of the main runloop.
-+ (instancetype)mainTransactionGroup;
++ (_ASAsyncTransactionGroup *)mainTransactionGroup;
 + (void)commit;
 
 /// Add a transaction container to be committed.
-/// @param containerLayer A layer containing a transaction to be committed. May or may not be a container layer.
 /// @see ASAsyncTransactionContainer
-- (void)addTransactionContainer:(CALayer *)containerLayer;
+- (void)addTransactionContainer:(id<ASAsyncTransactionContainer>)container;
 @end
+
+NS_ASSUME_NONNULL_END
