@@ -272,13 +272,40 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 /**
- * Similar to -cellForRowAtIndexPath:.
- * 
- * @param indexPath The index path of the requested node.
+ * Retrieves the node for the row at the given index path, in the data source's index space.
  *
- * @return a node for display at this indexpath.
+ * @param indexPath The index path of the requested row, in the data source's index space.
+ * @return The node for the row, or @c nil if no row exists at the specified path.
  */
-- (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+- (nullable ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+
+/**
+ * Retrieves the node for the row at the given index path.
+ *
+ * @param indexPath The index path of the requested row.
+ * @param useUIKitIndexSpace Whether the index path provided is in the UIKit index space or not.
+ *
+ * @discussion You should use the UIKit index space only if the index path was received from UIKit
+ *    e.g. @c tableView:didSelectRowAtIndexPath: or @c tableView:canMoveRowAtIndexPath: .
+ *
+ * @return The node for the row, or @c nil if no row exists at the specified path.
+ */
+- (nullable ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath usingUIKitIndexSpace:(BOOL)useUIKitIndexSpace AS_WARN_UNUSED_RESULT;
+
+/**
+ * TODO: Docs
+ */
+- (nullable NSIndexPath *)indexPathForRowWithUIKitIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * TODO: Docs
+ */
+- (NSInteger)asyncNumberOfRowsInSection:(NSInteger)section AS_WARN_UNUSED_RESULT;
+
+/**
+ * TODO: Docs
+ */
+@property (nonatomic, readonly) NSInteger asyncNumberOfSections;
 
 /**
  * Similar to -indexPathForCell:.
@@ -286,6 +313,11 @@ NS_ASSUME_NONNULL_BEGIN
  * @param cellNode a cellNode part of the table view
  *
  * @return an indexPath for this cellNode
+ *
+ * @discussion This method will return @c nil for a node that is still being
+ *   displayed in the table view, if the data source has deleted the row.
+ *   That is, the node is visible but it no longer corresponds
+ *   to any item in the data source and will be removed soon.
  */
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
 

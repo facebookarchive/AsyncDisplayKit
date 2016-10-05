@@ -307,14 +307,41 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 /**
- * Similar to -cellForItemAtIndexPath:.
+ * Retrieves the node for the item at the given index path, in the data source's index space.
  *
  * @param indexPath The index path of the requested node.
- *
- * @return a node for display at this indexpath or nil
+ * @return The node at the given index path, or @c nil if no item exists at the specified path.
  */
 - (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
+/**
+ * Retrieves the node for the item at the given index path.
+ *
+ * @param indexPath The index path of the requested node.
+ * @param useUIKitIndexSpace Whether the index path provided is in the UIKit index space or not.
+ *
+ * @discussion You should use the UIKit index space only when dealing directly with UIKit
+ *    e.g. when implementing a @c UICollectionViewLayout subclass, or when implementing
+ *    @c collectionView:didSelectItemAtIndexPath: .
+ *
+ * @return The node at the given index path, or @c nil if no item exists at the specified path.
+ */
+- (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath usingUIKitIndexSpace:(BOOL)useUIKitIndexSpace AS_WARN_UNUSED_RESULT;
+
+/**
+ * TODO: Docs
+ */
+- (nullable NSIndexPath *)indexPathForItemWithUIKitIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * TODO: Docs
+ */
+- (NSInteger)asyncNumberOfItemsInSection:(NSInteger)section AS_WARN_UNUSED_RESULT;
+
+/**
+ * TODO: Docs
+ */
+@property (nonatomic, readonly) NSInteger asyncNumberOfSections;
 
 /**
  * Similar to -supplementaryViewForElementKind:atIndexPath:
@@ -329,11 +356,16 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Similar to -indexPathForCell:.
  *
- * @param cellNode a cellNode part of the table view
+ * @param cellNode a cellNode in the collection view
  *
- * @return an indexPath for this cellNode
+ * @return The index path for this cell node, in the data source's index space.
+ *
+ * @discussion This method will return @c nil for a node that is still being
+ *   displayed in the collection view, if the data source has deleted the item.
+ *   That is, the node is visible but it no longer corresponds
+ *   to any item in the data source and will be removed soon.
  */
-- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
 
 /**
  * Similar to -visibleCells.
@@ -341,13 +373,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @return an array containing the nodes being displayed on screen.
  */
 - (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
-
-/**
- * Query the sized node at `indexPath` for its calculatedSize.
- *
- * @param indexPath The index path for the node of interest.
- */
-- (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
  * Determines collection view's current scroll direction. Supports 2-axis collection views.
@@ -386,6 +411,19 @@ NS_ASSUME_NONNULL_BEGIN
  * its flow layout behaves predictably and does not log undefined layout warnings.
  */
 @property (nonatomic) BOOL zeroContentInsets;
+
+@end
+
+@interface ASCollectionView (Deprecated)
+
+/**
+ * Query the sized node at `indexPath` for its calculatedSize.
+ *
+ * @param indexPath The index path for the node of interest.
+ *
+ * @deprecated Call @c calculatedSize on the node of interest instead. First deprecated in version 2.0.
+ */
+- (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
 
 @end
 

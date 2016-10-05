@@ -58,6 +58,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, strong, nullable) UICollectionViewLayoutAttributes *layoutAttributes;
 
+/// readwrite variant of the readonly public property.
+@property (nonatomic, copy, nullable) NSString *supplementaryElementKind;
+
+@property (nonatomic, copy, nullable) NSIndexPath *cachedIndexPath;
+
 @end
 
 NS_ASSUME_NONNULL_END

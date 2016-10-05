@@ -22,6 +22,18 @@
           selector == @selector(tableView:cellForRowAtIndexPath:) ||
           selector == @selector(tableView:heightForRowAtIndexPath:) ||
           
+          // Selection, highlighting, menu
+          selector == @selector(tableView:willSelectRowAtIndexPath:) ||
+          selector == @selector(tableView:didSelectRowAtIndexPath:) ||
+          selector == @selector(tableView:willDeselectRowAtIndexPath:) ||
+          selector == @selector(tableView:didDeselectRowAtIndexPath:) ||
+          selector == @selector(tableView:shouldHighlightRowAtIndexPath:) ||
+          selector == @selector(tableView:didHighlightRowAtIndexPath:) ||
+          selector == @selector(tableView:didUnhighlightRowAtIndexPath:) ||
+          selector == @selector(tableView:shouldShowMenuForRowAtIndexPath:) ||
+          selector == @selector(tableView:canPerformAction:forRowAtIndexPath:withSender:) ||
+          selector == @selector(tableView:performAction:forRowAtIndexPath:withSender:) ||
+
           // handled by ASRangeController
           selector == @selector(numberOfSectionsInTableView:) ||
           selector == @selector(tableView:numberOfRowsInSection:) ||
@@ -58,6 +70,18 @@
           selector == @selector(collectionView:layout:sizeForItemAtIndexPath:) ||
           selector == @selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:) ||
           
+          // Selection, highlighting, menu
+          selector == @selector(collectionView:shouldSelectItemAtIndexPath:) ||
+          selector == @selector(collectionView:didSelectItemAtIndexPath:) ||
+          selector == @selector(collectionView:shouldDeselectItemAtIndexPath:) ||
+          selector == @selector(collectionView:didDeselectItemAtIndexPath:) ||
+          selector == @selector(collectionView:shouldHighlightItemAtIndexPath:) ||
+          selector == @selector(collectionView:didHighlightItemAtIndexPath:) ||
+          selector == @selector(collectionView:didUnhighlightItemAtIndexPath:) ||
+          selector == @selector(collectionView:shouldShowMenuForItemAtIndexPath:) ||
+          selector == @selector(collectionView:canPerformAction:forItemAtIndexPath:withSender:) ||
+          selector == @selector(collectionView:performAction:forItemAtIndexPath:withSender:) ||
+
           // handled by ASRangeController
           selector == @selector(numberOfSectionsInCollectionView:) ||
           selector == @selector(collectionView:numberOfItemsInSection:) ||

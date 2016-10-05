@@ -54,7 +54,7 @@
 
 @end
 
-@interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionViewDelegate>
+@interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionViewDelegate, UICollectionViewDelegateFlowLayout>
 
 @property (nonatomic, assign) NSInteger sectionGeneration;
 
@@ -118,6 +118,16 @@
   return context;
 }
 
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
+{
+  return CGSizeMake(100, 100);
+}
+
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  return [[ASCellNode alloc] init];
+}
+
 @end
 
 @interface ASCollectionViewTestController: UIViewController
@@ -142,6 +152,7 @@
     self.collectionView.asyncDataSource = self.asyncDelegate;
     self.collectionView.asyncDelegate = self.asyncDelegate;
     
+    [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
     [self.view addSubview:self.collectionView];
   }
   return self;
@@ -483,14 +494,14 @@
 {
   updateValidationTestPrologue
   id layout = cv.collectionViewLayout;
-  CGSize initialItemSize = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  CGSize initialItemSize = [cv nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]].calculatedSize;
   CGSize initialCVSize = cv.bounds.size;
 
   // Capture the node size before first call to prepareLayout after frame change.
   __block CGSize itemSizeAtFirstLayout = CGSizeZero;
   __block CGSize boundsSizeAtFirstLayout = CGSizeZero;
   [[[[layout expect] andDo:^(NSInvocation *) {
-    itemSizeAtFirstLayout = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+    itemSizeAtFirstLayout = [cv nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]].calculatedSize;
     boundsSizeAtFirstLayout = [cv bounds].size;
   }] andForwardToRealObject] prepareLayout];
 
@@ -498,7 +509,7 @@
   UIDeviceOrientation oldDeviceOrientation = [[UIDevice currentDevice] orientation];
   [[UIDevice currentDevice] setValue:@(UIDeviceOrientationLandscapeLeft) forKey:@"orientation"];
 
-  CGSize finalItemSize = [cv calculatedSizeForNodeAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  CGSize finalItemSize = [cv nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]].calculatedSize;
   CGSize finalCVSize = cv.bounds.size;
   XCTAssertNotEqualObjects(NSStringFromCGSize(initialItemSize),  NSStringFromCGSize(itemSizeAtFirstLayout));
   XCTAssertNotEqualObjects(NSStringFromCGSize(initialCVSize),  NSStringFromCGSize(boundsSizeAtFirstLayout));
@@ -646,6 +657,41 @@
   // the bug demonstrated by
   // ASUICollectionViewTests.testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
   XCTAssertNoThrow([cv insertSections:[NSIndexSet indexSetWithIndex:0]]);
+}
+
+- (void)testThatNodeAtIndexPathIsCorrectImmediatelyAfterSubmittingUpdate
+{
+  updateValidationTestPrologue
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+
+  // Insert an item and assert nodeForItemAtIndexPath: immediately returns new node
+  ASCellNode *oldNode = [cv nodeForItemAtIndexPath:indexPath];
+  XCTAssertNotNil(oldNode);
+  del->_itemCounts[0] += 1;
+  [cv insertItemsAtIndexPaths:@[ indexPath ]];
+  ASCellNode *newNode = [cv nodeForItemAtIndexPath:indexPath];
+  XCTAssertNotNil(newNode);
+  XCTAssertNotEqualObjects(oldNode, newNode);
+
+  // Delete all sections and assert nodeForItemAtIndexPath: immediately returns nil
+  NSIndexSet *sections = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, del->_itemCounts.size())];
+  del->_itemCounts.clear();
+  [cv deleteSections:sections];
+  XCTAssertNil([cv nodeForItemAtIndexPath:indexPath]);
+}
+
+- (void)DISABLED_testThatSupplementaryNodeAtIndexPathIsCorrectImmediatelyAfterSubmittingUpdate
+{
+  updateValidationTestPrologue
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  ASCellNode *oldHeader = [cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:indexPath];
+  XCTAssertNotNil(oldHeader);
+
+  // Reload the section and ensure that the new header is loaded
+  [cv reloadSections:[NSIndexSet indexSetWithIndex:0]];
+  ASCellNode *newHeader = [cv supplementaryNodeForElementKind:UICollectionElementKindSectionHeader atIndexPath:indexPath];
+  XCTAssertNotNil(newHeader);
+  XCTAssertNotEqualObjects(oldHeader, newHeader);
 }
 
 @end

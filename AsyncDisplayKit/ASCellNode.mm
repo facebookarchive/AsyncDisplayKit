@@ -298,8 +298,16 @@
   
   ASDisplayNode *owningNode = scrollView.asyncdisplaykit_node;
   if ([owningNode isKindOfClass:[ASCollectionNode class]]) {
+    NSIndexPath *ip = [((ASCollectionNode *)owningNode).view indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
     [result addObject:@{ @"collectionNode" : ASObjectDescriptionMakeTiny(owningNode) }];
   } else if ([owningNode isKindOfClass:[ASTableNode class]]) {
+    NSIndexPath *ip = [((ASTableNode *)owningNode).view indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
     [result addObject:@{ @"tableNode" : ASObjectDescriptionMakeTiny(owningNode) }];
   
   } else if ([scrollView isKindOfClass:[ASCollectionView class]]) {
