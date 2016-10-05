@@ -38,7 +38,7 @@ ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
     // Check if percent is at the end and remove it
     if (percentStringLocation == (dimension.length-1)) {
       dimension = [dimension substringToIndex:(dimension.length-1)];
-      return ASDimensionMake(ASDimensionUnitFraction, dimension.floatValue);
+      return ASDimensionMake(ASDimensionUnitFraction, (dimension.floatValue / 100.0));
     }
   }
 

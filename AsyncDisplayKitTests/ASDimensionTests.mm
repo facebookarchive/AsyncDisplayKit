@@ -22,12 +22,20 @@
 {
   XCTAssertNoThrow(ASDimensionMake(ASDimensionUnitAuto, 0));
   XCTAssertThrows(ASDimensionMake(ASDimensionUnitAuto, 100));
+  XCTAssertTrue(ASDimensionEqualToDimension(ASDimensionMake(ASDimensionUnitFraction, 0.5), ASDimensionMake(@"50%")));
 }
 
 - (void)testCreatingDimensionUnitFraction
 {
   XCTAssertNoThrow(ASDimensionMake(ASDimensionUnitFraction, 0.5));
   XCTAssertThrows(ASDimensionMake(ASDimensionUnitAuto, 100));
+  XCTAssertTrue(ASDimensionEqualToDimension(ASDimensionMake(ASDimensionUnitFraction, 0.5), ASDimensionMake(@"50%")));
+}
+
+- (void)testCreatingDimensionUnitPoints
+{
+  XCTAssertNoThrow(ASDimensionMake(ASDimensionUnitPoints, 100));
+  XCTAssertTrue(ASDimensionEqualToDimension(ASDimensionMake(ASDimensionUnitPoints, 100), ASDimensionMake(@"100pt")));
 }
 
 - (void)testIntersectingOverlappingSizeRangesReturnsTheirIntersection
