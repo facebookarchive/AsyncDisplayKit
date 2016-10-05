@@ -216,6 +216,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @note Called on the main thread only
  */
 - (void)displayWillStart ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)displayWillStartAsynchronously:(BOOL)asynchronously ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * @abstract Indicates that the receiver has finished displaying.

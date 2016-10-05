@@ -132,7 +132,7 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 /**
  @summary Delegate override for willDisplay
  */
-- (void)willDisplayAsyncLayer:(_ASDisplayLayer *)layer;
+- (void)willDisplayAsyncLayer:(_ASDisplayLayer *)layer asynchronously:(BOOL)asynchronously;
 
 /**
  @summary Delegate override for didDisplay
