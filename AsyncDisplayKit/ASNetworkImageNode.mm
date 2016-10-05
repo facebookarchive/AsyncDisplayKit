@@ -249,11 +249,11 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 /* displayWillStart in ASMultiplexImageNode has a very similar implementation. Changes here are likely necessary
  in ASMultiplexImageNode as well. */
-- (void)displayWillStart
+- (void)displayWillStartAsynchronously:(BOOL)asynchronously
 {
-  [super displayWillStart];
+  [super displayWillStartAsynchronously:asynchronously];
   
-  if (_cacheFlags.cacheSupportsSynchronousFetch) {
+  if (asynchronously == NO && _cacheFlags.cacheSupportsSynchronousFetch) {
     ASDN::MutexLocker l(__instanceLock__);
     if (_imageLoaded == NO && _URL && _downloadIdentifier == nil) {
       UIImage *result = [[_cache synchronouslyFetchedCachedImageWithURL:_URL] asdk_image];

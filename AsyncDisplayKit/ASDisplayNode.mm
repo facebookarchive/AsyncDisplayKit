@@ -1601,10 +1601,11 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 
 #pragma mark - _ASDisplayLayerDelegate
 
-- (void)willDisplayAsyncLayer:(_ASDisplayLayer *)layer
+- (void)willDisplayAsyncLayer:(_ASDisplayLayer *)layer asynchronously:(BOOL)asynchronously
 {
   // Subclass hook.
   [self displayWillStart];
+  [self displayWillStartAsynchronously:asynchronously];
 }
 
 - (void)didDisplayAsyncLayer:(_ASDisplayLayer *)layer
@@ -2981,14 +2982,16 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 #pragma mark - Display
 
-- (void)displayWillStart
+- (void)displayWillStart {}
+- (void)displayWillStartAsynchronously:(BOOL)asynchronously
 {
+  [self displayWillStart]; // Subclass override
   ASDisplayNodeAssertMainThread();
 
   ASDisplayNodeLogEvent(self, @"displayWillStart");
   // in case current node takes longer to display than it's subnodes, treat it as a dependent node
   [self _pendingNodeWillDisplay:self];
-
+  
   [_supernode subnodeDisplayWillStart:self];
 }
 
