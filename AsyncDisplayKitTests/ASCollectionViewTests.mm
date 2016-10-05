@@ -22,6 +22,7 @@
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 
 @property (nonatomic, assign) NSUInteger setSelectedCounter;
+@property (nonatomic, assign) NSUInteger applyLayoutAttributesCount;
 
 @end
 
@@ -31,6 +32,11 @@
 {
   [super setSelected:selected];
   _setSelectedCounter++;
+}
+
+- (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
+{
+  _applyLayoutAttributesCount++;
 }
 
 @end
@@ -84,6 +90,16 @@
     textCellNode.text = indexPath.description;
     return textCellNode;
   };
+}
+
+- (void)collectionView:(ASCollectionView *)collectionView willDisplayNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertNotNil(node.layoutAttributes, @"Expected layout attributes for node in %@ to be non-nil.", NSStringFromSelector(_cmd));
+}
+
+- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertNotNil(node.layoutAttributes, @"Expected layout attributes for node in %@ to be non-nil.", NSStringFromSelector(_cmd));
 }
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
@@ -383,6 +399,34 @@
     [cv reloadSections:sections];
     [cv deleteSections:sections];
   } completion:nil]);
+}
+
+- (void)testCellNodeLayoutAttributes
+{
+  updateValidationTestPrologue
+  NSSet *nodeBatch1 = [NSSet setWithArray:[cv visibleNodes]];
+  XCTAssertGreaterThan(nodeBatch1.count, 0);
+
+  // Expect all visible nodes get 1 applyLayoutAttributes and have a non-nil value.
+  for (ASTextCellNodeWithSetSelectedCounter *node in nodeBatch1) {
+    XCTAssertEqual(node.applyLayoutAttributesCount, 1, @"Expected applyLayoutAttributes to be called exactly once for visible nodes.");
+    XCTAssertNotNil(node.layoutAttributes, @"Expected layoutAttributes to be non-nil for visible cell node.");
+  }
+
+  // Scroll to next batch of items.
+  NSIndexPath *nextIP = [NSIndexPath indexPathForItem:nodeBatch1.count inSection:0];
+  [cv scrollToItemAtIndexPath:nextIP atScrollPosition:UICollectionViewScrollPositionTop animated:NO];
+  [cv layoutIfNeeded];
+
+  // Ensure we scrolled far enough that all the old ones are offscreen.
+  NSSet *nodeBatch2 = [NSSet setWithArray:[cv visibleNodes]];
+  XCTAssertFalse([nodeBatch1 intersectsSet:nodeBatch2], @"Expected to scroll far away enough that all nodes are replaced.");
+
+  // Now the nodes are no longer visible, expect their layout attributes are nil but not another applyLayoutAttributes call.
+  for (ASTextCellNodeWithSetSelectedCounter *node in nodeBatch1) {
+    XCTAssertEqual(node.applyLayoutAttributesCount, 1, @"Expected applyLayoutAttributes to be called exactly once for visible nodes, even after node is removed.");
+    XCTAssertNil(node.layoutAttributes, @"Expected layoutAttributes to be nil for removed cell node.");
+  }
 }
 
 /**
