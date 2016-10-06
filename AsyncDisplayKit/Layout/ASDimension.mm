@@ -10,6 +10,7 @@
 
 #import "ASDimension.h"
 #import "ASAssert.h"
+#import "CGRect+ASConvenience.h"
 
 #pragma mark - ASDimension
 
@@ -17,11 +18,11 @@ ASDimension const ASDimensionAuto = {ASDimensionUnitAuto, 0};
 
 ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
 {
-  if (dimension.length != 0) {
+  if (dimension.length > 0) {
     
     // Handle points
     if ([dimension hasSuffix:@"pt"]) {
-      return ASDimensionMake(ASDimensionUnitPoints, dimension.floatValue);
+      return ASDimensionMake(ASDimensionUnitPoints, ASCGFloatFromString(dimension));
     }
     
     // Handle auto
@@ -31,7 +32,7 @@ ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
   
     // Handle percent
     if ([dimension hasSuffix:@"%"]) {
-      return ASDimensionMake(ASDimensionUnitFraction, (dimension.floatValue / 100.0));
+      return ASDimensionMake(ASDimensionUnitFraction, (ASCGFloatFromString(dimension) / 100.0));
     }
   }
   
@@ -58,12 +59,12 @@ NSString *NSStringFromASDimension(ASDimension dimension)
 
 - (ASDimension)as_pointDimension
 {
-  return ASDimensionMake(ASDimensionUnitPoints, self.floatValue);
+  return ASDimensionMake(ASDimensionUnitPoints, ASCGFloatFromNumber(self));
 }
 
 - (ASDimension)as_fractionDimension
 {
-  return ASDimensionMake(ASDimensionUnitFraction, self.floatValue);
+  return ASDimensionMake(ASDimensionUnitFraction, ASCGFloatFromNumber(self));
 }
 
 @end
