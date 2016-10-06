@@ -12,7 +12,7 @@
 #import <AsyncDisplayKit/ASLayout.h>
 #import "ASinternalHelpers.h"
 #import "ASXCTExtensions.h"
-#include "CGRect+ASConvenience.h"
+#import "CoreGraphics+ASConvenience.h"
 
 /**
  * NOTE: This test case is not run during the "test" action. You have to run it manually (click the little diamond.)

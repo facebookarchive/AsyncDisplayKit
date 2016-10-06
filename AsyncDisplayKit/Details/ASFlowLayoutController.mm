@@ -12,7 +12,7 @@
 #import "ASAssert.h"
 #import "ASDisplayNode.h"
 #import "ASIndexPath.h"
-#import "CGRect+ASConvenience.h"
+#import "CoreGraphics+ASConvenience.h"
 
 #include <map>
 #include <vector>

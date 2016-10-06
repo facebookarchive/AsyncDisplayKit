@@ -17,7 +17,7 @@
 #import "UIImage+ASConvenience.h"
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
-#import <AsyncDisplayKit/CGRect+ASConvenience.h>
+#import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 #import <AsyncDisplayKit/ASRangeController.h>

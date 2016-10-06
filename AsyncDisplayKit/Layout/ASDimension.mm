@@ -10,6 +10,7 @@
 
 #import "ASDimension.h"
 #import "ASAssert.h"
+#import "CoreGraphics+ASConvenience.h"
 
 #pragma mark - ASDimension
 
@@ -17,32 +18,24 @@ ASDimension const ASDimensionAuto = {ASDimensionUnitAuto, 0};
 
 ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
 {
-  // Handle empty string
-  if (dimension.length == 0) {
-    return ASDimensionMake(ASDimensionUnitPoints, 0.0);
-  }
+  if (dimension.length > 0) {
+    
+    // Handle points
+    if ([dimension hasSuffix:@"pt"]) {
+      return ASDimensionMake(ASDimensionUnitPoints, ASCGFloatFromString(dimension));
+    }
+    
+    // Handle auto
+    if ([dimension isEqualToString:@"auto"]) {
+      return ASDimensionAuto;
+    }
   
-  // Handle points
-  NSUInteger pointsStringLocation = [dimension rangeOfString:@"pt"].location;
-  if (pointsStringLocation != NSNotFound) {
-    // Check if points is at the end and remove it
-    if (pointsStringLocation == (dimension.length-2)) {
-      dimension = [dimension substringToIndex:(dimension.length-2)];
-      return ASDimensionMake(ASDimensionUnitPoints, dimension.floatValue);
+    // Handle percent
+    if ([dimension hasSuffix:@"%"]) {
+      return ASDimensionMake(ASDimensionUnitFraction, (ASCGFloatFromString(dimension) / 100.0));
     }
   }
   
-  // Handle fraction
-  NSUInteger percentStringLocation = [dimension rangeOfString:@"%"].location;
-  if (percentStringLocation != NSNotFound) {
-    // Check if percent is at the end and remove it
-    if (percentStringLocation == (dimension.length-1)) {
-      dimension = [dimension substringToIndex:(dimension.length-1)];
-      return ASDimensionMake(ASDimensionUnitFraction, (dimension.floatValue / 100.0));
-    }
-  }
-
-  // Assert as parsing went wrong
   ASDisplayNodeCAssert(NO, @"Parsing dimension failed for: %@", dimension);
   return ASDimensionAuto;
 }
@@ -66,12 +59,12 @@ NSString *NSStringFromASDimension(ASDimension dimension)
 
 - (ASDimension)as_pointDimension
 {
-  return ASDimensionMake(ASDimensionUnitPoints, self.floatValue);
+  return ASDimensionMake(ASDimensionUnitPoints, ASCGFloatFromNumber(self));
 }
 
 - (ASDimension)as_fractionDimension
 {
-  return ASDimensionMake(ASDimensionUnitFraction, self.floatValue);
+  return ASDimensionMake(ASDimensionUnitFraction, ASCGFloatFromNumber(self));
 }
 
 @end

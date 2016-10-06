@@ -85,7 +85,7 @@
 #import <AsyncDisplayKit/ASVisibilityProtocols.h>
 #import <AsyncDisplayKit/ASWeakSet.h>
 
-#import <AsyncDisplayKit/CGRect+ASConvenience.h>
+#import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
 #import <AsyncDisplayKit/NSMutableAttributedString+TextKitAdditions.h>
 #import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
 #import <AsyncDisplayKit/UIView+ASConvenience.h>
