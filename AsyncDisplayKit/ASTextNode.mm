@@ -27,7 +27,7 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
-#import "CGRect+ASConvenience.h"
+#import "CoreGraphics+ASConvenience.h"
 #import "ASObjectDescriptionHelpers.h"
 
 /**

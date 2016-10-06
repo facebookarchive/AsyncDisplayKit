@@ -16,7 +16,7 @@
 #import <AsyncDisplayKit/ASTextNode.h>
 
 #import <XCTest/XCTest.h>
-#include "CGRect+ASConvenience.h"
+#import "CoreGraphics+ASConvenience.h"
 
 
 @interface ASTextNodeTestDelegate : NSObject <ASTextNodeDelegate>

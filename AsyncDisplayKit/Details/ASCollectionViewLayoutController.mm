@@ -12,7 +12,7 @@
 
 #import "ASAssert.h"
 #import "ASCollectionView.h"
-#import "CGRect+ASConvenience.h"
+#import "CoreGraphics+ASConvenience.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 
 struct ASRangeGeometry {

@@ -10,7 +10,7 @@
 
 #import "ASDimension.h"
 #import "ASAssert.h"
-#import "CGRect+ASConvenience.h"
+#import "CoreGraphics+ASConvenience.h"
 
 #pragma mark - ASDimension
 
