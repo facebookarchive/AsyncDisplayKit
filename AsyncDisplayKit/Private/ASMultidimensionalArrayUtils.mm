@@ -12,7 +12,7 @@
 #import "ASMultidimensionalArrayUtils.h"
 
 // Import UIKit to get [NSIndexPath indexPathForItem:inSection:] which uses
-// static memory addresses rather than allocating new index path objects.
+// tagged pointers.
 #import <UIKit/UIKit.h>
 
 #pragma mark - Internal Methods
