@@ -60,7 +60,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion The delegate must adopt the ASCollectionDelegate protocol. The collection view maintains a weak reference to the delegate object.
  *
  * The delegate object is responsible for providing size constraints for nodes and indicating whether batch fetching should begin.
- * @note This is a convenience method which sets the delegate on the collection node's collection view.
+ * @note This is a convenience method which sets the asyncDelegate on the collection node's collection view.
  */
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
 
@@ -70,7 +70,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion The datasource must adopt the ASCollectionDataSource protocol. The collection view maintains a weak reference to the datasource object.
  *
  * The datasource object is responsible for providing nodes or node creation blocks to the collection view.
- * @note This is a convenience method which sets the datasource on the collection node's collection view.
+ * @note This is a convenience method which sets the asyncDatasource on the collection node's collection view.
  */
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
 
