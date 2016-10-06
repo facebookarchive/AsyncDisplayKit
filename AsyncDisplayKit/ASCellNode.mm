@@ -233,6 +233,17 @@
 
 #pragma clang diagnostic pop
 
+- (void)setLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
+{
+  ASDisplayNodeAssertMainThread();
+  if (ASObjectIsEqual(layoutAttributes, _layoutAttributes) == NO) {
+    _layoutAttributes = layoutAttributes;
+    if (layoutAttributes != nil) {
+      [self applyLayoutAttributes:layoutAttributes];
+    }
+  }
+}
+
 - (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
 {
   // To be overriden by subclasses

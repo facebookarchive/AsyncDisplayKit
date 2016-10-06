@@ -38,7 +38,7 @@ ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
     // Check if percent is at the end and remove it
     if (percentStringLocation == (dimension.length-1)) {
       dimension = [dimension substringToIndex:(dimension.length-1)];
-      return ASDimensionMake(ASDimensionUnitFraction, dimension.floatValue);
+      return ASDimensionMake(ASDimensionUnitFraction, (dimension.floatValue / 100.0));
     }
   }
 
@@ -79,22 +79,6 @@ NSString *NSStringFromASDimension(ASDimension dimension)
 
 #pragma mark - ASRelativeSize
 
-/**
- * Expresses a size with relative dimensions. Only used for calculations internally in ASDimension.h 
- */
-typedef struct {
-  ASDimension width;
-  ASDimension height;
-} ASRelativeSize;
-
-ASDISPLAYNODE_INLINE ASRelativeSize ASRelativeSizeMake(ASDimension width, ASDimension height)
-{
-  ASRelativeSize size;
-  size.width = width;
-  size.height = height;
-  return size;
-}
-
 // ** Resolve this relative size relative to a parent size. */
 ASDISPLAYNODE_INLINE CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize, CGSize autoSize)
 {
@@ -111,18 +95,18 @@ ASDISPLAYNODE_INLINE NSString *NSStringFromASRelativeSize(ASRelativeSize size)
 }
 
 
-#pragma mark - ASLayoutableSize
+#pragma mark - ASLayoutElementSize
 
-NSString *NSStringFromASLayoutableSize(ASLayoutableSize size)
+NSString *NSStringFromASLayoutElementSize(ASLayoutElementSize size)
 {
   return [NSString stringWithFormat:
-          @"<ASLayoutableSize: exact=%@, min=%@, max=%@>",
+          @"<ASLayoutElementSize: exact=%@, min=%@, max=%@>",
           NSStringFromASRelativeSize(ASRelativeSizeMake(size.width, size.height)),
           NSStringFromASRelativeSize(ASRelativeSizeMake(size.minWidth, size.minHeight)),
           NSStringFromASRelativeSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight))];
 }
 
-ASDISPLAYNODE_INLINE void ASLayoutableSizeConstrain(CGFloat minVal, CGFloat exactVal, CGFloat maxVal, CGFloat *outMin, CGFloat *outMax)
+ASDISPLAYNODE_INLINE void ASLayoutElementSizeConstrain(CGFloat minVal, CGFloat exactVal, CGFloat maxVal, CGFloat *outMin, CGFloat *outMax)
 {
     NSCAssert(!isnan(minVal), @"minVal must not be NaN");
     NSCAssert(!isnan(maxVal), @"maxVal must not be NaN");
@@ -154,15 +138,15 @@ ASDISPLAYNODE_INLINE void ASLayoutableSizeConstrain(CGFloat minVal, CGFloat exac
     }
 }
 
-ASSizeRange ASLayoutableSizeResolveAutoSize(ASLayoutableSize size, const CGSize parentSize, ASSizeRange autoASSizeRange)
+ASSizeRange ASLayoutElementSizeResolveAutoSize(ASLayoutElementSize size, const CGSize parentSize, ASSizeRange autoASSizeRange)
 {
   CGSize resolvedExact = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.width, size.height), parentSize, {NAN, NAN});
   CGSize resolvedMin = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.minWidth, size.minHeight), parentSize, autoASSizeRange.min);
   CGSize resolvedMax = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight), parentSize, autoASSizeRange.max);
   
   CGSize rangeMin, rangeMax;
-  ASLayoutableSizeConstrain(resolvedMin.width, resolvedExact.width, resolvedMax.width, &rangeMin.width, &rangeMax.width);
-  ASLayoutableSizeConstrain(resolvedMin.height, resolvedExact.height, resolvedMax.height, &rangeMin.height, &rangeMax.height);
+  ASLayoutElementSizeConstrain(resolvedMin.width, resolvedExact.width, resolvedMax.width, &rangeMin.width, &rangeMax.width);
+  ASLayoutElementSizeConstrain(resolvedMin.height, resolvedExact.height, resolvedMax.height, &rangeMin.height, &rangeMax.height);
   return {rangeMin, rangeMax};
 }
 

@@ -41,7 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param rangeType The range type to get the tuning parameters for.
  *
- * @returns A tuning parameter value for the given range type in full mode.
+ * @return A tuning parameter value for the given range type in full mode.
  *
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
@@ -65,7 +65,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param rangeMode The range mode to get the running parameters for.
  * @param rangeType The range type to get the tuning parameters for.
  *
- * @returns A tuning parameter value for the given range type in the given mode.
+ * @return A tuning parameter value for the given range type in the given mode.
  *
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
@@ -91,7 +91,7 @@ NS_ASSUME_NONNULL_BEGIN
  * the main thread.
  * @warning This method is substantially more expensive than UICollectionView's version.
  */
-- (void)reloadDataWithCompletion:(void (^)())completion;
+- (void)reloadDataWithCompletion:(nullable void (^)())completion;
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.

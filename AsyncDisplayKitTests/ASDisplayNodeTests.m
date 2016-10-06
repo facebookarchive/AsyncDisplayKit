@@ -10,6 +10,7 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "ASXCTExtensions.h"
 #import <XCTest/XCTest.h>
 
 #import "_ASDisplayLayer.h"
@@ -303,6 +304,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(NO, node.clipsToBounds, @"default clipsToBounds broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.opaque, @"default opaque broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.needsDisplayOnBoundsChange, @"default needsDisplayOnBoundsChange broken %@", hasLoadedView);
+  XCTAssertEqual(YES, node.allowsGroupOpacity, @"default allowsGroupOpacity broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.allowsEdgeAntialiasing, @"default allowsEdgeAntialiasing broken %@", hasLoadedView);
   XCTAssertEqual((unsigned int)(kCALayerLeftEdge | kCALayerRightEdge | kCALayerBottomEdge | kCALayerTopEdge), node.edgeAntialiasingMask, @"default edgeAntialisingMask broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.hidden, @"default hidden broken %@", hasLoadedView);
@@ -400,6 +402,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(YES, node.clipsToBounds, @"clipsToBounds broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.opaque, @"opaque broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.needsDisplayOnBoundsChange, @"needsDisplayOnBoundsChange broken %@", hasLoadedView);
+  XCTAssertEqual(NO, node.allowsGroupOpacity, @"allowsGroupOpacity broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.allowsEdgeAntialiasing, @"allowsEdgeAntialiasing broken %@", hasLoadedView);
   XCTAssertTrue((unsigned int)(kCALayerLeftEdge | kCALayerTopEdge) == node.edgeAntialiasingMask, @"edgeAntialiasingMask broken: %@", hasLoadedView);
   XCTAssertEqual(YES, node.hidden, @"hidden broken %@", hasLoadedView);
@@ -458,6 +461,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
     node.clipsToBounds = YES;
     node.opaque = NO;
     node.needsDisplayOnBoundsChange = YES;
+    node.allowsGroupOpacity = NO;
     node.allowsEdgeAntialiasing = YES;
     node.edgeAntialiasingMask = (kCALayerLeftEdge | kCALayerTopEdge);
     node.hidden = YES;
@@ -1941,6 +1945,36 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertEqual(contentsAfterRedisplay, node.contents);
 }
 
+// Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
+- (void)DISABLED_testThatNodesAreMarkedInvisibleWhenRemovedFromAVisibleRasterizedHierarchy
+{
+  ASCellNode *supernode = [[ASCellNode alloc] init];
+  supernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  [supernode addSubnode:node];
+  [window addSubnode:supernode];
+  [window makeKeyAndVisible];
+  XCTAssertTrue(node.isVisible);
+  [node removeFromSupernode];
+  XCTAssertFalse(node.isVisible);
+}
+
+// Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
+- (void)DISABLED_testThatNodesAreMarkedVisibleWhenAddedToARasterizedHierarchyAlreadyOnscreen
+{
+  ASCellNode *supernode = [[ASCellNode alloc] init];
+  supernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  [window addSubnode:supernode];
+  [window makeKeyAndVisible];
+  [supernode addSubnode:node];
+  XCTAssertTrue(node.isVisible);
+  [node removeFromSupernode];
+  XCTAssertFalse(node.isVisible);
+}
+
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2011
 - (void)testThatLayerBackedSubnodesAreMarkedInvisibleBeforeDeallocWhenSupernodesViewIsRemovedFromHierarchyWhileBeingRetained
 {
@@ -2046,6 +2080,47 @@ static bool stringContainsPointer(NSString *description, id p) {
   [node view];
   NSArray *expected = @[ @0, @1, @2 ];
   XCTAssertEqualObjects(calls, expected);
+}
+
+- (void)testPreferredFrameSizeDeprecated
+{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+  ASDisplayNode *node = [ASDisplayNode new];
+  
+  // Default auto preferred frame size will be CGSizeZero
+  XCTAssert(CGSizeEqualToSize(node.preferredFrameSize, CGSizeZero));
+  
+  // Set a specific preferredFrameSize
+  node.preferredFrameSize = CGSizeMake(100, 100);
+  ASXCTAssertEqualSizes(node.preferredFrameSize, CGSizeMake(100, 100));
+  
+  // CGSizeZero should be returned if width or height is not of unit type points
+  node.style.width = ASDimensionMakeWithFraction(0.5);
+  ASXCTAssertEqualSizes(node.preferredFrameSize, CGSizeZero);
+  
+#pragma clang diagnostic pop
+}
+
+- (void)testSubnodesFastEnumeration
+{
+  DeclareNodeNamed(parentNode);
+  DeclareNodeNamed(a);
+  DeclareNodeNamed(b);
+  DeclareNodeNamed(c);
+  DeclareViewNamed(d);
+
+  NSArray *subnodes = @[a, b, c, d];  
+  for (ASDisplayNode *node in subnodes) {
+    [parentNode addSubnode:node];
+  }
+  
+  NSInteger i = 0;
+  for (ASDisplayNode *subnode in parentNode.subnodes) {
+    XCTAssertEqualObjects(subnode, subnodes[i]);
+    i++;
+  }
 }
 
 @end

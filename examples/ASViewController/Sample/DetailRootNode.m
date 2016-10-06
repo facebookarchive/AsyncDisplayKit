@@ -63,8 +63,8 @@ static const NSInteger kImageHeight = 200;
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
     self.collectionNode.position = CGPointZero;
-    [self.collectionNode setSizeWithCGSize:constrainedSize.max];
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.collectionNode]];
+    self.collectionNode.style.preferredSize = constrainedSize.max;
+    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[self.collectionNode]];
 }
 
 #pragma mark - ASCollectionDataSource

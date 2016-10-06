@@ -53,7 +53,7 @@ static CGFloat kFixedHeight = 200.0f;
     [spinner startAnimating];
     return spinner;
   }];
-  [_loadingSpinner setSizeWithCGSize:CGSizeMake(50, 50)];
+  _loadingSpinner.style.preferredSize = CGSizeMake(50, 50);
     
   // add it as a subnode, and we're done
   [self addSubnode:_loadingSpinner];

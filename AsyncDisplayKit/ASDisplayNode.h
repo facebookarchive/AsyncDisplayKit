@@ -15,8 +15,10 @@
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
-#import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASLayoutElement.h>
 #import <AsyncDisplayKit/ASContextTransitioning.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 #define ASDisplayNodeLoggingEnabled 0
 
@@ -40,12 +42,12 @@ typedef CALayer * _Nonnull(^ASDisplayNodeLayerBlock)();
 /**
  * ASDisplayNode loaded callback block. This block is called BEFORE the -didLoad method and is always called on the main thread.
  */
-typedef void (^ASDisplayNodeDidLoadBlock)(__kindof ASDisplayNode * _Nonnull node);
+typedef void (^ASDisplayNodeDidLoadBlock)(__kindof ASDisplayNode * node);
 
 /**
  * ASDisplayNode will / did render node content in context.
  */
-typedef void (^ASDisplayNodeContextModifier)(_Nonnull CGContextRef context);
+typedef void (^ASDisplayNodeContextModifier)(CGContextRef context);
 
 /**
  * ASDisplayNode layout spec block. This block can be used instead of implementing layoutSpecThatFits: in subclass
@@ -102,9 +104,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  */
 
-NS_ASSUME_NONNULL_BEGIN
-@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
-
+@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutElement>
 
 /** @name Initializing a node object */
 
@@ -607,7 +607,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Convenience methods for debugging.
  */
-@interface ASDisplayNode (Debugging) <ASLayoutableAsciiArtProtocol>
+@interface ASDisplayNode (Debugging) <ASLayoutElementAsciiArtProtocol>
 
 /**
  * @abstract Return a description of the node hierarchy.
@@ -653,6 +653,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign)           BOOL clipsToBounds;                    // default==NO
 @property (nonatomic, getter=isOpaque)  BOOL opaque;                           // default==YES
 
+@property (nonatomic, assign)           BOOL allowsGroupOpacity;
 @property (nonatomic, assign)           BOOL allowsEdgeAntialiasing;
 @property (nonatomic, assign)           unsigned int edgeAntialiasingMask;     // default==all values from CAEdgeAntialiasingMask
 
@@ -827,9 +828,9 @@ NS_ASSUME_NONNULL_BEGIN
  * size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
  * image size.
  *
- * @return The preferred frame size of this node
+ * @return Try to create a CGSize for preferredFrameSize of this node from the width and height property of this node. It will return CGSizeZero if widht and height dimensions are not of type ASDimensionUnitPoints.
  *
- * @deprecated Deprecated in version 2.0: Use sizing properties instead: height, minHeight, maxHeight, width, minWidth, maxWidth
+ * @deprecated Deprecated in version 2.0: Just calls through to set the height and width property of the node. Convert to use sizing properties instead: height, minHeight, maxHeight, width, minWidth, maxWidth.
  */
 @property (nonatomic, assign, readwrite) CGSize preferredFrameSize ASDISPLAYNODE_DEPRECATED;
 
@@ -855,7 +856,7 @@ NS_ASSUME_NONNULL_BEGIN
  * ASDisplayNode participates in ASAsyncTransactions, so you can determine when your subnodes are done rendering.
  * See: -(void)asyncdisplaykit_asyncTransactionContainerStateDidChange in ASDisplayNodeSubclass.h
  */
-@interface ASDisplayNode (ASDisplayNodeAsyncTransactionContainer) <ASDisplayNodeAsyncTransactionContainer>
+@interface ASDisplayNode (ASAsyncTransactionContainer) <ASAsyncTransactionContainer>
 @end
 
 /** UIVIew(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to an UIView. */

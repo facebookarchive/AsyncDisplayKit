@@ -16,6 +16,9 @@
 @class ASDisplayNode;
 @class ASCollectionDataController;
 @protocol ASDataControllerSource;
+@protocol ASSectionContext;
+
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASCollectionDataControllerSource <ASDataControllerSource>
 
@@ -27,6 +30,8 @@
 - (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController;
 
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section;
+
+- (nullable id<ASSectionContext>)dataController:(ASCollectionDataController *)dataController contextForSection:(NSInteger)section;
 
 @optional
 
@@ -42,4 +47,8 @@
 
 - (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
+- (nullable id<ASSectionContext>)contextForSection:(NSInteger)section;
+
 @end
+
+NS_ASSUME_NONNULL_END

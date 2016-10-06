@@ -39,8 +39,8 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
     self.imageNode.position = CGPointZero;
-    [self.imageNode setSizeWithCGSize:constrainedSize.max];
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.imageNode]];
+    self.imageNode.style.preferredSize = constrainedSize.max;
+    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[self.imageNode]];
 }
 
 - (void)layoutDidFinish

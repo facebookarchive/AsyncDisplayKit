@@ -1,6 +1,8 @@
 //
-//  ASSentinel.m
+//  ASSection.h
 //  AsyncDisplayKit
+//
+//  Created by Huy Nguyen on 28/08/16.
 //
 //  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
 //  This source code is licensed under the BSD-style license found in the
@@ -8,23 +10,19 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASSentinel.h"
+#import "ASSection.h"
+#import "ASSectionContext.h"
 
-#import <libkern/OSAtomic.h>
+@implementation ASSection
 
-@implementation ASSentinel
+- (instancetype)initWithSectionID:(NSInteger)sectionID context:(id<ASSectionContext>)context
 {
-  int32_t _value;
-}
-
-- (int32_t)value
-{
-  return _value;
-}
-
-- (int32_t)increment
-{
-  return OSAtomicAdd32(1, &_value);
+  self = [super init];
+  if (self) {
+    _sectionID = sectionID;
+    _context = context;
+  }
+  return self;
 }
 
 @end

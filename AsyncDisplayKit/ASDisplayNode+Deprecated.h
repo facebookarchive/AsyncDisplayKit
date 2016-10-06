@@ -104,8 +104,4 @@
  */
 @property (nonatomic, assign) BOOL usesImplicitHierarchyManagement ASDISPLAYNODE_DEPRECATED;
 
-- (void)reclaimMemory ASDISPLAYNODE_DEPRECATED;
-- (void)recursivelyReclaimMemory ASDISPLAYNODE_DEPRECATED;
-@property (nonatomic, assign) BOOL placeholderFadesOut ASDISPLAYNODE_DEPRECATED;
-
 @end

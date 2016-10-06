@@ -23,8 +23,22 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
 
 @interface ASViewController<__covariant DisplayNodeType : ASDisplayNode *> : UIViewController <ASVisibilityDepth>
 
+/**
+ * ASViewController Designated initializer.
+ *
+ * @discussion ASViewController allows you to have a completely node backed heirarchy. It automatically
+ * handles @c ASVisibilityDepth, automatic range mode and propogating @c ASDisplayTraits to contained nodes.
+ *
+ * @param node An ASDisplayNode which will provide the root view (self.view)
+ * @return An ASViewController instance whose root view will be backed by the provided ASDisplayNode.
+ *
+ * @see ASVisibilityDepth
+ */
 - (instancetype)initWithNode:(DisplayNodeType)node NS_DESIGNATED_INITIALIZER;
 
+/**
+ * @return node Returns the ASDisplayNode which provides the backing view to the view controller.
+ */
 @property (nonatomic, strong, readonly) DisplayNodeType node;
 
 /**

@@ -16,7 +16,7 @@
 #import "ASDisplayNode+Beta.h"
 #import "ASDisplayNode+Subclasses.h"
 
-#import "ASStaticLayoutSpec.h"
+#import "ASAbsoluteLayoutSpec.h"
 #import "ASStackLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
 
@@ -68,15 +68,15 @@
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
   node.automaticallyManagesSubnodes = YES;
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
-    ASStaticLayoutSpec *staticLayout = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node4]];
+    ASAbsoluteLayoutSpec *absoluteLayout = [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node4]];
     
     ASStackLayoutSpec *stack1 = [[ASStackLayoutSpec alloc] init];
     [stack1 setChildren:@[node1, node2]];
 
     ASStackLayoutSpec *stack2 = [[ASStackLayoutSpec alloc] init];
-    [stack2 setChildren:@[node3, staticLayout]];
+    [stack2 setChildren:@[node3, absoluteLayout]];
     
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack1, stack2, node5]];
+    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[stack1, stack2, node5]];
   };
   [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
   XCTAssertEqual(node.subnodes[0], node5);
@@ -97,11 +97,11 @@
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize){
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
     if ([strongNode.layoutState isEqualToNumber:@1]) {
-      return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node1, node2]];
+      return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node1, node2]];
     } else {
       ASStackLayoutSpec *stackLayout = [[ASStackLayoutSpec alloc] init];
       [stackLayout setChildren:@[node3, node2]];
-      return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node1, stackLayout]];
+      return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node1, stackLayout]];
     }
   };
   
@@ -126,7 +126,7 @@
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
   node.automaticallyManagesSubnodes = YES;
   node.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode *weakNode, ASSizeRange constrainedSize){
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node1]];
+    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node1]];
   };
   
   XCTAssertNoThrow([node layoutThatFits:ASSizeRangeMake(CGSizeZero)]);
@@ -160,9 +160,9 @@
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
     if ([strongNode.layoutState isEqualToNumber:@1]) {
-      return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node1]];
+      return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node1]];
     } else {
-      return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node2]];
+      return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node2]];
     }
   };
   
@@ -205,9 +205,9 @@
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
     if ([strongNode.layoutState isEqualToNumber:@1]) {
-      return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node1]];
+      return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node1]];
     } else {
-      return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[node2]];
+      return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node2]];
     }
   };
  

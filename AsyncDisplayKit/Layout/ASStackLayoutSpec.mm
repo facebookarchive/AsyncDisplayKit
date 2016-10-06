@@ -120,13 +120,13 @@
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  std::vector<id<ASLayoutable>> stackChildren;
-  for (id<ASLayoutable> child in self.children) {
+  std::vector<id<ASLayoutElement>> stackChildren;
+  for (id<ASLayoutElement> child in self.children) {
     stackChildren.push_back(child);
   }
   
   if (stackChildren.empty()) {
-    return [ASLayout layoutWithLayoutable:self size:constrainedSize.min];
+    return [ASLayout layoutWithLayoutElement:self size:constrainedSize.min];
   }
   
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
@@ -143,12 +143,12 @@
   const auto baselinePositionedLayout = ASStackBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
   if (self.direction == ASStackLayoutDirectionVertical) {
     ASDN::MutexLocker l(__instanceLock__);
-    self.ascender = [stackChildren.front() ascender];
-    self.descender = [stackChildren.back() descender];
+    self.style.ascender = stackChildren.front().style.ascender;
+    self.style.descender = stackChildren.back().style.descender;
   } else {
     ASDN::MutexLocker l(__instanceLock__);
-    self.ascender = baselinePositionedLayout.ascender;
-    self.descender = baselinePositionedLayout.descender;
+    self.style.ascender = baselinePositionedLayout.ascender;
+    self.style.descender = baselinePositionedLayout.descender;
   }
   
   if (needsBaselinePass) {
@@ -159,7 +159,7 @@
     sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];
   }
   
-  return [ASLayout layoutWithLayoutable:self size:ASSizeRangeClamp(constrainedSize, finalSize) sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutElement:self size:ASSizeRangeClamp(constrainedSize, finalSize) sublayouts:sublayouts];
 }
 
 - (void)resolveHorizontalAlignment
@@ -193,7 +193,7 @@
 
 @implementation ASStackLayoutSpec (Debugging)
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutElementAsciiArtProtocol
 
 - (NSString *)asciiArtString
 {

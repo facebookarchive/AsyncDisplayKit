@@ -107,7 +107,7 @@ static NSString *suffixForPositionOptions(ASRelativeLayoutSpecPosition horizonta
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor]);
   ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor redColor], CGSizeMake(10, 10));
-  foregroundNode.flexGrow = YES;
+  foregroundNode.style.flexGrow = 1;
   
   ASLayoutSpec *childSpec =
   [ASBackgroundLayoutSpec

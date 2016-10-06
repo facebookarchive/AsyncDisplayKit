@@ -24,6 +24,7 @@
 #import "ASCollectionNode.h"
 #import "_ASDisplayLayer.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
+#import "ASSectionContext.h"
 
 
 /// What, if any, invalidation should we perform during the next -layoutSubviews.
@@ -46,12 +47,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 @interface _ASCollectionViewCell : UICollectionViewCell
 @property (nonatomic, weak) ASCellNode *node;
+@property (nonatomic, strong) UICollectionViewLayoutAttributes *layoutAttributes;
 @end
 
 @implementation _ASCollectionViewCell
 
 - (void)setNode:(ASCellNode *)node
 {
+  ASDisplayNodeAssertMainThread();
+  node.layoutAttributes = _layoutAttributes;
   _node = node;
   [node __setSelectedFromUIKit:self.selected];
   [node __setHighlightedFromUIKit:self.highlighted];
@@ -71,14 +75,25 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)prepareForReuse
 {
+  _layoutAttributes = nil;
+  _node.layoutAttributes = nil;
+
   // Need to clear node pointer before UIKit calls setSelected:NO / setHighlighted:NO on its cells
   self.node = nil;
   [super prepareForReuse];
 }
 
+/**
+ * In the initial case, this is called by UICollectionView during cell dequeueing, before
+ *   we get a chance to assign a node to it, so we must be sure to set these layout attributes
+ *   on our node when one is next assigned to us in @c setNode: . Since there may be cases when we _do_ already
+ *   have our node assigned e.g. during a layout update for existing cells, we also attempt
+ *   to update it now.
+ */
 - (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
 {
-  [_node applyLayoutAttributes:layoutAttributes];
+  _layoutAttributes = layoutAttributes;
+  _node.layoutAttributes = layoutAttributes;
 }
 
 @end
@@ -143,8 +158,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     unsigned int asyncDelegateScrollViewDidEndDragging:1;
     unsigned int asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset:1;
     unsigned int asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath:1;
+    unsigned int asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPathDeprecated:1;
     unsigned int asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPath:1;
-    unsigned int asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPathDeprecated:1;
     unsigned int asyncDelegateCollectionViewWillBeginBatchFetchWithContext:1;
     unsigned int asyncDelegateShouldBatchFetchForCollectionView:1;
   } _asyncDelegateFlags;
@@ -153,6 +168,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     unsigned int asyncDataSourceNodeForItemAtIndexPath:1;
     unsigned int asyncDataSourceNodeBlockForItemAtIndexPath:1;
     unsigned int asyncDataSourceNumberOfSectionsInCollectionView:1;
+    unsigned int asyncDataSourceContextForSection:1;
   } _asyncDataSourceFlags;
   
   struct {
@@ -193,12 +209,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 }
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
-{
-  return [self _initWithFrame:frame collectionViewLayout:layout ownedByNode:NO];
-}
-
-// FIXME: This method is deprecated and will probably be removed in or shortly after 2.0.
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout asyncDataFetching:(BOOL)asyncDataFetchingEnabled
 {
   return [self _initWithFrame:frame collectionViewLayout:layout ownedByNode:NO];
 }
@@ -354,9 +364,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForItemAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInCollectionView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
+    _asyncDataSourceFlags.asyncDataSourceContextForSection = [_asyncDataSource respondsToSelector:@selector(collectionView:contextForSection:)];
 
-    // Data-source must implement collectionView:nodeForItemAtIndexPath: or collectionView:nodeBlockForItemAtIndexPath:
-    ASDisplayNodeAssertTrue(_asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath || _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath);
+    ASDisplayNodeAssert(_asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath
+                        || _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath, @"Data source must implement collectionView:nodeForItemAtIndexPath: or collectionView:nodeBlockForItemAtIndexPath:");
   }
   
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
@@ -385,8 +396,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     
     _asyncDelegateFlags.asyncDelegateScrollViewDidScroll = [_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)];
     _asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
-    _asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPathDeprecated = [_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNodeForItemAtIndexPath:)];
+    _asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNode:forItemAtIndexPath:)];
+    if (_asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath == NO) {
+      _asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPathDeprecated = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)];
+    }
     _asyncDelegateFlags.asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPath = [_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNode:forItemAtIndexPath:)];
     _asyncDelegateFlags.asyncDelegateCollectionViewWillBeginBatchFetchWithContext = [_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)];
     _asyncDelegateFlags.asyncDelegateShouldBatchFetchForCollectionView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:)];
@@ -590,6 +603,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   [_dataController moveSection:section toSection:newSection withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
+- (id<ASSectionContext>)contextForSection:(NSInteger)section
+{
+  ASDisplayNodeAssertMainThread();
+  return [_dataController contextForSection:section];
+}
+
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
@@ -675,9 +694,16 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASCellNode *cellNode = [cell node];
   cellNode.scrollView = collectionView;
   
+  ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with cell that will be displayed not to be nil. indexPath: %@", indexPath);
+
   if (_asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath) {
+    [_asyncDelegate collectionView:self willDisplayNode:cellNode forItemAtIndexPath:indexPath];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  } else if (_asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPathDeprecated) {
     [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
   }
+#pragma clang diagnostic pop
   
   [_rangeController setNeedsUpdate];
   
@@ -699,14 +725,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   [_cellsForVisibilityUpdates removeObject:cell];
   
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  if (_asyncDelegateFlags.asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPathDeprecated) {
-    [_asyncDelegate collectionView:self didEndDisplayingNodeForItemAtIndexPath:indexPath];
-  }
-#pragma clang diagnostic pop
-  
   cellNode.scrollView = nil;
+  cellNode.layoutAttributes = nil;
 }
 
 
@@ -954,7 +974,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return ^{
     __typeof__(self) strongSelf = weakSelf;
 
-    ASCellNode *node = block();
+    ASCellNode *node = (block != nil ? block() : [[ASCellNode alloc] init]);
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
     if (node.interactionDelegate == nil) {
       node.interactionDelegate = strongSelf;
@@ -989,7 +1009,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return self.strongCollectionNode;
 }
 
-#pragma mark - ASCollectionViewDataControllerSource Supplementary view support
+#pragma mark - ASCollectionViewDataControllerSource
 
 - (ASCellNode *)dataController:(ASCollectionDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
@@ -1011,6 +1031,21 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
   return [self.layoutInspector collectionView:self supplementaryNodesOfKind:kind inSection:section];
+}
+
+- (id<ASSectionContext>)dataController:(ASDataController *)dataController contextForSection:(NSInteger)section
+{
+  ASDisplayNodeAssertMainThread();
+  id<ASSectionContext> context = nil;
+  
+  if (_asyncDataSourceFlags.asyncDataSourceContextForSection) {
+    context = [_asyncDataSource collectionView:self contextForSection:section];
+  }
+  
+  if (context != nil) {
+    context.collectionView = self;
+  }
+  return context;
 }
 
 #pragma mark - ASRangeControllerDataSource
@@ -1301,7 +1336,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
  */
 - (void)layer:(CALayer *)layer didChangeBoundsWithOldValue:(CGRect)oldBounds newValue:(CGRect)newBounds
 {
-  if (CGSizeEqualToSize(_lastBoundsSizeUsedForMeasuringNodes, newBounds.size)) {
+  CGSize lastUsedSize = _lastBoundsSizeUsedForMeasuringNodes;
+  if (CGSizeEqualToSize(lastUsedSize, newBounds.size)) {
     return;
   }
   _lastBoundsSizeUsedForMeasuringNodes = newBounds.size;
@@ -1311,15 +1347,31 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_ignoreNextBoundsSizeChangeForMeasuringNodes) {
     _ignoreNextBoundsSizeChangeForMeasuringNodes = NO;
   } else {
-    // This actually doesn't perform an animation, but prevents the transaction block from being processed in the
-    // data controller's prevent animation block that would interrupt an interrupted relayout happening in an animation block
-    // ie. ASCollectionView bounds change on rotation or multi-tasking split view resize.
-    [self performBatchAnimated:YES updates:^{
-      [_dataController relayoutAllNodes];
-    } completion:nil];
-    // We need to ensure the size requery is done before we update our layout.
-    [self waitUntilAllUpdatesAreCommitted];
-    [self.collectionViewLayout invalidateLayout];
+    // Laying out all nodes is expensive, and performing an empty update may be unsafe
+    // if the data source has pending changes that it hasn't reported yet – the collection
+    // view will requery the new counts and expect them to match the previous counts.
+    //
+    // We only need to do this if the bounds changed in the non-scrollable direction.
+    // If, for example, a vertical flow layout has its height changed due to a status bar
+    // appearance update, we do not need to relayout all nodes.
+    // For a more permanent fix to the unsafety mentioned above, see https://github.com/facebook/AsyncDisplayKit/pull/2182
+    ASScrollDirection scrollDirection = self.scrollableDirections;
+    BOOL fixedVertically = (ASScrollDirectionContainsVerticalDirection(scrollDirection) == NO);
+    BOOL fixedHorizontally = (ASScrollDirectionContainsHorizontalDirection(scrollDirection) == NO);
+
+    BOOL changedInNonScrollingDirection = (fixedHorizontally && newBounds.size.width != lastUsedSize.width) || (fixedVertically && newBounds.size.height != lastUsedSize.height);
+
+    if (changedInNonScrollingDirection) {
+      // This actually doesn't perform an animation, but prevents the transaction block from being processed in the
+      // data controller's prevent animation block that would interrupt an interrupted relayout happening in an animation block
+      // ie. ASCollectionView bounds change on rotation or multi-tasking split view resize.
+      [self performBatchAnimated:YES updates:^{
+        [_dataController relayoutAllNodes];
+      } completion:nil];
+      // We need to ensure the size requery is done before we update our layout.
+      [self waitUntilAllUpdatesAreCommitted];
+      [self.collectionViewLayout invalidateLayout];
+    }
   }
 }
 

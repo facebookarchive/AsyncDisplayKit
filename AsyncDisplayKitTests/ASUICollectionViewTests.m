@@ -34,6 +34,45 @@
   [self _testSupplementaryNodeAtIndexPath:[NSIndexPath indexPathWithIndex:3] sectionCount:2 expectException:NO];
 }
 
+- (void)testThatNestedBatchCompletionsAreCalledInOrder
+{
+  UICollectionViewLayout *layout = [[UICollectionViewLayout alloc] init];
+  id layoutMock = [OCMockObject partialMockForObject:layout];
+
+  UICollectionView *cv = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, 100, 100) collectionViewLayout:layoutMock];
+  id dataSource = [OCMockObject niceMockForProtocol:@protocol(UICollectionViewDataSource)];
+  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] collectionView:cv numberOfItemsInSection:0];
+
+  cv.dataSource = dataSource;
+
+  XCTestExpectation *inner0 = [self expectationWithDescription:@"Inner completion 0 is called"];
+  XCTestExpectation *inner1 = [self expectationWithDescription:@"Inner completion 1 is called"];
+  XCTestExpectation *outer = [self expectationWithDescription:@"Outer completion is called"];
+
+  NSMutableArray<XCTestExpectation *> *completions = [NSMutableArray array];
+
+  [cv performBatchUpdates:^{
+    [cv performBatchUpdates:^{
+
+    } completion:^(BOOL finished) {
+      [completions addObject:inner0];
+      [inner0 fulfill];
+    }];
+    [cv performBatchUpdates:^{
+
+    } completion:^(BOOL finished) {
+      [completions addObject:inner1];
+      [inner1 fulfill];
+    }];
+  } completion:^(BOOL finished) {
+    [completions addObject:outer];
+    [outer fulfill];
+  }];
+
+  [self waitForExpectationsWithTimeout:5 handler:nil];
+  XCTAssertEqualObjects(completions, (@[ outer, inner0, inner1 ]), @"Expected completion order to be correct");
+}
+
 - (void)_testSupplementaryNodeAtIndexPath:(NSIndexPath *)indexPath sectionCount:(NSInteger)sectionCount expectException:(BOOL)shouldFail
 {
   UICollectionViewLayoutAttributes *attr = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:@"SuppKind" withIndexPath:indexPath];
@@ -65,6 +104,37 @@
 
   [dataSource verify];
   [layoutMock verify];
+}
+
+- (void)testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
+{
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  UICollectionView *cv = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, 100, 100) collectionViewLayout:layout];
+  id dataSource = [OCMockObject niceMockForProtocol:@protocol(UICollectionViewDataSource)];
+
+  // Setup empty data source – 0 sections, 0 items
+  [[[dataSource stub] andDo:^(NSInvocation *invocation) {
+    NSIndexPath *indexPath = [invocation getArgumentAtIndexAsObject:3];
+    __autoreleasing UICollectionViewCell *view = [cv dequeueReusableCellWithReuseIdentifier:@"CellID" forIndexPath:indexPath];
+    [invocation setReturnValue:&view];
+  }] collectionView:cv cellForItemAtIndexPath:OCMOCK_ANY];
+  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:0]] numberOfSectionsInCollectionView:cv];
+  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:0]] collectionView:cv numberOfItemsInSection:0];
+  [cv registerClass:[UICollectionViewCell class] forCellWithReuseIdentifier:@"CellID"];
+  cv.dataSource = dataSource;
+
+  // Update data source – 1 section, 0 items
+  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] numberOfSectionsInCollectionView:cv];
+
+  /**
+   * Inform collection view – insert section 0
+   * Throws exception because collection view never saw the data source have 0 sections.
+   * so it's going to read "oldSectionCount" now and get 1. It will also read
+   * "newSectionCount" and get 1. Then it'll throw because "oldSectionCount(1) + insertedCount(1) != newSectionCount(1)".
+   * To workaround this, you could add `[cv numberOfSections]` before the data source is updated to
+   * trigger the collection view to read oldSectionCount=0.
+   */
+  XCTAssertThrowsSpecificNamed([cv insertSections:[NSIndexSet indexSetWithIndex:0]], NSException, NSInternalInconsistencyException);
 }
 
 @end

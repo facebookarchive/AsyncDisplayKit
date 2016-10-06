@@ -9,6 +9,7 @@
 //
 
 #import "ASBackgroundLayoutSpec.h"
+#import "ASLayoutSpec+Subclasses.h"
 
 #import "ASAssert.h"
 #import "ASLayout.h"
@@ -16,36 +17,39 @@
 static NSUInteger const kForegroundChildIndex = 0;
 static NSUInteger const kBackgroundChildIndex = 1;
 
-@interface ASBackgroundLayoutSpec ()
-@end
-
 @implementation ASBackgroundLayoutSpec
 
-- (instancetype)initWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background
+#pragma mark - Class
+
++ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutElement>)child background:(id<ASLayoutElement>)background;
+{
+  return [[self alloc] initWithChild:child background:background];
+}
+
+#pragma mark - Lifecycle
+
+- (instancetype)initWithChild:(id<ASLayoutElement>)child background:(id<ASLayoutElement>)background
 {
   if (!(self = [super init])) {
     return nil;
   }
   
   ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-  [self setChild:child forIndex:kForegroundChildIndex];
+  [self setChild:child atIndex:kForegroundChildIndex];
   self.background = background;
   return self;
 }
 
-+ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutable>)child background:(id<ASLayoutable>)background;
-{
-  return [[self alloc] initWithChild:child background:background];
-}
+#pragma mark - ASLayoutSpec
 
 /**
  * First layout the contents, then fit the background image.
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASLayoutableSize)size
+                     restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  ASLayout *contentsLayout = [self.child layoutThatFits:constrainedSize parentSize:parentSize];
+  ASLayout *contentsLayout = [[super childAtIndex:kForegroundChildIndex] layoutThatFits:constrainedSize parentSize:parentSize];
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:2];
   if (self.background) {
@@ -58,17 +62,19 @@ static NSUInteger const kBackgroundChildIndex = 1;
   contentsLayout.position = CGPointZero;
   [sublayouts addObject:contentsLayout];
 
-  return [ASLayout layoutWithLayoutable:self size:contentsLayout.size sublayouts:sublayouts];
+  return [ASLayout layoutWithLayoutElement:self size:contentsLayout.size sublayouts:sublayouts];
 }
 
-- (void)setBackground:(id<ASLayoutable>)background
+#pragma mark - Background
+
+- (void)setBackground:(id<ASLayoutElement>)background
 {
-  [super setChild:background forIndex:kBackgroundChildIndex];
+  [super setChild:background atIndex:kBackgroundChildIndex];
 }
 
-- (id<ASLayoutable>)background
+- (id<ASLayoutElement>)background
 {
-  return [super childForIndex:kBackgroundChildIndex];
+  return [super childAtIndex:kBackgroundChildIndex];
 }
 
 @end

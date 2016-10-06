@@ -42,7 +42,6 @@
 - (instancetype)init
 {
   if ((self = [super init])) {
-    _displaySentinel = [[ASSentinel alloc] init];
 
     self.opaque = YES;
   }
@@ -225,7 +224,6 @@
 - (void)cancelAsyncDisplay
 {
   ASDisplayNodeAssertMainThread();
-  [_displaySentinel increment];
 
   id<_ASDisplayLayerDelegate> NS_VALID_UNTIL_END_OF_SCOPE strongAsyncDelegate;
   {

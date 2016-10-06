@@ -75,6 +75,15 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 @property (nonatomic, assign) BOOL neverShowPlaceholders;
 
 /*
+ * The layout attributes currently assigned to this node, if any.
+ *
+ * @discussion This property is useful because it is set before @c collectionView:willDisplayNode:forItemAtIndexPath:
+ *   is called, when the node is not yet in the hierarchy and its frame cannot be converted to/from other nodes. Instead
+ *   you can use the layout attributes object to learn where and how the cell will be displayed.
+ */
+@property (nonatomic, strong, readonly, nullable) UICollectionViewLayoutAttributes *layoutAttributes;
+
+/*
  * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
  */
 //@property (nonatomic, retain) UIColor *backgroundColor;
@@ -120,6 +129,14 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  */
 - (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
 
+/**
+ * @abstract Notifies the cell node of certain visibility events, such as changing visible rect.
+ *
+ * @warning In cases where an ASCellNode is used as a plain node – i.e. not returned from the
+ *   nodeBlockForItemAtIndexPath/nodeForItemAtIndexPath data source methods – this method will
+ *   deliver only the `Visible` and `Invisible` events, `scrollView` will be nil, and
+ *   `cellFrame` will be the zero rect.
+ */
 - (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event inScrollView:(nullable UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
 
 @end

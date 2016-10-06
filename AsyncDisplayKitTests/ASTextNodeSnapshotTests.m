@@ -50,7 +50,7 @@
   textNode.highlightRange = NSMakeRange(0, textNode.attributedText.length);
 
   [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:textNode];
-  FBSnapshotVerifyLayer(backgroundView.layer, nil);
+  ASSnapshotVerifyLayer(backgroundView.layer, nil);
 }
 
 - (void)testTextContainerInsetHighlight
@@ -72,7 +72,7 @@
   textNode.highlightRange = NSMakeRange(0, textNode.attributedText.length);
 
   [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:textNode];
-  FBSnapshotVerifyLayer(backgroundView.layer, nil);
+  ASSnapshotVerifyLayer(backgroundView.layer, nil);
 }
 
 @end

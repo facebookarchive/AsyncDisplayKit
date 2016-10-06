@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # **** Update me when new Xcode versions are released! ****
-PLATFORM="platform=iOS Simulator,OS=9.3,name=iPhone 6"
-SDK="iphonesimulator9.3"
+PLATFORM="platform=iOS Simulator,OS=10.0,name=iPhone 7"
+SDK="iphonesimulator10.0"
 
 
 # It is pitch black.
@@ -51,7 +51,7 @@ if [ "$MODE" = "examples" ]; then
           fi
           rm -rf "$example/Pods"
           pod install --project-directory=$example
-          
+
           set -o pipefail && xcodebuild \
               -workspace "${example}/Sample.xcworkspace" \
               -scheme Sample \
@@ -64,17 +64,17 @@ if [ "$MODE" = "examples" ]; then
           local_repo=`pwd`
           current_branch=`git rev-parse --abbrev-ref HEAD`
           cd $example
-          
+
           echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
           carthage update --platform iOS
-          
+
           set -o pipefail && xcodebuild \
               -project "Sample.xcodeproj" \
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
               build | xcpretty $FORMATTER
-          
+
           cd ../..
         fi
     done
@@ -97,7 +97,7 @@ if [ "$MODE" = "examples-pt1" ]; then
           fi
           rm -rf "$example/Pods"
           pod install --project-directory=$example
-          
+
           set -o pipefail && xcodebuild \
               -workspace "${example}/Sample.xcworkspace" \
               -scheme Sample \
@@ -110,17 +110,17 @@ if [ "$MODE" = "examples-pt1" ]; then
           local_repo=`pwd`
           current_branch=`git rev-parse --abbrev-ref HEAD`
           cd $example
-          
+
           echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
           carthage update --platform iOS
-          
+
           set -o pipefail && xcodebuild \
               -project "Sample.xcodeproj" \
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
               build | xcpretty $FORMATTER
-          
+
           cd ../..
         fi
     done
@@ -143,7 +143,7 @@ if [ "$MODE" = "examples-pt2" ]; then
           fi
           rm -rf "$example/Pods"
           pod install --project-directory=$example
-          
+
           set -o pipefail && xcodebuild \
               -workspace "${example}/Sample.xcworkspace" \
               -scheme Sample \
@@ -156,17 +156,17 @@ if [ "$MODE" = "examples-pt2" ]; then
           local_repo=`pwd`
           current_branch=`git rev-parse --abbrev-ref HEAD`
           cd $example
-          
+
           echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
           carthage update --platform iOS
-          
+
           set -o pipefail && xcodebuild \
               -project "Sample.xcodeproj" \
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
               build | xcpretty $FORMATTER
-          
+
           cd ../..
         fi
     done
@@ -189,7 +189,7 @@ if [ "$MODE" = "examples-pt3" ]; then
           fi
           rm -rf "$example/Pods"
           pod install --project-directory=$example
-          
+
           set -o pipefail && xcodebuild \
               -workspace "${example}/Sample.xcworkspace" \
               -scheme Sample \
@@ -202,17 +202,63 @@ if [ "$MODE" = "examples-pt3" ]; then
           local_repo=`pwd`
           current_branch=`git rev-parse --abbrev-ref HEAD`
           cd $example
-          
+
           echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
           carthage update --platform iOS
-          
+
           set -o pipefail && xcodebuild \
               -project "Sample.xcodeproj" \
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
               build | xcpretty $FORMATTER
-          
+
+          cd ../..
+        fi
+    done
+    trap - EXIT
+    exit 0
+fi
+
+if [ "$MODE" = "examples-extra" ]; then
+    echo "Verifying that all AsyncDisplayKit examples compile."
+    #Update cocoapods repo
+    pod repo update master
+
+    for example in $((find ./examples_extra -type d -maxdepth 1 \( ! -iname ".*" \)) | head -7 | head); do
+        echo "Building $example (examples-extra)."
+
+        if [ -f "${example}/Podfile" ]; then
+          echo "Using CocoaPods"
+          if [ -f "${example}/Podfile.lock" ]; then
+              rm "$example/Podfile.lock"
+          fi
+          rm -rf "$example/Pods"
+          pod install --project-directory=$example
+
+          set -o pipefail && xcodebuild \
+              -workspace "${example}/Sample.xcworkspace" \
+              -scheme Sample \
+              -sdk "$SDK" \
+              -destination "$PLATFORM" \
+              -derivedDataPath ~/ \
+              build | xcpretty $FORMATTER
+        elif [ -f "${example}/Cartfile" ]; then
+          echo "Using Carthage"
+          local_repo=`pwd`
+          current_branch=`git rev-parse --abbrev-ref HEAD`
+          cd $example
+
+          echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
+          carthage update --platform iOS
+
+          set -o pipefail && xcodebuild \
+              -project "Sample.xcodeproj" \
+              -scheme Sample \
+              -sdk "$SDK" \
+              -destination "$PLATFORM" \
+              build | xcpretty $FORMATTER
+
           cd ../..
         fi
     done

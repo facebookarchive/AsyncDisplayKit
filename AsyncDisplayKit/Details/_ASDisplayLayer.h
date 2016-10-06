@@ -10,14 +10,19 @@
 
 #import <UIKit/UIKit.h>
 
-
-@class ASSentinel;
+@class ASDisplayNode;
 @protocol _ASDisplayLayerDelegate;
 
 // Type for the cancellation checker block passed into the async display blocks. YES means the operation has been cancelled, NO means continue.
 typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 
 @interface _ASDisplayLayer : CALayer
+
+/**
+ @discussion This property overrides the CALayer category method which implements this via associated objects.
+ This should result in much better performance for _ASDisplayLayers.
+ */
+@property (nonatomic, weak) ASDisplayNode *asyncdisplaykit_node;
 
 /**
  @summary Set to YES to enable asynchronous display for the receiver.
@@ -40,8 +45,6 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
  @desc This is exposed here for tests only.
  */
 + (dispatch_queue_t)displayQueue;
-
-@property (nonatomic, strong, readonly) ASSentinel *displaySentinel;
 
 /**
  @summary Delegate for asynchronous display of the layer.
@@ -132,7 +135,7 @@ typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 /**
  @summary Delegate override for willDisplay
  */
-- (void)willDisplayAsyncLayer:(_ASDisplayLayer *)layer;
+- (void)willDisplayAsyncLayer:(_ASDisplayLayer *)layer asynchronously:(BOOL)asynchronously;
 
 /**
  @summary Delegate override for didDisplay

@@ -46,9 +46,9 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
     // 100% of container
-    _node.width = ASDimensionMakeWithFraction(1.0);
-    _node.height = ASDimensionMakeWithFraction(1.0);
-    return [ASWrapperLayoutSpec wrapperWithLayoutable:_node];
+    _node.style.width = ASDimensionMakeWithFraction(1.0);
+    _node.style.height = ASDimensionMakeWithFraction(1.0);
+    return [ASWrapperLayoutSpec wrapperWithLayoutElement:_node];
 }
 
 #pragma mark - <ASCollectionDataSource, ASCollectionDelegate>

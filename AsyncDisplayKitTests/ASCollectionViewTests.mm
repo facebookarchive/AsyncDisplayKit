@@ -15,12 +15,14 @@
 #import "ASCellNode.h"
 #import "ASCollectionNode.h"
 #import "ASDisplayNode+Beta.h"
+#import "ASSectionContext.h"
 #import <vector>
 #import <OCMock/OCMock.h>
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 
 @property (nonatomic, assign) NSUInteger setSelectedCounter;
+@property (nonatomic, assign) NSUInteger applyLayoutAttributesCount;
 
 @end
 
@@ -32,9 +34,29 @@
   _setSelectedCounter++;
 }
 
+- (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
+{
+  _applyLayoutAttributesCount++;
+}
+
+@end
+
+@interface ASTestSectionContext : NSObject <ASSectionContext>
+
+@property (nonatomic, assign) NSInteger sectionIndex;
+@property (nonatomic, assign) NSInteger sectionGeneration;
+
+@end
+
+@implementation ASTestSectionContext
+
+@synthesize sectionName = _sectionName, collectionView = _collectionView;
+
 @end
 
 @interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionViewDelegate>
+
+@property (nonatomic, assign) NSInteger sectionGeneration;
 
 @end
 
@@ -48,6 +70,7 @@
     for (NSInteger i = 0; i < numberOfSections; i++) {
       _itemCounts.push_back(numberOfItemsInSection);
     }
+    _sectionGeneration = 1;
   }
 
   return self;
@@ -69,12 +92,30 @@
   };
 }
 
+- (void)collectionView:(ASCollectionView *)collectionView willDisplayNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertNotNil(node.layoutAttributes, @"Expected layout attributes for node in %@ to be non-nil.", NSStringFromSelector(_cmd));
+}
+
+- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertNotNil(node.layoutAttributes, @"Expected layout attributes for node in %@ to be non-nil.", NSStringFromSelector(_cmd));
+}
+
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
   return _itemCounts.size();
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
   return _itemCounts[section];
+}
+
+- (id<ASSectionContext>)collectionView:(ASCollectionView *)collectionView contextForSection:(NSInteger)section
+{
+  ASTestSectionContext *context = [[ASTestSectionContext alloc] init];
+  context.sectionGeneration = _sectionGeneration;
+  context.sectionIndex = section;
+  return context;
 }
 
 @end
@@ -119,6 +160,18 @@
 @end
 
 @implementation ASCollectionViewTests
+
+- (void)testDataSourceImplementsNecessaryMethods
+{
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+  
+  id dataSource = [NSObject new];
+  XCTAssertThrows((collectionView.asyncDataSource = dataSource));
+  
+  dataSource = [OCMockObject niceMockForProtocol:@protocol(ASCollectionDataSource)];
+  XCTAssertNoThrow((collectionView.asyncDataSource = dataSource));
+}
 
 - (void)testThatItSetsALayoutInspectorForFlowLayouts
 {
@@ -348,6 +401,34 @@
   } completion:nil]);
 }
 
+- (void)testCellNodeLayoutAttributes
+{
+  updateValidationTestPrologue
+  NSSet *nodeBatch1 = [NSSet setWithArray:[cv visibleNodes]];
+  XCTAssertGreaterThan(nodeBatch1.count, 0);
+
+  // Expect all visible nodes get 1 applyLayoutAttributes and have a non-nil value.
+  for (ASTextCellNodeWithSetSelectedCounter *node in nodeBatch1) {
+    XCTAssertEqual(node.applyLayoutAttributesCount, 1, @"Expected applyLayoutAttributes to be called exactly once for visible nodes.");
+    XCTAssertNotNil(node.layoutAttributes, @"Expected layoutAttributes to be non-nil for visible cell node.");
+  }
+
+  // Scroll to next batch of items.
+  NSIndexPath *nextIP = [NSIndexPath indexPathForItem:nodeBatch1.count inSection:0];
+  [cv scrollToItemAtIndexPath:nextIP atScrollPosition:UICollectionViewScrollPositionTop animated:NO];
+  [cv layoutIfNeeded];
+
+  // Ensure we scrolled far enough that all the old ones are offscreen.
+  NSSet *nodeBatch2 = [NSSet setWithArray:[cv visibleNodes]];
+  XCTAssertFalse([nodeBatch1 intersectsSet:nodeBatch2], @"Expected to scroll far away enough that all nodes are replaced.");
+
+  // Now the nodes are no longer visible, expect their layout attributes are nil but not another applyLayoutAttributes call.
+  for (ASTextCellNodeWithSetSelectedCounter *node in nodeBatch1) {
+    XCTAssertEqual(node.applyLayoutAttributesCount, 1, @"Expected applyLayoutAttributes to be called exactly once for visible nodes, even after node is removed.");
+    XCTAssertNil(node.layoutAttributes, @"Expected layoutAttributes to be nil for removed cell node.");
+  }
+}
+
 /**
  * https://github.com/facebook/AsyncDisplayKit/issues/2011
  *
@@ -427,6 +508,144 @@
 
   // Teardown
   [[UIDevice currentDevice] setValue:@(oldDeviceOrientation) forKey:@"orientation"];
+}
+
+/**
+ * See corresponding test in ASUICollectionViewTests
+ *
+ * @discussion Currently, we do not replicate UICollectionView's call order (outer, inner0, inner1, ...)
+ *   and instead call (inner0, inner1, outer, ...). This is because we primarily provide a
+ *   beginUpdates/endUpdatesWithCompletion: interface (like UITableView). With UICollectionView's
+ *   performBatchUpdates:completion:, the completion block is enqueued at -beginUpdates time.
+ *   With our tableView-like scheme, the completion block is provided at -endUpdates time
+ *   and it is naturally enqueued at this time. It is assumed that this is an acceptable deviation,
+ *   and that developers do not expect a particular completion order guarantee.
+ */
+- (void)testThatNestedBatchCompletionsAreCalledInOrder
+{
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+
+  ASCollectionView *cv = testController.collectionView;
+
+  XCTestExpectation *inner0 = [self expectationWithDescription:@"Inner completion 0 is called"];
+  XCTestExpectation *inner1 = [self expectationWithDescription:@"Inner completion 1 is called"];
+  XCTestExpectation *outer = [self expectationWithDescription:@"Outer completion is called"];
+
+  NSMutableArray<XCTestExpectation *> *completions = [NSMutableArray array];
+
+  [cv performBatchUpdates:^{
+    [cv performBatchUpdates:^{
+
+    } completion:^(BOOL finished) {
+      [completions addObject:inner0];
+      [inner0 fulfill];
+    }];
+    [cv performBatchUpdates:^{
+
+    } completion:^(BOOL finished) {
+      [completions addObject:inner1];
+      [inner1 fulfill];
+    }];
+  } completion:^(BOOL finished) {
+    [completions addObject:outer];
+    [outer fulfill];
+  }];
+
+  [self waitForExpectationsWithTimeout:5 handler:nil];
+  XCTAssertEqualObjects(completions, (@[ inner0, inner1, outer ]), @"Expected completion order to be correct");
+}
+
+#pragma mark - ASSectionContext tests
+
+- (void)testThatSectionContextsAreCorrectAfterTheInitialLayout
+{
+  updateValidationTestPrologue
+  NSInteger sectionCount = del->_itemCounts.size();
+  for (NSInteger section = 0; section < sectionCount; section++) {
+    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    XCTAssertNotNil(context);
+    XCTAssertEqual(context.sectionGeneration, 1);
+    XCTAssertEqual(context.sectionIndex, section);
+  }
+}
+
+- (void)testThatSectionContextsAreCorrectAfterSectionMove
+{
+  updateValidationTestPrologue
+  NSInteger sectionCount = del->_itemCounts.size();
+  NSInteger originalSection = sectionCount - 1;
+  NSInteger toSection = 0;
+
+  del.sectionGeneration++;
+  [cv moveSection:originalSection toSection:toSection];
+  [cv waitUntilAllUpdatesAreCommitted];
+  
+  // Only test left moving
+  XCTAssertTrue(toSection < originalSection);
+  ASTestSectionContext *movedSectionContext = (ASTestSectionContext *)[cv contextForSection:toSection];
+  XCTAssertNotNil(movedSectionContext);
+  // ASCollectionView currently uses ASChangeSetDataController which splits a move operation to a pair of delete and insert ones.
+  // So this movedSectionContext is newly loaded and thus is second generation.
+  XCTAssertEqual(movedSectionContext.sectionGeneration, 2);
+  XCTAssertEqual(movedSectionContext.sectionIndex, toSection);
+  
+  for (NSInteger section = toSection + 1; section <= originalSection && section < sectionCount; section++) {
+    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    XCTAssertNotNil(context);
+    XCTAssertEqual(context.sectionGeneration, 1);
+    // This section context was shifted to the right
+    XCTAssertEqual(context.sectionIndex, (section - 1));
+  }
+}
+
+- (void)testThatSectionContextsAreCorrectAfterReloadData
+{
+  updateValidationTestPrologue
+  
+  del.sectionGeneration++;
+  [cv reloadDataImmediately];
+  
+  NSInteger sectionCount = del->_itemCounts.size();
+  for (NSInteger section = 0; section < sectionCount; section++) {
+    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    XCTAssertNotNil(context);
+    XCTAssertEqual(context.sectionGeneration, 2);
+    XCTAssertEqual(context.sectionIndex, section);
+  }
+}
+
+- (void)testThatSectionContextsAreCorrectAfterReloadASection
+{
+  updateValidationTestPrologue
+  NSInteger sectionToReload = 0;
+  
+  del.sectionGeneration++;
+  [cv reloadSections:[NSIndexSet indexSetWithIndex:sectionToReload]];
+  [cv waitUntilAllUpdatesAreCommitted];
+  
+  NSInteger sectionCount = del->_itemCounts.size();
+  for (NSInteger section = 0; section < sectionCount; section++) {
+    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    XCTAssertNotNil(context);
+    XCTAssertEqual(context.sectionGeneration, section != sectionToReload ? 1 : 2);
+    XCTAssertEqual(context.sectionIndex, section);
+  }
+}
+
+/// See the same test in ASUICollectionViewTests for the reference behavior.
+- (void)testThatIssuingAnUpdateBeforeInitialReloadIsAcceptable
+{
+  ASCollectionViewTestDelegate *del = [[ASCollectionViewTestDelegate alloc] initWithNumberOfSections:0 numberOfItemsInSection:0];
+  ASCollectionView *cv = [[ASCollectionView alloc] initWithCollectionViewLayout:[UICollectionViewFlowLayout new]];
+  cv.asyncDataSource = del;
+  cv.asyncDelegate = del;
+
+  // Add a section to the data source
+  del->_itemCounts.push_back(0);
+  // Attempt to insert section into collection view. We ignore it to workaround
+  // the bug demonstrated by
+  // ASUICollectionViewTests.testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
+  XCTAssertNoThrow([cv insertSections:[NSIndexSet indexSetWithIndex:0]]);
 }
 
 @end

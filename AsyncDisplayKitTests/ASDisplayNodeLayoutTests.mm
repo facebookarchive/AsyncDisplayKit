@@ -23,8 +23,8 @@
   CGSize nodeSize = CGSizeMake(100, 100);
   
   ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
-  displayNode.width = ASDimensionMake(100);
-  displayNode.height = ASDimensionMake(100);
+  displayNode.style.width = ASDimensionMake(100);
+  displayNode.style.height = ASDimensionMake(100);
   
   // Use a button node in here as ASButtonNode uses layoutSpecThatFits:
   ASButtonNode *buttonNode = [ASButtonNode new];
@@ -80,7 +80,8 @@
   CGSize nodeSize = CGSizeMake(100, 100);
   
   ASDisplayNode *displayNode = [ASDisplayNode new];
-  [displayNode setSizeWithCGSize:nodeSize];
+  displayNode.style.width = ASDimensionMake(nodeSize.width);
+  displayNode.style.height = ASDimensionMake(nodeSize.height);
   
   ASButtonNode *buttonNode = [ASButtonNode new];
   [displayNode addSubnode:buttonNode];

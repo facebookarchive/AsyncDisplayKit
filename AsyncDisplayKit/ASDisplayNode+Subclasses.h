@@ -128,7 +128,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @warning Overriding this method should be done VERY rarely.
  */
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
-                     restrictedToSize:(ASLayoutableSize)size
+                     restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize;
 
 /**
@@ -229,6 +229,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @note Called on the main thread only
  */
 - (void)displayWillStart ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)displayWillStartAsynchronously:(BOOL)asynchronously ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * @abstract Indicates that the receiver has finished displaying.

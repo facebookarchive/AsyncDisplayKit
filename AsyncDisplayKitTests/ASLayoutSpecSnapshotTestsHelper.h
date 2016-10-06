@@ -35,8 +35,8 @@ __attribute__((overloadable)) static inline ASDisplayNode *ASDisplayNodeWithBack
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
   node.layerBacked = YES;
   node.backgroundColor = backgroundColor;
-  node.width = ASDimensionMakeWithPoints(size.width);
-  node.height = ASDimensionMakeWithPoints(size.height);
+  node.style.width = ASDimensionMakeWithPoints(size.width);
+  node.style.height = ASDimensionMakeWithPoints(size.height);
   return node;
 }
 

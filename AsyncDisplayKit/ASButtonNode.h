@@ -11,21 +11,23 @@
 #import <AsyncDisplayKit/ASTextNode.h>
 #import <AsyncDisplayKit/ASImageNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 /**
  Image alignment defines where the image will be placed relative to the text.
  */
 typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
   /** Places the image before the text. */
-  ASButtonNodeImageAlignmentBeginning  = 0,
+  ASButtonNodeImageAlignmentBeginning,
   /** Places the image after the text. */
-  ASButtonNodeImageAlignmentEnd = 1 << 0
+  ASButtonNodeImageAlignmentEnd
 };
 
 @interface ASButtonNode : ASControlNode
 
-@property (nonatomic, readonly) ASTextNode  * _Nonnull titleNode;
-@property (nonatomic, readonly) ASImageNode * _Nonnull imageNode;
-@property (nonatomic, readonly) ASImageNode * _Nonnull backgroundImageNode;
+@property (nonatomic, readonly) ASTextNode  * titleNode;
+@property (nonatomic, readonly) ASImageNode * imageNode;
+@property (nonatomic, readonly) ASImageNode * backgroundImageNode;
 
 /**
  Spacing between image and title. Defaults to 8.0.
@@ -85,7 +87,7 @@ typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
  *  @param color The color to use for the title.
  *  @param state The state that uses the specified title. The possible values are described in ASControlState.
  */
-- (void)setTitle:(nonnull NSString *)title withFont:(nullable UIFont *)font withColor:(nullable UIColor *)color forState:(ASControlState)state;
+- (void)setTitle:(NSString *)title withFont:(nullable UIFont *)font withColor:(nullable UIColor *)color forState:(ASControlState)state;
 #endif
 /**
  *  Returns the image used for a button state.
@@ -94,7 +96,7 @@ typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
  *
  *  @return The image used for the specified state.
  */
-- (UIImage * _Nullable)imageForState:(ASControlState)state;
+- (nullable UIImage *)imageForState:(ASControlState)state;
 
 /**
  *  Sets the image to use for the specified state.
@@ -120,6 +122,8 @@ typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
  *
  *  @return The background image used for the specified state.
  */
-- (UIImage * _Nullable)backgroundImageForState:(ASControlState)state;
+- (nullable UIImage *)backgroundImageForState:(ASControlState)state;
 
 @end
+
+NS_ASSUME_NONNULL_END

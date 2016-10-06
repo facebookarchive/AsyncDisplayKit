@@ -134,8 +134,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     unsigned int asyncDelegateScrollViewWillBeginDragging:1;
     unsigned int asyncDelegateScrollViewDidEndDragging:1;
     unsigned int asyncDelegateTableViewWillDisplayNodeForRowAtIndexPath:1;
+    unsigned int asyncDelegateTableViewWillDisplayNodeForRowAtIndexPathDeprecated:1;
     unsigned int asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPath:1;
-    unsigned int asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPathDeprecated:1;
     unsigned int asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset:1;
     unsigned int asyncDelegateTableViewWillBeginBatchFetchWithContext:1;
     unsigned int asyncDelegateShouldBatchFetchForTableView:1;
@@ -220,12 +220,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return [self _initWithFrame:frame style:style dataControllerClass:nil ownedByNode:NO];
 }
 
-// FIXME: This method is deprecated and will probably be removed in or shortly after 2.0.
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style asyncDataFetching:(BOOL)asyncDataFetchingEnabled
-{
-  return [self _initWithFrame:frame style:style dataControllerClass:nil ownedByNode:NO];
-}
-
 - (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass ownedByNode:(BOOL)ownedByNode
 {
   if (!(self = [super initWithFrame:frame style:style])) {
@@ -306,8 +300,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDataSourceFlags.asyncDataSourceTableViewCanMoveRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:canMoveRowAtIndexPath:)];
     _asyncDataSourceFlags.asyncDataSourceTableViewMoveRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:moveRowAtIndexPath:toIndexPath:)];
     
-    // Data source must implement tableView:nodeBlockForRowAtIndexPath: or tableView:nodeForRowAtIndexPath:
-    ASDisplayNodeAssertTrue(_asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath || _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath);
+    ASDisplayNodeAssert(_asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath
+                        || _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath, @"Data source must implement tableView:nodeBlockForRowAtIndexPath: or tableView:nodeForRowAtIndexPath:");
   }
   
   super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
@@ -331,9 +325,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _proxyDelegate = [[ASTableViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
     
     _asyncDelegateFlags.asyncDelegateScrollViewDidScroll = [_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)];
-    _asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)];
+    _asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNode:forRowAtIndexPath:)];
+    if (_asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPath == NO) {
+      _asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPathDeprecated = [_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)];
+    }
     _asyncDelegateFlags.asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNode:forRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPathDeprecated = [_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNodeForRowAtIndexPath:)];
     _asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
     _asyncDelegateFlags.asyncDelegateTableViewWillBeginBatchFetchWithContext = [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
     _asyncDelegateFlags.asyncDelegateShouldBatchFetchForTableView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)];
@@ -689,9 +685,16 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASCellNode *cellNode = [cell node];
   cellNode.scrollView = tableView;
 
+  ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with cell that will be displayed not to be nil. indexPath: %@", indexPath);
+
   if (_asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPath) {
+    [_asyncDelegate tableView:self willDisplayNode:cellNode forRowAtIndexPath:indexPath];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  } else if (_asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPathDeprecated) {
     [_asyncDelegate tableView:self willDisplayNodeForRowAtIndexPath:indexPath];
   }
+#pragma clang diagnostic pop
   
   [_rangeController setNeedsUpdate];
   
@@ -716,13 +719,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 
   [_cellsForVisibilityUpdates removeObject:cell];
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  if (_asyncDelegateFlags.asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPathDeprecated) {
-    [_asyncDelegate tableView:self didEndDisplayingNodeForRowAtIndexPath:indexPath];
-  }
-#pragma clang diagnostic pop
   
   cellNode.scrollView = nil;
 }
@@ -1129,10 +1125,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 
   ASCellNodeBlock block = [_asyncDataSource tableView:self nodeBlockForRowAtIndexPath:indexPath];
+  ASDisplayNodeAssertNotNil(block, @"Invalid block, expected nonnull ASCellNodeBlock");
   __weak __typeof__(self) weakSelf = self;
   ASCellNodeBlock configuredNodeBlock = ^{
     __typeof__(self) strongSelf = weakSelf;
-    ASCellNode *node = block();
+    ASCellNode *node = (block != nil ? block() : [[ASCellNode alloc] init]);
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
     if (node.interactionDelegate == nil) {
       node.interactionDelegate = strongSelf;

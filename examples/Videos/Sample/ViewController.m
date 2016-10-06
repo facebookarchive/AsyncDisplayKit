@@ -54,19 +54,19 @@
   _rootNode.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
     
     // Layout all nodes absolute in a static layout spec
-    [guitarVideoNode setSizeWithCGSize:CGSizeMake(mainScreenBoundsSize.width, mainScreenBoundsSize.height / 3.0)];
-    guitarVideoNode.layoutPosition = CGPointMake(0, 0);
+    guitarVideoNode.style.preferredSize = CGSizeMake(mainScreenBoundsSize.width, mainScreenBoundsSize.height / 3.0);
+    guitarVideoNode.style.layoutPosition = CGPointMake(0, 0);
     
-    [nicCageVideoNode setSizeWithCGSize:CGSizeMake(mainScreenBoundsSize.width/2, mainScreenBoundsSize.height / 3.0)];
-    nicCageVideoNode.layoutPosition = CGPointMake(mainScreenBoundsSize.width / 2.0, mainScreenBoundsSize.height / 3.0);
+    nicCageVideoNode.style.preferredSize = CGSizeMake(mainScreenBoundsSize.width/2, mainScreenBoundsSize.height / 3.0);
+    nicCageVideoNode.style.layoutPosition = CGPointMake(mainScreenBoundsSize.width / 2.0, mainScreenBoundsSize.height / 3.0);
     
-    [simonVideoNode setSizeWithCGSize:CGSizeMake(mainScreenBoundsSize.width/2, mainScreenBoundsSize.height / 3.0)];
-    simonVideoNode.layoutPosition = CGPointMake(0.0, mainScreenBoundsSize.height - (mainScreenBoundsSize.height / 3.0));
+    simonVideoNode.style.preferredSize = CGSizeMake(mainScreenBoundsSize.width/2, mainScreenBoundsSize.height / 3.0);
+    simonVideoNode.style.layoutPosition = CGPointMake(0.0, mainScreenBoundsSize.height - (mainScreenBoundsSize.height / 3.0));
     
-    [hlsVideoNode setSizeWithCGSize:CGSizeMake(mainScreenBoundsSize.width / 2.0, mainScreenBoundsSize.height / 3.0)];
-    hlsVideoNode.layoutPosition = CGPointMake(0.0, mainScreenBoundsSize.height / 3.0);
+    hlsVideoNode.style.preferredSize = CGSizeMake(mainScreenBoundsSize.width / 2.0, mainScreenBoundsSize.height / 3.0);
+    hlsVideoNode.style.layoutPosition = CGPointMake(0.0, mainScreenBoundsSize.height / 3.0);
     
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode, hlsVideoNode]];
+    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode, hlsVideoNode]];
   };
   
   [self.view addSubnode:_rootNode];

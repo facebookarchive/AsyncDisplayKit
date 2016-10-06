@@ -47,7 +47,7 @@
 
     _titleNode = [[ASTextNode alloc] init];
     _titleNode.attributedText = [[NSAttributedString alloc] initWithString:_videoModel.title attributes:[self titleNodeStringOptions]];
-    _titleNode.flexGrow = YES;
+    _titleNode.style.flexGrow = YES;
     [self addSubnode:_titleNode];
 
     _avatarNode = [[ASNetworkImageNode alloc] init];
@@ -65,8 +65,8 @@
     [self addSubnode:_likeButtonNode];
 
     _muteButtonNode = [[ASButtonNode alloc] init];
-    _muteButtonNode.width = ASDimensionMakeWithPoints(16.0);
-    _muteButtonNode.height = ASDimensionMakeWithPoints(22.0);
+    _muteButtonNode.style.width = ASDimensionMakeWithPoints(16.0);
+    _muteButtonNode.style.height = ASDimensionMakeWithPoints(22.0);
     [_muteButtonNode addTarget:self action:@selector(didTapMuteButton) forControlEvents:ASControlNodeEventTouchUpInside];
 
     _videoPlayerNode = [[ASVideoPlayerNode alloc] initWithUrl:_videoModel.url loadAssetWhenNodeBecomesVisible:YES];
@@ -91,14 +91,14 @@
 {
   CGFloat fullWidth = [UIScreen mainScreen].bounds.size.width;
   
-  _videoPlayerNode.width = ASDimensionMakeWithPoints(fullWidth);
-  _videoPlayerNode.height = ASDimensionMakeWithPoints(fullWidth * 9 / 16);
+  _videoPlayerNode.style.width = ASDimensionMakeWithPoints(fullWidth);
+  _videoPlayerNode.style.height = ASDimensionMakeWithPoints(fullWidth * 9 / 16);
   
-  _avatarNode.width = ASDimensionMakeWithPoints(AVATAR_IMAGE_HEIGHT);
-  _avatarNode.height = ASDimensionMakeWithPoints(AVATAR_IMAGE_HEIGHT);
+  _avatarNode.style.width = ASDimensionMakeWithPoints(AVATAR_IMAGE_HEIGHT);
+  _avatarNode.style.height = ASDimensionMakeWithPoints(AVATAR_IMAGE_HEIGHT);
   
-  _likeButtonNode.width = ASDimensionMakeWithPoints(50.0);
-  _likeButtonNode.height = ASDimensionMakeWithPoints(26.0);
+  _likeButtonNode.style.width = ASDimensionMakeWithPoints(50.0);
+  _likeButtonNode.style.height = ASDimensionMakeWithPoints(26.0);
 
   ASStackLayoutSpec *headerStack  = [ASStackLayoutSpec horizontalStackLayoutSpec];
   headerStack.spacing = HORIZONTAL_BUFFER;
@@ -184,16 +184,16 @@
 - (ASLayoutSpec*)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer forControls:(NSDictionary *)controls forMaximumSize:(CGSize)maxSize
 {
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
-  spacer.flexGrow = YES;
+  spacer.style.flexGrow = YES;
 
   UIEdgeInsets insets = UIEdgeInsetsMake(10.0, 10.0, 10.0, 10.0);
 
   if (controls[ @(ASVideoPlayerNodeControlTypeScrubber) ]) {
     ASDisplayNode *scrubber = controls[ @(ASVideoPlayerNodeControlTypeScrubber) ];
-    scrubber.height = ASDimensionMakeWithPoints(44.0);
-    scrubber.minWidth = ASDimensionMakeWithPoints(0.0);
-    scrubber.maxWidth = ASDimensionMakeWithPoints(maxSize.width);
-    scrubber.flexGrow = YES;
+    scrubber.style.height = ASDimensionMakeWithPoints(44.0);
+    scrubber.style.minWidth = ASDimensionMakeWithPoints(0.0);
+    scrubber.style.maxWidth = ASDimensionMakeWithPoints(maxSize.width);
+    scrubber.style.flexGrow = YES;
   }
 
   NSArray *controlBarControls = [self controlsForControlBar:controls];
@@ -218,13 +218,13 @@
                                                                        justifyContent:ASStackLayoutJustifyContentStart
                                                                            alignItems:ASStackLayoutAlignItemsCenter
                                                                              children: controlBarControls ];
-  controlbarSpec.alignSelf = ASStackLayoutAlignSelfStretch;
+  controlbarSpec.style.alignSelf = ASStackLayoutAlignSelfStretch;
 
 
 
   ASInsetLayoutSpec *controlbarInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:controlbarSpec];
 
-  controlbarInsetSpec.alignSelf = ASStackLayoutAlignSelfStretch;
+  controlbarInsetSpec.style.alignSelf = ASStackLayoutAlignSelfStretch;
 
   ASStackLayoutSpec *mainVerticalStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
                                                                                  spacing:0.0

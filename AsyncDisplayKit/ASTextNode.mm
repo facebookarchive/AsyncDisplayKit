@@ -82,16 +82,16 @@ ASDISPLAYNODE_INLINE NSUInteger ASHashFromCGSize(CGSize size)
 
 @end
 
-static NSCache *sharedRendererCache()
-{ 
- static dispatch_once_t onceToken;
- static NSCache *__rendererCache = nil;
- dispatch_once(&onceToken, ^{
-   __rendererCache = [[NSCache alloc] init];
-   __rendererCache.totalCostLimit = 500; // 500 renders cache
- });
- return __rendererCache;
-}
+//static NSCache *sharedRendererCache()
+//{ 
+// static dispatch_once_t onceToken;
+// static NSCache *__rendererCache = nil;
+// dispatch_once(&onceToken, ^{
+//   __rendererCache = [[NSCache alloc] init];
+//   __rendererCache.totalCostLimit = 500; // 500 renders cache
+// });
+// return __rendererCache;
+//}
 
 /**
  The concept here is that neither the node nor layout should ever have a strong reference to the renderer object.
@@ -99,23 +99,28 @@ static NSCache *sharedRendererCache()
  we maintain a LRU renderer cache that is queried via stack-allocated keys.
  */
 
+// Disabled renderer cache for now
+//static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, CGSize constrainedSize)
+//{
+//  NSCache *cache = sharedRendererCache();
+//  
+//  ASTextNodeRendererKey *key = [[ASTextNodeRendererKey alloc] init];
+//  key.attributes = attributes;
+//  key.constrainedSize = constrainedSize;
+//
+//  ASTextKitRenderer *renderer = [cache objectForKey:key];
+//  if (renderer == nil) {
+//    renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes constrainedSize:constrainedSize];
+//    [cache setObject:renderer forKey:key cost:1];
+//  }
+//  
+//  return renderer;
+//}
+
 static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, CGSize constrainedSize)
 {
-  NSCache *cache = sharedRendererCache();
-  
-  ASTextNodeRendererKey *key = [[ASTextNodeRendererKey alloc] init];
-  key.attributes = attributes;
-  key.constrainedSize = constrainedSize;
-
-  ASTextKitRenderer *renderer = [cache objectForKey:key];
-  if (renderer == nil) {
-    renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes constrainedSize:constrainedSize];
-    [cache setObject:renderer forKey:key cost:1];
-  }
-  
-  return renderer;
+  return [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes constrainedSize:constrainedSize];
 }
-
 
 #pragma mark - ASTextNode
 
@@ -372,12 +377,12 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   CGSize size = renderer.size;
   if (_attributedText.length > 0) {
-    self.ascender = [[self class] ascenderWithAttributedString:_attributedText];
-    self.descender = [[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender];
+    self.style.ascender = [[self class] ascenderWithAttributedString:_attributedText];
+    self.style.descender = [[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender];
     if (renderer.currentScaleFactor > 0 && renderer.currentScaleFactor < 1.0) {
       // while not perfect, this is a good estimate of what the ascender of the scaled font will be.
-      self.ascender *= renderer.currentScaleFactor;
-      self.descender *= renderer.currentScaleFactor;
+      self.style.ascender *= renderer.currentScaleFactor;
+      self.style.descender *= renderer.currentScaleFactor;
     }
   }
   
@@ -431,8 +436,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   NSUInteger length = attributedText.length;
   if (length > 0) {
-    self.ascender = [[self class] ascenderWithAttributedString:attributedText];
-    self.descender = [[attributedText attribute:NSFontAttributeName atIndex:attributedText.length - 1 effectiveRange:NULL] descender];
+    self.style.ascender = [[self class] ascenderWithAttributedString:attributedText];
+    self.style.descender = [[attributedText attribute:NSFontAttributeName atIndex:attributedText.length - 1 effectiveRange:NULL] descender];
   }
 
   // Tell the display node superclasses that the cached layout is incorrect now

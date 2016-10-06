@@ -23,7 +23,7 @@
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  return [ASLayout layoutWithLayoutable:self size:constrainedSize.max];
+  return [ASLayout layoutWithLayoutElement:self size:constrainedSize.max];
 }
 
 - (void)fetchData

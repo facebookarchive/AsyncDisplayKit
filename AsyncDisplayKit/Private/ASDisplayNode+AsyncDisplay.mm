@@ -267,16 +267,23 @@
 
   // for async display, capture the current displaySentinel value to bail early when the job is executed if another is
   // enqueued
-  // for sync display, just use nil for the displaySentinel and go
+  // for sync display, do not support cancellation
   
   // FIXME: what about the degenerate case where we are calling setNeedsDisplay faster than the jobs are dequeuing
   // from the displayQueue?  Need to not cancel early fails from displaySentinel changes.
-  ASSentinel *displaySentinel = (asynchronously ? _displaySentinel : nil);
-  int32_t displaySentinelValue = [displaySentinel increment];
-
-  asdisplaynode_iscancelled_block_t isCancelledBlock = ^{
-    return BOOL(displaySentinelValue != displaySentinel.value);
-  };
+  asdisplaynode_iscancelled_block_t isCancelledBlock = nil;
+  if (asynchronously) {
+    uint displaySentinelValue = ++_displaySentinel;
+    __weak ASDisplayNode *weakSelf = self;
+    isCancelledBlock = ^BOOL{
+      __strong ASDisplayNode *self = weakSelf;
+      return self == nil || (displaySentinelValue != self->_displaySentinel.load());
+    };
+  } else {
+    isCancelledBlock = ^BOOL{
+      return NO;
+    };
+  }
 
   // Set up displayBlock to call either display or draw on the delegate and return a UIImage contents
   asyncdisplaykit_async_transaction_operation_block_t displayBlock = [self _displayBlockWithAsynchronous:asynchronously isCancelledBlock:isCancelledBlock rasterizing:NO];
@@ -304,7 +311,7 @@
   };
 
   // Call willDisplay immediately in either case
-  [self willDisplayAsyncLayer:self.asyncLayer];
+  [self willDisplayAsyncLayer:self.asyncLayer asynchronously:asynchronously];
 
   if (asynchronously) {
     // Async rendering operations are contained by a transaction, which allows them to proceed and concurrently
@@ -329,7 +336,7 @@
 
 - (void)cancelDisplayAsyncLayer:(_ASDisplayLayer *)asyncLayer
 {
-  [_displaySentinel increment];
+  _displaySentinel.fetch_add(1);
 }
 
 - (ASDisplayNodeContextModifier)willDisplayNodeContentWithRenderingContext

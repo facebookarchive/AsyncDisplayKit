@@ -20,6 +20,11 @@
   _ASHierarchyChangeSet *_changeSet;
 }
 
+- (void)dealloc
+{
+  ASDisplayNodeCAssert(_changeSetBatchUpdateCounter == 0, @"ASChangeSetDataController deallocated in the middle of a batch update.");
+}
+
 #pragma mark - Batching (External API)
 
 - (void)beginUpdates
@@ -40,15 +45,24 @@
   // Prevent calling endUpdatesAnimated:completion: in an unbalanced way
   NSAssert(_changeSetBatchUpdateCounter >= 0, @"endUpdatesAnimated:completion: called without having a balanced beginUpdates call");
   
+  [_changeSet addCompletionHandler:completion];
   if (_changeSetBatchUpdateCounter == 0) {
+    void (^batchCompletion)(BOOL finished) = _changeSet.completionHandler;
+    
+    /**
+     * If the initial reloadData has not been called, just bail because we don't have
+     * our old data source counts.
+     * See ASUICollectionViewTests.testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
+     * For the issue that UICollectionView has that we're choosing to workaround.
+     */
     if (!self.initialReloadDataHasBeenCalled) {
-      if (completion) {
-        completion(YES);
+      if (batchCompletion != nil) {
+        batchCompletion(YES);
       }
       _changeSet = nil;
       return;
     }
-    
+
     [self invalidateDataSourceItemCounts];
     [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
     
@@ -70,7 +84,7 @@
       [super insertRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
 
-    [super endUpdatesAnimated:animated completion:completion];
+    [super endUpdatesAnimated:animated completion:batchCompletion];
     
     _changeSet = nil;
   }

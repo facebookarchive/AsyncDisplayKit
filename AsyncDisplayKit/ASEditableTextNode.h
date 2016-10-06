@@ -24,7 +24,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @abstract Initializes an editable text node using default TextKit components.
  *
- * @returns An initialized ASEditableTextNode.
+ * @return An initialized ASEditableTextNode.
  */
 - (instancetype)init;
 
@@ -34,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param textKitComponents The TextKit stack used to render text.
  * @param placeholderTextKitComponents The TextKit stack used to render placeholder text.
  *
- * @returns An initialized ASEditableTextNode.
+ * @return An initialized ASEditableTextNode.
  */
 - (instancetype)initWithTextKitComponents:(ASTextKitComponents *)textKitComponents
              placeholderTextKitComponents:(ASTextKitComponents *)placeholderTextKitComponents;

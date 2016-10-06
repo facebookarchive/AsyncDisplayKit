@@ -17,9 +17,8 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-@import AsyncDisplayKit;
-
 #import "ViewController.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 @interface ViewController ()
 
@@ -35,7 +34,7 @@
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         ASTextNode *node = [[ASTextNode alloc] init];
         node.attributedText = [[NSAttributedString alloc] initWithString:@"hello world"];
-        [node measure:(CGSize){.width = screenSize.width, .height = CGFLOAT_MAX}];
+        [node layoutThatFits:ASSizeRangeMake(CGSizeZero, (CGSize){.width = screenSize.width, .height = CGFLOAT_MAX})];
         node.frame = (CGRect) {.origin = (CGPoint){.x = 100, .y = 100}, .size = node.calculatedSize };
         
         dispatch_async(dispatch_get_main_queue(), ^{
