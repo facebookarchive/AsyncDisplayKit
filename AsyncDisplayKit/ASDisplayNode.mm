@@ -300,7 +300,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _contentsScaleForDisplay = ASScreenScale();
   
   // TODO: We should lazily initialize the style object.
-  _style = [[ASLayoutElementStyle alloc] init];
   _environmentState = ASEnvironmentStateMakeDefault();
   
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
@@ -723,6 +722,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (ASLayoutElementStyle *)style
 {
   ASDN::MutexLocker l(__instanceLock__);
+  if (_style == nil) {
+    _style = [[ASLayoutElementStyle alloc] init];
+  }
   return _style;
 }
 
@@ -750,7 +752,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // Prepare for layout transition
   auto previousLayout = _calculatedDisplayNodeLayout;
   auto pendingLayout = std::make_shared<ASDisplayNodeLayout>(
-    [self calculateLayoutThatFits:constrainedSize restrictedToSize:_style.size relativeToParentSize:parentSize],
+    [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
     constrainedSize,
     parentSize
   );
@@ -867,7 +869,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       BOOL automaticallyManagesSubnodesDisabled = (self.automaticallyManagesSubnodes == NO);
       self.automaticallyManagesSubnodes = YES; // Temporary flag for 1.9.x
       newLayout = [self calculateLayoutThatFits:constrainedSize
-                               restrictedToSize:_style.size
+                               restrictedToSize:self.style.size
                            relativeToParentSize:constrainedSize.max];
       if (automaticallyManagesSubnodesDisabled) {
         self.automaticallyManagesSubnodes = NO; // Temporary flag for 1.9.x
@@ -2399,7 +2401,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
                      restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutElementSizeResolve(_style.size, parentSize));
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutElementSizeResolve(self.style.size, parentSize));
   return [self calculateLayoutThatFits:resolvedRange];
 }
 
@@ -3482,7 +3484,7 @@ ASEnvironmentLayoutExtensibilityForwarding
   ASDN::MutexLocker l(__instanceLock__);
 
   // Deprecated preferredFrameSize just calls through to set width and height
-  _style.preferredSize = preferredFrameSize;
+  self.style.preferredSize = preferredFrameSize;
   [self invalidateCalculatedLayout];
 }
 
@@ -3490,8 +3492,9 @@ ASEnvironmentLayoutExtensibilityForwarding
 {
   ASDN::MutexLocker l(__instanceLock__);
   
-  if (_style.width.unit == ASDimensionUnitPoints && _style.height.unit == ASDimensionUnitPoints) {
-    return CGSizeMake(_style.width.value, _style.height.value);
+  ASLayoutElementStyle *style = self.style;
+  if (style.width.unit == ASDimensionUnitPoints && style.height.unit == ASDimensionUnitPoints) {
+    return CGSizeMake(style.width.value, style.height.value);
   }
 
   return CGSizeZero;
