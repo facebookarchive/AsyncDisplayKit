@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  @param children Children to be positioned at fixed positions, each conforms to ASAbsoluteLayoutElement
  */
-+ (instancetype)absoluteLayoutSpecWithChildren:(NSArray<id<ASAbsoluteLayoutElement>> *)children;
++ (instancetype)absoluteLayoutSpecWithChildren:(NSArray<id<ASAbsoluteLayoutElement>> *)children AS_WARN_UNUSED_RESULT;
 
 @end
 

@@ -46,7 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
 
 /**
  * Set the tuning parameters for a range type in full mode.
@@ -70,7 +70,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
 
 /**
  * Set the tuning parameters for a range type in the specified mode.

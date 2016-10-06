@@ -64,22 +64,22 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
 /**
  Returns the appropriate interface state for a given ASDisplayNode and window
  */
-extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window);
+extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window) AS_WARN_UNUSED_RESULT;
 
 /**
  Given a layer, returns the associated display node, if any.
  */
-extern ASDisplayNode * _Nullable ASLayerToDisplayNode(CALayer * _Nullable layer);
+extern ASDisplayNode * _Nullable ASLayerToDisplayNode(CALayer * _Nullable layer) AS_WARN_UNUSED_RESULT;
 
 /**
  Given a view, returns the associated display node, if any.
  */
-extern ASDisplayNode * _Nullable ASViewToDisplayNode(UIView * _Nullable view);
+extern ASDisplayNode * _Nullable ASViewToDisplayNode(UIView * _Nullable view) AS_WARN_UNUSED_RESULT;
 
 /**
  Given a node, returns the root of the node heirarchy (where supernode == nil)
  */
-extern ASDisplayNode *ASDisplayNodeUltimateParentOfNode(ASDisplayNode *node);
+extern ASDisplayNode *ASDisplayNodeUltimateParentOfNode(ASDisplayNode *node) AS_WARN_UNUSED_RESULT;
 
 /**
  If traverseSublayers == YES, this function will walk the layer hierarchy, spanning discontinuous sections of the node hierarchy\
@@ -104,12 +104,12 @@ extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, BOOL tr
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node that passes block.
  */
-extern ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernode(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node));
+extern ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernode(ASDisplayNode * _Nullable node, BOOL (^block)(ASDisplayNode *node)) AS_WARN_UNUSED_RESULT;
 
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node of kind class.
  */
-extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c);
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c) AS_WARN_UNUSED_RESULT;
 
 /**
  * Given two nodes, finds their most immediate common parent.  Used for geometry conversion methods.
@@ -119,40 +119,40 @@ extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernodeOfClass
  * undefined and undocumented behavior of UIKit in ASDisplayNode, this operation is defined to be incorrect in all
  * circumstances and must be fixed wherever encountered.
  */
-extern ASDisplayNode * _Nullable ASDisplayNodeFindClosestCommonAncestor(ASDisplayNode *node1, ASDisplayNode *node2);
+extern ASDisplayNode * _Nullable ASDisplayNodeFindClosestCommonAncestor(ASDisplayNode *node1, ASDisplayNode *node2) AS_WARN_UNUSED_RESULT;
 
 /**
  Given a display node, collects all descendants. This is a specialization of ASCollectContainer() that walks the Core Animation layer tree as opposed to the display node tree, thus supporting non-continues display node hierarchies.
  */
-extern NSArray<ASDisplayNode *> *ASCollectDisplayNodes(ASDisplayNode *node);
+extern NSArray<ASDisplayNode *> *ASCollectDisplayNodes(ASDisplayNode *node) AS_WARN_UNUSED_RESULT;
 
 /**
  Given a display node, traverses down the node hierarchy, returning all the display nodes that pass the block.
  */
-extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodes(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
+extern NSArray<ASDisplayNode *> *ASDisplayNodeFindAllSubnodes(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node)) AS_WARN_UNUSED_RESULT;
 
 /**
  Given a display node, traverses down the node hierarchy, returning all the display nodes of kind class.
  */
-extern NSArray<__kindof ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c);
+extern NSArray<__kindof ASDisplayNode *> *ASDisplayNodeFindAllSubnodesOfClass(ASDisplayNode *start, Class c) AS_WARN_UNUSED_RESULT;
 
 /**
  Given a display node, traverses down the node hierarchy, returning the depth-first display node, including the start node that pass the block.
  */
-extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstNode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstNode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node)) AS_WARN_UNUSED_RESULT;
 
 /**
  Given a display node, traverses down the node hierarchy, returning the depth-first display node, excluding the start node, that pass the block
  */
-extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSubnode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node));
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSubnode(ASDisplayNode *start, BOOL (^block)(ASDisplayNode *node)) AS_WARN_UNUSED_RESULT;
 
 /**
  Given a display node, traverses down the node hierarchy, returning the depth-first display node of kind class.
  */
-extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c);
+extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSubnodeOfClass(ASDisplayNode *start, Class c) AS_WARN_UNUSED_RESULT;
 
-extern UIColor *ASDisplayNodeDefaultPlaceholderColor();
-extern UIColor *ASDisplayNodeDefaultTintColor();
+extern UIColor *ASDisplayNodeDefaultPlaceholderColor() AS_WARN_UNUSED_RESULT;
+extern UIColor *ASDisplayNodeDefaultTintColor() AS_WARN_UNUSED_RESULT;
 
 /**
  Disable willAppear / didAppear / didDisappear notifications for a sub-hierarchy, then re-enable when done. Nested calls are supported.

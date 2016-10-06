@@ -152,4 +152,12 @@
 #endif
 #endif
 
+#ifndef AS_WARN_UNUSED_RESULT
+#if __has_attribute(warn_unused_result)
+#define AS_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#else
+#define AS_WARN_UNUSED_RESULT
+#endif
+#endif
+
 #define ASOVERLOADABLE __attribute__((overloadable))

@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param child A child that is laid out to determine the size of this spec.
  * @param overlay A layoutElement object that is laid out over the child. If this is nil, the overlay is omitted.
  */
-+ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutElement>)child overlay:(nullable id<ASLayoutElement>)overlay;
++ (instancetype)overlayLayoutSpecWithChild:(id<ASLayoutElement>)child overlay:(nullable id<ASLayoutElement>)overlay AS_WARN_UNUSED_RESULT;
 
 @end
 

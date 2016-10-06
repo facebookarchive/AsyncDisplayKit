@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param insets The amount of space to inset on each side.
  @param child The wrapped child to inset.
  */
-+ (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutElement>)child;
++ (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutElement>)child AS_WARN_UNUSED_RESULT;
 
 @end
 

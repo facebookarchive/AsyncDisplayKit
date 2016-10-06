@@ -11,6 +11,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -46,12 +47,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Read from the cache.  The Value object is accessible from the returned ASWeakMapEntry.
  */
-- (nullable ASWeakMapEntry<Value> *)entryForKey:(Key)key;
+- (nullable ASWeakMapEntry<Value> *)entryForKey:(Key)key AS_WARN_UNUSED_RESULT;
 
 /**
  * Put a value into the cache.  If an entry with an equal key already exists, then the value is updated on the existing entry.
  */
-- (ASWeakMapEntry<Value> *)setObject:(Value)value forKey:(Key)key;
+- (ASWeakMapEntry<Value> *)setObject:(Value)value forKey:(Key)key AS_WARN_UNUSED_RESULT;
 
 @end
 

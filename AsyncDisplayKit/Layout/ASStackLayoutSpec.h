@@ -71,17 +71,17 @@ NS_ASSUME_NONNULL_BEGIN
  @param alignItems Orientation of the children along the cross axis
  @param children ASLayoutElement children to be positioned.
  */
-+ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray<id<ASLayoutElement>> *)children;
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray<id<ASLayoutElement>> *)children AS_WARN_UNUSED_RESULT;
 
 /**
  * @return A stack layout spec with direction of ASStackLayoutDirectionVertical
  **/
-+ (instancetype)verticalStackLayoutSpec;
++ (instancetype)verticalStackLayoutSpec AS_WARN_UNUSED_RESULT;
 
 /**
  * @return A stack layout spec with direction of ASStackLayoutDirectionHorizontal
  **/
-+ (instancetype)horizontalStackLayoutSpec;
++ (instancetype)horizontalStackLayoutSpec AS_WARN_UNUSED_RESULT;
 
 @end
 

@@ -35,7 +35,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) CGFloat ratio;
 
-+ (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutElement>)child;
++ (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutElement>)child AS_WARN_UNUSED_RESULT;
 
 @end
 

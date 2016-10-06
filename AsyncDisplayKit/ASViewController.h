@@ -72,7 +72,7 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
  * both the min and max definitions. Override this method to provide a custom size range to the
  * backing node.
  */
-- (ASSizeRange)nodeConstrainedSize;
+- (ASSizeRange)nodeConstrainedSize AS_WARN_UNUSED_RESULT;
 
 @end
 

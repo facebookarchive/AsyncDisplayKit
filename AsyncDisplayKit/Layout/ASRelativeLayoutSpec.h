@@ -57,7 +57,7 @@ NS_ASSUME_NONNULL_BEGIN
 + (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
                                                 verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition
                                                     sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption
-                                                           child:(id<ASLayoutElement>)child;
+                                                           child:(id<ASLayoutElement>)child AS_WARN_UNUSED_RESULT;
 
 /*!
  * @discussion convenience initializer for a ASRelativeLayoutSpec

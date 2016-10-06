@@ -140,7 +140,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  a line break, the rects returned will be on opposite sides and different lines). The rects returned
  are in the coordinate system of the receiver.
  */
-- (NSArray<NSValue *> *)rectsForTextRange:(NSRange)textRange;
+- (NSArray<NSValue *> *)rectsForTextRange:(NSRange)textRange AS_WARN_UNUSED_RESULT;
 
 /**
  @abstract Returns an array of rects used for highlighting the characters in a given text range.
@@ -151,7 +151,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  are in the coordinate system of the receiver. This method is useful for visual coordination with a
  highlighted range of text.
  */
-- (NSArray<NSValue *> *)highlightRectsForTextRange:(NSRange)textRange;
+- (NSArray<NSValue *> *)highlightRectsForTextRange:(NSRange)textRange AS_WARN_UNUSED_RESULT;
 
 /**
  @abstract Returns a bounding rect for the given text range.
@@ -160,14 +160,14 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  cap-height and descenders is not performed. This method raises an exception if textRange is not
  a valid substring range of the receiver's string.
  */
-- (CGRect)frameForTextRange:(NSRange)textRange;
+- (CGRect)frameForTextRange:(NSRange)textRange AS_WARN_UNUSED_RESULT;
 
 /**
  @abstract Returns the trailing rectangle of space in the receiver, after the final character.
  @discussion Use this method to detect which portion of the receiver is not occupied by characters.
  The rect returned is in the coordinate system of the receiver.
  */
-- (CGRect)trailingRect;
+- (CGRect)trailingRect AS_WARN_UNUSED_RESULT;
 
 
 #pragma mark - Actions
@@ -184,7 +184,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  @param rangeOut The ultimate range of the found text. Can be NULL.
  @result YES if an entity exists at `point`; NO otherwise.
  */
-- (nullable id)linkAttributeValueAtPoint:(CGPoint)point attributeName:(out NSString * _Nullable * _Nullable)attributeNameOut range:(out NSRange * _Nullable)rangeOut;
+- (nullable id)linkAttributeValueAtPoint:(CGPoint)point attributeName:(out NSString * _Nullable * _Nullable)attributeNameOut range:(out NSRange * _Nullable)rangeOut AS_WARN_UNUSED_RESULT;
 
 /**
  @abstract The style to use when highlighting text.

@@ -270,7 +270,7 @@ didFinishDownloadingImageWithIdentifier:(ASImageIdentifier)imageIdentifier
 + (NSURL *)URLWithAssetLocalIdentifier:(NSString *)assetLocalIdentifier
                             targetSize:(CGSize)targetSize
                            contentMode:(PHImageContentMode)contentMode
-                               options:(PHImageRequestOptions *)options;
+                               options:(PHImageRequestOptions *)options AS_WARN_UNUSED_RESULT;
 
 @end
 #endif

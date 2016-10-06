@@ -60,7 +60,7 @@ typedef struct {
  *
  * This property defaults to NO. It will be removed in a future release.
  */
-+ (BOOL)suppressesInvalidCollectionUpdateExceptions;
++ (BOOL)suppressesInvalidCollectionUpdateExceptions AS_WARN_UNUSED_RESULT;
 + (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses;
 
 /** @name Layout */
@@ -103,7 +103,7 @@ typedef struct {
  * @abstract Currently used by ASNetworkImageNode and ASMultiplexImageNode to allow their placeholders to stay if they are loading an image from the network.
  * Otherwise, a display pass is scheduled and completes, but does not actually draw anything - and ASDisplayNode considers the element finished.
  */
-- (BOOL)placeholderShouldPersist;
+- (BOOL)placeholderShouldPersist AS_WARN_UNUSED_RESULT;
 
 /**
  * @abstract Indicates that the receiver and all subnodes have finished displaying. May be called more than once, for example if the receiver has
