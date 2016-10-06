@@ -12,6 +12,7 @@
 
 #import <UIKit/UIImage.h>
 #import <UIKit/UIBezierPath.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -33,7 +34,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
                                           cornerColor:(UIColor *)cornerColor
-                                            fillColor:(UIColor *)fillColor;
+                                            fillColor:(UIColor *)fillColor AS_WARN_UNUSED_RESULT;
 
 /**
  * This generates a flat-color, rounded-corner resizeable image with a border
@@ -48,7 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
                                           cornerColor:(UIColor *)cornerColor
                                             fillColor:(UIColor *)fillColor
                                           borderColor:(nullable UIColor *)borderColor
-                                          borderWidth:(CGFloat)borderWidth;
+                                          borderWidth:(CGFloat)borderWidth AS_WARN_UNUSED_RESULT;
 
 /**
  * This generates a flat-color, rounded-corner resizeable image with a border
@@ -67,7 +68,7 @@ NS_ASSUME_NONNULL_BEGIN
                                           borderColor:(nullable UIColor *)borderColor
                                           borderWidth:(CGFloat)borderWidth
                                        roundedCorners:(UIRectCorner)roundedCorners
-                                                scale:(CGFloat)scale;
+                                                scale:(CGFloat)scale AS_WARN_UNUSED_RESULT;
 
 @end
 

@@ -554,7 +554,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  * @return YES if point is inside the receiver's bounds; otherwise, NO.
  */
-- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event;
+- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event AS_WARN_UNUSED_RESULT;
 
 
 /** @name Converting Between View Coordinate Systems */
@@ -568,7 +568,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  * @return The point converted to the coordinate system of node.
  */
-- (CGPoint)convertPoint:(CGPoint)point toNode:(nullable ASDisplayNode *)node;
+- (CGPoint)convertPoint:(CGPoint)point toNode:(nullable ASDisplayNode *)node AS_WARN_UNUSED_RESULT;
 
 
 /** 
@@ -579,7 +579,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  * @return The point converted to the local coordinate system (bounds) of the receiver.
  */
-- (CGPoint)convertPoint:(CGPoint)point fromNode:(nullable ASDisplayNode *)node;
+- (CGPoint)convertPoint:(CGPoint)point fromNode:(nullable ASDisplayNode *)node AS_WARN_UNUSED_RESULT;
 
 
 /** 
@@ -590,7 +590,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  * @return The converted rectangle.
  */
-- (CGRect)convertRect:(CGRect)rect toNode:(nullable ASDisplayNode *)node;
+- (CGRect)convertRect:(CGRect)rect toNode:(nullable ASDisplayNode *)node AS_WARN_UNUSED_RESULT;
 
 /** 
  * @abstract Converts a rectangle from the coordinate system of another node to that of the receiver.
@@ -600,7 +600,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  * @return The converted rectangle.
  */
-- (CGRect)convertRect:(CGRect)rect fromNode:(nullable ASDisplayNode *)node;
+- (CGRect)convertRect:(CGRect)rect fromNode:(nullable ASDisplayNode *)node AS_WARN_UNUSED_RESULT;
 
 @end
 
@@ -614,7 +614,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  * @discussion For debugging: (lldb) po [node displayNodeRecursiveDescription]
  */
-- (NSString *)displayNodeRecursiveDescription;
+- (NSString *)displayNodeRecursiveDescription AS_WARN_UNUSED_RESULT;
 
 @end
 

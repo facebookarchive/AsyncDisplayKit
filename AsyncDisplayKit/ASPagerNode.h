@@ -87,14 +87,14 @@ NS_ASSUME_NONNULL_BEGIN
  * Data Source is required, and uses a different protocol from ASCollectionNode.
  */
 - (void)setDataSource:(nullable id <ASPagerDataSource>)dataSource;
-- (nullable id <ASPagerDataSource>)dataSource;
+- (nullable id <ASPagerDataSource>)dataSource AS_WARN_UNUSED_RESULT;
 
 /**
  * Delegate is optional.
  * This includes UIScrollViewDelegate as well as most methods from UICollectionViewDelegate, like willDisplay...
  */
 - (void)setDelegate:(nullable id <ASPagerDelegate>)delegate;
-- (nullable id <ASPagerDelegate>)delegate;
+- (nullable id <ASPagerDelegate>)delegate AS_WARN_UNUSED_RESULT;
 
 /**
  * The underlying ASCollectionView object.
@@ -114,7 +114,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Returns the node for the passed page index
  */
-- (ASCellNode *)nodeForPageAtIndex:(NSInteger)index;
+- (ASCellNode *)nodeForPageAtIndex:(NSInteger)index AS_WARN_UNUSED_RESULT;
 
 @end
 

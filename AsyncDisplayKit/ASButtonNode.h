@@ -68,7 +68,7 @@ typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
  *
  *  @return The title for the specified state.
  */
-- (NSAttributedString * _Nullable)attributedTitleForState:(ASControlState)state;
+- (NSAttributedString * _Nullable)attributedTitleForState:(ASControlState)state AS_WARN_UNUSED_RESULT;
 
 /**
  *  Sets the styled title to use for the specified state. This will reset styled title previously set with -setTitle:withFont:withColor:forState.
@@ -96,7 +96,7 @@ typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
  *
  *  @return The image used for the specified state.
  */
-- (nullable UIImage *)imageForState:(ASControlState)state;
+- (nullable UIImage *)imageForState:(ASControlState)state AS_WARN_UNUSED_RESULT;
 
 /**
  *  Sets the image to use for the specified state.
@@ -122,7 +122,7 @@ typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
  *
  *  @return The background image used for the specified state.
  */
-- (nullable UIImage *)backgroundImageForState:(ASControlState)state;
+- (nullable UIImage *)backgroundImageForState:(ASControlState)state AS_WARN_UNUSED_RESULT;
 
 @end
 

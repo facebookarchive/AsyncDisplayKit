@@ -28,7 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param child A child that is laid out to determine the size of this spec.
  * @param background A layoutElement object that is laid out behind the child. If this is nil, the background is omitted.
  */
-+ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutElement>)child background:(nullable id<ASLayoutElement>)background;
++ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutElement>)child background:(nullable id<ASLayoutElement>)background AS_WARN_UNUSED_RESULT;
 
 @end
 

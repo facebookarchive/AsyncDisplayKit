@@ -70,7 +70,7 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  * Returns an ASWrapperLayoutSpec object with the given layoutElement as child
  */
-+ (instancetype)wrapperWithLayoutElement:(id<ASLayoutElement>)layoutElement;
++ (instancetype)wrapperWithLayoutElement:(id<ASLayoutElement>)layoutElement AS_WARN_UNUSED_RESULT;
 
 /*
  * Returns an ASWrapperLayoutSpec object initialized with the given layoutElement as child

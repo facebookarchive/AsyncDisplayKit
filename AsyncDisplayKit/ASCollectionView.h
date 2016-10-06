@@ -92,7 +92,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType __attribute((warn_unused_result));
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
 
 /**
  * Set the tuning parameters for a range type in full mode.
@@ -116,7 +116,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType __attribute((warn_unused_result));
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
 
 /**
  * Set the tuning parameters for a range type in the specified mode.
@@ -262,7 +262,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
-- (nullable id<ASSectionContext>)contextForSection:(NSInteger)section __attribute((warn_unused_result));
+- (nullable id<ASSectionContext>)contextForSection:(NSInteger)section AS_WARN_UNUSED_RESULT;
 
 /**
  * Inserts items at the locations identified by an array of index paths.
@@ -313,7 +313,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return a node for display at this indexpath or nil
  */
-- (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath __attribute((warn_unused_result));
+- (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 
 /**
@@ -324,7 +324,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return The specified supplementary node or nil
  */
-- (nullable ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath __attribute((warn_unused_result));
+- (nullable ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
  * Similar to -indexPathForCell:.
@@ -333,35 +333,35 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return an indexPath for this cellNode
  */
-- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode __attribute((warn_unused_result));
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
 
 /**
  * Similar to -visibleCells.
  *
  * @return an array containing the nodes being displayed on screen.
  */
-- (NSArray<__kindof ASCellNode *> *)visibleNodes __attribute((warn_unused_result));
+- (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
 
 /**
  * Query the sized node at `indexPath` for its calculatedSize.
  *
  * @param indexPath The index path for the node of interest.
  */
-- (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath __attribute((warn_unused_result));
+- (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
  * Determines collection view's current scroll direction. Supports 2-axis collection views.
  *
  * @return a bitmask of ASScrollDirection values.
  */
-- (ASScrollDirection)scrollDirection;
+@property (nonatomic, readonly) ASScrollDirection scrollDirection;
 
 /**
  * Determines collection view's scrollable directions.
  *
  * @return a bitmask of ASScrollDirection values.
  */
-- (ASScrollDirection)scrollableDirections;
+@property (nonatomic, readonly) ASScrollDirection scrollableDirections;
 
 /**
  * Triggers all loaded ASCellNodes to destroy displayed contents (freeing a lot of memory).

@@ -57,7 +57,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
 
 /**
  * Set the tuning parameters for a range type in full mode.
@@ -81,7 +81,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
 
 /**
  * Set the tuning parameters for a range type in the specified mode.
@@ -278,7 +278,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return a node for display at this indexpath.
  */
-- (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
  * Similar to -indexPathForCell:.
@@ -287,14 +287,14 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return an indexPath for this cellNode
  */
-- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
 
 /**
  * Similar to -visibleCells.
  *
  * @return an array containing the cell nodes being displayed on screen.
  */
-- (NSArray<ASCellNode *> *)visibleNodes;
+- (NSArray<ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
 
 /**
  * YES to automatically adjust the contentOffset when cells are inserted or deleted "before"
@@ -339,7 +339,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @return a node for display at this indexpath. This will be called on the main thread and should not implement reuse (it will be called once per row). Unlike UITableView's version, this method
  * is not called when the row is about to display.
  */
-- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 
 /**
@@ -354,7 +354,7 @@ NS_ASSUME_NONNULL_BEGIN
  *   queue) and should not implement reuse (it will be called once per row).
  */
 
-- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
  * Indicator to lock the data source for data fetching in async mode.
@@ -445,7 +445,7 @@ NS_ASSUME_NONNULL_BEGIN
  * If not implemented, the tableView assumes that it should notify its asyncDelegate when batch fetching
  * should occur.
  */
-- (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView;
+- (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView AS_WARN_UNUSED_RESULT;
 
 /**
  * Provides the constrained size range for measuring the row at the index path.
@@ -457,7 +457,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return A constrained size range for layout the node at this index path.
  */
-- (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
  * Informs the delegate that the table view will add the node
