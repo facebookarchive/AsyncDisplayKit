@@ -16,6 +16,14 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+ * ASNavigationController
+ *
+ * @discussion ASNavigationController is a drop in replacement for UINavigationController
+ * which implements the memory efficiency improving @c ASManagesChildVisibilityDepth protocol.
+ *
+ * @see ASManagesChildVisibilityDepth
+ */
 @interface ASNavigationController : UINavigationController <ASManagesChildVisibilityDepth>
 
 @end
