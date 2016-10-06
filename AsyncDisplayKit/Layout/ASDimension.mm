@@ -20,29 +20,18 @@ ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
   if (dimension.length != 0) {
     
     // Handle points
-    NSUInteger pointsStringLocation = [dimension rangeOfString:@"pt"].location;
-    if (pointsStringLocation != NSNotFound) {
-      // Check if points is at the end and remove it
-      if (pointsStringLocation == (dimension.length-2)) {
-        dimension = [dimension substringToIndex:(dimension.length-2)];
-        return ASDimensionMake(ASDimensionUnitPoints, dimension.floatValue);
-      }
+    if ([dimension hasSuffix:@"pt"]) {
+      return ASDimensionMake(ASDimensionUnitPoints, dimension.floatValue);
     }
     
     // Handle auto
-    NSUInteger autoStringLocation = [dimension rangeOfString:@"auto"].location;
-    if (autoStringLocation != NSNotFound) {
+    if ([dimension isEqualToString:@"auto"]) {
       return ASDimensionAuto;
     }
   
     // Handle percent
-    NSUInteger percentStringLocation = [dimension rangeOfString:@"%"].location;
-    if (percentStringLocation != NSNotFound) {
-      // Check if percent is at the end and remove it
-      if (percentStringLocation == (dimension.length-1)) {
-        dimension = [dimension substringToIndex:(dimension.length-1)];
-        return ASDimensionMake(ASDimensionUnitFraction, (dimension.floatValue / 100.0));
-      }
+    if ([dimension hasSuffix:@"%"]) {
+      return ASDimensionMake(ASDimensionUnitFraction, (dimension.floatValue / 100.0));
     }
   }
   
