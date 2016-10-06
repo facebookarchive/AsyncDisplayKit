@@ -17,32 +17,35 @@ ASDimension const ASDimensionAuto = {ASDimensionUnitAuto, 0};
 
 ASOVERLOADABLE ASDimension ASDimensionMake(NSString *dimension)
 {
-  // Handle empty string
-  if (dimension.length == 0) {
-    return ASDimensionMake(ASDimensionUnitPoints, 0.0);
-  }
+  if (dimension.length != 0) {
+    
+    // Handle points
+    NSUInteger pointsStringLocation = [dimension rangeOfString:@"pt"].location;
+    if (pointsStringLocation != NSNotFound) {
+      // Check if points is at the end and remove it
+      if (pointsStringLocation == (dimension.length-2)) {
+        dimension = [dimension substringToIndex:(dimension.length-2)];
+        return ASDimensionMake(ASDimensionUnitPoints, dimension.floatValue);
+      }
+    }
+    
+    // Handle auto
+    NSUInteger autoStringLocation = [dimension rangeOfString:@"auto"].location;
+    if (autoStringLocation != NSNotFound) {
+      return ASDimensionAuto;
+    }
   
-  // Handle points
-  NSUInteger pointsStringLocation = [dimension rangeOfString:@"pt"].location;
-  if (pointsStringLocation != NSNotFound) {
-    // Check if points is at the end and remove it
-    if (pointsStringLocation == (dimension.length-2)) {
-      dimension = [dimension substringToIndex:(dimension.length-2)];
-      return ASDimensionMake(ASDimensionUnitPoints, dimension.floatValue);
+    // Handle percent
+    NSUInteger percentStringLocation = [dimension rangeOfString:@"%"].location;
+    if (percentStringLocation != NSNotFound) {
+      // Check if percent is at the end and remove it
+      if (percentStringLocation == (dimension.length-1)) {
+        dimension = [dimension substringToIndex:(dimension.length-1)];
+        return ASDimensionMake(ASDimensionUnitFraction, (dimension.floatValue / 100.0));
+      }
     }
   }
   
-  // Handle fraction
-  NSUInteger percentStringLocation = [dimension rangeOfString:@"%"].location;
-  if (percentStringLocation != NSNotFound) {
-    // Check if percent is at the end and remove it
-    if (percentStringLocation == (dimension.length-1)) {
-      dimension = [dimension substringToIndex:(dimension.length-1)];
-      return ASDimensionMake(ASDimensionUnitFraction, (dimension.floatValue / 100.0));
-    }
-  }
-
-  // Assert as parsing went wrong
   ASDisplayNodeCAssert(NO, @"Parsing dimension failed for: %@", dimension);
   return ASDimensionAuto;
 }
