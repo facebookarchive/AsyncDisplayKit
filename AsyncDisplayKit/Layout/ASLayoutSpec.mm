@@ -41,7 +41,6 @@
   
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
-  _style = [[ASLayoutElementStyle alloc] init];
   _childrenArray = [[NSMutableArray alloc] init];
   
   return self;
@@ -69,6 +68,9 @@
 - (ASLayoutElementStyle *)style
 {
   ASDN::MutexLocker l(__instanceLock__);
+  if (_style == nil) {
+    _style = [[ASLayoutElementStyle alloc] init];
+  }
   return _style;
 }
 
@@ -87,14 +89,14 @@
 
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
 {
-  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:_style.size relativeToParentSize:parentSize];
+  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
                      restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutElementSizeResolve(_style.size, parentSize));
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutElementSizeResolve(self.style.size, parentSize));
   return [self calculateLayoutThatFits:resolvedRange];
 }
 
