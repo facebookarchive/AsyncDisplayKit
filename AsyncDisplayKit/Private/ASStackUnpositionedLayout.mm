@@ -131,7 +131,7 @@ static const CGFloat kViolationEpsilon = 0.01;
  */
 static std::function<CGFloat(const ASStackUnpositionedItem &)> flexFactorInViolationDirection(const CGFloat violation)
 {
-  if (fabs(violation) < kViolationEpsilon) {
+  if (std::fabs(violation) < kViolationEpsilon) {
     return [](const ASStackUnpositionedItem &item) { return 0.0; };
   } else if (violation > 0) {
     return [](const ASStackUnpositionedItem &item) { return item.child.style.flexGrow; };
@@ -167,7 +167,7 @@ static std::function<CGFloat(const ASStackUnpositionedItem &)> flexShrinkAdjustm
     const CGFloat scaledFlexShrinkFactorRatio = scaledFlexShrinkFactor(item, style, flexFactorSum) / scaledFlexShrinkFactorSum;
     // The item should shrink proportionally to the scaled flex shrink factor ratio computed above.
     // Unlike the flex grow adjustment the flex shrink adjustment needs to take the size of each item into account.
-    return -fabs(scaledFlexShrinkFactorRatio * violation);
+    return -std::fabs(scaledFlexShrinkFactorRatio * violation);
   };
 }
 
@@ -184,7 +184,7 @@ static std::function<CGFloat(const ASStackUnpositionedItem &)> flexGrowAdjustmen
 {
   // To compute the flex grow adjustment distribute the violation proportionally based on each item's flex grow factor.
   return [violation, flexFactorSum](const ASStackUnpositionedItem &item) {
-    return floorf(violation * (item.child.style.flexGrow / flexFactorSum));
+    return std::floor(violation * (item.child.style.flexGrow / flexFactorSum));
   };
 }
 
@@ -368,7 +368,7 @@ static void flexChildrenAlongStackDimension(std::vector<ASStackUnpositionedItem>
                                                                                                               violation,
                                                                                                               flexFactorSum);
 
-  // Compute any remaining violation. Any remaining violation it will be allocated to the first flexible child.
+  // Compute any remaining violation to the first flexible child.
   const CGFloat remainingViolation = std::accumulate(items.begin(), items.end(), violation, [&](CGFloat x, const ASStackUnpositionedItem &item) {
     return x - flexAdjustment(item);
   });
