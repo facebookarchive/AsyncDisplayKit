@@ -299,7 +299,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _eventLogHead = -1;
   _contentsScaleForDisplay = ASScreenScale();
   
-  // TODO: We should lazily initialize the style object.
   _environmentState = ASEnvironmentStateMakeDefault();
   
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
