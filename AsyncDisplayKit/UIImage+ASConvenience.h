@@ -12,10 +12,13 @@
 
 #import <UIKit/UIImage.h>
 #import <UIKit/UIBezierPath.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 // High-performance flat-colored, rounded-corner resizable images
 //
-// For "Baked-in Opaque" corners, set cornerColor equal to the color behind the rounded image object, e.g. the background color.
+// For "Baked-in Opaque" corners, set cornerColor equal to the color behind the rounded image object, i.e. the background color.
 // For "Baked-in Alpha" corners, set cornerColor = [UIColor clearColor]
 //
 // See http://asyncdisplaykit.org/docs/corner-rounding.html for an explanation.
@@ -31,7 +34,7 @@
  */
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
                                           cornerColor:(UIColor *)cornerColor
-                                            fillColor:(UIColor *)fillColor;
+                                            fillColor:(UIColor *)fillColor AS_WARN_UNUSED_RESULT;
 
 /**
  * This generates a flat-color, rounded-corner resizeable image with a border
@@ -45,8 +48,8 @@
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
                                           cornerColor:(UIColor *)cornerColor
                                             fillColor:(UIColor *)fillColor
-                                          borderColor:(UIColor *)borderColor
-                                          borderWidth:(CGFloat)borderWidth;
+                                          borderColor:(nullable UIColor *)borderColor
+                                          borderWidth:(CGFloat)borderWidth AS_WARN_UNUSED_RESULT;
 
 /**
  * This generates a flat-color, rounded-corner resizeable image with a border
@@ -62,10 +65,11 @@
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
                                           cornerColor:(UIColor *)cornerColor
                                             fillColor:(UIColor *)fillColor
-                                          borderColor:(UIColor *)borderColor
+                                          borderColor:(nullable UIColor *)borderColor
                                           borderWidth:(CGFloat)borderWidth
                                        roundedCorners:(UIRectCorner)roundedCorners
-                                                scale:(CGFloat)scale;
+                                                scale:(CGFloat)scale AS_WARN_UNUSED_RESULT;
 
 @end
 
+NS_ASSUME_NONNULL_END

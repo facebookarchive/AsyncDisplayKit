@@ -12,7 +12,7 @@
 #import "ASMultidimensionalArrayUtils.h"
 
 // Import UIKit to get [NSIndexPath indexPathForItem:inSection:] which uses
-// static memory addresses rather than allocating new index path objects.
+// tagged pointers.
 #import <UIKit/UIKit.h>
 
 #pragma mark - Internal Methods
@@ -43,7 +43,9 @@ static void ASRecursivelyUpdateMultidimensionalArrayAtIndexPaths(NSMutableArray 
       curIdx++;
     }
 
-    updateBlock(mutableArray, indexSet, curIdx);
+    if (updateBlock){
+      updateBlock(mutableArray, indexSet, curIdx);
+    }
   }
 }
 
@@ -171,11 +173,22 @@ NSArray *ASFindElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutab
 NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *multidimensionalArray, NSIndexSet *indexSet)
 {
   NSMutableArray *res = [NSMutableArray array];
-  [indexSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-    ASRecursivelyFindIndexPathsForMultidimensionalArray(multidimensionalArray[idx], [NSIndexPath indexPathWithIndex:idx], res);
+  [indexSet enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
+    for (NSUInteger i = range.location; i < NSMaxRange(range); i++) {
+      ASRecursivelyFindIndexPathsForMultidimensionalArray(multidimensionalArray[i], [NSIndexPath indexPathWithIndex:i], res);
+    }
   }];
 
   return res;
+}
+
+void ASMoveElementInTwoDimensionalArray(NSMutableArray *mutableArray, NSIndexPath *sourceIndexPath, NSIndexPath *destinationIndexPath)
+{
+  NSMutableArray *oldSection = mutableArray[sourceIndexPath.section];
+  NSInteger oldItem = sourceIndexPath.item;
+  id object = oldSection[oldItem];
+  [oldSection removeObjectAtIndex:oldItem];
+  [mutableArray[destinationIndexPath.section] insertObject:object atIndex:destinationIndexPath.item];
 }
 
 NSArray<NSIndexPath *> *ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths(NSArray *multidimensionalArray, NSArray<NSIndexPath *> *indexPaths)

@@ -10,13 +10,16 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+#define ASDISPLAYNODE_DELAY_DISPLAY 0
 
 @class _ASAsyncTransaction;
 
 typedef void(^asyncdisplaykit_async_transaction_completion_block_t)(_ASAsyncTransaction *completedTransaction, BOOL canceled);
-typedef id<NSObject>(^asyncdisplaykit_async_transaction_operation_block_t)(void);
-typedef void(^asyncdisplaykit_async_transaction_operation_completion_block_t)(id<NSObject> value, BOOL canceled);
-typedef void(^asyncdisplaykit_async_transaction_complete_async_operation_block_t)(id<NSObject> value);
+typedef id<NSObject> _Nullable(^asyncdisplaykit_async_transaction_operation_block_t)(void);
+typedef void(^asyncdisplaykit_async_transaction_operation_completion_block_t)(id<NSObject> _Nullable value, BOOL canceled);
+typedef void(^asyncdisplaykit_async_transaction_complete_async_operation_block_t)(id<NSObject> _Nullable value);
 typedef void(^asyncdisplaykit_async_transaction_async_operation_block_t)(asyncdisplaykit_async_transaction_complete_async_operation_block_t completeOperationBlock);
 
 /**
@@ -53,11 +56,11 @@ extern NSInteger const ASDefaultTransactionPriority;
  @summary Initialize a transaction that can start collecting async operations.
 
  @see initWithCallbackQueue:commitBlock:completionBlock:executeConcurrently:
- @param callbackQueue The dispatch queue that the completion blocks will be called on.
- @param completionBlock A block that is called when the transaction is completed. May be NULL.
+ @param callbackQueue The dispatch queue that the completion blocks will be called on. Default is the main queue.
+ @param completionBlock A block that is called when the transaction is completed.
  */
-- (instancetype)initWithCallbackQueue:(dispatch_queue_t)callbackQueue
-                      completionBlock:(asyncdisplaykit_async_transaction_completion_block_t)completionBlock;
+- (instancetype)initWithCallbackQueue:(nullable dispatch_queue_t)callbackQueue
+                      completionBlock:(nullable asyncdisplaykit_async_transaction_completion_block_t)completionBlock;
 
 /**
  @summary Block the main thread until the transaction is complete, including callbacks.
@@ -69,18 +72,18 @@ extern NSInteger const ASDefaultTransactionPriority;
 /**
  The dispatch queue that the completion blocks will be called on.
  */
-@property (nonatomic, readonly, retain) dispatch_queue_t callbackQueue;
+@property (nonatomic, readonly, strong) dispatch_queue_t callbackQueue;
 
 /**
  A block that is called when the transaction is completed.
  */
-@property (nonatomic, readonly, copy) asyncdisplaykit_async_transaction_completion_block_t completionBlock;
+@property (nonatomic, readonly, copy, nullable) asyncdisplaykit_async_transaction_completion_block_t completionBlock;
 
 /**
  The state of the transaction.
  @see ASAsyncTransactionState
  */
-@property (nonatomic, readonly, assign) ASAsyncTransactionState state;
+@property (readonly, assign) ASAsyncTransactionState state;
 
 /**
  @summary Adds a synchronous operation to the transaction.  The execution block will be executed immediately.
@@ -96,7 +99,7 @@ extern NSInteger const ASDefaultTransactionPriority;
  */
 - (void)addOperationWithBlock:(asyncdisplaykit_async_transaction_operation_block_t)block
                         queue:(dispatch_queue_t)queue
-                   completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion;
+                   completion:(nullable asyncdisplaykit_async_transaction_operation_completion_block_t)completion;
 
 /**
  @summary Adds a synchronous operation to the transaction.  The execution block will be executed immediately.
@@ -114,7 +117,7 @@ extern NSInteger const ASDefaultTransactionPriority;
 - (void)addOperationWithBlock:(asyncdisplaykit_async_transaction_operation_block_t)block
                      priority:(NSInteger)priority
                         queue:(dispatch_queue_t)queue
-                   completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion;
+                   completion:(nullable asyncdisplaykit_async_transaction_operation_completion_block_t)completion;
 
 
 /**
@@ -133,7 +136,7 @@ extern NSInteger const ASDefaultTransactionPriority;
  */
 - (void)addAsyncOperationWithBlock:(asyncdisplaykit_async_transaction_async_operation_block_t)block
                              queue:(dispatch_queue_t)queue
-                        completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion;
+                        completion:(nullable asyncdisplaykit_async_transaction_operation_completion_block_t)completion;
 
 /**
  @summary Adds an async operation to the transaction.  The execution block will be executed immediately.
@@ -153,7 +156,7 @@ extern NSInteger const ASDefaultTransactionPriority;
 - (void)addAsyncOperationWithBlock:(asyncdisplaykit_async_transaction_async_operation_block_t)block
                           priority:(NSInteger)priority
                              queue:(dispatch_queue_t)queue
-                        completion:(asyncdisplaykit_async_transaction_operation_completion_block_t)completion;
+                        completion:(nullable asyncdisplaykit_async_transaction_operation_completion_block_t)completion;
 
 
 
@@ -188,3 +191,5 @@ extern NSInteger const ASDefaultTransactionPriority;
 - (void)commit;
 
 @end
+
+NS_ASSUME_NONNULL_END

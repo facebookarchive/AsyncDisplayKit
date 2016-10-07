@@ -12,8 +12,9 @@ please open an issue on GitHub.
 6. If you haven't already, complete the Contributor License Agreement ("CLA").
 7. Make sure that any new files conform to the correct file header style below
 
-*ASDK FILES:*
+#### ASDK files header style
 
+```
 //
 //  ASPagerFlowLayout.h
 //  AsyncDisplayKit
@@ -25,9 +26,11 @@ please open an issue on GitHub.
 //  LICENSE file in the root directory of this source tree. An additional grant
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
+```
 
-*EXAMPLE PROJECT FILES:*
+#### Example project files header style
 
+```
 //
 //  PhotoCellNode.m
 //  Sample
@@ -46,6 +49,7 @@ please open an issue on GitHub.
 //   ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //  
+```
 
 ## Contributor License Agreement ("CLA")
 In order to accept your pull request, we need you to submit a CLA. You only need

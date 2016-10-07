@@ -34,6 +34,8 @@ static inline BOOL ASDisplayNodeThreadIsMain()
 #import <QuartzCore/QuartzCore.h>
 #endif
 
+#include <memory>
+
 /**
  For use with ASDN::StaticMutex only.
  */
@@ -53,7 +55,7 @@ static inline BOOL ASDisplayNodeThreadIsMain()
 
 
 namespace ASDN {
-
+  
   template<class T>
   class Locker
   {
@@ -98,16 +100,71 @@ namespace ASDN {
 
   };
 
+  template<class T>
+  class SharedLocker
+  {
+    std::shared_ptr<T> _l;
+    
+#if TIME_LOCKER
+    CFTimeInterval _ti;
+    const char *_name;
+#endif
+    
+  public:
+#if !TIME_LOCKER
+    
+    SharedLocker (std::shared_ptr<T> const& l) ASDISPLAYNODE_NOTHROW : _l (l) {
+      assert(_l != nullptr);
+      _l->lock ();
+    }
+    
+    ~SharedLocker () {
+      _l->unlock ();
+    }
+    
+    // non-copyable.
+    SharedLocker(const SharedLocker<T>&) = delete;
+    SharedLocker &operator=(const SharedLocker<T>&) = delete;
+    
+#else
+    
+    SharedLocker (std::shared_ptr<T> const& l, const char *name = NULL) ASDISPLAYNODE_NOTHROW : _l (l), _name(name) {
+      _ti = CACurrentMediaTime();
+      _l->lock ();
+    }
+    
+    ~SharedLocker () {
+      _l->unlock ();
+      if (_name) {
+        printf(_name, NULL);
+        printf(" dt:%f\n", CACurrentMediaTime() - _ti);
+      }
+    }
+    
+#endif
+    
+  };
 
   template<class T>
   class Unlocker
   {
     T &_l;
   public:
-    Unlocker (T &l) ASDISPLAYNODE_NOTHROW : _l (l) {_l.unlock ();}
+    Unlocker (T &l) ASDISPLAYNODE_NOTHROW : _l (l) { _l.unlock (); }
     ~Unlocker () {_l.lock ();}
     Unlocker(Unlocker<T>&) = delete;
     Unlocker &operator=(Unlocker<T>&) = delete;
+  };
+  
+  template<class T>
+  class SharedUnlocker
+  {
+    std::shared_ptr<T> _l;
+  public:
+    SharedUnlocker (std::shared_ptr<T> const& l) ASDISPLAYNODE_NOTHROW : _l (l) { _l->unlock (); }
+    ~SharedUnlocker () { _l->lock (); }
+    SharedUnlocker(SharedUnlocker<T>&) = delete;
+    SharedUnlocker &operator=(SharedUnlocker<T>&) = delete;
   };
 
   struct Mutex
@@ -164,7 +221,9 @@ namespace ASDN {
   };
 
   typedef Locker<Mutex> MutexLocker;
+  typedef SharedLocker<Mutex> MutexSharedLocker;
   typedef Unlocker<Mutex> MutexUnlocker;
+  typedef SharedUnlocker<Mutex> MutexSharedUnlocker;
 
   /**
    If you are creating a static mutex, use StaticMutex and specify its default value as one of ASDISPLAYNODE_MUTEX_INITIALIZER

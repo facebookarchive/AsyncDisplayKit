@@ -45,8 +45,10 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    self.node.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.node]];
+    // 100% of container
+    _node.style.width = ASDimensionMakeWithFraction(1.0);
+    _node.style.height = ASDimensionMakeWithFraction(1.0);
+    return [ASWrapperLayoutSpec wrapperWithLayoutElement:_node];
 }
 
 #pragma mark - <ASCollectionDataSource, ASCollectionDelegate>
@@ -66,9 +68,9 @@
     };
 }
 
-- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-    return CGSizeMake(100, 100);
+    return ASSizeRangeMakeExactSize(CGSizeMake(100, 100));
 }
 
 @end

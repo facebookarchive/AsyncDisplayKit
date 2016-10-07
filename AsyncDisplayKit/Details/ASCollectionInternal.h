@@ -12,15 +12,19 @@
 
 #import <AsyncDisplayKit/ASCollectionView.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol ASCollectionViewLayoutFacilitatorProtocol;
 @class ASCollectionNode;
 @class ASDataController;
 @class ASRangeController;
 
 @interface ASCollectionView ()
-- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator ownedByNode:(BOOL)ownedByNode;
+- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(nullable id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator ownedByNode:(BOOL)ownedByNode;
 
 @property (nonatomic, weak, readwrite) ASCollectionNode *collectionNode;
 @property (nonatomic, strong, readonly) ASDataController *dataController;
 @property (nonatomic, strong, readonly) ASRangeController *rangeController;
 @end
+
+NS_ASSUME_NONNULL_END

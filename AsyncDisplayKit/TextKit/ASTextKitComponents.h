@@ -13,26 +13,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-ASDISPLAYNODE_INLINE CGFloat ceilPixelValueForScale(CGFloat f, CGFloat scale)
-{
-  // Round up to device pixel (.5 on retina)
-  return ceilf(f * scale) / scale;
-}
-
-ASDISPLAYNODE_INLINE CGSize ceilSizeValue(CGSize s)
-{
-  CGFloat screenScale = [UIScreen mainScreen].scale;
-  s.width = ceilPixelValueForScale(s.width, screenScale);
-  s.height = ceilPixelValueForScale(s.height, screenScale);
-  return s;
-}
-
 @interface ASTextKitComponents : NSObject
 
 /**
  @abstract Creates the stack of TextKit components.
  @param attributedSeedString The attributed string to seed the returned text storage with, or nil to receive an blank text storage.
- @param textContainerSize The size of the text-container. Typically, size specifies the constraining width of the layout, and FLT_MAX for height. Pass CGSizeZero if these components will be hooked up to a UITextView, which will manage the text container's size itself.
+ @param textContainerSize The size of the text-container. Typically, size specifies the constraining width of the layout, and CGFLOAT_MAX for height. Pass CGSizeZero if these components will be hooked up to a UITextView, which will manage the text container's size itself.
  @return An `ASTextKitComponents` containing the created components. The text view component will be nil.
  @discussion The returned components will be hooked up together, so they are ready for use as a system upon return.
  */
@@ -42,7 +28,7 @@ ASDISPLAYNODE_INLINE CGSize ceilSizeValue(CGSize s)
 /**
  @abstract Creates the stack of TextKit components.
  @param textStorage The NSTextStorage to use.
- @param textContainerSize The size of the text-container. Typically, size specifies the constraining width of the layout, and FLT_MAX for height. Pass CGSizeZero if these components will be hooked up to a UITextView, which will manage the text container's size itself.
+ @param textContainerSize The size of the text-container. Typically, size specifies the constraining width of the layout, and CGFLOAT_MAX for height. Pass CGSizeZero if these components will be hooked up to a UITextView, which will manage the text container's size itself.
  @param layoutManager The NSLayoutManager to use.
  @return An `ASTextKitComponents` containing the created components. The text view component will be nil.
  @discussion The returned components will be hooked up together, so they are ready for use as a system upon return.

@@ -9,13 +9,12 @@
 //
 
 #import "ASLayoutSpec.h"
+#import "ASLayoutSpecPrivate.h"
+#import "ASLayoutSpec+Subclasses.h"
 
-#import "ASAssert.h"
-#import "ASEnvironmentInternal.h"
+#import "ASLayoutElementStylePrivate.h"
 
-#import "ASLayout.h"
-#import "ASThread.h"
-#import "ASTraitCollection.h"
+@implementation ASLayoutSpec
 
 #import "ASDisplayNode+Subclasses.h" // FIXME: remove this later
 #import "ASDisplayNode+Beta.h"       // FIXME: remove this later
@@ -27,35 +26,39 @@
 #import <map>
 #import <vector>
 
-typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASChildMap;
+// Dynamic properties for ASLayoutElements
+@dynamic layoutElementType;
+@synthesize isFinalLayoutElement = _isFinalLayoutElement;
 
-@interface ASLayoutSpec() {
-  ASEnvironmentState _environmentState;
-  ASDN::RecursiveMutex _propertyLock;
-  ASChildMap _children;
+#pragma mark - Class
+
++ (void)initialize
+{
+  [super initialize];
+  if (self != [ASLayoutSpec class]) {
+    ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASLayoutSpec class], self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange: method. Instead overwrite calculateLayoutThatFits:", NSStringFromClass(self));
+  }
 }
-@end
 
-@implementation ASLayoutSpec
 
-// these dynamic properties all defined in ASLayoutOptionsPrivate.m
-@dynamic spacingAfter, spacingBefore, flexGrow, flexShrink, flexBasis,
-         alignSelf, ascender, descender, sizeRange, layoutPosition, layoutableType;
-@synthesize isFinalLayoutable = _isFinalLayoutable;
+#pragma mark - Lifecycle
 
 - (instancetype)init
 {
   if (!(self = [super init])) {
     return nil;
   }
+  
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
+  _childrenArray = [[NSMutableArray alloc] init];
+  
   return self;
 }
 
-- (ASLayoutableType)layoutableType
+- (ASLayoutElementType)layoutElementType
 {
-  return ASLayoutableTypeLayoutSpec;
+  return ASLayoutElementTypeLayoutSpec;
 }
 
 - (BOOL)canLayoutAsynchronous
@@ -63,18 +66,11 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   return YES;
 }
 
-#pragma mark - Layout
+#pragma mark - Final LayoutElement
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (id<ASLayoutElement>)finalLayoutElement
 {
-  return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
-                                         size:constrainedSize.min];
-}
-
-- (id<ASLayoutable>)finalLayoutable
-{
-  if (ASLayoutableGetCurrentContext().needsVisualizeNode && !self.neverShouldVisualize) {
+  if (ASLayoutElementGetCurrentContext().needsVisualizeNode && !self.neverShouldVisualize) {
     return [[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:self];
   } else {
     return self;
@@ -104,42 +100,52 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   }
 }
 
+#pragma mark - Style
 
-- (id<ASLayoutable>)layoutableToAddFromLayoutable:(id<ASLayoutable>)child
+- (ASLayoutElementStyle *)style
 {
-  if (self.isFinalLayoutable == NO) {
-    
-    // If you are getting recursion crashes here after implementing finalLayoutable, make sure
-    // that you are setting isFinalLayoutable flag to YES. This must be one BEFORE adding a child
-    // to the new ASLayoutable.
-    //
-    // For example:
-    //- (id<ASLayoutable>)finalLayoutable
-    //{
-    //  ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
-    //  insetSpec.insets = UIEdgeInsetsMake(10,10,10,10);
-    //  insetSpec.isFinalLayoutable = YES;
-    //  [insetSpec setChild:self];
-    //  return insetSpec;
-    //}
-
-    id<ASLayoutable> finalLayoutable = [child finalLayoutable];
-    if (finalLayoutable != child) {
-      if (ASEnvironmentStatePropagationEnabled()) {
-        ASEnvironmentStatePropagateUp(finalLayoutable, child.environmentState.layoutOptionsState);
-      } else {
-        // If state propagation is not enabled the layout options state needs to be copied manually
-        ASEnvironmentState finalLayoutableEnvironmentState = finalLayoutable.environmentState;
-        finalLayoutableEnvironmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
-        finalLayoutable.environmentState = finalLayoutableEnvironmentState;
-      }
-      return finalLayoutable;
-    }
+  ASDN::MutexLocker l(__instanceLock__);
+  if (_style == nil) {
+    _style = [[ASLayoutElementStyle alloc] init];
   }
-  return child;
+  return _style;
 }
 
-- (void)setParent:(id<ASLayoutable>)parent
+#pragma mark - Layout
+
+// Deprecated
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+{
+    return [self layoutThatFits:constrainedSize];
+}
+
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
+{
+  return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];
+}
+
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
+{
+  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
+}
+
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+                     restrictedToSize:(ASLayoutElementSize)size
+                 relativeToParentSize:(CGSize)parentSize
+{
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutElementSizeResolve(self.style.size, parentSize));
+  return [self calculateLayoutThatFits:resolvedRange];
+}
+
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+{
+  return [ASLayout layoutWithLayoutElement:self size:constrainedSize.min];
+}
+
+
+#pragma mark - Parent
+
+- (void)setParent:(id<ASLayoutElement>)parent
 {
   // FIXME: Locking should be evaluated here.  _parent is not widely used yet, though.
   _parent = parent;
@@ -149,72 +155,71 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   }
 }
 
-- (void)setChild:(id<ASLayoutable>)child
+#pragma mark - Child
+
+- (void)setChild:(id<ASLayoutElement>)child
 {
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");;
+  ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
+ 
   if (child) {
-    id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-    if (finalLayoutable) {
-      _children[0] = finalLayoutable;
-      [self propagateUpLayoutable:finalLayoutable];
+    if ([child isKindOfClass:[ASLayoutSpec class]]) {
+      [(ASLayoutSpec *)child setShouldVisualize:self.shouldVisualize];
+    }
+    id<ASLayoutElement> finalLayoutElement = [self layoutElementToAddFromLayoutElement:child];
+    if (finalLayoutElement) {
+      _childrenArray[0] = finalLayoutElement;
+      [self propagateUpLayoutElement:finalLayoutElement];
     }
   } else {
-    _children.erase(0);
+    if (_childrenArray.count) {
+      [_childrenArray removeObjectAtIndex:0];
+    }
   }
 }
 
-- (void)setChild:(id<ASLayoutable>)child forIndex:(NSUInteger)index
+- (id<ASLayoutElement>)child
 {
-  if ([child isKindOfClass:[ASLayoutSpec class]]) {
-    [(ASLayoutSpec *)child setShouldVisualize:self.shouldVisualize];
-  }
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  if (child) {
-    id<ASLayoutable> finalLayoutable = [self layoutableToAddFromLayoutable:child];
-    _children[index] = finalLayoutable;
-  } else {
-    _children.erase(index);
-  }
-  // TODO: Should we propagate up the layoutable at it could happen that multiple children will propagated up their
-  //       layout options and one child will overwrite values from another child
-  // [self propagateUpLayoutable:finalLayoutable];
-}
-
-- (void)setChildren:(NSArray<id<ASLayoutable>> *)children
-{
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+  ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
   
-  _children.clear();
-  [children enumerateObjectsUsingBlock:^(id<ASLayoutable>  _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
-      if ([obj isKindOfClass:[ASLayoutSpec class]]) {
-      [(ASLayoutSpec *)obj setShouldVisualize:self.shouldVisualize];
-//      NSLog(@"%@ %@ %d", self, child, self.shouldVisualize);
-    }
-    _children[idx] = [self layoutableToAddFromLayoutable:obj];
-  }];
-}
-
-- (id<ASLayoutable>)childForIndex:(NSUInteger)index
-{
-  if (index < _children.size()) {
-    return _children[index];
+  if (_childrenArray.count) {
+    return _childrenArray[0];
   }
+  
   return nil;
 }
 
-- (id<ASLayoutable>)child
+#pragma mark - Children
+
+- (void)setChildren:(NSArray<id<ASLayoutElement>> *)children
 {
-  return _children[0];
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
+
+  [_childrenArray removeAllObjects];
+  
+  NSUInteger i = 0;
+  for (id<ASLayoutElement> child in children) {
+    ASDisplayNodeAssert([child conformsToProtocol:NSProtocolFromString(@"ASLayoutElement")], @"Child %@ of spec %@ is not an ASLayoutElement!", child, self);
+    id <ASLayoutElement> finalLayoutElement = [self layoutElementToAddFromLayoutElement:child];
+    if ([finalLayoutElement isKindOfClass:[ASLayoutSpec class]]) {
+      [(ASLayoutSpec *)finalLayoutElement setShouldVisualize:self.shouldVisualize];
+      //      NSLog(@"%@ %@ %d", self, child, self.shouldVisualize);
+    }
+    _childrenArray[i] = finalLayoutElement;
+    i += 1;
+  }
 }
 
 - (NSArray *)children
 {
-  std::vector<ASLayout *> children;
-  for (ASChildMap::iterator it = _children.begin(); it != _children.end(); ++it ) {
-    children.push_back(it->second);
-  }
-  
-  return [NSArray arrayWithObjects:&children[0] count:children.size()];
+  return [_childrenArray copy];
+}
+
+#pragma mark - NSFastEnumeration
+
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id __unsafe_unretained _Nullable [_Nonnull])buffer count:(NSUInteger)len
+{
+  return [_childrenArray countByEnumeratingWithState:state objects:buffer count:len];
 }
 
 #pragma mark - ASEnvironment
@@ -230,7 +235,7 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
 }
 
 // Subclasses can override this method to return NO, because upward propagation is not enabled if a layout
-// specification has more than one child. Currently ASStackLayoutSpec and ASStaticLayoutSpec are currently
+// specification has more than one child. Currently ASStackLayoutSpec and ASAbsoluteLayoutSpec are currently
 // the specifications that are known to have more than one.
 - (BOOL)supportsUpwardPropagation
 {
@@ -242,12 +247,12 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   return ASEnvironmentStateTraitCollectionPropagationEnabled();
 }
 
-- (void)propagateUpLayoutable:(id<ASLayoutable>)layoutable
+- (void)propagateUpLayoutElement:(id<ASLayoutElement>)layoutElement
 {
-  if ([layoutable isKindOfClass:[ASLayoutSpec class]]) {
-    [(ASLayoutSpec *)layoutable setParent:self]; // This will trigger upward propogation if needed.
+  if ([layoutElement isKindOfClass:[ASLayoutSpec class]]) {
+    [(ASLayoutSpec *)layoutElement setParent:self]; // This will trigger upward propogation if needed.
   } else if ([self supportsUpwardPropagation]) {
-    ASEnvironmentStatePropagateUp(self, layoutable.environmentState.layoutOptionsState); // Probably an ASDisplayNode
+    ASEnvironmentStatePropagateUp(self, layoutElement.environmentState.layoutOptionsState); // Probably an ASDisplayNode
   }
 }
 
@@ -261,25 +266,54 @@ typedef std::map<unsigned long, id<ASLayoutable>, std::less<unsigned long>> ASCh
   _environmentState.environmentTraitCollection = environmentTraitCollection;
 }
 
-ASEnvironmentLayoutOptionsForwarding
-ASEnvironmentLayoutExtensibilityForwarding
-
 - (ASTraitCollection *)asyncTraitCollection
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
+}
+
+ASEnvironmentLayoutExtensibilityForwarding
+
+@end
+
+#pragma mark - ASWrapperLayoutSpec
+
+@implementation ASWrapperLayoutSpec
+
++ (instancetype)wrapperWithLayoutElement:(id<ASLayoutElement>)layoutElement
+{
+  return [[self alloc] initWithLayoutElement:layoutElement];
+}
+
+- (instancetype)initWithLayoutElement:(id<ASLayoutElement>)layoutElement
+{
+  self = [super init];
+  if (self) {
+    self.child = layoutElement;
+  }
+  return self;
+}
+
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+{
+  ASLayout *sublayout = [self.child layoutThatFits:constrainedSize parentSize:constrainedSize.max];
+  sublayout.position = CGPointZero;
+  return [ASLayout layoutWithLayoutElement:self size:sublayout.size sublayouts:@[sublayout]];
 }
 
 @end
 
+
+#pragma mark - ASLayoutSpec (Debugging)
+
 @implementation ASLayoutSpec (Debugging)
 
-#pragma mark - ASLayoutableAsciiArtProtocol
+#pragma mark - ASLayoutElementAsciiArtProtocol
 
 + (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction
 {
   NSMutableArray *childStrings = [NSMutableArray array];
-  for (id<ASLayoutableAsciiArtProtocol> layoutChild in children) {
+  for (id<ASLayoutElementAsciiArtProtocol> layoutChild in children) {
     NSString *childString = [layoutChild asciiArtString];
     if (childString) {
       [childStrings addObject:childString];

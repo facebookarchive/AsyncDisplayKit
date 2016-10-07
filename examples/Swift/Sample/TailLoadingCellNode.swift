@@ -27,7 +27,7 @@ final class TailLoadingCellNode: ASCellNode {
   override init() {
     super.init()
     addSubnode(text)
-    text.attributedString = NSAttributedString(
+    text.attributedText = NSAttributedString(
       string: "Loading…",
       attributes: [
         NSFontAttributeName: UIFont.systemFontOfSize(12),
@@ -54,7 +54,8 @@ final class SpinnerNode: ASDisplayNode {
 
   override init() {
     super.init(viewBlock: { UIActivityIndicatorView(activityIndicatorStyle: .Gray) }, didLoadBlock: nil)
-    preferredFrameSize.height = 32
+    
+    self.style.minHeight = ASDimensionMakeWithPoints(44.0)
   }
 
   override func didLoad() {

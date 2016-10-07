@@ -12,7 +12,6 @@
 
 #import <UIKit/UICollectionView.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
-#import <AsyncDisplayKit/ASLayoutController.h>
 #import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
 #import <AsyncDisplayKit/ASCollectionView.h>
 
@@ -27,14 +26,52 @@ NS_ASSUME_NONNULL_BEGIN
  * ASCollectionNode is a node based class that wraps an ASCollectionView. It can be used
  * as a subnode of another node, and provide room for many (great) features and improvements later on.
  */
-@interface ASCollectionNode : ASDisplayNode
+@interface ASCollectionNode : ASDisplayNode <ASRangeControllerUpdateRangeProtocol>
 
+/**
+ * Initializes an ASCollectionNode
+ *
+ * @discussion Initializes and returns a newly allocated collection node object with the specified layout.
+ *
+ * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
+ */
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
+
+/**
+ * Initializes an ASCollectionNode
+ *
+ * @discussion Initializes and returns a newly allocated collection node object with the specified frame and layout.
+ *
+ * @param frame The frame rectangle for the collection view, measured in points. The origin of the frame is relative to the superview in which you plan to add it. This frame is passed to the superclass during initialization.
+ * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
+ */
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
 
+/**
+ * Returns the corresponding ASCollectionView
+ *
+ * @return view The corresponding ASCollectionView.
+ */
 @property (strong, nonatomic, readonly) ASCollectionView *view;
 
+/**
+ * The object that acts as the asynchronous delegate of the collection view
+ *
+ * @discussion The delegate must adopt the ASCollectionDelegate protocol. The collection view maintains a weak reference to the delegate object.
+ *
+ * The delegate object is responsible for providing size constraints for nodes and indicating whether batch fetching should begin.
+ * @note This is a convenience method which sets the asyncDelegate on the collection node's collection view.
+ */
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
+
+/**
+ * The object that acts as the asynchronous data source of the collection view
+ *
+ * @discussion The datasource must adopt the ASCollectionDataSource protocol. The collection view maintains a weak reference to the datasource object.
+ *
+ * The datasource object is responsible for providing nodes or node creation blocks to the collection view.
+ * @note This is a convenience method which sets the asyncDatasource on the collection node's collection view.
+ */
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
 
 /**
@@ -42,12 +79,12 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param rangeType The range type to get the tuning parameters for.
  *
- * @returns A tuning parameter value for the given range type in full mode.
+ * @return A tuning parameter value for the given range type in full mode.
  *
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType;
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
 
 /**
  * Set the tuning parameters for a range type in full mode.
@@ -66,12 +103,12 @@ NS_ASSUME_NONNULL_BEGIN
  * @param rangeMode The range mode to get the running parameters for.
  * @param rangeType The range type to get the tuning parameters for.
  *
- * @returns A tuning parameter value for the given range type in the given mode.
+ * @return A tuning parameter value for the given range type in the given mode.
  *
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
 
 /**
  * Set the tuning parameters for a range type in the specified mode.
@@ -92,7 +129,7 @@ NS_ASSUME_NONNULL_BEGIN
  * the main thread.
  * @warning This method is substantially more expensive than UICollectionView's version.
  */
-- (void)reloadDataWithCompletion:(void (^)())completion;
+- (void)reloadDataWithCompletion:(nullable void (^)())completion;
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
@@ -108,10 +145,6 @@ NS_ASSUME_NONNULL_BEGIN
  * while all the cells load.
  */
 - (void)reloadDataImmediately;
-
-@end
-
-@interface ASCollectionNode (ASRangeControllerUpdateRangeProtocol) <ASRangeControllerUpdateRangeProtocol>
 
 @end
 

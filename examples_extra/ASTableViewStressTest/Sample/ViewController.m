@@ -47,7 +47,7 @@ typedef enum : NSUInteger {
   if (!(self = [super init]))
     return nil;
 
-  _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain asyncDataFetching:YES];
+  _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
   _tableView.asyncDataSource = self;
   _tableView.asyncDelegate = self;
   _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;

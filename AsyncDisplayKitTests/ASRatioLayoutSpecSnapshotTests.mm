@@ -21,8 +21,7 @@ static const ASSizeRange kFixedSize = {{0, 0}, {100, 100}};
 
 - (void)testRatioLayoutSpecWithRatio:(CGFloat)ratio childSize:(CGSize)childSize identifier:(NSString *)identifier
 {
-  ASStaticSizeDisplayNode *subnode = ASDisplayNodeWithBackgroundColor([UIColor greenColor]);
-  subnode.staticSize = childSize;
+  ASDisplayNode *subnode = ASDisplayNodeWithBackgroundColor([UIColor greenColor], childSize);
   
   ASLayoutSpec *layoutSpec = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:ratio child:subnode];
   

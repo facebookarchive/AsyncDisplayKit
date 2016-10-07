@@ -17,7 +17,7 @@
 
 @implementation ASRelativeLayoutSpec
 
-- (instancetype)initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
+- (instancetype)initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutElement>)child
 {
   if (!(self = [super init])) {
     return nil;
@@ -30,7 +30,7 @@
   return self;
 }
 
-+ (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
++ (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutElement>)child
 {
   return [[self alloc] initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOption child:child];
 }
@@ -52,11 +52,15 @@
   _sizingOption = sizingOption;
 }
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
+  // If we have a finite size in any direction, pass this so that the child can
+  // resolve percentages against it. Otherwise pass ASLayoutElementParentDimensionUndefined
+  // as the size will depend on the content
+  // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
   CGSize size = {
-    constrainedSize.max.width,
-    constrainedSize.max.height
+    isinf(constrainedSize.max.width) || !ASPointsAreValidForLayout(constrainedSize.max.width) ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.width,
+    isinf(constrainedSize.max.height) || !ASPointsAreValidForLayout(constrainedSize.max.height) ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.height
   };
   
   BOOL reduceWidth = (_horizontalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||
@@ -70,7 +74,8 @@
     reduceWidth ? 0 : constrainedSize.min.width,
     reduceHeight ? 0 : constrainedSize.min.height,
   };
-  ASLayout *sublayout = [self.child measureWithSizeRange:ASSizeRangeMake(minChildSize, constrainedSize.max)];
+  
+  ASLayout *sublayout = [self.child layoutThatFits:ASSizeRangeMake(minChildSize, constrainedSize.max) parentSize:size];
   
   // If we have an undetermined height or width, use the child size to define the layout
   // size
@@ -94,10 +99,7 @@
     ASRoundPixelValue((size.height - sublayout.size.height) * yPosition)
   };
   
-  return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
-                                         size:size
-                                   sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutElement:self size:size sublayouts:@[sublayout]];
 }
 
 - (CGFloat)proportionOfAxisForAxisPosition:(ASRelativeLayoutSpecPosition)position

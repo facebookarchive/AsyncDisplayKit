@@ -39,7 +39,7 @@ extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningPar
     .leadingBufferScreenfuls = 1.0,
     .trailingBufferScreenfuls = 0.5
   };
-  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypeFetchData] = {
+  _tuningParameters[ASLayoutRangeModeFull][ASLayoutRangeTypePreload] = {
     .leadingBufferScreenfuls = 2.5,
     .trailingBufferScreenfuls = 1.5
   };
@@ -48,7 +48,7 @@ extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningPar
     .leadingBufferScreenfuls = 0.25,
     .trailingBufferScreenfuls = 0.25
   };
-  _tuningParameters[ASLayoutRangeModeMinimum][ASLayoutRangeTypeFetchData] = {
+  _tuningParameters[ASLayoutRangeModeMinimum][ASLayoutRangeTypePreload] = {
     .leadingBufferScreenfuls = 0.5,
     .trailingBufferScreenfuls = 0.25
   };
@@ -57,7 +57,7 @@ extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningPar
     .leadingBufferScreenfuls = 0,
     .trailingBufferScreenfuls = 0
   };
-  _tuningParameters[ASLayoutRangeModeVisibleOnly][ASLayoutRangeTypeFetchData] = {
+  _tuningParameters[ASLayoutRangeModeVisibleOnly][ASLayoutRangeTypePreload] = {
     .leadingBufferScreenfuls = 0,
     .trailingBufferScreenfuls = 0
   };
@@ -69,7 +69,7 @@ extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningPar
     .leadingBufferScreenfuls = 0,
     .trailingBufferScreenfuls = 0
   };
-  _tuningParameters[ASLayoutRangeModeLowMemory][ASLayoutRangeTypeFetchData] = {
+  _tuningParameters[ASLayoutRangeModeLowMemory][ASLayoutRangeTypePreload] = {
     .leadingBufferScreenfuls = 0,
     .trailingBufferScreenfuls = 0
   };

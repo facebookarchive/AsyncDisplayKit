@@ -13,15 +13,17 @@
 // These methods must never be called or overridden by other classes.
 //
 
+#import <atomic>
 #import "_AS-objc-internal.h"
 #import "ASDisplayNode.h"
-#import "ASSentinel.h"
 #import "ASThread.h"
 #import "_ASTransitionContext.h"
 #import "ASLayoutTransition.h"
 #import "ASEnvironment.h"
+#import "ASObjectDescriptionHelpers.h"
+#import "ASWeakSet.h"
 
-#include <vector>
+#import "ASDisplayNode+Beta.h"
 
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
@@ -45,8 +47,6 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   ASDisplayNodeMethodOverrideLayoutSpecThatFits = 1 << 4
 };
 
-@class _ASDisplayNodePosition;
-
 FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification;
 FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp;
 
@@ -55,13 +55,13 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 #define TIME_DISPLAYNODE_OPS 0 // If you're using this information frequently, try: (DEBUG || PROFILE)
 
-@interface ASDisplayNode ()
+@interface ASDisplayNode () <ASDescriptionProvider, ASDebugDescriptionProvider>
 {
 @package
   _ASPendingState *_pendingViewState;
 
   // Protects access to _view, _layer, _pendingViewState, _subnodes, _supernode, and other properties which are accessed from multiple threads.
-  ASDN::RecursiveMutex _propertyLock;
+  ASDN::RecursiveMutex __instanceLock__;
   UIView *_view;
   CALayer *_layer;
 
@@ -85,10 +85,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
     
     // Prevent calling setNeedsDisplay on a layer that backs a UIImageView. Usually calling setNeedsDisplay on a CALayer
     // triggers a recreation of the contents of layer unfortunately calling it on a CALayer that backs a UIImageView
-    // it goes trough the normal flow to assign the contents to a layer via the CALayerDelegate methods. Unfortunately
+    // it goes through the normal flow to assign the contents to a layer via the CALayerDelegate methods. Unfortunately
     // UIImageView does not do recreate the layer contents the usual way, it actually does not implement some of the
     // methods at all instead it throws away the contents of the layer and nothing will show up.
-    unsigned canCallNeedsDisplayOfLayer:1;
+    unsigned canCallSetNeedsDisplayOfLayer:1;
 
     // whether custom drawing is enabled
     unsigned implementsInstanceDrawRect:1;
@@ -106,8 +106,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   
 @protected
   ASDisplayNode * __weak _supernode;
+  
+  ASLayoutElementStyle *_style;
 
-  ASSentinel *_displaySentinel;
+  std::atomic_uint _displaySentinel;
 
   int32_t _transitionID;
   BOOL _transitionInProgress;
@@ -116,22 +118,27 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   CGFloat _contentsScaleForDisplay;
 
   ASEnvironmentState _environmentState;
-  ASLayout *_layout;
-
 
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
-  
+  NSMutableArray<ASTraceEvent *> *_eventLog;
+  // The index of the most recent log entry. -1 until first entry.
+  NSInteger _eventLogHead;
+
   // Main thread only
-  _ASTransitionContext *_transitionContext;
-  BOOL _usesImplicitHierarchyManagement;
+  BOOL _automaticallyManagesSubnodes;
+  _ASTransitionContext *_pendingLayoutTransitionContext;
+  NSTimeInterval _defaultLayoutTransitionDuration;
+  NSTimeInterval _defaultLayoutTransitionDelay;
+  UIViewAnimationOptions _defaultLayoutTransitionOptions;
 
   int32_t _pendingTransitionID;
   ASLayoutTransition *_pendingLayoutTransition;
+  std::shared_ptr<ASDisplayNodeLayout> _calculatedDisplayNodeLayout;
   
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
-  ASDisplayNodeDidLoadBlock _nodeLoadedBlock;
+  NSMutableArray<ASDisplayNodeDidLoadBlock> *_onDidLoadBlocks;
   Class _viewClass;
   Class _layerClass;
   
@@ -139,7 +146,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   CALayer *_placeholderLayer;
 
   // keeps track of nodes/subnodes that have not finished display, used with placeholders
-  NSMutableSet *_pendingDisplayNodes;
+  ASWeakSet *_pendingDisplayNodes;
 
   ASDisplayNodeContextModifier _willDisplayNodeContentWithRenderingContext;
   ASDisplayNodeContextModifier _didDisplayNodeContentWithRenderingContext;
@@ -160,6 +167,13 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   NSArray *_accessibilityHeaderElements;
   CGPoint _accessibilityActivationPoint;
   UIBezierPath *_accessibilityPath;
+
+  // performance measurement
+  ASDisplayNodePerformanceMeasurementOptions _measurementOptions;
+  NSTimeInterval _layoutSpecTotalTime;
+  NSInteger _layoutSpecNumberOfPasses;
+  NSTimeInterval _layoutComputationTotalTime;
+  NSInteger _layoutComputationNumberOfPasses;
 
 #if TIME_DISPLAYNODE_OPS
 @public
@@ -183,7 +197,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;
-- (BOOL)__shouldSize;
 
 /**
  Invoked before a call to setNeedsLayout to the underlying view
@@ -197,6 +210,17 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 - (void)__layout;
 - (void)__setSupernode:(ASDisplayNode *)supernode;
+
+/**
+ Internal method to add / replace / insert subnode and remove from supernode without checking if
+ node has automaticallyManagesSubnodes set to YES. 
+ */
+- (void)_addSubnode:(ASDisplayNode *)subnode;
+- (void)_replaceSubnode:(ASDisplayNode *)oldSubnode withSubnode:(ASDisplayNode *)replacementSubnode;
+- (void)_insertSubnode:(ASDisplayNode *)subnode belowSubnode:(ASDisplayNode *)below;
+- (void)_insertSubnode:(ASDisplayNode *)subnode aboveSubnode:(ASDisplayNode *)above;
+- (void)_insertSubnode:(ASDisplayNode *)subnode atIndex:(NSInteger)idx;
+- (void)_removeFromSupernode;
 
 // Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
 - (BOOL)__visibilityNotificationsDisabled;

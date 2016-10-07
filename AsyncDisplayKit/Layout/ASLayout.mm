@@ -10,10 +10,12 @@
 
 #import "ASLayout.h"
 
+#import "ASDimension.h"
 #import "ASInternalHelpers.h"
 #import "ASLayoutSpecUtilities.h"
 
 #import <queue>
+#import "ASObjectDescriptionHelpers.h"
 
 CGPoint const CGPointNull = {NAN, NAN};
 
@@ -22,7 +24,22 @@ extern BOOL CGPointIsNull(CGPoint point)
   return isnan(point.x) && isnan(point.y);
 }
 
-@interface ASLayout ()
+/**
+ * Creates an defined number of "    |" indent blocks for the recursive description.
+ */
+static inline NSString * descriptionIndents(NSUInteger indents)
+{
+  NSMutableString *description = [NSMutableString string];
+  for (NSUInteger i = 0; i < indents; i++) {
+    [description appendString:@"    |"];
+  }
+  if (indents > 0) {
+    [description appendString:@" "];
+  }
+  return description;
+}
+
+@interface ASLayout () <ASDescriptionProvider>
 
 /**
  * A boolean describing if the current layout has been flattened.
@@ -35,38 +52,37 @@ extern BOOL CGPointIsNull(CGPoint point)
 
 @dynamic frame, type;
 
-- (instancetype)initWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                    constrainedSizeRange:(ASSizeRange)sizeRange
-                                    size:(CGSize)size
-                                position:(CGPoint)position
-                              sublayouts:(NSArray *)sublayouts
+- (instancetype)initWithLayoutElement:(id<ASLayoutElement>)layoutElement
+                                 size:(CGSize)size
+                             position:(CGPoint)position
+                           sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
 {
+  NSParameterAssert(layoutElement);
+  
   self = [super init];
   if (self) {
-    NSParameterAssert(layoutableObject);
 #if DEBUG
     for (ASLayout *sublayout in sublayouts) {
       ASDisplayNodeAssert(CGPointIsNull(sublayout.position) == NO, @"Invalid position is not allowed in sublayout.");
     }
 #endif
     
-    _layoutableObject = layoutableObject;
+    _layoutElement = layoutElement;
     
-    if (!isValidForLayout(size.width) || !isValidForLayout(size.height)) {
-      ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutableObject);
+    if (!ASIsCGSizeValidForLayout(size)) {
+      ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation! Release configurations will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutElement);
       size = CGSizeZero;
     } else {
       size = CGSizeMake(ASCeilPixelValue(size.width), ASCeilPixelValue(size.height));
     }
-    _constrainedSizeRange = sizeRange;
     _size = size;
-    _dirty = NO;
     
     if (CGPointIsNull(position) == NO) {
       _position = CGPointMake(ASCeilPixelValue(position.x), ASCeilPixelValue(position.y));
     } else {
       _position = position;
     }
+
     _sublayouts = sublayouts != nil ? [sublayouts copy] : @[];
     _flattened = NO;
   }
@@ -81,61 +97,41 @@ extern BOOL CGPointIsNull(CGPoint point)
 
 #pragma mark - Class Constructors
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                      constrainedSizeRange:(ASSizeRange)sizeRange
-                                      size:(CGSize)size
-                                  position:(CGPoint)position
-                                sublayouts:(NSArray *)sublayouts
++ (instancetype)layoutWithLayoutElement:(id<ASLayoutElement>)layoutElement
+                                   size:(CGSize)size
+                               position:(CGPoint)position
+                             sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
 {
-  return [[self alloc] initWithLayoutableObject:layoutableObject
-                           constrainedSizeRange:sizeRange
-                                           size:size
-                                       position:position
-                                     sublayouts:sublayouts];
+  return [[self alloc] initWithLayoutElement:layoutElement
+                                        size:size
+                                    position:position
+                                  sublayouts:sublayouts];
 }
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                      constrainedSizeRange:(ASSizeRange)sizeRange
-                                      size:(CGSize)size
-                                sublayouts:(NSArray *)sublayouts
++ (instancetype)layoutWithLayoutElement:(id<ASLayoutElement>)layoutElement
+                                   size:(CGSize)size
+                             sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
 {
-  return [self layoutWithLayoutableObject:layoutableObject
-                     constrainedSizeRange:sizeRange
-                                     size:size
-                                 position:CGPointNull
-                               sublayouts:sublayouts];
+  return [self layoutWithLayoutElement:layoutElement
+                                  size:size
+                              position:CGPointNull
+                            sublayouts:sublayouts];
 }
 
-+ (instancetype)layoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                      constrainedSizeRange:(ASSizeRange)sizeRange
-                                      size:(CGSize)size
++ (instancetype)layoutWithLayoutElement:(id<ASLayoutElement>)layoutElement size:(CGSize)size
 {
-  return [self layoutWithLayoutableObject:layoutableObject
-                     constrainedSizeRange:sizeRange
-                                     size:size
-                                 position:CGPointNull
-                               sublayouts:nil];
-}
-
-+ (instancetype)flattenedLayoutWithLayoutableObject:(id<ASLayoutable>)layoutableObject
-                               constrainedSizeRange:(ASSizeRange)sizeRange
-                                               size:(CGSize)size
-                                         sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
-{
-  return [self layoutWithLayoutableObject:layoutableObject
-                     constrainedSizeRange:sizeRange
-                                     size:size
-                                 position:CGPointNull
-                               sublayouts:sublayouts];
+  return [self layoutWithLayoutElement:layoutElement
+                                  size:size
+                              position:CGPointNull
+                            sublayouts:nil];
 }
 
 + (instancetype)layoutWithLayout:(ASLayout *)layout position:(CGPoint)position
 {
-  return [self layoutWithLayoutableObject:layout.layoutableObject
-                     constrainedSizeRange:layout.constrainedSizeRange
-                                     size:layout.size
-                                 position:position
-                               sublayouts:layout.sublayouts];
+  return [self layoutWithLayoutElement:layout.layoutElement
+                                  size:layout.size
+                              position:position
+                            sublayouts:layout.sublayouts];
 }
 
 #pragma mark - Layout Flattening
@@ -157,7 +153,7 @@ extern BOOL CGPointIsNull(CGPoint point)
     Context context = queue.front();
     queue.pop();
 
-    if (self != context.layout && context.layout.type == ASLayoutableTypeDisplayNode) {
+    if (self != context.layout && context.layout.type == ASLayoutElementTypeDisplayNode) {
       ASLayout *layout = [ASLayout layoutWithLayout:context.layout position:context.absolutePosition];
       layout.flattened = YES;
       [flattenedSublayouts addObject:layout];
@@ -170,17 +166,14 @@ extern BOOL CGPointIsNull(CGPoint point)
     }
   }
 
-  return [ASLayout layoutWithLayoutableObject:_layoutableObject
-                         constrainedSizeRange:_constrainedSizeRange
-                                         size:_size
-                                   sublayouts:flattenedSublayouts];
+  return [ASLayout layoutWithLayoutElement:_layoutElement size:_size sublayouts:flattenedSublayouts];
 }
 
 #pragma mark - Accessors
 
-- (ASLayoutableType)type
+- (ASLayoutElementType)type
 {
-  return _layoutableObject.layoutableType;
+  return _layoutElement.layoutElementType;
 }
 
 - (CGRect)frame
@@ -211,4 +204,52 @@ extern BOOL CGPointIsNull(CGPoint point)
   return subnodeFrame;
 }
 
+#pragma mark - Description
+
+- (NSMutableArray <NSDictionary *> *)propertiesForDescription
+{
+  NSMutableArray *result = [NSMutableArray array];
+  [result addObject:@{ @"layoutElement" : (self.layoutElement ?: (id)kCFNull) }];
+  [result addObject:@{ @"position" : [NSValue valueWithCGPoint:self.position] }];
+  [result addObject:@{ @"size" : [NSValue valueWithCGSize:self.size] }];
+  return result;
+}
+
+- (NSString *)description
+{
+  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
+}
+
+- (NSString *)recursiveDescription
+{
+  return [self _recursiveDescriptionForLayout:self level:0];
+}
+
+- (NSString *)_recursiveDescriptionForLayout:(ASLayout *)layout level:(NSUInteger)level
+{
+  NSMutableString *description = [NSMutableString string];
+  [description appendString:descriptionIndents(level)];
+  [description appendString:[layout description]];
+  for (ASLayout *sublayout in layout.sublayouts) {
+    [description appendString:@"\n"];
+    [description appendString:[self _recursiveDescriptionForLayout:sublayout level:level + 1]];
+  }
+  return description;
+}
+
 @end
+
+ASLayout *ASCalculateLayout(id<ASLayoutElement> layoutElement, const ASSizeRange sizeRange, const CGSize parentSize)
+{
+  ASDisplayNodeCAssertNotNil(layoutElement, @"Not valid layoutElement passed in.");
+  
+  return [layoutElement layoutThatFits:sizeRange parentSize:parentSize];
+}
+
+ASLayout *ASCalculateRootLayout(id<ASLayoutElement> rootLayoutElement, const ASSizeRange sizeRange)
+{
+  ASLayout *layout = ASCalculateLayout(rootLayoutElement, sizeRange, sizeRange.max);
+  // Here could specific verfication happen
+  return layout;
+}
+

@@ -70,7 +70,7 @@
     _photoImageView.layerBacked = YES;
     
     _userNameLabel                  = [[ASTextNode alloc] init];
-    _userNameLabel.attributedString = [photo.ownerUserProfile usernameAttributedStringWithFontSize:FONT_SIZE];
+    _userNameLabel.attributedText = [photo.ownerUserProfile usernameAttributedStringWithFontSize:FONT_SIZE];
     
     _photoLocationLabel      = [[ASTextNode alloc] init];
     _photoLocationLabel.maximumNumberOfLines = 1;
@@ -80,7 +80,7 @@
       // make sure to use _photoModel instance variable as photo may change when cell is reused,
       // where as local variable will never change
       if (locationModel == _photoModel.location) {
-        _photoLocationLabel.attributedString = [photo locationAttributedStringWithFontSize:FONT_SIZE];
+        _photoLocationLabel.attributedText = [photo locationAttributedStringWithFontSize:FONT_SIZE];
         [self setNeedsLayout];
       }
     }];
@@ -94,7 +94,7 @@
     _photoCommentsView.shouldRasterizeDescendants = YES;
     
     // instead of adding everything addSubnode:
-    self.usesImplicitHierarchyManagement = YES;
+    self.automaticallyManagesSubnodes = YES;
     
 #if DEBUG_PHOTOCELL_LAYOUT
     _userAvatarImageView.backgroundColor              = [UIColor greenColor];
@@ -113,12 +113,12 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   // username / photo location header vertical stack
-  _photoLocationLabel.flexShrink    = YES;
-  _userNameLabel.flexShrink         = YES;
+  _photoLocationLabel.style.flexShrink    = YES;
+  _userNameLabel.style.flexShrink         = YES;
   
   ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  headerSubStack.flexShrink         = YES;
-  if (_photoLocationLabel.attributedString) {
+  headerSubStack.style.flexShrink         = YES;
+  if (_photoLocationLabel.attributedText) {
     [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
   } else {
     [headerSubStack setChildren:@[_userNameLabel]];
@@ -126,11 +126,12 @@
   
   // header stack
   
-  _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);     // constrain avatar image frame size
-  _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER;                                    // to remove double spaces around spacer
+  // constrain avatar image frame size
+  _userAvatarImageView.style.preferredSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+  _photoTimeIntervalSincePostLabel.style.spacingBefore = HORIZONTAL_BUFFER;                                    // to remove double spaces around spacer
   
   ASLayoutSpec *spacer           = [[ASLayoutSpec alloc] init];    // FIXME: long locations overflow post time - set max size?
-  spacer.flexGrow                = YES;
+  spacer.style.flexGrow          = YES;
   
   UIEdgeInsets avatarInsets      = UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
   ASInsetLayoutSpec *avatarInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
@@ -155,7 +156,9 @@
   
   // vertical stack
   CGFloat cellWidth                  = constrainedSize.max.width;
-  _photoImageView.preferredFrameSize = CGSizeMake(cellWidth, cellWidth);              // constrain photo frame size
+  
+  // constrain photo frame size
+  _photoImageView.style.preferredSize = CGSizeMake(cellWidth, cellWidth);
   
   ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;                // stretch headerStack to fill horizontal space
@@ -181,7 +184,7 @@
 {
   ASTextNode *textNode      = [[ASTextNode alloc] init];
   textNode.layerBacked      = YES;
-  textNode.attributedString = attributedString;
+  textNode.attributedText = attributedString;
   
   return textNode;
 }

@@ -75,9 +75,18 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 @property (nonatomic, assign) BOOL neverShowPlaceholders;
 
 /*
+ * The layout attributes currently assigned to this node, if any.
+ *
+ * @discussion This property is useful because it is set before @c collectionView:willDisplayNode:forItemAtIndexPath:
+ *   is called, when the node is not yet in the hierarchy and its frame cannot be converted to/from other nodes. Instead
+ *   you can use the layout attributes object to learn where and how the cell will be displayed.
+ */
+@property (nonatomic, strong, readonly, nullable) UICollectionViewLayoutAttributes *layoutAttributes;
+
+/*
  * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
  */
-//@property (atomic, retain) UIColor *backgroundColor;
+//@property (nonatomic, retain) UIColor *backgroundColor;
 @property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
 
 /**
@@ -120,20 +129,28 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  */
 - (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)viewControllerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
 
-- (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event inScrollView:(UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
-
-@end
-
-@interface ASCellNode (Deprecated)
-
 /**
- * Previous versions of ASDK did not include "is" in the name of the getter for these properties.
- * These older accessor methods don't match UIKit naming, and will be removed in a future version.
+ * @abstract Notifies the cell node of certain visibility events, such as changing visible rect.
+ *
+ * @warning In cases where an ASCellNode is used as a plain node – i.e. not returned from the
+ *   nodeBlockForItemAtIndexPath/nodeForItemAtIndexPath data source methods – this method will
+ *   deliver only the `Visible` and `Invisible` events, `scrollView` will be nil, and
+ *   `cellFrame` will be the zero rect.
  */
-- (BOOL)selected ASDISPLAYNODE_DEPRECATED;
-- (BOOL)highlighted ASDISPLAYNODE_DEPRECATED;
+- (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event inScrollView:(nullable UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
 
 @end
+
+@interface ASCellNode (Unavailable)
+
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+
+- (void)setLayerBacked:(BOOL)layerBacked AS_UNAVAILABLE("ASCellNode does not support layer-backing");
+
+@end
+
 
 /**
  * Simple label-style cell node.  Read its source for an example of custom <ASCellNode>s.

@@ -77,7 +77,7 @@
   
   _textNode = [[ASTextNode alloc] init];
   _textNode.placeholderEnabled = NO;
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:@"Hello, ASDK!"
+  _textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Hello, ASDK!"
                                                                attributes:[self textStyle]];
   [self addSubnode:_textNode];
   
@@ -92,6 +92,8 @@
 
 - (void)layout
 {
+  [super layout];
+  
   CGSize boundsSize = self.bounds.size;
   CGSize textSize = _textNode.calculatedSize;
   CGRect textRect = CGRectMake(roundf((boundsSize.width - textSize.width) / 2.0),

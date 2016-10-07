@@ -10,6 +10,7 @@
 
 #import <XCTest/XCTest.h>
 #import <UIKit/UIKit.h>
+#import <OCMock/OCMock.h>
 
 #import "ASCollectionView.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
@@ -41,6 +42,27 @@
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
   return 2;
+}
+
+@end
+
+@protocol InspectorTestDataSourceDelegateProtocol <ASCollectionDataSource, ASCollectionDelegate>
+
+@end
+
+@interface InspectorTestDataSourceDelegateWithoutNodeConstrainedSize : NSObject <InspectorTestDataSourceDelegateProtocol>
+@end
+
+@implementation InspectorTestDataSourceDelegateWithoutNodeConstrainedSize
+
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  return ^{ return [[ASCellNode alloc] init]; };
+}
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+{
+  return 0;
 }
 
 @end
@@ -294,34 +316,6 @@
   collectionView.asyncDelegate = nil;
 }
 
-#pragma mark - #collectionView:numberOfSectionsForSupplementaryNodeOfKind:
-
-- (void)testThatItRespondsWithTheDefaultNumberOfSections
-{
-  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
-  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
-  NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  XCTAssert(sections == 1, @"should return 1 by default");
-  
-  collectionView.asyncDataSource = nil;
-  collectionView.asyncDelegate = nil;
-}
-
-- (void)testThatItProvidesTheNumberOfSectionsInTheDataSource
-{
-  InspectorTestDataSource *dataSource = [[InspectorTestDataSource alloc] init];
-  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
-  collectionView.asyncDataSource = dataSource;
-  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:collectionView flowLayout:layout];
-  NSUInteger sections = [inspector collectionView:collectionView numberOfSectionsForSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  XCTAssert(sections == 2, @"should return 2");
-  
-  collectionView.asyncDataSource = nil;
-  collectionView.asyncDelegate = nil;
-}
-
 #pragma mark - #collectionView:supplementaryNodesOfKind:inSection:
 
 - (void)testThatItReturnsOneWhenAValidSizeIsImplementedOnTheDelegate
@@ -371,6 +365,52 @@
   
   collectionView.asyncDataSource = nil;
   collectionView.asyncDelegate = nil;
+}
+
+- (void)testThatItThrowsIfNodeConstrainedSizeIsImplementedOnDataSourceButNotOnDelegateLayoutInspector
+{
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+  
+  id dataSourceAndDelegate = [OCMockObject mockForProtocol:@protocol(InspectorTestDataSourceDelegateProtocol)];
+  ASSizeRange constrainedSize = ASSizeRangeMake(CGSizeZero, CGSizeZero);
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  NSValue *value = [NSValue value:&constrainedSize withObjCType:@encode(ASSizeRange)];
+  [[[dataSourceAndDelegate stub] andReturnValue:value] collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
+  collectionView.asyncDataSource = dataSourceAndDelegate;
+  
+  id delegate = [InspectorTestDataSourceDelegateWithoutNodeConstrainedSize new];
+  collectionView.asyncDelegate = delegate;
+  
+  ASCollectionViewLayoutInspector *inspector = [[ASCollectionViewLayoutInspector alloc] initWithCollectionView:collectionView];
+  
+  collectionView.layoutInspector = inspector;
+  XCTAssertThrows([inspector collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath]);
+  
+  collectionView.asyncDelegate = dataSourceAndDelegate;
+  XCTAssertNoThrow([inspector collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath]);
+}
+
+- (void)testThatItThrowsIfNodeConstrainedSizeIsImplementedOnDataSourceButNotOnDelegateFlowLayoutInspector
+{
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+  
+  id dataSourceAndDelegate = [OCMockObject mockForProtocol:@protocol(InspectorTestDataSourceDelegateProtocol)];
+  ASSizeRange constrainedSize = ASSizeRangeMake(CGSizeZero, CGSizeZero);
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  NSValue *value = [NSValue value:&constrainedSize withObjCType:@encode(ASSizeRange)];
+  [[[dataSourceAndDelegate stub] andReturnValue:value] collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
+  collectionView.asyncDataSource = dataSourceAndDelegate;
+  
+  id delegate = [InspectorTestDataSourceDelegateWithoutNodeConstrainedSize new];
+  collectionView.asyncDelegate = delegate;
+  
+  ASCollectionViewFlowLayoutInspector *inspector = collectionView.layoutInspector;
+  XCTAssertThrows([inspector collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath]);
+  
+  collectionView.asyncDelegate = dataSourceAndDelegate;
+  XCTAssertNoThrow([inspector collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath]);
 }
 
 @end

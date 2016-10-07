@@ -33,33 +33,33 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion If `cache` is nil, the receiver will not attempt to retrieve images from a cache before downloading them.
  *
- * @returns An initialized ASNetworkImageNode.
+ * @return An initialized ASNetworkImageNode.
  */
 - (instancetype)initWithCache:(nullable id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader NS_DESIGNATED_INITIALIZER;
 
 /**
  * Convenience initialiser.
  *
- * @returns An ASNetworkImageNode configured to use the NSURLSession-powered ASBasicImageDownloader, and no extra cache.
+ * @return An ASNetworkImageNode configured to use the NSURLSession-powered ASBasicImageDownloader, and no extra cache.
  */
 - (instancetype)init;
 
 /**
  * The delegate, which must conform to the <ASNetworkImageNodeDelegate> protocol.
  */
-@property (nullable, atomic, weak, readwrite) id<ASNetworkImageNodeDelegate> delegate;
+@property (nullable, nonatomic, weak, readwrite) id<ASNetworkImageNodeDelegate> delegate;
 
 /**
  * A placeholder image to display while the URL is loading.
  */
-@property (nullable, atomic, strong, readwrite) UIImage *defaultImage;
+@property (nullable, nonatomic, strong, readwrite) UIImage *defaultImage;
 
 /**
  * The URL of a new image to download and display.
  *
  * @discussion Changing this property will reset the displayed image to a placeholder (<defaultImage>) while loading.
  */
-@property (nullable, atomic, strong, readwrite) NSURL *URL;
+@property (nullable, nonatomic, strong, readwrite) NSURL *URL;
 
 /**
  * Download and display a new image.

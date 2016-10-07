@@ -127,7 +127,7 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
   if (propagation == ASEnvironmentStatePropagation::UP) {
 
    // Object is the parent and the state is the state of the child
-    const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentDefaultLayoutOptionsState;
+    const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentLayoutOptionsStateMakeDefault();
     ASEnvironmentLayoutOptionsState parentLayoutOptionsState = environmentState.layoutOptionsState;
     
     // For every field check if the parent value is equal to the default and if so propegate up the value of the passed
@@ -147,7 +147,7 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
     if (parentLayoutOptionsState.flexShrink == defaultState.flexShrink) {
       parentLayoutOptionsState.flexShrink = layoutOptionsState.flexShrink;
     }
-    if (ASRelativeDimensionEqualToRelativeDimension(parentLayoutOptionsState.flexBasis, defaultState.flexBasis)) {
+    if (ASDimensionEqualToDimension(parentLayoutOptionsState.flexBasis, defaultState.flexBasis)) {
       parentLayoutOptionsState.flexBasis = layoutOptionsState.flexBasis;
     }
     if (parentLayoutOptionsState.alignSelf == defaultState.alignSelf) {
@@ -157,10 +157,6 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
       parentLayoutOptionsState.ascender = layoutOptionsState.ascender;
     }
     
-    if (ASRelativeSizeRangeEqualToRelativeSizeRange(parentLayoutOptionsState.sizeRange, defaultState.sizeRange)) {
-      // For now it is unclear if we should be up-propagating sizeRange or layoutPosition.
-      // parentLayoutOptionsState.sizeRange = layoutOptionsState.sizeRange;
-    }
     if (CGPointEqualToPoint(parentLayoutOptionsState.layoutPosition, defaultState.layoutPosition)) {
       // For now it is unclear if we should be up-propagating sizeRange or layoutPosition.
       // parentLayoutOptionsState.layoutPosition = layoutOptionsState.layoutPosition;

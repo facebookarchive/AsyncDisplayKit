@@ -289,7 +289,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       {
         // Create the dispatch table for this event.
         eventDispatchTable = [NSMapTable weakToStrongObjectsMapTable];
-        _controlEventDispatchTable[eventKey] = eventDispatchTable;
+        if (eventKey) {
+          [_controlEventDispatchTable setObject:eventDispatchTable forKey:eventKey];
+        }
       }
 
       // Have we seen this target before for this event?
@@ -333,7 +335,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSMutableSet *targets = [[NSMutableSet alloc] init];
 
   // Look at each event...
-  for (NSMapTable *eventDispatchTable in [_controlEventDispatchTable allValues])
+  for (NSMapTable *eventDispatchTable in [_controlEventDispatchTable objectEnumerator])
   {
     // and each event's targets...
     for (id target in eventDispatchTable)
@@ -445,9 +447,11 @@ id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEv
 
 void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, void (^block)(ASControlNodeEvent anEvent))
 {
+  if (block == nil) {
+    return;
+  }
   // Start with our first event (touch down) and work our way up to the last event (touch cancel)
-  for (ASControlNodeEvent thisEvent = ASControlNodeEventTouchDown; thisEvent <= ASControlNodeEventTouchCancel; thisEvent <<= 1)
-  {
+  for (ASControlNodeEvent thisEvent = ASControlNodeEventTouchDown; thisEvent <= ASControlNodeEventTouchCancel; thisEvent <<= 1){
     // If it's included in the mask, invoke the block.
     if ((mask & thisEvent) == thisEvent)
       block(thisEvent);

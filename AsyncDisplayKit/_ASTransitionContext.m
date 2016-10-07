@@ -11,7 +11,7 @@
 //
 
 #import "_ASTransitionContext.h"
-
+#import "ASDisplayNode.h"
 #import "ASLayout.h"
 
 
@@ -65,7 +65,7 @@ NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransi
 - (CGRect)finalFrameForNode:(ASDisplayNode *)node
 {
   for (ASLayout *layout in [self layoutForKey:ASTransitionContextToLayoutKey].sublayouts) {
-    if (layout.layoutableObject == node) {
+    if (layout.layoutElement == node) {
       return [layout frame];
     }
   }
@@ -76,7 +76,7 @@ NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransi
 {
   NSMutableArray<ASDisplayNode *> *subnodes = [NSMutableArray array];
   for (ASLayout *sublayout in [self layoutForKey:key].sublayouts) {
-    [subnodes addObject:(ASDisplayNode *)sublayout.layoutableObject];
+    [subnodes addObject:(ASDisplayNode *)sublayout.layoutElement];
   }
   return subnodes;
 }

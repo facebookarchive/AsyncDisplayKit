@@ -17,6 +17,7 @@
 #import "ASEnvironmentInternal.h"
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
+#import "AsyncDisplayKit+Debug.h"
 
 #pragma mark - _ASCollectionPendingState
 
@@ -171,11 +172,23 @@
   [self.view clearFetchedData];
 }
 
-#if ASRangeControllerLoggingEnabled
-- (void)visibleStateDidChange:(BOOL)isVisible
+- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
 {
-  [super visibleStateDidChange:isVisible];
-  NSLog(@"%@ - visible: %d", self, isVisible);
+  [super interfaceStateDidChange:newState fromState:oldState];
+  [ASRangeController layoutDebugOverlayIfNeeded];
+}
+
+#if ASRangeControllerLoggingEnabled
+- (void)didEnterVisibleState
+{
+  [super didEnterVisibleState];
+  NSLog(@"%@ - visible: YES", self);
+}
+
+- (void)didExitVisibleState
+{
+  [super didExitVisibleState];
+  NSLog(@"%@ - visible: NO", self);
 }
 #endif
 

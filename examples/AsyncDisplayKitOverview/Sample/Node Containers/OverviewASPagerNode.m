@@ -37,9 +37,7 @@ static UIColor *OverViewASPagerNodeRandomColor() {
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-    return [ASLayout layoutWithLayoutableObject:self
-                           constrainedSizeRange:constrainedSize
-                                           size:constrainedSize.max];
+    return [ASLayout layoutWithLayoutElement:self size:constrainedSize.max];
 }
 
 @end
@@ -47,7 +45,7 @@ static UIColor *OverViewASPagerNodeRandomColor() {
 
 #pragma mark - OverviewASPagerNode
 
-@interface OverviewASPagerNode () <ASPagerNodeDataSource>
+@interface OverviewASPagerNode () <ASPagerDataSource, ASPagerDelegate>
 @property (nonatomic, strong) ASPagerNode *node;
 @property (nonatomic, copy) NSArray *data;
 @end
@@ -61,6 +59,7 @@ static UIColor *OverViewASPagerNodeRandomColor() {
     
     _node = [ASPagerNode new];
     _node.dataSource = self;
+    _node.delegate = self;
     [self addSubnode:_node];
     
     return self;
@@ -68,8 +67,10 @@ static UIColor *OverViewASPagerNodeRandomColor() {
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    _node.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_node]];
+    // 100% of container
+    _node.style.width = ASDimensionMakeWithFraction(1.0);
+    _node.style.height = ASDimensionMakeWithFraction(1.0);
+    return [ASWrapperLayoutSpec wrapperWithLayoutElement:_node];
 }
 
 - (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode

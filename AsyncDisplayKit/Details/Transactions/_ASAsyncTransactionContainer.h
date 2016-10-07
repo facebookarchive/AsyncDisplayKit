@@ -8,9 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <CoreGraphics/CoreGraphics.h>
 #import <UIKit/UIKit.h>
 
+NS_ASSUME_NONNULL_BEGIN
 
 @class _ASAsyncTransaction;
 
@@ -27,11 +27,11 @@ typedef NS_ENUM(NSUInteger, ASAsyncTransactionContainerState) {
   ASAsyncTransactionContainerStatePendingTransactions,
 };
 
-@protocol ASDisplayNodeAsyncTransactionContainer
+@protocol ASAsyncTransactionContainer
 
 /**
- @summary If YES, the receiver is marked as a container for async display, grouping all of the async display calls
- in the layer hierarchy below the receiver together in a single ASAsyncTransaction.
+ @summary If YES, the receiver is marked as a container for async transactions, grouping all of the transactions
+ in the container hierarchy below the receiver together in a single ASAsyncTransaction.
 
  @default NO
  */
@@ -47,28 +47,26 @@ typedef NS_ENUM(NSUInteger, ASAsyncTransactionContainerState) {
  */
 - (void)asyncdisplaykit_cancelAsyncTransactions;
 
-/**
- @summary Invoked when the asyncdisplaykit_asyncTransactionContainerState property changes.
- @desc You may want to override this in a CALayer or UIView subclass to take appropriate action (such as hiding content while it renders).
- */
-- (void)asyncdisplaykit_asyncTransactionContainerStateDidChange;
+@property (nonatomic, strong, nullable, setter=asyncdisplaykit_setCurrentAsyncTransaction:) _ASAsyncTransaction *asyncdisplaykit_currentAsyncTransaction;
 
 @end
 
-@interface CALayer (ASDisplayNodeAsyncTransactionContainer) <ASDisplayNodeAsyncTransactionContainer>
+@interface CALayer (ASAsyncTransactionContainer) <ASAsyncTransactionContainer>
 /**
- @summary Returns the current async transaction for this container layer. A new transaction is created if one
+ @summary Returns the current async transaction for this layer. A new transaction is created if one
  did not already exist. This method will always return an open, uncommitted transaction.
  @desc asyncdisplaykit_isAsyncTransactionContainer does not need to be YES for this to return a transaction.
  */
-@property (nonatomic, readonly, strong) _ASAsyncTransaction *asyncdisplaykit_asyncTransaction;
+@property (nonatomic, readonly, strong, nullable) _ASAsyncTransaction *asyncdisplaykit_asyncTransaction;
 
 /**
  @summary Goes up the superlayer chain until it finds the first layer with asyncdisplaykit_isAsyncTransactionContainer=YES (including the receiver) and returns it.
  Returns nil if no parent container is found.
  */
-@property (nonatomic, readonly, strong) CALayer *asyncdisplaykit_parentTransactionContainer;
+@property (nonatomic, readonly, strong, nullable) CALayer *asyncdisplaykit_parentTransactionContainer;
 @end
 
-@interface UIView (ASDisplayNodeAsyncTransactionContainer) <ASDisplayNodeAsyncTransactionContainer>
+@interface UIView (ASAsyncTransactionContainer) <ASAsyncTransactionContainer>
 @end
+
+NS_ASSUME_NONNULL_END

@@ -19,7 +19,7 @@
 #import "ViewController.h"
 #import "GradientTableNode.h"
 
-@interface ViewController () <ASPagerNodeDataSource>
+@interface ViewController () <ASPagerDataSource, ASPagerDelegate>
 {
   ASPagerNode *_pagerNode;
 }
@@ -38,6 +38,8 @@
   
   _pagerNode = [[ASPagerNode alloc] init];
   _pagerNode.dataSource = self;
+  _pagerNode.delegate = self;
+  [ASRangeController setShouldShowRangeDebugOverlay:YES];
   
   // Could implement ASCollectionDelegate if we wanted extra callbacks, like from UIScrollView.
   //_pagerNode.delegate = self;
@@ -75,7 +77,7 @@
   CGSize boundsSize = pagerNode.bounds.size;
   CGSize gradientRowSize = CGSizeMake(boundsSize.width, 100);
   GradientTableNode *node = [[GradientTableNode alloc] initWithElementSize:gradientRowSize];
-  node.preferredFrameSize = boundsSize;
+  node.style.preferredSize = boundsSize;
   node.pageNumber = index;
   return node;
 }

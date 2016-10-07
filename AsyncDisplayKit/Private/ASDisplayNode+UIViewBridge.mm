@@ -37,9 +37,9 @@
 #define __loaded(node) (node->_view != nil || (node->_layer != nil && node->_flags.layerBacked))
 
 #if DISPLAYNODE_USE_LOCKS
-#define _bridge_prologue_read ASDN::MutexLocker l(_propertyLock); ASDisplayNodeAssertThreadAffinity(self)
-#define _bridge_prologue_write ASDN::MutexLocker l(_propertyLock)
-#define _bridge_prologue_write_unlock ASDN::MutexUnlocker u(_propertyLock)
+#define _bridge_prologue_read ASDN::MutexLocker l(__instanceLock__); ASDisplayNodeAssertThreadAffinity(self)
+#define _bridge_prologue_write ASDN::MutexLocker l(__instanceLock__)
+#define _bridge_prologue_write_unlock ASDN::MutexUnlocker u(__instanceLock__)
 #else
 #define _bridge_prologue_read ASDisplayNodeAssertThreadAffinity(self)
 #define _bridge_prologue_write
@@ -54,7 +54,7 @@ ASDISPLAYNODE_INLINE BOOL ASDisplayNodeShouldApplyBridgedWriteToView(ASDisplayNo
   if (ASDisplayNodeThreadIsMain()) {
     return loaded;
   } else {
-    if (loaded && !node->_pendingViewState.hasChanges) {
+    if (loaded && !ASDisplayNodeGetPendingState(node).hasChanges) {
       [[ASPendingStateController sharedInstance] registerNode:node];
     }
     return NO;
@@ -344,7 +344,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
     // The node is loaded but we're not on main.
     // We will call [self __setNeedsLayout] when we apply
     // the pending state. We need to call it on main if the node is loaded
-    // to support implicit hierarchy management.
+    // to support automatic subnode management.
     [ASDisplayNodeGetPendingState(self) setNeedsLayout];
   } else {
     // The node is not loaded and we're not on main.
@@ -695,6 +695,18 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   _setToLayer(borderColor, colorValue);
 }
 
+- (BOOL)allowsGroupOpacity
+{
+  _bridge_prologue_read;
+  return _getFromLayer(allowsGroupOpacity);
+}
+
+- (void)setAllowsGroupOpacity:(BOOL)allowsGroupOpacity
+{
+  _bridge_prologue_write;
+  _setToLayer(allowsGroupOpacity, allowsGroupOpacity);
+}
+
 - (BOOL)allowsEdgeAntialiasing
 {
   _bridge_prologue_read;
@@ -962,8 +974,14 @@ nodeProperty = nodeValueExpr; _setToViewOnly(viewAndPendingViewStateProperty, vi
   [_layer asyncdisplaykit_cancelAsyncTransactions];
 }
 
-- (void)asyncdisplaykit_asyncTransactionContainerStateDidChange
+- (void)asyncdisplaykit_setCurrentAsyncTransaction:(_ASAsyncTransaction *)transaction
 {
+  _layer.asyncdisplaykit_currentAsyncTransaction = transaction;
+}
+
+- (_ASAsyncTransaction *)asyncdisplaykit_currentAsyncTransaction
+{
+  return _layer.asyncdisplaykit_currentAsyncTransaction;
 }
 
 @end

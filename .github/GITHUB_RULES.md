@@ -56,6 +56,7 @@ Comment for moving to Ship:
 
 @\<FEATURE_REQUESTOR\> The community is planning an exciting long term road map for the project and getting organized around how to deliver these feature requests.
 
-If you are interested in helping contribute to this component or any other, don’t hesitate to send us an email at AsyncDisplayKit@gmail.com or ping us on ASDK's Slack (#1582). If you would like to contribute for a few weeks, we can also add you to our Ship bug tracker so that you can see what everyone is working on and actively coordinate with us. 
+If you are interested in helping contribute to this component or any other, don’t hesitate to send us an email at AsyncDisplayKit@gmail.com or ping us on <a href="https://github.com/facebook/AsyncDisplayKit/issues/1582">
+ASDK's Slack</a> channel. If you would like to contribute for a few weeks, we can also add you to our Ship bug tracker so that you can see what everyone is working on and actively coordinate with us. 
 
 As always, keep filing issues and submitting pull requests here on Github and we will only move things to the new tracker if they require long term coordination. 

@@ -31,8 +31,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithRects:(NSArray<NSValue *> *)rects;
 
-@property (nullable, atomic, strong) __attribute__((NSObject)) CGColorRef highlightColor;
-@property (atomic, weak) CALayer *targetLayer;
+@property (nullable, nonatomic, strong) __attribute__((NSObject)) CGColorRef highlightColor;
+@property (nonatomic, weak) CALayer *targetLayer;
 
 @end
 

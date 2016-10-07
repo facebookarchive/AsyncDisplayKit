@@ -25,6 +25,10 @@
           // handled by ASRangeController
           selector == @selector(numberOfSectionsInTableView:) ||
           selector == @selector(tableView:numberOfRowsInSection:) ||
+
+          // reordering support
+          selector == @selector(tableView:canMoveRowAtIndexPath:) ||
+          selector == @selector(tableView:moveRowAtIndexPath:toIndexPath:) ||
           
           // used for ASCellNode visibility
           selector == @selector(scrollViewDidScroll:) ||
@@ -91,8 +95,7 @@
           selector == @selector(collectionView:nodeForItemAtIndexPath:) ||
           selector == @selector(collectionView:nodeBlockForItemAtIndexPath:) ||
           selector == @selector(collectionView:numberOfItemsInSection:) ||
-          selector == @selector(collectionView:constrainedSizeForNodeAtIndexPath:) ||
-          selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)
+          selector == @selector(collectionView:constrainedSizeForNodeAtIndexPath:)
           );
 }
 

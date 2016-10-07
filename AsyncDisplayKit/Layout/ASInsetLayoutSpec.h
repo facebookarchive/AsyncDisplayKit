@@ -13,9 +13,9 @@
 NS_ASSUME_NONNULL_BEGIN
 
 /**
- A layout spec that wraps another layoutable child, applying insets around it.
+ A layout spec that wraps another layoutElement child, applying insets around it.
 
- If the child has a size specified as a percentage, the percentage is resolved against this spec's parent
+ If the child has a size specified as a fraction, the fraction is resolved against this spec's parent
  size **after** applying insets.
 
  @example ASOuterLayoutSpec contains an ASInsetLayoutSpec with an ASInnerLayoutSpec. Suppose that:
@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
  @param insets The amount of space to inset on each side.
  @param child The wrapped child to inset.
  */
-+ (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutable>)child;
++ (instancetype)insetLayoutSpecWithInsets:(UIEdgeInsets)insets child:(id<ASLayoutElement>)child AS_WARN_UNUSED_RESULT;
 
 @end
 
