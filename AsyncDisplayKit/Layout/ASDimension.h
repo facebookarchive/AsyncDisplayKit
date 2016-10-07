@@ -172,7 +172,7 @@ ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT CGFloat ASDimensionResolve(ASDimensio
 @end
 
 
-#pragma mark - ASRelativeSize
+#pragma mark - ASLayoutSize
 
 /**
  * Expresses a size with relative dimensions. Only used for calculations internally in ASDimension.h
@@ -180,14 +180,14 @@ ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT CGFloat ASDimensionResolve(ASDimensio
 typedef struct {
   ASDimension width;
   ASDimension height;
-} ASRelativeSize;
+} ASLayoutSize;
 
 /*
- * Creates an ASRelativeSize with provided min and max dimensions.
+ * Creates an ASLayoutSize with provided min and max dimensions.
  */
-ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASRelativeSize ASRelativeSizeMake(ASDimension width, ASDimension height)
+ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASLayoutSize ASLayoutSizeMake(ASDimension width, ASDimension height)
 {
-  ASRelativeSize size;
+  ASLayoutSize size;
   size.width = width;
   size.height = height;
   return size;
@@ -196,7 +196,7 @@ ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASRelativeSize ASRelativeSizeMake(ASD
 /*
  * Returns a string representation of a relative size.
  */
-ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT NSString *NSStringFromASRelativeSize(ASRelativeSize size);
+ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT NSString *NSStringFromASLayoutSize(ASLayoutSize size);
 
 #pragma mark - ASSizeRange
 

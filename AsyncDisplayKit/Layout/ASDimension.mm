@@ -70,17 +70,17 @@ NSString *NSStringFromASDimension(ASDimension dimension)
 @end
 
 
-#pragma mark - ASRelativeSize
+#pragma mark - ASLayoutSize
 
 // ** Resolve this relative size relative to a parent size. */
-ASDISPLAYNODE_INLINE CGSize ASRelativeSizeResolveSize(ASRelativeSize relativeSize, CGSize parentSize, CGSize autoSize)
+ASDISPLAYNODE_INLINE CGSize ASLayoutSizeResolveSize(ASLayoutSize layoutSize, CGSize parentSize, CGSize autoSize)
 {
-  return CGSizeMake(ASDimensionResolve(relativeSize.width, parentSize.width, autoSize.width),
-                    ASDimensionResolve(relativeSize.height, parentSize.height, autoSize.height));
+  return CGSizeMake(ASDimensionResolve(layoutSize.width, parentSize.width, autoSize.width),
+                    ASDimensionResolve(layoutSize.height, parentSize.height, autoSize.height));
 }
 
-// ** Returns a string formatted to contain the data from an ASRelativeSize. */
-ASDISPLAYNODE_INLINE NSString *NSStringFromASRelativeSize(ASRelativeSize size)
+// ** Returns a string formatted to contain the data from an ASLayoutSize. */
+ASDISPLAYNODE_INLINE NSString *NSStringFromASLayoutSize(ASLayoutSize size)
 {
   return [NSString stringWithFormat:@"{%@, %@}",
           NSStringFromASDimension(size.width),
@@ -94,9 +94,9 @@ NSString *NSStringFromASLayoutElementSize(ASLayoutElementSize size)
 {
   return [NSString stringWithFormat:
           @"<ASLayoutElementSize: exact=%@, min=%@, max=%@>",
-          NSStringFromASRelativeSize(ASRelativeSizeMake(size.width, size.height)),
-          NSStringFromASRelativeSize(ASRelativeSizeMake(size.minWidth, size.minHeight)),
-          NSStringFromASRelativeSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight))];
+          NSStringFromASLayoutSize(ASLayoutSizeMake(size.width, size.height)),
+          NSStringFromASLayoutSize(ASLayoutSizeMake(size.minWidth, size.minHeight)),
+          NSStringFromASLayoutSize(ASLayoutSizeMake(size.maxWidth, size.maxHeight))];
 }
 
 ASDISPLAYNODE_INLINE void ASLayoutElementSizeConstrain(CGFloat minVal, CGFloat exactVal, CGFloat maxVal, CGFloat *outMin, CGFloat *outMax)
@@ -133,9 +133,9 @@ ASDISPLAYNODE_INLINE void ASLayoutElementSizeConstrain(CGFloat minVal, CGFloat e
 
 ASSizeRange ASLayoutElementSizeResolveAutoSize(ASLayoutElementSize size, const CGSize parentSize, ASSizeRange autoASSizeRange)
 {
-  CGSize resolvedExact = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.width, size.height), parentSize, {NAN, NAN});
-  CGSize resolvedMin = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.minWidth, size.minHeight), parentSize, autoASSizeRange.min);
-  CGSize resolvedMax = ASRelativeSizeResolveSize(ASRelativeSizeMake(size.maxWidth, size.maxHeight), parentSize, autoASSizeRange.max);
+  CGSize resolvedExact = ASLayoutSizeResolveSize(ASLayoutSizeMake(size.width, size.height), parentSize, {NAN, NAN});
+  CGSize resolvedMin = ASLayoutSizeResolveSize(ASLayoutSizeMake(size.minWidth, size.minHeight), parentSize, autoASSizeRange.min);
+  CGSize resolvedMax = ASLayoutSizeResolveSize(ASLayoutSizeMake(size.maxWidth, size.maxHeight), parentSize, autoASSizeRange.max);
   
   CGSize rangeMin, rangeMax;
   ASLayoutElementSizeConstrain(resolvedMin.width, resolvedExact.width, resolvedMax.width, &rangeMin.width, &rangeMax.width);
