@@ -112,7 +112,7 @@ ASOVERLOADABLE ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASDimension ASDimensio
 
 /**
  * Returns a dimension by parsing the specified dimension string.
- * Examples: ASDimensionMake(@"0.5%") = ASDimensionMake(ASDimensionUnitFraction, 0.5)
+ * Examples: ASDimensionMake(@"50%") = ASDimensionMake(ASDimensionUnitFraction, 0.5)
  *           ASDimensionMake(@"0.5pt") = ASDimensionMake(ASDimensionUnitPoints, 0.5)
  */
 ASOVERLOADABLE AS_WARN_UNUSED_RESULT extern ASDimension ASDimensionMake(NSString *dimension);
