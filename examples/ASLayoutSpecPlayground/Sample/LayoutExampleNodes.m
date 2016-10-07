@@ -21,9 +21,9 @@
 {
   self = [super init];
   if (self) {
-    self.usesImplicitHierarchyManagement = YES;
+    self.automaticallyManagesSubnodes = YES;
     self.shouldVisualizeLayoutSpecs = NO;
-    self.shouldCacheLayoutSpec = YES;
+    self.shouldCacheLayoutSpec = NO;
     self.backgroundColor = [UIColor whiteColor];
   }
   return self;
@@ -83,14 +83,14 @@
   
   if (self) {
     _usernameNode = [[ASTextNode alloc] init];
-    _usernameNode.attributedString = [self usernameAttributedStringWithFontSize:FONT_SIZE];
+    _usernameNode.attributedText = [self usernameAttributedStringWithFontSize:FONT_SIZE];
     
     _postLocationNode = [[ASTextNode alloc] init];
     _postLocationNode.maximumNumberOfLines = 1;
-    _postLocationNode.attributedString = [self locationAttributedStringWithFontSize:FONT_SIZE];
+    _postLocationNode.attributedText = [self locationAttributedStringWithFontSize:FONT_SIZE];
     
     _postTimeNode = [[ASTextNode alloc] init];
-    _postTimeNode.attributedString = [self uploadDateAttributedStringWithFontSize:FONT_SIZE];
+    _postTimeNode.attributedText = [self uploadDateAttributedStringWithFontSize:FONT_SIZE];
   }
   
   return self;
@@ -98,36 +98,36 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _usernameNode.flexShrink = YES;
-  _postLocationNode.flexShrink = YES;
+  _usernameNode.style.flexShrink = YES;
+  _postLocationNode.style.flexShrink = YES;
 
   ASStackLayoutSpec *verticalStackSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
-  verticalStackSpec.flexShrink = YES;
+  verticalStackSpec.style.flexShrink = YES;
   
   // if fetching post location data from server, check if it is available yet
-  if (_postLocationNode.attributedString) {
+  if (_postLocationNode.attributedText) {
     [verticalStackSpec setChildren:@[_usernameNode, _postLocationNode]];
   } else {
     [verticalStackSpec setChildren:@[_usernameNode]];
   }
   
   ASLayoutSpec *spacerSpec = [[ASLayoutSpec alloc] init];
-  spacerSpec.flexGrow = YES;
-  spacerSpec.flexShrink = YES;
+  spacerSpec.style.flexGrow = YES;
+  spacerSpec.style.flexShrink = YES;
   
   // horizontal stack
   ASStackLayoutSpec *horizontalStackSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStackSpec.alignItems = ASStackLayoutAlignItemsCenter; // center items vertically in horiz stack
   horizontalStackSpec.justifyContent = ASStackLayoutJustifyContentStart; // justify content to left
-  horizontalStackSpec.flexShrink = YES;
-  horizontalStackSpec.flexGrow = YES;
+  horizontalStackSpec.style.flexShrink = YES;
+  horizontalStackSpec.style.flexGrow = YES;
   [horizontalStackSpec setChildren:@[verticalStackSpec, spacerSpec, _postTimeNode]];
   
   // inset horizontal stack
   UIEdgeInsets insets = UIEdgeInsetsMake(0, 10, 0, 10);
   ASInsetLayoutSpec *headerInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:horizontalStackSpec];
-  headerInsetSpec.flexShrink = YES;
-  headerInsetSpec.flexGrow = YES;
+  headerInsetSpec.style.flexShrink = YES;
+  headerInsetSpec.style.flexGrow = YES;
   
   return headerInsetSpec;
 }
@@ -147,11 +147,11 @@
     
     _titleNode = [[ASTextNode alloc] init];
     _titleNode.maximumNumberOfLines = 2;
-    _titleNode.truncationAttributedString = [NSAttributedString attributedStringWithString:@"..."
+    _titleNode.truncationAttributedText = [NSAttributedString attributedStringWithString:@"..."
                                                                                   fontSize:16
                                                                             color:[UIColor whiteColor]
                                                                    firstWordColor:nil];
-    _titleNode.attributedString = [NSAttributedString attributedStringWithString:@"family fall hikes"
+    _titleNode.attributedText = [NSAttributedString attributedStringWithString:@"family fall hikes"
                                                                         fontSize:16
                                                                            color:[UIColor whiteColor]
                                                                   firstWordColor:nil];
@@ -162,13 +162,13 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _photoNode.preferredFrameSize = CGSizeMake(USER_IMAGE_HEIGHT*2, USER_IMAGE_HEIGHT*2);
-  ASStaticLayoutSpec *backgroundImageStaticSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_photoNode]];
+  _photoNode.style.preferredSize = CGSizeMake(USER_IMAGE_HEIGHT*2, USER_IMAGE_HEIGHT*2);
+  ASAbsoluteLayoutSpec *backgroundImageAbsoluteSpec = [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[_photoNode]];
 
   UIEdgeInsets insets = UIEdgeInsetsMake(INFINITY, 12, 12, 12);
   ASInsetLayoutSpec *textInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_titleNode];
 
-  ASOverlayLayoutSpec *textOverlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:backgroundImageStaticSpec
+  ASOverlayLayoutSpec *textOverlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:backgroundImageAbsoluteSpec
                                                                                  overlay:textInsetSpec];
   
   return textOverlaySpec;
@@ -202,18 +202,18 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _iconNode.preferredFrameSize = CGSizeMake(40, 40);
-  _photoNode.preferredFrameSize = CGSizeMake(150, 150);
+  _iconNode.style.preferredSize = CGSizeMake(40, 40);
+  _photoNode.style.preferredSize = CGSizeMake(150, 150);
 
-  CGFloat x = _photoNode.preferredFrameSize.width;
+  CGFloat x = 150;
   CGFloat y = 0;
   
-  _iconNode.layoutPosition = CGPointMake(x, y);
-  _photoNode.layoutPosition = CGPointMake(_iconNode.preferredFrameSize.height/2.0, _iconNode.preferredFrameSize.height/2.0);
+  _iconNode.style.layoutPosition = CGPointMake(x, y);
+  _photoNode.style.layoutPosition = CGPointMake(40 / 2.0, 40 / 2.0);
   
-  ASStaticLayoutSpec *staticLayoutSpec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[_photoNode, _iconNode]];
+  ASAbsoluteLayoutSpec *absoluteLayoutSpec = [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[_photoNode, _iconNode]];
   
-  return staticLayoutSpec;
+  return absoluteLayoutSpec;
 }
 
 @end
@@ -235,7 +235,7 @@
                                                                   fillColor:[UIColor blackColor]];
     
     _textNode = [[ASTextNode alloc] init];
-    _textNode.attributedString = [NSAttributedString attributedStringWithString:@"this is a long text node"
+    _textNode.attributedText = [NSAttributedString attributedStringWithString:@"this is a long text node"
                                                                        fontSize:16
                                                                           color:[UIColor blackColor]
                                                                  firstWordColor:nil];
@@ -251,8 +251,8 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _topSeparator.flexGrow = YES;
-  _bottomSeparator.flexGrow = YES;
+  _topSeparator.style.flexGrow = YES;
+  _bottomSeparator.style.flexGrow = YES;
 
   UIEdgeInsets contentInsets = UIEdgeInsetsMake(10, 10, 10, 10);
   ASInsetLayoutSpec *insetContentSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentInsets

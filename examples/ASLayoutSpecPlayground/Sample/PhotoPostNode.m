@@ -36,7 +36,7 @@
   if (self) {
     
     self.backgroundColor                 = [UIColor whiteColor];
-    self.usesImplicitHierarchyManagement = YES;
+    self.automaticallyManagesSubnodes = YES;
     self.shouldVisualizeLayoutSpecs = YES;
     self.shouldCacheLayoutSpec = YES;
     
@@ -51,23 +51,23 @@
     }];
     
     _userNameLabel                  = [[ASTextNode alloc] init];
-    _userNameLabel.attributedString = [self usernameAttributedStringWithFontSize:FONT_SIZE];
+    _userNameLabel.attributedText = [self usernameAttributedStringWithFontSize:FONT_SIZE];
     
     _photoLocationLabel                      = [[ASTextNode alloc] init];
     _photoLocationLabel.maximumNumberOfLines = 1;
-    _photoLocationLabel.attributedString     = [self locationAttributedStringWithFontSize:FONT_SIZE];
+    _photoLocationLabel.attributedText     = [self locationAttributedStringWithFontSize:FONT_SIZE];
     
     _photoTimeIntervalSincePostLabel                  = [[ASTextNode alloc] init];
-    _photoTimeIntervalSincePostLabel.attributedString = [self uploadDateAttributedStringWithFontSize:FONT_SIZE];
+    _photoTimeIntervalSincePostLabel.attributedText = [self uploadDateAttributedStringWithFontSize:FONT_SIZE];
     
     _photoImageView     = [[ASNetworkImageNode alloc] init];
     _photoImageView.URL = [NSURL URLWithString:@"https://s-media-cache-ak0.pinimg.com/564x/9f/5b/3a/9f5b3a35640bc7a5d484b66124c48c46.jpg"];
     
     _photoLikesLabel                  = [[ASTextNode alloc] init];
-    _photoLikesLabel.attributedString = [self likesAttributedStringWithFontSize:FONT_SIZE];
+    _photoLikesLabel.attributedText = [self likesAttributedStringWithFontSize:FONT_SIZE];
     
     _photoDescriptionLabel                      = [[ASTextNode alloc] init];
-    _photoDescriptionLabel.attributedString     = [self descriptionAttributedStringWithFontSize:FONT_SIZE];
+    _photoDescriptionLabel.attributedText     = [self descriptionAttributedStringWithFontSize:FONT_SIZE];
     _photoDescriptionLabel.maximumNumberOfLines = 3;
   }
   
@@ -91,13 +91,13 @@
 {
   // username / photo location header vertical stack
   
-  _userNameLabel.flexShrink         = YES;
-  _photoLocationLabel.flexShrink    = YES;
+  _userNameLabel.style.flexShrink         = YES;
+  _photoLocationLabel.style.flexShrink    = YES;
 
   ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  headerSubStack.flexShrink         = YES;
+  headerSubStack.style.flexShrink         = YES;
   
-  if (_photoLocationLabel.attributedString) {
+  if (_photoLocationLabel.attributedText) {
     [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
   } else {
     [headerSubStack setChildren:@[_userNameLabel]];
@@ -105,22 +105,22 @@
   
   // header stack
   
-  _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
-  _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER; // hack to remove double spaces around spacer
+  _userAvatarImageView.style.preferredSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+  _photoTimeIntervalSincePostLabel.style.spacingBefore = HORIZONTAL_BUFFER; // hack to remove double spaces around spacer
   
   UIEdgeInsets avatarInsets          = UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
   ASInsetLayoutSpec *avatarInset     = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
   
   ASLayoutSpec *spacer               = [[ASLayoutSpec alloc] init];
-  spacer.flexGrow                    = YES;
-  spacer.flexShrink                  = YES;  // FIXME: this overrides stuff :) THIS IS A SYSTEMIC ISSUE - can we make layoutSpecThatFits only run once? cache layoutSpec, just use new constrainedSize, don't put properties in layoutSpecThatFits
+  spacer.style.flexGrow                    = YES;
+  spacer.style.flexShrink                  = YES;  // FIXME: this overrides stuff :) THIS IS A SYSTEMIC ISSUE - can we make layoutSpecThatFits only run once? cache layoutSpec, just use new constrainedSize, don't put properties in layoutSpecThatFits
   // separate the idea of laying out and rerunning with new constrainedSize
   
   ASStackLayoutSpec *headerStack     = [ASStackLayoutSpec horizontalStackLayoutSpec];
   headerStack.alignItems             = ASStackLayoutAlignItemsCenter;                     // center items vertically in horizontal stack
   headerStack.justifyContent         = ASStackLayoutJustifyContentStart;                  // justify content to the left side of the header stack
-  headerStack.flexShrink             = YES;
-  headerStack.flexGrow               = YES;
+  headerStack.style.flexShrink             = YES;
+  headerStack.style.flexGrow               = YES;
   
   [headerStack setChildren:@[avatarInset, headerSubStack, spacer, _photoTimeIntervalSincePostLabel]];
   
@@ -128,8 +128,8 @@
   
   UIEdgeInsets insets                = UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER);
   ASInsetLayoutSpec *headerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:headerStack];
-  headerWithInset.flexShrink         = YES;
-  headerWithInset.flexGrow           = YES;
+  headerWithInset.style.flexShrink         = YES;
+  headerWithInset.style.flexGrow           = YES;
   
   return headerWithInset;
 }
@@ -138,13 +138,13 @@
 {
   // username / photo location header vertical stack
   
-  _userNameLabel.flexShrink         = YES;
-  _photoLocationLabel.flexShrink    = YES;
+  _userNameLabel.style.flexShrink         = YES;
+  _photoLocationLabel.style.flexShrink    = YES;
 
   ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  headerSubStack.flexShrink         = YES;
+  headerSubStack.style.flexShrink         = YES;
   
-  if (_photoLocationLabel.attributedString) {
+  if (_photoLocationLabel.attributedText) {
     [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
   } else {
     [headerSubStack setChildren:@[_userNameLabel]];
@@ -152,22 +152,22 @@
   
   // header stack
   
-  _userAvatarImageView.preferredFrameSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
-  _photoTimeIntervalSincePostLabel.spacingBefore = HORIZONTAL_BUFFER; // hack to remove double spaces around spacer
+  _userAvatarImageView.style.preferredSize        = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+  _photoTimeIntervalSincePostLabel.style.spacingBefore = HORIZONTAL_BUFFER; // hack to remove double spaces around spacer
   
   UIEdgeInsets avatarInsets          = UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
   ASInsetLayoutSpec *avatarInset     = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
   
   ASLayoutSpec *spacer               = [[ASLayoutSpec alloc] init];
-  spacer.flexGrow                    = YES;
-  spacer.flexShrink                  = YES;  // FIXME: this overrides stuff :) THIS IS A SYSTEMIC ISSUE - can we make layoutSpecThatFits only run once? cache layoutSpec, just use new constrainedSize, don't put properties in layoutSpecThatFits
+  spacer.style.flexGrow                    = YES;
+  spacer.style.flexShrink                  = YES;  // FIXME: this overrides stuff :) THIS IS A SYSTEMIC ISSUE - can we make layoutSpecThatFits only run once? cache layoutSpec, just use new constrainedSize, don't put properties in layoutSpecThatFits
   // separate the idea of laying out and rerunning with new constrainedSize
   
   ASStackLayoutSpec *headerStack     = [ASStackLayoutSpec horizontalStackLayoutSpec];
   headerStack.alignItems             = ASStackLayoutAlignItemsCenter;                     // center items vertically in horizontal stack
   headerStack.justifyContent         = ASStackLayoutJustifyContentStart;                  // justify content to the left side of the header stack
-  headerStack.flexShrink             = YES;
-  headerStack.flexGrow               = YES;
+  headerStack.style.flexShrink             = YES;
+  headerStack.style.flexGrow               = YES;
   
   [headerStack setChildren:@[avatarInset, headerSubStack, spacer, _photoTimeIntervalSincePostLabel]];
   
@@ -175,8 +175,8 @@
   
   UIEdgeInsets insets                = UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER);
   ASInsetLayoutSpec *headerWithInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:headerStack];
-  headerWithInset.flexShrink         = YES;
-  headerWithInset.flexGrow           = YES;
+  headerWithInset.style.flexShrink         = YES;
+  headerWithInset.style.flexGrow           = YES;
   
   // footer stack
   
@@ -197,7 +197,7 @@
   ASStackLayoutSpec *verticalStack   = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStack.alignItems           = ASStackLayoutAlignItemsStretch;                // sretch headerStack to fill horizontal space
   [verticalStack setChildren:@[headerWithInset, photoRatioSpec, footerWithInset]];
-  verticalStack.flexShrink           = YES;
+  verticalStack.style.flexShrink           = YES;
   
   return verticalStack;
 }

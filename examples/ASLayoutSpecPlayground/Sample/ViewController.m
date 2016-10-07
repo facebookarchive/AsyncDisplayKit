@@ -8,9 +8,9 @@
 
 #import "ViewController.h"
 #import "PlaygroundContainerNode.h"
-#import "ASLayoutableInspectorNode.h"
+#import "ASLayoutElementInspectorNode.h"
 
-@interface ViewController () <ASPagerNodeDataSource, ASLayoutableInspectorNodeDelegate, PlaygroundContainerNodeDelegate>
+@interface ViewController () <ASPagerNodeDataSource, ASLayoutElementInspectorNodeDelegate, PlaygroundContainerNodeDelegate>
 @end
 
 @implementation ViewController
@@ -30,7 +30,7 @@
     _pagerNode.dataSource = self;
     self.navigationItem.title   = @"ASLayoutSpec Playground";
     self.edgesForExtendedLayout = UIRectEdgeNone;
-    [ASLayoutableInspectorNode sharedInstance].delegate = self;
+    [ASLayoutElementInspectorNode sharedInstance].delegate = self;
   }
   
   return self;
@@ -80,7 +80,7 @@
   [_pagerNode reloadData];
 }
 
-#pragma mark - ASLayoutableInspectorNodeDelegate
+#pragma mark - ASLayoutElementInspectorNodeDelegate
 
 - (void)toggleVisualization:(BOOL)toggle
 {

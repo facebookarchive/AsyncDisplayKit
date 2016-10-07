@@ -8,7 +8,7 @@
 
 #import "AppDelegate.h"
 #import "ViewController.h"
-#import "ASLayoutableInspectorNode.h"
+#import "ASLayoutElementInspectorNode.h"
 #import "Utilities.h"
 
 @implementation AppDelegate
@@ -22,7 +22,7 @@
   UIDevice *device = [UIDevice currentDevice];
   if (device.userInterfaceIdiom == UIUserInterfaceIdiomPad) {
 
-    ASViewController *masterVC        = [[ASViewController alloc] initWithNode:[ASLayoutableInspectorNode sharedInstance]];
+    ASViewController *masterVC        = [[ASViewController alloc] initWithNode:[ASLayoutElementInspectorNode sharedInstance]];
     masterVC.view.backgroundColor     = [UIColor customOrangeColor];
     UINavigationController *masterNav = [[UINavigationController alloc] initWithRootViewController:masterVC];
 

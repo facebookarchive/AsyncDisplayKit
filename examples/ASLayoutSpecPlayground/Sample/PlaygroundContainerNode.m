@@ -9,7 +9,7 @@
 #import "PlaygroundContainerNode.h"
 #import "LayoutExampleNodes.h"
 #import "PhotoPostNode.h"
-#import "ASLayoutableInspectorNode.h"  // FIXME: move to ASLayoutSpecDebug
+#import "ASLayoutElementInspectorNode.h"  // FIXME: move to ASLayoutSpecDebug
 #import "AsyncDisplayKit+Debug.h"
 
 #define RESIZE_HANDLE_SIZE 30
@@ -46,7 +46,7 @@
   
   if (self) {
     self.backgroundColor = [UIColor whiteColor]; //[UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
-    self.usesImplicitHierarchyManagement = YES;
+    self.automaticallyManagesSubnodes = YES;
     
     _playgroundNode = [[self class] nodeForIndex:index];
     
@@ -55,11 +55,11 @@
     _resizeHandle.userInteractionEnabled = YES;
 //    [self addSubnode:_resizeHandle];
     
-    [ASLayoutableInspectorNode sharedInstance].flexBasis = ASRelativeDimensionMakeWithPercent(1.0);
-    [ASLayoutableInspectorNode sharedInstance].vizNodeInsetSize = 10.0;
+    [ASLayoutElementInspectorNode sharedInstance].style.flexBasis = ASDimensionMakeWithFraction(1.0);
+    [ASLayoutElementInspectorNode sharedInstance].vizNodeInsetSize = 10.0;
     
-    self.shouldVisualizeLayoutSpecs = YES;
-    self.shouldCacheLayoutSpec = YES;
+    self.shouldVisualizeLayoutSpecs = NO;
+    self.shouldCacheLayoutSpec = NO;
   }
   
   return self;
@@ -87,8 +87,8 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _playgroundNode.flexGrow = YES;
-  _playgroundNode.flexShrink = YES;
+  _playgroundNode.style.flexGrow = YES;
+  _playgroundNode.style.flexShrink = YES;
 
   return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(10, 10, 10, 10)
                                                 child:_playgroundNode];

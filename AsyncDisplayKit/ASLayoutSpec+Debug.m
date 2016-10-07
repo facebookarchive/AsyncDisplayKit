@@ -38,8 +38,8 @@
   insetSpec.neverShouldVisualize = YES;
 
   // propogate child's layoutSpec properties to the inset that we are adding
-//  insetSpec.flexGrow   = _layoutSpec.flexGrow;
-//  insetSpec.flexShrink = _layoutSpec.flexShrink;
+//  insetSpec.style.flexGrow   = _layoutSpec.style.flexGrow;
+//  insetSpec.style.flexShrink = _layoutSpec.style.flexShrink;
 //  insetSpec.alignSelf  = _layoutSpec.alignSelf;
   
   NSLog(@"%@: vizNode = %f, child = %f", self, insetSpec.style.flexGrow, _layoutSpec.style.flexGrow);

@@ -131,63 +131,63 @@
 //  _childNodeNavBtn.alignSelf = ASStackLayoutAlignSelfCenter;
 //
 //  ASStackLayoutSpec *horizontalStackNav = [ASStackLayoutSpec horizontalStackLayoutSpec];
-//  horizontalStackNav.flexGrow = YES;
+//  horizontalStackNav.style.flexGrow = YES;
 //  horizontalStackNav.alignSelf = ASStackLayoutAlignSelfCenter;
 //  horizontalStackNav.children = @[_siblingNodeLefttNavBtn, _siblingNodeRightNavBtn];
 //  
 //  ASStackLayoutSpec *horizontalStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
-//  horizontalStack.flexGrow = YES;
+//  horizontalStack.style.flexGrow = YES;
 //  ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
 //  
-//  spacer.flexGrow = YES;
+//  spacer.style.flexGrow = YES;
 //  horizontalStack.children = @[_flexGrowBtn, spacer];
 //  _flexGrowValue.alignSelf = ASStackLayoutAlignSelfEnd;      // FIXME: make framework give a warning if you use ASAlignmentBottom!!!!!
 //  
 //  ASStackLayoutSpec *horizontalStack2 = [ASStackLayoutSpec horizontalStackLayoutSpec];
-//  horizontalStack2.flexGrow = YES;
+//  horizontalStack2.style.flexGrow = YES;
 //  horizontalStack2.children = @[_flexShrinkBtn, spacer];
 //  _flexShrinkValue.alignSelf = ASStackLayoutAlignSelfEnd;
 //  
 //  ASStackLayoutSpec *horizontalStack3 = [ASStackLayoutSpec horizontalStackLayoutSpec];
-//  horizontalStack3.flexGrow = YES;
+//  horizontalStack3.style.flexGrow = YES;
 //  horizontalStack3.children = @[_flexBasisBtn, spacer, _flexBasisValue];
 //  _flexBasisValue.alignSelf = ASStackLayoutAlignSelfEnd;
 //  
 //  ASStackLayoutSpec *itemDescriptionStack = [ASStackLayoutSpec verticalStackLayoutSpec];
 //  itemDescriptionStack.children = @[_itemDescription];
 //  itemDescriptionStack.spacing = 5;
-//  itemDescriptionStack.flexGrow = YES;
+//  itemDescriptionStack.style.flexGrow = YES;
 //  
 //  ASStackLayoutSpec *layoutableStack = [ASStackLayoutSpec verticalStackLayoutSpec];
 //  layoutableStack.children = @[_layoutablePropertiesSectionTitle, horizontalStack, horizontalStack2, horizontalStack3, _alignSelfBtn];
 //  layoutableStack.spacing = 5;
-//  layoutableStack.flexGrow = YES;
+//  layoutableStack.style.flexGrow = YES;
 //  
 //  ASStackLayoutSpec *layoutSpecStack = [ASStackLayoutSpec verticalStackLayoutSpec];
 //  layoutSpecStack.children = @[_layoutSpecPropertiesSectionTitle, _alignItemsBtn];
 //  layoutSpecStack.spacing = 5;
-//  layoutSpecStack.flexGrow = YES;
+//  layoutSpecStack.style.flexGrow = YES;
 //  
 //  ASStackLayoutSpec *debugHelpStack = [ASStackLayoutSpec verticalStackLayoutSpec];
 //  debugHelpStack.children = @[_debugSectionTitle, _vizNodeInsetSizeBtn, _vizNodeBordersBtn];
 //  debugHelpStack.spacing = 5;
-//  debugHelpStack.flexGrow = YES;
+//  debugHelpStack.style.flexGrow = YES;
 //
 //  ASStackLayoutSpec *verticalLayoutableStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-//  verticalLayoutableStack.flexGrow = YES;
+//  verticalLayoutableStack.style.flexGrow = YES;
 //  verticalLayoutableStack.spacing = 20;
 //  verticalLayoutableStack.children = @[_parentNodeNavBtn, horizontalStackNav, _childNodeNavBtn, itemDescriptionStack, layoutableStack, layoutSpecStack, debugHelpStack];
 //  verticalLayoutableStack.alignItems = ASStackLayoutAlignItemsStretch;                // stretch headerStack to fill horizontal space
 //
 //  ASLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(100, 10, 10, 10) child:verticalLayoutableStack];
-//  insetSpec.flexGrow = YES;
+//  insetSpec.style.flexGrow = YES;
 //  return insetSpec;
 //}
 //
 //#pragma mark - configure Inspector node for layoutable
 //- (void)updateInspectorWithLayoutable
 //{
-//  _itemDescription.attributedString = [self attributedStringFromLayoutable:_layoutElementToEdit];
+//  _itemDescription.attributedText = [self attributedStringFromLayoutable:_layoutElementToEdit];
 //
 //  if ([self node]) {
 //    UIColor *nodeBackgroundColor = [[self node] backgroundColor];
@@ -200,13 +200,13 @@
 //  }
 //  
 //  _flexGrowBtn.selected           = [self.layoutElementToEdit flexGrow];
-//  _flexGrowValue.attributedString = [self attributedStringFromString: (_flexGrowBtn.selected) ? @"YES" : @"NO"];
+//  _flexGrowValue.attributedText = [self attributedStringFromString: (_flexGrowBtn.selected) ? @"YES" : @"NO"];
 //  
-//  _flexShrinkBtn.selected           = self.layoutElementToEdit.flexShrink;
-//  _flexShrinkValue.attributedString = [self attributedStringFromString: (_flexShrinkBtn.selected) ? @"YES" : @"NO"];
+//  _flexShrinkBtn.selected           = self.layoutElementToEdit.style.flexShrink;
+//  _flexShrinkValue.attributedText = [self attributedStringFromString: (_flexShrinkBtn.selected) ? @"YES" : @"NO"];
 //  
-//  //  _flexBasisBtn.selected           = self.layoutElementToEdit.flexShrink;
-//  //  _flexBasisValue.attributedString = [self attributedStringFromString: (_flexBasisBtn.selected) ? @"YES" : @"NO"];
+//  //  _flexBasisBtn.selected           = self.layoutElementToEdit.style.flexShrink;
+//  //  _flexBasisValue.attributedText = [self attributedStringFromString: (_flexBasisBtn.selected) ? @"YES" : @"NO"];
 //  
 //  
 //  NSUInteger alignSelfValue = [self.layoutElementToEdit alignSelf];
