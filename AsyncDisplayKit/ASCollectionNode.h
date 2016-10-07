@@ -28,12 +28,50 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface ASCollectionNode : ASDisplayNode <ASRangeControllerUpdateRangeProtocol>
 
+/**
+ * Initializes an ASCollectionNode
+ *
+ * @discussion Initializes and returns a newly allocated collection node object with the specified layout.
+ *
+ * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
+ */
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
+
+/**
+ * Initializes an ASCollectionNode
+ *
+ * @discussion Initializes and returns a newly allocated collection node object with the specified frame and layout.
+ *
+ * @param frame The frame rectangle for the collection view, measured in points. The origin of the frame is relative to the superview in which you plan to add it. This frame is passed to the superclass during initialization.
+ * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
+ */
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
 
+/**
+ * Returns the corresponding ASCollectionView
+ *
+ * @return view The corresponding ASCollectionView.
+ */
 @property (strong, nonatomic, readonly) ASCollectionView *view;
 
+/**
+ * The object that acts as the asynchronous delegate of the collection view
+ *
+ * @discussion The delegate must adopt the ASCollectionDelegate protocol. The collection view maintains a weak reference to the delegate object.
+ *
+ * The delegate object is responsible for providing size constraints for nodes and indicating whether batch fetching should begin.
+ * @note This is a convenience method which sets the asyncDelegate on the collection node's collection view.
+ */
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
+
+/**
+ * The object that acts as the asynchronous data source of the collection view
+ *
+ * @discussion The datasource must adopt the ASCollectionDataSource protocol. The collection view maintains a weak reference to the datasource object.
+ *
+ * The datasource object is responsible for providing nodes or node creation blocks to the collection view.
+ * @note This is a convenience method which sets the asyncDatasource on the collection node's collection view.
+ */
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
 
 /**
