@@ -73,10 +73,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   [_node __setHighlightedFromUIKit:highlighted];
 }
 
+- (void)setLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
+{
+  _layoutAttributes = layoutAttributes;
+  _node.layoutAttributes = layoutAttributes;
+}
+
 - (void)prepareForReuse
 {
-  _layoutAttributes = nil;
-  _node.layoutAttributes = nil;
+  self.layoutAttributes = nil;
 
   // Need to clear node pointer before UIKit calls setSelected:NO / setHighlighted:NO on its cells
   self.node = nil;
@@ -92,8 +97,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
  */
 - (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
 {
-  _layoutAttributes = layoutAttributes;
-  _node.layoutAttributes = layoutAttributes;
+  self.layoutAttributes = layoutAttributes;
 }
 
 @end
@@ -694,6 +698,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASCellNode *cellNode = [cell node];
   cellNode.scrollView = collectionView;
   
+  // Under iOS 10+, cells may be removed/re-added to the collection view without
+  // receiving prepareForReuse/applyLayoutAttributes, as an optimization for e.g.
+  // if the user is scrolling back and forth across a small set of items.
+  // In this case, we have to fetch the layout attributes manually.
+  // This may be possible under iOS < 10 but it has not been observed yet.
+  if (cell.layoutAttributes == nil) {
+    cell.layoutAttributes = [collectionView layoutAttributesForItemAtIndexPath:indexPath];
+  }
+
   ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with cell that will be displayed not to be nil. indexPath: %@", indexPath);
 
   if (_asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath) {
@@ -726,7 +739,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   [_cellsForVisibilityUpdates removeObject:cell];
   
   cellNode.scrollView = nil;
-  cellNode.layoutAttributes = nil;
+  cell.layoutAttributes = nil;
 }
 
 
