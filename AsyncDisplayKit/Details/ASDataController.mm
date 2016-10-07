@@ -21,6 +21,8 @@
 #import "ASDataController+Subclasses.h"
 #import "ASDispatch.h"
 
+#import <sys/kdebug_signpost.h>
+
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
@@ -136,6 +138,8 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     [ASDataController _expectToInsertNodes:contexts.count];
 #endif
 
+  kdebug_signpost_start(2, 0, 0, 0, 2);
+  
   NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
   NSUInteger count = contexts.count;
   
@@ -147,6 +151,8 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     NSArray *indexPaths = [ASIndexedNodeContext indexPathsFromContexts:batchedContexts];
     batchCompletionHandler(nodes, indexPaths);
   }
+  
+  kdebug_signpost_end(2, 0, 0, 0, 2);
 }
 
 /**
