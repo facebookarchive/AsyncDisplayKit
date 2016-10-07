@@ -195,14 +195,14 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 /**
  * @abstract The width property specifies the height of the content area of an ASLayoutElement.
  * The minWidth and maxWidth properties override width.
- * Defaults to ASRelativeDimensionTypeAuto
+ * Defaults to ASDimensionAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension width;
 
 /**
  * @abstract The height property specifies the height of the content area of an ASLayoutElement
  * The minHeight and maxHeight properties override height.
- * Defaults to ASDimensionTypeAuto
+ * Defaults to ASDimensionAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension height;
 
@@ -210,7 +210,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  * @abstract The minHeight property is used to set the minimum height of a given element. It prevents the used value
  * of the height property from becoming smaller than the value specified for minHeight.
  * The value of minHeight overrides both maxHeight and height.
- * Defaults to ASDimensionTypeAuto
+ * Defaults to ASDimensionAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension minHeight;
 
@@ -218,7 +218,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  * @abstract The maxHeight property is used to set the maximum height of an element. It prevents the used value of the
  * height property from becoming larger than the value specified for maxHeight.
  * The value of maxHeight overrides height, but minHeight overrides maxHeight.
- * Defaults to ASDimensionTypeAuto
+ * Defaults to ASDimensionAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension maxHeight;
 
@@ -226,7 +226,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  * @abstract The minWidth property is used to set the minimum width of a given element. It prevents the used value of
  * the width property from becoming smaller than the value specified for minWidth.
  * The value of minWidth overrides both maxWidth and width.
- * Defaults to ASDimensionTypeAuto
+ * Defaults to ASDimensionAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension minWidth;
 
@@ -234,7 +234,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  * @abstract The maxWidth property is used to set the maximum width of a given element. It prevents the used value of
  * the width property from becoming larger than the value specified for maxWidth.
  * The value of maxWidth overrides width, but minWidth overrides maxWidth.
- * Defaults to ASDimensionTypeAuto
+ * Defaults to ASDimensionAuto
  */
 @property (nonatomic, assign, readwrite) ASDimension maxWidth;
 
@@ -332,7 +332,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 
 /**
  * @abstract Specifies the initial size in the stack dimension for this object.
- * Default to ASRelativeDimensionAuto
+ * Default to ASDimensionAuto
  * Used when attached to a stack layout.
  */
 @property (nonatomic, assign) ASDimension flexBasis;
