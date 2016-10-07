@@ -14,8 +14,6 @@
 
 #import "ASLayoutElementStylePrivate.h"
 
-@implementation ASLayoutSpec
-
 #import "ASDisplayNode+Subclasses.h" // FIXME: remove this later
 #import "ASDisplayNode+Beta.h"       // FIXME: remove this later
 #import "ASInsetLayoutSpec.h"        // FIXME: remove this later
@@ -25,6 +23,8 @@
 #import <objc/runtime.h>
 #import <map>
 #import <vector>
+
+@implementation ASLayoutSpec
 
 // Dynamic properties for ASLayoutElements
 @dynamic layoutElementType;
@@ -81,7 +81,7 @@
 {
   NSMutableArray *mutableChildren = [self.children mutableCopy];
   
-  for (id<ASLayoutable>layoutableChild in self.children) {
+  for (id<ASLayoutElement>layoutableChild in self.children) {
     if ([layoutableChild isKindOfClass:[ASLayoutSpec class]]) {
       ASLayoutSpec *layoutSpec = (ASLayoutSpec *)layoutableChild;
       

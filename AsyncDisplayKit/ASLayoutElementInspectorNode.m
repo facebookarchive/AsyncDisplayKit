@@ -1,21 +1,21 @@
 //
-//  ASLayoutableInspectorNode.m
+//  ASLayoutElementInspectorNode.m
 //  Sample
 //
 //  Created by Hannah Troisi on 3/19/16.
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASLayoutableInspectorNode.h"
-#import "ASLayoutableInspectorCell.h"
+#import "ASLayoutElementInspectorNode.h"
+#import "ASLayoutElementInspectorCell.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASLayoutSpec+Debug.h"
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface ASLayoutableInspectorNode () <ASTableDelegate, ASTableDataSource>
+@interface ASLayoutElementInspectorNode () <ASTableDelegate, ASTableDataSource>
 @end
 
-@implementation ASLayoutableInspectorNode
+@implementation ASLayoutElementInspectorNode
 {
   ASTableNode  *_tableNode;
 }
@@ -23,11 +23,11 @@
 #pragma mark - class methods
 + (instancetype)sharedInstance
 {
-  static ASLayoutableInspectorNode *__inspector = nil;
+  static ASLayoutElementInspectorNode *__inspector = nil;
   
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    __inspector = [[ASLayoutableInspectorNode alloc] init];
+    __inspector = [[ASLayoutElementInspectorNode alloc] init];
   });
   
   return __inspector;
@@ -64,10 +64,10 @@
 }
 
 #pragma mark - intstance methods
-- (void)setLayoutableToEdit:(id<ASLayoutable>)layoutableToEdit
+- (void)setlayoutElementToEdit:(id<ASLayoutElement>)layoutElementToEdit
 {
-  if (_layoutableToEdit != layoutableToEdit) {
-    _layoutableToEdit = layoutableToEdit;
+  if (_layoutElementToEdit != layoutElementToEdit) {
+    _layoutElementToEdit = layoutElementToEdit;
   }
   [_tableNode.view reloadData];
 }
@@ -81,12 +81,12 @@
     NSDictionary *attributes = @{NSForegroundColorAttributeName : [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1],
                                  NSFontAttributeName : [UIFont fontWithName:@"Menlo-Regular" size:12]};
     ASTextCellNode *textCell = [[ASTextCellNode alloc] initWithAttributes:attributes insets:UIEdgeInsetsMake(0, 4, 0, 0)];
-    textCell.text = [_layoutableToEdit description];
+    textCell.text = [_layoutElementToEdit description];
     return textCell;
     
   } else {
     
-    return [[ASLayoutableInspectorCell alloc] initWithProperty:(ASLayoutablePropertyType)indexPath.row layoutableToEdit:_layoutableToEdit];
+    return [[ASLayoutElementInspectorCell alloc] initWithProperty:(ASLayoutElementPropertyType)indexPath.row layoutElementToEdit:_layoutElementToEdit];
   }
 }
 
@@ -95,7 +95,7 @@
   if (section == 0) {
     return 1;
   } else {
-    return ASLayoutablePropertyCount;
+    return ASLayoutElementPropertyCount;
   }
 }
 
@@ -187,11 +187,11 @@
 //#pragma mark - configure Inspector node for layoutable
 //- (void)updateInspectorWithLayoutable
 //{
-//  _itemDescription.attributedString = [self attributedStringFromLayoutable:_layoutableToEdit];
+//  _itemDescription.attributedString = [self attributedStringFromLayoutable:_layoutElementToEdit];
 //
 //  if ([self node]) {
 //    UIColor *nodeBackgroundColor = [[self node] backgroundColor];
-//    UIImage *colorBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:nodeBackgroundColor
+//    UIImage *colorBtnImg = [ASLayoutElementInspectorNode imageForButtonWithBackgroundColor:nodeBackgroundColor
 //                                                                            borderColor:[UIColor whiteColor]
 //                                                                            borderWidth:3];
 //    [_itemBackgroundColorBtn setBackgroundImage:colorBtnImg forState:ASControlStateNormal];
@@ -199,17 +199,17 @@
 //    _itemBackgroundColorBtn.enabled = NO;
 //  }
 //  
-//  _flexGrowBtn.selected           = [self.layoutableToEdit flexGrow];
+//  _flexGrowBtn.selected           = [self.layoutElementToEdit flexGrow];
 //  _flexGrowValue.attributedString = [self attributedStringFromString: (_flexGrowBtn.selected) ? @"YES" : @"NO"];
 //  
-//  _flexShrinkBtn.selected           = self.layoutableToEdit.flexShrink;
+//  _flexShrinkBtn.selected           = self.layoutElementToEdit.flexShrink;
 //  _flexShrinkValue.attributedString = [self attributedStringFromString: (_flexShrinkBtn.selected) ? @"YES" : @"NO"];
 //  
-//  //  _flexBasisBtn.selected           = self.layoutableToEdit.flexShrink;
+//  //  _flexBasisBtn.selected           = self.layoutElementToEdit.flexShrink;
 //  //  _flexBasisValue.attributedString = [self attributedStringFromString: (_flexBasisBtn.selected) ? @"YES" : @"NO"];
 //  
 //  
-//  NSUInteger alignSelfValue = [self.layoutableToEdit alignSelf];
+//  NSUInteger alignSelfValue = [self.layoutElementToEdit alignSelf];
 //  NSString *newTitle = [@"alignSelf:" stringByAppendingString:[self alignSelfName:alignSelfValue]];
 //  [_alignSelfBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:ASControlStateNormal];
 //  
@@ -299,7 +299,7 @@
 //                            [UIColor greenColor],
 //                            [UIColor purpleColor]];
 //    
-//    UIColor *nodeBackgroundColor = [(ASDisplayNode *)self.layoutableToEdit backgroundColor];
+//    UIColor *nodeBackgroundColor = [(ASDisplayNode *)self.layoutElementToEdit backgroundColor];
 //    
 //    NSUInteger colorIndex = [colorArray indexOfObject:nodeBackgroundColor];
 //    colorIndex = (colorIndex + 1 < [colorArray count]) ? colorIndex + 1 : 0;
@@ -412,27 +412,27 @@
 //  // FIXME: finish
 //}
 
-#pragma mark - cast layoutableToEdit
+#pragma mark - cast layoutElementToEdit
 
 //- (ASDisplayNode *)node                                                         // FIXME: move to ASLayoutSpec? or make a category?
 //{
-//  if ([self.layoutableToEdit isKindOfClass:[ASDisplayNode class]]) {
-//    return (ASDisplayNode *)self.layoutableToEdit;
+//  if ([self.layoutElementToEdit isKindOfClass:[ASDisplayNode class]]) {
+//    return (ASDisplayNode *)self.layoutElementToEdit;
 //  }
 //  return nil;
 //}
 //
 //- (ASLayoutSpec *)layoutSpec
 //{
-//  if ([self.layoutableToEdit isKindOfClass:[ASLayoutSpec class]]) {
-//    return (ASLayoutSpec *)self.layoutableToEdit;
+//  if ([self.layoutElementToEdit isKindOfClass:[ASLayoutSpec class]]) {
+//    return (ASLayoutSpec *)self.layoutElementToEdit;
 //  }
 //  return nil;
 //}
 
 #pragma mark - helper methods
 
-//- (NSAttributedString *)attributedStringFromLayoutable:(id<ASLayoutable>)layoutable   // FIXME: move to Utilities.h
+//- (NSAttributedString *)attributedStringFromLayoutable:(id<ASLayoutElement>)layoutable   // FIXME: move to Utilities.h
 //{
 //  if ([self layoutSpec]) {
 //    return [self attributedStringFromString:[[self layoutSpec] description]];
@@ -458,13 +458,13 @@
 //- (ASButtonNode *)makeBtnNodeWithTitle:(NSString *)title
 //{
 //  UIColor *orangeColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
-//  UIImage *orangeStretchBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:orangeColor
+//  UIImage *orangeStretchBtnImg = [ASLayoutElementInspectorNode imageForButtonWithBackgroundColor:orangeColor
 //                                                                                  borderColor:[UIColor whiteColor]
 //                                                                                  borderWidth:3];
-//  UIImage *greyStretchBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:[UIColor darkGrayColor]
+//  UIImage *greyStretchBtnImg = [ASLayoutElementInspectorNode imageForButtonWithBackgroundColor:[UIColor darkGrayColor]
 //                                                                                borderColor:[UIColor lightGrayColor]
 //                                                                                borderWidth:3];
-//  UIImage *clearStretchBtnImg = [ASLayoutableInspectorNode imageForButtonWithBackgroundColor:[UIColor clearColor]
+//  UIImage *clearStretchBtnImg = [ASLayoutElementInspectorNode imageForButtonWithBackgroundColor:[UIColor clearColor]
 //                                                                                 borderColor:[UIColor whiteColor]
 //                                                                                 borderWidth:3];
 //  ASButtonNode *btn = [[ASButtonNode alloc] init];

@@ -9,7 +9,7 @@
 #import "ASLayoutSpec+Debug.h"
 #import "ASDisplayNode+Beta.h"
 #import "AsyncDisplayKit.h"
-#import "ASLayoutableInspectorNode.h"
+#import "ASLayoutElementInspectorNode.h"
 
 @implementation ASLayoutSpecVisualizerNode
 
@@ -21,7 +21,7 @@
     self.borderColor = [[UIColor redColor] CGColor];
     self.layoutSpec = layoutSpec;
     self.layoutSpec.neverShouldVisualize = YES;
-    self.usesImplicitHierarchyManagement = YES;
+    self.automaticallyManagesSubnodes = YES;
     self.shouldCacheLayoutSpec = YES;
     [self addTarget:self action:@selector(visualizerNodeTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
   }
@@ -30,7 +30,7 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  CGFloat insetFloat   = [ASLayoutableInspectorNode sharedInstance].vizNodeInsetSize;
+  CGFloat insetFloat   = [ASLayoutElementInspectorNode sharedInstance].vizNodeInsetSize;
   UIEdgeInsets insets  = UIEdgeInsetsMake(insetFloat, insetFloat, insetFloat, insetFloat);
   
   // FIXME in framework: auto pass properties to children
@@ -42,7 +42,7 @@
 //  insetSpec.flexShrink = _layoutSpec.flexShrink;
 //  insetSpec.alignSelf  = _layoutSpec.alignSelf;
   
-  NSLog(@"%@: vizNode = %d, child = %d", self, insetSpec.flexGrow, _layoutSpec.flexGrow);
+  NSLog(@"%@: vizNode = %f, child = %f", self, insetSpec.style.flexGrow, _layoutSpec.style.flexGrow);
   
   return insetSpec;
 }
@@ -67,7 +67,7 @@
 
 - (void)visualizerNodeTapped:(UIGestureRecognizer *)sender
 {
-  [[ASLayoutableInspectorNode sharedInstance] setLayoutableToEdit:self.layoutSpec];
+  [[ASLayoutElementInspectorNode sharedInstance] setLayoutElementToEdit:self.layoutSpec];
 }
 
 @end

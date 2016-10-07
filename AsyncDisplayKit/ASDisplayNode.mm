@@ -37,7 +37,7 @@
 #import "ASWeakProxy.h"
 
 //#import "ASLayoutSpec+Debug.h" // FIXME: remove later
-#import "ASStaticLayoutSpec.h" // FIXME: remove later
+#import "ASAbsoluteLayoutSpec.h" // FIXME: remove later
 
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
@@ -760,13 +760,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   BOOL didCreateNewContext = NO;
   BOOL didOverrideExistingContext = NO;
   BOOL shouldVisualizeLayout = ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
-  ASLayoutableContext context;
-  if (ASLayoutableContextIsNull(ASLayoutableGetCurrentContext())) {
-    context = ASLayoutableContextMake(ASLayoutableContextDefaultTransitionID, shouldVisualizeLayout);
+  ASLayoutElementContext context;
+  if (ASLayoutElementContextIsNull(ASLayoutElementGetCurrentContext())) {
+    context = ASLayoutElementContextMake(ASLayoutElementContextDefaultTransitionID, shouldVisualizeLayout);
     ASLayoutElementSetCurrentContext(context);
     didCreateNewContext = YES;
   } else {
-    context = ASLayoutableGetCurrentContext();
+    context = ASLayoutElementGetCurrentContext();
     if (context.needsVisualizeNode != shouldVisualizeLayout) {
       context.needsVisualizeNode = shouldVisualizeLayout;
       ASLayoutElementSetCurrentContext(context);
@@ -783,7 +783,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   );
   
   if (didCreateNewContext) {
-    ASLayoutableClearCurrentContext();
+    ASLayoutElementClearCurrentContext();
   } else if (didOverrideExistingContext) {
     context.needsVisualizeNode = !context.needsVisualizeNode;
     ASLayoutElementSetCurrentContext(context);
@@ -2446,10 +2446,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
   ASDN::MutexLocker l(__instanceLock__);
   if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
+    BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
+    
     ASLayoutSpec *layoutSpec = _shouldCacheLayoutSpec ? _layoutSpec : nil;
     
     if (layoutSpec == nil) {
-      BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
       ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
       if (measureLayoutSpec) {
         _layoutSpecNumberOfPasses++;
@@ -3679,7 +3680,7 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (void)setShouldVisualizeLayoutSpecs:(BOOL)shouldVisualizeLayoutSpecs
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (shouldVisualizeLayoutSpecs != [self shouldVisualizeLayoutSpecs]) {
     if (shouldVisualizeLayoutSpecs) {
       [self enterHierarchyState:ASHierarchyStateVisualizeLayout];
@@ -3692,13 +3693,13 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (BOOL)shouldVisualizeLayoutSpecs
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
 }
 
 - (void)setShouldCacheLayoutSpec:(BOOL)shouldCacheLayoutSpec
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   if (_shouldCacheLayoutSpec != shouldCacheLayoutSpec) {
     _shouldCacheLayoutSpec = shouldCacheLayoutSpec;
     if (_shouldCacheLayoutSpec == NO) {
@@ -3709,13 +3710,13 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 - (BOOL)shouldCacheLayoutSpec
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _shouldCacheLayoutSpec;
 }
 
 - (void)clearCachedLayoutSpec
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   _layoutSpec = nil;
 }
 

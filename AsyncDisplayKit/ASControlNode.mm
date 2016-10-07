@@ -14,7 +14,7 @@
 #import "AsyncDisplayKit+Debug.h"
 #import "ASInternalHelpers.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASLayoutableInspectorNode.h"
+#import "ASLayoutElementInspectorNode.h"
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
@@ -497,7 +497,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
 - (void)inspectElement
 {
-  [ASLayoutableInspectorNode sharedInstance].layoutableToEdit = self;
+  [ASLayoutElementInspectorNode sharedInstance].layoutElementToEdit = self;
 }
 
 @end

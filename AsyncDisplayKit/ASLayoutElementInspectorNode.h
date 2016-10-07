@@ -1,5 +1,5 @@
 //
-//  ASLayoutableInspectorNode.h
+//  ASLayoutElementInspectorNode.h
 //  Sample
 //
 //  Created by Hannah Troisi on 3/19/16.
@@ -8,16 +8,16 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@protocol ASLayoutableInspectorNodeDelegate <NSObject>
+@protocol ASLayoutElementInspectorNodeDelegate <NSObject>
 
 - (void)toggleVisualization:(BOOL)toggle;
 
 @end 
 
-@interface ASLayoutableInspectorNode : ASDisplayNode
+@interface ASLayoutElementInspectorNode : ASDisplayNode
 
-@property (nonatomic, strong) id<ASLayoutable>                      layoutableToEdit;
-@property (nonatomic, strong) id<ASLayoutableInspectorNodeDelegate> delegate;
+@property (nonatomic, strong) id<ASLayoutElement>                      layoutElementToEdit;
+@property (nonatomic, strong) id<ASLayoutElementInspectorNodeDelegate> delegate;
 @property (nonatomic, assign) CGFloat                               vizNodeInsetSize;
 
 + (instancetype)sharedInstance;

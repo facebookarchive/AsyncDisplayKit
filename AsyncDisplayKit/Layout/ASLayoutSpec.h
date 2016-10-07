@@ -60,6 +60,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nullable, strong, nonatomic) NSArray<id<ASLayoutElement>> *children;
 
+@property (nonatomic, assign) BOOL shouldVisualize;
+@property (nonatomic, assign) BOOL neverShouldVisualize;
+- (void)recursivelySetShouldVisualize:(BOOL)visualize;
+
 @end
 
 /**
@@ -81,11 +85,6 @@ NS_ASSUME_NONNULL_BEGIN
  * Init not available for ASWrapperLayoutSpec
  */
 - (instancetype)init __unavailable;
-
-// FIXME:
-@property (nonatomic, assign) BOOL shouldVisualize;
-@property (nonatomic, assign) BOOL neverShouldVisualize;
-- (void)recursivelySetShouldVisualize:(BOOL)visualize;
 
 @end
 
