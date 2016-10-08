@@ -93,3 +93,122 @@ extern void ASLayoutElementClearCurrentContext();
 {\
   return _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(self, idx);\
 }\
+
+
+
+#pragma mark - ASLayoutElementStyleForwarding (Deprecated)
+
+// For the time beeing we are forwading all style related properties on ASDisplayNode and ASLayoutSpec. This define
+// help us to not have duplicate code while moving from 1.x to 2.0s
+#define ASLayoutElementStyleForwarding \
+\
+@dynamic spacingBefore, spacingAfter, flexGrow, flexShrink, flexBasis, alignSelf, ascender, descender, sizeRange, layoutPosition;\
+\
+_Pragma("mark - ASStackLayoutElement")\
+\
+- (void)setSpacingBefore:(CGFloat)spacingBefore\
+{\
+  self.style.spacingBefore = spacingBefore;\
+}\
+\
+- (CGFloat)spacingBefore\
+{\
+  return self.style.spacingBefore;\
+}\
+\
+- (void)setSpacingAfter:(CGFloat)spacingAfter\
+{\
+  self.style.spacingAfter = spacingAfter;\
+}\
+\
+- (CGFloat)spacingAfter\
+{\
+  return self.style.spacingAfter;\
+}\
+\
+- (void)setFlexGrow:(CGFloat)flexGrow\
+{\
+  self.style.flexGrow = flexGrow;\
+}\
+\
+- (CGFloat)flexGrow\
+{\
+  return self.style.flexGrow;\
+}\
+\
+- (void)setFlexShrink:(CGFloat)flexShrink\
+{\
+  self.style.flexShrink = flexShrink;\
+}\
+\
+- (CGFloat)flexShrink\
+{\
+  return self.style.flexShrink;\
+}\
+\
+- (void)setFlexBasis:(ASDimension)flexBasis\
+{\
+  self.style.flexBasis = flexBasis;\
+}\
+\
+- (ASDimension)flexBasis\
+{\
+  return self.style.flexBasis;\
+}\
+\
+- (void)setAlignSelf:(ASStackLayoutAlignSelf)alignSelf\
+{\
+  self.style.alignSelf = alignSelf;\
+}\
+\
+- (ASStackLayoutAlignSelf)alignSelf\
+{\
+  return self.style.alignSelf;\
+}\
+\
+- (void)setAscender:(CGFloat)ascender\
+{\
+  self.style.ascender = ascender;\
+}\
+\
+- (CGFloat)ascender\
+{\
+  return self.style.ascender;\
+}\
+\
+- (void)setDescender:(CGFloat)descender\
+{\
+  self.style.descender = descender;\
+}\
+\
+- (CGFloat)descender\
+{\
+  return self.style.descender;\
+}\
+\
+_Pragma("mark - ASAbsoluteLayoutElement")\
+\
+- (void)setLayoutPosition:(CGPoint)layoutPosition\
+{\
+  self.style.layoutPosition = layoutPosition;\
+}\
+\
+- (CGPoint)layoutPosition\
+{\
+  return self.style.layoutPosition;\
+}\
+\
+_Pragma("clang diagnostic push")\
+_Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")\
+\
+- (void)setSizeRange:(ASRelativeSizeRange)sizeRange\
+{\
+  self.style.sizeRange = sizeRange;\
+}\
+\
+- (ASRelativeSizeRange)sizeRange\
+{\
+  return self.style.sizeRange;\
+}\
+\
+_Pragma("clang diagnostic pop")\

@@ -10,9 +10,20 @@
 
 #import "ASAbsoluteLayoutSpec.h"
 
-#import "ASLayoutSpecUtilities.h"
 #import "ASLayout.h"
+#import "ASLayoutSpecUtilities.h"
 #import "ASLayoutElementStylePrivate.h"
+
+#pragma mark - ASAbsoluteLayoutSpec
+
+@interface ASAbsoluteLayoutSpec ()
+
+// ASStaticLayoutSpec always adjusted the size of itself based on the children's layoutPositino and size.
+// ASAbsoluteLayoutSpec does this only if the constrainedSize.max.width or constrainedSize.max.height is INF.
+// For backwards compatiblity let's support both ways
+@property (assign, nonatomic) BOOL alwaysSizeToFit;
+
+@end
 
 @implementation ASAbsoluteLayoutSpec
 
@@ -31,6 +42,9 @@
   if (!(self = [super init])) {
     return nil;
   }
+
+  _alwaysSizeToFit = NO;
+  
   self.children = children;
   return self;
 }
@@ -60,14 +74,14 @@
     [sublayouts addObject:sublayout];
   }
   
-  if (isnan(size.width)) {
+  if (_alwaysSizeToFit || isnan(size.width)) {
     size.width = constrainedSize.min.width;
     for (ASLayout *sublayout in sublayouts) {
       size.width  = MAX(size.width,  sublayout.position.x + sublayout.size.width);
     }
   }
   
-  if (isnan(size.height)) {
+  if (_alwaysSizeToFit || isnan(size.height)) {
     size.height = constrainedSize.min.height;
     for (ASLayout *sublayout in sublayouts) {
       size.height = MAX(size.height, sublayout.position.y + sublayout.size.height);
@@ -79,6 +93,8 @@
 
 @end
 
+#pragma mark - ASEnvironment
+
 @implementation ASAbsoluteLayoutSpec (ASEnvironment)
 
 - (BOOL)supportsUpwardPropagation
@@ -88,13 +104,36 @@
 
 @end
 
-@implementation ASAbsoluteLayoutSpec (Debugging)
+#pragma mark - Debugging
 
-#pragma mark - ASLayoutElementAsciiArtProtocol
+@implementation ASAbsoluteLayoutSpec (Debugging)
 
 - (NSString *)debugBoxString
 {
   return [ASLayoutSpec asciiArtStringForChildren:self.children parentName:[self asciiArtName]];
+}
+
+@end
+
+
+#pragma mark - ASStaticLayoutSpec
+
+@implementation ASStaticLayoutSpec : ASAbsoluteLayoutSpec
+
++ (instancetype)staticLayoutSpecWithChildren:(NSArray<id<ASLayoutElement>> *)children
+{
+  return [self absoluteLayoutSpecWithChildren:children];
+}
+
+- (instancetype)initWithChildren:(NSArray *)children
+{
+  if (!(self = [super initWithChildren:children])) {
+    return nil;
+  }
+  
+  self.alwaysSizeToFit = YES;
+  
+  return self;
 }
 
 @end

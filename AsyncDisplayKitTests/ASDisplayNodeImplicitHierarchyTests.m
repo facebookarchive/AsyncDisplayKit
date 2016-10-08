@@ -118,20 +118,21 @@
   XCTAssertEqual(node.subnodes[2], node2);
 }
 
-- (void)testLayoutTransitionWillThrowForManualSubnodeManagement
-{
-  ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
-  node1.name = @"node1";
-  
-  ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
-  node.automaticallyManagesSubnodes = YES;
-  node.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode *weakNode, ASSizeRange constrainedSize){
-    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node1]];
-  };
-  
-  XCTAssertNoThrow([node layoutThatFits:ASSizeRangeMake(CGSizeZero)]);
-  XCTAssertThrows([node1 removeFromSupernode]);
-}
+// Disable test for now as we disabled the assertion
+//- (void)testLayoutTransitionWillThrowForManualSubnodeManagement
+//{
+//  ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
+//  node1.name = @"node1";
+//  
+//  ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+//  node.automaticallyManagesSubnodes = YES;
+//  node.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode *weakNode, ASSizeRange constrainedSize){
+//    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node1]];
+//  };
+//  
+//  XCTAssertNoThrow([node layoutThatFits:ASSizeRangeMake(CGSizeZero)]);
+//  XCTAssertThrows([node1 removeFromSupernode]);
+//}
 
 - (void)testLayoutTransitionMeasurementCompletionBlockIsCalledOnMainThread
 {
