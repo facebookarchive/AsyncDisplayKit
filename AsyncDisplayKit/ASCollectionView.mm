@@ -506,34 +506,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return [_dataController completedNodes];
 }
 
-- (NSInteger)asyncNumberOfItemsInSection:(NSInteger)section
-{
-  return [_dataController numberOfRowsInSection:section];
-}
-
-- (NSInteger)asyncNumberOfSections
-{
-  return [_dataController numberOfSections];
-}
-
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [self nodeForItemAtIndexPath:indexPath usingUIKitIndexSpace:NO];
+  return [_dataController nodeAtCompletedIndexPath:indexPath];
 }
 
-- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath usingUIKitIndexSpace:(BOOL)useUIKitIndexSpace
+- (NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath
 {
-  if (useUIKitIndexSpace) {
-    return [_dataController nodeAtCompletedIndexPath:indexPath];
-  } else {
-    return [_dataController nodeAtIndexPath:indexPath];
-  }
-}
-
-- (NSIndexPath *)indexPathForItemWithUIKitIndexPath:(NSIndexPath *)indexPath
-{
-  ASCellNode *node = [self nodeForItemAtIndexPath:indexPath usingUIKitIndexSpace:YES];
-  return [self indexPathForNode:node];
+  ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
+  return [_dataController indexPathForNode:node];
 }
 
 - (ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
@@ -543,7 +524,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
-  return [_dataController indexPathForNode:cellNode];
+  return [_dataController completedIndexPathForNode:cellNode];
 }
 
 - (NSArray *)visibleNodes
@@ -552,7 +533,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSMutableArray *visibleNodes = [[NSMutableArray alloc] init];
   
   for (NSIndexPath *indexPath in indexPaths) {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath usingUIKitIndexSpace:YES];
+    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
     if (node) {
       // It is possible for UICollectionView to return indexPaths before the node is completed.
       [visibleNodes addObject:node];
@@ -706,7 +687,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [[self nodeForItemAtIndexPath:indexPath usingUIKitIndexSpace:YES] calculatedSize];
+  return [[self nodeForItemAtIndexPath:indexPath] calculatedSize];
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -725,7 +706,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
   
-  ASCellNode *node = [_dataController nodeAtCompletedIndexPath:indexPath];
+  ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
   cell.node = node;
   [_rangeController configureContentView:cell.contentView forCellNode:node];
   
@@ -791,7 +772,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateCollectionViewShouldSelectItemAtIndexPath) {
-    indexPath = [self indexPathForItemWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
     return [_asyncDelegate collectionView:self shouldSelectItemAtIndexPath:indexPath];
   } else {
     return YES;
@@ -801,7 +782,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateCollectionViewDidSelectItemAtIndexPath) {
-    indexPath = [self indexPathForItemWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
     [_asyncDelegate collectionView:self didSelectItemAtIndexPath:indexPath];
   }
 }
@@ -809,7 +790,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateCollectionViewShouldDeselectItemAtIndexPath) {
-    indexPath = [self indexPathForItemWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
     return [_asyncDelegate collectionView:self shouldDeselectItemAtIndexPath:indexPath];
   } else {
     return YES;
@@ -819,7 +800,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateCollectionViewDidSelectItemAtIndexPath) {
-    indexPath = [self indexPathForItemWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
     [_asyncDelegate collectionView:self didDeselectItemAtIndexPath:indexPath];
   }
 }
@@ -827,7 +808,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateCollectionViewShouldHighlightItemAtIndexPath) {
-    indexPath = [self indexPathForItemWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
     return [_asyncDelegate collectionView:self shouldHighlightItemAtIndexPath:indexPath];
   } else {
     return YES;
@@ -837,7 +818,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)collectionView:(UICollectionView *)collectionView didHighlightItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateCollectionViewDidHighlightItemAtIndexPath) {
-    indexPath = [self indexPathForItemWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
     [_asyncDelegate collectionView:self didHighlightItemAtIndexPath:indexPath];
   }
 }
@@ -845,7 +826,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)collectionView:(UICollectionView *)collectionView didUnhighlightItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateCollectionViewDidUnhighlightItemAtIndexPath) {
-    indexPath = [self indexPathForItemWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
     [_asyncDelegate collectionView:self didUnhighlightItemAtIndexPath:indexPath];
   }
 }
@@ -853,7 +834,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateCollectionViewShouldShowMenuForItemAtIndexPath) {
-    indexPath = [self indexPathForItemWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
     return [_asyncDelegate collectionView:self shouldShowMenuForItemAtIndexPath:indexPath];
   } else {
     return NO;
@@ -863,7 +844,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(nonnull SEL)action forItemAtIndexPath:(nonnull NSIndexPath *)indexPath withSender:(nullable id)sender
 {
   if (_asyncDelegateFlags.asyncDelegateCollectionViewCanPerformActionForItemAtIndexPathWithSender) {
-    indexPath = [self indexPathForItemWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
     return [_asyncDelegate collectionView:self canPerformAction:action forItemAtIndexPath:indexPath withSender:sender];
   } else {
     return NO;
@@ -873,7 +854,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)collectionView:(UICollectionView *)collectionView performAction:(nonnull SEL)action forItemAtIndexPath:(nonnull NSIndexPath *)indexPath withSender:(nullable id)sender
 {
   if (_asyncDelegateFlags.asyncDelegateCollectionViewPerformActionForItemAtIndexPathWithSender) {
-    indexPath = [self indexPathForItemWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
     [_asyncDelegate collectionView:self performAction:action forItemAtIndexPath:indexPath withSender:sender];
   }
 }

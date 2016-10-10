@@ -146,6 +146,38 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)reloadDataImmediately;
 
+/**
+ * TODO: Docs
+ */
+- (NSInteger)numberOfItemsInSection:(NSInteger)section AS_WARN_UNUSED_RESULT;
+
+/**
+ * TODO: Docs
+ */
+@property (nonatomic, readonly) NSInteger numberOfSections;
+
+/**
+ * Retrieves the node for the item at the given index path.
+ *
+ * @param indexPath The index path of the requested node.
+ * @return The node at the given index path, or @c nil if no item exists at the specified path.
+ */
+- (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+
+/**
+ * Retrieve the index path for the item with the given node.
+ *
+ * @param cellNode a cellNode part of the collection node
+ *
+ * @return an indexPath for this cellNode
+ *
+ * @discussion This method will return @c nil for a node that is still being
+ *   displayed in the view, if the data source has deleted the item.
+ *   That is, the node is visible but it no longer corresponds
+ *   to any item in the data source and will be removed.
+ */
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
+
 @end
 
 NS_ASSUME_NONNULL_END

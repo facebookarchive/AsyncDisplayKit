@@ -134,6 +134,7 @@
 
 @property (nonatomic, strong) ASCollectionViewTestDelegate *asyncDelegate;
 @property (nonatomic, strong) ASCollectionView *collectionView;
+@property (nonatomic, strong) ASCollectionNode *collectionNode;
 
 @end
 
@@ -146,8 +147,8 @@
     self.asyncDelegate = [[ASCollectionViewTestDelegate alloc] initWithNumberOfSections:10 numberOfItemsInSection:10];
     id realLayout = [UICollectionViewFlowLayout new];
     id mockLayout = [OCMockObject partialMockForObject:realLayout];
-    self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds
-                                             collectionViewLayout:mockLayout];
+    self.collectionNode = [[ASCollectionNode alloc] initWithFrame:self.view.bounds collectionViewLayout:mockLayout];
+    self.collectionView = self.collectionNode.view;
     self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.collectionView.asyncDataSource = self.asyncDelegate;
     self.collectionView.asyncDelegate = self.asyncDelegate;
@@ -314,6 +315,7 @@
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];\
   __unused ASCollectionViewTestDelegate *del = testController.asyncDelegate;\
   __unused ASCollectionView *cv = testController.collectionView;\
+  __unused ASCollectionNode *cn = testController.collectionNode;\
   UIWindow *window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];\
   [window makeKeyAndVisible]; \
   window.rootViewController = testController;\
@@ -665,11 +667,11 @@
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
 
   // Insert an item and assert nodeForItemAtIndexPath: immediately returns new node
-  ASCellNode *oldNode = [cv nodeForItemAtIndexPath:indexPath];
+  ASCellNode *oldNode = [cn nodeForItemAtIndexPath:indexPath];
   XCTAssertNotNil(oldNode);
   del->_itemCounts[0] += 1;
   [cv insertItemsAtIndexPaths:@[ indexPath ]];
-  ASCellNode *newNode = [cv nodeForItemAtIndexPath:indexPath];
+  ASCellNode *newNode = [cn nodeForItemAtIndexPath:indexPath];
   XCTAssertNotNil(newNode);
   XCTAssertNotEqualObjects(oldNode, newNode);
 
@@ -677,7 +679,7 @@
   NSIndexSet *sections = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, del->_itemCounts.size())];
   del->_itemCounts.clear();
   [cv deleteSections:sections];
-  XCTAssertNil([cv nodeForItemAtIndexPath:indexPath]);
+  XCTAssertNil([cn nodeForItemAtIndexPath:indexPath]);
 }
 
 - (void)DISABLED_testThatSupplementaryNodeAtIndexPathIsCorrectImmediatelyAfterSubmittingUpdate

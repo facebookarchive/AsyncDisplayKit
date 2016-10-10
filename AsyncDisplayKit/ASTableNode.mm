@@ -211,4 +211,32 @@
 
 ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 
+#pragma mark Public API
+
+- (NSInteger)numberOfRowsInSection:(NSInteger)section
+{
+  return [self.view.dataController numberOfRowsInSection:section];
+}
+
+- (NSInteger)numberOfSections
+{
+  return [self.view.dataController numberOfSections];
+}
+
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
+{
+  return [self.view.dataController indexPathForNode:cellNode];
+}
+
+- (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [self.view.dataController nodeAtIndexPath:indexPath];
+}
+
+- (NSIndexPath *)convertIndexPathToTableNode:(NSIndexPath *)indexPath
+{
+  ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
+  return [self.view.dataController indexPathForNode:node];
+}
+
 @end

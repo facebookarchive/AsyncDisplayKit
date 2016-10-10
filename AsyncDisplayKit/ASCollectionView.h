@@ -307,7 +307,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 /**
- * Retrieves the node for the item at the given index path, in the data source's index space.
+ * Retrieves the node for the item at the given index path.
  *
  * @param indexPath The index path of the requested node.
  * @return The node at the given index path, or @c nil if no item exists at the specified path.
@@ -315,33 +315,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
- * Retrieves the node for the item at the given index path.
- *
- * @param indexPath The index path of the requested node.
- * @param useUIKitIndexSpace Whether the index path provided is in the UIKit index space or not.
- *
- * @discussion You should use the UIKit index space only when dealing directly with UIKit
- *    e.g. when implementing a @c UICollectionViewLayout subclass, or when implementing
- *    @c collectionView:didSelectItemAtIndexPath: .
- *
- * @return The node at the given index path, or @c nil if no item exists at the specified path.
- */
-- (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath usingUIKitIndexSpace:(BOOL)useUIKitIndexSpace AS_WARN_UNUSED_RESULT;
-
-/**
  * TODO: Docs
  */
-- (nullable NSIndexPath *)indexPathForItemWithUIKitIndexPath:(NSIndexPath *)indexPath;
-
-/**
- * TODO: Docs
- */
-- (NSInteger)asyncNumberOfItemsInSection:(NSInteger)section AS_WARN_UNUSED_RESULT;
-
-/**
- * TODO: Docs
- */
-@property (nonatomic, readonly) NSInteger asyncNumberOfSections;
+- (nullable NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath;
 
 /**
  * Similar to -supplementaryViewForElementKind:atIndexPath:
@@ -358,7 +334,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param cellNode a cellNode in the collection view
  *
- * @return The index path for this cell node, in the data source's index space.
+ * @return The index path for this cell node.
  *
  * @discussion This method will return @c nil for a node that is still being
  *   displayed in the collection view, if the data source has deleted the item.

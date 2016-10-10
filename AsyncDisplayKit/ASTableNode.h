@@ -35,6 +35,40 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
 @property (weak, nonatomic) id <ASTableDataSource> dataSource;
 
+/**
+ * TODO: Docs
+ */
+- (NSInteger)numberOfRowsInSection:(NSInteger)section AS_WARN_UNUSED_RESULT;
+
+/**
+ * TODO: Docs
+ */
+@property (nonatomic, readonly) NSInteger numberOfSections;
+
+/**
+ * Retrieves the node for the row at the given index path.
+ */
+- (nullable ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+
+/**
+ * Similar to -indexPathForCell:.
+ *
+ * @param cellNode a cellNode part of the table view
+ *
+ * @return an indexPath for this cellNode
+ *
+ * @discussion This method will return @c nil for a node that is still being
+ *   displayed in the table view, if the data source has deleted the row.
+ *   That is, the node is visible but it no longer corresponds
+ *   to any item in the data source and will be removed soon.
+ */
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
+
+/**
+ * TODO: Docs
+ */
+- (nullable NSIndexPath *)convertIndexPathToTableNode:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+
 @end
 
 NS_ASSUME_NONNULL_END

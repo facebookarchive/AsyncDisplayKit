@@ -420,16 +420,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return [_dataController completedNodes];
 }
 
-- (NSInteger)asyncNumberOfRowsInSection:(NSInteger)section
-{
-  return [_dataController numberOfRowsInSection:section];
-}
-
-- (NSInteger)asyncNumberOfSections
-{
-  return [_dataController numberOfSections];
-}
-
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   return [self nodeForRowAtIndexPath:indexPath usingUIKitIndexSpace:NO];

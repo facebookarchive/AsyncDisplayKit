@@ -889,27 +889,27 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 - (NSUInteger)numberOfSections
 {
   ASDisplayNodeAssertMainThread();
-  return [[self completedNodes] count];
+  return [_nodeContexts[ASDataControllerRowNodeKind] count];
 }
 
 - (NSUInteger)numberOfRowsInSection:(NSUInteger)section
 {
   ASDisplayNodeAssertMainThread();
-  NSArray *completedNodes = [self completedNodes];
-  return (section < completedNodes.count) ? [completedNodes[section] count] : 0;
+  NSArray *contextSections = _nodeContexts[ASDataControllerRowNodeKind];
+  return (section < contextSections.count) ? [contextSections[section] count] : 0;
 }
 
 - (NSUInteger)completedNumberOfSections
 {
   ASDisplayNodeAssertMainThread();
-  return [_nodeContexts[ASDataControllerRowNodeKind] count];
+  return [[self completedNodes] count];
 }
 
 - (NSUInteger)completedNumberOfRowsInSection:(NSUInteger)section
 {
   ASDisplayNodeAssertMainThread();
-  NSArray *contextSections = _nodeContexts[ASDataControllerRowNodeKind];
-  return (section < contextSections.count) ? [contextSections[section] count] : 0;
+  NSArray *completedNodes = [self completedNodes];
+  return (section < completedNodes.count) ? [completedNodes[section] count] : 0;
 }
 
 - (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath

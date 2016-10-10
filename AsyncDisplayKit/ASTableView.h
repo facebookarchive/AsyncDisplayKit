@@ -272,40 +272,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 /**
- * Retrieves the node for the row at the given index path, in the data source's index space.
- *
- * @param indexPath The index path of the requested row, in the data source's index space.
- * @return The node for the row, or @c nil if no row exists at the specified path.
+ * Retrieves the node for the row at the given index path.
  */
 - (nullable ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
-
-/**
- * Retrieves the node for the row at the given index path.
- *
- * @param indexPath The index path of the requested row.
- * @param useUIKitIndexSpace Whether the index path provided is in the UIKit index space or not.
- *
- * @discussion You should use the UIKit index space only if the index path was received from UIKit
- *    e.g. @c tableView:didSelectRowAtIndexPath: or @c tableView:canMoveRowAtIndexPath: .
- *
- * @return The node for the row, or @c nil if no row exists at the specified path.
- */
-- (nullable ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath usingUIKitIndexSpace:(BOOL)useUIKitIndexSpace AS_WARN_UNUSED_RESULT;
-
-/**
- * TODO: Docs
- */
-- (nullable NSIndexPath *)indexPathForRowWithUIKitIndexPath:(NSIndexPath *)indexPath;
-
-/**
- * TODO: Docs
- */
-- (NSInteger)asyncNumberOfRowsInSection:(NSInteger)section AS_WARN_UNUSED_RESULT;
-
-/**
- * TODO: Docs
- */
-@property (nonatomic, readonly) NSInteger asyncNumberOfSections;
 
 /**
  * Similar to -indexPathForCell:.

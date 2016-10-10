@@ -293,6 +293,26 @@
   [self.view.dataController endUpdatesAnimated:animated completion:completion];
 }
 
+- (NSInteger)numberOfItemsInSection:(NSInteger)section
+{
+  return [self.view.dataController numberOfRowsInSection:section];
+}
+
+- (NSInteger)numberOfSections
+{
+  return [self.view.dataController numberOfSections];
+}
+
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
+{
+  return [self.view.dataController indexPathForNode:cellNode];
+}
+
+- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [self.view.dataController nodeAtIndexPath:indexPath];
+}
+
 #pragma mark - ASRangeControllerUpdateRangeProtocol
 
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
