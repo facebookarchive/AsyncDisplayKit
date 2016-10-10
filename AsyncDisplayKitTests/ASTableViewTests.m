@@ -16,6 +16,7 @@
 #import "ASChangeSetDataController.h"
 #import "ASCellNode.h"
 #import "ASTableNode.h"
+#import "ASTableView+Undeprecated.h"
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20

@@ -25,7 +25,7 @@
 #import "_ASDisplayLayer.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASSectionContext.h"
-#import "ASCollectionView+Internal.h"
+#import "ASCollectionView+Undeprecated.h"
 
 /// What, if any, invalidation should we perform during the next -layoutSubviews.
 typedef NS_ENUM(NSUInteger, ASCollectionViewInvalidationStyle) {

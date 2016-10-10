@@ -1,39 +1,33 @@
 //
-//  ASTableNode.h
+//  ASTableView+Undeprecated.h
 //  AsyncDisplayKit
 //
-//  Created by Steven Ramkumar on 11/4/15.
-//
-//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
-//  This source code is licensed under the BSD-style license found in the
-//  LICENSE file in the root directory of this source tree. An additional grant
-//  of patent rights can be found in the PATENTS file in the same directory.
+//  Created by Adlai Holler on 10/10/16.
+//  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/ASTableView.h>
-#import <AsyncDisplayKit/ASDisplayNode.h>
-#import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol ASTableDataSource;
-@protocol ASTableDelegate;
-@class ASTableView;
+/**
+ * Currently our public table API is on @c ASTableNode and the @c ASTableView
+ * API is deprecated, but the implementations still live in the view.
+ *
+ * This category lets us avoid deprecation warnings everywhere internally.
+ * In the future, the ASTableView public API will be eliminated and so will this file.
+ */
+@interface ASTableView (Undeprecated)
 
 /**
- * ASTableNode is a node based class that wraps an ASTableView. It can be used
- * as a subnode of another node, and provide room for many (great) features and improvements later on.
+ * Initializer.
+ *
+ * @param frame A rectangle specifying the initial location and size of the table view in its superview’s coordinates.
+ * The frame of the table view changes as table cells are added and deleted.
+ *
+ * @param style A constant that specifies the style of the table view. See UITableViewStyle for descriptions of valid constants.
  */
-@interface ASTableNode : ASDisplayNode <ASRangeControllerUpdateRangeProtocol>
-
-- (instancetype)init; // UITableViewStylePlain
-- (instancetype)initWithStyle:(UITableViewStyle)style;
-
-@property (strong, nonatomic, readonly) ASTableView *view;
-
-// These properties can be set without triggering the view to be created, so it's fine to set them in -init.
-@property (weak, nonatomic) id <ASTableDelegate>   delegate;
-@property (weak, nonatomic) id <ASTableDataSource> dataSource;
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style;
 
 /**
  * Tuning parameters for a range type in full mode.
@@ -113,6 +107,13 @@ NS_ASSUME_NONNULL_BEGIN
  * all the cells load.
  */
 - (void)reloadDataImmediately;
+
+/**
+ * Triggers a relayout of all nodes.
+ *
+ * @discussion This method invalidates and lays out every cell node in the table view.
+ */
+- (void)relayoutItems;
 
 /**
  *  Begins a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
@@ -252,45 +253,5 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
-/**
- * TODO: Docs
- */
-- (NSInteger)numberOfRowsInSection:(NSInteger)section AS_WARN_UNUSED_RESULT;
-
-/**
- * TODO: Docs
- */
-@property (nonatomic, readonly) NSInteger numberOfSections;
-
-/**
- * Retrieves the node for the row at the given index path.
- */
-- (nullable ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
-
-/**
- * Similar to -indexPathForCell:.
- *
- * @param cellNode a cellNode part of the table view
- *
- * @return an indexPath for this cellNode
- *
- * @discussion This method will return @c nil for a node that is still being
- *   displayed in the table view, if the data source has deleted the row.
- *   That is, the node is visible but it no longer corresponds
- *   to any item in the data source and will be removed soon.
- */
-- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
-
-/**
- * TODO: Docs
- */
-- (nullable NSIndexPath *)convertIndexPathToTableNode:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
-
-/**
- * TODO: Docs
- */
-- (nullable NSIndexPath *)convertIndexPathFromTableNode:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
-
 @end
-
 NS_ASSUME_NONNULL_END

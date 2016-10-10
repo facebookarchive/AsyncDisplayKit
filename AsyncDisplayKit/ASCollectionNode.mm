@@ -20,7 +20,7 @@
 #import "AsyncDisplayKit+Debug.h"
 #import "ASSectionContext.h"
 #import "ASCollectionDataController.h"
-#import "ASCollectionView+Internal.h"
+#import "ASCollectionView+Undeprecated.h"
 
 #pragma mark - _ASCollectionPendingState
 
@@ -90,8 +90,6 @@
   ASDN::RecursiveMutex _environmentStateLock;
 }
 @property (nonatomic) _ASCollectionPendingState *pendingState;
-@property (strong, nonatomic) ASRangeController *rangeController;
-@property (strong, nonatomic) ASCollectionDataController *dataController;
 @end
 
 @implementation ASCollectionNode
@@ -169,13 +167,13 @@
 - (void)clearContents
 {
   [super clearContents];
-  [_rangeController clearContents];
+  [self.rangeController clearContents];
 }
 
 - (void)clearFetchedData
 {
   [super clearFetchedData];
-  [_rangeController clearFetchedData];
+  [self.rangeController clearFetchedData];
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
@@ -199,6 +197,18 @@
 #endif
 
 #pragma mark Setter / Getter
+
+// TODO: Implement this without the view.
+- (ASCollectionDataController *)dataController
+{
+  return (ASCollectionDataController *)self.view.dataController;
+}
+
+// TODO: Implement this without the view.
+- (ASRangeController *)rangeController
+{
+  return self.view.rangeController;
+}
 
 - (_ASCollectionPendingState *)pendingState
 {
@@ -251,44 +261,44 @@
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  return [_rangeController tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+  return [self.rangeController tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  [_rangeController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+  [self.rangeController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  return [_rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
+  return [self.rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  return [_rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+  return [self.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
 #pragma mark - Querying Data
 
 - (NSInteger)numberOfItemsInSection:(NSInteger)section
 {
-  return [self.view.dataController numberOfRowsInSection:section];
+  return [self.dataController numberOfRowsInSection:section];
 }
 
 - (NSInteger)numberOfSections
 {
-  return [self.view.dataController numberOfSections];
+  return [self.dataController numberOfSections];
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
-  return [self.view.dataController indexPathForNode:cellNode];
+  return [self.dataController indexPathForNode:cellNode];
 }
 
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [self.view.dataController nodeAtIndexPath:indexPath];
+  return [self.dataController nodeAtIndexPath:indexPath];
 }
 
 - (id<ASSectionContext>)contextForSection:(NSInteger)section
@@ -329,7 +339,6 @@
   [self.view reloadDataImmediately];
 }
 
-
 - (void)beginUpdates
 {
   [self.dataController beginUpdates];
@@ -342,7 +351,7 @@
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
-  [self.view.dataController endUpdatesAnimated:animated completion:completion];
+  [self.dataController endUpdatesAnimated:animated completion:completion];
 }
 
 - (void)insertSections:(NSIndexSet *)sections
@@ -392,7 +401,7 @@
   if ([self pendingState]) {
     _pendingState.rangeMode = rangeMode;
   } else {
-    [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+    [self.rangeController updateCurrentRangeWithMode:rangeMode];
   }
 }
 

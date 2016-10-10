@@ -1,5 +1,5 @@
 //
-//  ASCollectionView+Internal.h
+//  ASCollectionView+Undeprecated.h
 //  AsyncDisplayKit
 //
 //  Created by Adlai Holler on 10/10/16.
@@ -15,7 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
  * API is deprecated, but the implementations still live in the view.
  *
  * This category lets us avoid deprecation warnings everywhere internally.
- * In the future, the ASCollectionView public API will be eliminated and so will this file.
+ * In the future, the @c ASCollectionView public API will be eliminated and so will this file.
  */
 @interface ASCollectionView (Undeprecated)
 

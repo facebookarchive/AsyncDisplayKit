@@ -18,7 +18,7 @@
 #import "ASSectionContext.h"
 #import <vector>
 #import <OCMock/OCMock.h>
-#import "ASCollectionView+Internal.h"
+#import "ASCollectionView+Undeprecated.h"
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 

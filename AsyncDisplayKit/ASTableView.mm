@@ -23,6 +23,7 @@
 #import "_ASDisplayLayer.h"
 #import "ASTableNode.h"
 #import "ASEqualityHelpers.h"
+#import "ASTableView+Undeprecated.h"
 
 static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
