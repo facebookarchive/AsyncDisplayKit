@@ -19,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASCellNode;
 @protocol ASTableDataSource;
 @protocol ASTableDelegate;
+@class ASTableNode;
 
 /**
  * Asynchronous UITableView with Intelligent Preloading capabilities.
@@ -34,6 +35,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface ASTableView : UITableView
 
+/// The corresponding table node, or nil if one does not exist.
+@property (nonatomic, weak, readonly) ASTableNode *tableNode;
+
 @property (nonatomic, weak) id<ASTableDelegate>   asyncDelegate;
 @property (nonatomic, weak) id<ASTableDataSource> asyncDataSource;
 
@@ -48,20 +52,8 @@ NS_ASSUME_NONNULL_BEGIN
  * @param cellNode a cellNode part of the table view
  *
  * @return an indexPath for this cellNode
- *
- * @discussion This method will return @c nil for a node that is still being
- *   displayed in the table view, if the data source has deleted the row.
- *   That is, the node is visible but it no longer corresponds
- *   to any item in the data source and will be removed soon.
  */
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
-
-/**
- * Similar to -visibleCells.
- *
- * @return an array containing the cell nodes being displayed on screen.
- */
-- (NSArray<ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
 
 /**
  * YES to automatically adjust the contentOffset when cells are inserted or deleted "before"
@@ -140,6 +132,13 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeType
  */
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Similar to -visibleCells.
+ *
+ * @return an array containing the cell nodes being displayed on screen.
+ */
+- (NSArray<ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED;
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.

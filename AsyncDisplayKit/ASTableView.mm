@@ -416,6 +416,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return [_rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
 }
 
+- (ASTableNode *)tableNode
+{
+  return (ASTableNode *)ASViewToDisplayNode(self);
+}
+
 - (NSArray<NSArray <ASCellNode *> *> *)completedNodes
 {
   return [_dataController completedNodes];
@@ -423,27 +428,29 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [self nodeForRowAtIndexPath:indexPath usingUIKitIndexSpace:NO];
+  return [_dataController nodeAtCompletedIndexPath:indexPath];
 }
 
-- (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath usingUIKitIndexSpace:(BOOL)useUIKitIndexSpace
+- (NSIndexPath *)convertIndexPathToTableNode:(NSIndexPath *)indexPath
 {
-  if (useUIKitIndexSpace) {
-    return [_dataController nodeAtCompletedIndexPath:indexPath];
-  } else {
-    return [_dataController nodeAtIndexPath:indexPath];
+  ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
+  return [_dataController indexPathForNode:node];
+}
+
+- (NSIndexPath *)convertIndexPathFromTableNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait
+{
+  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+  NSIndexPath *viewIndexPath = [_dataController completedIndexPathForNode:node];
+  if (viewIndexPath == nil && wait) {
+    [self waitUntilAllUpdatesAreCommitted];
+    viewIndexPath = [_dataController completedIndexPathForNode:node];
   }
-}
-
-- (NSIndexPath *)indexPathForRowWithUIKitIndexPath:(NSIndexPath *)indexPath
-{
-  ASCellNode *node = [self nodeForRowAtIndexPath:indexPath usingUIKitIndexSpace:YES];
-  return [self indexPathForNode:node];
+  return viewIndexPath;
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
-  return [_dataController indexPathForNode:cellNode];
+  return [_dataController completedIndexPathForNode:cellNode];
 }
 
 - (NSArray<ASCellNode *> *)visibleNodes
@@ -485,12 +492,22 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [_dataController waitUntilAllUpdatesAreCommitted];
 }
 
+/**
+ * TODO: This method was built when the distinction between data source
+ * index paths and view index paths was unclear. For compatibility, it
+ * still expects data source index paths for the time being.
+ */
+
 - (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
 {
   ASDisplayNodeAssertMainThread();
 
-  [self waitUntilAllUpdatesAreCommitted];
-  [super scrollToRowAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+  indexPath = [self convertIndexPathFromTableNode:indexPath waitingIfNeeded:YES];
+  if (indexPath != nil) {
+    [super scrollToRowAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+  } else {
+    NSLog(@"Warning: Ignoring request to scroll to row at index path %@ because the item did not reach the table view.", indexPath);
+  }
 }
 
 - (void)scrollToNearestSelectedRowAtScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
@@ -501,12 +518,21 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [super scrollToNearestSelectedRowAtScrollPosition:scrollPosition animated:animated];
 }
 
+/**
+ * TODO: This method was built when the distinction between data source
+ * index paths and view index paths was unclear. For compatibility, it
+ * still expects data source index paths for the time being.
+ */
 - (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition
 {
   ASDisplayNodeAssertMainThread();
   
-  [self waitUntilAllUpdatesAreCommitted];
-  [super selectRowAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+  indexPath = [self convertIndexPathFromTableNode:indexPath waitingIfNeeded:YES];
+  if (indexPath != nil) {
+    [super selectRowAtIndexPath:indexPath animated:YES scrollPosition:scrollPosition];
+  } else {
+    NSLog(@"Warning: Ignoring request to select row at index path %@ because the item did not reach the table view.", indexPath);
+  }
 }
 
 - (void)layoutSubviews
@@ -764,7 +790,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateTableViewWillSelectRowAtIndexPath) {
-    indexPath = [self indexPathForRowWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToTableNode:indexPath];
     [_asyncDelegate tableView:self willSelectRowAtIndexPath:indexPath];
   }
 }
@@ -772,7 +798,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateTableViewDidSelectRowAtIndexPath) {
-    indexPath = [self indexPathForRowWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToTableNode:indexPath];
     [_asyncDelegate tableView:self didSelectRowAtIndexPath:indexPath];
   }
 }
@@ -780,7 +806,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)tableView:(UITableView *)tableView willDeselectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateTableViewWillDeselectRowAtIndexPath) {
-    indexPath = [self indexPathForRowWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToTableNode:indexPath];
     [_asyncDelegate tableView:self willDeselectRowAtIndexPath:indexPath];
   }
 }
@@ -788,7 +814,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateTableViewDidDeselectRowAtIndexPath) {
-    indexPath = [self indexPathForRowWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToTableNode:indexPath];
     [_asyncDelegate tableView:self didDeselectRowAtIndexPath:indexPath];
   }
 }
@@ -796,7 +822,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (BOOL)tableView:(ASTableView *)tableView shouldHighlightRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateTableViewShouldHighlightRowAtIndexPath) {
-    indexPath = [self indexPathForRowWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToTableNode:indexPath];
     return [_asyncDelegate tableView:self shouldHighlightRowAtIndexPath:indexPath];
   } else {
     return YES;
@@ -806,7 +832,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)tableView:(UITableView *)tableView didHighlightRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateTableViewDidHighlightRowAtIndexPath) {
-    indexPath = [self indexPathForRowWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToTableNode:indexPath];
     [_asyncDelegate tableView:self didHighlightRowAtIndexPath:indexPath];
   }
 }
@@ -814,7 +840,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)tableView:(UITableView *)tableView didUnhighlightRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateTableViewDidUnhighlightRowAtIndexPath) {
-    indexPath = [self indexPathForRowWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToTableNode:indexPath];
     [_asyncDelegate tableView:self didUnhighlightRowAtIndexPath:indexPath];
   }
 }
@@ -822,7 +848,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (BOOL)tableView:(UITableView *)tableView shouldShowMenuForRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.asyncDelegateTableViewShouldShowMenuForRowAtIndexPath) {
-    indexPath = [self indexPathForRowWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToTableNode:indexPath];
     return [_asyncDelegate tableView:self shouldShowMenuForRowAtIndexPath:indexPath];
   } else {
     return NO;
@@ -832,7 +858,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (BOOL)tableView:(UITableView *)tableView canPerformAction:(nonnull SEL)action forRowAtIndexPath:(nonnull NSIndexPath *)indexPath withSender:(nullable id)sender
 {
   if (_asyncDelegateFlags.asyncDelegateTableViewCanPerformActionForRowAtIndexPathWithSender) {
-    indexPath = [self indexPathForRowWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToTableNode:indexPath];
     return [_asyncDelegate tableView:self canPerformAction:action forRowAtIndexPath:indexPath withSender:sender];
   } else {
     return NO;
@@ -842,7 +868,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)tableView:(UITableView *)tableView performAction:(nonnull SEL)action forRowAtIndexPath:(nonnull NSIndexPath *)indexPath withSender:(nullable id)sender
 {
   if (_asyncDelegateFlags.asyncDelegateTableViewPerformActionForRowAtIndexPathWithSender) {
-    indexPath = [self indexPathForRowWithUIKitIndexPath:indexPath];
+    indexPath = [self convertIndexPathToTableNode:indexPath];
     [_asyncDelegate tableView:self performAction:action forRowAtIndexPath:indexPath withSender:sender];
   }
 }

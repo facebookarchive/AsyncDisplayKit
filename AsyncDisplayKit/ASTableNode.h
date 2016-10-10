@@ -281,15 +281,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
 
-/**
- * TODO: Docs
- */
-- (nullable NSIndexPath *)convertIndexPathToTableNode:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+#pragma mark - Converting Index Paths
 
 /**
  * TODO: Docs
  */
-- (nullable NSIndexPath *)convertIndexPathFromTableNode:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+- (nullable NSIndexPath *)convertIndexPathToTableView:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+
+/**
+ * TODO: Docs
+ */
+- (nullable NSIndexPath *)convertIndexPathFromTableView:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 @end
 

@@ -91,16 +91,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
- * TODO: Docs
- */
-- (nullable NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath;
-
-/**
- * TODO: Docs
- */
-- (nullable NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath;
-
-/**
  * Similar to -supplementaryViewForElementKind:atIndexPath:
  *
  * @param elementKind The kind of supplementary node to locate.
@@ -123,13 +113,6 @@ NS_ASSUME_NONNULL_BEGIN
  *   to any item in the data source and will be removed soon.
  */
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
-
-/**
- * Similar to -visibleCells.
- *
- * @return an array containing the nodes being displayed on screen.
- */
-- (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
 
 /**
  * Determines collection view's current scroll direction. Supports 2-axis collection views.
@@ -389,6 +372,13 @@ NS_ASSUME_NONNULL_BEGIN
  * This method is deprecated. Call @c calculatedSize on the node of interest instead. First deprecated in version 2.0.
  */
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Similar to -visibleCells.
+ *
+ * @return an array containing the nodes being displayed on screen.
+ */
+- (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED;
 
 @end
 

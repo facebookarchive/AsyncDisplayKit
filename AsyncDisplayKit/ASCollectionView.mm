@@ -519,10 +519,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return [_dataController indexPathForNode:node];
 }
 
-- (NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath
+- (NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait
 {
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  return [_dataController completedIndexPathForNode:node];
+  NSIndexPath *viewIndexPath = [_dataController completedIndexPathForNode:node];
+  if (viewIndexPath == nil && wait) {
+    [self waitUntilAllUpdatesAreCommitted];
+    viewIndexPath = [_dataController completedIndexPathForNode:node];
+  }
+  return viewIndexPath;
 }
 
 - (ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
@@ -552,27 +557,36 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 }
 
 /**
- * TODO: These two methods were built when the distinction between data source
- * index paths and view index paths was unclear. For compatibility, they
- * still expect data source index paths.
+ * TODO: This method was built when the distinction between data source
+ * index paths and view index paths was unclear. For compatibility, it
+ * still expects data source index paths for the time being.
  */
 - (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated
 {
   ASDisplayNodeAssertMainThread();
 
-  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath];
+  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
   if (viewIndexPath != nil) {
     [super scrollToItemAtIndexPath:viewIndexPath atScrollPosition:scrollPosition animated:animated];
+  } else {
+    NSLog(@"Warning: Ignoring request to scroll to item at index path %@ because the item did not reach the collection view.", indexPath);
   }
 }
 
+/**
+ * TODO: This method was built when the distinction between data source
+ * index paths and view index paths was unclear. For compatibility, it
+ * still expects data source index paths for the time being.
+ */
 - (void)selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
 {
   ASDisplayNodeAssertMainThread();
 
-  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath];
+  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
   if (viewIndexPath != nil) {
     [super selectItemAtIndexPath:viewIndexPath animated:animated scrollPosition:scrollPosition];
+  } else {
+    NSLog(@"Warning: Ignoring request to select item at index path %@ because the item did not reach the collection view.", indexPath);
   }
 }
 

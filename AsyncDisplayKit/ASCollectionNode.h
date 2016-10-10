@@ -303,6 +303,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
 
+#pragma mark - Converting Index Paths
+
+/**
+ * TODO: Docs
+ */
+- (nullable NSIndexPath *)convertIndexPathToCollectionView:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+
+/**
+ * TODO: Docs
+ */
+- (nullable NSIndexPath *)convertIndexPathFromCollectionView:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+
 @end
 
 NS_ASSUME_NONNULL_END
