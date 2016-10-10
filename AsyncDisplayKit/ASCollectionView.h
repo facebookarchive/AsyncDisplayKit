@@ -39,32 +39,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASCollectionView : UICollectionView
 
 /**
- * Initializes an ASCollectionView
- *
- * @discussion Initializes and returns a newly allocated collection view object with the specified layout.
- *
- * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
- */
-- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
-
-/**
- * Initializes an ASCollectionView
- *
- * @discussion Initializes and returns a newly allocated collection view object with the specified frame and layout.
- *
- * @param frame The frame rectangle for the collection view, measured in points. The origin of the frame is relative to the superview in which you plan to add it. This frame is passed to the superclass during initialization.
- * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
- */
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
-
-/**
- * Returns the corresponding ASCollectionNode
- *
- * @return collectionNode The corresponding ASCollectionNode which exists even if directly allocating & handling the view class.
- */
-@property (nonatomic, weak, readonly) ASCollectionNode *collectionNode;
-
-/**
  * The object that acts as the asynchronous delegate of the collection view
  *
  * @discussion The delegate must adopt the ASCollectionDelegate protocol. The collection view maintains a weak reference to the delegate object.
@@ -83,52 +57,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<ASCollectionDataSource> asyncDataSource;
 
 /**
- * Tuning parameters for a range type in full mode.
+ * Returns the corresponding ASCollectionNode
  *
- * @param rangeType The range type to get the tuning parameters for.
- *
- * @return A tuning parameter value for the given range type in full mode.
- *
- * @see ASLayoutRangeMode
- * @see ASLayoutRangeType
+ * @return collectionNode The corresponding ASCollectionNode, if one exists.
  */
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
-
-/**
- * Set the tuning parameters for a range type in full mode.
- *
- * @param tuningParameters The tuning parameters to store for a range type.
- * @param rangeType The range type to set the tuning parameters for.
- *
- * @see ASLayoutRangeMode
- * @see ASLayoutRangeType
- */
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
-
-/**
- * Tuning parameters for a range type in the specified mode.
- *
- * @param rangeMode The range mode to get the running parameters for.
- * @param rangeType The range type to get the tuning parameters for.
- *
- * @return A tuning parameter value for the given range type in the given mode.
- *
- * @see ASLayoutRangeMode
- * @see ASLayoutRangeType
- */
-- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
-
-/**
- * Set the tuning parameters for a range type in the specified mode.
- *
- * @param tuningParameters The tuning parameters to store for a range type.
- * @param rangeMode The range mode to set the running parameters for.
- * @param rangeType The range type to set the tuning parameters for.
- *
- * @see ASLayoutRangeMode
- * @see ASLayoutRangeType
- */
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
+@property (nonatomic, weak, readonly) ASCollectionNode *collectionNode;
 
 /**
  * The number of screens left to scroll before the delegate -collectionView:beginBatchFetchingWithContext: is called.
@@ -150,163 +83,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak) id<ASCollectionViewLayoutInspecting> layoutInspector;
 
 /**
- *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread. 
- *  The asyncDataSource must be updated to reflect the changes before the update block completes.
- *
- *  @param animated   NO to disable animations for this batch
- *  @param updates    The block that performs the relevant insert, delete, reload, or move operations.
- *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single 
- *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or 
- *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
- */
-- (void)performBatchAnimated:(BOOL)animated updates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
-
-/**
- *  Perform a batch of updates asynchronously.  This method must be called from the main thread.
- *  The asyncDataSource must be updated to reflect the changes before update block completes.
- *
- *  @param updates    The block that performs the relevant insert, delete, reload, or move operations.
- *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
- *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
- *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
- */
-- (void)performBatchUpdates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
-
-/**
- * Reload everything from scratch, destroying the working range and all cached nodes.
- *
- * @param completion block to run on completion of asynchronous loading or nil. If supplied, the block is run on
- * the main thread.
- * @warning This method is substantially more expensive than UICollectionView's version.
- */
-- (void)reloadDataWithCompletion:(nullable void (^)())completion;
-
-/**
- * Reload everything from scratch, destroying the working range and all cached nodes.
- *
- * @warning This method is substantially more expensive than UICollectionView's version.
- */
-- (void)reloadData;
-
-/**
- * Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.
- *
- * @warning This method is substantially more expensive than UICollectionView's version and will block the main thread
- * while all the cells load.
- */
-- (void)reloadDataImmediately;
-
-/**
- * Triggers a relayout of all nodes.
- *
- * @discussion This method invalidates and lays out every cell node in the collection view.
- */
-- (void)relayoutItems;
-
-/**
- *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
- */
-- (void)waitUntilAllUpdatesAreCommitted;
-
-/**
- * Registers the given kind of supplementary node for use in creating node-backed supplementary views.
- *
- * @param elementKind The kind of supplementary node that will be requested through the data source.
- *
- * @discussion Use this method to register support for the use of supplementary nodes in place of the default
- * `registerClass:forSupplementaryViewOfKind:withReuseIdentifier:` and `registerNib:forSupplementaryViewOfKind:withReuseIdentifier:`
- * methods. This method will register an internal backing view that will host the contents of the supplementary nodes
- * returned from the data source.
- */
-- (void)registerSupplementaryNodeOfKind:(NSString *)elementKind;
-
-/**
- * Inserts one or more sections.
- *
- * @param sections An index set that specifies the sections to insert.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
-- (void)insertSections:(NSIndexSet *)sections;
-
-/**
- * Deletes one or more sections.
- *
- * @param sections An index set that specifies the sections to delete.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
-- (void)deleteSections:(NSIndexSet *)sections;
-
-/**
- * Reloads the specified sections.
- *
- * @param sections An index set that specifies the sections to reload.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
-- (void)reloadSections:(NSIndexSet *)sections;
-
-/**
- * Moves a section to a new location.
- *
- * @param section The index of the section to move.
- *
- * @param newSection The index that is the destination of the move for the section.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
-- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
-
-- (nullable id<ASSectionContext>)contextForSection:(NSInteger)section AS_WARN_UNUSED_RESULT;
-
-/**
- * Inserts items at the locations identified by an array of index paths.
- *
- * @param indexPaths An array of NSIndexPath objects, each representing an item index and section index that together identify an item.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
-- (void)insertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
-
-/**
- * Deletes the items specified by an array of index paths.
- *
- * @param indexPaths An array of NSIndexPath objects identifying the items to delete.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
-- (void)deleteItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
-
-/**
- * Reloads the specified items.
- *
- * @param indexPaths An array of NSIndexPath objects identifying the items to reload.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
-- (void)reloadItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
-
-/**
- * Moves the item at a specified location to a destination location.
- *
- * @param indexPath The index path identifying the item to move.
- *
- * @param newIndexPath The index path that is the destination of the move for the item.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
-- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
-
-/**
  * Retrieves the node for the item at the given index path.
  *
  * @param indexPath The index path of the requested node.
@@ -318,6 +94,11 @@ NS_ASSUME_NONNULL_BEGIN
  * TODO: Docs
  */
 - (nullable NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath;
+
+/**
+ * TODO: Docs
+ */
+- (nullable NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath;
 
 /**
  * Similar to -supplementaryViewForElementKind:atIndexPath:
@@ -365,20 +146,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) ASScrollDirection scrollableDirections;
 
 /**
- * Triggers all loaded ASCellNodes to destroy displayed contents (freeing a lot of memory).
- *
- * @discussion This method should only be called by ASCollectionNode.  To be removed in a later release.
- */
-- (void)clearContents;
-
-/**
- * Triggers all loaded ASCellNodes to purge any data fetched from the network or disk (freeing memory).
- *
- * @discussion This method should only be called by ASCollectionNode.  To be removed in a later release.
- */
-- (void)clearFetchedData;
-
-/**
  * Forces the .contentInset to be UIEdgeInsetsZero.
  *
  * @discussion By default, UIKit sets the top inset to the navigation bar height, even for horizontally
@@ -393,11 +160,233 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASCollectionView (Deprecated)
 
 /**
- * Query the sized node at `indexPath` for its calculatedSize.
+ * Initializes an ASCollectionView
+ *
+ * @discussion Initializes and returns a newly allocated collection view object with the specified layout.
+ *
+ * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
+ */
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Initializes an ASCollectionView
+ *
+ * @discussion Initializes and returns a newly allocated collection view object with the specified frame and layout.
+ *
+ * @param frame The frame rectangle for the collection view, measured in points. The origin of the frame is relative to the superview in which you plan to add it. This frame is passed to the superclass during initialization.
+ * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
+ */
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Tuning parameters for a range type in full mode.
+ *
+ * @param rangeType The range type to get the tuning parameters for.
+ *
+ * @return A tuning parameter value for the given range type in full mode.
+ *
+ * @see ASLayoutRangeMode
+ * @see ASLayoutRangeType
+ */
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Set the tuning parameters for a range type in full mode.
+ *
+ * @param tuningParameters The tuning parameters to store for a range type.
+ * @param rangeType The range type to set the tuning parameters for.
+ *
+ * @see ASLayoutRangeMode
+ * @see ASLayoutRangeType
+ */
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Tuning parameters for a range type in the specified mode.
+ *
+ * @param rangeMode The range mode to get the running parameters for.
+ * @param rangeType The range type to get the tuning parameters for.
+ *
+ * @return A tuning parameter value for the given range type in the given mode.
+ *
+ * @see ASLayoutRangeMode
+ * @see ASLayoutRangeType
+ */
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Set the tuning parameters for a range type in the specified mode.
+ *
+ * @param tuningParameters The tuning parameters to store for a range type.
+ * @param rangeMode The range mode to set the running parameters for.
+ * @param rangeType The range type to set the tuning parameters for.
+ *
+ * @see ASLayoutRangeMode
+ * @see ASLayoutRangeType
+ */
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_DEPRECATED;
+
+/**
+ *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread.
+ *  The asyncDataSource must be updated to reflect the changes before the update block completes.
+ *
+ *  @param animated   NO to disable animations for this batch
+ *  @param updates    The block that performs the relevant insert, delete, reload, or move operations.
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ */
+- (void)performBatchAnimated:(BOOL)animated updates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion ASDISPLAYNODE_DEPRECATED;
+
+/**
+ *  Perform a batch of updates asynchronously.  This method must be called from the main thread.
+ *  The asyncDataSource must be updated to reflect the changes before update block completes.
+ *
+ *  @param updates    The block that performs the relevant insert, delete, reload, or move operations.
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ */
+- (void)performBatchUpdates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Reload everything from scratch, destroying the working range and all cached nodes.
+ *
+ * @param completion block to run on completion of asynchronous loading or nil. If supplied, the block is run on
+ * the main thread.
+ * @warning This method is substantially more expensive than UICollectionView's version.
+ */
+- (void)reloadDataWithCompletion:(nullable void (^)())completion ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Reload everything from scratch, destroying the working range and all cached nodes.
+ *
+ * @warning This method is substantially more expensive than UICollectionView's version.
+ */
+- (void)reloadData ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.
+ *
+ * @warning This method is substantially more expensive than UICollectionView's version and will block the main thread
+ * while all the cells load.
+ */
+- (void)reloadDataImmediately ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Triggers a relayout of all nodes.
+ *
+ * @discussion This method invalidates and lays out every cell node in the collection.
+ */
+- (void)relayoutItems ASDISPLAYNODE_DEPRECATED;
+
+/**
+ *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
+ */
+- (void)waitUntilAllUpdatesAreCommitted ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Registers the given kind of supplementary node for use in creating node-backed supplementary views.
+ *
+ * @param elementKind The kind of supplementary node that will be requested through the data source.
+ *
+ * @discussion Use this method to register support for the use of supplementary nodes in place of the default
+ * `registerClass:forSupplementaryViewOfKind:withReuseIdentifier:` and `registerNib:forSupplementaryViewOfKind:withReuseIdentifier:`
+ * methods. This method will register an internal backing view that will host the contents of the supplementary nodes
+ * returned from the data source.
+ */
+- (void)registerSupplementaryNodeOfKind:(NSString *)elementKind ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Inserts one or more sections.
+ *
+ * @param sections An index set that specifies the sections to insert.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
+- (void)insertSections:(NSIndexSet *)sections ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Deletes one or more sections.
+ *
+ * @param sections An index set that specifies the sections to delete.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
+- (void)deleteSections:(NSIndexSet *)sections ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Reloads the specified sections.
+ *
+ * @param sections An index set that specifies the sections to reload.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
+- (void)reloadSections:(NSIndexSet *)sections ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Moves a section to a new location.
+ *
+ * @param section The index of the section to move.
+ *
+ * @param newSection The index that is the destination of the move for the section.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Inserts items at the locations identified by an array of index paths.
+ *
+ * @param indexPaths An array of NSIndexPath objects, each representing an item index and section index that together identify an item.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
+- (void)insertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Deletes the items specified by an array of index paths.
+ *
+ * @param indexPaths An array of NSIndexPath objects identifying the items to delete.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
+- (void)deleteItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Reloads the specified items.
+ *
+ * @param indexPaths An array of NSIndexPath objects identifying the items to reload.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
+- (void)reloadItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Moves the item at a specified location to a destination location.
+ *
+ * @param indexPath The index path identifying the item to move.
+ *
+ * @param newIndexPath The index path that is the destination of the move for the item.
+ *
+ * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
+ * before this method is called.
+ */
+- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Query the sized node at @c indexPath for its calculatedSize.
  *
  * @param indexPath The index path for the node of interest.
  *
- * @deprecated Call @c calculatedSize on the node of interest instead. First deprecated in version 2.0.
+ * This method is deprecated. Call @c calculatedSize on the node of interest instead. First deprecated in version 2.0.
  */
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
 
@@ -449,6 +438,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
 /**
+ * TODO: Docs
+ */
+- (nullable id<ASSectionContext>)collectionView:(ASCollectionView *)collectionView contextForSection:(NSInteger)section;
+
+/**
  * Indicator to lock the data source for data fetching in async mode.
  * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistency or exception
  * due to the data access in async mode.
@@ -467,8 +461,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
 - (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
-
-- (nullable id<ASSectionContext>)collectionView:(ASCollectionView *)collectionView contextForSection:(NSInteger)section;
 
 @end
 

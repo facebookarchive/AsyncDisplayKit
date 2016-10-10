@@ -25,7 +25,7 @@
 #import "_ASDisplayLayer.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASSectionContext.h"
-
+#import "ASCollectionView+Internal.h"
 
 /// What, if any, invalidation should we perform during the next -layoutSubviews.
 typedef NS_ENUM(NSUInteger, ASCollectionViewInvalidationStyle) {
@@ -207,6 +207,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 @end
 
 @implementation ASCollectionView
+@synthesize asyncDelegate = _asyncDelegate;
+@synthesize asyncDataSource = _asyncDataSource;
 
 // Using _ASDisplayLayer ensures things like -layout are properly forwarded to ASCollectionNode.
 + (Class)layerClass
@@ -517,6 +519,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return [_dataController indexPathForNode:node];
 }
 
+- (NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath
+{
+  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+  return [_dataController completedIndexPathForNode:node];
+}
+
 - (ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
   return [_dataController supplementaryNodeOfKind:elementKind atIndexPath:indexPath];
@@ -543,20 +551,29 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return visibleNodes;
 }
 
+/**
+ * TODO: These two methods were built when the distinction between data source
+ * index paths and view index paths was unclear. For compatibility, they
+ * still expect data source index paths.
+ */
 - (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated
 {
   ASDisplayNodeAssertMainThread();
 
-  [self waitUntilAllUpdatesAreCommitted];
-  [super scrollToItemAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath];
+  if (viewIndexPath != nil) {
+    [super scrollToItemAtIndexPath:viewIndexPath atScrollPosition:scrollPosition animated:animated];
+  }
 }
 
 - (void)selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
 {
   ASDisplayNodeAssertMainThread();
 
-  [self waitUntilAllUpdatesAreCommitted];
-  [super selectItemAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath];
+  if (viewIndexPath != nil) {
+    [super selectItemAtIndexPath:viewIndexPath animated:animated scrollPosition:scrollPosition];
+  }
 }
 
 #pragma mark Internal
@@ -1492,6 +1509,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     BOOL changedInNonScrollingDirection = (fixedHorizontally && newBounds.size.width != lastUsedSize.width) || (fixedVertically && newBounds.size.height != lastUsedSize.height);
 
     if (changedInNonScrollingDirection) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
       // This actually doesn't perform an animation, but prevents the transaction block from being processed in the
       // data controller's prevent animation block that would interrupt an interrupted relayout happening in an animation block
       // ie. ASCollectionView bounds change on rotation or multi-tasking split view resize.
@@ -1502,6 +1521,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
       [self waitUntilAllUpdatesAreCommitted];
       [self.collectionViewLayout invalidateLayout];
     }
+#pragma clang diagnostic pop
   }
 }
 

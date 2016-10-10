@@ -18,6 +18,7 @@
 #import "ASSectionContext.h"
 #import <vector>
 #import <OCMock/OCMock.h>
+#import "ASCollectionView+Internal.h"
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 
@@ -150,10 +151,10 @@
     self.collectionNode = [[ASCollectionNode alloc] initWithFrame:self.view.bounds collectionViewLayout:mockLayout];
     self.collectionView = self.collectionNode.view;
     self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.collectionView.asyncDataSource = self.asyncDelegate;
-    self.collectionView.asyncDelegate = self.asyncDelegate;
+    self.collectionNode.dataSource = self.asyncDelegate;
+    self.collectionNode.delegate = self.asyncDelegate;
     
-    [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+    [self.collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
     [self.view addSubview:self.collectionView];
   }
   return self;
@@ -575,7 +576,7 @@
   updateValidationTestPrologue
   NSInteger sectionCount = del->_itemCounts.size();
   for (NSInteger section = 0; section < sectionCount; section++) {
-    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    ASTestSectionContext *context = (ASTestSectionContext *)[cn contextForSection:section];
     XCTAssertNotNil(context);
     XCTAssertEqual(context.sectionGeneration, 1);
     XCTAssertEqual(context.sectionIndex, section);
@@ -595,7 +596,7 @@
   
   // Only test left moving
   XCTAssertTrue(toSection < originalSection);
-  ASTestSectionContext *movedSectionContext = (ASTestSectionContext *)[cv contextForSection:toSection];
+  ASTestSectionContext *movedSectionContext = (ASTestSectionContext *)[cn contextForSection:toSection];
   XCTAssertNotNil(movedSectionContext);
   // ASCollectionView currently uses ASChangeSetDataController which splits a move operation to a pair of delete and insert ones.
   // So this movedSectionContext is newly loaded and thus is second generation.
@@ -603,7 +604,7 @@
   XCTAssertEqual(movedSectionContext.sectionIndex, toSection);
   
   for (NSInteger section = toSection + 1; section <= originalSection && section < sectionCount; section++) {
-    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    ASTestSectionContext *context = (ASTestSectionContext *)[cn contextForSection:section];
     XCTAssertNotNil(context);
     XCTAssertEqual(context.sectionGeneration, 1);
     // This section context was shifted to the right
@@ -620,7 +621,7 @@
   
   NSInteger sectionCount = del->_itemCounts.size();
   for (NSInteger section = 0; section < sectionCount; section++) {
-    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    ASTestSectionContext *context = (ASTestSectionContext *)[cn contextForSection:section];
     XCTAssertNotNil(context);
     XCTAssertEqual(context.sectionGeneration, 2);
     XCTAssertEqual(context.sectionIndex, section);
@@ -638,7 +639,7 @@
   
   NSInteger sectionCount = del->_itemCounts.size();
   for (NSInteger section = 0; section < sectionCount; section++) {
-    ASTestSectionContext *context = (ASTestSectionContext *)[cv contextForSection:section];
+    ASTestSectionContext *context = (ASTestSectionContext *)[cn contextForSection:section];
     XCTAssertNotNil(context);
     XCTAssertEqual(context.sectionGeneration, section != sectionToReload ? 1 : 2);
     XCTAssertEqual(context.sectionIndex, section);

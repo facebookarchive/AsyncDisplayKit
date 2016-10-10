@@ -12,6 +12,7 @@
 #import "ASCollectionView.h"
 #import "ASAssert.h"
 #import "ASEqualityHelpers.h"
+#import "ASCollectionView+Internal.h"
 
 #define kDefaultItemSize CGSizeMake(50, 50)
 

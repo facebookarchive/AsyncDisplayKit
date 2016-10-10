@@ -16,6 +16,12 @@
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASCellNode.h"
 
+@interface ASCollectionView (Private)
+
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
+
+@end
+
 /**
  * Test Data Source
  */

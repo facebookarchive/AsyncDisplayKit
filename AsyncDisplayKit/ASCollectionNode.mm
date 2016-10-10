@@ -18,6 +18,9 @@
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
 #import "AsyncDisplayKit+Debug.h"
+#import "ASSectionContext.h"
+#import "ASCollectionDataController.h"
+#import "ASCollectionView+Internal.h"
 
 #pragma mark - _ASCollectionPendingState
 
@@ -87,6 +90,8 @@
   ASDN::RecursiveMutex _environmentStateLock;
 }
 @property (nonatomic) _ASCollectionPendingState *pendingState;
+@property (strong, nonatomic) ASRangeController *rangeController;
+@property (strong, nonatomic) ASCollectionDataController *dataController;
 @end
 
 @implementation ASCollectionNode
@@ -149,6 +154,7 @@
     self.pendingState      = nil;
     view.asyncDelegate     = pendingState.delegate;
     view.asyncDataSource   = pendingState.dataSource;
+
     if (pendingState.rangeMode != ASLayoutRangeModeCount) {
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
     }
@@ -163,13 +169,13 @@
 - (void)clearContents
 {
   [super clearContents];
-  [self.view clearContents];
+  [_rangeController clearContents];
 }
 
 - (void)clearFetchedData
 {
   [super clearFetchedData];
-  [self.view clearFetchedData];
+  [_rangeController clearFetchedData];
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
@@ -241,57 +247,29 @@
   }
 }
 
-#pragma mark ASCollectionView Forwards
+#pragma mark - Range Tuning
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
 {
-  return [self.view.rangeController tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+  return [_rangeController tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
 {
-  [self.view.rangeController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+  [_rangeController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
 }
 
 - (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  return [self.view.rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
+  return [_rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  return [self.view.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+  return [_rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
-- (void)reloadDataWithCompletion:(void (^)())completion
-{
-  [self.view reloadDataWithCompletion:completion];
-}
-
-- (void)reloadData
-{
-  [self.view reloadData];
-}
-
-- (void)reloadDataImmediately
-{
-  [self.view reloadDataImmediately];
-}
-
-- (void)beginUpdates
-{
-  [self.view.dataController beginUpdates];
-}
-
-- (void)endUpdatesAnimated:(BOOL)animated
-{
-  [self endUpdatesAnimated:animated completion:nil];
-}
-
-- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
-{
-  [self.view.dataController endUpdatesAnimated:animated completion:completion];
-}
+#pragma mark - Querying Data
 
 - (NSInteger)numberOfItemsInSection:(NSInteger)section
 {
@@ -311,6 +289,100 @@
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   return [self.view.dataController nodeAtIndexPath:indexPath];
+}
+
+- (id<ASSectionContext>)contextForSection:(NSInteger)section
+{
+  ASDisplayNodeAssertMainThread();
+  return [self.dataController contextForSection:section];
+}
+
+#pragma mark - Editing
+
+- (void)registerSupplementaryNodeOfKind:(NSString *)elementKind
+{
+  [self.view registerSupplementaryNodeOfKind:elementKind];
+}
+
+- (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
+{
+  [self.view performBatchAnimated:animated updates:updates completion:completion];
+}
+
+- (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
+{
+  [self.view performBatchUpdates:updates completion:completion];
+}
+
+- (void)reloadDataWithCompletion:(void (^)())completion
+{
+  [self.view reloadDataWithCompletion:completion];
+}
+
+- (void)reloadData
+{
+  [self.view reloadData];
+}
+
+- (void)reloadDataImmediately
+{
+  [self.view reloadDataImmediately];
+}
+
+
+- (void)beginUpdates
+{
+  [self.dataController beginUpdates];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated
+{
+  [self endUpdatesAnimated:animated completion:nil];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
+{
+  [self.view.dataController endUpdatesAnimated:animated completion:completion];
+}
+
+- (void)insertSections:(NSIndexSet *)sections
+{
+  [self.view insertSections:sections];
+}
+
+- (void)deleteSections:(NSIndexSet *)sections
+{
+  [self.view deleteSections:sections];
+}
+
+- (void)reloadSections:(NSIndexSet *)sections
+{
+  [self.view reloadSections:sections];
+}
+
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
+{
+  [self.view moveSection:section toSection:newSection];
+}
+
+- (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
+{
+  [self.view insertItemsAtIndexPaths:indexPaths];
+}
+
+- (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
+{
+  [self.view deleteItemsAtIndexPaths:indexPaths];
+}
+
+- (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
+{
+  [self.view reloadItemsAtIndexPaths:indexPaths];
+}
+
+- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
+{
+  [self.view moveItemAtIndexPath:indexPath toIndexPath:newIndexPath];
 }
 
 #pragma mark - ASRangeControllerUpdateRangeProtocol
