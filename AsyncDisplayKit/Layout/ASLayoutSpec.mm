@@ -74,6 +74,12 @@
   return _style;
 }
 
+- (id<ASLayoutElement>)styleWithBlock:(void (^)(ASLayoutElementStyle *style))styleBlock
+{
+  styleBlock(self.style);
+  return self;
+}
+
 #pragma mark - Layout
 
 // Deprecated
