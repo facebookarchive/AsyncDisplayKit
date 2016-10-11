@@ -73,29 +73,29 @@
   XCTAssertTrue(ASDimensionEqualToDimension(style.maxHeight, ASDimensionMakeWithPoints(size.height)));
 }
 
-- (void)setSettingSizeViaRelativeSize
+- (void)setSettingSizeViaLayoutSize
 {
   ASLayoutElementStyle *style = [ASLayoutElementStyle new];
   
-  ASRelativeSize relativeSize = ASRelativeSizeMake(ASDimensionMake(100), ASDimensionMake(100));
+  ASLayoutSize layoutSize = ASLayoutSizeMake(ASDimensionMake(100), ASDimensionMake(100));
   
-  style.preferredRelativeSize = relativeSize;
-  XCTAssertTrue(ASDimensionEqualToDimension(style.width, relativeSize.width));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.height, relativeSize.height));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.preferredRelativeSize.width, relativeSize.width));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.preferredRelativeSize.height, relativeSize.height));
+  style.preferredLayoutSize = layoutSize;
+  XCTAssertTrue(ASDimensionEqualToDimension(style.width, layoutSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.height, layoutSize.height));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.preferredLayoutSize.width, layoutSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.preferredLayoutSize.height, layoutSize.height));
   
-  style.minRelativeSize = relativeSize;
-  XCTAssertTrue(ASDimensionEqualToDimension(style.minWidth, relativeSize.width));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.minHeight, relativeSize.height));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.minRelativeSize.width, relativeSize.width));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.minRelativeSize.height, relativeSize.height));
+  style.minLayoutSize = layoutSize;
+  XCTAssertTrue(ASDimensionEqualToDimension(style.minWidth, layoutSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.minHeight, layoutSize.height));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.minLayoutSize.width, layoutSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.minLayoutSize.height, layoutSize.height));
   
-  style.maxRelativeSize = relativeSize;
-  XCTAssertTrue(ASDimensionEqualToDimension(style.maxWidth, relativeSize.width));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.maxHeight, relativeSize.height));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.maxRelativeSize.width, relativeSize.width));
-  XCTAssertTrue(ASDimensionEqualToDimension(style.maxRelativeSize.height, relativeSize.height));
+  style.maxLayoutSize = layoutSize;
+  XCTAssertTrue(ASDimensionEqualToDimension(style.maxWidth, layoutSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.maxHeight, layoutSize.height));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.maxLayoutSize.width, layoutSize.width));
+  XCTAssertTrue(ASDimensionEqualToDimension(style.maxLayoutSize.height, layoutSize.height));
 }
   
 - (void)testSettingPropertiesWillCallDelegate

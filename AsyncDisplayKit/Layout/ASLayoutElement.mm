@@ -113,7 +113,7 @@ do {\
 }
 
 @dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
-@dynamic preferredSize, minSize, maxSize, preferredRelativeSize, minRelativeSize, maxRelativeSize;
+@dynamic preferredSize, minSize, maxSize, preferredLayoutSize, minLayoutSize, maxLayoutSize;
 
 #pragma mark - Lifecycle
 
@@ -250,40 +250,40 @@ do {\
   self.maxHeight = ASDimensionMakeWithPoints(maxSize.height);
 }
 
-- (ASRelativeSize)preferredRelativeSize
+- (ASLayoutSize)preferredLayoutSize
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return ASRelativeSizeMake(_size.width, _size.height);
+  return ASLayoutSizeMake(_size.width, _size.height);
 }
 
-- (void)setPreferredRelativeSize:(ASRelativeSize)preferredRelativeSize
+- (void)setPreferredLayoutSize:(ASLayoutSize)preferredLayoutSize
 {
-  self.width = preferredRelativeSize.width;
-  self.height = preferredRelativeSize.height;
+  self.width = preferredLayoutSize.width;
+  self.height = preferredLayoutSize.height;
 }
 
-- (ASRelativeSize)minRelativeSize
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return ASRelativeSizeMake(_size.minWidth, _size.minHeight);
-}
-
-- (void)setMinRelativeSize:(ASRelativeSize)minRelativeSize
-{
-  self.minWidth = minRelativeSize.width;
-  self.minHeight = minRelativeSize.height;
-}
-
-- (ASRelativeSize)maxRelativeSize
+- (ASLayoutSize)minLayoutSize
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return ASRelativeSizeMake(_size.maxWidth, _size.maxHeight);
+  return ASLayoutSizeMake(_size.minWidth, _size.minHeight);
 }
 
-- (void)setMaxRelativeSize:(ASRelativeSize)maxRelativeSize
+- (void)setMinLayoutSize:(ASLayoutSize)minLayoutSize
 {
-  self.maxWidth = maxRelativeSize.width;
-  self.maxHeight = maxRelativeSize.height;
+  self.minWidth = minLayoutSize.width;
+  self.minHeight = minLayoutSize.height;
+}
+
+- (ASLayoutSize)maxLayoutSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASLayoutSizeMake(_size.maxWidth, _size.maxHeight);
+}
+
+- (void)setMaxLayoutSize:(ASLayoutSize)maxLayoutSize
+{
+  self.maxWidth = maxLayoutSize.width;
+  self.maxHeight = maxLayoutSize.height;
 }
 
 
