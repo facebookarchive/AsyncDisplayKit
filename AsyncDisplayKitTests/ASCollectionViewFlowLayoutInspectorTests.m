@@ -13,6 +13,7 @@
 #import <OCMock/OCMock.h>
 
 #import "ASCollectionView.h"
+#import "ASCollectionNode.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASCellNode.h"
 
@@ -25,7 +26,7 @@
 /**
  * Test Data Source
  */
-@interface InspectorTestDataSource : NSObject <ASCollectionViewDataSource>
+@interface InspectorTestDataSource : NSObject <ASCollectionDataSource>
 @end
 
 @implementation InspectorTestDataSource
@@ -80,7 +81,7 @@
 /**
  * Test Delegate for Header Reference Size Implementation
  */
-@interface HeaderReferenceSizeTestDelegate : NSObject <ASCollectionDelegateFlowLayout>
+@interface HeaderReferenceSizeTestDelegate : NSObject <ASCollectionViewDelegateFlowLayout>
 
 @end
 
@@ -96,7 +97,7 @@
 /**
  * Test Delegate for Footer Reference Size Implementation
  */
-@interface FooterReferenceSizeTestDelegate : NSObject <ASCollectionDelegateFlowLayout>
+@interface FooterReferenceSizeTestDelegate : NSObject <ASCollectionViewDelegateFlowLayout>
 
 @end
 

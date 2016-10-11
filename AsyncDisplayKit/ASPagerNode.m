@@ -16,7 +16,7 @@
 #import "ASPagerFlowLayout.h"
 #import "ASCollectionView+Undeprecated.h"
 
-@interface ASPagerNode () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionDelegateFlowLayout, ASDelegateProxyInterceptor>
+@interface ASPagerNode () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
   ASPagerFlowLayout *_flowLayout;
 
@@ -64,7 +64,7 @@
   [super didLoad];
   
   ASCollectionView *cv = self.view;
-  cv.asyncDataSource = (id<ASCollectionViewDataSource>)_proxyDataSource ?: self;
+  cv.asyncDataSource = (id<ASCollectionDataSource>)_proxyDataSource ?: self;
   cv.asyncDelegate = (id<ASCollectionDelegate>)_proxyDelegate ?: self;
 #if TARGET_OS_IOS
   cv.pagingEnabled = YES;
@@ -110,7 +110,7 @@
   return [self.view nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
 }
 
-#pragma mark - ASCollectionViewDataSource
+#pragma mark - ASCollectionDataSource
 
 - (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {

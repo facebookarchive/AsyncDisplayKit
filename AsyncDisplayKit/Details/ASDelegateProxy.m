@@ -9,8 +9,8 @@
 //
 
 #import "ASDelegateProxy.h"
-#import "ASTableView.h"
-#import "ASCollectionView.h"
+#import "ASTableNode.h"
+#import "ASCollectionNode.h"
 #import "ASAssert.h"
 
 @implementation ASTableViewProxy
@@ -82,13 +82,15 @@
           selector == @selector(collectionView:canPerformAction:forItemAtIndexPath:withSender:) ||
           selector == @selector(collectionView:performAction:forItemAtIndexPath:withSender:) ||
 
-          // handled by ASRangeController
+          // Item counts
           selector == @selector(numberOfSectionsInCollectionView:) ||
           selector == @selector(collectionView:numberOfItemsInSection:) ||
           
-          // used for ASRangeController visibility updates
+          // Element appearance callbacks
           selector == @selector(collectionView:willDisplayCell:forItemAtIndexPath:) ||
           selector == @selector(collectionView:didEndDisplayingCell:forItemAtIndexPath:) ||
+          selector == @selector(collectionView:willDisplaySupplementaryView:forElementKind:atIndexPath:) ||
+          selector == @selector(collectionView:didEndDisplayingSupplementaryView:forElementOfKind:atIndexPath:) ||
           
           // used for batch fetching API
           selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:) ||
@@ -102,9 +104,7 @@
           
           // intercepted due to not being supported by ASCollectionView (prevent bugs caused by usage)
           selector == @selector(collectionView:canMoveItemAtIndexPath:) ||
-          selector == @selector(collectionView:moveItemAtIndexPath:toIndexPath:) ||
-          selector == @selector(collectionView:willDisplaySupplementaryView:forElementKind:atIndexPath:) ||
-          selector == @selector(collectionView:didEndDisplayingSupplementaryView:forElementOfKind:atIndexPath:)
+          selector == @selector(collectionView:moveItemAtIndexPath:toIndexPath:)
           );
 }
 

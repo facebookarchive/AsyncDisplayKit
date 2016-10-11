@@ -55,7 +55,7 @@
 
 @end
 
-@interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionDelegate, UICollectionViewDelegateFlowLayout>
+@interface ASCollectionViewTestDelegate : NSObject <ASCollectionDataSource, ASCollectionDelegate, UICollectionViewDelegateFlowLayout>
 
 @property (nonatomic, assign) NSInteger sectionGeneration;
 
@@ -111,7 +111,7 @@
   return _itemCounts[section];
 }
 
-- (id<ASSectionContext>)collectionView:(ASCollectionView *)collectionView contextForSection:(NSInteger)section
+- (id<ASSectionContext>)collectionNode:(ASCollectionNode *)collectionNode contextForSection:(NSInteger)section
 {
   ASTestSectionContext *context = [[ASTestSectionContext alloc] init];
   context.sectionGeneration = _sectionGeneration;
@@ -452,7 +452,8 @@
 {
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UICollectionViewLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *cv = [[ASCollectionView alloc] initWithFrame:window.bounds collectionViewLayout:layout];
+  ASCollectionNode *cn = [[ASCollectionNode alloc] initWithFrame:window.bounds collectionViewLayout:layout];
+  ASCollectionView *cv = cn.view;
 
 
   __unused NSMutableSet *keepaliveNodes = [NSMutableSet set];
@@ -469,7 +470,7 @@
     layerBacked.name = [NSString stringWithFormat:@"Subnode #%d", thisNodeIdx];
     [suppNode addSubnode:layerBacked];
     [invocation setReturnValue:&suppNode];
-  }] collectionView:cv nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];
+  }] collectionNode:cn nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];
   [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] numberOfSectionsInCollectionView:cv];
   cv.asyncDataSource = dataSource;
 

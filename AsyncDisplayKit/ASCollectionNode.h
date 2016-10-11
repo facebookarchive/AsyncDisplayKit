@@ -254,21 +254,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)reloadDataWithCompletion:(nullable void (^)())completion;
 
-/**
- * Reload everything from scratch, destroying the working range and all cached nodes.
- *
- * @warning This method is substantially more expensive than UICollectionView's version.
- */
-- (void)reloadData;
-
-/**
- * Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.
- *
- * @warning This method is substantially more expensive than UICollectionView's version and will block the main thread
- * while all the cells load.
- */
-- (void)reloadDataImmediately;
-
 #pragma mark - Querying Data
 
 /**
@@ -321,6 +306,253 @@ NS_ASSUME_NONNULL_BEGIN
  * TODO: Docs
  */
 - (nullable NSIndexPath *)convertIndexPathFromCollectionView:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+
+@end
+
+/**
+ * This is a node-based UICollectionViewDataSource.
+ */
+@protocol ASCollectionDataSource <ASCommonCollectionDataSource>
+
+@optional
+
+- (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section;
+
+- (NSInteger)numberOfSectionsInCollectionNode:(ASCollectionNode *)collectionNode;
+
+/**
+ * Similar to -collectionView:nodeForItemAtIndexPath:
+ * This method takes precedence over collectionView:nodeForItemAtIndexPath: if implemented.
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the requested node.
+ *
+ * @return a block that creates the node for display at this indexpath.
+ *   Must be thread-safe (can be called on the main thread or a background
+ *   queue) and should not implement reuse (it will be called once per row).
+ */
+- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Similar to -collectionView:cellForItemAtIndexPath:.
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the requested node.
+ *
+ * @return a node for display at this indexpath. This will be called on the main thread and should
+ *   not implement reuse (it will be called once per row).  Unlike UICollectionView's version,
+ *   this method is not called when the row is about to display.
+ */
+- (ASCellNode *)collectionNode:(ASCollectionNode *)collectionNode nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Asks the collection view to provide a supplementary node to display in the collection view.
+ *
+ * @param collectionView An object representing the collection view requesting this information.
+ * @param kind           The kind of supplementary node to provide.
+ * @param indexPath      The index path that specifies the location of the new supplementary node.
+ */
+- (ASCellNode *)collectionNode:(ASCollectionNode *)collectionNode nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Similar to -collectionView:cellForItemAtIndexPath:.
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the requested node.
+ *
+ * @return a node for display at this indexpath. This will be called on the main thread and should
+ *   not implement reuse (it will be called once per row).  Unlike UICollectionView's version,
+ *   this method is not called when the row is about to display.
+ */
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Similar to -collectionView:nodeForItemAtIndexPath:
+ * This method takes precedence over collectionView:nodeForItemAtIndexPath: if implemented.
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the requested node.
+ *
+ * @return a block that creates the node for display at this indexpath.
+ *   Must be thread-safe (can be called on the main thread or a background
+ *   queue) and should not implement reuse (it will be called once per row).
+ */
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Asks the collection view to provide a supplementary node to display in the collection view.
+ *
+ * @param collectionView An object representing the collection view requesting this information.
+ * @param kind           The kind of supplementary node to provide.
+ * @param indexPath      The index path that specifies the location of the new supplementary node.
+ */
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * TODO: Docs
+ */
+- (nullable id<ASSectionContext>)collectionNode:(ASCollectionNode *)collectionNode contextForSection:(NSInteger)section;
+
+/**
+ * Indicator to lock the data source for data fetching in async mode.
+ * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistency or exception
+ * due to the data access in async mode.
+ *
+ * @param collectionView The sender.
+ * @deprecated The data source is always accessed on the main thread, and this method will not be called.
+ */
+- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Indicator to unlock the data source for data fetching in async mode.
+ * We should not update the data source until the data source has been unlocked. Otherwise, it will incur data inconsistency or exception
+ * due to the data access in async mode.
+ *
+ * @param collectionView The sender.
+ * @deprecated The data source is always accessed on the main thread, and this method will not be called.
+ */
+- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+
+@end
+
+/**
+ * This is a node-based UICollectionViewDelegate.
+ */
+@protocol ASCollectionDelegate <ASCommonCollectionDelegate, NSObject>
+
+@optional
+
+/**
+ * Provides the constrained size range for measuring the node at the index path.
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the node.
+ *
+ * @return A constrained size range for layout the node at this index path.
+ */
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForItemAtIndexPath:(NSIndexPath *)indexPath;
+
+- (void)collectionNode:(ASCollectionNode *)collectionNode willDisplayItemWithNode:(ASCellNode *)node;
+
+- (void)collectionNode:(ASCollectionNode *)collectionNode didEndDisplayingItemWithNode:(ASCellNode *)node;
+
+- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldHighlightItemWithNode:(ASCellNode *)node;
+- (void)collectionNode:(ASCollectionNode *)collectionNode didHighlightItemWithNode:(ASCellNode *)node;
+- (void)collectionNode:(ASCollectionNode *)collectionNode didUnhighlightItemWithNode:(ASCellNode *)node;
+- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldSelectItemWithNode:(ASCellNode *)node;
+- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldDeselectItemWithNode:(ASCellNode *)node;
+- (void)collectionNode:(ASCollectionNode *)collectionNode didSelectItemWithNode:(ASCellNode *)node;
+- (void)collectionNode:(ASCollectionNode *)collectionNode didDeselectItemWithNode:(ASCellNode *)node;
+
+- (void)collectionNode:(ASCollectionNode *)collectionNode willDisplaySupplementaryElementWithNode:(ASCellNode *)node NS_AVAILABLE_IOS(8_0);
+- (void)collectionNode:(ASCollectionNode *)collectionNode didEndDisplayingSupplementaryElementWithNode:(ASCellNode *)node;
+
+- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldShowMenuForItemWithNode:(ASCellNode *)node;
+- (BOOL)collectionNode:(ASCollectionNode *)collectionNode canPerformAction:(SEL)action forItemWithNode:(ASCellNode *)node sender:(nullable id)sender;
+- (void)collectionNode:(ASCollectionNode *)collectionNode performAction:(SEL)action forItemWithNode:(ASCellNode *)node sender:(nullable id)sender;
+
+/**
+ * Receive a message that the collection node is near the end of its data set and more data should be fetched if
+ * necessary.
+ *
+ * @param collectionNode The sender.
+ * @param context A context object that must be notified when the batch fetch is completed.
+ *
+ * @discussion You must eventually call -completeBatchFetching: with an argument of YES in order to receive future
+ * notifications to do batch fetches. This method is called on a background queue.
+ *
+ * ASCollectionNode currently only supports batch events for tail loads. If you require a head load, consider
+ * implementing a UIRefreshControl.
+ */
+- (void)collectionNode:(ASCollectionNode *)collectionNode willBeginBatchFetchWithContext:(ASBatchContext *)context;
+
+/**
+ * Tell the collection node if batch fetching should begin.
+ *
+ * @param collectionNode The sender.
+ *
+ * @discussion Use this method to conditionally fetch batches. Example use cases are: limiting the total number of
+ * objects that can be fetched or no network connection.
+ *
+ * If not implemented, the collection node assumes that it should notify its asyncDelegate when batch fetching
+ * should occur.
+ */
+- (BOOL)shouldBatchFetchForCollectionNode:(ASCollectionNode *)collectionNode;
+
+/**
+ * Provides the constrained size range for measuring the node at the index path.
+ *
+ * @param collectionView The sender.
+ *
+ * @param indexPath The index path of the node.
+ *
+ * @return A constrained size range for layout the node at this index path.
+ */
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Informs the delegate that the collection view will add the given node
+ * at the given index path to the view hierarchy.
+ *
+ * @param collectionView The sender.
+ * @param node The node that will be displayed.
+ * @param indexPath The index path of the item that will be displayed.
+ *
+ * @warning AsyncDisplayKit processes collection view edits asynchronously. The index path
+ *   passed into this method may not correspond to the same item in your data source
+ *   if your data source has been updated since the last edit was processed.
+ */
+- (void)collectionView:(ASCollectionView *)collectionView willDisplayNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Informs the delegate that the collection view did remove the provided node from the view hierarchy.
+ * This may be caused by the node scrolling out of view, or by deleting the item
+ * or its containing section with @c deleteItemsAtIndexPaths: or @c deleteSections: .
+ *
+ * @param collectionView The sender.
+ * @param node The node which was removed from the view hierarchy.
+ * @param indexPath The index path at which the node was located before it was removed.
+ *
+ * @warning AsyncDisplayKit processes collection view edits asynchronously. The index path
+ *   passed into this method may not correspond to the same item in your data source
+ *   if your data source has been updated since the last edit was processed.
+ */
+- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+
+- (void)collectionView:(ASCollectionView *)collectionView willBeginBatchFetchWithContext:(ASBatchContext *)context ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Tell the collectionView if batch fetching should begin.
+ *
+ * @param collectionView The sender.
+ *
+ * @discussion Use this method to conditionally fetch batches. Example use cases are: limiting the total number of
+ * objects that can be fetched or no network connection.
+ *
+ * If not implemented, the collectionView assumes that it should notify its asyncDelegate when batch fetching
+ * should occur.
+ */
+- (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+
+/**
+ * Informs the delegate that the collection view will add the node
+ * at the given index path to the view hierarchy.
+ *
+ * @param collectionView The sender.
+ * @param indexPath The index path of the item that will be displayed.
+ *
+ * @warning AsyncDisplayKit processes collection view edits asynchronously. The index path
+ *   passed into this method may not correspond to the same item in your data source
+ *   if your data source has been updated since the last edit was processed.
+ *
+ * This method is deprecated. Use @c collectionView:willDisplayNode:forItemAtIndexPath: instead.
+ */
+- (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
 
 @end
 
