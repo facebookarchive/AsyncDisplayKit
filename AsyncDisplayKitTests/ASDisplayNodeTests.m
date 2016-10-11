@@ -2107,7 +2107,7 @@ static bool stringContainsPointer(NSString *description, id p) {
 {
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
   id<ASLayoutElement> returnedNode =
-   [node styleWithBlock:^(ASLayoutElementStyle * _Nonnull style) {
+   [node styledWithBlock:^(ASLayoutElementStyle * _Nonnull style) {
      style.width = ASDimensionMake(100);
      style.flexGrow = 1.0;
      style.flexShrink = 1.0;
