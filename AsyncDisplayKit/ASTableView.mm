@@ -168,10 +168,16 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   
   struct {
     unsigned int asyncDataSourceNumberOfSectionsInTableView:1;
+    unsigned int asyncDataSourceNumberOfSectionsInTableNode:1;
+    unsigned int asyncDataSourceTableNodeNumberOfRowsInSection:1;
     unsigned int asyncDataSourceTableViewNodeBlockForRowAtIndexPath:1;
+    unsigned int asyncDataSourceTableNodeNodeBlockForRow:1;
     unsigned int asyncDataSourceTableViewNodeForRowAtIndexPath:1;
+    unsigned int asyncDataSourceTableNodeNodeForRow:1;
     unsigned int asyncDataSourceTableViewCanMoveRowAtIndexPath:1;
+    unsigned int asyncDataSourceTableNodeCanMoveRow:1;
     unsigned int asyncDataSourceTableViewMoveRowAtIndexPath:1;
+    unsigned int asyncDataSourceTableViewMoveRow:1;
   } _asyncDataSourceFlags;
 }
 
@@ -1352,24 +1358,43 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 #pragma mark - ASDataControllerDelegate
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
-  if (![_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)]) {
+  ASCellNodeBlock block = nil;
+
+  if (_asyncDataSourceFlags.asyncDataSourceTableNodeNodeBlockForRow) {
+    block = [_asyncDataSource tableNode:self.tableNode nodeBlockForRowAtIndexPath:indexPath];
+  } else if (_asyncDataSourceFlags.asyncDataSourceTableNodeNodeBlockForRow) {
+    ASCellNode *node = [_asyncDataSource tableNode:self.tableNode nodeForRowAtIndexPath:indexPath];
+    if ([node isKindOfClass:[ASCellNode class]]) {
+      block = ^{
+        return node;
+      };
+    } else {
+      ASDisplayNodeFailAssert(@"Data source returned invalid node from tableNode:nodeForRowAtIndexPath:. Node: %@", node);
+    }
+  } else if (_asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath) {
+    block = [_asyncDataSource tableView:self nodeBlockForRowAtIndexPath:indexPath];
+  } else if (_asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath) {
     ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
-    ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
-    __weak __typeof__(self) weakSelf = self;
-    return ^{
-      __typeof__(self) strongSelf = weakSelf;
-      [node enterHierarchyState:ASHierarchyStateRangeManaged];
-      if (node.interactionDelegate == nil) {
-        node.interactionDelegate = strongSelf;
-      }
-      return node;
+    if ([node isKindOfClass:[ASCellNode class]]) {
+      block = ^{
+        return node;
+      };
+    } else {
+      ASDisplayNodeFailAssert(@"Data source returned invalid node from tableView:nodeForRowAtIndexPath:. Node: %@", node);
+    }
+  }
+
+  // Handle nil node block
+  if (block == nil) {
+    ASDisplayNodeFailAssert(@"ASTableNode could not get a node block for row at index path %@", indexPath);
+    block = ^{
+      return [[ASCellNode alloc] init];
     };
   }
 
-  ASCellNodeBlock block = [_asyncDataSource tableView:self nodeBlockForRowAtIndexPath:indexPath];
-  ASDisplayNodeAssertNotNil(block, @"Invalid block, expected nonnull ASCellNodeBlock");
+  // Wrap the node block
   __weak __typeof__(self) weakSelf = self;
-  ASCellNodeBlock configuredNodeBlock = ^{
+  return ^{
     __typeof__(self) strongSelf = weakSelf;
     ASCellNode *node = (block != nil ? block() : [[ASCellNode alloc] init]);
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
@@ -1378,7 +1403,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     }
     return node;
   };
-  return configuredNodeBlock;
+  return block;
 }
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
