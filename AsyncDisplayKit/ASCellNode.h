@@ -75,6 +75,13 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 @property (nonatomic, assign) BOOL neverShowPlaceholders;
 
 /*
+ * The kind of supplementary element this node represents, if any.
+ *
+ * @return The supplementary element kind, or @c nil if this node does not represent a supplementary element.
+ */
+@property (nonatomic, copy, readonly, nullable) NSString *supplementaryElementKind;
+
+/*
  * The layout attributes currently assigned to this node, if any.
  *
  * @discussion This property is useful because it is set before @c collectionView:willDisplayNode:forItemAtIndexPath:

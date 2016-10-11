@@ -1,79 +1,23 @@
 //
-//  ASTableView.h
+//  ASTableView+Undeprecated.h
 //  AsyncDisplayKit
 //
-//  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
-//  This source code is licensed under the BSD-style license found in the
-//  LICENSE file in the root directory of this source tree. An additional grant
-//  of patent rights can be found in the PATENTS file in the same directory.
+//  Created by Adlai Holler on 10/10/16.
+//  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-#import <AsyncDisplayKit/ASRangeController.h>
-#import <AsyncDisplayKit/ASTableViewProtocols.h>
-#import <AsyncDisplayKit/ASBaseDefines.h>
-#import <AsyncDisplayKit/ASBatchContext.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class ASCellNode;
-@protocol ASTableDataSource;
-@protocol ASTableDelegate;
-@class ASTableNode;
-
 /**
- * Asynchronous UITableView with Intelligent Preloading capabilities.
+ * Currently our public table API is on @c ASTableNode and the @c ASTableView
+ * API is deprecated, but the implementations still live in the view.
  *
- * @discussion ASTableView is a true subclass of UITableView, meaning it is pointer-compatible with code that
- * currently uses UITableView
- *
- * The main difference is that asyncDataSource expects -nodeForRowAtIndexPath, an ASCellNode, and
- * the heightForRowAtIndexPath: method is eliminated (as are the performance problems caused by it).
- * This is made possible because ASCellNodes can calculate their own size, and preload ahead of time.
- *
- * @note ASTableNode is strongly recommended over ASTableView.  This class is provided for adoption convenience.
+ * This category lets us avoid deprecation warnings everywhere internally.
+ * In the future, the ASTableView public API will be eliminated and so will this file.
  */
-@interface ASTableView : UITableView
-
-/// The corresponding table node, or nil if one does not exist.
-@property (nonatomic, weak, readonly) ASTableNode *tableNode;
-
-@property (nonatomic, weak) id<ASTableDelegate>   asyncDelegate;
-@property (nonatomic, weak) id<ASTableDataSource> asyncDataSource;
-
-/**
- * Retrieves the node for the row at the given index path.
- */
-- (nullable ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
-
-/**
- * Similar to -indexPathForCell:.
- *
- * @param cellNode a cellNode part of the table view
- *
- * @return an indexPath for this cellNode
- */
-- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
-
-/**
- * YES to automatically adjust the contentOffset when cells are inserted or deleted "before"
- * visible cells, maintaining the users' visible scroll position. Currently this feature tracks insertions, moves and deletions of
- * cells, but section edits are ignored.
- *
- * default is NO.
- */
-@property (nonatomic) BOOL automaticallyAdjustsContentOffset;
-
-/**
- * The number of screens left to scroll before the delegate -tableView:beginBatchFetchingWithContext: is called.
- *
- * Defaults to two screenfuls.
- */
-@property (nonatomic, assign) CGFloat leadingScreensForBatching;
-
-@end
-
-@interface ASTableView (Deprecated)
+@interface ASTableView (Undeprecated)
 
 /**
  * Initializer.
@@ -83,7 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param style A constant that specifies the style of the table view. See UITableViewStyle for descriptions of valid constants.
  */
-- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style ASDISPLAYNODE_DEPRECATED;
+- (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style;
 
 /**
  * Tuning parameters for a range type in full mode.
@@ -95,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED;
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
 
 /**
  * Set the tuning parameters for a range type in full mode.
@@ -106,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_DEPRECATED;
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType;
 
 /**
  * Tuning parameters for a range type in the specified mode.
@@ -119,7 +63,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED;
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType AS_WARN_UNUSED_RESULT;
 
 /**
  * Set the tuning parameters for a range type in the specified mode.
@@ -131,14 +75,21 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_DEPRECATED;
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
 /**
  * Similar to -visibleCells.
  *
  * @return an array containing the cell nodes being displayed on screen.
  */
-- (NSArray<ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED;
+- (NSArray<ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
+
+/**
+ * The number of screens left to scroll before the delegate -tableView:beginBatchFetchingWithContext: is called.
+ *
+ * Defaults to two screenfuls.
+ */
+@property (nonatomic, assign) CGFloat leadingScreensForBatching;
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
@@ -147,14 +98,14 @@ NS_ASSUME_NONNULL_BEGIN
  * the main thread.
  * @warning This method is substantially more expensive than UITableView's version.
  */
--(void)reloadDataWithCompletion:(void (^ _Nullable)())completion ASDISPLAYNODE_DEPRECATED;
+-(void)reloadDataWithCompletion:(void (^ _Nullable)())completion;
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
  * @warning This method is substantially more expensive than UITableView's version.
  */
-- (void)reloadData ASDISPLAYNODE_DEPRECATED;
+- (void)reloadData;
 
 /**
  * Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.
@@ -162,14 +113,14 @@ NS_ASSUME_NONNULL_BEGIN
  * @warning This method is substantially more expensive than UITableView's version and will block the main thread while
  * all the cells load.
  */
-- (void)reloadDataImmediately ASDISPLAYNODE_DEPRECATED;
+- (void)reloadDataImmediately;
 
 /**
  * Triggers a relayout of all nodes.
  *
  * @discussion This method invalidates and lays out every cell node in the table view.
  */
-- (void)relayoutItems ASDISPLAYNODE_DEPRECATED;
+- (void)relayoutItems;
 
 /**
  *  Begins a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
@@ -180,7 +131,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @warning This method must be called from the main thread.
  */
-- (void)beginUpdates ASDISPLAYNODE_DEPRECATED;
+- (void)beginUpdates;
 
 /**
  *  Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
@@ -191,7 +142,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @warning This method is must be called from the main thread.
  */
-- (void)endUpdates ASDISPLAYNODE_DEPRECATED;
+- (void)endUpdates;
 
 /**
  *  Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view.
@@ -206,12 +157,12 @@ NS_ASSUME_NONNULL_BEGIN
  *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
-- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL completed))completion ASDISPLAYNODE_DEPRECATED;
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL completed))completion;
 
 /**
  *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
  */
-- (void)waitUntilAllUpdatesAreCommitted ASDISPLAYNODE_DEPRECATED;
+- (void)waitUntilAllUpdatesAreCommitted;
 
 /**
  * Inserts one or more sections, with an option to animate the insertion.
@@ -223,7 +174,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED;
+- (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
  * Deletes one or more sections, with an option to animate the deletion.
@@ -235,7 +186,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED;
+- (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
  * Reloads the specified sections using a given animation effect.
@@ -247,7 +198,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED;
+- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
  * Moves a section to a new location.
@@ -259,7 +210,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection ASDISPLAYNODE_DEPRECATED;
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 /**
  * Inserts rows at the locations identified by an array of index paths, with an option to animate the insertion.
@@ -271,7 +222,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)insertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED;
+- (void)insertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
  * Deletes the rows specified by an array of index paths, with an option to animate the deletion.
@@ -283,7 +234,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)deleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED;
+- (void)deleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
  * Reloads the specified rows using a given animation effect.
@@ -295,7 +246,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED;
+- (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation;
 
 /**
  * Moves the row at a specified location to a destination location.
@@ -307,16 +258,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath ASDISPLAYNODE_DEPRECATED;
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 @end
-
-ASDISPLAYNODE_DEPRECATED
-@protocol ASTableViewDataSource <ASTableDataSource>
-@end
-
-ASDISPLAYNODE_DEPRECATED
-@protocol ASTableViewDelegate <ASTableDelegate>
-@end
-
 NS_ASSUME_NONNULL_END

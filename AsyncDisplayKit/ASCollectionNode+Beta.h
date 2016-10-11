@@ -21,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)endUpdatesAnimated:(BOOL)animated;
 
-- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
+- (void)endUpdatesAnimated:(BOOL)animated completion:(nullable void (^)(BOOL))completion;
 
 @end
 

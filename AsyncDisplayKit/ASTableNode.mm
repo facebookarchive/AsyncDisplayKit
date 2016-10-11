@@ -17,6 +17,7 @@
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
 #import "AsyncDisplayKit+Debug.h"
+#import "ASTableView+Undeprecated.h"
 
 #pragma mark - _ASTablePendingState
 
@@ -117,13 +118,13 @@
 - (void)clearContents
 {
   [super clearContents];
-  [self.view clearContents];
+  [self.rangeController clearContents];
 }
 
 - (void)clearFetchedData
 {
   [super clearFetchedData];
-  [self.view clearFetchedData];
+  [self.rangeController clearFetchedData];
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
@@ -147,6 +148,18 @@
 #endif
 
 #pragma mark Setter / Getter
+
+// TODO: Implement this without the view.
+- (ASDataController *)dataController
+{
+  return self.view.dataController;
+}
+
+// TODO: Implement this without the view.
+- (ASRangeController *)rangeController
+{
+  return self.view.rangeController;
+}
 
 - (_ASTablePendingState *)pendingState
 {
@@ -203,12 +216,150 @@
     _pendingState.rangeMode = rangeMode;
   } else {
     ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
-    [self.view.rangeController updateCurrentRangeWithMode:rangeMode];
+    [self.rangeController updateCurrentRangeWithMode:rangeMode];
   }
 }
 
 #pragma mark ASEnvironment
 
 ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
+
+#pragma mark - Range Tuning
+
+- (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.rangeController tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
+{
+  [self.rangeController setTuningParameters:tuningParameters forRangeMode:ASLayoutRangeModeFull rangeType:rangeType];
+}
+
+- (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
+}
+
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+{
+  return [self.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+}
+
+#pragma mark - Querying Data
+
+- (NSInteger)numberOfRowsInSection:(NSInteger)section
+{
+  return [self.dataController numberOfRowsInSection:section];
+}
+
+- (NSInteger)numberOfSections
+{
+  return [self.dataController numberOfSections];
+}
+
+- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
+{
+  return [self.dataController indexPathForNode:cellNode];
+}
+
+- (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [self.dataController nodeAtIndexPath:indexPath];
+}
+
+- (NSIndexPath *)convertIndexPathToTableView:(NSIndexPath *)indexPath
+{
+  ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
+  return [self.dataController completedIndexPathForNode:node];
+}
+
+- (NSIndexPath *)convertIndexPathFromTableView:(NSIndexPath *)indexPath
+{
+  ASCellNode *node = [self.dataController nodeAtCompletedIndexPath:indexPath];
+  return [self indexPathForNode:node];
+}
+
+#pragma mark - Editing
+
+- (void)reloadDataWithCompletion:(void (^)())completion
+{
+  [self.view reloadDataWithCompletion:completion];
+}
+
+- (void)reloadData
+{
+  [self.view reloadData];
+}
+
+- (void)reloadDataImmediately
+{
+  [self.view reloadDataImmediately];
+}
+
+- (void)beginUpdates
+{
+  [self.dataController beginUpdates];
+}
+
+- (void)endUpdates
+{
+  [self.view endUpdates];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated
+{
+  [self endUpdatesAnimated:animated completion:nil];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
+{
+  [self.dataController endUpdatesAnimated:animated completion:completion];
+}
+
+- (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view insertSections:sections withRowAnimation:animation];
+}
+
+- (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view deleteSections:sections withRowAnimation:animation];
+}
+
+- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view reloadSections:sections withRowAnimation:animation];
+}
+
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
+{
+  [self.view moveSection:section toSection:newSection];
+}
+
+- (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view insertRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+}
+
+- (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view deleteRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+}
+
+- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
+{
+  [self.view reloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+}
+
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
+{
+  [self.view moveRowAtIndexPath:indexPath toIndexPath:newIndexPath];
+}
+
+- (void)waitUntilAllUpdatesAreCommitted
+{
+  [self.view waitUntilAllUpdatesAreCommitted];
+}
 
 @end
