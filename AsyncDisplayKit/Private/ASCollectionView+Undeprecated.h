@@ -241,6 +241,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
+/**
+ * Similar to -visibleCells.
+ *
+ * @return an array containing the nodes being displayed on screen.
+ */
+- (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
+
 @end
 
 NS_ASSUME_NONNULL_END

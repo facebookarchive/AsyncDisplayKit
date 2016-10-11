@@ -415,11 +415,11 @@ ASDISPLAYNODE_DEPRECATED
 
 - (void)tableNode:(ASTableNode *)tableNode didEndDisplayingRowWithNode:(ASCellNode *)node;
 
-- (NSIndexPath *)tableNode:(ASTableNode *)tableNode willSelectRowWithNode:(ASCellNode *)node;
+- (nullable ASCellNode *)tableNode:(ASTableNode *)tableNode willSelectRowWithNode:(ASCellNode *)node;
 
 - (void)tableNode:(ASTableNode *)tableNode didSelectRowWithNode:(ASCellNode *)node;
 
-- (NSIndexPath *)tableNode:(ASTableNode *)tableNode willDeselectRowWithNode:(ASCellNode *)node;
+- (nullable ASCellNode *)tableNode:(ASTableNode *)tableNode willDeselectRowWithNode:(ASCellNode *)node;
 
 - (void)tableNode:(ASTableNode *)tableNode didDeselectRowWithNode:(ASCellNode *)node;
 

@@ -418,7 +418,7 @@
 - (void)testCellNodeLayoutAttributes
 {
   updateValidationTestPrologue
-  NSSet *nodeBatch1 = [NSSet setWithArray:[cv visibleNodes]];
+  NSSet *nodeBatch1 = [NSSet setWithArray:[cn visibleNodes]];
   XCTAssertGreaterThan(nodeBatch1.count, 0);
 
   // Expect all visible nodes get 1 applyLayoutAttributes and have a non-nil value.
@@ -433,7 +433,7 @@
   [cv layoutIfNeeded];
 
   // Ensure we scrolled far enough that all the old ones are offscreen.
-  NSSet *nodeBatch2 = [NSSet setWithArray:[cv visibleNodes]];
+  NSSet *nodeBatch2 = [NSSet setWithArray:[cn visibleNodes]];
   XCTAssertFalse([nodeBatch1 intersectsSet:nodeBatch2], @"Expected to scroll far away enough that all nodes are replaced.");
 
   // Now the nodes are no longer visible, expect their layout attributes are nil but not another applyLayoutAttributes call.

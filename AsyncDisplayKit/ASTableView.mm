@@ -131,53 +131,56 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   NSMutableSet *_cellsForVisibilityUpdates;
   
   struct {
-    unsigned int asyncDelegateScrollViewDidScroll:1;
-    unsigned int asyncDelegateScrollViewWillBeginDragging:1;
-    unsigned int asyncDelegateScrollViewDidEndDragging:1;
-    unsigned int asyncDelegateTableViewWillDisplayNodeForRowAtIndexPath:1;
-    unsigned int asyncDelegateTableViewWillDisplayNodeForRowAtIndexPathDeprecated:1;
-    unsigned int asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPath:1;
-    unsigned int asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset:1;
-    unsigned int asyncDelegateTableNodeWillBeginBatchFetchWithContext:1;
-    unsigned int asyncDelegateTableViewWillBeginBatchFetchWithContext:1;
-    unsigned int asyncDelegateShouldBatchFetchForTableNode:1;
-    unsigned int asyncDelegateShouldBatchFetchForTableView:1;
-    unsigned int asyncDelegateTableNodeConstrainedSizeForRowAtIndexPath:1;
-    unsigned int asyncDelegateTableViewConstrainedSizeForRowAtIndexPath:1;
-    unsigned int asyncDelegateTableViewWillSelectRowAtIndexPath:1;
-    unsigned int asyncDelegateTableNodeWillSelectRow:1;
-    unsigned int asyncDelegateTableViewDidSelectRowAtIndexPath:1;
-    unsigned int asyncDelegateTableNodeDidSelectRow:1;
-    unsigned int asyncDelegateTableViewWillDeselectRowAtIndexPath:1;
-    unsigned int asyncDelegateTableNodeWillDeselectRow:1;
-    unsigned int asyncDelegateTableViewDidDeselectRowAtIndexPath:1;
-    unsigned int asyncDelegateTableNodeDidDeselectRow:1;
-    unsigned int asyncDelegateTableViewShouldHighlightRowAtIndexPath:1;
-    unsigned int asyncDelegateTableNodeShouldHighlightRow:1;
-    unsigned int asyncDelegateTableViewDidHighlightRowAtIndexPath:1;
-    unsigned int asyncDelegateTableNodeDidHighlightRow:1;
-    unsigned int asyncDelegateTableViewDidUnhighlightRowAtIndexPath:1;
-    unsigned int asyncDelegateTableNodeDidUnhighlightRow:1;
-    unsigned int asyncDelegateTableViewShouldShowMenuForRowAtIndexPath:1;
-    unsigned int asyncDelegateTableNodeShouldShowMenuForRow:1;
-    unsigned int asyncDelegateTableViewCanPerformActionForRowAtIndexPathWithSender:1;
-    unsigned int asyncDelegateTableNodeCanPerformActionForRow:1;
-    unsigned int asyncDelegateTableViewPerformActionForRowAtIndexPathWithSender:1;
-    unsigned int asyncDelegateTableNodePerformActionForRow:1;
+    unsigned int scrollViewDidScroll:1;
+    unsigned int scrollViewWillBeginDragging:1;
+    unsigned int scrollViewDidEndDragging:1;
+    unsigned int scrollViewWillEndDragging:1;
+    unsigned int tableNodeWillDisplayNodeForRow:1;
+    unsigned int tableViewWillDisplayNodeForRow:1;
+    unsigned int tableViewWillDisplayNodeForRowDeprecated:1;
+    unsigned int tableNodeDidEndDisplayingNodeForRow:1;
+    unsigned int tableViewDidEndDisplayingNodeForRow:1;
+    unsigned int tableNodeWillBeginBatchFetch:1;
+    unsigned int tableViewWillBeginBatchFetch:1;
+    unsigned int shouldBatchFetchForTableView:1;
+    unsigned int shouldBatchFetchForTableNode:1;
+    unsigned int tableViewConstrainedSizeForRow:1;
+    unsigned int tableNodeConstrainedSizeForRow:1;
+    unsigned int tableViewWillSelectRow:1;
+    unsigned int tableNodeWillSelectRow:1;
+    unsigned int tableViewDidSelectRow:1;
+    unsigned int tableNodeDidSelectRow:1;
+    unsigned int tableViewWillDeselectRow:1;
+    unsigned int tableNodeWillDeselectRow:1;
+    unsigned int tableViewDidDeselectRow:1;
+    unsigned int tableNodeDidDeselectRow:1;
+    unsigned int tableViewShouldHighlightRow:1;
+    unsigned int tableNodeShouldHighlightRow:1;
+    unsigned int tableViewDidHighlightRow:1;
+    unsigned int tableNodeDidHighlightRow:1;
+    unsigned int tableViewDidUnhighlightRow:1;
+    unsigned int tableNodeDidUnhighlightRow:1;
+    unsigned int tableViewShouldShowMenuForRow:1;
+    unsigned int tableNodeShouldShowMenuForRow:1;
+    unsigned int tableViewCanPerformActionForRow:1;
+    unsigned int tableNodeCanPerformActionForRow:1;
+    unsigned int tableViewPerformActionForRow:1;
+    unsigned int tableNodePerformActionForRow:1;
   } _asyncDelegateFlags;
   
   struct {
-    unsigned int asyncDataSourceNumberOfSectionsInTableView:1;
-    unsigned int asyncDataSourceNumberOfSectionsInTableNode:1;
-    unsigned int asyncDataSourceTableNodeNumberOfRowsInSection:1;
-    unsigned int asyncDataSourceTableViewNodeBlockForRowAtIndexPath:1;
-    unsigned int asyncDataSourceTableNodeNodeBlockForRow:1;
-    unsigned int asyncDataSourceTableViewNodeForRowAtIndexPath:1;
-    unsigned int asyncDataSourceTableNodeNodeForRow:1;
-    unsigned int asyncDataSourceTableViewCanMoveRowAtIndexPath:1;
-    unsigned int asyncDataSourceTableNodeCanMoveRow:1;
-    unsigned int asyncDataSourceTableViewMoveRowAtIndexPath:1;
-    unsigned int asyncDataSourceTableViewMoveRow:1;
+    unsigned int numberOfSectionsInTableView:1;
+    unsigned int numberOfSectionsInTableNode:1;
+    unsigned int tableNodeNumberOfRowsInSection:1;
+    unsigned int tableViewNumberOfRowsInSection:1;
+    unsigned int tableViewNodeBlockForRow:1;
+    unsigned int tableNodeNodeBlockForRow:1;
+    unsigned int tableViewNodeForRow:1;
+    unsigned int tableNodeNodeForRow:1;
+    unsigned int tableViewCanMoveRow:1;
+    unsigned int tableNodeCanMoveRow:1;
+    unsigned int tableViewMoveRow:1;
+    unsigned int tableNodeMoveRow:1;
   } _asyncDataSourceFlags;
 }
 
@@ -324,14 +327,22 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[ASTableViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     
-    _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInTableView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInTableView:)];
-    _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeForRowAtIndexPath:)];
-    _asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)];
-    _asyncDataSourceFlags.asyncDataSourceTableViewCanMoveRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:canMoveRowAtIndexPath:)];
-    _asyncDataSourceFlags.asyncDataSourceTableViewMoveRowAtIndexPath = [_asyncDataSource respondsToSelector:@selector(tableView:moveRowAtIndexPath:toIndexPath:)];
+    _asyncDataSourceFlags.numberOfSectionsInTableView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInTableView:)];
+    _asyncDataSourceFlags.numberOfSectionsInTableNode = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInTableNode:)];
+    _asyncDataSourceFlags.tableViewNumberOfRowsInSection = [_asyncDataSource respondsToSelector:@selector(tableView:numberOfRowsInSection:)];
+    _asyncDataSourceFlags.tableNodeNumberOfRowsInSection = [_asyncDataSource respondsToSelector:@selector(tableNode:numberOfRowsInSection:)];
+    _asyncDataSourceFlags.tableViewNodeForRow = [_asyncDataSource respondsToSelector:@selector(tableView:nodeForRowAtIndexPath:)];
+    _asyncDataSourceFlags.tableNodeNodeForRow = [_asyncDataSource respondsToSelector:@selector(tableNode:nodeForRowAtIndexPath:)];
+    _asyncDataSourceFlags.tableViewNodeBlockForRow = [_asyncDataSource respondsToSelector:@selector(tableView:nodeBlockForRowAtIndexPath:)];
+    _asyncDataSourceFlags.tableNodeNodeBlockForRow = [_asyncDataSource respondsToSelector:@selector(tableNode:nodeBlockForRowAtIndexPath:)];
+    _asyncDataSourceFlags.tableViewCanMoveRow = [_asyncDataSource respondsToSelector:@selector(tableView:canMoveRowAtIndexPath:)];
+    _asyncDataSourceFlags.tableViewMoveRow = [_asyncDataSource respondsToSelector:@selector(tableView:moveRowAtIndexPath:toIndexPath:)];
     
-    ASDisplayNodeAssert(_asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath
-                        || _asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath, @"Data source must implement tableView:nodeBlockForRowAtIndexPath: or tableView:nodeForRowAtIndexPath:");
+    ASDisplayNodeAssert(_asyncDataSourceFlags.tableViewNodeBlockForRow
+                        || _asyncDataSourceFlags.tableViewNodeForRow
+                        || _asyncDataSourceFlags.tableNodeNodeBlockForRow
+                        || _asyncDataSourceFlags.tableNodeNodeForRow, @"Data source must implement tableNode:nodeBlockForRowAtIndexPath: or tableNode:nodeForRowAtIndexPath:");
+    ASDisplayNodeAssert(_asyncDataSourceFlags.tableNodeNumberOfRowsInSection || _asyncDataSourceFlags.tableViewNumberOfRowsInSection, @"Data source must implement tableNode:numberOfRowsInSection:");
   }
   
   super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
@@ -354,28 +365,43 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[ASTableViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
     
-    _asyncDelegateFlags.asyncDelegateScrollViewDidScroll = [_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)];
-    _asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNode:forRowAtIndexPath:)];
-    if (_asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPath == NO) {
-      _asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPathDeprecated = [_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)];
+    _asyncDelegateFlags.scrollViewDidScroll = [_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)];
+
+    _asyncDelegateFlags.tableViewWillDisplayNodeForRow = [_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNode:forRowAtIndexPath:)];
+    if (_asyncDelegateFlags.tableViewWillDisplayNodeForRow == NO) {
+      _asyncDelegateFlags.tableViewWillDisplayNodeForRowDeprecated = [_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)];
     }
-    _asyncDelegateFlags.asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNode:forRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
-    _asyncDelegateFlags.asyncDelegateTableViewWillBeginBatchFetchWithContext = [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
-    _asyncDelegateFlags.asyncDelegateShouldBatchFetchForTableView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)];
-    _asyncDelegateFlags.asyncDelegateScrollViewWillBeginDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillBeginDragging:)];
-    _asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)];
-    _asyncDelegateFlags.asyncDelegateTableViewConstrainedSizeForRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:constrainedSizeForRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateTableViewWillSelectRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:willSelectRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateTableViewDidSelectRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:didSelectRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateTableViewWillDeselectRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:willDeselectRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateTableViewDidDeselectRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:didDeselectRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateTableViewShouldHighlightRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:shouldHighlightRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateTableViewDidHighlightRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:didHighlightRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateTableViewDidUnhighlightRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:didUnhighlightRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateTableViewShouldShowMenuForRowAtIndexPath = [_asyncDelegate respondsToSelector:@selector(tableView:shouldShowMenuForRowAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateTableViewCanPerformActionForRowAtIndexPathWithSender = [_asyncDelegate respondsToSelector:@selector(tableView:canPerformAction:forRowAtIndexPath:withSender:)];
-    _asyncDelegateFlags.asyncDelegateTableViewPerformActionForRowAtIndexPathWithSender = [_asyncDelegate respondsToSelector:@selector(tableView:performAction:forRowAtIndexPath:withSender:)];
+    _asyncDelegateFlags.tableViewDidEndDisplayingNodeForRow = [_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNode:forRowAtIndexPath:)];
+    _asyncDelegateFlags.scrollViewWillEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
+    _asyncDelegateFlags.tableViewWillBeginBatchFetch = [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
+    _asyncDelegateFlags.tableNodeWillBeginBatchFetch = [_asyncDelegate respondsToSelector:@selector(tableNode:willBeginBatchFetchWithContext:)];
+    _asyncDelegateFlags.shouldBatchFetchForTableView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableView:)];
+    _asyncDelegateFlags.shouldBatchFetchForTableNode = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForTableNode:)];
+    _asyncDelegateFlags.scrollViewWillBeginDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillBeginDragging:)];
+    _asyncDelegateFlags.scrollViewDidEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)];
+    _asyncDelegateFlags.tableViewConstrainedSizeForRow = [_asyncDelegate respondsToSelector:@selector(tableView:constrainedSizeForRowAtIndexPath:)];
+    _asyncDelegateFlags.tableNodeConstrainedSizeForRow = [_asyncDelegate respondsToSelector:@selector(tableNode:constrainedSizeForRowAtIndexPath:)];
+
+    _asyncDelegateFlags.tableViewWillSelectRow = [_asyncDelegate respondsToSelector:@selector(tableView:willSelectRowAtIndexPath:)];
+    _asyncDelegateFlags.tableNodeWillSelectRow = [_asyncDelegate respondsToSelector:@selector(tableNode:willSelectRowWithNode:)];
+    _asyncDelegateFlags.tableViewDidSelectRow = [_asyncDelegate respondsToSelector:@selector(tableView:didSelectRowAtIndexPath:)];
+    _asyncDelegateFlags.tableNodeDidSelectRow = [_asyncDelegate respondsToSelector:@selector(tableNode:didSelectRowWithNode:)];
+    _asyncDelegateFlags.tableViewWillDeselectRow = [_asyncDelegate respondsToSelector:@selector(tableView:willDeselectRowAtIndexPath:)];
+    _asyncDelegateFlags.tableNodeWillDeselectRow = [_asyncDelegate respondsToSelector:@selector(tableNode:willDeselectRowWithNode:)];
+    _asyncDelegateFlags.tableViewDidDeselectRow = [_asyncDelegate respondsToSelector:@selector(tableView:didDeselectRowAtIndexPath:)];
+    _asyncDelegateFlags.tableNodeDidDeselectRow = [_asyncDelegate respondsToSelector:@selector(tableNode:didDeselectRowWithNode:)];
+    _asyncDelegateFlags.tableViewShouldHighlightRow = [_asyncDelegate respondsToSelector:@selector(tableView:shouldHighlightRowAtIndexPath:)];
+    _asyncDelegateFlags.tableNodeShouldHighlightRow = [_asyncDelegate respondsToSelector:@selector(tableNode:shouldHighlightRowWithNode:)];
+    _asyncDelegateFlags.tableViewDidHighlightRow = [_asyncDelegate respondsToSelector:@selector(tableView:didHighlightRowAtIndexPath:)];
+    _asyncDelegateFlags.tableNodeDidHighlightRow = [_asyncDelegate respondsToSelector:@selector(tableNode:didHighlightRowWithNode:)];
+    _asyncDelegateFlags.tableViewDidUnhighlightRow = [_asyncDelegate respondsToSelector:@selector(tableView:didUnhighlightRowAtIndexPath:)];
+    _asyncDelegateFlags.tableNodeDidUnhighlightRow = [_asyncDelegate respondsToSelector:@selector(tableNode:didUnhighlightRowWithNode:)];
+    _asyncDelegateFlags.tableViewShouldShowMenuForRow = [_asyncDelegate respondsToSelector:@selector(tableView:shouldShowMenuForRowAtIndexPath:)];
+    _asyncDelegateFlags.tableNodeShouldShowMenuForRow = [_asyncDelegate respondsToSelector:@selector(tableNode:shouldShowMenuForRowWithNode:)];
+    _asyncDelegateFlags.tableViewCanPerformActionForRow = [_asyncDelegate respondsToSelector:@selector(tableView:canPerformAction:forRowAtIndexPath:withSender:)];
+    _asyncDelegateFlags.tableNodeCanPerformActionForRow = [_asyncDelegate respondsToSelector:@selector(tableNode:canPerformAction:forRowWithNode:withSender:)];
+    _asyncDelegateFlags.tableViewPerformActionForRow = [_asyncDelegate respondsToSelector:@selector(tableView:performAction:forRowAtIndexPath:withSender:)];
+    _asyncDelegateFlags.tableNodePerformActionForRow = [_asyncDelegate respondsToSelector:@selector(tableNode:performAction:forRowWithNode:withSender:)];
   }
   
   super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
@@ -459,17 +485,22 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (NSIndexPath *)convertIndexPathFromTableNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait
 {
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  NSIndexPath *viewIndexPath = [_dataController completedIndexPathForNode:node];
-  if (viewIndexPath == nil && wait) {
-    [self waitUntilAllUpdatesAreCommitted];
-    viewIndexPath = [_dataController completedIndexPathForNode:node];
-  }
-  return viewIndexPath;
+  return [self indexPathForNode:node waitingIfNeeded:wait];
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
-  return [_dataController completedIndexPathForNode:cellNode];
+  return [self indexPathForNode:cellNode waitingIfNeeded:NO];
+}
+
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode waitingIfNeeded:(BOOL)wait
+{
+  NSIndexPath *indexPath = [_dataController completedIndexPathForNode:cellNode];
+  if (indexPath == nil && wait) {
+    [_dataController waitUntilAllUpdatesAreCommitted];
+    indexPath = [_dataController completedIndexPathForNode:cellNode];
+  }
+  return indexPath;
 }
 
 - (NSArray<ASCellNode *> *)visibleNodes
@@ -742,7 +773,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  if (_asyncDataSourceFlags.asyncDataSourceTableViewCanMoveRowAtIndexPath) {
+  if (_asyncDataSourceFlags.tableViewCanMoveRow) {
     return [_asyncDataSource tableView:self canMoveRowAtIndexPath:indexPath];
   } else {
     return NO;
@@ -751,7 +782,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)tableView:(UITableView *)tableView moveRowAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath *)destinationIndexPath
 {
-  if (_asyncDataSourceFlags.asyncDataSourceTableViewMoveRowAtIndexPath) {
+  if (_asyncDataSourceFlags.tableViewMoveRow) {
     [_asyncDataSource tableView:self moveRowAtIndexPath:sourceIndexPath toIndexPath:destinationIndexPath];
   }
   // Move node after informing data source in case they call nodeAtIndexPath:
@@ -767,11 +798,13 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with cell that will be displayed not to be nil. indexPath: %@", indexPath);
 
-  if (_asyncDelegateFlags.asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPath) {
+  if (_asyncDelegateFlags.tableNodeWillDisplayNodeForRow) {
+    [_asyncDelegate tableNode:self.tableNode willDisplayRowWithNode:cellNode];
+  } else if (_asyncDelegateFlags.tableViewWillDisplayNodeForRow) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [_asyncDelegate tableView:self willDisplayNode:cellNode forRowAtIndexPath:indexPath];
-  } else if (_asyncDelegateFlags.asyncDelegateTableViewWillDisplayNodeForRowAtIndexPathDeprecated) {
+  } else if (_asyncDelegateFlags.tableViewWillDisplayNodeForRowDeprecated) {
     [_asyncDelegate tableView:self willDisplayNodeForRowAtIndexPath:indexPath];
   }
 #pragma clang diagnostic pop
@@ -794,7 +827,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [_rangeController setNeedsUpdate];
 
   ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with removed cell not to be nil.");
-  if (_asyncDelegateFlags.asyncDelegateTableViewDidEndDisplayingNodeForRowAtIndexPath) {
+  if (_asyncDelegateFlags.tableNodeDidEndDisplayingNodeForRow) {
+    [_asyncDelegate tableNode:self.tableNode didEndDisplayingRowWithNode:cellNode];
+  } else if (_asyncDelegateFlags.tableViewDidEndDisplayingNodeForRow) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [_asyncDelegate tableView:self didEndDisplayingNode:cellNode forRowAtIndexPath:indexPath];
@@ -808,13 +843,16 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-  if (_asyncDelegateFlags.asyncDelegateTableNodeWillSelectRow) {
+  if (_asyncDelegateFlags.tableNodeWillSelectRow) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-    ASTableNode *tableNode = self.tableNode;
-    indexPath = [tableNode indexPathForNode:node];
-    indexPath = [_asyncDelegate tableNode:tableNode willSelectRowWithNode:node];
-    return [self convertIndexPathFromTableNode:indexPath waitingIfNeeded:YES];
-  } else if (_asyncDelegateFlags.asyncDelegateTableViewWillSelectRowAtIndexPath) {
+    node = [_asyncDelegate tableNode:self.tableNode willSelectRowWithNode:node];
+    if (node != nil) {
+      return [self indexPathForNode:node waitingIfNeeded:YES];
+    } else {
+      return nil;
+    }
+
+  } else if (_asyncDelegateFlags.tableViewWillSelectRow) {
     indexPath = [self convertIndexPathToTableNode:indexPath];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -828,12 +866,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-  if (_asyncDelegateFlags.asyncDelegateTableNodeDidSelectRow) {
+  if (_asyncDelegateFlags.tableNodeDidSelectRow) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-    ASTableNode *tableNode = self.tableNode;
-    indexPath = [tableNode indexPathForNode:node];
-    [_asyncDelegate tableNode:tableNode didSelectRowWithNode:node];
-  } else if (_asyncDelegateFlags.asyncDelegateTableViewDidSelectRowAtIndexPath) {
+    [_asyncDelegate tableNode:self.tableNode didSelectRowWithNode:node];
+  } else if (_asyncDelegateFlags.tableViewDidSelectRow) {
     indexPath = [self convertIndexPathToTableNode:indexPath];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -844,12 +880,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willDeselectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-  if (_asyncDelegateFlags.asyncDelegateTableNodeWillDeselectRow) {
+  if (_asyncDelegateFlags.tableNodeWillDeselectRow) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-    ASTableNode *tableNode = self.tableNode;
-    indexPath = [_asyncDelegate tableNode:tableNode willSelectRowWithNode:node];
-    return [tableNode convertIndexPathToTableView:indexPath];
-  } else if (_asyncDelegateFlags.asyncDelegateTableViewWillDeselectRowAtIndexPath) {
+    node = [_asyncDelegate tableNode:self.tableNode willSelectRowWithNode:node];
+    if (node != nil) {
+      return [self indexPathForNode:node waitingIfNeeded:YES];
+    } else {
+      return nil;
+    }
+  } else if (_asyncDelegateFlags.tableViewWillDeselectRow) {
     indexPath = [self convertIndexPathToTableNode:indexPath];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -863,12 +902,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)tableView:(UITableView *)tableView didDeselectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-  if (_asyncDelegateFlags.asyncDelegateTableNodeDidDeselectRow) {
+  if (_asyncDelegateFlags.tableNodeDidDeselectRow) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-    ASTableNode *tableNode = self.tableNode;
-    indexPath = [tableNode indexPathForNode:node];
-    [_asyncDelegate tableNode:tableNode didDeselectRowWithNode:node];
-  } else if (_asyncDelegateFlags.asyncDelegateTableViewDidDeselectRowAtIndexPath) {
+    [_asyncDelegate tableNode:self.tableNode didDeselectRowWithNode:node];
+  } else if (_asyncDelegateFlags.tableViewDidDeselectRow) {
     indexPath = [self convertIndexPathToTableNode:indexPath];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -879,12 +916,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (BOOL)tableView:(UITableView *)tableView shouldHighlightRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-  if (_asyncDelegateFlags.asyncDelegateTableNodeShouldHighlightRow) {
+  if (_asyncDelegateFlags.tableNodeShouldHighlightRow) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-    ASTableNode *tableNode = self.tableNode;
-    return [_asyncDelegate tableNode:tableNode shouldHighlightRowWithNode:node];
-  } else if (_asyncDelegateFlags.asyncDelegateTableViewShouldHighlightRowAtIndexPath) {
-    indexPath = [self convertIndexPathToTableNode:indexPath];
+    return [_asyncDelegate tableNode:self.tableNode shouldHighlightRowWithNode:node];
+  } else if (_asyncDelegateFlags.tableViewShouldHighlightRow) {
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDelegate tableView:self shouldHighlightRowAtIndexPath:indexPath];
@@ -896,12 +932,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)tableView:(UITableView *)tableView didHighlightRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-  if (_asyncDelegateFlags.asyncDelegateTableNodeDidHighlightRow) {
+  if (_asyncDelegateFlags.tableNodeDidHighlightRow) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-    ASTableNode *tableNode = self.tableNode;
-    return [_asyncDelegate tableNode:tableNode didHighlightRowWithNode:node];
-  } else if (_asyncDelegateFlags.asyncDelegateTableViewDidHighlightRowAtIndexPath) {
-    indexPath = [self convertIndexPathToTableNode:indexPath];
+    return [_asyncDelegate tableNode:self.tableNode didHighlightRowWithNode:node];
+  } else if (_asyncDelegateFlags.tableViewDidHighlightRow) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [_asyncDelegate tableView:self didHighlightRowAtIndexPath:indexPath];
@@ -911,11 +945,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)tableView:(UITableView *)tableView didUnhighlightRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-  if (_asyncDelegateFlags.asyncDelegateTableNodeDidHighlightRow) {
+  if (_asyncDelegateFlags.tableNodeDidHighlightRow) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
     return [_asyncDelegate tableNode:self.tableNode didUnhighlightRowWithNode:node];
-  } else if (_asyncDelegateFlags.asyncDelegateTableViewDidUnhighlightRowAtIndexPath) {
-    indexPath = [self convertIndexPathToTableNode:indexPath];
+  } else if (_asyncDelegateFlags.tableViewDidUnhighlightRow) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [_asyncDelegate tableView:self didUnhighlightRowAtIndexPath:indexPath];
@@ -925,11 +958,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (BOOL)tableView:(UITableView *)tableView shouldShowMenuForRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-  if (_asyncDelegateFlags.asyncDelegateTableNodeShouldShowMenuForRow) {
+  if (_asyncDelegateFlags.tableNodeShouldShowMenuForRow) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
     return [_asyncDelegate tableNode:self.tableNode shouldShowMenuForRowWithNode:node];
-  } else if (_asyncDelegateFlags.asyncDelegateTableViewShouldShowMenuForRowAtIndexPath) {
-    indexPath = [self convertIndexPathToTableNode:indexPath];
+  } else if (_asyncDelegateFlags.tableViewShouldShowMenuForRow) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDelegate tableView:self shouldShowMenuForRowAtIndexPath:indexPath];
@@ -941,11 +973,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (BOOL)tableView:(UITableView *)tableView canPerformAction:(nonnull SEL)action forRowAtIndexPath:(nonnull NSIndexPath *)indexPath withSender:(nullable id)sender
 {
-  if (_asyncDelegateFlags.asyncDelegateTableNodeCanPerformActionForRow) {
+  if (_asyncDelegateFlags.tableNodeCanPerformActionForRow) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
     return [_asyncDelegate tableNode:self.tableNode canPerformAction:action forRowWithNode:node withSender:sender];
-  } else if (_asyncDelegateFlags.asyncDelegateTableViewCanPerformActionForRowAtIndexPathWithSender) {
-    indexPath = [self convertIndexPathToTableNode:indexPath];
+  } else if (_asyncDelegateFlags.tableViewCanPerformActionForRow) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDelegate tableView:self canPerformAction:action forRowAtIndexPath:indexPath withSender:sender];
@@ -957,11 +988,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)tableView:(UITableView *)tableView performAction:(nonnull SEL)action forRowAtIndexPath:(nonnull NSIndexPath *)indexPath withSender:(nullable id)sender
 {
-  if (_asyncDelegateFlags.asyncDelegateTableNodePerformActionForRow) {
+  if (_asyncDelegateFlags.tableNodePerformActionForRow) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
     [_asyncDelegate tableNode:self.tableNode performAction:action forRowWithNode:node withSender:sender];
-  } else if (_asyncDelegateFlags.asyncDelegateTableViewPerformActionForRowAtIndexPathWithSender) {
-    indexPath = [self convertIndexPathToTableNode:indexPath];
+  } else if (_asyncDelegateFlags.tableViewPerformActionForRow) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [_asyncDelegate tableView:self performAction:action forRowAtIndexPath:indexPath withSender:sender];
@@ -982,7 +1012,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
                                  inScrollView:scrollView
                                 withCellFrame:tableCell.frame];
   }
-  if (_asyncDelegateFlags.asyncDelegateScrollViewDidScroll) {
+  if (_asyncDelegateFlags.scrollViewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
   }
 }
@@ -1000,7 +1030,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollDirection] contentOffset:*targetContentOffset];
   }
   
-  if (_asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset) {
+  if (_asyncDelegateFlags.scrollViewWillEndDragging) {
     [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:(targetContentOffset ? : &contentOffset)];
   }
 }
@@ -1012,7 +1042,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
                                           inScrollView:scrollView
                                          withCellFrame:tableViewCell.frame];
   }
-  if (_asyncDelegateFlags.asyncDelegateScrollViewWillBeginDragging) {
+  if (_asyncDelegateFlags.scrollViewWillBeginDragging) {
     [_asyncDelegate scrollViewWillBeginDragging:scrollView];
   }
 }
@@ -1024,7 +1054,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
                                           inScrollView:scrollView
                                          withCellFrame:tableViewCell.frame];
   }
-  if (_asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging) {
+  if (_asyncDelegateFlags.scrollViewDidEndDragging) {
     [_asyncDelegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
   }
 }
@@ -1086,8 +1116,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (BOOL)canBatchFetch
 {
   // if the delegate does not respond to this method, there is no point in starting to fetch
-  BOOL canFetch = _asyncDelegateFlags.asyncDelegateTableViewWillBeginBatchFetchWithContext;
-  if (canFetch && _asyncDelegateFlags.asyncDelegateShouldBatchFetchForTableView) {
+  BOOL canFetch = _asyncDelegateFlags.tableNodeWillBeginBatchFetch || _asyncDelegateFlags.tableViewWillBeginBatchFetch;
+  if (canFetch && _asyncDelegateFlags.shouldBatchFetchForTableNode) {
+    return [_asyncDelegate shouldBatchFetchForTableNode:self.tableNode];
+  } else if (canFetch && _asyncDelegateFlags.shouldBatchFetchForTableView) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDelegate shouldBatchFetchForTableView:self];
@@ -1130,9 +1162,16 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)_beginBatchFetching
 {
   [_batchContext beginBatchFetching];
-  if (_asyncDelegateFlags.asyncDelegateTableViewWillBeginBatchFetchWithContext) {
+  if (_asyncDelegateFlags.tableNodeWillBeginBatchFetch) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      [_asyncDelegate tableNode:self.tableNode willBeginBatchFetchWithContext:_batchContext];
+    });
+  } else if (_asyncDelegateFlags.tableViewWillBeginBatchFetch) {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
       [_asyncDelegate tableView:self willBeginBatchFetchWithContext:_batchContext];
+#pragma clang diagnostic pop
     });
   }
 }
@@ -1360,9 +1399,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
   ASCellNodeBlock block = nil;
 
-  if (_asyncDataSourceFlags.asyncDataSourceTableNodeNodeBlockForRow) {
+  if (_asyncDataSourceFlags.tableNodeNodeBlockForRow) {
     block = [_asyncDataSource tableNode:self.tableNode nodeBlockForRowAtIndexPath:indexPath];
-  } else if (_asyncDataSourceFlags.asyncDataSourceTableNodeNodeBlockForRow) {
+  } else if (_asyncDataSourceFlags.tableNodeNodeBlockForRow) {
     ASCellNode *node = [_asyncDataSource tableNode:self.tableNode nodeForRowAtIndexPath:indexPath];
     if ([node isKindOfClass:[ASCellNode class]]) {
       block = ^{
@@ -1371,10 +1410,13 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     } else {
       ASDisplayNodeFailAssert(@"Data source returned invalid node from tableNode:nodeForRowAtIndexPath:. Node: %@", node);
     }
-  } else if (_asyncDataSourceFlags.asyncDataSourceTableViewNodeBlockForRowAtIndexPath) {
+  } else if (_asyncDataSourceFlags.tableViewNodeBlockForRow) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     block = [_asyncDataSource tableView:self nodeBlockForRowAtIndexPath:indexPath];
-  } else if (_asyncDataSourceFlags.asyncDataSourceTableViewNodeForRowAtIndexPath) {
+  } else if (_asyncDataSourceFlags.tableViewNodeForRow) {
     ASCellNode *node = [_asyncDataSource tableView:self nodeForRowAtIndexPath:indexPath];
+#pragma clang diagnostic pop
     if ([node isKindOfClass:[ASCellNode class]]) {
       block = ^{
         return node;
@@ -1409,8 +1451,16 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASSizeRange constrainedSize = kInvalidSizeRange;
-  if (_asyncDelegateFlags.asyncDelegateTableViewConstrainedSizeForRowAtIndexPath) {
+  if (_asyncDelegateFlags.tableNodeConstrainedSizeForRow) {
+    ASSizeRange delegateConstrainedSize = [_asyncDelegate tableNode:self.tableNode constrainedSizeForRowAtIndexPath:indexPath];
+    // ignore widths in the returned size range (for TableView)
+    constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, delegateConstrainedSize.min.height),
+                                      CGSizeMake(_nodesConstrainedWidth, delegateConstrainedSize.max.height));
+  } else if (_asyncDelegateFlags.tableViewConstrainedSizeForRow) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     ASSizeRange delegateConstrainedSize = [_asyncDelegate tableView:self constrainedSizeForRowAtIndexPath:indexPath];
+#pragma clang diagnostic pop
     // ignore widths in the returned size range (for TableView)
     constrainedSize = ASSizeRangeMake(CGSizeMake(_nodesConstrainedWidth, delegateConstrainedSize.min.height),
                                       CGSizeMake(_nodesConstrainedWidth, delegateConstrainedSize.max.height));
@@ -1423,13 +1473,27 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section
 {
-  return [_asyncDataSource tableView:self numberOfRowsInSection:section];
+  if (_asyncDataSourceFlags.tableNodeNumberOfRowsInSection) {
+    return [_asyncDataSource tableNode:self.tableNode numberOfRowsInSection:section];
+  } else if (_asyncDataSourceFlags.tableViewNumberOfRowsInSection) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return [_asyncDataSource tableView:self numberOfRowsInSection:section];
+#pragma clang diagnostic pop
+  } else {
+    return 0;
+  }
 }
 
 - (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController
 {
-  if (_asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInTableView) {
+  if (_asyncDataSourceFlags.numberOfSectionsInTableNode) {
+    return [_asyncDataSource numberOfSectionsInTableNode:self.tableNode];
+  } else if (_asyncDataSourceFlags.numberOfSectionsInTableView) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDataSource numberOfSectionsInTableView:self];
+#pragma clang diagnostic pop
   } else {
     return 1; // default section number
   }

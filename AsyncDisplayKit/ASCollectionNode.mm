@@ -291,6 +291,11 @@
   return [self.dataController numberOfSections];
 }
 
+- (NSArray<__kindof ASCellNode *> *)visibleNodes
+{
+  return [self.view visibleNodes];
+}
+
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
   return [self.dataController indexPathForNode:cellNode];
