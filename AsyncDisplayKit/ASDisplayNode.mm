@@ -727,6 +727,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _style;
 }
 
+- (instancetype)styledWithBlock:(void (^)(ASLayoutElementStyle *style))styleBlock
+{
+  styleBlock(self.style);
+  return self;
+}
+
 #pragma mark - Layout
 
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize

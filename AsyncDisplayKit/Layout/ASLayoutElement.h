@@ -18,6 +18,7 @@
 
 @class ASLayout;
 @class ASLayoutSpec;
+@protocol ASLayoutElementStylability;
 
 /** A constant that indicates that the parent's size is not yet determined in a given dimension. */
 extern CGFloat const ASLayoutElementParentDimensionUndefined;
@@ -49,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
  * access to the options via convenience properties. If you are creating custom layout spec, then you can
  * extend the backing layout options class to accommodate any new layout options.
  */
-@protocol ASLayoutElement <ASEnvironment, ASLayoutElementPrivate, ASLayoutElementExtensibility, NSFastEnumeration>
+@protocol ASLayoutElement <ASEnvironment, ASLayoutElementPrivate, ASLayoutElementExtensibility, ASLayoutElementStylability, NSFastEnumeration>
 
 #pragma mark - Getter
 
@@ -360,6 +361,15 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  * @abstract The position of this object within its parent spec.
  */
 @property (nonatomic, assign) CGPoint layoutPosition;
+
+@end
+
+
+#pragma mark - ASLayoutElementStylability
+
+@protocol ASLayoutElementStylability
+
+- (instancetype)styledWithBlock:(__attribute__((noescape)) void (^)(__kindof ASLayoutElementStyle *style))styleBlock;
 
 @end
 
