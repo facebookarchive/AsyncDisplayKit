@@ -61,7 +61,7 @@
 
 @end
 
-@interface ASTableViewTestDelegate : NSObject <ASTableViewDataSource, ASTableViewDelegate>
+@interface ASTableViewTestDelegate : NSObject <ASTableDataSource, ASTableDelegate>
 @property (nonatomic, copy) void (^willDeallocBlock)(ASTableViewTestDelegate *delegate);
 @end
 
@@ -108,7 +108,7 @@
 
 @end
 
-@interface ASTableViewFilledDataSource : NSObject <ASTableViewDataSource, ASTableViewDelegate>
+@interface ASTableViewFilledDataSource : NSObject <ASTableDataSource, ASTableDelegate>
 @end
 
 @implementation ASTableViewFilledDataSource
@@ -142,7 +142,7 @@
 
 @end
 
-@interface ASTableViewFilledDelegate : NSObject <ASTableViewDelegate>
+@interface ASTableViewFilledDelegate : NSObject <ASTableDelegate>
 @end
 
 @implementation ASTableViewFilledDelegate

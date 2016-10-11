@@ -78,6 +78,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
 /**
+ * Similar to -visibleCells.
+ *
+ * @return an array containing the cell nodes being displayed on screen.
+ */
+- (NSArray<ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
+
+/**
  * The number of screens left to scroll before the delegate -tableView:beginBatchFetchingWithContext: is called.
  *
  * Defaults to two screenfuls.

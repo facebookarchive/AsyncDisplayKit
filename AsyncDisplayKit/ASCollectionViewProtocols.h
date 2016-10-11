@@ -33,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * This is a subset of UICollectionViewDelegate.
  *
- * @see ASCollectionViewDelegate
+ * @see ASCollectionDelegate
  */
 @protocol ASCommonCollectionViewDelegate <NSObject, UIScrollViewDelegate>
 

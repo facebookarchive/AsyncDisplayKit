@@ -55,7 +55,7 @@
 
 @end
 
-@interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionViewDelegate, UICollectionViewDelegateFlowLayout>
+@interface ASCollectionViewTestDelegate : NSObject <ASCollectionViewDataSource, ASCollectionDelegate, UICollectionViewDelegateFlowLayout>
 
 @property (nonatomic, assign) NSInteger sectionGeneration;
 

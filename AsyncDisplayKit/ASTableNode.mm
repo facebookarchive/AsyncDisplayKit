@@ -268,17 +268,18 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
   return [self.dataController nodeAtIndexPath:indexPath];
 }
 
-- (NSIndexPath *)convertIndexPathToTableNode:(NSIndexPath *)indexPath
+- (NSIndexPath *)convertIndexPathToTableView:(NSIndexPath *)indexPath
 {
   ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-  return [self.dataController indexPathForNode:node];
-}
-
-- (NSIndexPath *)convertIndexPathFromTableNode:(NSIndexPath *)indexPath
-{
-  ASCellNode *node = [self.dataController nodeAtIndexPath:indexPath];
   return [self.dataController completedIndexPathForNode:node];
 }
+
+- (NSIndexPath *)convertIndexPathFromTableView:(NSIndexPath *)indexPath
+{
+  ASCellNode *node = [self.dataController nodeAtCompletedIndexPath:indexPath];
+  return [self indexPathForNode:node];
+}
+
 #pragma mark - Editing
 
 - (void)reloadDataWithCompletion:(void (^)())completion

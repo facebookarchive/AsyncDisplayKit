@@ -393,7 +393,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-- (void)setAsyncDelegate:(id<ASCollectionViewDelegate>)asyncDelegate
+- (void)setAsyncDelegate:(id<ASCollectionDelegate>)asyncDelegate
 {
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDelegate in the ViewController's dealloc. In this case our _asyncDelegate

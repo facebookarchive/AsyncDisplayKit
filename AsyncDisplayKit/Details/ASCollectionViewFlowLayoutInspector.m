@@ -213,9 +213,9 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
   }
 }
 
-- (id<ASCollectionViewDelegateFlowLayout>)delegateForCollectionView:(ASCollectionView *)collectionView
+- (id<ASCollectionDelegateFlowLayout>)delegateForCollectionView:(ASCollectionView *)collectionView
 {
-  return (id<ASCollectionViewDelegateFlowLayout>)collectionView.asyncDelegate;
+  return (id<ASCollectionDelegateFlowLayout>)collectionView.asyncDelegate;
 }
 
 @end

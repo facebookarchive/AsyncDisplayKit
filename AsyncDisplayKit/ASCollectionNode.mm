@@ -307,6 +307,18 @@
   return [self.dataController contextForSection:section];
 }
 
+- (NSIndexPath *)convertIndexPathToCollectionView:(NSIndexPath *)indexPath
+{
+  ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
+  return [self.view indexPathForNode:node];
+}
+
+- (NSIndexPath *)convertIndexPathFromCollectionView:(NSIndexPath *)indexPath
+{
+  ASCellNode *node = [self.view nodeForItemAtIndexPath:indexPath];
+  return [self indexPathForNode:node];
+}
+
 #pragma mark - Editing
 
 - (void)registerSupplementaryNodeOfKind:(NSString *)elementKind

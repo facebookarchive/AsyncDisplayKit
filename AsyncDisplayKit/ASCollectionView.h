@@ -454,11 +454,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+ASDISPLAYNODE_DEPRECATED
+@protocol ASCollectionViewDelegate <ASCollectionDelegate>
+@end
 
 /**
  * This is a node-based UICollectionViewDelegate.
  */
-#define ASCollectionViewDelegate ASCollectionDelegate
 @protocol ASCollectionDelegate <ASCommonCollectionViewDelegate, NSObject>
 
 @optional
@@ -551,7 +553,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Defines methods that let you coordinate with a `UICollectionViewFlowLayout` in combination with an `ASCollectionView`.
  */
-@protocol ASCollectionViewDelegateFlowLayout <ASCollectionViewDelegate>
+@protocol ASCollectionDelegateFlowLayout <ASCollectionDelegate>
 
 @optional
 

@@ -80,7 +80,7 @@
 /**
  * Test Delegate for Header Reference Size Implementation
  */
-@interface HeaderReferenceSizeTestDelegate : NSObject <ASCollectionViewDelegateFlowLayout>
+@interface HeaderReferenceSizeTestDelegate : NSObject <ASCollectionDelegateFlowLayout>
 
 @end
 
@@ -96,7 +96,7 @@
 /**
  * Test Delegate for Footer Reference Size Implementation
  */
-@interface FooterReferenceSizeTestDelegate : NSObject <ASCollectionViewDelegateFlowLayout>
+@interface FooterReferenceSizeTestDelegate : NSObject <ASCollectionDelegateFlowLayout>
 
 @end
 
