@@ -138,7 +138,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     [ASDataController _expectToInsertNodes:contexts.count];
 #endif
 
-  kdebug_signpost_start(2, 0, 0, 0, 2);
+  ASProfilingSignpostStart(2);
   
   NSUInteger blockSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
   NSUInteger count = contexts.count;
@@ -152,7 +152,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     batchCompletionHandler(nodes, indexPaths);
   }
   
-  kdebug_signpost_end(2, 0, 0, 0, 2);
+  ASProfilingSignpostEnd(2);
 }
 
 /**

@@ -190,7 +190,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
     return; // don't do anything for this update, but leave _rangeIsValid == NO to make sure we update it later
   }
-  kdebug_signpost_start(1, 0, 0, 0, 1);
+  ASProfilingSignpostStart(1);
 
   ASScrollDirection scrollDirection = [_dataSource scrollDirectionForRangeController:self];
   if (_layoutControllerImplementsSetViewportSize) {
@@ -379,7 +379,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 #endif
   [_delegate didCompleteUpdatesInRangeController:self];
   
-  kdebug_signpost_end(1, 0, 0, 0, 1);
+  ASProfilingSignpostEnd(1);
 }
 
 #pragma mark - Notification observers
