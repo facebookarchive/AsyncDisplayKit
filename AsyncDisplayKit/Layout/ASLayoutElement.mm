@@ -115,6 +115,16 @@ do {\
 @dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
 @dynamic preferredSize, minSize, maxSize, preferredLayoutSize, minLayoutSize, maxLayoutSize;
 
+@synthesize spacingBefore = _spacingBefore;
+@synthesize spacingAfter = _spacingAfter;
+@synthesize flexGrow = _flexGrow;
+@synthesize flexShrink = _flexShrink;
+@synthesize flexBasis = _flexBasis;
+@synthesize alignSelf = _alignSelf;
+@synthesize ascender = _ascender;
+@synthesize descender = _descender;
+@synthesize layoutPosition = _layoutPosition;
+
 #pragma mark - Lifecycle
 
 - (instancetype)initWithDelegate:(id<ASLayoutElementStyleDelegate>)delegate
@@ -296,11 +306,23 @@ do {\
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleSpacingBeforeProperty);
 }
 
+- (CGFloat)spacingBefore
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _spacingBefore;
+}
+
 - (void)setSpacingAfter:(CGFloat)spacingAfter
 {
   ASDN::MutexLocker l(__instanceLock__);
   _spacingAfter = spacingAfter;
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleSpacingAfterProperty);
+}
+
+- (CGFloat)spacingAfter
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _spacingAfter;
 }
 
 - (void)setFlexGrow:(CGFloat)flexGrow
@@ -310,11 +332,23 @@ do {\
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleFlexGrowProperty);
 }
 
+- (CGFloat)flexGrow
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _flexGrow;
+}
+
 - (void)setFlexShrink:(CGFloat)flexShrink
 {
   ASDN::MutexLocker l(__instanceLock__);
   _flexShrink = flexShrink;
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleFlexShrinkProperty);
+}
+
+- (CGFloat)flexShrink
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _flexShrink;
 }
 
 - (void)setFlexBasis:(ASDimension)flexBasis
@@ -324,11 +358,23 @@ do {\
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleFlexBasisProperty);
 }
 
+- (ASDimension)flexBasis
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _flexBasis;
+}
+
 - (void)setAlignSelf:(ASStackLayoutAlignSelf)alignSelf
 {
   ASDN::MutexLocker l(__instanceLock__);
   _alignSelf = alignSelf;
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleAlignSelfProperty);
+}
+
+- (ASStackLayoutAlignSelf)alignSelf
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _alignSelf;
 }
 
 - (void)setAscender:(CGFloat)ascender
@@ -338,11 +384,23 @@ do {\
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleAscenderProperty);
 }
 
+- (CGFloat)ascender
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _ascender;
+}
+
 - (void)setDescender:(CGFloat)descender
 {
   ASDN::MutexLocker l(__instanceLock__);
   _descender = descender;
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleDescenderProperty);
+}
+
+- (CGFloat)descender
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _descender;
 }
 
 #pragma mark - ASAbsoluteLayoutElement
@@ -352,6 +410,12 @@ do {\
   ASDN::MutexLocker l(__instanceLock__);
   _layoutPosition = layoutPosition;
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleLayoutPositionProperty);
+}
+
+- (CGPoint)layoutPosition
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _layoutPosition;
 }
 
 @end
