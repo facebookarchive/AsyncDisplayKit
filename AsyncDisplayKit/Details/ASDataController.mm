@@ -121,7 +121,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    parallelProcessorCount = [[NSProcessInfo processInfo] processorCount];
+    parallelProcessorCount = [[NSProcessInfo processInfo] activeProcessorCount];
   });
 
   return parallelProcessorCount;
