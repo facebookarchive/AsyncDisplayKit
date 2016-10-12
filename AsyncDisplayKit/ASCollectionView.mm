@@ -216,7 +216,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   } _layoutInspectorFlags;
 }
 
-// Always set, whether ASCollectionView is created directly or via ASCollectionNode.
 @property (nonatomic, weak)   ASCollectionNode *collectionNode;
 
 @end
