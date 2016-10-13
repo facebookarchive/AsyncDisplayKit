@@ -469,20 +469,20 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)collectionNode:(ASCollectionNode *)collectionNode didEndDisplayingItemWithNode:(ASCellNode *)node;
 
-- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldHighlightItemWithNode:(ASCellNode *)node;
-- (void)collectionNode:(ASCollectionNode *)collectionNode didHighlightItemWithNode:(ASCellNode *)node;
-- (void)collectionNode:(ASCollectionNode *)collectionNode didUnhighlightItemWithNode:(ASCellNode *)node;
-- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldSelectItemWithNode:(ASCellNode *)node;
-- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldDeselectItemWithNode:(ASCellNode *)node;
-- (void)collectionNode:(ASCollectionNode *)collectionNode didSelectItemWithNode:(ASCellNode *)node;
-- (void)collectionNode:(ASCollectionNode *)collectionNode didDeselectItemWithNode:(ASCellNode *)node;
-
 - (void)collectionNode:(ASCollectionNode *)collectionNode willDisplaySupplementaryElementWithNode:(ASCellNode *)node NS_AVAILABLE_IOS(8_0);
 - (void)collectionNode:(ASCollectionNode *)collectionNode didEndDisplayingSupplementaryElementWithNode:(ASCellNode *)node;
 
-- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldShowMenuForItemWithNode:(ASCellNode *)node;
-- (BOOL)collectionNode:(ASCollectionNode *)collectionNode canPerformAction:(SEL)action forItemWithNode:(ASCellNode *)node sender:(nullable id)sender;
-- (void)collectionNode:(ASCollectionNode *)collectionNode performAction:(SEL)action forItemWithNode:(ASCellNode *)node sender:(nullable id)sender;
+- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath;
+- (void)collectionNode:(ASCollectionNode *)collectionNode didHighlightItemAtIndexPath:(NSIndexPath *)indexPath;
+- (void)collectionNode:(ASCollectionNode *)collectionNode didUnhighlightItemAtIndexPath:(NSIndexPath *)indexPath;
+- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath;
+- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath;
+- (void)collectionNode:(ASCollectionNode *)collectionNode didSelectItemAtIndexPath:(NSIndexPath *)indexPath;
+- (void)collectionNode:(ASCollectionNode *)collectionNode didDeselectItemAtIndexPath:(NSIndexPath *)indexPath;
+
+- (BOOL)collectionNode:(ASCollectionNode *)collectionNode shouldShowMenuForItemAtIndexPath:(NSIndexPath *)indexPath;
+- (BOOL)collectionNode:(ASCollectionNode *)collectionNode canPerformAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath sender:(nullable id)sender;
+- (void)collectionNode:(ASCollectionNode *)collectionNode performAction:(SEL)action forItemAtIndexPath:(NSIndexPath *)indexPath sender:(nullable id)sender;
 
 /**
  * Receive a message that the collection node is near the end of its data set and more data should be fetched if

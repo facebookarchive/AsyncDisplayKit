@@ -451,16 +451,16 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDelegateFlags.collectionNodeDidEndDisplayingItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didEndDisplayingItemWithNode:)];
     _asyncDelegateFlags.collectionNodeWillBeginBatchFetch = [_asyncDelegate respondsToSelector:@selector(collectionNode:willBeginBatchFetchWithContext:)];
     _asyncDelegateFlags.shouldBatchFetchForCollectionNode = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionNode:)];
-    _asyncDelegateFlags.collectionNodeShouldSelectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldSelectItemWithNode:)];
-    _asyncDelegateFlags.collectionNodeDidSelectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didSelectItemWithNode:)];
-    _asyncDelegateFlags.collectionNodeShouldDeselectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldDeselectItemWithNode:)];
-    _asyncDelegateFlags.collectionNodeDidDeselectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didDeselectItemWithNode:)];
-    _asyncDelegateFlags.collectionNodeShouldHighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldHighlightItemWithNode:)];
-    _asyncDelegateFlags.collectionNodeDidHighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didHighlightItemWithNode:)];
-    _asyncDelegateFlags.collectionNodeDidUnhighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didUnhighlightItemWithNode:)];
-    _asyncDelegateFlags.collectionNodeShouldShowMenuForItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldShowMenuForItemWithNode:)];
-    _asyncDelegateFlags.collectionNodeCanPerformActionForItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:canPerformAction:forItemWithNode:sender:)];
-    _asyncDelegateFlags.collectionNodePerformActionForItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:performAction:forItemWithNode:sender:)];
+    _asyncDelegateFlags.collectionNodeShouldSelectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldSelectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeDidSelectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didSelectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeShouldDeselectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldDeselectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeDidDeselectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didDeselectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeShouldHighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldHighlightItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeDidHighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didHighlightItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeDidUnhighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didUnhighlightItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeShouldShowMenuForItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldShowMenuForItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeCanPerformActionForItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:canPerformAction:forItemAtIndexPath:sender:)];
+    _asyncDelegateFlags.collectionNodePerformActionForItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:performAction:forItemAtIndexPath:sender:)];
   }
 
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
@@ -553,6 +553,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     viewIndexPath = [self indexPathForNode:node];
   }
   return viewIndexPath;
+}
+
+- (NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath
+{
+  ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
+  return [_dataController indexPathForNode:node];
 }
 
 - (ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
@@ -852,23 +858,26 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.collectionNodeShouldSelectItem) {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-    return [_asyncDelegate collectionNode:self.collectionNode shouldSelectItemWithNode:node];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      return [_asyncDelegate collectionNode:self.collectionNode shouldSelectItemAtIndexPath:indexPath];
+    }
   } else if (_asyncDelegateFlags.collectionViewShouldSelectItem) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDelegate collectionView:self shouldSelectItemAtIndexPath:indexPath];
 #pragma clang diagnostic pop
-  } else {
-    return YES;
   }
+  return YES;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.collectionNodeDidSelectItem) {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-    [_asyncDelegate collectionNode:self.collectionNode didSelectItemWithNode:node];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      [_asyncDelegate collectionNode:self.collectionNode didSelectItemAtIndexPath:indexPath];
+    }
   } else if (_asyncDelegateFlags.collectionViewDidSelectItem) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -880,23 +889,26 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.collectionNodeShouldDeselectItem) {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-    return [_asyncDelegate collectionNode:self.collectionNode shouldDeselectItemWithNode:node];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      return [_asyncDelegate collectionNode:self.collectionNode shouldDeselectItemAtIndexPath:indexPath];
+    }
   } else if (_asyncDelegateFlags.collectionViewShouldDeselectItem) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDelegate collectionView:self shouldDeselectItemAtIndexPath:indexPath];
 #pragma clang diagnostic pop
-  } else {
-    return YES;
   }
+  return YES;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.collectionNodeDidDeselectItem) {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-    return [_asyncDelegate collectionNode:self.collectionNode didSelectItemWithNode:node];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      [_asyncDelegate collectionNode:self.collectionNode didDeselectItemAtIndexPath:indexPath];
+    }
   } else if (_asyncDelegateFlags.collectionViewDidDeselectItem) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -908,23 +920,28 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.collectionNodeShouldHighlightItem) {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-    return [_asyncDelegate collectionNode:self.collectionNode shouldHighlightItemWithNode:node];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      return [_asyncDelegate collectionNode:self.collectionNode shouldHighlightItemAtIndexPath:indexPath];
+    } else {
+      return YES;
+    }
   } else if (_asyncDelegateFlags.collectionViewShouldHighlightItem) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDelegate collectionView:self shouldHighlightItemAtIndexPath:indexPath];
 #pragma clang diagnostic pop
-  } else {
-    return YES;
   }
+  return YES;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView didHighlightItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.collectionNodeDidHighlightItem) {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-    [_asyncDelegate collectionNode:self.collectionNode didHighlightItemWithNode:node];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      [_asyncDelegate collectionNode:self.collectionNode didHighlightItemAtIndexPath:indexPath];
+    }
   } else if (_asyncDelegateFlags.collectionViewDidHighlightItem) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -936,8 +953,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)collectionView:(UICollectionView *)collectionView didUnhighlightItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.collectionNodeDidUnhighlightItem) {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-    [_asyncDelegate collectionNode:self.collectionNode didUnhighlightItemWithNode:node];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      [_asyncDelegate collectionNode:self.collectionNode didUnhighlightItemAtIndexPath:indexPath];
+    }
   } else if (_asyncDelegateFlags.collectionViewDidUnhighlightItem) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -949,38 +968,42 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
   if (_asyncDelegateFlags.collectionNodeShouldShowMenuForItem) {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-    return [_asyncDelegate collectionNode:self.collectionNode shouldShowMenuForItemWithNode:node];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      return [_asyncDelegate collectionNode:self.collectionNode shouldShowMenuForItemAtIndexPath:indexPath];
+    }
   } else if (_asyncDelegateFlags.collectionViewShouldShowMenuForItem) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDelegate collectionView:self shouldShowMenuForItemAtIndexPath:indexPath];
 #pragma clang diagnostic pop
-  } else {
-    return NO;
   }
+  return NO;
 }
 
 - (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(nonnull SEL)action forItemAtIndexPath:(nonnull NSIndexPath *)indexPath withSender:(nullable id)sender
 {
   if (_asyncDelegateFlags.collectionNodeCanPerformActionForItem) {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-    return [_asyncDelegate collectionNode:self.collectionNode canPerformAction:action forItemWithNode:node sender:sender];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      return [_asyncDelegate collectionNode:self.collectionNode canPerformAction:action forItemAtIndexPath:indexPath sender:sender];
+    }
   } else if (_asyncDelegateFlags.collectionViewCanPerformActionForItem) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDelegate collectionView:self canPerformAction:action forItemAtIndexPath:indexPath withSender:sender];
 #pragma clang diagnostic pop
-  } else {
-    return NO;
   }
+  return NO;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView performAction:(nonnull SEL)action forItemAtIndexPath:(nonnull NSIndexPath *)indexPath withSender:(nullable id)sender
 {
   if (_asyncDelegateFlags.collectionNodePerformActionForItem) {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-    [_asyncDelegate collectionNode:self.collectionNode performAction:action forItemWithNode:node sender:sender];
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      [_asyncDelegate collectionNode:self.collectionNode performAction:action forItemAtIndexPath:indexPath sender:sender];
+    }
   } else if (_asyncDelegateFlags.collectionViewPerformActionForItem) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"

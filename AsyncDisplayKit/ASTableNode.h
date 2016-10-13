@@ -349,21 +349,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)tableNode:(ASTableNode *)tableNode didEndDisplayingRowWithNode:(ASCellNode *)node;
 
-- (nullable ASCellNode *)tableNode:(ASTableNode *)tableNode willSelectRowWithNode:(ASCellNode *)node;
+- (nullable NSIndexPath *)tableNode:(ASTableNode *)tableNode willSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 
-- (void)tableNode:(ASTableNode *)tableNode didSelectRowWithNode:(ASCellNode *)node;
+- (void)tableNode:(ASTableNode *)tableNode didSelectRowAtIndexPath:(NSIndexPath *)indexPath;
 
-- (nullable ASCellNode *)tableNode:(ASTableNode *)tableNode willDeselectRowWithNode:(ASCellNode *)node;
+- (nullable NSIndexPath *)tableNode:(ASTableNode *)tableNode willDeselectRowAtIndexPath:(NSIndexPath *)indexPath;
 
-- (void)tableNode:(ASTableNode *)tableNode didDeselectRowWithNode:(ASCellNode *)node;
+- (void)tableNode:(ASTableNode *)tableNode didDeselectRowAtIndexPath:(NSIndexPath *)indexPath;
 
-- (BOOL)tableNode:(ASTableNode *)tableNode shouldHighlightRowWithNode:(ASCellNode *)node;
-- (void)tableNode:(ASTableNode *)tableNode didHighlightRowWithNode:(ASCellNode *)node;
-- (void)tableNode:(ASTableNode *)tableNode didUnhighlightRowWithNode:(ASCellNode *)node;
+- (BOOL)tableNode:(ASTableNode *)tableNode shouldHighlightRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void)tableNode:(ASTableNode *)tableNode didHighlightRowAtIndexPath:(NSIndexPath *)indexPath;
+- (void)tableNode:(ASTableNode *)tableNode didUnhighlightRowAtIndexPath:(NSIndexPath *)indexPath;
 
-- (BOOL)tableNode:(ASTableNode *)tableNode shouldShowMenuForRowWithNode:(ASCellNode *)node;
-- (BOOL)tableNode:(ASTableNode *)tableNode canPerformAction:(SEL)action forRowWithNode:(ASCellNode *)node withSender:(nullable id)sender;
-- (void)tableNode:(ASTableNode *)tableNode performAction:(SEL)action forRowWithNode:(ASCellNode *)node withSender:(nullable id)sender;
+- (BOOL)tableNode:(ASTableNode *)tableNode shouldShowMenuForRowAtIndexPath:(NSIndexPath *)indexPath;
+- (BOOL)tableNode:(ASTableNode *)tableNode canPerformAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(nullable id)sender;
+- (void)tableNode:(ASTableNode *)tableNode performAction:(SEL)action forRowAtIndexPath:(NSIndexPath *)indexPath withSender:(nullable id)sender;
 
 /**
  * Provides the constrained size range for measuring the row at the index path.
