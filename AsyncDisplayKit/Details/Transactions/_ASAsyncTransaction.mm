@@ -13,7 +13,9 @@
 
 #import "_ASAsyncTransaction.h"
 #import "_ASAsyncTransactionGroup.h"
-
+#import "ASAssert.h"
+#import "ASLog.h"
+#import "ASThread.h"
 #import <list>
 #import <map>
 #import <mutex>
@@ -242,10 +244,11 @@ void ASAsyncTransactionQueue::GroupImpl::schedule(NSInteger priority, dispatch_q
       // go until there are no more pending operations
       while (!entry._operationQueue.empty()) {
         Operation operation = entry.popNextOperation(respectPriority);
-
         lock.unlock();
         if (operation._block) {
+          ASProfilingSignpostStart(3, operation._block);
           operation._block();
+          ASProfilingSignpostEnd(3, operation._block);
         }
         operation._group->leave();
         operation._block = nil; // the block must be freed while mutex is unlocked
