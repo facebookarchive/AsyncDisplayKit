@@ -424,8 +424,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     self.descender = [[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender];
     if (_renderer.currentScaleFactor > 0 && _renderer.currentScaleFactor < 1.0) {
       // while not perfect, this is a good estimate of what the ascender of the scaled font will be.
-      self.style.ascender *= _renderer.currentScaleFactor;
-      self.style.descender *= _renderer.currentScaleFactor;
+      self.ascender *= _renderer.currentScaleFactor;
+      self.descender *= _renderer.currentScaleFactor;
     }
   }
   
