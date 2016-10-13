@@ -51,14 +51,14 @@
 {
   std::vector<CGSize> sizeOptions;
   // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
-  if (!isinf(constrainedSize.max.width) && ASPointsAreValidForLayout(constrainedSize.max.width)) {
+  if (!isinf(constrainedSize.max.width) && ASPointsValidForLayout(constrainedSize.max.width)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
       constrainedSize.max.width,
       ASFloorPixelValue(_ratio * constrainedSize.max.width)
     }));
   }
   // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
-  if (!isinf(constrainedSize.max.height) && ASPointsAreValidForLayout(constrainedSize.max.width)) {
+  if (!isinf(constrainedSize.max.height) && ASPointsValidForLayout(constrainedSize.max.width)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
       ASFloorPixelValue(constrainedSize.max.height / _ratio),
       constrainedSize.max.height
