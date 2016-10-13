@@ -100,16 +100,6 @@
 
 @end
 
-#pragma mark - ASEnvironment
-
-@implementation ASAbsoluteLayoutSpec (ASEnvironment)
-
-- (BOOL)supportsUpwardPropagation
-{
-  return NO;
-}
-
-@end
 
 #pragma mark - Debugging
 

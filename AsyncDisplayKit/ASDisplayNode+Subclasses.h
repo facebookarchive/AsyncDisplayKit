@@ -41,6 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASDisplayNode (Subclassing)
 
+#pragma mark - Properties
 /** @name Properties */
 
 /**
@@ -64,8 +65,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nullable, nonatomic, readonly, assign) ASLayout *calculatedLayout;
 
+#pragma mark - View Lifecycle
 /** @name View Lifecycle */
-
 
 /**
  * @abstract Called on the main thread immediately after self.view is created.
@@ -75,8 +76,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)didLoad ASDISPLAYNODE_REQUIRES_SUPER;
 
 
+#pragma mark - Layout
 /** @name Layout */
-
 
 /**
  * @abstract Called on the main thread by the view's -layoutSubviews.
@@ -101,6 +102,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)calculatedLayoutDidChange ASDISPLAYNODE_REQUIRES_SUPER;
 
+
+#pragma mark - Layout calculation
 /** @name Layout calculation */
 
 /**
@@ -159,9 +162,9 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
  *
- * @warning Subclasses that implement -layoutSpecThatFits: must not also use .layoutSpecBlock. Doing so will trigger
- * an exception. A future version of the framework may support using both, calling them serially, with the
- * .layoutSpecBlock superseding any values set by the method override.
+ * @warning Subclasses that implement -layoutSpecThatFits: must not use .layoutSpecBlock. Doing so will trigger an
+ * exception. A future version of the framework may support using both, calling them serially, with the .layoutSpecBlock
+ * superseding any values set by the method override.
  */
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize;
 
@@ -174,8 +177,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)invalidateCalculatedLayout;
 
 
+#pragma mark - Drawing
 /** @name Drawing */
-
 
 /**
  * @summary Delegate method to draw layer contents into a CGBitmapContext. The current UIGraphics context will be set
@@ -407,8 +410,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) CGFloat contentsScaleForDisplay;
 
 
+#pragma mark - Touch handling
 /** @name Touch handling */
-
 
 /**
  * @abstract Tells the node when touches began in its view.
@@ -443,8 +446,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)touchesCancelled:(nullable NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
 
+#pragma mark - Managing Gesture Recognizers
 /** @name Managing Gesture Recognizers */
-
 
 /**
  * @abstract Asks the node if a gesture recognizer should continue tracking touches.
@@ -454,8 +457,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer;
 
 
-/** @name Hit Testing */
+#pragma mark - Hit Testing
 
+/** @name Hit Testing */
 
 /**
  * @abstract Returns the view that contains the point.
@@ -472,6 +476,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable UIView *)hitTest:(CGPoint)point withEvent:(nullable UIEvent *)event;
 
+
+#pragma mark - Placeholders
 /** @name Placeholders */
 
 /**
@@ -492,6 +498,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable UIImage *)placeholderImage;
 
 
+#pragma mark - Description
 /** @name Description */
 
 /**

@@ -105,19 +105,6 @@
   return [ASLayout layoutWithLayoutElement:self size:constrainedSize.min];
 }
 
-
-#pragma mark - Parent
-
-- (void)setParent:(id<ASLayoutElement>)parent
-{
-  // FIXME: Locking should be evaluated here.  _parent is not widely used yet, though.
-  _parent = parent;
-  
-  if ([parent supportsUpwardPropagation]) {
-    ASEnvironmentStatePropagateUp(parent, self.environmentState.layoutOptionsState);
-  }
-}
-
 #pragma mark - Child
 
 - (void)setChild:(id<ASLayoutElement>)child
@@ -129,7 +116,6 @@
     id<ASLayoutElement> finalLayoutElement = [self layoutElementToAddFromLayoutElement:child];
     if (finalLayoutElement) {
       _childrenArray[0] = finalLayoutElement;
-      [self propagateUpLayoutElement:finalLayoutElement];
     }
   } else {
     if (_childrenArray.count) {
@@ -185,26 +171,9 @@
   _environmentState = environmentState;
 }
 
-// Subclasses can override this method to return NO, because upward propagation is not enabled if a layout
-// specification has more than one child. Currently ASStackLayoutSpec and ASAbsoluteLayoutSpec are currently
-// the specifications that are known to have more than one.
-- (BOOL)supportsUpwardPropagation
-{
-  return ASEnvironmentStatePropagationEnabled();
-}
-
 - (BOOL)supportsTraitsCollectionPropagation
 {
   return ASEnvironmentStateTraitCollectionPropagationEnabled();
-}
-
-- (void)propagateUpLayoutElement:(id<ASLayoutElement>)layoutElement
-{
-  if ([layoutElement isKindOfClass:[ASLayoutSpec class]]) {
-    [(ASLayoutSpec *)layoutElement setParent:self]; // This will trigger upward propogation if needed.
-  } else if ([self supportsUpwardPropagation]) {
-    ASEnvironmentStatePropagateUp(self, layoutElement.environmentState.layoutOptionsState); // Probably an ASDisplayNode
-  }
 }
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection

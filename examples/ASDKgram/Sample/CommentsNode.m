@@ -45,8 +45,7 @@
 {
   ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStack.spacing            = INTER_COMMENT_SPACING;
-  [verticalStack setChildren:_commentNodes];
-  
+  verticalStack.children           = [_commentNodes copy];
   return verticalStack;
 }
 
