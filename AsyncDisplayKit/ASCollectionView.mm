@@ -1340,7 +1340,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     // If, for example, a vertical flow layout has its height changed due to a status bar
     // appearance update, we do not need to relayout all nodes.
     // For a more permanent fix to the unsafety mentioned above, see https://github.com/facebook/AsyncDisplayKit/pull/2182
+    
+    // If the bounds have changed, scrollable directions may be invalid until relayout has
+    // occurred.
+    [[self collectionViewLayout] invalidateLayout];
+    [self layoutIfNeeded];
     ASScrollDirection scrollDirection = self.scrollableDirections;
+    
     BOOL fixedVertically = (ASScrollDirectionContainsVerticalDirection(scrollDirection) == NO);
     BOOL fixedHorizontally = (ASScrollDirectionContainsHorizontalDirection(scrollDirection) == NO);
 
