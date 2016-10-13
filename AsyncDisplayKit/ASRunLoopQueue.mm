@@ -110,6 +110,8 @@ static void runLoopSourceCallback(void *info) {
     if (_internalQueue.empty()) {
       return;
     }
+    
+    ASProfilingSignpostStart(0, self);
 
     // Snatch the next batch of items.
     NSUInteger totalNodeCount = _internalQueue.size();
@@ -138,6 +140,8 @@ static void runLoopSourceCallback(void *info) {
     CFRunLoopSourceSignal(_runLoopSource);
     CFRunLoopWakeUp(_runLoop);
    }
+  
+  ASProfilingSignpostEnd(0, self);
 }
 
 - (void)enqueue:(id)object

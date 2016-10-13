@@ -34,20 +34,20 @@
 #endif
 
 #define ASProfilingSignpost(x) \
-  AS_AT_LEAST_IOS10 ? kdebug_signpost(x, 0, 0, 0, 0) \
-                    : syscall(SYS_kdebug_trace, APPSDBG_CODE(DBG_MACH_CHUD, x) | DBG_FUNC_NONE, 0, 0, 0, 0);
+  AS_AT_LEAST_IOS10 ? kdebug_signpost(x, 0, 0, 0, (uint32_t)(x % 4)) \
+                    : syscall(SYS_kdebug_trace, APPSDBG_CODE(DBG_MACH_CHUD, x) | DBG_FUNC_NONE, 0, 0, 0, (uint32_t)(x % 4));
 
-#define ASProfilingSignpostStart(x) \
-  AS_AT_LEAST_IOS10 ? kdebug_signpost_start(x, 0, 0, 0, 0) \
-                    : syscall(SYS_kdebug_trace, APPSDBG_CODE(DBG_MACH_CHUD, x) | DBG_FUNC_START, 0, 0, 0, 0);
+#define ASProfilingSignpostStart(x, y) \
+  AS_AT_LEAST_IOS10 ? kdebug_signpost_start((uint32_t)x, (uintptr_t)y, 0, 0, (uint32_t)(x % 4)) \
+                    : syscall(SYS_kdebug_trace, APPSDBG_CODE(DBG_MACH_CHUD, x) | DBG_FUNC_START, (uintptr_t)y, 0, 0, (uint32_t)(x % 4));
 
-#define ASProfilingSignpostEnd(x) \
-  AS_AT_LEAST_IOS10 ? kdebug_signpost_end(x, 0, 0, 0, 0) \
-                    : syscall(SYS_kdebug_trace, APPSDBG_CODE(DBG_MACH_CHUD, x) | DBG_FUNC_END, 0, 0, 0, 0);
+#define ASProfilingSignpostEnd(x, y) \
+  AS_AT_LEAST_IOS10 ? kdebug_signpost_end((uint32_t)x, (uintptr_t)y, 0, 0, (uint32_t)(x % 4)) \
+                    : syscall(SYS_kdebug_trace, APPSDBG_CODE(DBG_MACH_CHUD, x) | DBG_FUNC_END, (uintptr_t)y, 0, 0, (uint32_t)(x % 4));
 #else
 
 #define ASProfilingSignpost(x)
-#define ASProfilingSignpostStart(x)
-#define ASProfilingSignpostEnd(x)
+#define ASProfilingSignpostStart(x, y)
+#define ASProfilingSignpostEnd(x, y)
 
 #endif
