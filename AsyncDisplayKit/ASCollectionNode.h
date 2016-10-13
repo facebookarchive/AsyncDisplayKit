@@ -149,6 +149,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)performBatchAnimated:(BOOL)animated updates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
 
 /**
+ *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread.
+ *  The data source must be updated to reflect the changes before the update block completes.
+ *
+ *  @param updates    The block that performs the relevant insert, delete, reload, or move operations.
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ */
+- (void)performBatchUpdates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
+
+/**
  * Inserts one or more sections.
  *
  * @param sections An index set that specifies the sections to insert.
@@ -241,6 +252,14 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)reloadDataWithCompletion:(nullable void (^)())completion;
 
+
+/**
+ * Reload everything from scratch, destroying the working range and all cached nodes.
+ *
+ * @warning This method is substantially more expensive than UICollectionView's version.
+ */
+- (void)reloadData;
+
 #pragma mark - Querying Data
 
 /**
@@ -300,15 +319,6 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface ASCollectionNode (Deprecated)
-
-/**
- * Reload everything from scratch, destroying the working range and all cached nodes.
- *
- * @warning This method is substantially more expensive than UICollectionView's version.
- *
- * @deprecated This method is deprecated in 2.0. Use @c reloadDataWithCompletion: instead.
- */
-- (void)reloadData ASDISPLAYNODE_DEPRECATED;
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.

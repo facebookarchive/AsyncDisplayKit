@@ -282,11 +282,21 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
   [self.view reloadDataWithCompletion:completion];
 }
 
+- (void)reloadData
+{
+  [self reloadDataWithCompletion:nil];
+}
+
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
   [self.view beginUpdates];
   updates();
   [self.view endUpdatesAnimated:animated completion:completion];
+}
+
+- (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
+{
+  [self performBatchAnimated:YES updates:updates completion:completion];
 }
 
 - (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation

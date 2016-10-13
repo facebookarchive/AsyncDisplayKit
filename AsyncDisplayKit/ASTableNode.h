@@ -93,6 +93,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reloadDataWithCompletion:(nullable void (^)())completion;
 
 /**
+ * Reload everything from scratch, destroying the working range and all cached nodes.
+ *
+ * @warning This method is substantially more expensive than UITableView's version.
+ */
+- (void)reloadData;
+
+/**
  *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread.
  *  The data source must be updated to reflect the changes before the update block completes.
  *
@@ -103,6 +110,17 @@ NS_ASSUME_NONNULL_BEGIN
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
 - (void)performBatchAnimated:(BOOL)animated updates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
+
+/**
+ *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread.
+ *  The data source must be updated to reflect the changes before the update block completes.
+ *
+ *  @param updates    The block that performs the relevant insert, delete, reload, or move operations.
+ *  @param completion A completion handler block to execute when all of the operations are finished. This block takes a single
+ *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
+ *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
+ */
+- (void)performBatchUpdates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
 
 /**
  *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
