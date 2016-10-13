@@ -73,7 +73,7 @@
   XCTAssertTrue(ASDimensionEqualToDimension(style.maxHeight, ASDimensionMakeWithPoints(size.height)));
 }
 
-- (void)setSettingSizeViaLayoutSize
+- (void)testSettingSizeViaLayoutSize
 {
   ASLayoutElementStyle *style = [ASLayoutElementStyle new];
   
