@@ -333,6 +333,23 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 }
 
+#pragma mark - Layout and Sizing
+
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+
+  // If the image node is currently in the loading process and no valid size is applied return CGSizeZero for the time
+  // being.
+  // TODO: After 2.0 is stable we should remove this behavior as a ASNetworkImageNode is a replaced element and the
+  // client code should set the size of an image or it's container it's embedded in
+  if (ASIsCGSizeValidForSize(constrainedSize) == NO && _URL != nil && self.image == nil) {
+    return CGSizeZero;
+  }
+    
+  return [super calculateSizeThatFits:constrainedSize];
+}
+
 #pragma mark - Private methods -- only call with lock.
 
 - (void)_updateProgressImageBlockOnDownloaderIfNeeded

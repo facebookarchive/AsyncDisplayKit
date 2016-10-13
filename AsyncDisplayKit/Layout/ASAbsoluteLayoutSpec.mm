@@ -39,8 +39,8 @@
 {
   // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
   CGSize size = {
-    (isinf(constrainedSize.max.width) || !ASPointsAreValidForLayout(constrainedSize.max.width)) ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.width,
-    (isinf(constrainedSize.max.height) || !ASPointsAreValidForLayout(constrainedSize.max.height)) ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.height
+    (isinf(constrainedSize.max.width) || !ASPointsValidForLayout(constrainedSize.max.width)) ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.width,
+    (isinf(constrainedSize.max.height) || !ASPointsValidForLayout(constrainedSize.max.height)) ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.height
   };
   
   NSArray *children = self.children;
