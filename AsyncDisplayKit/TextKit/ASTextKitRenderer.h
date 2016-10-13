@@ -53,7 +53,7 @@
 
 @property (nonatomic, assign, readonly) ASTextKitAttributes attributes;
 
-@property (nonatomic, assign, readonly) CGSize constrainedSize;
+@property (nonatomic, assign, readwrite) CGSize constrainedSize;
 
 @property (nonatomic, assign, readonly) CGFloat currentScaleFactor;
 
