@@ -41,7 +41,7 @@
   return self;
 }
 
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+- (id<ASLayoutElement>)layoutElementThatFits:(ASSizeRange)constrainedSize
 {
   ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStack.spacing            = INTER_COMMENT_SPACING;

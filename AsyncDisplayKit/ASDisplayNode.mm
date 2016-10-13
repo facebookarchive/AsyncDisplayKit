@@ -179,6 +179,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (ASDisplayNodeSubclassOverridesSelector(c, @selector(layoutSpecThatFits:))) {
     overrides |= ASDisplayNodeMethodOverrideLayoutSpecThatFits;
   }
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(layoutElementThatFits:))) {
+    overrides |= ASDisplayNodeMethodOverrideLayoutElementThatFits;
+  }
 
   return overrides;
 }
@@ -186,10 +189,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // At most a layoutSpecBlock or one of the three layout methods is overridden
 #define __ASDisplayNodeCheckForLayoutMethodOverrides \
     ASDisplayNodeAssert(_layoutSpecBlock != NULL || \
-    (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateSizeThatFits:)) ? 1 : 0) \
+    ((ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateSizeThatFits:)) ? 1 : 0) \
     + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(layoutSpecThatFits:)) ? 1 : 0) \
-    + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateLayoutThatFits:)) ? 1 : 0) <= 1, \
-    @"Subclass %@ must at least provide a layoutSpecBlock or override at most one of the three layout methods: calculateLayoutThatFits, layoutSpecThatFits or calculateSizeThatFits", NSStringFromClass(self.class))
+    + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(layoutElementThatFits:)) ? 1 : 0) \
+    + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateLayoutThatFits:)) ? 1 : 0)) <= 1, \
+    @"Subclass %@ must at least provide a layoutSpecBlock or override at most one of the four layout methods: calculateLayoutThatFits:, layoutSpecThatFits:, layoutElementThatFits:, or calculateSizeThatFits:", NSStringFromClass(self.class))
 
 + (void)initialize
 {
@@ -232,18 +236,17 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   
 #if DEBUG
-  // Check if subnodes where modified during layoutSpecThatFits:
-  if (self == [ASDisplayNode class] || ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(layoutSpecThatFits:)))
-  {
-    __block IMP originalLayoutSpecThatFitsIMP = ASReplaceMethodWithBlock(self, @selector(layoutSpecThatFits:), ^(ASDisplayNode *_self, ASSizeRange sizeRange) {
+  // Check if subnodes where modified during the creation of the layout
+  if (self == [ASDisplayNode class]) {
+    __block IMP originalLayoutSpecThatFitsIMP = ASReplaceMethodWithBlock(self, @selector(_layoutElementThatFits:), ^(ASDisplayNode *_self, ASSizeRange sizeRange) {
       NSArray *oldSubnodes = _self.subnodes;
-      ASLayoutSpec *layoutSpec = ((ASLayoutSpec *( *)(id, SEL, ASSizeRange))originalLayoutSpecThatFitsIMP)(_self, @selector(layoutSpecThatFits:), sizeRange);
+      ASLayoutSpec *layoutElement = ((ASLayoutSpec *( *)(id, SEL, ASSizeRange))originalLayoutSpecThatFitsIMP)(_self, @selector(_layoutElementThatFits:), sizeRange);
       NSArray *subnodes = _self.subnodes;
-      ASDisplayNodeAssert(oldSubnodes.count == subnodes.count, @"Adding or removing nodes in layoutSpecThatFits: is verboten.");
+      ASDisplayNodeAssert(oldSubnodes.count == subnodes.count, @"Adding or removing nodes in layoutElementThatFits or layoutSpecBlock or layoutElementThatFits: is not allowed and can cause unexpected behavior.");
       for (NSInteger i = 0; i < oldSubnodes.count; i++) {
-        ASDisplayNodeAssert(oldSubnodes[i] == subnodes[i], @"Adding and removing nodes in layoutSpecThatFits: is verboten.");
+        ASDisplayNodeAssert(oldSubnodes[i] == subnodes[i], @"Adding or removing nodes in layoutElementThatFits or layoutSpecBlock or layoutElementThatFits: is not allowed and can cause unexpected behavior.");
       }
-      return layoutSpec;
+      return layoutElement;
     });
   }
 #endif
@@ -2425,62 +2428,68 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   __ASDisplayNodeCheckForLayoutMethodOverrides;
 
   ASDN::MutexLocker l(__instanceLock__);
-  if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
-    BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
-    if (measureLayoutSpec) {
-      _layoutSpecNumberOfPasses++;
-    }
 
-    ASLayoutSpec *layoutSpec = ({
-      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-      [self layoutSpecThatFits:constrainedSize];
-    });
+  // Manual size calculation via calculateSizeThatFits:
+  if (((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) ||
+      (_methodOverrides & ASDisplayNodeMethodOverrideLayoutElementThatFits) ||
+      (_layoutSpecBlock != NULL)) == NO) {
+    CGSize size = [self calculateSizeThatFits:constrainedSize.max];
+    ASDisplayNodeLogEvent(self, @"calculatedSize: %@", NSStringFromCGSize(size));
+    return [ASLayout layoutWithLayoutElement:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:nil];
+  }
+  
+  // Size calcualtion with layout elements
+  BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
+  if (measureLayoutSpec) {
+    _layoutSpecNumberOfPasses++;
+  }
 
-#if AS_DEDUPE_LAYOUT_SPEC_TREE
+  // Get layout element from the node
+  id<ASLayoutElement> layoutElement = [self _layoutElementThatFits:constrainedSize];
+
+  // Certain properties are necessary to set on an element of type ASLayoutSpec
+  if (layoutElement.layoutElementType == ASLayoutElementTypeLayoutSpec) {
+    ASLayoutSpec *layoutSpec = (ASLayoutSpec *)layoutElement;
+    
     NSSet *duplicateElements = [layoutSpec findDuplicatedElementsInSubtree];
     if (duplicateElements.count > 0) {
       ASDisplayNodeFailAssert(@"Node %@ returned a layout spec that contains the same elements in multiple positions. Elements: %@", self, duplicateElements);
       // Use an empty layout spec to avoid crash.
       layoutSpec = [[ASLayoutSpec alloc] init];
     }
-#endif
-
+    
     ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
-
-    layoutSpec.parent = self; // This causes upward propogation of any non-default layoutElement values.
-    
-    // manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
-    {
-      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-      ASEnvironmentStatePropagateDown(layoutSpec, self.environmentTraitCollection);
-    }
-    
+    layoutSpec.parent = self;
     layoutSpec.isMutable = NO;
-    BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
-    if (measureLayoutComputation) {
-      _layoutComputationNumberOfPasses++;
-    }
-
-    ASLayout *layout = ({
-      ASDN::SumScopeTimer t(_layoutComputationTotalTime, measureLayoutComputation);
-      [layoutSpec layoutThatFits:constrainedSize];
-    });
-
-    ASDisplayNodeAssertNotNil(layout, @"[ASLayoutSpec measureWithSizeRange:] should never return nil! %@, %@", self, layoutSpec);
-      
-    // Make sure layoutElementObject of the root layout is `self`, so that the flattened layout will be structurally correct.
-    BOOL isFinalLayoutElement = (layout.layoutElement != self);
-    if (isFinalLayoutElement) {
-      layout.position = CGPointZero;
-      layout = [ASLayout layoutWithLayoutElement:self size:layout.size sublayouts:@[layout]];
-    }
-    ASDisplayNodeLogEvent(self, @"computedLayout: %@", layout);
-    return [layout filteredNodeLayoutTree];
-  } else {
-    CGSize size = [self calculateSizeThatFits:constrainedSize.max];
-    ASDisplayNodeLogEvent(self, @"calculatedSize: %@", NSStringFromCGSize(size));
-    return [ASLayout layoutWithLayoutElement:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:nil];
   }
+  
+  // Manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
+  {
+    ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+    ASEnvironmentStatePropagateDown(layoutElement, self.environmentTraitCollection);
+  }
+  
+  BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
+  if (measureLayoutComputation) {
+    _layoutComputationNumberOfPasses++;
+  }
+
+  // Layout element layout creation
+  ASLayout *layout = ({
+    ASDN::SumScopeTimer t(_layoutComputationTotalTime, measureLayoutComputation);
+    [layoutElement layoutThatFits:constrainedSize];
+  });
+  ASDisplayNodeAssertNotNil(layout, @"[ASLayoutElement layoutThatFits:] should never return nil! %@, %@", self, layout);
+    
+  // Make sure layoutElementObject of the root layout is `self`, so that the flattened layout will be structurally correct.
+  BOOL isFinalLayoutElement = (layout.layoutElement != self);
+  if (isFinalLayoutElement) {
+    layout.position = CGPointZero;
+    layout = [ASLayout layoutWithLayoutElement:self size:layout.size sublayouts:@[layout]];
+  }
+  ASDisplayNodeLogEvent(self, @"computedLayout: %@", layout);
+
+  return [layout filteredNodeLayoutTree];
 }
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
@@ -2490,24 +2499,56 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   return CGSizeZero;
 }
 
+- (id<ASLayoutElement>)_layoutElementThatFits:(ASSizeRange)constrainedSize
+{
+  __ASDisplayNodeCheckForLayoutMethodOverrides;
+  
+  BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
+  if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutElementThatFits)) {
+    return ({
+      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+      [self layoutElementThatFits:constrainedSize];
+    });
+  } else if (_layoutSpecBlock != NULL) {
+    return ({
+      ASDN::MutexLocker l(__instanceLock__);
+      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+      _layoutSpecBlock(self, constrainedSize);
+    });
+  } else {
+    return ({
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+      [self layoutSpecThatFits:constrainedSize];
+#pragma clang diagnostic pop
+    });
+  }
+}
+
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
 
   ASDN::MutexLocker l(__instanceLock__);
   
-  if (_layoutSpecBlock != NULL) {
-    return _layoutSpecBlock(self, constrainedSize);
-  }
-  
   ASDisplayNodeAssert(NO, @"-[ASDisplayNode layoutSpecThatFits:] should never return an empty value. One way this is caused is by calling -[super layoutSpecThatFits:] which is not currently supported.");
+  return [[ASLayoutSpec alloc] init];
+}
+
+- (id<ASLayoutElement>)layoutElementThatFits:(ASSizeRange)constrainedSize
+{
+  __ASDisplayNodeCheckForLayoutMethodOverrides;
+  
+  ASDisplayNodeAssert(NO, @"-[ASDisplayNode layoutElementThatFits:] should never return an empty value. One way this is caused is by calling -[super layoutElementThatFits:] which is not currently supported.");
   return [[ASLayoutSpec alloc] init];
 }
 
 - (void)setLayoutSpecBlock:(ASLayoutSpecBlock)layoutSpecBlock
 {
-  // For now there should never be a overwrite of layoutSpecThatFits: and a layoutSpecThatFitsBlock: be provided
+  // For now there should never be an overwrite of layoutSpecThatFits: / layoutElementThatFits: and a layoutSpecBlock
   ASDisplayNodeAssert(!(_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits), @"Overwriting layoutSpecThatFits: and providing a layoutSpecBlock block is currently not supported");
+  ASDisplayNodeAssert(!(_methodOverrides & ASDisplayNodeMethodOverrideLayoutElementThatFits), @"Overwriting layoutElementThatFits: and providing a layoutSpecBlock block is currently not supported");
 
   ASDN::MutexLocker l(__instanceLock__);
   _layoutSpecBlock = layoutSpecBlock;
@@ -3419,11 +3460,6 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 - (NSArray<ASDisplayNode *> *)children
 {
   return self.subnodes;
-}
-
-- (BOOL)supportsUpwardPropagation
-{
-  return ASEnvironmentStatePropagationEnabled();
 }
 
 - (BOOL)supportsTraitsCollectionPropagation

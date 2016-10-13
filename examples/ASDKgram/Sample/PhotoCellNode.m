@@ -110,7 +110,7 @@
   return self;
 }
 
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+- (id<ASLayoutElement>)layoutElementThatFits:(ASSizeRange)constrainedSize
 {
   // username / photo location header vertical stack
   _photoLocationLabel.style.flexShrink    = 1.0;
