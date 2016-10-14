@@ -76,7 +76,7 @@ const CGFloat kSoldOutGBHeight = 50.0;
   self.titleLabel = [[ASTextNode alloc] init];
   self.titleLabel.maximumNumberOfLines = 2;
   self.titleLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
-  self.titleLabel.style.flexGrow = YES;
+  self.titleLabel.style.flexGrow = 1.0;
   self.titleLabel.layerBacked = YES;
   
   self.firstInfoLabel = [[ASTextNode alloc] init];
@@ -110,11 +110,11 @@ const CGFloat kSoldOutGBHeight = 50.0;
   self.soldOutLabelBackground.style.width = ASDimensionMakeWithFraction(1.0);
   self.soldOutLabelBackground.style.height = ASDimensionMakeWithPoints(kSoldOutGBHeight);
   self.soldOutLabelBackground.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.9];
-  self.soldOutLabelBackground.style.flexGrow = YES;
+  self.soldOutLabelBackground.style.flexGrow = 1.0;
   self.soldOutLabelBackground.layerBacked = YES;
   
   self.soldOutOverlay = [[ASDisplayNode alloc] init];
-  self.soldOutOverlay.style.flexGrow = YES;
+  self.soldOutOverlay.style.flexGrow = 1.0;
   self.soldOutOverlay.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
   self.soldOutOverlay.layerBacked = YES;
   
@@ -257,13 +257,13 @@ const CGFloat kSoldOutGBHeight = 50.0;
   UIEdgeInsets textInsets = UIEdgeInsetsMake(kInsetTop, kInsetHorizontal, kInsetBottom, kInsetHorizontal);
   
   ASLayoutSpec *verticalSpacer = [[ASLayoutSpec alloc] init];
-  verticalSpacer.style.flexGrow = YES;
+  verticalSpacer.style.flexGrow = 1.0;
   
   ASLayoutSpec *horizontalSpacer1 = [[ASLayoutSpec alloc] init];
-  horizontalSpacer1.style.flexGrow = YES;
+  horizontalSpacer1.style.flexGrow = 1.0;
   
   ASLayoutSpec *horizontalSpacer2 = [[ASLayoutSpec alloc] init];
-  horizontalSpacer2.style.flexGrow = YES;
+  horizontalSpacer2.style.flexGrow = 1.0;
   
   NSArray *info1Children = @[self.firstInfoLabel, self.distanceLabel, horizontalSpacer1, self.originalPriceLabel];
   NSArray *info2Children = @[self.secondInfoLabel, horizontalSpacer2, self.finalPriceLabel];
@@ -279,7 +279,7 @@ const CGFloat kSoldOutGBHeight = 50.0;
   ASStackLayoutSpec *textStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical spacing:0.0 justifyContent:ASStackLayoutJustifyContentEnd alignItems:ASStackLayoutAlignItemsStretch children:@[self.titleLabel, verticalSpacer, info1Stack, info2Stack]];
   
   ASInsetLayoutSpec *textWrapper = [ASInsetLayoutSpec insetLayoutSpecWithInsets:textInsets child:textStack];
-  textWrapper.style.flexGrow = YES;
+  textWrapper.style.flexGrow = 1.0;
   
   return textWrapper;
 }
@@ -294,7 +294,7 @@ const CGFloat kSoldOutGBHeight = 50.0;
   ASAbsoluteLayoutSpec *badgePosition = [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[self.badge]];
   
   ASOverlayLayoutSpec *badgeOverImage = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:imagePlace overlay:badgePosition];
-  badgeOverImage.style.flexGrow = YES;
+  badgeOverImage.style.flexGrow = 1.0;
   
   return badgeOverImage;
 }

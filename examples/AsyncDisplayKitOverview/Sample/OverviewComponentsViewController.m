@@ -387,8 +387,8 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     // If we just would add the childrent to the stack layout the layout would be to tall and run out of the edge of
     // the node as 50+50+50 = 150 but the parent node is only 100 height. To prevent that we set flexShrink on 2 of the
     // children to let the stack layout know it should shrink these children in case the layout will run over the edge
-    childNode2.style.flexShrink = YES;
-    childNode3.style.flexShrink = YES;
+    childNode2.style.flexShrink = 1.0;
+    childNode3.style.flexShrink = 1.0;
     
     parentNode = [self parentNodeWithChild:childNode];
     parentNode.entryTitle = @"Vertical ASStackLayoutSpec";
@@ -407,7 +407,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 #pragma mark Horizontal ASStackLayoutSpec
     childNode1 = [ASDisplayNode new];
     childNode1.style.preferredSize = CGSizeMake(10.0, 20.0);
-    childNode1.style.flexGrow = YES;
+    childNode1.style.flexGrow = 1.0;
     childNode1.backgroundColor = [UIColor greenColor];
     
     childNode2 = [ASDisplayNode new];

@@ -33,8 +33,8 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
     return nil;
   
   _textNode = [[ASTextNode alloc] init];
-  _textNode.style.flexGrow = YES;
-  _textNode.style.flexShrink = YES;
+  _textNode.style.flexGrow = 1.0;
+  _textNode.style.flexShrink = 1.0;
   _textNode.maximumNumberOfLines = 3;
   [self addSubnode:_textNode];
   
