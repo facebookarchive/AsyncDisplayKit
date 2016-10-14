@@ -58,7 +58,7 @@
 
 - (void)reloadEverything
 {
-  [_tableNode reloadDataWithCompletion:nil];
+  [_tableNode reloadData];
 }
 
 #pragma mark - ASTableView.

@@ -83,7 +83,7 @@ static NSUInteger kNumberOfImages = 14;
 
 - (void)reloadTapped
 {
-  [_collectionNode reloadDataWithCompletion:^{}];
+  [_collectionNode reloadData];
 }
 
 #pragma mark -
