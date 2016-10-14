@@ -17,11 +17,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @protocol ASCommonCollectionDataSource <NSObject>
 
-@required
+@optional
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section ASDISPLAYNODE_DEPRECATED;
-
-@optional
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
 

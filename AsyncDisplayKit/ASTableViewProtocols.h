@@ -17,11 +17,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @protocol ASCommonTableDataSource <NSObject>
 
-@required
+@optional
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section ASDISPLAYNODE_DEPRECATED;
-
-@optional
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView ASDISPLAYNODE_DEPRECATED;
 
