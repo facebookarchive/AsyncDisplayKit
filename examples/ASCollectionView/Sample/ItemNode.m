@@ -22,10 +22,12 @@
 - (instancetype)initWithString:(NSString *)string
 {
   self = [super init];
+  
   if (self != nil) {
     self.text = string;
     [self updateBackgroundColor];
   }
+  
   return self;
 }
 
@@ -43,12 +45,14 @@
 - (void)setSelected:(BOOL)selected
 {
   [super setSelected:selected];
+  
   [self updateBackgroundColor];
 }
 
 - (void)setHighlighted:(BOOL)highlighted
 {
   [super setHighlighted:highlighted];
+  
   [self updateBackgroundColor];
 }
 
