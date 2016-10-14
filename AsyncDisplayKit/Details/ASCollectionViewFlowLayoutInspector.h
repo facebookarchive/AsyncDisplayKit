@@ -12,7 +12,7 @@
 
 #import <Foundation/Foundation.h>
 #import <AsyncDisplayKit/ASDimension.h>
-#import "ASScrollDirection.h"
+#import <AsyncDisplayKit/ASScrollDirection.h>
 
 @class ASCollectionView;
 @protocol ASCollectionDataSource;
