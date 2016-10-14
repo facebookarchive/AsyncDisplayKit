@@ -36,17 +36,10 @@
   return self;
 }
 
-#pragma mark - UIViewController
-
-- (void)viewDidLoad
-{
-  [super viewDidLoad];
-
-}
-
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
+  
   self.navigationController.navigationBarHidden = true;
 }
 
