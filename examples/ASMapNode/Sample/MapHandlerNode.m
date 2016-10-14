@@ -26,17 +26,20 @@
 
 #import <AsyncDisplayKit/ASStackLayoutSpec.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import <AsyncDisplayKit/UIImage+ASConvenience.h>
 
 @interface MapHandlerNode () <ASEditableTextNodeDelegate, MKMapViewDelegate>
 
-@property (nonatomic, strong) ASEditableTextNode * latEditableNode;
-@property (nonatomic, strong) ASEditableTextNode * lonEditableNode;
-@property (nonatomic, strong) ASEditableTextNode * deltaLatEditableNode;
-@property (nonatomic, strong) ASEditableTextNode * deltaLonEditableNode;
-@property (nonatomic, strong) ASButtonNode * updateRegionButton;
-@property (nonatomic, strong) ASButtonNode * liveMapToggleButton;
-@property (nonatomic, strong) ASMapNode * mapNode;
+@property (nonatomic, strong) ASEditableTextNode *latEditableNode;
+@property (nonatomic, strong) ASEditableTextNode *lonEditableNode;
+@property (nonatomic, strong) ASEditableTextNode *deltaLatEditableNode;
+@property (nonatomic, strong) ASEditableTextNode *deltaLonEditableNode;
+@property (nonatomic, strong) ASButtonNode *updateRegionButton;
+@property (nonatomic, strong) ASButtonNode *liveMapToggleButton;
+@property (nonatomic, strong) ASButtonNode *testButton;
+@property (nonatomic, strong) ASMapNode *mapNode;
+
 
 @end
 
@@ -62,6 +65,8 @@
   _updateRegionButton  = [[ASButtonNode alloc] init];
   _liveMapToggleButton = [[ASButtonNode alloc] init];
   
+  _testButton = [[ASButtonNode alloc] init];
+  
   UIImage *backgroundImage = [UIImage as_resizableRoundedImageWithCornerRadius:5
                                                                    cornerColor:[UIColor whiteColor]
                                                                      fillColor:[UIColor lightGrayColor]];
@@ -77,8 +82,12 @@
   
   [_liveMapToggleButton setBackgroundImage:backgroundImage forState:ASControlStateNormal];
   [_liveMapToggleButton setBackgroundImage:backgroundHiglightedImage forState:ASControlStateHighlighted];
+  
+  [_testButton setBackgroundImage:backgroundImage forState:ASControlStateNormal];
+  [_testButton setBackgroundImage:backgroundHiglightedImage forState:ASControlStateHighlighted];
 
   
+  _updateRegionButton.contentEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
   [_updateRegionButton setTitle:@"Update Region" withFont:nil withColor:[UIColor blueColor] forState:ASControlStateNormal];
   
   [_updateRegionButton addTarget:self action:@selector(updateRegion) forControlEvents:ASControlNodeEventTouchUpInside];
@@ -143,60 +152,59 @@
 #define HEIGHT 30
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-//  _latEditableNode.style.minWidth      = ASDimensionMake(@"30%");
-//  _lonEditableNode.style.minWidth      = ASDimensionMake(@"30%");
-//  _deltaLatEditableNode.style.minWidth = ASDimensionMake(@"30%");
-//  _deltaLonEditableNode.style.minWidth = ASDimensionMake(@"30%");
+  _latEditableNode.style.width      = ASDimensionMake(@"50%");
+  _lonEditableNode.style.width      = ASDimensionMake(@"50%");
+  _deltaLatEditableNode.style.width = ASDimensionMake(@"50%");
+  _deltaLonEditableNode.style.width = ASDimensionMake(@"50%");
 
-  _latEditableNode.style.flexGrow      = YES;
-  _lonEditableNode.style.flexGrow      = YES;
-  _deltaLatEditableNode.style.flexGrow = YES;
-  _deltaLonEditableNode.style.flexGrow = YES;
-  
-  _updateRegionButton.style.flexGrow = YES;
-  
-  _liveMapToggleButton.style.flexGrow = YES;
   _liveMapToggleButton.style.maxHeight = ASDimensionMake(HEIGHT);
   
-  _mapNode.style.flexGrow = YES;
+  _mapNode.style.flexGrow = 1.0;
 
   ASStackLayoutSpec *lonlatSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
                                                                           spacing:SPACING
                                                                    justifyContent:ASStackLayoutJustifyContentStart
                                                                        alignItems:ASStackLayoutAlignItemsCenter
                                                                          children:@[_latEditableNode, _lonEditableNode]];
-  lonlatSpec.style.flexGrow = true;
 
   ASStackLayoutSpec *deltaLonlatSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
                                                                                spacing:SPACING
-                                                                        justifyContent:ASStackLayoutJustifyContentStart
+                                                                        justifyContent:ASStackLayoutJustifyContentSpaceBetween
                                                                             alignItems:ASStackLayoutAlignItemsCenter
                                                                               children:@[_deltaLatEditableNode, _deltaLonEditableNode]];
-  deltaLonlatSpec.style.flexGrow = true;
 
   ASStackLayoutSpec *lonlatConfigSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
                                                                                 spacing:SPACING
                                                                          justifyContent:ASStackLayoutJustifyContentStart
                                                                              alignItems:ASStackLayoutAlignItemsStretch
                                                                                children:@[lonlatSpec, deltaLonlatSpec]];
-  lonlatConfigSpec.style.flexGrow = true;
+  
+  lonlatConfigSpec.style.flexGrow = 1.0;
 
   ASStackLayoutSpec *dashboardSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
                                                                              spacing:SPACING
                                                                       justifyContent:ASStackLayoutJustifyContentStart
                                                                           alignItems:ASStackLayoutAlignItemsStretch
                                                                             children:@[lonlatConfigSpec, _updateRegionButton]];
-  dashboardSpec.style.flexGrow = true;
+  
+  ASStackLayoutSpec *headerVerticalStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+                                                                                   spacing:SPACING
+                                                                            justifyContent:ASStackLayoutJustifyContentStart
+                                                                                alignItems:ASStackLayoutAlignItemsStretch
+                                                                                  children:@[dashboardSpec, _liveMapToggleButton]];
+  
+  
+  
+  dashboardSpec.style.flexGrow = 1.0;
 
   ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(40, 10, 0, 10)
-                                                                        child:dashboardSpec];
+                                                                        child:headerVerticalStack];
   
-  _liveMapToggleButton.style.flexGrow = YES;
   ASStackLayoutSpec *layoutSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
                                                                           spacing:SPACING
                                                                    justifyContent:ASStackLayoutJustifyContentStart
                                                                        alignItems:ASStackLayoutAlignItemsStretch
-                                                                         children:@[insetSpec, _liveMapToggleButton, _mapNode]];
+                                                                         children:@[insetSpec, _mapNode]];
   
   return layoutSpec;
 }
@@ -213,8 +221,8 @@
   double const deltaLat = [f numberFromString:_deltaLatEditableNode.attributedText.string].doubleValue;
   double const deltaLon = [f numberFromString:_deltaLonEditableNode.attributedText.string].doubleValue;
 
-  
-  MKCoordinateRegion region = MKCoordinateRegionMake(CLLocationCoordinate2DMake(lat, lon),
+  // TODO: check for valid latitude / longitude coordinates
+    MKCoordinateRegion region = MKCoordinateRegionMake(CLLocationCoordinate2DMake(lat, lon),
                                                      MKCoordinateSpanMake(deltaLat, deltaLon));
 
   _mapNode.region = region;
