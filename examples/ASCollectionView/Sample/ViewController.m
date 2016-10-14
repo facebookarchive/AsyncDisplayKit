@@ -26,7 +26,7 @@
 @property (nonatomic, strong) NSArray *data;
 @end
 
-@interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout>
+@interface ViewController () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout>
 
 @end
 
@@ -49,12 +49,16 @@
   layout.headerReferenceSize = CGSizeMake(50.0, 50.0);
   layout.footerReferenceSize = CGSizeMake(50.0, 50.0);
   
+  // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
+  // This functionality & example project remains for users who insist on using ASCollectionView.
   self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
   self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   self.collectionView.asyncDataSource = self;
   self.collectionView.asyncDelegate = self;
   self.collectionView.backgroundColor = [UIColor whiteColor];
   
+  // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
+  // This functionality & example project remains for users who insist on using ASCollectionView.
   [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
   [self.view addSubview:self.collectionView];
@@ -92,6 +96,8 @@
 
 - (void)reloadTapped
 {
+  // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
+  // This functionality & example project remains for users who insist on using ASCollectionView.
   [self.collectionView reloadData];
 }
 

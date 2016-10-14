@@ -21,7 +21,7 @@
  * This ASCellNode contains an ASCollectionNode.  It intelligently interacts with a containing ASCollectionView or ASTableView,
  * to preload and clean up contents as the user scrolls around both vertically and horizontally — in a way that minimizes memory usage.
  */
-@interface HorizontalScrollCellNode : ASCellNode <ASCollectionViewDelegate, ASCollectionViewDataSource>
+@interface HorizontalScrollCellNode : ASCellNode <ASCollectionDelegate, ASCollectionDataSource>
 
 - (instancetype)initWithElementSize:(CGSize)size;
 

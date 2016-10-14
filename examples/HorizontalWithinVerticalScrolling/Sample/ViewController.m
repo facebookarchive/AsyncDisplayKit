@@ -15,15 +15,14 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import <AsyncDisplayKit/ASAssert.h>
 
 #import "ViewController.h"
 #import "HorizontalScrollCellNode.h"
 
-@interface ViewController () <ASTableViewDataSource, ASTableViewDelegate>
+@interface ViewController () <ASTableDataSource, ASTableDelegate>
 {
-  ASTableView *_tableView;
+  ASTableNode *_tableNode;
 }
 
 @end
@@ -35,13 +34,12 @@
 
 - (instancetype)init
 {
-  if (!(self = [super init]))
+  if (!(self = [super initWithNode:_tableNode]))
     return nil;
 
-  _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
-  _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-  _tableView.asyncDataSource = self;
-  _tableView.asyncDelegate = self;
+  _tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+  _tableNode.dataSource = self;
+  _tableNode.delegate = self;
   
   self.title = @"Horizontal Scrolling Gradients";
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRedo
@@ -51,21 +49,16 @@
   return self;
 }
 
-- (void)reloadEverything
-{
-  [_tableView reloadData];
-}
-
 - (void)viewDidLoad
 {
   [super viewDidLoad];
 
-  [self.view addSubview:_tableView];
+  _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
 }
 
-- (void)viewWillLayoutSubviews
+- (void)reloadEverything
 {
-  _tableView.frame = self.view.bounds;
+  [_tableNode reloadDataWithCompletion:nil];
 }
 
 #pragma mark - ASTableView.

@@ -52,7 +52,7 @@
 
   [self generateFeedData];
 
-  [_tableNode.view reloadData];
+  [_tableNode reloadData];
 }
 
 - (void)generateFeedData

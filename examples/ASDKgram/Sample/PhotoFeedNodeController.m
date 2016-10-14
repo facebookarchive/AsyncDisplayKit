@@ -144,7 +144,7 @@
     [indexPaths addObject:path];
   }
   
-  [_tableNode.view insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
+  [_tableNode insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (UIStatusBarStyle)preferredStatusBarStyle
@@ -192,7 +192,7 @@
 - (void)resetAllData
 {
   [_photoFeed clearFeed];
-  [_tableNode.view reloadData];
+  [_tableNode reloadData];
   [self refreshFeed];
 }
 

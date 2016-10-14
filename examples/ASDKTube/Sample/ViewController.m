@@ -50,7 +50,7 @@
 
   _videoFeedData = [[NSMutableArray alloc] initWithObjects:[[VideoModel alloc] init], [[VideoModel alloc] init], nil];
 
-  [_tableNode.view reloadData];
+  [_tableNode reloadData];
 }
 
 - (void)viewWillAppear:(BOOL)animated
