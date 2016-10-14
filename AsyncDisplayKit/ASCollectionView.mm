@@ -178,6 +178,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   struct {
     unsigned int layoutInspectorDidChangeCollectionViewDataSource:1;
     unsigned int layoutInspectorDidChangeCollectionViewDelegate:1;
+    unsigned int layoutInspectorScrollableDirections:1;
   } _layoutInspectorFlags;
 }
 
@@ -454,6 +455,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   _layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDataSource = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDataSource:)];
   _layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDelegate = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDelegate:)];
+  _layoutInspectorFlags.layoutInspectorScrollableDirections = [_layoutInspector respondsToSelector:@selector(scrollableDirections)];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
@@ -844,30 +846,25 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASScrollDirection)scrollableDirections
 {
-  if ([self.collectionViewLayout asdk_isFlowLayout]) {
-    return [self flowLayoutScrollableDirections:(UICollectionViewFlowLayout *)self.collectionViewLayout];
+  if (_layoutInspectorFlags.layoutInspectorScrollableDirections) {
+    return [self.layoutInspector scrollableDirections];
   } else {
-    return [self nonFlowLayoutScrollableDirections];
+    ASScrollDirection scrollableDirection = ASScrollDirectionNone;
+    CGFloat totalContentWidth = self.contentSize.width + self.contentInset.left + self.contentInset.right;
+    CGFloat totalContentHeight = self.contentSize.height + self.contentInset.top + self.contentInset.bottom;
+    
+    if (self.alwaysBounceHorizontal || totalContentWidth > self.bounds.size.width) { // Can scroll horizontally.
+      scrollableDirection |= ASScrollDirectionHorizontalDirections;
+    }
+    if (self.alwaysBounceVertical || totalContentHeight > self.bounds.size.height) { // Can scroll vertically.
+      scrollableDirection |= ASScrollDirectionVerticalDirections;
+    }
+    return scrollableDirection;
   }
 }
 
 - (ASScrollDirection)flowLayoutScrollableDirections:(UICollectionViewFlowLayout *)flowLayout {
   return (flowLayout.scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASScrollDirectionHorizontalDirections : ASScrollDirectionVerticalDirections;
-}
-
-- (ASScrollDirection)nonFlowLayoutScrollableDirections
-{
-  ASScrollDirection scrollableDirection = ASScrollDirectionNone;
-  CGFloat totalContentWidth = self.contentSize.width + self.contentInset.left + self.contentInset.right;
-  CGFloat totalContentHeight = self.contentSize.height + self.contentInset.top + self.contentInset.bottom;
-  
-  if (self.alwaysBounceHorizontal || totalContentWidth > self.bounds.size.width) { // Can scroll horizontally.
-    scrollableDirection |= ASScrollDirectionHorizontalDirections;
-  }
-  if (self.alwaysBounceVertical || totalContentHeight > self.bounds.size.height) { // Can scroll vertically.
-    scrollableDirection |= ASScrollDirectionVerticalDirections;
-  }
-  return scrollableDirection;
 }
 
 - (void)layoutSubviews
