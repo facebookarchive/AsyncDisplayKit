@@ -70,7 +70,7 @@
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-    return ASSizeRangeMakeExactSize(CGSizeMake(100, 100));
+    return ASSizeRangeMake(CGSizeMake(100, 100));
 }
 
 @end
