@@ -1113,7 +1113,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASScrollDirection)scrollableDirections
 {
-  if (_layoutInspectorFlags.layoutInspectorScrollableDirections) {
+  if (_layoutInspectorFlags.scrollableDirections) {
     return [self.layoutInspector scrollableDirections];
   } else {
     ASScrollDirection scrollableDirection = ASScrollDirectionNone;
