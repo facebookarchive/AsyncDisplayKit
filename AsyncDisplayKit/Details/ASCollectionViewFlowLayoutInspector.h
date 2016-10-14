@@ -12,6 +12,7 @@
 
 #import <Foundation/Foundation.h>
 #import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASScrollDirection.h>
 
 @class ASCollectionView;
 @protocol ASCollectionDataSource;
@@ -51,6 +52,11 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion A great time to update perform selector caches!
  */
 - (void)didChangeCollectionViewDataSource:(nullable id<ASCollectionDataSource>)dataSource;
+
+/**
+ * Return the directions in which your collection view can scroll
+ */
+- (ASScrollDirection)scrollableDirections;
 
 #pragma mark Deprecated Methods
 

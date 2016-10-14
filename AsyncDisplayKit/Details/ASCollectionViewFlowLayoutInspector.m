@@ -176,6 +176,11 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
   return [self layoutHasSupplementaryViewOfKind:kind inSection:section collectionView:collectionView] ? 1 : 0;
 }
 
+- (ASScrollDirection)scrollableDirections
+{
+  return (self.layout.scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASScrollDirectionHorizontalDirections : ASScrollDirectionVerticalDirections;
+}
+
 #pragma mark - Private helpers
 
 - (CGSize)sizeForSupplementaryViewOfKind:(NSString *)kind inSection:(NSUInteger)section collectionView:(ASCollectionView *)collectionView
