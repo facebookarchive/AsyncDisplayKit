@@ -341,7 +341,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   // being.
   // TODO: After 2.0 is stable we should remove this behavior as a ASNetworkImageNode is a replaced element and the
   // client code should set the size of an image or it's container it's embedded in
-  if (ASIsCGSizeValidForSize(constrainedSize) == NO && _URL != nil && self.image == nil) {
+  if (ASIsCGSizeValidForSize(constrainedSize) == NO && self.image == nil) {
+    ASDisplayNodeAssert(_URL != nil, @"An NSURL must be set on ASNetworkImageNode before layout unless a valid size is provided.");
     return CGSizeZero;
   }
     
