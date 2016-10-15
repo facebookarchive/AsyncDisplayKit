@@ -1386,7 +1386,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   if (_asyncDataSourceFlags.tableNodeNodeBlockForRow) {
     block = [_asyncDataSource tableNode:self.tableNode nodeBlockForRowAtIndexPath:indexPath];
-  } else if (_asyncDataSourceFlags.tableNodeNodeBlockForRow) {
+  } else if (_asyncDataSourceFlags.tableNodeNodeForRow) {
     ASCellNode *node = [_asyncDataSource tableNode:self.tableNode nodeForRowAtIndexPath:indexPath];
     if ([node isKindOfClass:[ASCellNode class]]) {
       block = ^{
