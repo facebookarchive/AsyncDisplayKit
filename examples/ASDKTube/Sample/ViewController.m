@@ -63,25 +63,23 @@
 }
 
 #pragma mark - ASCollectionDelegate - ASCollectionDataSource
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+
+- (NSInteger)numberOfSectionsInTableNode:(ASTableNode *)tableNode
+{
   return 1;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+- (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
+{
   return _videoFeedData.count;
 }
 
-- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNode *)tableNode:(ASTableNode *)tableNode nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   VideoModel *videoObject = [_videoFeedData objectAtIndex:indexPath.row];
   VideoContentCell *cellNode = [[VideoContentCell alloc] initWithVideoObject:videoObject];
   return cellNode;
 }
-
-//- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath{
-//  CGFloat fullWidth = [UIScreen mainScreen].bounds.size.width;
-//  return ASSizeRangeMake(CGSizeMake(fullWidth, 0.0), CGSizeMake(fullWidth, 400.0));
-//}
 
 - (ASVideoPlayerNode *)videoPlayerNode;
 {
