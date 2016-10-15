@@ -215,18 +215,6 @@
 }
 
 /**
- * Asks the inspector for the number of supplementary sections in the collection view for the given kind.
- */
-- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind
-{
-  if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
-    return [[collectionView asyncDataSource] numberOfSectionsInCollectionView:collectionView];
-  } else {
-    return 0;
-  }
-}
-
-/**
  * Asks the inspector for the number of supplementary views for the given kind in the specified section.
  */
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section

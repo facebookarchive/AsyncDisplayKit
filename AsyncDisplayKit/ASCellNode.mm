@@ -13,6 +13,8 @@
 #import "ASEqualityHelpers.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASCollectionView+Undeprecated.h"
+#import "ASTableView+Undeprecated.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
@@ -298,8 +300,16 @@
   
   ASDisplayNode *owningNode = scrollView.asyncdisplaykit_node;
   if ([owningNode isKindOfClass:[ASCollectionNode class]]) {
+    NSIndexPath *ip = [(ASCollectionNode *)owningNode indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
     [result addObject:@{ @"collectionNode" : ASObjectDescriptionMakeTiny(owningNode) }];
   } else if ([owningNode isKindOfClass:[ASTableNode class]]) {
+    NSIndexPath *ip = [(ASTableNode *)owningNode indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
     [result addObject:@{ @"tableNode" : ASObjectDescriptionMakeTiny(owningNode) }];
   
   } else if ([scrollView isKindOfClass:[ASCollectionView class]]) {

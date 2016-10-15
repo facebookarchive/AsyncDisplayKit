@@ -181,7 +181,24 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 
 - (nullable ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath;
 
+- (NSUInteger)completedNumberOfSections;
+
+- (NSUInteger)completedNumberOfRowsInSection:(NSUInteger)section;
+
+- (nullable ASCellNode *)nodeAtCompletedIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * @return The index path, in the data source's index space, for the given node.
+ */
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
+
+/**
+ * @return The index path, in UIKit's index space, for the given node.
+ *
+ * @discussion @c indexPathForNode: is returns an index path in the data source's index space.
+ *   This method is useful for e.g. looking up the cell for a given node.
+ */
+- (nullable NSIndexPath *)completedIndexPathForNode:(ASCellNode *)cellNode;
 
 /**
  * Direct access to the nodes that have completed calculation and layout

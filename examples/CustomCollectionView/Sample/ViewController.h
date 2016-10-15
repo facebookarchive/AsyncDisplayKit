@@ -16,7 +16,8 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-@interface ViewController : UIViewController
+@interface ViewController : ASViewController
 
 @end

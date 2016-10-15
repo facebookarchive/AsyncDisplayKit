@@ -25,7 +25,7 @@
 #import "_ASDisplayLayer.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASSectionContext.h"
-
+#import "ASCollectionView+Undeprecated.h"
 
 /// What, if any, invalidation should we perform during the next -layoutSubviews.
 typedef NS_ENUM(NSUInteger, ASCollectionViewInvalidationStyle) {
@@ -157,38 +157,65 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   BOOL _superIsPendingDataLoad;
     
   struct {
-    unsigned int asyncDelegateScrollViewDidScroll:1;
-    unsigned int asyncDelegateScrollViewWillBeginDragging:1;
-    unsigned int asyncDelegateScrollViewDidEndDragging:1;
-    unsigned int asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset:1;
-    unsigned int asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath:1;
-    unsigned int asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPathDeprecated:1;
-    unsigned int asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPath:1;
-    unsigned int asyncDelegateCollectionViewWillBeginBatchFetchWithContext:1;
-    unsigned int asyncDelegateShouldBatchFetchForCollectionView:1;
+    unsigned int scrollViewDidScroll:1;
+    unsigned int scrollViewWillBeginDragging:1;
+    unsigned int scrollViewDidEndDragging:1;
+    unsigned int scrollViewWillEndDragging:1;
+    unsigned int collectionViewWillDisplayNodeForItem:1;
+    unsigned int collectionViewWillDisplayNodeForItemDeprecated:1;
+    unsigned int collectionViewDidEndDisplayingNodeForItem:1;
+    unsigned int collectionViewShouldSelectItem:1;
+    unsigned int collectionViewDidSelectItem:1;
+    unsigned int collectionViewShouldDeselectItem:1;
+    unsigned int collectionViewDidDeselectItem:1;
+    unsigned int collectionViewShouldHighlightItem:1;
+    unsigned int collectionViewDidHighlightItem:1;
+    unsigned int collectionViewDidUnhighlightItem:1;
+    unsigned int collectionViewShouldShowMenuForItem:1;
+    unsigned int collectionViewCanPerformActionForItem:1;
+    unsigned int collectionViewPerformActionForItem:1;
+    unsigned int collectionViewWillBeginBatchFetch:1;
+    unsigned int shouldBatchFetchForCollectionView:1;
+    unsigned int collectionNodeWillDisplayItem:1;
+    unsigned int collectionNodeDidEndDisplayingItem:1;
+    unsigned int collectionNodeShouldSelectItem:1;
+    unsigned int collectionNodeDidSelectItem:1;
+    unsigned int collectionNodeShouldDeselectItem:1;
+    unsigned int collectionNodeDidDeselectItem:1;
+    unsigned int collectionNodeShouldHighlightItem:1;
+    unsigned int collectionNodeDidHighlightItem:1;
+    unsigned int collectionNodeDidUnhighlightItem:1;
+    unsigned int collectionNodeShouldShowMenuForItem:1;
+    unsigned int collectionNodeCanPerformActionForItem:1;
+    unsigned int collectionNodePerformActionForItem:1;
+    unsigned int collectionNodeWillBeginBatchFetch:1;
+    unsigned int collectionNodeWillDisplaySupplementaryElement:1;
+    unsigned int collectionNodeDidEndDisplayingSupplementaryElement:1;
+
+    unsigned int shouldBatchFetchForCollectionNode:1;
   } _asyncDelegateFlags;
   
   struct {
-    unsigned int asyncDataSourceNodeForItemAtIndexPath:1;
-    unsigned int asyncDataSourceNodeBlockForItemAtIndexPath:1;
-    unsigned int asyncDataSourceNumberOfSectionsInCollectionView:1;
-    unsigned int asyncDataSourceContextForSection:1;
+    unsigned int collectionViewNodeForItem:1;
+    unsigned int collectionViewNodeBlockForItem:1;
+    unsigned int collectionViewNodeForSupplementaryElement:1;
+    unsigned int numberOfSectionsInCollectionView:1;
+    unsigned int collectionViewNumberOfItemsInSection:1;
+    unsigned int collectionNodeNodeForItem:1;
+    unsigned int collectionNodeNodeBlockForItem:1;
+    unsigned int collectionNodeNodeForSupplementaryElement:1;
+    unsigned int numberOfSectionsInCollectionNode:1;
+    unsigned int collectionNodeNumberOfItemsInSection:1;
+    unsigned int collectionNodeContextForSection:1;
   } _asyncDataSourceFlags;
   
   struct {
-    unsigned int layoutInspectorDidChangeCollectionViewDataSource:1;
-    unsigned int layoutInspectorDidChangeCollectionViewDelegate:1;
-    unsigned int layoutInspectorScrollableDirections:1;
+    unsigned int didChangeCollectionViewDataSource:1;
+    unsigned int didChangeCollectionViewDelegate:1;
+	unsigned int scrollableDirections:1;
   } _layoutInspectorFlags;
 }
 
-// Used only when ASCollectionView is created directly rather than through ASCollectionNode.
-// We create a node so that logic related to appearance, memory management, etc can be located there
-// for both the node-based and view-based version of the table.
-// This also permits sharing logic with ASTableNode, as the superclass is not UIKit-controlled.
-@property (nonatomic, strong) ASCollectionNode *strongCollectionNode;
-
-// Always set, whether ASCollectionView is created directly or via ASCollectionNode.
 @property (nonatomic, weak)   ASCollectionNode *collectionNode;
 
 @end
@@ -198,6 +225,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 @end
 
 @implementation ASCollectionView
+@synthesize asyncDelegate = _asyncDelegate;
+@synthesize asyncDataSource = _asyncDataSource;
 
 // Using _ASDisplayLayer ensures things like -layout are properly forwarded to ASCollectionNode.
 + (Class)layerClass
@@ -210,32 +239,18 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
 {
-  return [self _initWithFrame:CGRectZero collectionViewLayout:layout ownedByNode:NO];
+  return [self initWithFrame:CGRectZero collectionViewLayout:layout];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
-  return [self _initWithFrame:frame collectionViewLayout:layout ownedByNode:NO];
+  return [self _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:nil];
 }
 
-- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout ownedByNode:(BOOL)ownedByNode
-{
-  return [self _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:nil ownedByNode:ownedByNode];
-}
-
-- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator ownedByNode:(BOOL)ownedByNode
+- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
   if (!(self = [super initWithFrame:frame collectionViewLayout:layout]))
     return nil;
-  
-  if (!ownedByNode) {
-    // See commentary at the definition of .strongCollectionNode for why we create an ASCollectionNode.
-    // FIXME: The _view pointer of the node retains us, but the node will die immediately if we don't
-    // retain it.  At the moment there isn't a great solution to this, so we can't yet move our core
-    // logic to ASCollectionNode (required to have a shared superclass with ASTable*).
-    ASCollectionNode *collectionNode = nil; //[[ASCollectionNode alloc] _initWithCollectionView:self];
-    self.strongCollectionNode = collectionNode;
-  }
   
   _layoutController = [[ASCollectionViewLayoutController alloc] initWithCollectionView:self];
   
@@ -349,7 +364,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-- (void)setAsyncDataSource:(id<ASCollectionViewDataSource>)asyncDataSource
+- (void)setAsyncDataSource:(id<ASCollectionDataSource>)asyncDataSource
 {
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDataSource in the ViewController's dealloc. In this case our _asyncDataSource
@@ -366,23 +381,35 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     
-    _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForItemAtIndexPath:)];
-    _asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
-    _asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInCollectionView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
-    _asyncDataSourceFlags.asyncDataSourceContextForSection = [_asyncDataSource respondsToSelector:@selector(collectionView:contextForSection:)];
+    _asyncDataSourceFlags.collectionViewNodeForItem = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForItemAtIndexPath:)];
+    _asyncDataSourceFlags.collectionViewNodeBlockForItem = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
+    _asyncDataSourceFlags.numberOfSectionsInCollectionView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
+    _asyncDataSourceFlags.collectionViewNumberOfItemsInSection = [_asyncDataSource respondsToSelector:@selector(collectionView:numberOfItemsInSection:)];
+    _asyncDataSourceFlags.collectionViewNodeForSupplementaryElement = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForSupplementaryElementOfKind:atIndexPath:)];
 
-    ASDisplayNodeAssert(_asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath
-                        || _asyncDataSourceFlags.asyncDataSourceNodeForItemAtIndexPath, @"Data source must implement collectionView:nodeForItemAtIndexPath: or collectionView:nodeBlockForItemAtIndexPath:");
+    _asyncDataSourceFlags.collectionNodeNodeForItem = [_asyncDataSource respondsToSelector:@selector(collectionNode:nodeForItemAtIndexPath:)];
+    _asyncDataSourceFlags.collectionNodeNodeBlockForItem = [_asyncDataSource respondsToSelector:@selector(collectionNode:nodeBlockForItemAtIndexPath:)];
+    _asyncDataSourceFlags.numberOfSectionsInCollectionNode = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionNode:)];
+    _asyncDataSourceFlags.collectionNodeNumberOfItemsInSection = [_asyncDataSource respondsToSelector:@selector(collectionNode:numberOfItemsInSection:)];
+    _asyncDataSourceFlags.collectionNodeContextForSection = [_asyncDataSource respondsToSelector:@selector(collectionNode:contextForSection:)];
+    _asyncDataSourceFlags.collectionNodeNodeForSupplementaryElement = [_asyncDataSource respondsToSelector:@selector(collectionNode:nodeForSupplementaryElementOfKind:atIndexPath:)];
+
+
+    ASDisplayNodeAssert(_asyncDataSourceFlags.collectionNodeNumberOfItemsInSection || _asyncDataSourceFlags.collectionViewNumberOfItemsInSection, @"Data source must implement collectionNode:numberOfItemsInSection:");
+    ASDisplayNodeAssert(_asyncDataSourceFlags.collectionNodeNodeBlockForItem
+                        || _asyncDataSourceFlags.collectionNodeNodeForItem
+                        || _asyncDataSourceFlags.collectionViewNodeBlockForItem
+                        || _asyncDataSourceFlags.collectionViewNodeForItem, @"Data source must implement collectionNode:nodeBlockForItemAtIndexPath: or collectionNode:nodeForItemAtIndexPath:");
   }
   
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
   
-  if (_layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDataSource) {
+  if (_layoutInspectorFlags.didChangeCollectionViewDataSource) {
     [self.layoutInspector didChangeCollectionViewDataSource:asyncDataSource];
   }
 }
 
-- (void)setAsyncDelegate:(id<ASCollectionViewDelegate>)asyncDelegate
+- (void)setAsyncDelegate:(id<ASCollectionDelegate>)asyncDelegate
 {
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
   // the (common) case of nilling the asyncDelegate in the ViewController's dealloc. In this case our _asyncDelegate
@@ -399,22 +426,46 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDelegate = asyncDelegate;
     _proxyDelegate = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDelegate interceptor:self];
     
-    _asyncDelegateFlags.asyncDelegateScrollViewDidScroll = [_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)];
-    _asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
-    _asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNode:forItemAtIndexPath:)];
-    if (_asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath == NO) {
-      _asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPathDeprecated = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)];
+    _asyncDelegateFlags.scrollViewDidScroll = [_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)];
+    _asyncDelegateFlags.scrollViewWillEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
+    _asyncDelegateFlags.scrollViewWillBeginDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillBeginDragging:)];
+    _asyncDelegateFlags.scrollViewDidEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)];
+    _asyncDelegateFlags.collectionViewWillDisplayNodeForItem = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNode:forItemAtIndexPath:)];
+    if (_asyncDelegateFlags.collectionViewWillDisplayNodeForItem == NO) {
+      _asyncDelegateFlags.collectionViewWillDisplayNodeForItemDeprecated = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)];
     }
-    _asyncDelegateFlags.asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPath = [_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNode:forItemAtIndexPath:)];
-    _asyncDelegateFlags.asyncDelegateCollectionViewWillBeginBatchFetchWithContext = [_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)];
-    _asyncDelegateFlags.asyncDelegateShouldBatchFetchForCollectionView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:)];
-    _asyncDelegateFlags.asyncDelegateScrollViewWillBeginDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillBeginDragging:)];
-    _asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)];
+    _asyncDelegateFlags.collectionViewDidEndDisplayingNodeForItem = [_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNode:forItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionViewWillBeginBatchFetch = [_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)];
+    _asyncDelegateFlags.shouldBatchFetchForCollectionView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:)];
+    _asyncDelegateFlags.collectionViewShouldSelectItem = [_asyncDelegate respondsToSelector:@selector(collectionView:shouldSelectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionViewDidSelectItem = [_asyncDelegate respondsToSelector:@selector(collectionView:didSelectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionViewShouldDeselectItem = [_asyncDelegate respondsToSelector:@selector(collectionView:shouldDeselectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionViewDidDeselectItem = [_asyncDelegate respondsToSelector:@selector(collectionView:didDeselectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionViewShouldHighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionView:shouldHighlightItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionViewDidHighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionView:didHighlightItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionViewDidUnhighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionView:didUnhighlightItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionViewShouldShowMenuForItem = [_asyncDelegate respondsToSelector:@selector(collectionView:shouldShowMenuForItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionViewCanPerformActionForItem = [_asyncDelegate respondsToSelector:@selector(collectionView:canPerformAction:forItemAtIndexPath:withSender:)];
+    _asyncDelegateFlags.collectionViewPerformActionForItem = [_asyncDelegate respondsToSelector:@selector(collectionView:performAction:forItemAtIndexPath:withSender:)];
+    _asyncDelegateFlags.collectionNodeWillDisplayItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:willDisplayItemWithNode:)];
+    _asyncDelegateFlags.collectionNodeDidEndDisplayingItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didEndDisplayingItemWithNode:)];
+    _asyncDelegateFlags.collectionNodeWillBeginBatchFetch = [_asyncDelegate respondsToSelector:@selector(collectionNode:willBeginBatchFetchWithContext:)];
+    _asyncDelegateFlags.shouldBatchFetchForCollectionNode = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionNode:)];
+    _asyncDelegateFlags.collectionNodeShouldSelectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldSelectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeDidSelectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didSelectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeShouldDeselectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldDeselectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeDidDeselectItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didDeselectItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeShouldHighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldHighlightItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeDidHighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didHighlightItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeDidUnhighlightItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:didUnhighlightItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeShouldShowMenuForItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:shouldShowMenuForItemAtIndexPath:)];
+    _asyncDelegateFlags.collectionNodeCanPerformActionForItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:canPerformAction:forItemAtIndexPath:sender:)];
+    _asyncDelegateFlags.collectionNodePerformActionForItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:performAction:forItemAtIndexPath:sender:)];
   }
 
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
   
-  if (_layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDelegate) {
+  if (_layoutInspectorFlags.didChangeCollectionViewDelegate) {
     [self.layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
   }
 }
@@ -453,9 +504,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   _layoutInspector = layoutInspector;
   
-  _layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDataSource = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDataSource:)];
-  _layoutInspectorFlags.layoutInspectorDidChangeCollectionViewDelegate = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDelegate:)];
-  _layoutInspectorFlags.layoutInspectorScrollableDirections = [_layoutInspector respondsToSelector:@selector(scrollableDirections)];
+  _layoutInspectorFlags.didChangeCollectionViewDataSource = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDataSource:)];
+  _layoutInspectorFlags.didChangeCollectionViewDelegate = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDelegate:)];
+  _layoutInspectorFlags.scrollableDirections = [_layoutInspector respondsToSelector:@selector(scrollableDirections)];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
@@ -480,7 +531,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [[_dataController nodeAtIndexPath:indexPath] calculatedSize];
+  return [[self nodeForItemAtIndexPath:indexPath] calculatedSize];
 }
 
 - (NSArray<NSArray <ASCellNode *> *> *)completedNodes
@@ -490,7 +541,24 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [_dataController nodeAtIndexPath:indexPath];
+  return [_dataController nodeAtCompletedIndexPath:indexPath];
+}
+
+- (NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait
+{
+  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+  NSIndexPath *viewIndexPath = [self indexPathForNode:node];
+  if (viewIndexPath == nil && wait) {
+    [self waitUntilAllUpdatesAreCommitted];
+    viewIndexPath = [self indexPathForNode:node];
+  }
+  return viewIndexPath;
+}
+
+- (NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath
+{
+  ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
+  return [_dataController indexPathForNode:node];
 }
 
 - (ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
@@ -500,7 +568,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
-  return [_dataController indexPathForNode:cellNode];
+  return [_dataController completedIndexPathForNode:cellNode];
 }
 
 - (NSArray *)visibleNodes
@@ -519,20 +587,38 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return visibleNodes;
 }
 
+/**
+ * TODO: This method was built when the distinction between data source
+ * index paths and view index paths was unclear. For compatibility, it
+ * still expects data source index paths for the time being.
+ */
 - (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated
 {
   ASDisplayNodeAssertMainThread();
 
-  [self waitUntilAllUpdatesAreCommitted];
-  [super scrollToItemAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
+  if (viewIndexPath != nil) {
+    [super scrollToItemAtIndexPath:viewIndexPath atScrollPosition:scrollPosition animated:animated];
+  } else {
+    NSLog(@"Warning: Ignoring request to scroll to item at index path %@ because the item did not reach the collection view.", indexPath);
+  }
 }
 
+/**
+ * TODO: This method was built when the distinction between data source
+ * index paths and view index paths was unclear. For compatibility, it
+ * still expects data source index paths for the time being.
+ */
 - (void)selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
 {
   ASDisplayNodeAssertMainThread();
 
-  [self waitUntilAllUpdatesAreCommitted];
-  [super selectItemAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
+  if (viewIndexPath != nil) {
+    [super selectItemAtIndexPath:viewIndexPath animated:animated scrollPosition:scrollPosition];
+  } else {
+    NSLog(@"Warning: Ignoring request to select item at index path %@ because the item did not reach the collection view.", indexPath);
+  }
 }
 
 #pragma mark Internal
@@ -653,17 +739,17 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
   _superIsPendingDataLoad = NO;
-  return [_dataController numberOfSections];
+  return [_dataController completedNumberOfSections];
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-  return [_dataController numberOfRowsInSection:section];
+  return [_dataController completedNumberOfRowsInSection:section];
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [[_dataController nodeAtIndexPath:indexPath] calculatedSize];
+  return [[self nodeForItemAtIndexPath:indexPath] calculatedSize];
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -682,7 +768,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
   
-  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+  ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
   cell.node = node;
   [_rangeController configureContentView:cell.contentView forCellNode:node];
   
@@ -711,11 +797,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
   ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with cell that will be displayed not to be nil. indexPath: %@", indexPath);
 
-  if (_asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPath) {
-    [_asyncDelegate collectionView:self willDisplayNode:cellNode forItemAtIndexPath:indexPath];
+  if (_asyncDelegateFlags.collectionNodeWillDisplayItem) {
+    [_asyncDelegate collectionNode:self.collectionNode willDisplayItemWithNode:cellNode];
+  } else if (_asyncDelegateFlags.collectionViewWillDisplayNodeForItem) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-  } else if (_asyncDelegateFlags.asyncDelegateCollectionViewWillDisplayNodeForItemAtIndexPathDeprecated) {
+    [_asyncDelegate collectionView:self willDisplayNode:cellNode forItemAtIndexPath:indexPath];
+  } else if (_asyncDelegateFlags.collectionViewWillDisplayNodeForItemDeprecated) {
     [_asyncDelegate collectionView:self willDisplayNodeForItemAtIndexPath:indexPath];
   }
 #pragma clang diagnostic pop
@@ -730,10 +818,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(_ASCollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNode *cellNode = [cell node];
+  ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with removed cell not to be nil.");
 
-  if (_asyncDelegateFlags.asyncDelegateCollectionViewDidEndDisplayingNodeForItemAtIndexPath) {
-    ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with removed cell not to be nil.");
+  if (_asyncDelegateFlags.collectionNodeDidEndDisplayingItem) {
+    [_asyncDelegate collectionNode:self.collectionNode didEndDisplayingItemWithNode:cellNode];
+  } else if (_asyncDelegateFlags.collectionViewDidEndDisplayingNodeForItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [_asyncDelegate collectionView:self didEndDisplayingNode:cellNode forItemAtIndexPath:indexPath];
+#pragma clang diagnostic pop
   }
   
   [_rangeController setNeedsUpdate];
@@ -744,6 +837,180 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   cell.layoutAttributes = nil;
 }
 
+- (void)collectionView:(UICollectionView *)collectionView willDisplaySupplementaryView:(UICollectionReusableView *)view forElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
+{
+  if (_asyncDelegateFlags.collectionNodeWillDisplaySupplementaryElement) {
+    ASCellNode *node = [self supplementaryNodeForElementKind:elementKind atIndexPath:indexPath];
+    ASDisplayNodeAssert([node.supplementaryElementKind isEqualToString:elementKind], @"Expected node for supplementary element to have kind '%@', got '%@'.", elementKind, node.supplementaryElementKind);
+    [_asyncDelegate collectionNode:self.collectionNode willDisplaySupplementaryElementWithNode:node];
+  }
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didEndDisplayingSupplementaryView:(UICollectionReusableView *)view forElementOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
+{
+  if (_asyncDelegateFlags.collectionNodeDidEndDisplayingSupplementaryElement) {
+    ASCellNode *node = [self supplementaryNodeForElementKind:elementKind atIndexPath:indexPath];
+    ASDisplayNodeAssert([node.supplementaryElementKind isEqualToString:elementKind], @"Expected node for supplementary element to have kind '%@', got '%@'.", elementKind, node.supplementaryElementKind);
+    [_asyncDelegate collectionNode:self.collectionNode didEndDisplayingSupplementaryElementWithNode:node];
+  }
+}
+
+- (BOOL)collectionView:(UICollectionView *)collectionView shouldSelectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  if (_asyncDelegateFlags.collectionNodeShouldSelectItem) {
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      return [_asyncDelegate collectionNode:self.collectionNode shouldSelectItemAtIndexPath:indexPath];
+    }
+  } else if (_asyncDelegateFlags.collectionViewShouldSelectItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return [_asyncDelegate collectionView:self shouldSelectItemAtIndexPath:indexPath];
+#pragma clang diagnostic pop
+  }
+  return YES;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didSelectItemAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+  if (_asyncDelegateFlags.collectionNodeDidSelectItem) {
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      [_asyncDelegate collectionNode:self.collectionNode didSelectItemAtIndexPath:indexPath];
+    }
+  } else if (_asyncDelegateFlags.collectionViewDidSelectItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [_asyncDelegate collectionView:self didSelectItemAtIndexPath:indexPath];
+#pragma clang diagnostic pop
+  }
+}
+
+- (BOOL)collectionView:(UICollectionView *)collectionView shouldDeselectItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  if (_asyncDelegateFlags.collectionNodeShouldDeselectItem) {
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      return [_asyncDelegate collectionNode:self.collectionNode shouldDeselectItemAtIndexPath:indexPath];
+    }
+  } else if (_asyncDelegateFlags.collectionViewShouldDeselectItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return [_asyncDelegate collectionView:self shouldDeselectItemAtIndexPath:indexPath];
+#pragma clang diagnostic pop
+  }
+  return YES;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didDeselectItemAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+  if (_asyncDelegateFlags.collectionNodeDidDeselectItem) {
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      [_asyncDelegate collectionNode:self.collectionNode didDeselectItemAtIndexPath:indexPath];
+    }
+  } else if (_asyncDelegateFlags.collectionViewDidDeselectItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [_asyncDelegate collectionView:self didDeselectItemAtIndexPath:indexPath];
+#pragma clang diagnostic pop
+  }
+}
+
+- (BOOL)collectionView:(UICollectionView *)collectionView shouldHighlightItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  if (_asyncDelegateFlags.collectionNodeShouldHighlightItem) {
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      return [_asyncDelegate collectionNode:self.collectionNode shouldHighlightItemAtIndexPath:indexPath];
+    } else {
+      return YES;
+    }
+  } else if (_asyncDelegateFlags.collectionViewShouldHighlightItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return [_asyncDelegate collectionView:self shouldHighlightItemAtIndexPath:indexPath];
+#pragma clang diagnostic pop
+  }
+  return YES;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didHighlightItemAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+  if (_asyncDelegateFlags.collectionNodeDidHighlightItem) {
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      [_asyncDelegate collectionNode:self.collectionNode didHighlightItemAtIndexPath:indexPath];
+    }
+  } else if (_asyncDelegateFlags.collectionViewDidHighlightItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [_asyncDelegate collectionView:self didHighlightItemAtIndexPath:indexPath];
+#pragma clang diagnostic pop
+  }
+}
+
+- (void)collectionView:(UICollectionView *)collectionView didUnhighlightItemAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+  if (_asyncDelegateFlags.collectionNodeDidUnhighlightItem) {
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      [_asyncDelegate collectionNode:self.collectionNode didUnhighlightItemAtIndexPath:indexPath];
+    }
+  } else if (_asyncDelegateFlags.collectionViewDidUnhighlightItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [_asyncDelegate collectionView:self didUnhighlightItemAtIndexPath:indexPath];
+#pragma clang diagnostic pop
+  }
+}
+
+- (BOOL)collectionView:(UICollectionView *)collectionView shouldShowMenuForItemAtIndexPath:(nonnull NSIndexPath *)indexPath
+{
+  if (_asyncDelegateFlags.collectionNodeShouldShowMenuForItem) {
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      return [_asyncDelegate collectionNode:self.collectionNode shouldShowMenuForItemAtIndexPath:indexPath];
+    }
+  } else if (_asyncDelegateFlags.collectionViewShouldShowMenuForItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return [_asyncDelegate collectionView:self shouldShowMenuForItemAtIndexPath:indexPath];
+#pragma clang diagnostic pop
+  }
+  return NO;
+}
+
+- (BOOL)collectionView:(UICollectionView *)collectionView canPerformAction:(nonnull SEL)action forItemAtIndexPath:(nonnull NSIndexPath *)indexPath withSender:(nullable id)sender
+{
+  if (_asyncDelegateFlags.collectionNodeCanPerformActionForItem) {
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      return [_asyncDelegate collectionNode:self.collectionNode canPerformAction:action forItemAtIndexPath:indexPath sender:sender];
+    }
+  } else if (_asyncDelegateFlags.collectionViewCanPerformActionForItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return [_asyncDelegate collectionView:self canPerformAction:action forItemAtIndexPath:indexPath withSender:sender];
+#pragma clang diagnostic pop
+  }
+  return NO;
+}
+
+- (void)collectionView:(UICollectionView *)collectionView performAction:(nonnull SEL)action forItemAtIndexPath:(nonnull NSIndexPath *)indexPath withSender:(nullable id)sender
+{
+  if (_asyncDelegateFlags.collectionNodePerformActionForItem) {
+    indexPath = [self convertIndexPathToCollectionNode:indexPath];
+    if (indexPath != nil) {
+      [_asyncDelegate collectionNode:self.collectionNode performAction:action forItemAtIndexPath:indexPath sender:sender];
+    }
+  } else if (_asyncDelegateFlags.collectionViewPerformActionForItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [_asyncDelegate collectionView:self performAction:action forItemAtIndexPath:indexPath withSender:sender];
+#pragma clang diagnostic pop
+  }
+}
 
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView
 {
@@ -759,7 +1026,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
                                       inScrollView:scrollView
                                      withCellFrame:collectionCell.frame];
   }
-  if (_asyncDelegateFlags.asyncDelegateScrollViewDidScroll) {
+  if (_asyncDelegateFlags.scrollViewDidScroll) {
     [_asyncDelegate scrollViewDidScroll:scrollView];
   }
 }
@@ -777,7 +1044,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollDirection] contentOffset:*targetContentOffset];
   }
   
-  if (_asyncDelegateFlags.asyncDelegateScrollViewWillEndDraggingWithVelocityTargetContentOffset) {
+  if (_asyncDelegateFlags.scrollViewWillEndDragging) {
     [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:(targetContentOffset ? : &contentOffset)];
   }
 }
@@ -789,7 +1056,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
                                           inScrollView:scrollView
                                          withCellFrame:collectionCell.frame];
   }
-  if (_asyncDelegateFlags.asyncDelegateScrollViewWillBeginDragging) {
+  if (_asyncDelegateFlags.scrollViewWillBeginDragging) {
     [_asyncDelegate scrollViewWillBeginDragging:scrollView];
   }
 }
@@ -801,7 +1068,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
                                           inScrollView:scrollView
                                          withCellFrame:collectionCell.frame];
     }
-    if (_asyncDelegateFlags.asyncDelegateScrollViewDidEndDragging) {
+    if (_asyncDelegateFlags.scrollViewDidEndDragging) {
         [_asyncDelegate scrollViewDidEndDragging:scrollView willDecelerate:decelerate];
     }
 }
@@ -846,7 +1113,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASScrollDirection)scrollableDirections
 {
-  if (_layoutInspectorFlags.layoutInspectorScrollableDirections) {
+  if (_layoutInspectorFlags.scrollableDirections) {
     return [self.layoutInspector scrollableDirections];
   } else {
     ASScrollDirection scrollableDirection = ASScrollDirectionNone;
@@ -911,9 +1178,14 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (BOOL)canBatchFetch
 {
   // if the delegate does not respond to this method, there is no point in starting to fetch
-  BOOL canFetch = _asyncDelegateFlags.asyncDelegateCollectionViewWillBeginBatchFetchWithContext;
-  if (canFetch && _asyncDelegateFlags.asyncDelegateShouldBatchFetchForCollectionView) {
+  BOOL canFetch = _asyncDelegateFlags.collectionNodeWillBeginBatchFetch || _asyncDelegateFlags.collectionViewWillBeginBatchFetch;
+  if (canFetch && _asyncDelegateFlags.shouldBatchFetchForCollectionNode) {
+    return [_asyncDelegate shouldBatchFetchForCollectionNode:self.collectionNode];
+  } else if (canFetch && _asyncDelegateFlags.shouldBatchFetchForCollectionView) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDelegate shouldBatchFetchForCollectionView:self];
+#pragma clang diagnostic pop
   } else {
     return canFetch;
   }
@@ -952,9 +1224,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)_beginBatchFetching
 {
   [_batchContext beginBatchFetching];
-  if (_asyncDelegateFlags.asyncDelegateCollectionViewWillBeginBatchFetchWithContext) {
+  if (_asyncDelegateFlags.collectionViewWillBeginBatchFetch) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
       [_asyncDelegate collectionView:self willBeginBatchFetchWithContext:_batchContext];
+#pragma clang diagnostic pop
     });
   }
 }
@@ -962,28 +1237,48 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 #pragma mark - ASDataControllerSource
 
-- (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath
-{
-  if (!_asyncDataSourceFlags.asyncDataSourceNodeBlockForItemAtIndexPath) {
+- (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
+  ASCellNodeBlock block = nil;
+
+  if (_asyncDataSourceFlags.collectionNodeNodeBlockForItem) {
+    block = [_asyncDataSource collectionNode:self.collectionNode nodeBlockForItemAtIndexPath:indexPath];
+  } else if (_asyncDataSourceFlags.collectionNodeNodeForItem) {
+    ASCellNode *node = [_asyncDataSource collectionNode:self.collectionNode nodeForItemAtIndexPath:indexPath];
+    if ([node isKindOfClass:[ASCellNode class]]) {
+      block = ^{
+        return node;
+      };
+    } else {
+      ASDisplayNodeFailAssert(@"Data source returned invalid node from tableNode:nodeForRowAtIndexPath:. Node: %@", node);
+    }
+  } else if (_asyncDataSourceFlags.collectionViewNodeBlockForItem) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    block = [_asyncDataSource collectionView:self nodeBlockForItemAtIndexPath:indexPath];
+  } else if (_asyncDataSourceFlags.collectionViewNodeForItem) {
     ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
-    ASDisplayNodeAssert([node isKindOfClass:ASCellNode.class], @"invalid node class, expected ASCellNode");
-    __weak __typeof__(self) weakSelf = self;
-    return ^{
-      __typeof__(self) strongSelf = weakSelf;
-      [node enterHierarchyState:ASHierarchyStateRangeManaged];
-      if (node.interactionDelegate == nil) {
-        node.interactionDelegate = strongSelf;
-      }
-      return node;
+#pragma clang diagnostic pop
+    if ([node isKindOfClass:[ASCellNode class]]) {
+      block = ^{
+        return node;
+      };
+    } else {
+      ASDisplayNodeFailAssert(@"Data source returned invalid node from tableView:nodeForRowAtIndexPath:. Node: %@", node);
+    }
+  }
+
+  // Handle nil node block
+  if (block == nil) {
+    ASDisplayNodeFailAssert(@"ASTableNode could not get a node block for row at index path %@", indexPath);
+    block = ^{
+      return [[ASCellNode alloc] init];
     };
   }
 
-  ASCellNodeBlock block = [_asyncDataSource collectionView:self nodeBlockForItemAtIndexPath:indexPath];
-  ASDisplayNodeAssertNotNil(block, @"Invalid block, expected nonnull ASCellNodeBlock");
+  // Wrap the node block
   __weak __typeof__(self) weakSelf = self;
   return ^{
     __typeof__(self) strongSelf = weakSelf;
-
     ASCellNode *node = (block != nil ? block() : [[ASCellNode alloc] init]);
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
     if (node.interactionDelegate == nil) {
@@ -991,6 +1286,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     }
     return node;
   };
+  return block;
 }
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
@@ -1000,12 +1296,26 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section
 {
-  return [_asyncDataSource collectionView:self numberOfItemsInSection:section];
+  if (_asyncDataSourceFlags.collectionNodeNumberOfItemsInSection) {
+    return [_asyncDataSource collectionNode:self.collectionNode numberOfItemsInSection:section];
+  } else if (_asyncDataSourceFlags.collectionViewNumberOfItemsInSection) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return [_asyncDataSource collectionView:self numberOfItemsInSection:section];
+#pragma clang diagnostic pop
+  } else {
+    return 0;
+  }
 }
 
 - (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController {
-  if (_asyncDataSourceFlags.asyncDataSourceNumberOfSectionsInCollectionView) {
+  if (_asyncDataSourceFlags.numberOfSectionsInCollectionNode) {
+    return [_asyncDataSource numberOfSectionsInCollectionNode:self.collectionNode];
+  } else if (_asyncDataSourceFlags.numberOfSectionsInCollectionView) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [_asyncDataSource numberOfSectionsInCollectionView:self];
+#pragma clang diagnostic pop
   } else {
     return 1;
   }
@@ -1013,21 +1323,27 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (id<ASEnvironment>)dataControllerEnvironment
 {
-  if (self.collectionNode) {
-    return self.collectionNode;
-  }
-  return self.strongCollectionNode;
+  return self.collectionNode;
 }
 
 #pragma mark - ASCollectionViewDataControllerSource
 
 - (ASCellNode *)dataController:(ASCollectionDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  ASCellNode *node = [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
-  ASDisplayNodeAssert(node != nil, @"A node must be returned for a supplementary node");
+  ASCellNode *node = nil;
+  if (_asyncDataSourceFlags.collectionNodeNodeForSupplementaryElement) {
+    node = [_asyncDataSource collectionNode:self.collectionNode nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+  } else if (_asyncDataSourceFlags.collectionViewNodeForSupplementaryElement) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    node = [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+#pragma clang diagnostic pop
+  }
+  ASDisplayNodeAssert(node != nil, @"A node must be returned for supplementary element of kind '%@' at index path '%@'", kind, indexPath);
   return node;
 }
 
+// TODO: Lock this
 - (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController
 {
   return [_registeredSupplementaryKinds allObjects];
@@ -1048,8 +1364,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASDisplayNodeAssertMainThread();
   id<ASSectionContext> context = nil;
   
-  if (_asyncDataSourceFlags.asyncDataSourceContextForSection) {
-    context = [_asyncDataSource collectionView:self contextForSection:section];
+  if (_asyncDataSourceFlags.collectionNodeContextForSection) {
+    context = [_asyncDataSource collectionNode:self.collectionNode contextForSection:section];
   }
   
   if (context != nil) {
@@ -1092,7 +1408,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [_dataController nodeAtIndexPath:indexPath];
+  return [self nodeForItemAtIndexPath:indexPath];
 }
 
 - (NSString *)nameForRangeControllerDataSource
@@ -1239,9 +1555,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSIndexPath *indexPath = [self indexPathForNode:node];
   if (indexPath) {
     if (node.isSelected) {
-      [self selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+      [super selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
     } else {
-      [self deselectItemAtIndexPath:indexPath animated:NO];
+      [super deselectItemAtIndexPath:indexPath animated:NO];
     }
   }
 }
@@ -1262,12 +1578,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return;
   }
   
-  NSIndexPath *indexPath = [self indexPathForNode:node];
-  if (indexPath == nil) {
+  NSIndexPath *uikitIndexPath = [self indexPathForNode:node];
+  if (uikitIndexPath == nil) {
     return;
   }
 
-  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[ indexPath ] batched:NO];
+  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[ uikitIndexPath ] batched:NO];
   
   ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
   if (invalidationStyle == ASCollectionViewInvalidationStyleNone) {
@@ -1372,6 +1688,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     BOOL changedInNonScrollingDirection = (fixedHorizontally && newBounds.size.width != lastUsedSize.width) || (fixedVertically && newBounds.size.height != lastUsedSize.height);
 
     if (changedInNonScrollingDirection) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
       // This actually doesn't perform an animation, but prevents the transaction block from being processed in the
       // data controller's prevent animation block that would interrupt an interrupted relayout happening in an animation block
       // ie. ASCollectionView bounds change on rotation or multi-tasking split view resize.
@@ -1382,6 +1700,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
       [self waitUntilAllUpdatesAreCommitted];
       [self.collectionViewLayout invalidateLayout];
     }
+#pragma clang diagnostic pop
   }
 }
 
@@ -1400,16 +1719,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)collectionView:(UICollectionView *)collectionView moveItemAtIndexPath:(NSIndexPath *)sourceIndexPath toIndexPath:(NSIndexPath*)destinationIndexPath NS_AVAILABLE_IOS(9_0)
 {
   ASDisplayNodeAssert(![self.asyncDataSource respondsToSelector:_cmd], @"%@ is not supported by ASCollectionView - please remove or disable this data source method.", NSStringFromSelector(_cmd));
-}
-
-- (void)collectionView:(UICollectionView *)collectionView willDisplaySupplementaryView:(UICollectionReusableView *)view forElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssert(![self.asyncDataSource respondsToSelector:_cmd], @"%@ is not supported by ASCollectionView - please remove or disable this delegate method.", NSStringFromSelector(_cmd));
-}
-
-- (void)collectionView:(UICollectionView *)collectionView didEndDisplayingSupplementaryView:(UICollectionReusableView *)view forElementOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssert(![self.asyncDataSource respondsToSelector:_cmd], @"%@ is not supported by ASCollectionView - please remove or disable this delegate method.", NSStringFromSelector(_cmd));
 }
 
 #endif

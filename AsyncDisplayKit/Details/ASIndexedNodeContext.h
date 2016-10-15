@@ -13,22 +13,38 @@
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASEnvironment.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface ASIndexedNodeContext : NSObject
 
+/**
+ * The index path at which this node was originally inserted. Don't rely on this
+ * property too heavily – we should remove it in the future.
+ */
 @property (nonatomic, readonly, strong) NSIndexPath *indexPath;
+@property (nonatomic, readonly, copy, nullable) NSString *supplementaryElementKind;
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSize;
 @property (nonatomic, readonly, assign) ASEnvironmentTraitCollection environmentTraitCollection;
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
                         indexPath:(NSIndexPath *)indexPath
+         supplementaryElementKind:(nullable NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
        environmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection;
 
 /**
- * Returns a node allocated by executing node block. Node block will be nil out immediately.
+ * @return The node, running the node block if necessary. The node block will be discarded
+ * after the first time it is run.
  */
-- (ASCellNode *)allocateNode;
+@property (strong, readonly) ASCellNode *node;
+
+/**
+ * @return The node, if the node block has been run already.
+ */
+@property (strong, readonly, nullable) ASCellNode *nodeIfAllocated;
 
 + (NSArray<NSIndexPath *> *)indexPathsFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts;
 
 @end
+
+NS_ASSUME_NONNULL_END

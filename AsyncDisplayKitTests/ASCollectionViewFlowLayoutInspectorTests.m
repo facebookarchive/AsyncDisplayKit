@@ -13,13 +13,20 @@
 #import <OCMock/OCMock.h>
 
 #import "ASCollectionView.h"
+#import "ASCollectionNode.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASCellNode.h"
+
+@interface ASCollectionView (Private)
+
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
+
+@end
 
 /**
  * Test Data Source
  */
-@interface InspectorTestDataSource : NSObject <ASCollectionViewDataSource>
+@interface InspectorTestDataSource : NSObject <ASCollectionDataSource>
 @end
 
 @implementation InspectorTestDataSource
