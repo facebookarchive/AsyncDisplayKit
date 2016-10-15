@@ -18,14 +18,6 @@
 #import "MapHandlerNode.h"
 #import "CustomMapAnnotation.h"
 
-#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
-
-#import <AsyncDisplayKit/ASMapNode.h>
-#import <AsyncDisplayKit/ASButtonNode.h>
-#import <AsyncDisplayKit/ASEditableTextNode.h>
-
-#import <AsyncDisplayKit/ASStackLayoutSpec.h>
-#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import <AsyncDisplayKit/UIImage+ASConvenience.h>
 
@@ -37,9 +29,7 @@
 @property (nonatomic, strong) ASEditableTextNode *deltaLonEditableNode;
 @property (nonatomic, strong) ASButtonNode *updateRegionButton;
 @property (nonatomic, strong) ASButtonNode *liveMapToggleButton;
-@property (nonatomic, strong) ASButtonNode *testButton;
 @property (nonatomic, strong) ASMapNode *mapNode;
-
 
 @end
 
@@ -65,8 +55,6 @@
   _updateRegionButton  = [[ASButtonNode alloc] init];
   _liveMapToggleButton = [[ASButtonNode alloc] init];
   
-  _testButton = [[ASButtonNode alloc] init];
-  
   UIImage *backgroundImage = [UIImage as_resizableRoundedImageWithCornerRadius:5
                                                                    cornerColor:[UIColor whiteColor]
                                                                      fillColor:[UIColor lightGrayColor]];
@@ -82,10 +70,6 @@
   
   [_liveMapToggleButton setBackgroundImage:backgroundImage forState:ASControlStateNormal];
   [_liveMapToggleButton setBackgroundImage:backgroundHiglightedImage forState:ASControlStateHighlighted];
-  
-  [_testButton setBackgroundImage:backgroundImage forState:ASControlStateNormal];
-  [_testButton setBackgroundImage:backgroundHiglightedImage forState:ASControlStateHighlighted];
-
   
   _updateRegionButton.contentEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
   [_updateRegionButton setTitle:@"Update Region" withFont:nil withColor:[UIColor blueColor] forState:ASControlStateNormal];
@@ -192,8 +176,6 @@
                                                                             justifyContent:ASStackLayoutJustifyContentStart
                                                                                 alignItems:ASStackLayoutAlignItemsStretch
                                                                                   children:@[dashboardSpec, _liveMapToggleButton]];
-  
-  
   
   dashboardSpec.style.flexGrow = 1.0;
 
