@@ -13,23 +13,25 @@
 #import <AsyncDisplayKit/ASLayoutSpec.h>
 
 /** How the child is positioned within the spec. */
-typedef NS_OPTIONS(NSUInteger, ASRelativeLayoutSpecPosition) {
+typedef NS_ENUM(NSUInteger, ASRelativeLayoutSpecPosition) {
     /** The child is positioned at point 0 relatively to the layout axis (ie left / top most) */
-    ASRelativeLayoutSpecPositionStart = 1 << 0,
+    ASRelativeLayoutSpecPositionStart = 0,
     /** The child is centered along the specified axis */
-    ASRelativeLayoutSpecPositionCenter = 1 << 1,
+    ASRelativeLayoutSpecPositionCenter = 1,
     /** The child is positioned at the maximum point of the layout axis (ie right / bottom most) */
-    ASRelativeLayoutSpecPositionEnd = 1 << 2,
+    ASRelativeLayoutSpecPositionEnd = 2,
 };
 
-/** How much space the spec will take up. */
+/** How much space the spec will take up. 
+ *  Note: To use the ASRelativeLayoutSpecSizingOptionDefault sizing option in Swift use []
+ */
 typedef NS_OPTIONS(NSUInteger, ASRelativeLayoutSpecSizingOption) {
     /** The spec will take up the maximum size possible */
-    ASRelativeLayoutSpecSizingOptionDefault = 1 << 0,
+    ASRelativeLayoutSpecSizingOptionDefault,
     /** The spec will take up the minimum size possible along the X axis */
-    ASRelativeLayoutSpecSizingOptionMinimumWidth = 1 << 1,
+    ASRelativeLayoutSpecSizingOptionMinimumWidth = 1 << 0,
     /** The spec will take up the minimum size possible along the Y axis */
-    ASRelativeLayoutSpecSizingOptionMinimumHeight = 1 << 2,
+    ASRelativeLayoutSpecSizingOptionMinimumHeight = 1 << 1,
     /** Convenience option to take up the minimum size along both the X and Y axis */
     ASRelativeLayoutSpecSizingOptionMinimumSize = ASRelativeLayoutSpecSizingOptionMinimumWidth | ASRelativeLayoutSpecSizingOptionMinimumHeight,
 };
