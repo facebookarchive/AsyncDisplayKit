@@ -342,7 +342,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Asks the data source for the number of items in the given section of the collection node.
  *
- * @see @c numberOfSectionsInCollectionView:
+ * @see @c collectionView:numberOfItemsInSection:
  */
 - (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section;
 

@@ -239,7 +239,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
 {
-  return [self _initWithFrame:CGRectZero collectionViewLayout:layout layoutFacilitator:nil];
+  return [self initWithFrame:CGRectZero collectionViewLayout:layout];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
