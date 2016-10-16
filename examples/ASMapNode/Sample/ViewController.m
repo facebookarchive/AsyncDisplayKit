@@ -40,7 +40,7 @@
 {
   [super viewWillAppear:animated];
   
-  self.navigationController.navigationBarHidden = true;
+  self.navigationController.navigationBarHidden = YES;
 }
 
 @end
