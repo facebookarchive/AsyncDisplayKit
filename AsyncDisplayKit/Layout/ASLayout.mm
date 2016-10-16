@@ -40,12 +40,6 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 }
 
 @interface ASLayout () <ASDescriptionProvider>
-
-/**
- * A boolean describing if the current layout has been flattened.
- */
-@property (nonatomic, getter=isFlattened) BOOL flattened;
-
 @end
 
 @implementation ASLayout
@@ -84,7 +78,6 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     }
 
     _sublayouts = sublayouts != nil ? [sublayouts copy] : @[];
-    _flattened = NO;
   }
   return self;
 }
@@ -154,15 +147,12 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     queue.pop();
 
     if (self != context.layout && context.layout.type == ASLayoutElementTypeDisplayNode) {
-      ASLayout *layout = [ASLayout layoutWithLayout:context.layout position:context.absolutePosition];
-      layout.flattened = YES;
-      [flattenedSublayouts addObject:layout];
+      context.layout.position = context.absolutePosition;
+      [flattenedSublayouts addObject:context.layout];
     }
     
     for (ASLayout *sublayout in context.layout.sublayouts) {
-      if (sublayout.isFlattened == NO) {
-        queue.push({sublayout, context.absolutePosition + sublayout.position});
-      }
+      queue.push({sublayout, context.absolutePosition + sublayout.position});
     }
   }
 
