@@ -29,7 +29,7 @@ static const NSInteger kBatchSize = 20;
 static const CGFloat kHorizontalSectionPadding = 10.0f;
 static const CGFloat kVerticalSectionPadding = 20.0f;
 
-@interface ViewController () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout>
+@interface ViewController () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionViewDelegateFlowLayout>
 {
   ASCollectionNode *_collectionNode;
   NSMutableArray *_data;
@@ -45,15 +45,15 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
 
 - (instancetype)init
 {
+  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+  _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
+
   self = [super initWithNode:_collectionNode];
   
   if (self) {
     
     self.title = @"Cat Deals";
-    
-    UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-    
-    _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
+  
     _collectionNode.dataSource = self;
     _collectionNode.delegate = self;
     _collectionNode.backgroundColor = [UIColor grayColor];
@@ -63,10 +63,10 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
     preloadTuning.trailingBufferScreenfuls = 1;
     [_collectionNode setTuningParameters:preloadTuning forRangeType:ASLayoutRangeTypePreload];
     
-    ASRangeTuningParameters preRenderTuning;
-    preRenderTuning.leadingBufferScreenfuls = 1;
-    preRenderTuning.trailingBufferScreenfuls = 0.5;
-    [_collectionNode setTuningParameters:preRenderTuning forRangeType:ASLayoutRangeTypeDisplay];
+    ASRangeTuningParameters displayTuning;
+    displayTuning.leadingBufferScreenfuls = 1;
+    displayTuning.trailingBufferScreenfuls = 0.5;
+    [_collectionNode setTuningParameters:displayTuning forRangeType:ASLayoutRangeTypeDisplay];
     
     [_collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
     [_collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
@@ -151,10 +151,9 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
   [_collectionNode reloadData];
 }
 
-#pragma mark -
-#pragma mark ASCollectionView data source.
+#pragma mark - ASCollectionNodeDelegate / ASCollectionNodeDataSource
 
-- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   ItemViewModel *viewModel = _data[indexPath.item];
   return ^{
@@ -162,13 +161,52 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
   };
 }
 
-- (ASCellNode *)collectionView:(UICollectionView *)collectionView nodeForSupplementaryElementOfKind:(nonnull NSString *)kind atIndexPath:(nonnull NSIndexPath *)indexPath {
+- (ASCellNode *)collectionNode:(ASCollectionNode *)collectionNode nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
   if ([kind isEqualToString:UICollectionElementKindSectionHeader] && indexPath.section == 0) {
     return [[BlurbNode alloc] init];
   } else if ([kind isEqualToString:UICollectionElementKindSectionFooter] && indexPath.section == 0) {
     return [[LoadingNode alloc] init];
   }
   return nil;
+}
+
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  CGFloat collectionViewWidth = CGRectGetWidth(self.view.frame) - 2 * kHorizontalSectionPadding;
+  CGFloat oneItemWidth = [ItemNode preferredViewSize].width;
+  NSInteger numColumns = floor(collectionViewWidth / oneItemWidth);
+  // Number of columns should be at least 1
+  numColumns = MAX(1, numColumns);
+  
+  CGFloat totalSpaceBetweenColumns = (numColumns - 1) * kHorizontalSectionPadding;
+  CGFloat itemWidth = ((collectionViewWidth - totalSpaceBetweenColumns) / numColumns);
+  CGSize itemSize = [ItemNode sizeForWidth:itemWidth];
+  return ASSizeRangeMake(itemSize, itemSize);
+}
+
+- (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
+{
+  return [_data count];
+}
+
+- (NSInteger)numberOfSectionsInCollectionNode:(ASCollectionNode *)collectionNode
+{
+  return 1;
+}
+
+- (void)collectionNode:(ASCollectionNode *)collectionNode willBeginBatchFetchWithContext:(ASBatchContext *)context
+{
+  NSLog(@"fetch additional content");
+  [self fetchMoreCatsWithCompletion:^(BOOL finished){
+    [context completeBatchFetching:YES];
+  }];
+}
+
+#pragma mark - ASCollectionViewDelegateFlowLayout
+
+- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
+  return UIEdgeInsetsMake(kVerticalSectionPadding, kHorizontalSectionPadding, kVerticalSectionPadding, kHorizontalSectionPadding);
 }
 
 - (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section {
@@ -187,55 +225,5 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
   return CGSizeZero;
 }
 
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath {
-  CGFloat collectionViewWidth = CGRectGetWidth(self.view.frame) - 2 * kHorizontalSectionPadding;
-  CGFloat oneItemWidth = [ItemNode preferredViewSize].width;
-  NSInteger numColumns = floor(collectionViewWidth / oneItemWidth);
-  // Number of columns should be at least 1
-  numColumns = MAX(1, numColumns);
-  
-  CGFloat totalSpaceBetweenColumns = (numColumns - 1) * kHorizontalSectionPadding;
-  CGFloat itemWidth = ((collectionViewWidth - totalSpaceBetweenColumns) / numColumns);
-  CGSize itemSize = [ItemNode sizeForWidth:itemWidth];
-  return ASSizeRangeMake(itemSize, itemSize);
-}
-
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
-{
-  return [_data count];
-}
-
-- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
-{
-  return 1;
-}
-
-- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView
-{
-  // lock the data source
-  // The data source should not be change until it is unlocked.
-}
-
-- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView
-{
-  // unlock the data source to enable data source updating.
-}
-
-- (void)collectionView:(UICollectionView *)collectionView willBeginBatchFetchWithContext:(ASBatchContext *)context
-{
-  NSLog(@"fetch additional content");
-  [self fetchMoreCatsWithCompletion:^(BOOL finished){
-    [context completeBatchFetching:YES];
-  }];
-}
-
-- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section {
-  return UIEdgeInsetsMake(kVerticalSectionPadding, kHorizontalSectionPadding, kVerticalSectionPadding, kHorizontalSectionPadding);
-}
-
--(void)dealloc
-{
-  NSLog(@"ViewController is deallocing");
-}
 
 @end
