@@ -128,10 +128,10 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     // truncater do it's job again for the new constrained size. This is necessary as after a truncation did happen
     // the context would use the truncated string and not the original string to truncate based on the new
     // constrained size
-    ASRunLoopQueue *deallocQueue = [ASRunLoopQueue sharedDeallocationQueue];
-    [deallocQueue enqueue:_context];
-    [deallocQueue enqueue:_truncater];
-    [deallocQueue enqueue:_fontSizeAdjuster];
+
+    ASPerformBackgroundDeallocation(_context);
+    ASPerformBackgroundDeallocation(_truncater);
+    ASPerformBackgroundDeallocation(_fontSizeAdjuster);
     _context = nil;
     _truncater = nil;
     _fontSizeAdjuster = nil;
