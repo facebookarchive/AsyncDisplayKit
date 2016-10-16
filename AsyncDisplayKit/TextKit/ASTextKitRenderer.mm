@@ -50,6 +50,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     _constrainedSize = constrainedSize;
     _attributes = attributes;
     _sizeIsCalculated = NO;
+    _currentScaleFactor = 1;
   }
   return self;
 }
@@ -140,8 +141,13 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (void)_calculateSize
 {
+  // if we have no scale factors or an unconstrained width, there is no reason to try to adjust the font size
+  if (isinf(_constrainedSize.width) == NO && [_attributes.pointSizeScaleFactors count] > 0) {
+    _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
+  }
+
   // If we do not scale, do exclusion, or do custom truncation, we should just use TextKit for a fast-path.
-  BOOL doesNotScale = isinf(_constrainedSize.width) || [_attributes.pointSizeScaleFactors count] == 0;
+  BOOL doesNotScale = _currentScaleFactor == 1;
   // NOTE: This code does not correctly handle if they set `…` with different attributes.
   BOOL defaultTruncation = _attributes.avoidTailTruncationSet == nil && [_attributes.truncationAttributedString.string isEqualToString:@"\u2026"];
   BOOL doesNoExclusion = _attributes.exclusionPaths.count == 0;
@@ -151,11 +157,6 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     return;
   }
 
-  // if we have no scale factors or an unconstrained width, there is no reason to try to adjust the font size
-  if (isinf(_constrainedSize.width) == NO && [_attributes.pointSizeScaleFactors count] > 0) {
-    _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
-  }
-  
   __block NSTextStorage *scaledTextStorage = nil;
   BOOL isScaled = [self isScaled];
   if (isScaled) {
