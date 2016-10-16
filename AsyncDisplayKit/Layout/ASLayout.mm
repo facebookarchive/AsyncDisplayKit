@@ -129,9 +129,13 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
 #pragma mark - Layout Flattening
 
+/**
+ * NOTE: This method has the side effect of updating the @c position values of all the
+ *   ASLayout objects in the layout tree.
+ */
 - (ASLayout *)filteredNodeLayoutTree
 {
-  NSMutableArray *flattenedSublayouts = [NSMutableArray array];
+  NSMutableArray<ASLayout *> *flattenedSublayouts = [NSMutableArray array];
   
   struct Context {
     ASLayout *layout;
