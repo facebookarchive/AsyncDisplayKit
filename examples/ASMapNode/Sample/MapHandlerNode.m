@@ -87,12 +87,12 @@
 {
   [super didLoad];
 
-  [self updateLocationTextWithMKCoordinateRegion:_mapNode.region];
-
   [self configureEditableNodes:_latEditableNode];
   [self configureEditableNodes:_lonEditableNode];
   [self configureEditableNodes:_deltaLatEditableNode];
   [self configureEditableNodes:_deltaLonEditableNode];
+  
+  [self updateLocationTextWithMKCoordinateRegion:_mapNode.region];
   
   // avoiding retain cycles
   __weak MapHandlerNode *weakSelf = self;
@@ -220,10 +220,10 @@
 
 - (void)updateLocationTextWithMKCoordinateRegion:(MKCoordinateRegion)region
 {
-  _latEditableNode.attributedText = [self attributedStringFromFloat:_mapNode.region.center.latitude];
-  _lonEditableNode.attributedText = [self attributedStringFromFloat:_mapNode.region.center.longitude];
-  _deltaLatEditableNode.attributedText = [self attributedStringFromFloat:_mapNode.region.span.latitudeDelta];
-  _deltaLonEditableNode.attributedText = [self attributedStringFromFloat:_mapNode.region.span.longitudeDelta];
+  _latEditableNode.attributedText = [self attributedStringFromFloat:region.center.latitude];
+  _lonEditableNode.attributedText = [self attributedStringFromFloat:region.center.longitude];
+  _deltaLatEditableNode.attributedText = [self attributedStringFromFloat:region.span.latitudeDelta];
+  _deltaLonEditableNode.attributedText = [self attributedStringFromFloat:region.span.longitudeDelta];
 }
 
 #pragma mark - Helper Methods
