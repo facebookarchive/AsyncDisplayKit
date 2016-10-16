@@ -166,7 +166,7 @@ void ASAsyncTransactionQueue::GroupImpl::release()
   if (_pendingOperations == 0)  {
     delete this;
   } else {
-    _releaseCalled = true;
+    _releaseCalled = YES;
   }
 }
 
