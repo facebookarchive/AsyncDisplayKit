@@ -417,7 +417,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_controlFlexGrowSpacerSpec == nil) {
     _controlFlexGrowSpacerSpec = [[ASStackLayoutSpec alloc] init];
-    _controlFlexGrowSpacerSpec.style.flexGrow = 1;
+    _controlFlexGrowSpacerSpec.style.flexGrow = 1.0;
   }
 
   [_cachedControls setObject:_controlFlexGrowSpacerSpec forKey:@(ASVideoPlayerNodeControlTypeFlexGrowSpacer)];
@@ -733,7 +733,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _scrubberNode.style.preferredSize = CGSizeMake(maxSize.width, 44.0);
 
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
-  spacer.style.flexGrow = 1;
+  spacer.style.flexGrow = 1.0;
 
   ASStackLayoutSpec *controlbarSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
                                                                             spacing:10.0

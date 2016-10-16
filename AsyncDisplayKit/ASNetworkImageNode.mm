@@ -38,6 +38,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
   NSUUID *_cacheUUID;
   id _downloadIdentifier;
+  // The download identifier that we have set a progress block on, if any.
+  id _downloadIdentifierForProgressBlock;
 
   BOOL _imageLoaded;
   CGFloat _currentImageQuality;
@@ -222,16 +224,12 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)setShouldRenderProgressImages:(BOOL)shouldRenderProgressImages
 {
-  __instanceLock__.lock();
+  ASDN::MutexLocker l(__instanceLock__);
   if (shouldRenderProgressImages == _shouldRenderProgressImages) {
-    __instanceLock__.unlock();
     return;
   }
-  
   _shouldRenderProgressImages = shouldRenderProgressImages;
-  
-  
-  __instanceLock__.unlock();
+
   [self _updateProgressImageBlockOnDownloaderIfNeeded];
 }
 
@@ -283,9 +281,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)didEnterVisibleState
 {
   [super didEnterVisibleState];
-  
+  ASDN::MutexLocker l(__instanceLock__);
+
   if (_downloaderFlags.downloaderImplementsSetPriority) {
-    ASDN::MutexLocker l(__instanceLock__);
     if (_downloadIdentifier != nil) {
       [_downloader setPriority:ASImageDownloaderPriorityVisible withDownloadIdentifier:_downloadIdentifier];
     }
@@ -297,9 +295,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)didExitVisibleState
 {
   [super didExitVisibleState];
-  
+  ASDN::MutexLocker l(__instanceLock__);
+
   if (_downloaderFlags.downloaderImplementsSetPriority) {
-    ASDN::MutexLocker l(__instanceLock__);
     if (_downloadIdentifier != nil) {
       [_downloader setPriority:ASImageDownloaderPriorityPreload withDownloadIdentifier:_downloadIdentifier];
     }
@@ -350,41 +348,56 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   return [super calculateSizeThatFits:constrainedSize];
 }
 
-#pragma mark - Private methods -- only call with lock.
+#pragma mark - Private methods, safe to call without lock
+
+- (void)handleProgressImage:(UIImage *)progressImage progress:(CGFloat)progress downloadIdentifier:(nullable id)downloadIdentifier
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  // Getting a result back for a different download identifier, download must not have been successfully canceled
+  if (ASObjectIsEqual(_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
+    return;
+  }
+  self.image = progressImage;
+  dispatch_async(dispatch_get_main_queue(), ^{
+    // See comment in -displayDidFinish for why this must be dispatched to main
+    self.currentImageQuality = progress;
+  });
+}
+
+#pragma mark - Private methods, call with lock held
 
 - (void)_updateProgressImageBlockOnDownloaderIfNeeded
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  BOOL shouldRenderProgressImages = _shouldRenderProgressImages;
-  ASInterfaceState interfaceState = self.interfaceState;
-
-  if (!_downloaderFlags.downloaderImplementsSetProgress || _downloadIdentifier == nil) {
+  // If the downloader doesn't do progress, we are done.
+  if (_downloaderFlags.downloaderImplementsSetProgress == NO) {
     return;
   }
 
-  ASImageDownloaderProgressImage progress = nil;
-  if (shouldRenderProgressImages && ASInterfaceStateIncludesVisible(interfaceState)) {
-    __weak __typeof__(self) weakSelf = self;
-    progress = ^(UIImage * _Nonnull progressImage, CGFloat progress, id _Nullable downloadIdentifier) {
-      __typeof__(self) strongSelf = weakSelf;
-      if (strongSelf == nil) {
-        return;
-      }
+  // Read state.
+  BOOL shouldRender = _shouldRenderProgressImages && ASInterfaceStateIncludesVisible(_interfaceState);
+  id oldDownloadIDForProgressBlock = _downloadIdentifierForProgressBlock;
+  id newDownloadIDForProgressBlock = shouldRender ? _downloadIdentifier : nil;
 
-      ASDN::MutexLocker l(strongSelf->__instanceLock__);
-      //Getting a result back for a different download identifier, download must not have been successfully canceled
-      if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
-        return;
-      }
-      strongSelf.image = progressImage;
-      dispatch_async(dispatch_get_main_queue(), ^{
-        // See comment in -displayDidFinish for why this must be dispatched to main
-        strongSelf.currentImageQuality = progress;
-      });
-    };
+  // If we're already bound to the correct download, we're done.
+  if (ASObjectIsEqual(oldDownloadIDForProgressBlock, newDownloadIDForProgressBlock)) {
+    return;
   }
-  [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
+
+  // Unbind from the previous download.
+  if (oldDownloadIDForProgressBlock != nil) {
+    [_downloader setProgressImageBlock:nil callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:oldDownloadIDForProgressBlock];
+  }
+
+  // Bind to the current download.
+  if (newDownloadIDForProgressBlock != nil) {
+    __weak __typeof(self) weakSelf = self;
+    [_downloader setProgressImageBlock:^(UIImage * _Nonnull progressImage, CGFloat progress, id  _Nullable downloadIdentifier) {
+      [weakSelf handleProgressImage:progressImage progress:progress downloadIdentifier:downloadIdentifier];
+    } callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:newDownloadIDForProgressBlock];
+  }
+
+  // Update state.
+  _downloadIdentifierForProgressBlock = newDownloadIDForProgressBlock;
 }
 
 - (void)_clearImage

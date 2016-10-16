@@ -418,6 +418,7 @@
 		C78F7E2B1BF7809800CDEAFC /* ASTableNode.h in Headers */ = {isa = PBXBuildFile; fileRef = B0F880581BEAEC7500D17647 /* ASTableNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC051F1F1D7A286A006434CB /* ASCALayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC051F1E1D7A286A006434CB /* ASCALayerTests.m */; };
 		CC0AEEA41D66316E005D1C78 /* ASUICollectionViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC0AEEA31D66316E005D1C78 /* ASUICollectionViewTests.m */; };
+		CC11F97A1DB181180024D77B /* ASNetworkImageNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */; };
 		CC3B20841C3F76D600798563 /* ASPendingStateController.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20811C3F76D600798563 /* ASPendingStateController.h */; };
 		CC3B20851C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
 		CC3B20861C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
@@ -1108,6 +1109,7 @@
 		CC051F1E1D7A286A006434CB /* ASCALayerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCALayerTests.m; sourceTree = "<group>"; };
 		CC0AEEA31D66316E005D1C78 /* ASUICollectionViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASUICollectionViewTests.m; sourceTree = "<group>"; };
 		CC2E317F1DAC353700EEE891 /* ASCollectionView+Undeprecated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASCollectionView+Undeprecated.h"; sourceTree = "<group>"; };
+		CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASNetworkImageNodeTests.m; sourceTree = "<group>"; };
 		CC3B20811C3F76D600798563 /* ASPendingStateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPendingStateController.h; sourceTree = "<group>"; };
 		CC3B20821C3F76D600798563 /* ASPendingStateController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASPendingStateController.mm; sourceTree = "<group>"; };
 		CC3B20871C3F7A5400798563 /* ASWeakSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASWeakSet.h; sourceTree = "<group>"; };
@@ -1368,6 +1370,7 @@
 		058D09C5195D04C000B7D73C /* AsyncDisplayKitTests */ = {
 			isa = PBXGroup;
 			children = (
+				CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */,
 				CC051F1E1D7A286A006434CB /* ASCALayerTests.m */,
 				CC8B05D71D73979700F54286 /* ASTextNodePerformanceTests.m */,
 				CC8B05D41D73836400F54286 /* ASPerformanceTestContext.h */,
@@ -2296,6 +2299,7 @@
 				DBC453221C5FD97200B16017 /* ASDisplayNodeImplicitHierarchyTests.m in Sources */,
 				058D0A41195D057000B7D73C /* ASTextNodeWordKernerTests.mm in Sources */,
 				DBC452DE1C5C6A6A00B16017 /* ArrayDiffingTests.m in Sources */,
+				CC11F97A1DB181180024D77B /* ASNetworkImageNodeTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
