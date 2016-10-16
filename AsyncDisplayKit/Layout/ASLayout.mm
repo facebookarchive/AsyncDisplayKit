@@ -15,6 +15,7 @@
 #import "ASLayoutSpecUtilities.h"
 
 #import <queue>
+#import <mutex>
 #import "ASObjectDescriptionHelpers.h"
 
 CGPoint const CGPointNull = {NAN, NAN};
@@ -43,14 +44,12 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 {
   ASLayoutElementType _layoutElementType;
 }
-/**
- * A boolean describing if the current layout has been flattened.
- */
-@property (nonatomic, getter=isFlattened) BOOL flattened;
-
 @end
 
-@implementation ASLayout
+@implementation ASLayout {
+  std::mutex __instanceLock__;
+  CGPoint _position;
+}
 
 @dynamic frame, type;
 
@@ -88,7 +87,6 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     }
 
     _sublayouts = sublayouts != nil ? [sublayouts copy] : @[];
-    _flattened = NO;
   }
   return self;
 }
@@ -140,9 +138,13 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
 #pragma mark - Layout Flattening
 
+/**
+ * NOTE: This method has the side effect of updating the @c position values of all the
+ *   ASLayout objects in the layout tree.
+ */
 - (ASLayout *)filteredNodeLayoutTree
 {
-  NSMutableArray *flattenedSublayouts = [NSMutableArray array];
+  NSMutableArray<ASLayout *> *flattenedSublayouts = [NSMutableArray array];
   
   struct Context {
     ASLayout *layout;
@@ -158,15 +160,21 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     queue.pop();
 
     if (self != context.layout && context.layout.type == ASLayoutElementTypeDisplayNode) {
-      ASLayout *layout = [ASLayout layoutWithLayout:context.layout position:context.absolutePosition];
-      layout.flattened = YES;
-      [flattenedSublayouts addObject:layout];
+      /**
+       * A prior implementation copied the layout object to add into the array. This
+       * introduced significant overhead and should be avoided.
+       *
+       * NOTE: It is possible that, if a supernode performs multiple concurrent layouts,
+       * wherein the subnode's layout is valid across both layouts but the subnode's
+       * position changes, that there would be a race condition on the subnode's ASLayout.position.
+       * This risk is considered acceptable for the time-being.
+       */
+      context.layout.position = context.absolutePosition;
+      [flattenedSublayouts addObject:context.layout];
     }
     
     for (ASLayout *sublayout in context.layout.sublayouts) {
-      if (sublayout.isFlattened == NO) {
-        queue.push({sublayout, context.absolutePosition + sublayout.position});
-      }
+      queue.push({sublayout, context.absolutePosition + sublayout.position});
     }
   }
 
@@ -180,10 +188,22 @@ static inline NSString * descriptionIndents(NSUInteger indents)
   return _layoutElementType;
 }
 
+- (CGPoint)position
+{
+  std::lock_guard<std::mutex> l(__instanceLock__);
+  return _position;
+}
+
+- (void)setPosition:(CGPoint)position
+{
+  std::lock_guard<std::mutex> l(__instanceLock__);
+  _position = position;
+}
+
 - (CGRect)frame
 {
   CGRect subnodeFrame = CGRectZero;
-  CGPoint adjustedOrigin = _position;
+  CGPoint adjustedOrigin = self.position;
   if (isfinite(adjustedOrigin.x) == NO) {
     ASDisplayNodeAssert(0, @"Layout has an invalid position");
     adjustedOrigin.x = 0;
