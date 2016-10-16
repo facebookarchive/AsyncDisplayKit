@@ -91,8 +91,8 @@ static const CGFloat kInnerPadding = 10.0f;
   _textNode = [[ASTextNode alloc] init];
   _textNode.attributedText = [[NSAttributedString alloc] initWithString:[self kittyIpsum]
                                                                attributes:[self textStyle]];
-  _textNode.style.flexShrink = YES;
-  _textNode.style.flexGrow = YES;
+  _textNode.style.flexShrink = 1.0;
+  _textNode.style.flexGrow = 1.0;
   [self addSubnode:_textNode];
   
   return self;

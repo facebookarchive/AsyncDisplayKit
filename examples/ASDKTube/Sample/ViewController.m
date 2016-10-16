@@ -176,7 +176,7 @@
   }
 
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
-  spacer.flexGrow = YES;
+  spacer.flexGrow = 1.0;
 
   ASStackLayoutSpec *topBarSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
                                                                               spacing:10.0

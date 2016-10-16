@@ -113,11 +113,11 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   // username / photo location header vertical stack
-  _photoLocationLabel.style.flexShrink    = YES;
-  _userNameLabel.style.flexShrink         = YES;
+  _photoLocationLabel.style.flexShrink    = 1.0;
+  _userNameLabel.style.flexShrink         = 1.0;
   
   ASStackLayoutSpec *headerSubStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  headerSubStack.style.flexShrink         = YES;
+  headerSubStack.style.flexShrink         = 1.0;
   if (_photoLocationLabel.attributedText) {
     [headerSubStack setChildren:@[_userNameLabel, _photoLocationLabel]];
   } else {
@@ -131,7 +131,7 @@
   _photoTimeIntervalSincePostLabel.style.spacingBefore = HORIZONTAL_BUFFER;                                    // to remove double spaces around spacer
   
   ASLayoutSpec *spacer           = [[ASLayoutSpec alloc] init];    // FIXME: long locations overflow post time - set max size?
-  spacer.style.flexGrow          = YES;
+  spacer.style.flexGrow          = 1.0;
   
   UIEdgeInsets avatarInsets      = UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER);
   ASInsetLayoutSpec *avatarInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:avatarInsets child:_userAvatarImageView];
