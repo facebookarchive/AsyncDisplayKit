@@ -1356,7 +1356,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
   }
 
   // If we've reached this point, both _additionalTruncationMessage and
-  // _truncationAttributedString are present.  Compose them.
+  // _truncationAttributedText are present.  Compose them.
 
   NSMutableAttributedString *newComposedTruncationString = [[NSMutableAttributedString alloc] initWithAttributedString:_truncationAttributedText];
   [newComposedTruncationString replaceCharactersInRange:NSMakeRange(newComposedTruncationString.length, 0) withString:@" "];

@@ -108,7 +108,7 @@ static NSString *const kTestCaseUIKitWithReusedContext = @"UIKitReusedContext";
   ctx.results[kTestCaseASDK].userInfo[@"size"] = NSStringFromCGSize(asdkSize);
   
   ASXCTAssertEqualSizes(uiKitSize, asdkSize);
-  ASXCTAssertRelativePerformanceInRange(ctx, kTestCaseASDK, 0.2, 0.5);
+  ASXCTAssertRelativePerformanceInRange(ctx, kTestCaseASDK, 0.5, 0.9);
 }
 
 - (void)testPerformance_OneParagraphLatinWithTruncation
