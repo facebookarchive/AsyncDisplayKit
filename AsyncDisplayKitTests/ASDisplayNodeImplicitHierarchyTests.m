@@ -121,7 +121,7 @@
 - (void)testLayoutTransitionWillThrowForManualSubnodeManagement
 {
   ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
-  node1.name = @"node1";
+  node1.debugName = @"node1";
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
   node.automaticallyManagesSubnodes = YES;

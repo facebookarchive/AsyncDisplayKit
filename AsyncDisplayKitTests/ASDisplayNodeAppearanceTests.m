@@ -55,10 +55,10 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
 @end
 
 // Conveniences for making nodes named a certain way
-#define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
+#define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.debugName = @#n
 #define DeclareViewNamed(v) \
   ASDisplayNode *node_##v = [[ASDisplayNode alloc] init]; \
-  node_##v.name = @#v; \
+  node_##v.debugName = @#v; \
   UIView *v = node_##v.view;
 
 @implementation ASDisplayNodeAppearanceTests

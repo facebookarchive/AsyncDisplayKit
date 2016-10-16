@@ -18,6 +18,7 @@
 
 // Dynamic properties for ASLayoutElements
 @dynamic layoutElementType;
+@synthesize debugName = _debugName;
 @synthesize isFinalLayoutElement = _isFinalLayoutElement;
 
 #pragma mark - Class
@@ -54,6 +55,20 @@
 - (BOOL)canLayoutAsynchronous
 {
   return YES;
+}
+
+- (NSString *)debugName
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _debugName;
+}
+
+- (void)setDebugName:(NSString *)debugName
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if (!ASObjectIsEqual(_debugName, debugName)) {
+    _debugName = [debugName copy];
+  }
 }
 
 #pragma mark - Final LayoutElement
@@ -264,7 +279,6 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 @end
 
-
 #pragma mark - ASLayoutSpec (Debugging)
 
 @implementation ASLayoutSpec (Debugging)
@@ -299,7 +313,11 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (NSString *)asciiArtName
 {
-  return NSStringFromClass([self class]);
+  NSString *string = NSStringFromClass([self class]);
+  if (_debugName) {
+    string = [string stringByAppendingString:[NSString stringWithFormat:@" (debugName = %@)",_debugName]];
+  }
+  return string;
 }
 
 @end
