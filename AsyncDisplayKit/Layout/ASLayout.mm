@@ -70,6 +70,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 #endif
     
     _layoutElement = layoutElement;
+    // Read this now to avoid @c weak overhead later.
     _layoutElementType = layoutElement.layoutElementType;
     
     if (!ASIsCGSizeValidForLayout(size)) {
