@@ -375,14 +375,12 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   // Destruction of bigger images on the main thread can be expensive
   // and can take some time, so we dispatch onto a bg queue to
   // actually dealloc.
-  __block UIImage *image = self.image;
+  UIImage *image = self.image;
   CGSize imageSize = image.size;
   BOOL shouldReleaseImageOnBackgroundThread = imageSize.width > kMinReleaseImageOnBackgroundSize.width ||
                                               imageSize.height > kMinReleaseImageOnBackgroundSize.height;
   if (shouldReleaseImageOnBackgroundThread) {
-    ASPerformBlockOnDeallocationQueue(^{
-      image = nil;
-    });
+    ASPerformBackgroundDeallocation(image);
   }
   self.animatedImage = nil;
   self.image = _defaultImage;

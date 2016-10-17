@@ -27,8 +27,8 @@ void ASPerformBlockOnMainThread(void (^block)());
 /// Dispatches the given block to a background queue with priority of DISPATCH_QUEUE_PRIORITY_DEFAULT if not already run on a background queue
 void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
 
-/// Dispatches a block on to a serial queue that's main purpose is for deallocation of objects on a background thread
-void ASPerformBlockOnDeallocationQueue(void (^block)());
+/// For deallocation of objects on a background thread without GCD overhead / thread explosion
+void ASPerformBackgroundDeallocation(id object);
 
 CGFloat ASScreenScale();
 
