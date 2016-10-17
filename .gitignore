@@ -24,3 +24,8 @@ build
 *.gcov
 *.gcno
 *.gcda
+
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
