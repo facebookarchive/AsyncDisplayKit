@@ -147,18 +147,17 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   }
 
   // If we do not scale, do exclusion, or do custom truncation, we should just use TextKit for a fast-path.
-  BOOL doesNotScale = _currentScaleFactor == 1;
+  BOOL isScaled = [self isScaled];
   // NOTE: This code does not correctly handle if they set `…` with different attributes.
   BOOL defaultTruncation = _attributes.avoidTailTruncationSet == nil && [_attributes.truncationAttributedString.string isEqualToString:@"\u2026"];
   BOOL doesNoExclusion = _attributes.exclusionPaths.count == 0;
-  if (doesNotScale && defaultTruncation && doesNoExclusion) {
+  if (isScaled == NO && defaultTruncation && doesNoExclusion) {
     CGSize baseSize = [_attributes.attributedString boundingRectWithSize:_constrainedSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil].size;
     _calculatedSize = [self.shadower outsetSizeWithInsetSize:baseSize];
     return;
   }
 
   __block NSTextStorage *scaledTextStorage = nil;
-  BOOL isScaled = [self isScaled];
   if (isScaled) {
     // apply the string scale before truncating or else we may truncate the string after we've done the work to shrink it.
     [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
@@ -196,7 +195,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (BOOL)isScaled
 {
-  return (self.currentScaleFactor > 0 && self.currentScaleFactor < 1.0);
+  return (_currentScaleFactor > 0 && _currentScaleFactor < 1.0);
 }
 
 #pragma mark - Drawing
