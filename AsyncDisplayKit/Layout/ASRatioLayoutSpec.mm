@@ -19,10 +19,14 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 
+#pragma mark - ASRatioLayoutSpec
+
 @implementation ASRatioLayoutSpec
 {
   CGFloat _ratio;
 }
+
+#pragma mark - Lifecycle
 
 + (instancetype)ratioLayoutSpecWithRatio:(CGFloat)ratio child:(id<ASLayoutElement>)child
 {
@@ -34,18 +38,24 @@
   if (!(self = [super init])) {
     return nil;
   }
+
   ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
   ASDisplayNodeAssert(ratio > 0, @"Ratio should be strictly positive, but received %f", ratio);
   _ratio = ratio;
-  [self setChild:child];
+  self.child = child;
+
   return self;
 }
+
+#pragma mark - Setter / Getter
 
 - (void)setRatio:(CGFloat)ratio
 {
   ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   _ratio = ratio;
 }
+
+#pragma mark - ASLayoutElement
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
@@ -71,7 +81,7 @@
   });
 
   // If there is no max size in *either* dimension, we can't apply the ratio, so just pass our size range through.
-  const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeMake(*bestSize, *bestSize);
+  const ASSizeRange childRange = (bestSize == sizeOptions.end()) ? constrainedSize : ASSizeRangeIntersect(constrainedSize, ASSizeRangeMake(*bestSize, *bestSize));
   const CGSize parentSize = (bestSize == sizeOptions.end()) ? ASLayoutElementParentSizeUndefined : *bestSize;
   ASLayout *sublayout = [self.child layoutThatFits:childRange parentSize:parentSize];
   sublayout.position = CGPointZero;
@@ -79,6 +89,8 @@
 }
 
 @end
+
+#pragma mark - ASRatioLayoutSpec (Debugging)
 
 @implementation ASRatioLayoutSpec (Debugging)
 
