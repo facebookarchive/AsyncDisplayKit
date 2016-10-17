@@ -82,7 +82,7 @@
   UIGraphicsBeginImageContextWithOptions(bounds.size, YES, 1);
   [[UIColor whiteColor] setFill];
   UIRectFill(bounds);
-  [str drawWithRect:bounds options:NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin context:nil];
+  [str drawWithRect:bounds options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil];
   UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
   UIGraphicsEndImageContext();
   UIImageView *iv = [[UIImageView alloc] initWithImage:image];
