@@ -18,6 +18,7 @@
 
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector)
 {
+  if (superclass == subclass) return NO; // Even if the class implements the selector, it doesn't override itself.
   Method superclassMethod = class_getInstanceMethod(superclass, selector);
   Method subclassMethod = class_getInstanceMethod(subclass, selector);
   IMP superclassIMP = superclassMethod ? method_getImplementation(superclassMethod) : NULL;
@@ -27,6 +28,7 @@ BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector)
 
 BOOL ASSubclassOverridesClassSelector(Class superclass, Class subclass, SEL selector)
 {
+  if (superclass == subclass) return NO; // Even if the class implements the selector, it doesn't override itself.
   Method superclassMethod = class_getClassMethod(superclass, selector);
   Method subclassMethod = class_getClassMethod(subclass, selector);
   IMP superclassIMP = superclassMethod ? method_getImplementation(superclassMethod) : NULL;
