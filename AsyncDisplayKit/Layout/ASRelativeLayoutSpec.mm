@@ -13,7 +13,7 @@
 #import "ASRelativeLayoutSpec.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayout.h"
+#import "ASLayoutPrivate.h"
 
 @implementation ASRelativeLayoutSpec
 
