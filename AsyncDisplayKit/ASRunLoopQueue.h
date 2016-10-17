@@ -17,7 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASRunLoopQueue<ObjectType> : NSObject
 
 - (instancetype)initWithRunLoop:(CFRunLoopRef)runloop
-                     andHandler:(nullable void(^)(ObjectType dequeuedItem, BOOL isQueueDrained))handlerBlock;
+                     andHandler:(void(^)(ObjectType dequeuedItem, BOOL isQueueDrained))handlerBlock;
 
 - (void)enqueue:(ObjectType)object;
 
@@ -33,6 +33,5 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)releaseObjectInBackground:(id)object;
 
 @end
-
 
 NS_ASSUME_NONNULL_END

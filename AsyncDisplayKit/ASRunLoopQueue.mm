@@ -28,8 +28,7 @@ static void runLoopSourceCallback(void *info) {
 
 #pragma mark - ASDeallocQueue
 
-@implementation ASDeallocQueue
-{
+@implementation ASDeallocQueue {
   NSThread *_thread;
   NSCondition *_condition;
   std::deque<id> _queue;
@@ -57,16 +56,21 @@ static void runLoopSourceCallback(void *info) {
 {
   @autoreleasepool {
     __unsafe_unretained __typeof__(self) weakSelf = self;
+    // 100ms timer.  No resources are wasted in between, as the thread sleeps, and each check is fast.
+    // This time is fast enough for most use cases without excessive churn.
     CFRunLoopTimerRef timer = CFRunLoopTimerCreateWithHandler(NULL, -1, 0.1, 0, 0, ^(CFRunLoopTimerRef timer) {
 #if ASRunLoopQueueLoggingEnabled
       NSLog(@"ASDeallocQueue Processing: %d objects destroyed", weakSelf->_queue.size());
 #endif
       weakSelf->_queueLock.lock();
-        // Sometimes we release 10,000 objects at a time.  Avoid holding the lock while doing so.
-        std::deque<id> oldQueue = weakSelf->_queue;
-        weakSelf->_queue = std::deque<id>();
+      std::deque<id> currentQueue = weakSelf->_queue;
+      if (currentQueue.size() == 0) {
+        return;
+      }
+      // Sometimes we release 10,000 objects at a time.  Don't hold the lock while releasing.
+      weakSelf->_queue = std::deque<id>();
       weakSelf->_queueLock.unlock();
-      oldQueue.clear();
+      currentQueue.clear();
     });
     
     CFRunLoopRef runloop = CFRunLoopGetCurrent();
@@ -131,8 +135,8 @@ static void runLoopSourceCallback(void *info) {
 
 @interface ASRunLoopQueue () {
   CFRunLoopRef _runLoop;
-  CFRunLoopObserverRef _runLoopObserver;
   CFRunLoopSourceRef _runLoopSource;
+  CFRunLoopObserverRef _runLoopObserver;
   std::deque<id> _internalQueue;
   ASDN::RecursiveMutex _internalQueueLock;
   
@@ -210,16 +214,7 @@ static void runLoopSourceCallback(void *info) {
 
 - (void)processQueue
 {
-  if (_queueConsumer == nil) {
-    // If we have no block to run on each item, just dump the entire queue (e.g. sharedDeallocationQueue)
-    _internalQueueLock.lock();
-    _internalQueue.clear();
-    _internalQueueLock.unlock();
-    return;
-  }
-  
-  std::deque<id> itemsToProcess = std::deque<id>();
-  
+  std::deque<id> itemsToProcess = std::deque<id>();  
   BOOL isQueueDrained = NO;
   {
     ASDN::MutexLocker l(_internalQueueLock);
@@ -268,11 +263,11 @@ static void runLoopSourceCallback(void *info) {
     return;
   }
   
+  ASDN::MutexLocker l(_internalQueueLock);
+
   // Check if the object exists.
   BOOL foundObject = NO;
-  
-  _internalQueueLock.lock();
-  
+    
   if (_ensureExclusiveMembership) {
     for (id currentObject : _internalQueue) {
       if (currentObject == object) {
@@ -284,12 +279,9 @@ static void runLoopSourceCallback(void *info) {
 
   if (!foundObject) {
     _internalQueue.push_back(object);
-    _internalQueueLock.unlock();
     
     CFRunLoopSourceSignal(_runLoopSource);
     CFRunLoopWakeUp(_runLoop);
-  } else {
-    _internalQueueLock.unlock();
   }
 }
 
