@@ -95,7 +95,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASRangeController *_rangeController;
   ASCollectionViewLayoutController *_layoutController;
   id<ASCollectionViewLayoutInspecting> _defaultLayoutInspector;
-  id<ASCollectionViewLayoutInspecting> _layoutInspector;
+  __weak id<ASCollectionViewLayoutInspecting> _layoutInspector;
   NSMutableSet *_cellsForVisibilityUpdates;
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
