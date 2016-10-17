@@ -100,4 +100,16 @@
   ASSnapshotVerifyNode(textNode, nil);
 }
 
+- (void)testThatSlowPathTruncationWorks
+{
+  self.recordMode = YES;
+  ASTextNode *textNode = [[ASTextNode alloc] init];
+  textNode.attributedText = [[NSAttributedString alloc] initWithString:@"judar judar judar judar judar judar"
+                                                            attributes:@{ NSFontAttributeName : [UIFont systemFontOfSize:30] }];
+  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
+  textNode.exclusionPaths = @[ [UIBezierPath bezierPath] ];
+  textNode.maximumNumberOfLines = 1;
+  ASSnapshotVerifyNode(textNode, nil);
+}
+
 @end
