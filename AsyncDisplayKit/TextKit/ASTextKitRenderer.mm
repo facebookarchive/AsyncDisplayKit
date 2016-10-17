@@ -152,8 +152,10 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   BOOL defaultTruncation = _attributes.avoidTailTruncationSet == nil && [_attributes.truncationAttributedString.string isEqualToString:@"\u2026"];
   BOOL doesNoExclusion = _attributes.exclusionPaths.count == 0;
   if (isScaled == NO && defaultTruncation && doesNoExclusion) {
-    CGSize baseSize = [_attributes.attributedString boundingRectWithSize:_constrainedSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil].size;
-    _calculatedSize = [self.shadower outsetSizeWithInsetSize:baseSize];
+    CGRect rect = [_attributes.attributedString boundingRectWithSize:_constrainedSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil];
+    // Intersect with constrained rect, in case text kit goes out-of-bounds.
+    rect = CGRectIntersection(rect, {CGPointZero, _constrainedSize});
+    _calculatedSize = [self.shadower outsetSizeWithInsetSize:rect.size];
     return;
   }
 
