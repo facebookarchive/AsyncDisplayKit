@@ -75,26 +75,10 @@
   ASSnapshotVerifyView(backgroundView, nil);
 }
 
-- (void)testThatTextKitTruncationMatchesStyle
-{
-  NSAttributedString *str = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
-  CGRect bounds = CGRectMake(0, 0, 110, 30);
-  UIGraphicsBeginImageContextWithOptions(bounds.size, YES, 1);
-  [[UIColor whiteColor] setFill];
-  UIRectFill(bounds);
-  [str drawWithRect:bounds options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil];
-  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-  UIGraphicsEndImageContext();
-  UIImageView *iv = [[UIImageView alloc] initWithImage:image];
-  ASSnapshotVerifyView(iv, nil);
-}
-
 - (void)testThatFastPathTruncationWorks
 {
-  self.recordMode = YES;
   ASTextNode *textNode = [[ASTextNode alloc] init];
-  textNode.attributedText = [[NSAttributedString alloc] initWithString:@"judar judar judar judar judar judar"
-                                                            attributes:@{ NSFontAttributeName : [UIFont systemFontOfSize:30] }];
+  textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
   [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
   textNode.maximumNumberOfLines = 1;
   ASSnapshotVerifyNode(textNode, nil);
@@ -102,10 +86,8 @@
 
 - (void)testThatSlowPathTruncationWorks
 {
-  self.recordMode = YES;
   ASTextNode *textNode = [[ASTextNode alloc] init];
-  textNode.attributedText = [[NSAttributedString alloc] initWithString:@"judar judar judar judar judar judar"
-                                                            attributes:@{ NSFontAttributeName : [UIFont systemFontOfSize:30] }];
+  textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
   [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
   textNode.exclusionPaths = @[ [UIBezierPath bezierPath] ];
   textNode.maximumNumberOfLines = 1;

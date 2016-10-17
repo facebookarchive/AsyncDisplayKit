@@ -35,11 +35,20 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   return truncationCharacterSet;
 }
 
+@interface ASTextKitRenderer()
+/**
+ * This object is lazily created. It is provided to the NSAttributedString
+ * drawing methods used by the fast-paths in the size calculation and drawing
+ * instance methods.
+ */
+@property (nonatomic, strong, readonly) NSStringDrawingContext *stringDrawingContext;
+@end
+
 @implementation ASTextKitRenderer {
   CGSize _calculatedSize;
   BOOL _sizeIsCalculated;
 }
-@synthesize attributes = _attributes, context = _context, shadower = _shadower, truncater = _truncater, fontSizeAdjuster = _fontSizeAdjuster;
+@synthesize attributes = _attributes, context = _context, shadower = _shadower, truncater = _truncater, fontSizeAdjuster = _fontSizeAdjuster, stringDrawingContext = _stringDrawingContext;
 
 #pragma mark - Initialization
 
@@ -107,6 +116,14 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   return _context;
 }
 
+- (NSStringDrawingContext *)stringDrawingContext
+{
+  if (_stringDrawingContext == nil) {
+    _stringDrawingContext = [[NSStringDrawingContext alloc] init];
+  }
+  return _stringDrawingContext;
+}
+
 #pragma mark - Sizing
 
 - (CGSize)size
@@ -148,11 +165,8 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
   // If we do not scale, do exclusion, or do custom truncation, we should just use TextKit for a fast-path.
   BOOL isScaled = [self isScaled];
-  // NOTE: This code does not correctly handle if they set `…` with different attributes.
-  BOOL defaultTruncation = _attributes.avoidTailTruncationSet == nil && [_attributes.truncationAttributedString.string isEqualToString:@"\u2026"];
-  BOOL doesNoExclusion = _attributes.exclusionPaths.count == 0;
-  if (isScaled == NO && defaultTruncation && doesNoExclusion) {
-    CGRect rect = [_attributes.attributedString boundingRectWithSize:_constrainedSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil];
+  if (isScaled == NO && self.usesCustomTruncation == NO && self.usesExclusionPaths == NO) {
+    CGRect rect = [_attributes.attributedString boundingRectWithSize:_constrainedSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:self.stringDrawingContext];
     // Intersect with constrained rect, in case text kit goes out-of-bounds.
     rect = CGRectIntersection(rect, {CGPointZero, _constrainedSize});
     _calculatedSize = [self.shadower outsetSizeWithInsetSize:rect.size];
@@ -200,6 +214,17 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   return (_currentScaleFactor > 0 && _currentScaleFactor < 1.0);
 }
 
+- (BOOL)usesCustomTruncation
+{
+  // NOTE: This code does not correctly handle if they set `…` with different attributes.
+  return _attributes.avoidTailTruncationSet != nil || [_attributes.truncationAttributedString.string isEqualToString:@"\u2026"] == NO;
+}
+
+- (BOOL)usesExclusionPaths
+{
+  return _attributes.exclusionPaths.count > 0;
+}
+
 #pragma mark - Drawing
 
 - (void)drawInContext:(CGContextRef)context bounds:(CGRect)bounds;
@@ -220,35 +245,42 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   UIGraphicsPushContext(context);
 
   LOG(@"%@, shadowInsetBounds = %@",self, NSStringFromCGRect(shadowInsetBounds));
-  
-  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
-    
-    NSTextStorage *scaledTextStorage = nil;
-    BOOL isScaled = [self isScaled];
+  BOOL isScaled = [self isScaled];
 
-    if (isScaled) {
-      // if we are going to scale the text, swap out the non-scaled text for the scaled version.
-      NSMutableAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
-      [ASTextKitFontSizeAdjuster adjustFontSizeForAttributeString:scaledString withScaleFactor:_currentScaleFactor];
-      scaledTextStorage = [[NSTextStorage alloc] initWithAttributedString:scaledString];
+  // If we use default options, we can use NSAttributedString for a
+  // fast path.
+  if (isScaled == NO && self.usesCustomTruncation == NO && self.usesExclusionPaths == NO) {
+    [_attributes.attributedString drawWithRect:shadowInsetBounds options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:self.stringDrawingContext];
+  } else {
+    [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
       
-      [textStorage removeLayoutManager:layoutManager];
-      [scaledTextStorage addLayoutManager:layoutManager];
-    }
-    
-    LOG(@"usedRect: %@", NSStringFromCGRect([layoutManager usedRectForTextContainer:textContainer]));
-    NSRange glyphRange = [layoutManager glyphRangeForBoundingRect:CGRectMake(0,0,textContainer.size.width, textContainer.size.height) inTextContainer:textContainer];
-    LOG(@"boundingRect: %@", NSStringFromCGRect([layoutManager boundingRectForGlyphRange:glyphRange inTextContainer:textContainer]));
-    
-    [layoutManager drawBackgroundForGlyphRange:glyphRange atPoint:shadowInsetBounds.origin];
-    [layoutManager drawGlyphsForGlyphRange:glyphRange atPoint:shadowInsetBounds.origin];
-    
-    if (isScaled) {
-      // put the non-scaled version back
-      [scaledTextStorage removeLayoutManager:layoutManager];
-      [textStorage addLayoutManager:layoutManager];
-    }
-  }];
+      NSTextStorage *scaledTextStorage = nil;
+
+      if (isScaled) {
+        // if we are going to scale the text, swap out the non-scaled text for the scaled version.
+        NSMutableAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
+        [ASTextKitFontSizeAdjuster adjustFontSizeForAttributeString:scaledString withScaleFactor:_currentScaleFactor];
+        scaledTextStorage = [[NSTextStorage alloc] initWithAttributedString:scaledString];
+        
+        [textStorage removeLayoutManager:layoutManager];
+        [scaledTextStorage addLayoutManager:layoutManager];
+      }
+      
+      LOG(@"usedRect: %@", NSStringFromCGRect([layoutManager usedRectForTextContainer:textContainer]));
+
+      NSRange glyphRange = [layoutManager glyphRangeForBoundingRect:CGRectMake(0,0,textContainer.size.width, textContainer.size.height) inTextContainer:textContainer];
+      LOG(@"boundingRect: %@", NSStringFromCGRect([layoutManager boundingRectForGlyphRange:glyphRange inTextContainer:textContainer]));
+      
+      [layoutManager drawBackgroundForGlyphRange:glyphRange atPoint:shadowInsetBounds.origin];
+      [layoutManager drawGlyphsForGlyphRange:glyphRange atPoint:shadowInsetBounds.origin];
+      
+      if (isScaled) {
+        // put the non-scaled version back
+        [scaledTextStorage removeLayoutManager:layoutManager];
+        [textStorage addLayoutManager:layoutManager];
+      }
+    }];
+  }
 
   UIGraphicsPopContext();
   CGContextRestoreGState(context);
