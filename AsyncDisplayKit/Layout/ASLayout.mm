@@ -40,7 +40,9 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 }
 
 @interface ASLayout () <ASDescriptionProvider>
-
+{
+  ASLayoutableType _layoutableType;
+}
 /**
  * A boolean describing if the current layout has been flattened.
  */
@@ -68,6 +70,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 #endif
     
     _layoutableObject = layoutableObject;
+    _layoutableType = layoutableObject.type;
     
     if (!isValidForLayout(size.width) || !isValidForLayout(size.height)) {
       ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation!  Production will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutableObject);
@@ -197,7 +200,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
 - (ASLayoutableType)type
 {
-  return _layoutableObject.layoutableType;
+  return _layoutableType;
 }
 
 - (CGRect)frame
