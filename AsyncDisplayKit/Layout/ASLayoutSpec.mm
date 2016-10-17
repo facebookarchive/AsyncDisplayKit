@@ -148,11 +148,7 @@
 {
   ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
   
-  if (_childrenArray.count) {
-    return _childrenArray[0];
-  }
-  
-  return nil;
+  return _childrenArray.firstObject;
 }
 
 #pragma mark - Children
@@ -234,6 +230,51 @@
 }
 
 ASEnvironmentLayoutExtensibilityForwarding
+
+#pragma mark - Framework Private
+
+- (nullable NSSet<id<ASLayoutElement>> *)findDuplicatedElementsInSubtree
+{
+  NSMutableSet *result = nil;
+  NSUInteger count = 0;
+  [self _findDuplicatedElementsInSubtreeWithWorkingSet:[[NSMutableSet alloc] init] workingCount:&count result:&result];
+  return result;
+}
+
+/**
+ * This method is extremely performance-sensitive, so we do some strange things.
+ *
+ * @param workingSet A working set of elements for use in the recursion.
+ * @param workingCount The current count of the set for use in the recursion.
+ * @param result The set into which to put the result. This initially points to @c nil to save time if no duplicates exist.
+ */
+- (void)_findDuplicatedElementsInSubtreeWithWorkingSet:(NSMutableSet<id<ASLayoutElement>> *)workingSet workingCount:(NSUInteger *)workingCount result:(NSMutableSet<id<ASLayoutElement>>  * _Nullable *)result
+{
+  Class layoutSpecClass = [ASLayoutSpec class];
+
+  for (id<ASLayoutElement> child in self) {
+    // Add the object into the set.
+    [workingSet addObject:child];
+
+    // Check that addObject: caused the count to increase.
+    // This is faster than using containsObject.
+    NSUInteger oldCount = *workingCount;
+    NSUInteger newCount = workingSet.count;
+    BOOL objectAlreadyExisted = (newCount != oldCount + 1);
+    if (objectAlreadyExisted) {
+      if (*result == nil) {
+        *result = [[NSMutableSet alloc] init];
+      }
+      [*result addObject:child];
+    } else {
+      *workingCount = newCount;
+      // If child is a layout spec we haven't visited, recurse its children.
+      if ([child isKindOfClass:layoutSpecClass]) {
+        [(ASLayoutSpec *)child _findDuplicatedElementsInSubtreeWithWorkingSet:workingSet workingCount:workingCount result:result];
+      }
+    }
+  }
+}
 
 @end
 

@@ -15,11 +15,20 @@
 #import "ASEnvironmentInternal.h"
 #import "ASThread.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface ASLayoutSpec() {
   ASDN::RecursiveMutex __instanceLock__;
   ASEnvironmentState _environmentState;
   ASLayoutElementStyle *_style;
   NSMutableArray *_childrenArray;
 }
+
+/**
+ * Recursively search the subtree for elements that occur more than once.
+ */
+- (nullable NSSet<id<ASLayoutElement>> *)findDuplicatedElementsInSubtree;
+
 @end
 
+NS_ASSUME_NONNULL_END

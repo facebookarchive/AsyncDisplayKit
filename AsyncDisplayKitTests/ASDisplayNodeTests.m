@@ -21,6 +21,8 @@
 #import "UIView+ASConvenience.h"
 #import "ASCellNode.h"
 #import "ASImageNode.h"
+#import "ASOverlayLayoutSpec.h"
+#import "ASInsetLayoutSpec.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
@@ -2137,6 +2139,16 @@ static bool stringContainsPointer(NSString *description, id p) {
     XCTAssertEqualObjects(subnode, subnodes[i]);
     i++;
   }
+}
+
+- (void)testThatHavingTheSameNodeTwiceInALayoutSpecCausesExceptionOnLayoutCalculation
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  node.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode *node, ASSizeRange constrainedSize) {
+    return [ASOverlayLayoutSpec overlayLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:subnode] overlay:subnode];
+  };
+  XCTAssertThrowsSpecificNamed([node calculateLayoutThatFits:ASSizeRangeMake(CGSizeMake(100, 100))], NSException, NSInternalInconsistencyException);
 }
 
 @end

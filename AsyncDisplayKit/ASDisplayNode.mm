@@ -34,6 +34,7 @@
 #import "ASLayoutSpec.h"
 #import "ASCellNode+Internal.h"
 #import "ASWeakProxy.h"
+#import "ASLayoutSpecPrivate.h"
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
@@ -2425,6 +2426,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
       [self layoutSpecThatFits:constrainedSize];
     });
+
+    NSSet *duplicateElements = [layoutSpec findDuplicatedElementsInSubtree];
+    if (duplicateElements.count > 0) {
+      ASDisplayNodeFailAssert(@"Node %@ returned a layout spec that contains the same elements in multiple positions. Elements: %@", self, duplicateElements);
+      // Use an empty layout spec as a production workaround.
+      layoutSpec = [[ASLayoutSpec alloc] init];
+    }
 
     ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
 
