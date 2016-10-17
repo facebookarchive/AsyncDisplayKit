@@ -37,9 +37,18 @@
 - (void)testThatProgressBlockIsSetAndClearedCorrectlyOnVisibility
 {
   node.URL = [NSURL URLWithString:@"http://imageA"];
+
+  // Enter preload range, wait for download start.
+  [[[downloader expect] andForwardToRealObject] downloadImageWithURL:[OCMArg isNotNil] callbackQueue:OCMOCK_ANY downloadProgress:OCMOCK_ANY completion:OCMOCK_ANY];
+  [node enterInterfaceState:ASInterfaceStatePreload];
+  [downloader verifyWithDelay:5];
+
+  // Make the node visible.
   [[downloader expect] setProgressImageBlock:[OCMArg isNotNil] callbackQueue:OCMOCK_ANY withDownloadIdentifier:@0];
   [node enterInterfaceState:ASInterfaceStateInHierarchy];
   [downloader verify];
+
+  // Make the node invisible.
   [[downloader expect] setProgressImageBlock:[OCMArg isNil] callbackQueue:OCMOCK_ANY withDownloadIdentifier:@0];
   [node exitInterfaceState:ASInterfaceStateInHierarchy];
   [downloader verify];
