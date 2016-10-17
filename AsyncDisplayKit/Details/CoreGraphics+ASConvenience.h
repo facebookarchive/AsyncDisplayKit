@@ -12,6 +12,7 @@
 #import <CoreGraphics/CoreGraphics.h>
 
 #import "ASBaseDefines.h"
+#import "ASDimension.h"
 #import "ASLayoutController.h"
 #include "tgmath.h"
 
@@ -66,6 +67,9 @@ CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect,
                                                    ASRangeTuningParameters tuningParameters,
                                                    ASScrollDirection scrollableDirections,
                                                    ASScrollDirection scrollDirection);
+
+// returns CGSizeZero if ASLayoutSize contains relative (non-point) width or height values
+CGSize CGSizeWithASLayoutSize(ASLayoutSize layoutSize);
 
 ASDISPLAYNODE_EXTERN_C_END
 
