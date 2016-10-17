@@ -339,7 +339,7 @@ static NSString * const kRate = @"rate";
         [self play]; // autoresume after buffer catches up
       }
     } else if ([keyPath isEqualToString:kplaybackBufferEmpty]) {
-      if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == true && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+      if (_shouldBePlaying && [change[NSKeyValueChangeNewKey] boolValue] == YES && ASInterfaceStateIncludesVisible(self.interfaceState)) {
         self.playerState = ASVideoNodePlayerStateLoading;
       }
     }
