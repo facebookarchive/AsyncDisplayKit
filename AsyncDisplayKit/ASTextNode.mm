@@ -307,12 +307,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   if (_renderer) {
     // Destruction of the layout managers/containers/text storage is quite
     // expensive, and can take some time, so we dispatch onto a bg queue to
-    // actually dealloc.
-    __block ASTextKitRenderer *renderer = _renderer;
-    
-    ASPerformBlockOnDeallocationQueue(^{
-      renderer = nil;
-    });
+    // actually dealloc.    
+    ASPerformBackgroundDeallocation(_renderer);
     _renderer = nil;
   }
 }
@@ -1360,7 +1356,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
   }
 
   // If we've reached this point, both _additionalTruncationMessage and
-  // _truncationAttributedString are present.  Compose them.
+  // _truncationAttributedText are present.  Compose them.
 
   NSMutableAttributedString *newComposedTruncationString = [[NSMutableAttributedString alloc] initWithAttributedString:_truncationAttributedText];
   [newComposedTruncationString replaceCharactersInRange:NSMakeRange(newComposedTruncationString.length, 0) withString:@" "];

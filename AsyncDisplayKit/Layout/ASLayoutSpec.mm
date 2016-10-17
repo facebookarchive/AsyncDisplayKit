@@ -82,12 +82,6 @@
 
 #pragma mark - Layout
 
-// Deprecated
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
-{
-    return [self layoutThatFits:constrainedSize];
-}
-
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
 {
   return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];
@@ -234,6 +228,16 @@
 }
 
 ASEnvironmentLayoutExtensibilityForwarding
+
+#pragma mark - Deprecated
+
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+{
+  return [self layoutThatFits:constrainedSize];
+}
+
+
+ASLayoutElementStyleForwarding
 
 @end
 

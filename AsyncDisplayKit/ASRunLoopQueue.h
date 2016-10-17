@@ -16,11 +16,21 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASRunLoopQueue<ObjectType> : NSObject
 
-- (instancetype)initWithRunLoop:(CFRunLoopRef)runloop andHandler:(void(^)(ObjectType dequeuedItem, BOOL isQueueDrained))handlerBlock;
+- (instancetype)initWithRunLoop:(CFRunLoopRef)runloop
+                     andHandler:(void(^)(ObjectType dequeuedItem, BOOL isQueueDrained))handlerBlock;
 
 - (void)enqueue:(ObjectType)object;
 
-@property (nonatomic, assign) NSUInteger batchSize;
+@property (nonatomic, assign) NSUInteger batchSize;           // Default == 1.
+@property (nonatomic, assign) BOOL ensureExclusiveMembership; // Default == YES.  Set-like behavior.
+
+@end
+
+@interface ASDeallocQueue : NSObject
+
++ (instancetype)sharedDeallocationQueue;
+
+- (void)releaseObjectInBackground:(id)object;
 
 @end
 

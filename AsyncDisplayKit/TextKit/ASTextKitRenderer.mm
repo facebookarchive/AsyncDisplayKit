@@ -17,6 +17,7 @@
 #import "ASTextKitTailTruncater.h"
 #import "ASTextKitFontSizeAdjuster.h"
 #import "ASInternalHelpers.h"
+#import "ASRunLoopQueue.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -49,6 +50,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     _constrainedSize = constrainedSize;
     _attributes = attributes;
     _sizeIsCalculated = NO;
+    _currentScaleFactor = 1;
   }
   return self;
 }
@@ -127,17 +129,13 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     // truncater do it's job again for the new constrained size. This is necessary as after a truncation did happen
     // the context would use the truncated string and not the original string to truncate based on the new
     // constrained size
-    __block ASTextKitContext *ctx = _context;
-    __block ASTextKitTailTruncater *tru = _truncater;
-    __block ASTextKitFontSizeAdjuster *adj = _fontSizeAdjuster;
+
+    ASPerformBackgroundDeallocation(_context);
+    ASPerformBackgroundDeallocation(_truncater);
+    ASPerformBackgroundDeallocation(_fontSizeAdjuster);
     _context = nil;
     _truncater = nil;
     _fontSizeAdjuster = nil;
-    ASPerformBlockOnDeallocationQueue(^{
-      ctx = nil;
-      tru = nil;
-      adj = nil;
-    });
   }
 }
 
@@ -147,7 +145,18 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   if (isinf(_constrainedSize.width) == NO && [_attributes.pointSizeScaleFactors count] > 0) {
     _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
   }
-  
+
+  // If we do not scale, do exclusion, or do custom truncation, we should just use TextKit for a fast-path.
+  BOOL doesNotScale = _currentScaleFactor == 1;
+  // NOTE: This code does not correctly handle if they set `…` with different attributes.
+  BOOL defaultTruncation = _attributes.avoidTailTruncationSet == nil && [_attributes.truncationAttributedString.string isEqualToString:@"\u2026"];
+  BOOL doesNoExclusion = _attributes.exclusionPaths.count == 0;
+  if (doesNotScale && defaultTruncation && doesNoExclusion) {
+    CGSize baseSize = [_attributes.attributedString boundingRectWithSize:_constrainedSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil].size;
+    _calculatedSize = [self.shadower outsetSizeWithInsetSize:baseSize];
+    return;
+  }
+
   __block NSTextStorage *scaledTextStorage = nil;
   BOOL isScaled = [self isScaled];
   if (isScaled) {

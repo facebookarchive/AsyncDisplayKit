@@ -72,7 +72,21 @@
   textNode.highlightRange = NSMakeRange(0, textNode.attributedText.length);
 
   [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:textNode];
-  ASSnapshotVerifyLayer(backgroundView.layer, nil);
+  ASSnapshotVerifyView(backgroundView, nil);
+}
+
+- (void)testThatTextKitTruncationMatchesStyle
+{
+  NSAttributedString *str = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
+  CGRect bounds = CGRectMake(0, 0, 110, 30);
+  UIGraphicsBeginImageContextWithOptions(bounds.size, YES, 1);
+  [[UIColor whiteColor] setFill];
+  UIRectFill(bounds);
+  [str drawWithRect:bounds options:NSStringDrawingTruncatesLastVisibleLine | NSStringDrawingUsesLineFragmentOrigin context:nil];
+  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  UIImageView *iv = [[UIImageView alloc] initWithImage:image];
+  ASSnapshotVerifyView(iv, nil);
 }
 
 @end

@@ -10,37 +10,57 @@
 
 #import "ASAbsoluteLayoutSpec.h"
 
-#import "ASLayoutSpecUtilities.h"
 #import "ASLayout.h"
+#import "ASLayoutSpecUtilities.h"
 #import "ASLayoutElementStylePrivate.h"
 
+#pragma mark - ASAbsoluteLayoutSpec
+
 @implementation ASAbsoluteLayoutSpec
+
+#pragma mark - Class
 
 + (instancetype)absoluteLayoutSpecWithChildren:(NSArray *)children
 {
   return [[self alloc] initWithChildren:children];
 }
 
++ (instancetype)absoluteLayoutSpecWithSizing:(ASAbsoluteLayoutSpecSizing)sizing children:(NSArray<id<ASLayoutElement>> *)children
+{
+  return [[self alloc] initWithSizing:sizing children:children];
+}
+
+#pragma mark - Lifecycle
+
 - (instancetype)init
 {
-    return [self initWithChildren:@[]];
+  return [self initWithChildren:nil];
 }
 
 - (instancetype)initWithChildren:(NSArray *)children
 {
+  return [self initWithSizing:ASAbsoluteLayoutSpecSizingDefault children:children];
+}
+
+- (instancetype)initWithSizing:(ASAbsoluteLayoutSpecSizing)sizing children:(NSArray<id<ASLayoutElement>> *)children
+{
   if (!(self = [super init])) {
     return nil;
   }
+    
+  _sizing = sizing;
   self.children = children;
+
   return self;
 }
 
+#pragma mark - ASLayoutSpec
+
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
   CGSize size = {
-    (isinf(constrainedSize.max.width) || !ASPointsValidForLayout(constrainedSize.max.width)) ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.width,
-    (isinf(constrainedSize.max.height) || !ASPointsValidForLayout(constrainedSize.max.height)) ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.height
+    ASPointsValidForSize(constrainedSize.max.width) == NO ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.width,
+    ASPointsValidForSize(constrainedSize.max.height) == NO ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.height
   };
   
   NSArray *children = self.children;
@@ -60,14 +80,14 @@
     [sublayouts addObject:sublayout];
   }
   
-  if (isnan(size.width)) {
+  if (_sizing == ASAbsoluteLayoutSpecSizingSizeToFit || isnan(size.width)) {
     size.width = constrainedSize.min.width;
     for (ASLayout *sublayout in sublayouts) {
       size.width  = MAX(size.width,  sublayout.position.x + sublayout.size.width);
     }
   }
   
-  if (isnan(size.height)) {
+  if (_sizing == ASAbsoluteLayoutSpecSizingSizeToFit || isnan(size.height)) {
     size.height = constrainedSize.min.height;
     for (ASLayout *sublayout in sublayouts) {
       size.height = MAX(size.height, sublayout.position.y + sublayout.size.height);
@@ -79,6 +99,8 @@
 
 @end
 
+#pragma mark - ASEnvironment
+
 @implementation ASAbsoluteLayoutSpec (ASEnvironment)
 
 - (BOOL)supportsUpwardPropagation
@@ -88,13 +110,30 @@
 
 @end
 
-@implementation ASAbsoluteLayoutSpec (Debugging)
+#pragma mark - Debugging
 
-#pragma mark - ASLayoutElementAsciiArtProtocol
+@implementation ASAbsoluteLayoutSpec (Debugging)
 
 - (NSString *)debugBoxString
 {
   return [ASLayoutSpec asciiArtStringForChildren:self.children parentName:[self asciiArtName]];
+}
+
+@end
+
+
+#pragma mark - ASStaticLayoutSpec
+
+@implementation ASStaticLayoutSpec : ASAbsoluteLayoutSpec
+
++ (instancetype)staticLayoutSpecWithChildren:(NSArray<id<ASLayoutElement>> *)children
+{
+  return [[self alloc] initWithChildren:children];
+}
+
+- (instancetype)initWithChildren:(NSArray *)children
+{
+  return [super initWithSizing:ASAbsoluteLayoutSpecSizingSizeToFit children:children];
 }
 
 @end

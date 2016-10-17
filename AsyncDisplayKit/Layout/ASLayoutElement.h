@@ -50,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
  * access to the options via convenience properties. If you are creating custom layout spec, then you can
  * extend the backing layout options class to accommodate any new layout options.
  */
-@protocol ASLayoutElement <ASEnvironment, ASLayoutElementPrivate, ASLayoutElementExtensibility, ASLayoutElementStylability, NSFastEnumeration>
+@protocol ASLayoutElement <ASEnvironment, ASLayoutElementPrivate, ASLayoutElementExtensibility, ASLayoutElementStylability, NSFastEnumeration, ASStackLayoutElement, ASAbsoluteLayoutElement>
 
 #pragma mark - Getter
 
@@ -68,7 +68,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract A size constraint that should apply to this ASLayoutElement.
  */
 @property (nonatomic, assign, readonly) ASLayoutElementStyle *style;
-
 
 #pragma mark - Calculate layout
 
@@ -314,3 +313,4 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 @end
 
 NS_ASSUME_NONNULL_END
+#define ASLayoutable ASLayoutElement

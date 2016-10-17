@@ -144,6 +144,23 @@ ASDISPLAYNODE_EXTERN_C_END
 
 @end
 
+#pragma mark - Deprecated
+
+@interface ASLayout (Deprecated)
+
+- (id <ASLayoutElement>)layoutableObject ASDISPLAYNODE_DEPRECATED;
+
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutElement>)layoutElement
+                      constrainedSizeRange:(ASSizeRange)constrainedSizeRange
+                                      size:(CGSize)size ASDISPLAYNODE_DEPRECATED;
+
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutElement>)layoutElement
+                      constrainedSizeRange:(ASSizeRange)constrainedSizeRange
+                                      size:(CGSize)size
+                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED;
+
+@end
+
 #pragma mark - Debugging
 
 @interface ASLayout (Debugging)
