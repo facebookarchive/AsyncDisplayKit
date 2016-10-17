@@ -65,6 +65,7 @@ static void runLoopSourceCallback(void *info) {
       weakSelf->_queueLock.lock();
       std::deque<id> currentQueue = weakSelf->_queue;
       if (currentQueue.size() == 0) {
+        weakSelf->_queueLock.unlock();
         return;
       }
       // Sometimes we release 10,000 objects at a time.  Don't hold the lock while releasing.
