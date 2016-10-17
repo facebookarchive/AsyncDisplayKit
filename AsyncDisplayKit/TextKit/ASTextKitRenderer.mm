@@ -173,15 +173,13 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   
   [[self truncater] truncate];
   
+  CGRect constrainedRect = {CGPointZero, _constrainedSize};
+  __block CGRect boundingRect;
+
   // Force glyph generation and layout, which may not have happened yet (and isn't triggered by
   // -usedRectForTextContainer:).
   [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     [layoutManager ensureLayoutForTextContainer:textContainer];
-  }];
-  
-  CGRect constrainedRect = {CGPointZero, _constrainedSize};
-  __block CGRect boundingRect;
-  [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     boundingRect = [layoutManager usedRectForTextContainer:textContainer];
     if (isScaled) {
       // put the non-scaled version back
@@ -193,8 +191,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   // TextKit often returns incorrect glyph bounding rects in the horizontal direction, so we clip to our bounding rect
   // to make sure our width calculations aren't being offset by glyphs going beyond the constrained rect.
   boundingRect = CGRectIntersection(boundingRect, {.size = constrainedRect.size});
-  CGSize boundingSize = [_shadower outsetSizeWithInsetSize:boundingRect.size];
-  _calculatedSize = CGSizeMake(boundingSize.width, boundingSize.height);
+  _calculatedSize = [_shadower outsetSizeWithInsetSize:boundingRect.size];
 }
 
 - (BOOL)isScaled
