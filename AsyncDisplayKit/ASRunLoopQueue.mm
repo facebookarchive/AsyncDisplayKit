@@ -26,35 +26,103 @@ static void runLoopSourceCallback(void *info) {
 #endif
 }
 
-#pragma mark - ASDeallocThread
+#pragma mark - ASDeallocQueue
 
-@interface ASDeallocThread : NSThread
-@property (nonatomic, strong) ASRunLoopQueue *deallocQueue;
-@end
-
-@implementation ASDeallocThread
-
-- (void)main
+@implementation ASDeallocQueue
 {
-  self.name = @"ASDeallocThread";
-  [self deallocQueue];
-  while (YES) {
-    // This method will still return once all sources have finished.
-    [[NSRunLoop currentRunLoop] runUntilDate:[NSDate distantFuture]];
-    // Waiting 100ms allows some objects to collect without too much thrash.
-    [NSThread sleepForTimeInterval:0.1];
-  }
-  ASDisplayNodeFailAssert(@"ASDeallocThread should never exit");
+  NSThread *_thread;
+  NSCondition *_condition;
+  std::deque<id> _queue;
+  ASDN::RecursiveMutex _queueLock;
 }
 
-- (ASRunLoopQueue *)deallocQueue
++ (instancetype)sharedDeallocationQueue
 {
-  if (_deallocQueue == nil) {
-    _deallocQueue = [[ASRunLoopQueue alloc] initWithRunLoop:CFRunLoopGetCurrent() andHandler:nil];
-    _deallocQueue.ensureExclusiveMembership = NO;
+  static ASDeallocQueue *deallocQueue = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    deallocQueue = [[ASDeallocQueue alloc] init];
+  });
+  return deallocQueue;
+}
+
+- (void)releaseObjectInBackground:(id)object
+{
+  _queueLock.lock();
+  _queue.push_back(object);
+  _queueLock.unlock();
+}
+
+- (void)threadMain
+{
+  @autoreleasepool {
+    __unsafe_unretained __typeof__(self) weakSelf = self;
+    CFRunLoopTimerRef timer = CFRunLoopTimerCreateWithHandler(NULL, -1, 0.1, 0, 0, ^(CFRunLoopTimerRef timer) {
+#if ASRunLoopQueueLoggingEnabled
+      NSLog(@"ASDeallocQueue Processing: %d objects destroyed", weakSelf->_queue.size());
+#endif
+      weakSelf->_queueLock.lock();
+        // Sometimes we release 10,000 objects at a time.  Avoid holding the lock while doing so.
+        std::deque<id> oldQueue = weakSelf->_queue;
+        weakSelf->_queue = std::deque<id>();
+      weakSelf->_queueLock.unlock();
+      oldQueue.clear();
+    });
+    
+    CFRunLoopRef runloop = CFRunLoopGetCurrent();
+    CFRunLoopAddTimer(runloop, timer, kCFRunLoopCommonModes);
+    
+    [_condition lock];
+    [_condition signal];
+    // At this moment, the thread is guaranteed to be finished starting.
+    [_condition unlock];
+    
+    // Keep processing events until the runloop is stopped.
+    CFRunLoopRun();
+    
+    CFRunLoopTimerInvalidate(timer);
+    CFRunLoopRemoveTimer(runloop, timer, kCFRunLoopCommonModes);
   }
-  ASDisplayNodeAssertNotNil(_deallocQueue, @"Starting dealloc thread should have created dealloc queue");
-  return _deallocQueue;
+}
+
+- (instancetype)init
+{
+  if ((self = [super init])) {
+    _condition = [[NSCondition alloc] init];
+    
+    _thread = [[NSThread alloc] initWithTarget:self selector:@selector(threadMain) object:nil];
+    _thread.name = @"ASDeallocQueue";
+    
+    // Use condition to ensure NSThread has finished starting.
+    [_condition lock];
+    [_thread start];
+    [_condition wait];
+    [_condition unlock];
+  }
+  return self;
+}
+
+- (void)stop
+{
+  if (!_thread) {
+    return;
+  }
+  
+  [_condition lock];
+  [self performSelector:@selector(_stop) onThread:_thread withObject:nil waitUntilDone:NO];
+  [_condition wait];
+  [_condition unlock];
+  _thread = nil;
+}
+
+- (void)_stop
+{
+  CFRunLoopStop(CFRunLoopGetCurrent());
+}
+
+- (void)dealloc
+{
+  [self stop];
 }
 
 @end
@@ -78,17 +146,6 @@ static void runLoopSourceCallback(void *info) {
 @end
 
 @implementation ASRunLoopQueue
-
-+ (instancetype)sharedDeallocationQueue
-{
-  static ASDeallocThread *deallocThread = nil;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    deallocThread = [[ASDeallocThread alloc] init];
-    [deallocThread start];
-  });
-  return [deallocThread deallocQueue];
-}
 
 - (instancetype)initWithRunLoop:(CFRunLoopRef)runloop andHandler:(void(^)(id dequeuedItem, BOOL isQueueDrained))handlerBlock
 {

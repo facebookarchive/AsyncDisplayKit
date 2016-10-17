@@ -81,12 +81,12 @@ void ASPerformBlockOnBackgroundThread(void (^block)())
 
 void ASPerformBackgroundDeallocation(id object)
 {
-  static ASRunLoopQueue *deallocQueue = nil;
+  static ASDeallocQueue *deallocQueue = nil;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    deallocQueue = [ASRunLoopQueue sharedDeallocationQueue];
+    deallocQueue = [ASDeallocQueue sharedDeallocationQueue];
   });
-  [deallocQueue enqueue:object];
+  [deallocQueue releaseObjectInBackground:object];
 }
 
 CGFloat ASScreenScale()

@@ -16,8 +16,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASRunLoopQueue<ObjectType> : NSObject
 
-+ (instancetype)sharedDeallocationQueue;
-
 - (instancetype)initWithRunLoop:(CFRunLoopRef)runloop
                      andHandler:(nullable void(^)(ObjectType dequeuedItem, BOOL isQueueDrained))handlerBlock;
 
@@ -27,5 +25,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL ensureExclusiveMembership; // Default == YES.  Set-like behavior.
 
 @end
+
+@interface ASDeallocQueue : NSObject
+
++ (instancetype)sharedDeallocationQueue;
+
+- (void)releaseObjectInBackground:(id)object;
+
+@end
+
 
 NS_ASSUME_NONNULL_END
