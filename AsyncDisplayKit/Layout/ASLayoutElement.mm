@@ -243,22 +243,33 @@ do {\
 
 #pragma mark - ASLayoutElementStyleSizeHelpers
 
+// We explicitly not call the setter for (max/min) width and height to avoid locking overhead
+
 - (void)setPreferredSize:(CGSize)preferredSize
 {
-  self.width = ASDimensionMakeWithPoints(preferredSize.width);
-  self.height = ASDimensionMakeWithPoints(preferredSize.height);
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.width = ASDimensionMakeWithPoints(preferredSize.width);
+  _size.height = ASDimensionMakeWithPoints(preferredSize.height);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleHeightProperty);
 }
 
 - (void)setMinSize:(CGSize)minSize
 {
-  self.minWidth = ASDimensionMakeWithPoints(minSize.width);
-  self.minHeight = ASDimensionMakeWithPoints(minSize.height);
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.minWidth = ASDimensionMakeWithPoints(minSize.width);
+  _size.minHeight = ASDimensionMakeWithPoints(minSize.height);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMinWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMinHeightProperty);
 }
 
 - (void)setMaxSize:(CGSize)maxSize
 {
-  self.maxWidth = ASDimensionMakeWithPoints(maxSize.width);
-  self.maxHeight = ASDimensionMakeWithPoints(maxSize.height);
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.maxWidth = ASDimensionMakeWithPoints(maxSize.width);
+  _size.maxHeight = ASDimensionMakeWithPoints(maxSize.height);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMaxWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMaxHeightProperty);
 }
 
 - (ASLayoutSize)preferredLayoutSize
@@ -269,8 +280,11 @@ do {\
 
 - (void)setPreferredLayoutSize:(ASLayoutSize)preferredLayoutSize
 {
-  self.width = preferredLayoutSize.width;
-  self.height = preferredLayoutSize.height;
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.width = preferredLayoutSize.width;
+  _size.height = preferredLayoutSize.height;
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleHeightProperty);
 }
 
 - (ASLayoutSize)minLayoutSize
@@ -281,8 +295,11 @@ do {\
 
 - (void)setMinLayoutSize:(ASLayoutSize)minLayoutSize
 {
-  self.minWidth = minLayoutSize.width;
-  self.minHeight = minLayoutSize.height;
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.minWidth = minLayoutSize.width;
+  _size.minHeight = minLayoutSize.height;
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMinWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMinHeightProperty);
 }
 
 - (ASLayoutSize)maxLayoutSize
@@ -293,8 +310,11 @@ do {\
 
 - (void)setMaxLayoutSize:(ASLayoutSize)maxLayoutSize
 {
-  self.maxWidth = maxLayoutSize.width;
-  self.maxHeight = maxLayoutSize.height;
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.maxWidth = maxLayoutSize.width;
+  _size.maxHeight = maxLayoutSize.height;
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMaxWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMaxHeightProperty);
 }
 
 
