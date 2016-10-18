@@ -21,6 +21,16 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
 
 @implementation ASRelativeLayoutSpecSnapshotTests
 
+#pragma mark - XCTestCase
+
+- (void)setUp
+{
+  [super setUp];
+  
+  self.recordMode = NO;
+}
+
+
 - (void)testWithOptions
 {
   [self testAllVerticalPositionsForHorizontalPosition:ASRelativeLayoutSpecPositionStart];
@@ -29,7 +39,8 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
 
 }
 
-- (void)testAllVerticalPositionsForHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition {
+- (void)testAllVerticalPositionsForHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition
+{
   [self testWithHorizontalPosition:horizontalPosition verticalPosition:ASRelativeLayoutSpecPositionStart sizingOptions:{}];
   [self testWithHorizontalPosition:horizontalPosition verticalPosition:ASRelativeLayoutSpecPositionCenter sizingOptions:{}];
   [self testWithHorizontalPosition:horizontalPosition verticalPosition:ASRelativeLayoutSpecPositionEnd sizingOptions:{}];
@@ -76,19 +87,19 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
 
 static NSString *suffixForPositionOptions(ASRelativeLayoutSpecPosition horizontalPosition,
                                           ASRelativeLayoutSpecPosition verticalPosition,
-                                           ASRelativeLayoutSpecSizingOption sizingOptions)
+                                          ASRelativeLayoutSpecSizingOption sizingOptions)
 {
   NSMutableString *suffix = [NSMutableString string];
 
-  if ((horizontalPosition & ASRelativeLayoutSpecPositionCenter) != 0) {
+  if (horizontalPosition == ASRelativeLayoutSpecPositionCenter) {
     [suffix appendString:@"CenterX"];
-  } else if ((horizontalPosition & ASRelativeLayoutSpecPositionEnd) != 0) {
+  } else if (horizontalPosition == ASRelativeLayoutSpecPositionEnd) {
     [suffix appendString:@"EndX"];
   }
 
-  if ((verticalPosition & ASRelativeLayoutSpecPositionCenter) != 0) {
+  if (verticalPosition  == ASRelativeLayoutSpecPositionCenter) {
     [suffix appendString:@"CenterY"];
-  } else if ((verticalPosition & ASRelativeLayoutSpecPositionEnd) != 0) {
+  } else if (verticalPosition == ASRelativeLayoutSpecPositionEnd) {
     [suffix appendString:@"EndY"];
   }
 
@@ -122,8 +133,8 @@ static NSString *suffixForPositionOptions(ASRelativeLayoutSpecPosition horizonta
   
   ASRelativeLayoutSpec *layoutSpec =
   [ASRelativeLayoutSpec
-   relativePositionLayoutSpecWithHorizontalPosition:ASRelativeLayoutSpecPositionStart
-   verticalPosition:ASRelativeLayoutSpecPositionStart
+   relativePositionLayoutSpecWithHorizontalPosition:ASRelativeLayoutSpecPositionNone
+   verticalPosition:ASRelativeLayoutSpecPositionNone
    sizingOption:{}
    child:childSpec];
 
