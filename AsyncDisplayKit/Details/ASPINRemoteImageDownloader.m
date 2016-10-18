@@ -27,6 +27,7 @@
 
 #import <PINRemoteImage/PINRemoteImageManager.h>
 #import <PINRemoteImage/NSData+ImageDetectors.h>
+#import <PINRemoteImage/PINRemoteImageCaching.h>
 #import <PINCache/PINCache.h>
 
 #if PIN_ANIMATED_AVAILABLE
@@ -165,7 +166,7 @@
 {
   PINRemoteImageManager *manager = [self sharedPINRemoteImageManager];
   NSString *key = [manager cacheKeyForURL:URL processorKey:nil];
-  [[[manager cache] memoryCache] removeObjectForKey:key];
+  [[manager cache] removeObjectForKey:key];
 }
 
 - (nullable id)downloadImageWithURL:(NSURL *)URL
