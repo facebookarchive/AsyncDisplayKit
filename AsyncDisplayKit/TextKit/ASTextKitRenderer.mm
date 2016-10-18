@@ -238,6 +238,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     [self _calculateSize];
   }
 
+  bounds = CGRectIntersection(bounds, { .size = _constrainedSize });
   CGRect shadowInsetBounds = [[self shadower] insetRectWithConstrainedRect:bounds];
 
   CGContextSaveGState(context);
