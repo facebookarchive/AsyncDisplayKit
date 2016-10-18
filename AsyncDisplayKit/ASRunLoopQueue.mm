@@ -79,7 +79,7 @@ static void runLoopSourceCallback(void *info) {
     
     [_condition lock];
     [_condition signal];
-    // At this moment, the thread is guaranteed to be finished starting.
+    // At this moment, -init is signalled that the thread is guaranteed to be finished starting.
     [_condition unlock];
     
     // Keep processing events until the runloop is stopped.
@@ -87,6 +87,12 @@ static void runLoopSourceCallback(void *info) {
     
     CFRunLoopTimerInvalidate(timer);
     CFRunLoopRemoveTimer(runloop, timer, kCFRunLoopCommonModes);
+    CFRelease(timer);
+    
+    [_condition lock];
+    [_condition signal];
+    // At this moment, -stop is signalled that the thread is guaranteed to be finished exiting.
+    [_condition unlock];
   }
 }
 
@@ -116,6 +122,7 @@ static void runLoopSourceCallback(void *info) {
   [_condition lock];
   [self performSelector:@selector(_stop) onThread:_thread withObject:nil waitUntilDone:NO];
   [_condition wait];
+  // At this moment, the thread is guaranteed to be finished running.
   [_condition unlock];
   _thread = nil;
 }
