@@ -160,6 +160,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)performBatchUpdates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
 
 /**
+ *  Blocks execution of the main thread until all section and item updates are committed to the view. This method must be called from the main thread.
+ */
+- (void)waitUntilAllUpdatesAreCommitted;
+
+/**
  * Inserts one or more sections.
  *
  * @param sections An index set that specifies the sections to insert.
