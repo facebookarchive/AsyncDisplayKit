@@ -13,6 +13,7 @@
 #import "ASDisplayNodeInternal.h"
 
 #import <map>
+#import <atomic>
 
 CGFloat const ASLayoutElementParentDimensionUndefined = NAN;
 CGSize const ASLayoutElementParentSizeUndefined = {ASLayoutElementParentDimensionUndefined, ASLayoutElementParentDimensionUndefined};
@@ -110,20 +111,20 @@ do {\
 @implementation ASLayoutElementStyle {
   ASDN::RecursiveMutex __instanceLock__;
   ASLayoutElementSize _size;
+  
+  std::atomic<CGFloat> _spacingBefore;
+  std::atomic<CGFloat> _spacingAfter;
+  std::atomic<CGFloat> _flexGrow;
+  std::atomic<CGFloat> _flexShrink;
+  std::atomic<ASDimension> _flexBasis;
+  std::atomic<ASStackLayoutAlignSelf> _alignSelf;
+  std::atomic<CGFloat> _ascender;
+  std::atomic<CGFloat> _descender;
+  std::atomic<CGPoint> _layoutPosition;
 }
 
 @dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
 @dynamic preferredSize, minSize, maxSize, preferredLayoutSize, minLayoutSize, maxLayoutSize;
-
-@synthesize spacingBefore = _spacingBefore;
-@synthesize spacingAfter = _spacingAfter;
-@synthesize flexGrow = _flexGrow;
-@synthesize flexShrink = _flexShrink;
-@synthesize flexBasis = _flexBasis;
-@synthesize alignSelf = _alignSelf;
-@synthesize ascender = _ascender;
-@synthesize descender = _descender;
-@synthesize layoutPosition = _layoutPosition;
 
 #pragma mark - Lifecycle
 
@@ -301,121 +302,103 @@ do {\
 
 - (void)setSpacingBefore:(CGFloat)spacingBefore
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _spacingBefore = spacingBefore;
+  _spacingBefore.store(spacingBefore);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleSpacingBeforeProperty);
 }
 
 - (CGFloat)spacingBefore
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _spacingBefore;
+  return _spacingBefore.load();
 }
 
 - (void)setSpacingAfter:(CGFloat)spacingAfter
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _spacingAfter = spacingAfter;
+  _spacingAfter.store(spacingAfter);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleSpacingAfterProperty);
 }
 
 - (CGFloat)spacingAfter
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _spacingAfter;
+  return _spacingAfter.load();
 }
 
 - (void)setFlexGrow:(CGFloat)flexGrow
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _flexGrow = flexGrow;
+  _flexGrow.store(flexGrow);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleFlexGrowProperty);
 }
 
 - (CGFloat)flexGrow
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _flexGrow;
+  return _flexGrow.load();
 }
 
 - (void)setFlexShrink:(CGFloat)flexShrink
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _flexShrink = flexShrink;
+  _flexShrink.store(flexShrink);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleFlexShrinkProperty);
 }
 
 - (CGFloat)flexShrink
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _flexShrink;
+  return _flexShrink.load();
 }
 
 - (void)setFlexBasis:(ASDimension)flexBasis
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _flexBasis = flexBasis;
+  _flexBasis.store(flexBasis);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleFlexBasisProperty);
 }
 
 - (ASDimension)flexBasis
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _flexBasis;
+  return _flexBasis.load();
 }
 
 - (void)setAlignSelf:(ASStackLayoutAlignSelf)alignSelf
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _alignSelf = alignSelf;
+  _alignSelf.store(alignSelf);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleAlignSelfProperty);
 }
 
 - (ASStackLayoutAlignSelf)alignSelf
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _alignSelf;
+  return _alignSelf.load();
 }
 
 - (void)setAscender:(CGFloat)ascender
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _ascender = ascender;
+  _ascender.store(ascender);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleAscenderProperty);
 }
 
 - (CGFloat)ascender
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _ascender;
+  return _ascender.load();
 }
 
 - (void)setDescender:(CGFloat)descender
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _descender = descender;
+  _descender.store(descender);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleDescenderProperty);
 }
 
 - (CGFloat)descender
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _descender;
+  return _descender.load();
 }
 
 #pragma mark - ASAbsoluteLayoutElement
 
 - (void)setLayoutPosition:(CGPoint)layoutPosition
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _layoutPosition = layoutPosition;
+  _layoutPosition.store(layoutPosition);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleLayoutPositionProperty);
 }
 
 - (CGPoint)layoutPosition
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _layoutPosition;
+  return _layoutPosition.load();
 }
 
 @end
