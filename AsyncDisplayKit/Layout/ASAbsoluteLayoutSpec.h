@@ -12,10 +12,10 @@
 
 /** How much space the spec will take up. */
 typedef NS_ENUM(NSInteger, ASAbsoluteLayoutSpecSizing) {
-  /** The spec will take up the maximum size possible. */
-  ASAbsoluteLayoutSpecSizingDefault,
   /** Computes a size for the spec that is the union of all childrens' frames. */
   ASAbsoluteLayoutSpecSizingSizeToFit,
+  /** The spec will take up the maximum size possible. */
+  ASAbsoluteLayoutSpecSizingMaximum
 };
 
 NS_ASSUME_NONNULL_BEGIN

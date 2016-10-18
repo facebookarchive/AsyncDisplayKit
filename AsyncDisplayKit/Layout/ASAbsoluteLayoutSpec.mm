@@ -40,7 +40,7 @@
 
 - (instancetype)initWithChildren:(NSArray *)children
 {
-  return [self initWithSizing:ASAbsoluteLayoutSpecSizingDefault children:children];
+  return [self initWithSizing:ASAbsoluteLayoutSpecSizingSizeToFit children:children];
 }
 
 - (instancetype)initWithSizing:(ASAbsoluteLayoutSpecSizing)sizing children:(NSArray<id<ASLayoutElement>> *)children
