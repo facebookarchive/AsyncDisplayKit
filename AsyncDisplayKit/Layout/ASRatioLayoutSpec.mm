@@ -17,7 +17,7 @@
 #import "ASAssert.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayout.h"
+#import "ASLayoutPrivate.h"
 
 @implementation ASRatioLayoutSpec
 {

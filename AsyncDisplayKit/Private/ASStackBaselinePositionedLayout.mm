@@ -11,6 +11,7 @@
 #import "ASStackBaselinePositionedLayout.h"
 
 #import "ASLayoutSpecUtilities.h"
+#import "ASLayoutPrivate.h"
 
 static CGFloat baselineForItem(const ASStackLayoutSpecStyle &style,
                                const ASLayout *layout) {

@@ -65,7 +65,7 @@ ASDISPLAYNODE_EXTERN_C_END
  * 
  * @discussion When being used as a sublayout, this property must not equal CGPointNull.
  */
-@property (nonatomic, assign, readwrite) CGPoint position;
+@property (nonatomic, assign, readonly) CGPoint position;
 
 /**
  * Array of ASLayouts. Each must have a valid non-null position.
