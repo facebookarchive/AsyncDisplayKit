@@ -5,9 +5,10 @@
  - - -
 
  ## Table of Contents
- * [Photo With Inset Text Overlay](PhotoWithInsetTextOverlay)
  * [Stack Layout](StackLayout)
- 
+ * [Photo With Inset Text Overlay](PhotoWithInsetTextOverlay)
+ * [Photo With Outset Icon Overlay](PhotoWithOutsetIconOverlay)
+
 
  - - -
 Tips:

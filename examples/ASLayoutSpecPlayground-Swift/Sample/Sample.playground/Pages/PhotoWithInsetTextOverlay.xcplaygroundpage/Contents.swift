@@ -1,4 +1,4 @@
-//: [Previous](@previous)
+//: [Stack Layout](StackLayout)
 
 import AsyncDisplayKit
 
@@ -23,4 +23,4 @@ extension PhotoWithInsetTextOverlay {
 
 PhotoWithInsetTextOverlay().show()
 
-//: [Next](@next)
+//: [Photo With Outset Icon Overlay](PhotoWithOutsetIconOverlay)

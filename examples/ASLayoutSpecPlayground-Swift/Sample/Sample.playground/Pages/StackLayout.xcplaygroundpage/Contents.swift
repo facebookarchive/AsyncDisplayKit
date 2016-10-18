@@ -1,4 +1,4 @@
-//: [Previous](@previous)
+//: [Index](Index)
 /*:
  In this example, you can experiment with stack layouts.
  */
@@ -28,4 +28,4 @@ extension StackLayout {
 
 StackLayout().show()
 
-//: [Next](@next)
+//: [Photo With Inset Text Overlay](PhotoWithInsetTextOverlay)
