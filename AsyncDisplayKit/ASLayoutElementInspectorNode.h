@@ -12,7 +12,7 @@
 
 - (void)toggleVisualization:(BOOL)toggle;
 
-@end 
+@end
 
 @interface ASLayoutElementInspectorNode : ASDisplayNode
 

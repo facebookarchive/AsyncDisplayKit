@@ -61,13 +61,23 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
     _textNode = [[ASTextNode alloc] init];
     _textNode.attributedText = [ASLayoutElementInspectorCell propertyValueAttributedStringForProperty:property withLayoutElement:layoutElement];
     
-    //_buttonNode.select = method here
-    
+    [self updateButtonStateForProperty:property withLayoutElement:layoutElement];
+
     _textNode2 = [[ASTextNode alloc] init];
     _textNode2.attributedText = [ASLayoutElementInspectorCell propertyValueDetailAttributedStringForProperty:property withLayoutElement:layoutElement];
     
   }
   return self;
+}
+
+- (void)updateButtonStateForProperty:(ASLayoutElementPropertyType)property withLayoutElement:(id<ASLayoutElement>)layoutElement
+{
+  if (property == ASLayoutElementPropertyFlexGrow) {
+    _buttonNode.selected = layoutElement.style.flexGrow;
+  }
+  else if (property == ASLayoutElementPropertyFlexShrink) {
+    _buttonNode.selected = layoutElement.style.flexShrink;
+  }
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
@@ -177,6 +187,21 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
       _layoutElementToEdit.style.alignSelf = index;
       _textNode.attributedText = [ASLayoutElementInspectorCell attributedStringFromString:[ASLayoutElementInspectorCell alignSelfEnumValueString:index]];
       break;
+
+    case ASLayoutElementPropertySpacingBefore:
+      _layoutElementToEdit.style.spacingBefore = (CGFloat)index;
+      _textNode.attributedText = [ASLayoutElementInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutElementToEdit.style.spacingBefore]];
+      break;
+
+    case ASLayoutElementPropertySpacingAfter:
+      _layoutElementToEdit.style.spacingAfter = (CGFloat)index;
+      _textNode.attributedText = [ASLayoutElementInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutElementToEdit.style.spacingAfter]];
+      break;
+
+    case ASLayoutElementPropertyAscender:
+      _layoutElementToEdit.style.ascender = (CGFloat)index;
+      _textNode.attributedText = [ASLayoutElementInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutElementToEdit.style.ascender]];
+      break;
       
     case ASLayoutElementPropertyDescender:
       _layoutElementToEdit.style.descender = (CGFloat)index;
@@ -197,23 +222,23 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
   BOOL selfIsEditing = (self == __currentlyOpenedCell);
   [__currentlyOpenedCell endEditingValue];
   if (selfIsEditing) {
+    sender.selected = NO;
     return;
   }
   
 //  NSUInteger currentAlignSelfValue;
 //  NSUInteger nextAlignSelfValue;
 //  CGFloat    newValue;
-  
+
+  sender.selected = !sender.selected;
   switch (_propertyType) {
       
     case ASLayoutElementPropertyFlexGrow:
-      sender.selected = !sender.selected;
       _layoutElementToEdit.style.flexGrow = sender.isSelected ? 1.0 : 0.0;
       _textNode.attributedText = [ASLayoutElementInspectorCell attributedStringFromString:sender.selected ? @"YES" : @"NO"];
       break;
       
     case ASLayoutElementPropertyFlexShrink:
-      sender.selected = !sender.selected;
       _layoutElementToEdit.style.flexShrink = sender.isSelected ? 1.0 : 0.0;
       _textNode.attributedText = [ASLayoutElementInspectorCell attributedStringFromString:sender.selected ? @"YES" : @"NO"];
       break;
@@ -235,12 +260,29 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
 //        [[self node] setAlignSelf:nextAlignSelfValue];
 //      }
       break;
-      
+
+    case ASLayoutElementPropertySpacingBefore:
+      _textBubble = [[ASLayoutElementInspectorCellEditingBubble alloc] initWithSliderMinValue:0 maxValue:100 currentValue:_layoutElementToEdit.style.spacingBefore];
+      [self beginEditingValue];
+      _textNode.attributedText = [ASLayoutElementInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutElementToEdit.style.spacingBefore]];
+      break;
+
+    case ASLayoutElementPropertySpacingAfter:
+      _textBubble = [[ASLayoutElementInspectorCellEditingBubble alloc] initWithSliderMinValue:0 maxValue:100 currentValue:_layoutElementToEdit.style.spacingAfter];
+      [self beginEditingValue];
+      _textNode.attributedText = [ASLayoutElementInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutElementToEdit.style.spacingAfter]];
+      break;
+
+
+    case ASLayoutElementPropertyAscender:
+      _textBubble = [[ASLayoutElementInspectorCellEditingBubble alloc] initWithSliderMinValue:0 maxValue:100 currentValue:_layoutElementToEdit.style.ascender];
+      [self beginEditingValue];
+      _textNode.attributedText = [ASLayoutElementInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutElementToEdit.style.ascender]];
+      break;
+
     case ASLayoutElementPropertyDescender:
       _textBubble = [[ASLayoutElementInspectorCellEditingBubble alloc] initWithSliderMinValue:0 maxValue:100 currentValue:_layoutElementToEdit.style.descender];
       [self beginEditingValue];
-      // update .selected & value
-      sender.selected            = !sender.selected;
       _textNode.attributedText = [ASLayoutElementInspectorCell attributedStringFromString:[NSString stringWithFormat:@"%0.0f", _layoutElementToEdit.style.descender]];
       break;
       
@@ -475,7 +517,7 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
     }];
     _slider.userInteractionEnabled = YES;
     self.userInteractionEnabled = YES;
-    [self addSubnode:_slider];
+//    [self addSubnode:_slider];
   }
   return self;
 }

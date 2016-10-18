@@ -57,7 +57,7 @@
     
     [ASLayoutElementInspectorNode sharedInstance].style.flexBasis = ASDimensionMakeWithFraction(1.0);
     [ASLayoutElementInspectorNode sharedInstance].vizNodeInsetSize = 10.0;
-    
+
     self.shouldVisualizeLayoutSpecs = NO;
     self.shouldCacheLayoutSpec = NO;
   }

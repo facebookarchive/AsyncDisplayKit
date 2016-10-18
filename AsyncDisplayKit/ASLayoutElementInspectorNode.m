@@ -64,7 +64,7 @@
 }
 
 #pragma mark - intstance methods
-- (void)setlayoutElementToEdit:(id<ASLayoutElement>)layoutElementToEdit
+- (void)setLayoutElementToEdit:(id<ASLayoutElement>)layoutElementToEdit
 {
   if (_layoutElementToEdit != layoutElementToEdit) {
     _layoutElementToEdit = layoutElementToEdit;
