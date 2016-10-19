@@ -16,5 +16,5 @@ Tips:
     - (cmd + opt/alt + ⮐)
     - View → Assistant Editor → Show Assistant Editor, to see the preview
  1. Make sure that **Timeline** as the element selected in the Assistant Editor
-
+ 1. You might have to click on stop/start (the one at the bottom of the screen, under the editor) a few times in case the timeline isn't updating.
 */
