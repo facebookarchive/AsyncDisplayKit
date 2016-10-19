@@ -265,6 +265,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)reloadData;
 
+/**
+ * Triggers a relayout of all nodes.
+ *
+ * @discussion This method invalidates and lays out every cell node in the collection view.
+ */
+- (void)relayoutItems;
+
 #pragma mark - Querying Data
 
 /**
@@ -333,7 +340,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @deprecated This method is deprecated in 2.0. Use @c reloadDataWithCompletion: and
  *   then @c waitUntilAllUpdatesAreCommitted instead.
  */
-- (void)reloadDataImmediately ASDISPLAYNODE_DEPRECATED;
+- (void)reloadDataImmediately ASDISPLAYNODE_DEPRECATED_MSG("Use -reloadDataWithCompletion: followed by -waitUntilAllUpdatesAreCommitted instead.");
 
 @end
 
@@ -415,7 +422,7 @@ NS_ASSUME_NONNULL_BEGIN
  *   not implement reuse (it will be called once per row).  Unlike UICollectionView's version,
  *   this method is not called when the row is about to display.
  */
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Similar to -collectionView:nodeForItemAtIndexPath:
@@ -429,7 +436,7 @@ NS_ASSUME_NONNULL_BEGIN
  *   Must be thread-safe (can be called on the main thread or a background
  *   queue) and should not implement reuse (it will be called once per row).
  */
-- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Asks the collection view to provide a supplementary node to display in the collection view.
@@ -438,7 +445,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param kind           The kind of supplementary node to provide.
  * @param indexPath      The index path that specifies the location of the new supplementary node.
  */
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Indicator to lock the data source for data fetching in async mode.
@@ -448,7 +455,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param collectionView The sender.
  * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED_MSG("Data source accesses are on the main thread. Method will not be called.");
 
 /**
  * Indicator to unlock the data source for data fetching in async mode.
@@ -458,7 +465,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param collectionView The sender.
  * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED_MSG("Data source accesses are on the main thread. Method will not be called.");
 
 @end
 
@@ -536,7 +543,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return A constrained size range for layout the node at this index path.
  */
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Informs the delegate that the collection view will add the given node
@@ -550,7 +557,7 @@ NS_ASSUME_NONNULL_BEGIN
  *   passed into this method may not correspond to the same item in your data source
  *   if your data source has been updated since the last edit was processed.
  */
-- (void)collectionView:(ASCollectionView *)collectionView willDisplayNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (void)collectionView:(ASCollectionView *)collectionView willDisplayNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Informs the delegate that the collection view did remove the provided node from the view hierarchy.
@@ -565,9 +572,9 @@ NS_ASSUME_NONNULL_BEGIN
  *   passed into this method may not correspond to the same item in your data source
  *   if your data source has been updated since the last edit was processed.
  */
-- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
-- (void)collectionView:(ASCollectionView *)collectionView willBeginBatchFetchWithContext:(ASBatchContext *)context ASDISPLAYNODE_DEPRECATED;
+- (void)collectionView:(ASCollectionView *)collectionView willBeginBatchFetchWithContext:(ASBatchContext *)context ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Tell the collectionView if batch fetching should begin.
@@ -580,7 +587,7 @@ NS_ASSUME_NONNULL_BEGIN
  * If not implemented, the collectionView assumes that it should notify its asyncDelegate when batch fetching
  * should occur.
  */
-- (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+- (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Informs the delegate that the collection view will add the node
@@ -595,7 +602,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * This method is deprecated. Use @c collectionView:willDisplayNode:forItemAtIndexPath: instead.
  */
-- (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 @end
 

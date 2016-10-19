@@ -128,7 +128,7 @@
 
 - (void)setChild:(id<ASLayoutElement>)child
 {
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");;
+  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
   ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
   
   if (child) {

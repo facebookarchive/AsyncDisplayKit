@@ -74,12 +74,8 @@
 # define ASDISPLAYNODE_WARN_DEPRECATED 1
 #endif
 
-#ifndef ASDISPLAYNODE_DEPRECATED
-# if ASDISPLAYNODE_GNUC (3, 0) && ASDISPLAYNODE_WARN_DEPRECATED
-#  define ASDISPLAYNODE_DEPRECATED __attribute__ ((deprecated))
-# else
-#  define ASDISPLAYNODE_DEPRECATED
-# endif
+#ifndef ASDISPLAYNODE_DEPRECATED_MSG
+# define  ASDISPLAYNODE_DEPRECATED_MSG(msg) __deprecated_msg(msg)
 #endif
 
 #if defined (__cplusplus) && defined (__GNUC__)

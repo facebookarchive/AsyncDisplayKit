@@ -338,6 +338,11 @@
   [self.view reloadData];
 }
 
+- (void)relayoutItems
+{
+  [self.view relayoutItems];
+}
+
 - (void)reloadDataImmediately
 {
   [self.view reloadDataImmediately];
