@@ -169,6 +169,7 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
 {
   _textBubble = nil;
   __currentlyOpenedCell = nil;
+  _buttonNode.selected = NO;
   [self setNeedsLayout];
 }
 
