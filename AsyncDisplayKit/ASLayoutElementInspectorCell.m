@@ -84,7 +84,7 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
 {
   ASStackLayoutSpec *horizontalSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalSpec.children           = @[_buttonNode, _textNode];
-  horizontalSpec.style.flexGrow           = YES;
+  horizontalSpec.style.flexGrow     = 1.0;
   horizontalSpec.alignItems         = ASStackLayoutAlignItemsCenter;
   horizontalSpec.justifyContent     = ASStackLayoutJustifyContentSpaceBetween;
   
@@ -93,14 +93,14 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
     ASStackLayoutSpec *verticalSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
     verticalSpec.children           = @[horizontalSpec, _textBubble];
     verticalSpec.spacing            = 8;
-    verticalSpec.style.flexGrow           = YES;
-    _textBubble.style.flexGrow            = YES;
+    verticalSpec.style.flexGrow     = 1.0;
+    _textBubble.style.flexGrow      = 1.0;
     childSpec = verticalSpec;
   } else {
     childSpec = horizontalSpec;
   }
-  ASInsetLayoutSpec *insetSpec      = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(2, 4, 2, 4) child:childSpec];
-  insetSpec.style.flexGrow = YES;
+  ASInsetLayoutSpec *insetSpec     = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(2, 4, 2, 4) child:childSpec];
+  insetSpec.style.flexGrow         =1.0;
   
   return insetSpec;
 }

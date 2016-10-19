@@ -98,11 +98,11 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _usernameNode.style.flexShrink = YES;
-  _postLocationNode.style.flexShrink = YES;
+  _usernameNode.style.flexShrink = 1.0;
+  _postLocationNode.style.flexShrink = 1.0;
 
   ASStackLayoutSpec *verticalStackSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
-  verticalStackSpec.style.flexShrink = YES;
+  verticalStackSpec.style.flexShrink = 1.0;
   
   // if fetching post location data from server, check if it is available yet
   if (_postLocationNode.attributedText) {
@@ -112,22 +112,22 @@
   }
   
   ASLayoutSpec *spacerSpec = [[ASLayoutSpec alloc] init];
-  spacerSpec.style.flexGrow = YES;
-  spacerSpec.style.flexShrink = YES;
+  spacerSpec.style.flexGrow = 1.0;
+  spacerSpec.style.flexShrink = 1.0;
   
   // horizontal stack
   ASStackLayoutSpec *horizontalStackSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStackSpec.alignItems = ASStackLayoutAlignItemsCenter; // center items vertically in horiz stack
   horizontalStackSpec.justifyContent = ASStackLayoutJustifyContentStart; // justify content to left
-  horizontalStackSpec.style.flexShrink = YES;
-  horizontalStackSpec.style.flexGrow = YES;
+  horizontalStackSpec.style.flexShrink = 1.0;
+  horizontalStackSpec.style.flexGrow = 1.0;
   [horizontalStackSpec setChildren:@[verticalStackSpec, spacerSpec, _postTimeNode]];
   
   // inset horizontal stack
   UIEdgeInsets insets = UIEdgeInsetsMake(0, 10, 0, 10);
   ASInsetLayoutSpec *headerInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:horizontalStackSpec];
-  headerInsetSpec.style.flexShrink = YES;
-  headerInsetSpec.style.flexGrow = YES;
+  headerInsetSpec.style.flexShrink = 1.0;
+  headerInsetSpec.style.flexGrow = 1.0;
   
   return headerInsetSpec;
 }
@@ -251,8 +251,8 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _topSeparator.style.flexGrow = YES;
-  _bottomSeparator.style.flexGrow = YES;
+  _topSeparator.style.flexGrow = 1.0;
+  _bottomSeparator.style.flexGrow = 1.0;
 
   UIEdgeInsets contentInsets = UIEdgeInsetsMake(10, 10, 10, 10);
   ASInsetLayoutSpec *insetContentSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentInsets

@@ -131,56 +131,56 @@
 //  _childNodeNavBtn.alignSelf = ASStackLayoutAlignSelfCenter;
 //
 //  ASStackLayoutSpec *horizontalStackNav = [ASStackLayoutSpec horizontalStackLayoutSpec];
-//  horizontalStackNav.style.flexGrow = YES;
+//  horizontalStackNav.style.flexGrow = 1.0;
 //  horizontalStackNav.alignSelf = ASStackLayoutAlignSelfCenter;
 //  horizontalStackNav.children = @[_siblingNodeLefttNavBtn, _siblingNodeRightNavBtn];
 //  
 //  ASStackLayoutSpec *horizontalStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
-//  horizontalStack.style.flexGrow = YES;
+//  horizontalStack.style.flexGrow = 1.0;
 //  ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
 //  
-//  spacer.style.flexGrow = YES;
+//  spacer.style.flexGrow = 1.0;
 //  horizontalStack.children = @[_flexGrowBtn, spacer];
 //  _flexGrowValue.alignSelf = ASStackLayoutAlignSelfEnd;      // FIXME: make framework give a warning if you use ASAlignmentBottom!!!!!
 //  
 //  ASStackLayoutSpec *horizontalStack2 = [ASStackLayoutSpec horizontalStackLayoutSpec];
-//  horizontalStack2.style.flexGrow = YES;
+//  horizontalStack2.style.flexGrow = 1.0;
 //  horizontalStack2.children = @[_flexShrinkBtn, spacer];
 //  _flexShrinkValue.alignSelf = ASStackLayoutAlignSelfEnd;
 //  
 //  ASStackLayoutSpec *horizontalStack3 = [ASStackLayoutSpec horizontalStackLayoutSpec];
-//  horizontalStack3.style.flexGrow = YES;
+//  horizontalStack3.style.flexGrow = 1.0;
 //  horizontalStack3.children = @[_flexBasisBtn, spacer, _flexBasisValue];
 //  _flexBasisValue.alignSelf = ASStackLayoutAlignSelfEnd;
 //  
 //  ASStackLayoutSpec *itemDescriptionStack = [ASStackLayoutSpec verticalStackLayoutSpec];
 //  itemDescriptionStack.children = @[_itemDescription];
 //  itemDescriptionStack.spacing = 5;
-//  itemDescriptionStack.style.flexGrow = YES;
+//  itemDescriptionStack.style.flexGrow = 1.0;
 //  
 //  ASStackLayoutSpec *layoutableStack = [ASStackLayoutSpec verticalStackLayoutSpec];
 //  layoutableStack.children = @[_layoutablePropertiesSectionTitle, horizontalStack, horizontalStack2, horizontalStack3, _alignSelfBtn];
 //  layoutableStack.spacing = 5;
-//  layoutableStack.style.flexGrow = YES;
+//  layoutableStack.style.flexGrow = 1.0;
 //  
 //  ASStackLayoutSpec *layoutSpecStack = [ASStackLayoutSpec verticalStackLayoutSpec];
 //  layoutSpecStack.children = @[_layoutSpecPropertiesSectionTitle, _alignItemsBtn];
 //  layoutSpecStack.spacing = 5;
-//  layoutSpecStack.style.flexGrow = YES;
+//  layoutSpecStack.style.flexGrow = 1.0;
 //  
 //  ASStackLayoutSpec *debugHelpStack = [ASStackLayoutSpec verticalStackLayoutSpec];
 //  debugHelpStack.children = @[_debugSectionTitle, _vizNodeInsetSizeBtn, _vizNodeBordersBtn];
 //  debugHelpStack.spacing = 5;
-//  debugHelpStack.style.flexGrow = YES;
+//  debugHelpStack.style.flexGrow = 1.0;
 //
 //  ASStackLayoutSpec *verticalLayoutableStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-//  verticalLayoutableStack.style.flexGrow = YES;
+//  verticalLayoutableStack.style.flexGrow = 1.0;
 //  verticalLayoutableStack.spacing = 20;
 //  verticalLayoutableStack.children = @[_parentNodeNavBtn, horizontalStackNav, _childNodeNavBtn, itemDescriptionStack, layoutableStack, layoutSpecStack, debugHelpStack];
 //  verticalLayoutableStack.alignItems = ASStackLayoutAlignItemsStretch;                // stretch headerStack to fill horizontal space
 //
 //  ASLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(100, 10, 10, 10) child:verticalLayoutableStack];
-//  insetSpec.style.flexGrow = YES;
+//  insetSpec.style.flexGrow = 1.0;
 //  return insetSpec;
 //}
 //
