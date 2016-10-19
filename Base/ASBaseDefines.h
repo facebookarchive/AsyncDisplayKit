@@ -85,6 +85,8 @@
 #ifndef ASDISPLAYNODE_DEPRECATED_MSG
 # if ASDISPLAYNODE_GNUC (3, 0) && ASDISPLAYNODE_WARN_DEPRECATED
 #   define  ASDISPLAYNODE_DEPRECATED_MSG(msg) __deprecated_msg(msg)
+# else
+#   define  ASDISPLAYNODE_DEPRECATED_MSG(msg)
 # endif
 #endif
 
