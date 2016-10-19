@@ -180,7 +180,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @warning This method must be called from the main thread.
  */
-- (void)beginUpdates ASDISPLAYNODE_DEPRECATED;
+- (void)beginUpdates ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's -performBatchUpdates:completion: instead.");
 
 /**
  *  Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
@@ -191,7 +191,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  *  @warning This method is must be called from the main thread.
  */
-- (void)endUpdates ASDISPLAYNODE_DEPRECATED;
+- (void)endUpdates ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's -performBatchUpdates:completion: instead.");
 
 /**
  *  Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view.
@@ -206,7 +206,7 @@ NS_ASSUME_NONNULL_BEGIN
  *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
-- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL completed))completion ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL completed))completion ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's -performBatchUpdates:completion: instead.");
 
 /**
  *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
@@ -307,7 +307,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath ASDISPLAYNODE_DEPRECATED;
+- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /// Deprecated in 2.0. You should not call this method.
 - (void)clearContents ASDISPLAYNODE_DEPRECATED_MSG("You should not call this method directly. Intead, rely on the Interstate State callback methods.");
