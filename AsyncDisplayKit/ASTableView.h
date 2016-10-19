@@ -169,7 +169,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion This method invalidates and lays out every cell node in the table view.
  */
-- (void)relayoutItems ASDISPLAYNODE_DEPRECATED;
+- (void)relayoutItems ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /**
  *  Begins a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
@@ -317,11 +317,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-ASDISPLAYNODE_DEPRECATED
+ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASTableDataSource.")
 @protocol ASTableViewDataSource <ASTableDataSource>
 @end
 
-ASDISPLAYNODE_DEPRECATED
+ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASTableDelegate.")
 @protocol ASTableViewDelegate <ASTableDelegate>
 @end
 

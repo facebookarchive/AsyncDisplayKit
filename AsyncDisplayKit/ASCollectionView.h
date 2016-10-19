@@ -257,7 +257,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion This method invalidates and lays out every cell node in the collection.
  */
-- (void)relayoutItems ASDISPLAYNODE_DEPRECATED;
+- (void)relayoutItems ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 /**
  *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
@@ -392,11 +392,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-ASDISPLAYNODE_DEPRECATED
+ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASCollectionDataSource.")
 @protocol ASCollectionViewDataSource <ASCollectionDataSource>
 @end
 
-ASDISPLAYNODE_DEPRECATED
+ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASCollectionDelegate.")
 @protocol ASCollectionViewDelegate <ASCollectionDelegate>
 @end
 

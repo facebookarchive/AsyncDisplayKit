@@ -287,6 +287,11 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
   [self reloadDataWithCompletion:nil];
 }
 
+- (void)relayoutItems
+{
+  [self.view relayoutItems];
+}
+
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
   [self.view beginUpdates];

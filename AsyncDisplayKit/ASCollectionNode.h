@@ -265,6 +265,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)reloadData;
 
+/**
+ * Triggers a relayout of all nodes.
+ *
+ * @discussion This method invalidates and lays out every cell node in the collection view.
+ */
+- (void)relayoutItems;
+
 #pragma mark - Querying Data
 
 /**
@@ -448,7 +455,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param collectionView The sender.
  * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED_MSG("Data source accesses are on the main thread. Method will not be called.");
 
 /**
  * Indicator to unlock the data source for data fetching in async mode.
@@ -458,7 +465,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param collectionView The sender.
  * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED_MSG("Data source accesses are on the main thread. Method will not be called.");
 
 @end
 

@@ -100,6 +100,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)reloadData;
 
 /**
+ * Triggers a relayout of all nodes.
+ *
+ * @discussion This method invalidates and lays out every cell node in the table view.
+ */
+- (void)relayoutItems;
+
+/**
  *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread.
  *  The data source must be updated to reflect the changes before the update block completes.
  *
@@ -339,7 +346,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param tableView The sender.
  * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)tableViewLockDataSource:(ASTableView *)tableView ASDISPLAYNODE_DEPRECATED;
+- (void)tableViewLockDataSource:(ASTableView *)tableView ASDISPLAYNODE_DEPRECATED_MSG("Data source accesses are on the main thread. Method will not be called.");
 
 /**
  * Indicator to unlock the data source for data fetching in asyn mode.
@@ -349,7 +356,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param tableView The sender.
  * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)tableViewUnlockDataSource:(ASTableView *)tableView ASDISPLAYNODE_DEPRECATED;
+- (void)tableViewUnlockDataSource:(ASTableView *)tableView ASDISPLAYNODE_DEPRECATED_MSG("Data source accesses are on the main thread. Method will not be called.");
 
 @end
 
