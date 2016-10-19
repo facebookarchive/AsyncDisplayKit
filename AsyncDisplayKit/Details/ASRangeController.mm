@@ -22,8 +22,6 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "AsyncDisplayKit+Debug.h"
 
-#import <sys/kdebug_signpost.h>
-
 #define AS_RANGECONTROLLER_LOG_UPDATE_FREQ 0
 
 @interface ASRangeController ()
