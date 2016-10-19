@@ -23,8 +23,6 @@
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
 
-#import <sys/kdebug_signpost.h>
-
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
 
