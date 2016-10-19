@@ -75,7 +75,7 @@ NS_ASSUME_NONNULL_BEGIN
 /*
  * Returns an ASWrapperLayoutSpec object initialized with the given layoutElement as child
  */
-- (instancetype)initWithLayoutElement:(id<ASLayoutElement>)layoutElement NS_DESIGNATED_INITIALIZER;;
+- (instancetype)initWithLayoutElement:(id<ASLayoutElement>)layoutElement NS_DESIGNATED_INITIALIZER;
 
 /*
  * Init not available for ASWrapperLayoutSpec

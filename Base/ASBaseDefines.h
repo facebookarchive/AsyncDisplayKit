@@ -82,6 +82,10 @@
 # endif
 #endif
 
+#ifndef ASDISPLAYNODE_DEPRECATED_MSG
+# define  ASDISPLAYNODE_DEPRECATED_MSG(msg) __deprecated_msg(msg)
+#endif
+
 #if defined (__cplusplus) && defined (__GNUC__)
 # define ASDISPLAYNODE_NOTHROW __attribute__ ((nothrow))
 #else

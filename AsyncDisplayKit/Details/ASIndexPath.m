@@ -64,7 +64,7 @@ BOOL ASIndexPathRangeEqualToIndexPathRange(ASIndexPathRange first, ASIndexPathRa
 
 + (NSIndexPath *)indexPathWithASIndexPath:(ASIndexPath)indexPath
 {
-  return [NSIndexPath indexPathForRow:indexPath.row inSection:indexPath.section];;
+  return [NSIndexPath indexPathForRow:indexPath.row inSection:indexPath.section];
 }
 
 - (ASIndexPath)ASIndexPathValue

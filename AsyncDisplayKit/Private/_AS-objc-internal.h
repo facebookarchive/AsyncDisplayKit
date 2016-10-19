@@ -441,7 +441,7 @@ typedef enum {
     -(BOOL)_tryRetain {                                                         \
         __typeof__(_rc_ivar) _prev;                                             \
         do {                                                                    \
-            _prev = __atomic_load_n(&_rc_ivar, __ATOMIC_SEQ_CST);;              \
+            _prev = __atomic_load_n(&_rc_ivar, __ATOMIC_SEQ_CST);              \
             if (_prev & 1) {                                                    \
                 return 0;                                                       \
             } else if (_prev == -2) {                                           \

@@ -145,9 +145,9 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return An ASLayout instance defining the layout of the receiver and its children.
  *
- * @deprecated Deprecated in version 2.0: Use ASCalculateRootLayout or ASCalculateLayout instead
+ * @deprecated Deprecated in version 2.0: Use ASCalculateRootLayout() or ASCalculateLayout() instead
  */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize ASDISPLAYNODE_DEPRECATED;
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize ASDISPLAYNODE_DEPRECATED_MSG("Use ASCalculateRootLayout() or ASCalculateLayout() instead");
 
 @end
 
