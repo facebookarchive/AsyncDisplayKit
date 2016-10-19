@@ -4,7 +4,7 @@ let userImageHeight = 60
 
 public class PhotoWithOutsetIconOverlay: ASDisplayNode, ASPlayground {
   public let photoNode = ASNetworkImageNode()
-  public let iconNode = ASNetworkImageNode()
+  public let iconNode  = ASNetworkImageNode()
 
   override public init() {
     super.init()
@@ -22,8 +22,8 @@ public class PhotoWithOutsetIconOverlay: ASDisplayNode, ASPlayground {
     iconNode.imageModificationBlock = ASImageNodeRoundBorderModificationBlock(10, .white)
   }
 
+  // This is used to expose this function for overriding in extensions
   override public func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
-    // This is to expose this function for overriding in extensions
     return ASLayoutSpec()
   }
 

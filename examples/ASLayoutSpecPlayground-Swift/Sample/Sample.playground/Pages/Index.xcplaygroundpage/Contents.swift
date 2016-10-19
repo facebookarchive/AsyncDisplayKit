@@ -8,7 +8,7 @@
  * [Stack Layout](StackLayout)
  * [Photo With Inset Text Overlay](PhotoWithInsetTextOverlay)
  * [Photo With Outset Icon Overlay](PhotoWithOutsetIconOverlay)
-
+ * [Horizontal Stack With Spacer](HorizontalStackWithSpacer)
 
  - - -
 Tips:

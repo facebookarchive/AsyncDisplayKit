@@ -25,4 +25,4 @@ extension PhotoWithOutsetIconOverlay {
 
 PhotoWithOutsetIconOverlay().show()
 
-//: [Index](Index)
+//: [Horizontal Stack With Spacer](HorizontalStackWithSpacer)

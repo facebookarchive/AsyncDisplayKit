@@ -16,18 +16,14 @@ public class PhotoWithInsetTextOverlay: ASDisplayNode, ASPlayground {
     photoNode.url = URL(string: "http://asyncdisplaykit.org/static/images/layout-examples-photo-with-inset-text-overlay-photo.png")
     photoNode.backgroundColor = .black
 
-    let attributes = [NSFontAttributeName: UIFont.boldSystemFont(ofSize: 16),
-                      NSForegroundColorAttributeName: UIColor.white]
-
     titleNode.backgroundColor = .blue
     titleNode.maximumNumberOfLines = 2
-    titleNode.truncationAttributedText = NSAttributedString(string: "...", attributes: attributes)
-    titleNode.attributedText = NSAttributedString(string: "family fall hikes", attributes: attributes)
-
+    titleNode.truncationAttributedText = NSAttributedString.attributedString(string: "...", fontSize: 16, color: .white, firstWordColor: nil)
+    titleNode.attributedText = NSAttributedString.attributedString(string: "family fall hikes", fontSize: 16, color: .white, firstWordColor: nil)
   }
 
+  // This is used to expose this function for overriding in extensions
   override public func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
-    // This is to expose this function for overriding in extensions
     return ASLayoutSpec()
   }
 
