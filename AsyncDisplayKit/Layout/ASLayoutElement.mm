@@ -254,6 +254,22 @@ do {\
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleHeightProperty);
 }
 
+- (CGSize)preferredSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if (_size.width.unit != ASDimensionUnitPoints) {
+    NSCAssert(NO, @"Cannot get preferredSize of element with fractional width. Width: %@.", NSStringFromASDimension(_size.width));
+    return CGSizeZero;
+  }
+  
+  if (_size.height.unit != ASDimensionUnitPoints) {
+    NSCAssert(NO, @"Cannot get preferredSize of element with fractional height. Height: %@.", NSStringFromASDimension(_size.height));
+    return CGSizeZero;
+  }
+  
+  return CGSizeMake(_size.width.value, _size.height.value);
+}
+
 - (void)setMinSize:(CGSize)minSize
 {
   ASDN::MutexLocker l(__instanceLock__);
