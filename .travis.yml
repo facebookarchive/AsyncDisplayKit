@@ -2,7 +2,7 @@ language: objective-c
 cache:
   - bundler
   - cocoapods
-osx_image: xcode8
+osx_image: xcode7.3
 git:
   depth: 10
 before_install:
@@ -22,7 +22,7 @@ env:
   - MODE=examples-pt3
   - MODE=life-without-cocoapods
   - MODE=framework
-script: ./build.sh $MODE
+script: ./build.sh $MODE "platform=iOS Simulator,OS=9.3,name=iPhone 6" "iphonesimulator9.0"
 
 #after_success:
 #  - slather
