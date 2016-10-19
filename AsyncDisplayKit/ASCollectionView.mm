@@ -1224,7 +1224,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)_beginBatchFetching
 {
   [_batchContext beginBatchFetching];
-  if (_asyncDelegateFlags.collectionViewWillBeginBatchFetch) {
+  if (_asyncDelegateFlags.collectionNodeWillBeginBatchFetch) {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      [_asyncDelegate collectionNode:self.collectionNode willBeginBatchFetchWithContext:_batchContext];
+    });
+  } else if (_asyncDelegateFlags.collectionViewWillBeginBatchFetch) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
