@@ -336,7 +336,7 @@ ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASSizeRange ASLayoutElementSizeResolv
 /**
  * Function is deprecated. Use ASSizeRangeMakeWithExactCGSize instead.
  */
-extern AS_WARN_UNUSED_RESULT ASSizeRange ASSizeRangeMakeExactSize(CGSize size) ASDISPLAYNODE_DEPRECATED;
+extern AS_WARN_UNUSED_RESULT ASSizeRange ASSizeRangeMakeExactSize(CGSize size) ASDISPLAYNODE_DEPRECATED_MSG("Use ASSizeRangeMakeWithExactCGSize instead.");
 
 NS_ASSUME_NONNULL_END
 ASDISPLAYNODE_EXTERN_C_END

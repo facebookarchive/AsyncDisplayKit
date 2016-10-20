@@ -41,7 +41,6 @@
 
   UICollectionView *cv = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, 100, 100) collectionViewLayout:layoutMock];
   id dataSource = [OCMockObject niceMockForProtocol:@protocol(UICollectionViewDataSource)];
-  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] collectionView:cv numberOfItemsInSection:0];
 
   cv.dataSource = dataSource;
 
@@ -135,6 +134,31 @@
    * trigger the collection view to read oldSectionCount=0.
    */
   XCTAssertThrowsSpecificNamed([cv insertSections:[NSIndexSet indexSetWithIndex:0]], NSException, NSInternalInconsistencyException);
+}
+
+// If you put reloadData in a batch update, collection view will ignore it and perform the normal
+// update validation i.e. throw an exception if your data source counts changed.
+- (void)testThatPuttingReloadDataInABatchUpdateDoesntWork
+{
+  UICollectionViewLayout *layout = [[UICollectionViewLayout alloc] init];
+  UICollectionView *cv = [[UICollectionView alloc] initWithFrame:CGRectMake(0, 0, 100, 100) collectionViewLayout:layout];
+  id dataSource = [OCMockObject niceMockForProtocol:@protocol(UICollectionViewDataSource)];
+  // Start data source at 1 section, 1 item
+  [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:1]] numberOfSectionsInCollectionView:cv];
+  [[[dataSource expect] andReturnValue:[NSNumber numberWithInteger:1]] collectionView:cv numberOfItemsInSection:0];
+
+  cv.dataSource = dataSource;
+
+  // Verify initial data.
+  XCTAssertEqual([cv numberOfSections], 1);
+  XCTAssertEqual([cv numberOfItemsInSection:0], 1);
+  [dataSource verify];
+
+  XCTAssertThrows([cv performBatchUpdates:^{
+    // Change data source to 1 section, 2 items
+    [[[dataSource stub] andReturnValue:[NSNumber numberWithInteger:2]] collectionView:cv numberOfItemsInSection:0];
+    [cv reloadData];
+  } completion:nil]);
 }
 
 @end

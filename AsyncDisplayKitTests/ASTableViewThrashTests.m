@@ -9,6 +9,8 @@
 @import XCTest;
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "ASTableViewInternal.h"
+#import "ASTableView+Undeprecated.h"
+
 
 // Set to 1 to use UITableView and see if the issue still exists.
 #define USE_UIKIT_REFERENCE 0

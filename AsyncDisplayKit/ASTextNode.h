@@ -299,7 +299,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  
  @see attributedText
  */
-@property (nullable, nonatomic, copy) NSAttributedString *attributedString ASDISPLAYNODE_DEPRECATED;
+@property (nullable, nonatomic, copy) NSAttributedString *attributedString ASDISPLAYNODE_DEPRECATED_MSG("Use .attributedText instead.");
 
 
 /**
@@ -308,8 +308,10 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  
  @see truncationAttributedText
  */
-@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedString ASDISPLAYNODE_DEPRECATED;
+@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedString ASDISPLAYNODE_DEPRECATED_MSG("Use .truncationAttributedText instead.");
 
 @end
 
 NS_ASSUME_NONNULL_END
+
+

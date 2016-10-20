@@ -12,6 +12,7 @@
 
 #import <Foundation/Foundation.h>
 #import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASScrollDirection.h>
 
 @class ASCollectionView;
 @protocol ASCollectionDataSource;
@@ -52,6 +53,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)didChangeCollectionViewDataSource:(nullable id<ASCollectionDataSource>)dataSource;
 
+/**
+ * Return the directions in which your collection view can scroll
+ */
+- (ASScrollDirection)scrollableDirections;
+
 #pragma mark Deprecated Methods
 
 /**
@@ -60,7 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @deprecated This method will not be called, and it is only deprecated as a reminder to remove it.
  * Supplementary elements must exist in the same sections as regular collection view items i.e. -numberOfSectionsInCollectionView:
  */
-- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind ASDISPLAYNODE_DEPRECATED;
+- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 @end
 

@@ -20,13 +20,16 @@
 
 #import "DetailViewController.h"
 
+
 @interface ViewController () <ASTableDataSource, ASTableDelegate>
+
 @property (nonatomic, copy) NSArray *imageCategories;
 @property (nonatomic, strong, readonly) ASTableNode *tableNode;
+
 @end
 
-@implementation ViewController
 
+@implementation ViewController
 
 #pragma mark - Lifecycle
 
@@ -77,12 +80,12 @@
 
 #pragma mark - ASTableDataSource / ASTableDelegate
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+- (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
 {
     return self.imageCategories.count;
 }
 
-- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)tableNode:(ASTableNode *)tableNode nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString *imageCategory = self.imageCategories[indexPath.row];
     return ^{
@@ -92,15 +95,13 @@
     };
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)tableNode:(ASTableNode *)tableNode didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString *imageCategory = self.imageCategories[indexPath.row];
     DetailRootNode *detailRootNode = [[DetailRootNode alloc] initWithImageCategory:imageCategory];
     DetailViewController *detailViewController = [[DetailViewController alloc] initWithNode:detailRootNode];
     detailViewController.title = [imageCategory capitalizedString];
     [self.navigationController pushViewController:detailViewController animated:YES];
-    
-    
 }
 
 @end

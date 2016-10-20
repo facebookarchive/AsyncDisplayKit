@@ -16,6 +16,7 @@
 #import "ASChangeSetDataController.h"
 #import "ASCellNode.h"
 #import "ASTableNode.h"
+#import "ASTableView+Undeprecated.h"
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20
@@ -43,7 +44,7 @@
 
 - (instancetype)__initWithFrame:(CGRect)frame style:(UITableViewStyle)style
 {
-  return [super _initWithFrame:frame style:style dataControllerClass:[ASTestDataController class] ownedByNode:NO];
+  return [super _initWithFrame:frame style:style dataControllerClass:[ASTestDataController class]];
 }
 
 - (ASTestDataController *)testDataController
@@ -60,7 +61,7 @@
 
 @end
 
-@interface ASTableViewTestDelegate : NSObject <ASTableViewDataSource, ASTableViewDelegate>
+@interface ASTableViewTestDelegate : NSObject <ASTableDataSource, ASTableDelegate>
 @property (nonatomic, copy) void (^willDeallocBlock)(ASTableViewTestDelegate *delegate);
 @end
 
@@ -107,7 +108,7 @@
 
 @end
 
-@interface ASTableViewFilledDataSource : NSObject <ASTableViewDataSource, ASTableViewDelegate>
+@interface ASTableViewFilledDataSource : NSObject <ASTableDataSource, ASTableDelegate>
 @end
 
 @implementation ASTableViewFilledDataSource
@@ -141,7 +142,7 @@
 
 @end
 
-@interface ASTableViewFilledDelegate : NSObject <ASTableViewDelegate>
+@interface ASTableViewFilledDelegate : NSObject <ASTableDelegate>
 @end
 
 @implementation ASTableViewFilledDelegate

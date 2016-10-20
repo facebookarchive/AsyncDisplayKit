@@ -21,7 +21,7 @@
 #import "SupplementaryNode.h"
 #import "ItemNode.h"
 
-@interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout>
+@interface ViewController () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout>
 
 @property (nonatomic, strong) ASCollectionView *collectionView;
 @property (nonatomic, strong) NSArray *data;
@@ -48,6 +48,8 @@
   layout.headerReferenceSize = CGSizeMake(50.0, 50.0);
   layout.footerReferenceSize = CGSizeMake(50.0, 50.0);
   
+  // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
+  // This functionality & example project remains for users who insist on using ASCollectionView.
   self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
   self.collectionView.asyncDataSource = self;
   self.collectionView.asyncDelegate = self;
@@ -55,6 +57,8 @@
   self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   self.collectionView.backgroundColor = [UIColor whiteColor];
   
+  // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
+  // This functionality & example project remains for users who insist on using ASCollectionView.
   [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
   
@@ -97,6 +101,8 @@
 
 - (void)reloadTapped
 {
+  // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
+  // This functionality & example project remains for users who insist on using ASCollectionView.
   [self.collectionView reloadData];
 }
 

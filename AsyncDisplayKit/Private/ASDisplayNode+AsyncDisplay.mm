@@ -120,7 +120,7 @@
         }
       }
     };
-    [displayBlocks addObject:[pushAndDisplayBlock copy]];
+    [displayBlocks addObject:pushAndDisplayBlock];
   }
 
   // Recursively capture displayBlocks for all descendants.
@@ -130,11 +130,16 @@
 
   // If we pushed a transform, pop it by adding a display block that does nothing other than that.
   if (shouldDisplay) {
-    dispatch_block_t popBlock = ^{
-      CGContextRef context = UIGraphicsGetCurrentContext();
-      CGContextRestoreGState(context);
-    };
-    [displayBlocks addObject:[popBlock copy]];
+    // Since this block is pure, we can store it statically.
+    static dispatch_block_t popBlock;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+      popBlock = ^{
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        CGContextRestoreGState(context);
+      };
+    });
+    [displayBlocks addObject:popBlock];
   }
 }
 
@@ -252,7 +257,7 @@
     };
   }
 
-  return [displayBlock copy];
+  return displayBlock;
 }
 
 - (void)displayAsyncLayer:(_ASDisplayLayer *)asyncLayer asynchronously:(BOOL)asynchronously
