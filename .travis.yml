@@ -13,6 +13,8 @@ before_install:
   - gem install xcpretty -v 0.2.2
   - gem install xcpretty-travis-formatter
 #  - gem install slather
+  - gem uninstall bundler
+  - gem install bundler -v 1.13.5
   - xcrun simctl list
 install: echo "<3"
 env:
