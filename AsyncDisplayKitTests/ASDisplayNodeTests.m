@@ -21,6 +21,8 @@
 #import "UIView+ASConvenience.h"
 #import "ASCellNode.h"
 #import "ASImageNode.h"
+#import "ASOverlayLayoutSpec.h"
+#import "ASInsetLayoutSpec.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
@@ -2103,6 +2105,22 @@ static bool stringContainsPointer(NSString *description, id p) {
 #pragma clang diagnostic pop
 }
 
+- (void)testSettingPropertiesViaStyllableProtocol
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  id<ASLayoutElement> returnedNode =
+   [node styledWithBlock:^(ASLayoutElementStyle * _Nonnull style) {
+     style.width = ASDimensionMake(100);
+     style.flexGrow = 1.0;
+     style.flexShrink = 1.0;
+   }];
+  
+  XCTAssertEqualObjects(node, returnedNode);
+  ASXCTAssertEqualDimensions(node.style.width, ASDimensionMake(100));
+  XCTAssertEqual(node.style.flexGrow, 1.0, @"flexGrow should have have the value 1.0");
+  XCTAssertEqual(node.style.flexShrink, 1.0, @"flexShrink should have have the value 1.0");
+}
+
 - (void)testSubnodesFastEnumeration
 {
   DeclareNodeNamed(parentNode);
@@ -2121,6 +2139,16 @@ static bool stringContainsPointer(NSString *description, id p) {
     XCTAssertEqualObjects(subnode, subnodes[i]);
     i++;
   }
+}
+
+- (void)testThatHavingTheSameNodeTwiceInALayoutSpecCausesExceptionOnLayoutCalculation
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  node.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode *node, ASSizeRange constrainedSize) {
+    return [ASOverlayLayoutSpec overlayLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:subnode] overlay:subnode];
+  };
+  XCTAssertThrowsSpecificNamed([node calculateLayoutThatFits:ASSizeRangeMake(CGSizeMake(100, 100))], NSException, NSInternalInconsistencyException);
 }
 
 @end

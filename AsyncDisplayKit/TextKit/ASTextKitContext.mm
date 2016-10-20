@@ -54,6 +54,18 @@
   return self;
 }
 
+- (CGSize)constrainedSize
+{
+  ASDN::MutexSharedLocker l(__instanceLock__);
+  return _textContainer.size;
+}
+
+- (void)setConstrainedSize:(CGSize)constrainedSize
+{
+  ASDN::MutexSharedLocker l(__instanceLock__);
+  _textContainer.size = constrainedSize;
+}
+
 - (void)performBlockWithLockedTextKitComponents:(void (^)(NSLayoutManager *,
                                                           NSTextStorage *,
                                                           NSTextContainer *))block

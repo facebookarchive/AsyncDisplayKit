@@ -9,6 +9,7 @@
 //
 
 #import "ASInternalHelpers.h"
+#import "ASRunLoopQueue.h"
 
 #import <objc/runtime.h>
 
@@ -17,6 +18,7 @@
 
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector)
 {
+  if (superclass == subclass) return NO; // Even if the class implements the selector, it doesn't override itself.
   Method superclassMethod = class_getInstanceMethod(superclass, selector);
   Method subclassMethod = class_getInstanceMethod(subclass, selector);
   IMP superclassIMP = superclassMethod ? method_getImplementation(superclassMethod) : NULL;
@@ -26,6 +28,7 @@ BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector)
 
 BOOL ASSubclassOverridesClassSelector(Class superclass, Class subclass, SEL selector)
 {
+  if (superclass == subclass) return NO; // Even if the class implements the selector, it doesn't override itself.
   Method superclassMethod = class_getClassMethod(superclass, selector);
   Method subclassMethod = class_getClassMethod(subclass, selector);
   IMP superclassIMP = superclassMethod ? method_getImplementation(superclassMethod) : NULL;
@@ -76,15 +79,9 @@ void ASPerformBlockOnBackgroundThread(void (^block)())
   }
 }
 
-void ASPerformBlockOnDeallocationQueue(void (^block)())
+void ASPerformBackgroundDeallocation(id object)
 {
-  static dispatch_queue_t queue;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    queue = dispatch_queue_create("org.AsyncDisplayKit.deallocationQueue", DISPATCH_QUEUE_SERIAL);
-  });
-  
-  dispatch_async(queue, block);
+  [[ASDeallocQueue sharedDeallocationQueue] releaseObjectInBackground:object];
 }
 
 CGFloat ASScreenScale()

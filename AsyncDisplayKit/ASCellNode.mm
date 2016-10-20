@@ -11,8 +11,11 @@
 #import "ASCellNode+Internal.h"
 
 #import "ASEqualityHelpers.h"
+#import "ASInternalHelpers.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASCollectionView+Undeprecated.h"
+#import "ASTableView+Undeprecated.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
@@ -39,6 +42,7 @@
 
 @implementation ASCellNode
 @synthesize interactionDelegate = _interactionDelegate;
+static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +initialize.
 
 - (instancetype)init
 {
@@ -269,10 +273,26 @@
   [self handleVisibilityChange:NO];
 }
 
++ (void)initialize
+{
+  [super initialize];
+  if (ASSubclassOverridesSelector([ASCellNode class], self, @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:))) {
+    if (__cellClassesForVisibilityNotifications == nil) {
+      __cellClassesForVisibilityNotifications = [NSMutableSet set];
+    }
+    [__cellClassesForVisibilityNotifications addObject:self];
+  }
+}
+
 - (void)handleVisibilityChange:(BOOL)isVisible
 {
+  if ([__cellClassesForVisibilityNotifications containsObject:[self class]] == NO) {
+    return; // The work below is expensive, and only valuable for subclasses watching visibility events.
+  }
+  
   // NOTE: This assertion is failing in some apps and will be enabled soon.
   // ASDisplayNodeAssert(self.isNodeLoaded, @"Node should be loaded in order for it to become visible or invisible.  If not in this situation, we shouldn't trigger creating the view.");
+  
   UIView *view = self.view;
   CGRect cellFrame = CGRectZero;
   
@@ -285,7 +305,8 @@
   
   // If we did not convert, we'll pass along CGRectZero and a nil scrollView.  The EventInvisible call is thus equivalent to
   // didExitVisibileState, but is more convenient for the developer than implementing multiple methods.
-  [self cellNodeVisibilityEvent:isVisible ? ASCellNodeVisibilityEventVisible : ASCellNodeVisibilityEventInvisible
+  [self cellNodeVisibilityEvent:isVisible ? ASCellNodeVisibilityEventVisible
+                                          : ASCellNodeVisibilityEventInvisible
                    inScrollView:scrollView
                   withCellFrame:cellFrame];
 }
@@ -298,8 +319,16 @@
   
   ASDisplayNode *owningNode = scrollView.asyncdisplaykit_node;
   if ([owningNode isKindOfClass:[ASCollectionNode class]]) {
+    NSIndexPath *ip = [(ASCollectionNode *)owningNode indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
     [result addObject:@{ @"collectionNode" : ASObjectDescriptionMakeTiny(owningNode) }];
   } else if ([owningNode isKindOfClass:[ASTableNode class]]) {
+    NSIndexPath *ip = [(ASTableNode *)owningNode indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
     [result addObject:@{ @"tableNode" : ASObjectDescriptionMakeTiny(owningNode) }];
   
   } else if ([scrollView isKindOfClass:[ASCollectionView class]]) {

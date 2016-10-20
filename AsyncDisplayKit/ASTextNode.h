@@ -81,7 +81,7 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
 @property (nonatomic, readonly, assign) NSUInteger lineCount;
 
 /**
- * An array of path objects representing the regions where text is not displayed.
+ * An array of path objects representing the regions where text should not be displayed.
  *
  * @discussion The default value of this property is an empty array. You can
  * assign an array of UIBezierPath objects to exclude text from one or more regions in

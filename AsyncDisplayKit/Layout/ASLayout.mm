@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASLayout.h"
+#import "ASLayoutPrivate.h"
 
 #import "ASDimension.h"
 #import "ASInternalHelpers.h"
@@ -40,7 +40,9 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 }
 
 @interface ASLayout () <ASDescriptionProvider>
-
+{
+  ASLayoutElementType _layoutElementType;
+}
 /**
  * A boolean describing if the current layout has been flattened.
  */
@@ -68,6 +70,8 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 #endif
     
     _layoutElement = layoutElement;
+    // Read this now to avoid @c weak overhead later.
+    _layoutElementType = layoutElement.layoutElementType;
     
     if (!ASIsCGSizeValidForLayout(size)) {
       ASDisplayNodeAssert(NO, @"layoutSize is invalid and unsafe to provide to Core Animation! Release configurations will force to 0, 0.  Size = %@, node = %@", NSStringFromCGSize(size), layoutElement);
@@ -173,7 +177,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
 - (ASLayoutElementType)type
 {
-  return _layoutElement.layoutElementType;
+  return _layoutElementType;
 }
 
 - (CGRect)frame

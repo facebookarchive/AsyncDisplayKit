@@ -31,10 +31,15 @@
 #import "ASLayoutElementStylePrivate.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayout.h"
+#import "ASLayoutPrivate.h"
 #import "ASLayoutSpec.h"
 #import "ASCellNode+Internal.h"
 #import "ASWeakProxy.h"
+#import "ASLayoutSpecPrivate.h"
+
+#if DEBUG
+  #define AS_DEDUPE_LAYOUT_SPEC_TREE 1
+#endif
 
 //#import "ASLayoutSpec+Debug.h" // FIXME: remove later
 #import "ASAbsoluteLayoutSpec.h" // FIXME: remove later
@@ -734,6 +739,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _style = [[ASLayoutElementStyle alloc] init];
   }
   return _style;
+}
+
+- (instancetype)styledWithBlock:(void (^)(ASLayoutElementStyle *style))styleBlock
+{
+  styleBlock(self.style);
+  return self;
 }
 
 #pragma mark - Layout
@@ -2462,22 +2473,32 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
         layoutSpec = [self layoutSpecThatFits:constrainedSize];
       }
       
+    }
+
+#if AS_DEDUPE_LAYOUT_SPEC_TREE
+    NSSet *duplicateElements = [layoutSpec findDuplicatedElementsInSubtree];
+    if (duplicateElements.count > 0) {
+      ASDisplayNodeFailAssert(@"Node %@ returned a layout spec that contains the same elements in multiple positions. Elements: %@", self, duplicateElements);
+      // Use an empty layout spec to avoid crash.
+      layoutSpec = [[ASLayoutSpec alloc] init];
+    }
+#endif
+
+    if (_shouldCacheLayoutSpec) {
+      _layoutSpec = layoutSpec;
+    } else {
       ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
-      if (_shouldCacheLayoutSpec) {
-        _layoutSpec = layoutSpec;
-      }
     }
 
     layoutSpec.parent = self; // This causes upward propogation of any non-default layoutElement values.
-    
+    layoutSpec.isMutable = NO;
+  
     // manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
     {
       ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
       ASEnvironmentStatePropagateDown(layoutSpec, self.environmentTraitCollection);
     }
     
-    layoutSpec.isMutable = NO;
-
     BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
     if (measureLayoutComputation) {
       _layoutComputationNumberOfPasses++;
@@ -3558,7 +3579,7 @@ ASEnvironmentLayoutExtensibilityForwarding
   creationTypeString = [NSString stringWithFormat:@"cr8:%.2lfms dl:%.2lfms ap:%.2lfms ad:%.2lfms",  1000 * _debugTimeToCreateView, 1000 * _debugTimeForDidLoad, 1000 * _debugTimeToApplyPendingState, 1000 * _debugTimeToAddSubnodeViews];
 #endif
 
-  return [NSString stringWithFormat:@"<%@ alpha:%.2f isLayerBacked:%d %@>", self.description, self.alpha, self.isLayerBacked, creationTypeString];
+  return [NSString stringWithFormat:@"<%@ alpha:%.2f isLayerBacked:%d frame:%@ %@>", self.description, self.alpha, self.isLayerBacked, NSStringFromCGRect(self.frame), creationTypeString];
 }
 
 - (NSString *)displayNodeRecursiveDescription

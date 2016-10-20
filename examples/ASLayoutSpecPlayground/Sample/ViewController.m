@@ -10,7 +10,7 @@
 #import "PlaygroundContainerNode.h"
 #import "ASLayoutElementInspectorNode.h"
 
-@interface ViewController () <ASPagerNodeDataSource, ASLayoutElementInspectorNodeDelegate, PlaygroundContainerNodeDelegate>
+@interface ViewController () <ASPagerDelegate, ASPagerDataSource, ASLayoutElementInspectorNodeDelegate, PlaygroundContainerNodeDelegate>
 @end
 
 @implementation ViewController
@@ -27,6 +27,7 @@
   self = [super initWithNode:_pagerNode];
   
   if (self) {
+    _pagerNode.delegate = self;
     _pagerNode.dataSource = self;
     self.navigationItem.title   = @"ASLayoutSpec Playground";
     self.edgesForExtendedLayout = UIRectEdgeNone;

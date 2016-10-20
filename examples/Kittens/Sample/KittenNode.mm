@@ -148,7 +148,7 @@ static const CGFloat kInnerPadding = 10.0f;
   _imageNode.style.preferredSize = imageSize;
   
   // Shrink the text node in case the image + text gonna be too wide
-  _textNode.style.flexShrink = YES;
+  _textNode.style.flexShrink = 1.0;
 
   // Configure stack
   ASStackLayoutSpec *stackLayoutSpec =

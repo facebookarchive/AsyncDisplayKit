@@ -27,9 +27,13 @@ ASDISPLAYNODE_EXTERN_C_END
 /**
  * ASVisibilityDepth
  *
- * @discussion A protocol which when implemented represents the number of user actions required to
- * make an ASDisplayNode or ASViewController visible. Parent view controllers should also implement
- * @c ASManagesChildVisibilityDepth
+ * @discussion "Visibility Depth" represents the number of user actions required to make an ASDisplayNode or 
+ * ASViewController visibile. AsyncDisplayKit uses this information to intelligently manage memory and focus
+ * resources where they are most visible to the user.
+ *
+ * The ASVisibilityDepth protocol describes how custom view controllers can integrate with this system.
+ *
+ * Parent view controllers should also implement @c ASManagesChildVisibilityDepth
  *
  * @see ASManagesChildVisibilityDepth
  */

@@ -69,7 +69,7 @@
   if (_layoutElementToEdit != layoutElementToEdit) {
     _layoutElementToEdit = layoutElementToEdit;
   }
-  [_tableNode.view reloadData];
+  [_tableNode reloadData];
 }
 
 #pragma mark - ASTableDataSource

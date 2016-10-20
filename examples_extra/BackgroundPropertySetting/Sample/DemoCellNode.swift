@@ -33,10 +33,10 @@ final class DemoCellNode: ASCellNode {
 	override func layoutSpecThatFits(constrainedSize: ASSizeRange) -> ASLayoutSpec {
 		let specA = ASRatioLayoutSpec(ratio: 1, child: childA)
 		specA.style.flexBasis = ASDimensionMakeWithPoints(1)
-		specA.style.flexGrow = 1
+		specA.style.flexGrow = 1.0
 		let specB = ASRatioLayoutSpec(ratio: 1, child: childB)
 		specB.style.flexBasis = ASDimensionMakeWithPoints(1)
-		specB.style.flexGrow = 1
+		specB.style.flexGrow = 1.0
 		let children = state.isReverse ? [ specB, specA ] : [ specA, specB ]
 		let direction: ASStackLayoutDirection = state.isVertical ? .Vertical : .Horizontal
 		return ASStackLayoutSpec(direction: direction,

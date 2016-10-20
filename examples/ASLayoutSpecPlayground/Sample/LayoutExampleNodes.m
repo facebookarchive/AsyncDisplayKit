@@ -104,7 +104,8 @@
   ASStackLayoutSpec *verticalStackSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStackSpec.style.flexShrink = YES;
   
-  // if fetching post location data from server, check if it is available yet
+  // Example: see ASDKgram for how this technique can be used to animate in the location label
+  // once a separate network request provides the data.
   if (_postLocationNode.attributedText) {
     [verticalStackSpec setChildren:@[_usernameNode, _postLocationNode]];
   } else {
@@ -163,12 +164,12 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   _photoNode.style.preferredSize = CGSizeMake(USER_IMAGE_HEIGHT*2, USER_IMAGE_HEIGHT*2);
-  ASAbsoluteLayoutSpec *backgroundImageAbsoluteSpec = [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[_photoNode]];
-
+  
   UIEdgeInsets insets = UIEdgeInsetsMake(INFINITY, 12, 12, 12);
-  ASInsetLayoutSpec *textInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_titleNode];
+  ASInsetLayoutSpec *textInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets
+                                                                            child:_titleNode];
 
-  ASOverlayLayoutSpec *textOverlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:backgroundImageAbsoluteSpec
+  ASOverlayLayoutSpec *textOverlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_photoNode
                                                                                  overlay:textInsetSpec];
   
   return textOverlaySpec;

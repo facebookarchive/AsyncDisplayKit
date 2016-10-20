@@ -110,8 +110,7 @@ struct ASTextKitAttributes {
     && maximumNumberOfLines == other.maximumNumberOfLines
     && shadowOpacity == other.shadowOpacity
     && shadowRadius == other.shadowRadius
-    && (pointSizeScaleFactors == other.pointSizeScaleFactors
-        || [pointSizeScaleFactors isEqualToArray:other.pointSizeScaleFactors])
+    && [pointSizeScaleFactors isEqualToArray:other.pointSizeScaleFactors]
     && CGSizeEqualToSize(shadowOffset, other.shadowOffset)
     && ASObjectIsEqual(exclusionPaths, other.exclusionPaths)
     && ASObjectIsEqual(avoidTailTruncationSet, other.avoidTailTruncationSet)

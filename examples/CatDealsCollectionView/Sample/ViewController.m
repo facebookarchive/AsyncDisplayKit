@@ -29,9 +29,9 @@ static const NSInteger kBatchSize = 20;
 static const CGFloat kHorizontalSectionPadding = 10.0f;
 static const CGFloat kVerticalSectionPadding = 20.0f;
 
-@interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout>
+@interface ViewController () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout>
 {
-  ASCollectionView *_collectionView;
+  ASCollectionNode *_collectionNode;
   NSMutableArray *_data;
 }
 
@@ -45,7 +45,7 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
 
 - (instancetype)init
 {
-  self = [super init];
+  self = [super initWithNode:_collectionNode];
   
   if (self) {
     
@@ -53,24 +53,23 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
     
     UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
     
-    _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
-    _collectionView.asyncDataSource = self;
-    _collectionView.asyncDelegate = self;
-    _collectionView.backgroundColor = [UIColor grayColor];
-    _collectionView.leadingScreensForBatching = 2;
+    _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
+    _collectionNode.dataSource = self;
+    _collectionNode.delegate = self;
+    _collectionNode.backgroundColor = [UIColor grayColor];
     
     ASRangeTuningParameters preloadTuning;
     preloadTuning.leadingBufferScreenfuls = 2;
     preloadTuning.trailingBufferScreenfuls = 1;
-    [_collectionView setTuningParameters:preloadTuning forRangeType:ASLayoutRangeTypePreload];
+    [_collectionNode setTuningParameters:preloadTuning forRangeType:ASLayoutRangeTypePreload];
     
     ASRangeTuningParameters preRenderTuning;
     preRenderTuning.leadingBufferScreenfuls = 1;
     preRenderTuning.trailingBufferScreenfuls = 0.5;
-    [_collectionView setTuningParameters:preRenderTuning forRangeType:ASLayoutRangeTypeDisplay];
+    [_collectionNode setTuningParameters:preRenderTuning forRangeType:ASLayoutRangeTypeDisplay];
     
-    [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-    [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
+    [_collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+    [_collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
     
     _data = [[NSMutableArray alloc] init];
     
@@ -85,7 +84,8 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
 {
   [super viewDidLoad];
   
-  [self.view addSubview:_collectionView];
+  // set any collectionView properties here (once the node's backing view is loaded)
+  _collectionNode.view.leadingScreensForBatching = 2;
   [self fetchMoreCatsWithCompletion:nil];
 }
 
@@ -115,10 +115,10 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
 - (void)appendMoreItems:(NSInteger)numberOfNewItems completion:(void (^)(BOOL))completion {
   NSArray *newData = [self getMoreData:numberOfNewItems];
   dispatch_async(dispatch_get_main_queue(), ^{
-    [_collectionView performBatchUpdates:^{
+    [_collectionNode performBatchAnimated:YES updates:^{
       [_data addObjectsFromArray:newData];
       NSArray *addedIndexPaths = [self indexPathsForObjects:newData];
-      [_collectionView insertItemsAtIndexPaths:addedIndexPaths];
+      [_collectionNode insertItemsAtIndexPaths:addedIndexPaths];
     } completion:completion];
   });
 }
@@ -142,19 +142,13 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
   return indexPaths;
 }
 
-- (void)viewWillLayoutSubviews
-{
-  _collectionView.frame = self.view.bounds;
-}
-
-
 - (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator {
-  [_collectionView.collectionViewLayout invalidateLayout];
+  [_collectionNode.view.collectionViewLayout invalidateLayout];
 }
 
 - (void)reloadTapped
 {
-  [_collectionView reloadData];
+  [_collectionNode reloadData];
 }
 
 #pragma mark -
