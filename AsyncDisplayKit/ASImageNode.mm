@@ -526,7 +526,7 @@ static ASDN::Mutex cacheLock;
   // Stash the block and call-site queue. We'll invoke it in -displayDidFinish.
   ASDN::MutexLocker l(__instanceLock__);
   if (_displayCompletionBlock != displayCompletionBlock) {
-    _displayCompletionBlock = [displayCompletionBlock copy];
+    _displayCompletionBlock = displayCompletionBlock;
   }
 
   [self setNeedsDisplay];

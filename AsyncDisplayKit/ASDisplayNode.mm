@@ -2505,7 +2505,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssert(!(_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits), @"Overwriting layoutSpecThatFits: and providing a layoutSpecBlock block is currently not supported");
 
   ASDN::MutexLocker l(__instanceLock__);
-  _layoutSpecBlock = [layoutSpecBlock copy];
+  _layoutSpecBlock = layoutSpecBlock;
 }
 
 - (ASLayoutSpecBlock)layoutSpecBlock
