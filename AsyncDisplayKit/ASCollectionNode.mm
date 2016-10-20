@@ -323,6 +323,11 @@
   [self.view performBatchUpdates:updates completion:completion];
 }
 
+- (void)waitUntilAllUpdatesAreCommitted
+{
+  [self.view waitUntilAllUpdatesAreCommitted];
+}
+
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   [self.view reloadDataWithCompletion:completion];
@@ -331,6 +336,11 @@
 - (void)reloadData
 {
   [self.view reloadData];
+}
+
+- (void)relayoutItems
+{
+  [self.view relayoutItems];
 }
 
 - (void)reloadDataImmediately

@@ -47,7 +47,7 @@
 
     _titleNode = [[ASTextNode alloc] init];
     _titleNode.attributedText = [[NSAttributedString alloc] initWithString:_videoModel.title attributes:[self titleNodeStringOptions]];
-    _titleNode.style.flexGrow = YES;
+    _titleNode.style.flexGrow = 1.0;
     [self addSubnode:_titleNode];
 
     _avatarNode = [[ASNetworkImageNode alloc] init];
@@ -184,7 +184,7 @@
 - (ASLayoutSpec*)videoPlayerNodeLayoutSpec:(ASVideoPlayerNode *)videoPlayer forControls:(NSDictionary *)controls forMaximumSize:(CGSize)maxSize
 {
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
-  spacer.style.flexGrow = YES;
+  spacer.style.flexGrow = 1.0;
 
   UIEdgeInsets insets = UIEdgeInsetsMake(10.0, 10.0, 10.0, 10.0);
 
@@ -193,7 +193,7 @@
     scrubber.style.height = ASDimensionMakeWithPoints(44.0);
     scrubber.style.minWidth = ASDimensionMakeWithPoints(0.0);
     scrubber.style.maxWidth = ASDimensionMakeWithPoints(maxSize.width);
-    scrubber.style.flexGrow = YES;
+    scrubber.style.flexGrow = 1.0;
   }
 
   NSArray *controlBarControls = [self controlsForControlBar:controls];

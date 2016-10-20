@@ -98,8 +98,8 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASTextNode *nextTextNode = self.enabled ? self.textNodeTwo : self.textNodeOne;
-  nextTextNode.style.flexGrow = YES;
-  nextTextNode.style.flexShrink = YES;
+  nextTextNode.style.flexGrow = 1.0;
+  nextTextNode.style.flexShrink = 1.0;
   
   ASStackLayoutSpec *horizontalStackLayout = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStackLayout.children = @[nextTextNode];

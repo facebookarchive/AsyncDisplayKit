@@ -832,7 +832,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  * @deprecated Deprecated in version 2.0: Just calls through to set the height and width property of the node. Convert to use sizing properties instead: height, minHeight, maxHeight, width, minWidth, maxWidth.
  */
-@property (nonatomic, assign, readwrite) CGSize preferredFrameSize ASDISPLAYNODE_DEPRECATED;
+@property (nonatomic, assign, readwrite) CGSize preferredFrameSize ASDISPLAYNODE_DEPRECATED_MSG("Use .style.preferredSize instead OR set individual values with .style.height and .style.width.");
 
 @end
 

@@ -58,21 +58,19 @@
 
 - (ASRelativeLayoutSpecPosition)horizontalPositionFromCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
 {
-  BOOL centerX =  (centeringOptions & ASCenterLayoutSpecCenteringX) != 0;
-  if (centerX) {
+  if ((centeringOptions & ASCenterLayoutSpecCenteringX) != 0) {
     return ASRelativeLayoutSpecPositionCenter;
   } else {
-    return ASRelativeLayoutSpecPositionStart;
+    return ASRelativeLayoutSpecPositionNone;
   }
 }
 
 - (ASRelativeLayoutSpecPosition)verticalPositionFromCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
 {
-  BOOL centerY =  (centeringOptions & ASCenterLayoutSpecCenteringY) != 0;
-  if (centerY) {
+  if ((centeringOptions & ASCenterLayoutSpecCenteringY) != 0) {
     return ASRelativeLayoutSpecPositionCenter;
   } else {
-    return ASRelativeLayoutSpecPositionStart;
+    return ASRelativeLayoutSpecPositionNone;
   }
 }
 
