@@ -130,9 +130,6 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-  
-    _tableNode.frame = self.view.bounds;
-    [self.node addSubnode:_tableNode];
 
     self.title = @"AsyncDisplayKit";
     
