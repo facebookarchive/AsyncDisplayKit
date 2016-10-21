@@ -13,22 +13,7 @@
 #import "ASImageNode.h"
 #import "AsyncDisplayKit+Debug.h"
 #import "ASInternalHelpers.h"
-#import <stdlib.h>
-#import <stdio.h>
-
-@interface ASControlTargetAction : NSObject {
-  SEL  _action;
-  id   _target;
-}
-
-@property (nonatomic, readwrite, assign) SEL action;
-@property (nonatomic, readwrite) id target;
-
-@end
-
-@implementation ASControlTargetAction
-
-@end
+#import "ASControlTargetAction.h"
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
