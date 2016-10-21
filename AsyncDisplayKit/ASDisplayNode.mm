@@ -3474,6 +3474,20 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 #pragma mark - Deprecated
 
+- (NSString *)name
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _debugName;
+}
+
+- (void)setName:(NSString *)name
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if (!ASObjectIsEqual(_debugName, name)) {
+    _debugName = [name copy];
+  }
+}
+
 - (CGSize)measure:(CGSize)constrainedSize
 {
   return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;

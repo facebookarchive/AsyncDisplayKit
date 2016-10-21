@@ -15,6 +15,14 @@
 @interface ASDisplayNode (Deprecated)
 
 /**
+ * @abstract The name of this node, which will be displayed in `description`. The default value is nil.
+ * 
+ * @deprecated Deprecated in version 2.0: Use .debugName instead. This value will display in 
+ * results of the -asciiArtString method (@see ASLayoutElementAsciiArtProtocol).
+ */
+@property (nullable, nonatomic, copy) NSString *name;
+
+/**
  * @abstract Asks the node to measure and return the size that best fits its subnodes.
  *
  * @param constrainedSize The maximum size the receiver should fit in.
