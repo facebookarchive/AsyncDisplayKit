@@ -77,7 +77,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 @dynamic layoutElementType;
 
-@synthesize name = _name;
+@synthesize debugName = _debugName;
 @synthesize isFinalLayoutElement = _isFinalLayoutElement;
 @synthesize threadSafeBounds = _threadSafeBounds;
 @synthesize layoutSpecBlock = _layoutSpecBlock;
@@ -677,17 +677,17 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return (_view != nil || (_layer != nil && _flags.layerBacked));
 }
 
-- (NSString *)name
+- (NSString *)debugName
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return _name;
+  return _debugName;
 }
 
-- (void)setName:(NSString *)name
+- (void)setDebugName:(NSString *)debugName
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if (!ASObjectIsEqual(_name, name)) {
-    _name = [name copy];
+  if (!ASObjectIsEqual(_debugName, debugName)) {
+    _debugName = [debugName copy];
   }
 }
 
@@ -3299,8 +3299,8 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 - (NSMutableArray<NSDictionary *> *)propertiesForDescription
 {
   NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
-  if (self.name.length > 0) {
-    [result addObject:@{ @"name" : ASStringWithQuotesIfMultiword(self.name) }];
+  if (self.debugName.length > 0) {
+    [result addObject:@{ @"debugName" : ASStringWithQuotesIfMultiword(self.debugName) }];
   }
   return result;
 }
@@ -3309,8 +3309,8 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 {
   NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
   
-  if (self.name.length > 0) {
-    [result addObject:@{ @"name" : ASStringWithQuotesIfMultiword(self.name)}];
+  if (self.debugName.length > 0) {
+    [result addObject:@{ @"debugName" : ASStringWithQuotesIfMultiword(self.debugName)}];
   }
   
   CGRect windowFrame = [self _frameInWindow];
@@ -3488,6 +3488,16 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 #pragma mark - Deprecated
 
+- (NSString *)name
+{
+  return self.debugName;
+}
+
+- (void)setName:(NSString *)name
+{
+  self.debugName = name;
+}
+
 - (CGSize)measure:(CGSize)constrainedSize
 {
   return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
@@ -3551,12 +3561,16 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (NSString *)asciiArtString
 {
-    return [ASLayoutSpec asciiArtStringForChildren:@[] parentName:[self asciiArtName]];
+  return [ASLayoutSpec asciiArtStringForChildren:@[] parentName:[self asciiArtName]];
 }
 
 - (NSString *)asciiArtName
 {
-    return NSStringFromClass([self class]);
+  NSString *string = NSStringFromClass([self class]);
+  if (_debugName) {
+    string = [string stringByAppendingString:[NSString stringWithFormat:@"\"%@\"",_debugName]];
+  }
+  return string;
 }
 
 @end

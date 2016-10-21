@@ -173,13 +173,6 @@ extern NSInteger const ASDefaultDrawingPriority;
  */
 - (void)onDidLoad:(ASDisplayNodeDidLoadBlock)body;
 
-/** @name Properties */
-
-/**
- * @abstract The name of this node, which will be displayed in `description`. The default value is nil.
- */
-@property (nullable, nonatomic, copy) NSString *name;
-
 /** 
  * @abstract Returns whether the node is synchronous.
  *
