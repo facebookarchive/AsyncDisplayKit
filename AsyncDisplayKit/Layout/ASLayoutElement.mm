@@ -437,5 +437,22 @@ do {\
   return _layoutPosition.load();
 }
 
+#pragma mark - DebuggingminLayoutSize
+
+- (NSString *)description
+{
+  NSString *str = @"Layout Size =";
+  if (self.minLayoutSize.width.unit != ASDimensionUnitAuto || self.minLayoutSize.height.unit != ASDimensionUnitAuto) {
+    str = [str stringByAppendingString:[NSString stringWithFormat:@" min %@ <=", NSStringFromASLayoutSize(self.minLayoutSize)]];
+  }
+  if (self.preferredLayoutSize.width.unit != ASDimensionUnitAuto || self.preferredLayoutSize.height.unit != ASDimensionUnitAuto) {
+    str = [str stringByAppendingString:[NSString stringWithFormat:@" preferred %@", NSStringFromASLayoutSize(self.preferredLayoutSize)]];
+  }
+  if (self.maxLayoutSize.width.unit != ASDimensionUnitAuto || self.maxLayoutSize.height.unit != ASDimensionUnitAuto) {
+    str = [str stringByAppendingString:[NSString stringWithFormat:@" <= max %@", NSStringFromASLayoutSize(self.maxLayoutSize)]];
+  }
+  return str;
+}
+
 @end
 
