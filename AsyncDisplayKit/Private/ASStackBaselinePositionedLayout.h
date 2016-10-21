@@ -12,12 +12,20 @@
 #import "ASDimension.h"
 #import "ASStackPositionedLayout.h"
 
+struct ASStackBaselinePositionedLayoutItem {
+  /** The original source child. */
+  ASStackLayoutSpecChild child;
+  /** The proposed layout. */
+  ASLayout *layout;
+};
+
 struct ASStackBaselinePositionedLayout {
-    const std::vector<ASLayout *> sublayouts;
-    const CGFloat crossSize;
-    const CGFloat ascender;
-    const CGFloat descender;
-    
+  const std::vector<ASStackBaselinePositionedLayoutItem> items;
+  //const std::vector<ASLayout *> sublayouts;
+  const CGFloat crossSize;
+  const CGFloat ascender;
+  const CGFloat descender;
+  
     /** Given a positioned layout, computes each child position using baseline alignment. */
   static ASStackBaselinePositionedLayout compute(const ASStackPositionedLayout &positionedLayout,
                                                  const ASStackLayoutSpecStyle &style,

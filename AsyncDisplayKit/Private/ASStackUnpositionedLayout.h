@@ -14,12 +14,22 @@
 #import "ASStackLayoutSpecUtilities.h"
 #import "ASStackLayoutSpec.h"
 
+struct ASStackLayoutSpecChild {
+  /** The original source child. */
+  id<ASLayoutElement> element;
+  /** Style object of element. */
+  ASLayoutElementStyle *style;
+  /** Size object of the element */
+  ASLayoutElementSize size;
+};
+
 struct ASStackUnpositionedItem {
   /** The original source child. */
-  id<ASLayoutElement> child;
+  ASStackLayoutSpecChild child;
   /** The proposed layout. */
   ASLayout *layout;
 };
+
 
 /** Represents a set of stack layout children that have their final layout computed, but are not yet positioned. */
 struct ASStackUnpositionedLayout {
@@ -31,7 +41,7 @@ struct ASStackUnpositionedLayout {
   const CGFloat violation;
 
   /** Given a set of children, computes the unpositioned layouts for those children. */
-  static ASStackUnpositionedLayout compute(const std::vector<id<ASLayoutElement>> &children,
+  static ASStackUnpositionedLayout compute(const std::vector<ASStackLayoutSpecChild> &children,
                                            const ASStackLayoutSpecStyle &style,
                                            const ASSizeRange &sizeRange);
 };

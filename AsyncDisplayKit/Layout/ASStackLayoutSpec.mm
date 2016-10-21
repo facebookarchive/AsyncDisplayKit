@@ -13,6 +13,8 @@
 
 #import "ASInternalHelpers.h"
 
+#import "ASLayoutElement.h"
+#import "ASLayoutElementStylePrivate.h"
 #import "ASLayoutSpecUtilities.h"
 #import "ASStackBaselinePositionedLayout.h"
 #import "ASThread.h"
@@ -120,43 +122,49 @@
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  std::vector<id<ASLayoutElement>> stackChildren;
-  for (id<ASLayoutElement> child in self.children) {
-    stackChildren.push_back(child);
-  }
-  
-  if (stackChildren.empty()) {
+  NSArray *children = self.children;
+  if (children.count == 0) {
     return [ASLayout layoutWithLayoutElement:self size:constrainedSize.min];
   }
+ 
+  // As accessing the style and size property is pretty costly we create layout spec children in C++
+  const auto stackChildren = AS::map(children, [&](const id<ASLayoutElement> child) -> ASStackLayoutSpecChild {
+    ASLayoutElementStyle *style = child.style;
+    return {child, style, style.size};
+  });
   
   ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
-  BOOL needsBaselinePass = _baselineRelativeArrangement || _alignItems == ASStackLayoutAlignItemsBaselineFirst || _alignItems == ASStackLayoutAlignItemsBaselineLast;
   
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, style, constrainedSize);
   
-  CGSize finalSize = CGSizeZero;
-  NSArray *sublayouts = nil;
-  
   // regardless of whether or not this stack aligns to baseline, we should let ASStackBaselinePositionedLayout::compute find the max ascender
   // and min descender in case this spec is a child in another spec that wants to align to a baseline.
   const auto baselinePositionedLayout = ASStackBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
-  if (self.direction == ASStackLayoutDirectionVertical) {
+  {
     ASDN::MutexLocker l(__instanceLock__);
-    self.style.ascender = stackChildren.front().style.ascender;
-    self.style.descender = stackChildren.back().style.descender;
-  } else {
-    ASDN::MutexLocker l(__instanceLock__);
-    self.style.ascender = baselinePositionedLayout.ascender;
-    self.style.descender = baselinePositionedLayout.descender;
+    BOOL directionIsVertical = self.direction == ASStackLayoutDirectionVertical;
+    self.style.ascender = directionIsVertical ? stackChildren.front().style.ascender : baselinePositionedLayout.ascender;
+    self.style.descender = directionIsVertical ? stackChildren.back().style.descender : baselinePositionedLayout.descender;
   }
   
+  BOOL needsBaselinePass = _baselineRelativeArrangement ||
+                           _alignItems == ASStackLayoutAlignItemsBaselineFirst ||
+                           _alignItems == ASStackLayoutAlignItemsBaselineLast;
+  CGSize finalSize = CGSizeZero;
+  NSArray *sublayouts = nil;
   if (needsBaselinePass) {
     finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, baselinePositionedLayout.crossSize);
-    sublayouts = [NSArray arrayWithObjects:&baselinePositionedLayout.sublayouts[0] count:baselinePositionedLayout.sublayouts.size()];
+    const auto stackSublayouts = AS::map(baselinePositionedLayout.items, [&](const ASStackBaselinePositionedLayoutItem &l) -> ASLayout *{
+      return l.layout;
+    });
+    sublayouts = [NSArray arrayWithObjects:&stackSublayouts[0] count:stackSublayouts.size()];
   } else {
     finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
-    sublayouts = [NSArray arrayWithObjects:&positionedLayout.sublayouts[0] count:positionedLayout.sublayouts.size()];
+    const auto stackSublayouts = AS::map(positionedLayout.items, [&](const ASStackPositionedItem &l) -> ASLayout *{
+      return l.layout;
+    });
+    sublayouts = [NSArray arrayWithObjects:&stackSublayouts[0] count:stackSublayouts.size()];
   }
   
   return [ASLayout layoutWithLayoutElement:self size:ASSizeRangeClamp(constrainedSize, finalSize) sublayouts:sublayouts];

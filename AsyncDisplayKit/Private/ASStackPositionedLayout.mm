@@ -64,9 +64,8 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
   BOOL first = YES;
   const auto lastChild = unpositionedLayout.items.back().child;
   CGFloat offset = 0;
-  
-  auto stackedChildren = AS::map(unpositionedLayout.items, [&](const ASStackUnpositionedItem &l) -> ASLayout *{
-    offset = (l.child == lastChild) ? lastChildOffset : 0;
+  const auto stackedChildren = AS::map(unpositionedLayout.items, [&](const ASStackUnpositionedItem &l) -> ASStackPositionedItem {
+    offset = (l.child.element == lastChild.element) ? lastChildOffset : 0;
     p = p + directionPoint(style.direction, l.child.style.spacingBefore + offset, 0);
     if (!first) {
       p = p + directionPoint(style.direction, style.spacing + extraSpacing, 0);
@@ -75,9 +74,10 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
     l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize));
     
     p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.style.spacingAfter, 0);
-    return l.layout;
+    return {l.child, l.layout};
   });
-  return {stackedChildren, crossSize};
+  
+  return {std::move(stackedChildren), crossSize};
 }
 
 static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style,
@@ -105,12 +105,15 @@ ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnposition
   }
   
   switch (justifyContent) {
-    case ASStackLayoutJustifyContentStart:
+    case ASStackLayoutJustifyContentStart: {
       return stackedLayout(style, 0, unpositionedLayout, constrainedSize);
-    case ASStackLayoutJustifyContentCenter:
+    }
+    case ASStackLayoutJustifyContentCenter: {
       return stackedLayout(style, std::floor(violation / 2), unpositionedLayout, constrainedSize);
-    case ASStackLayoutJustifyContentEnd:
+    }
+    case ASStackLayoutJustifyContentEnd: {
       return stackedLayout(style, violation, unpositionedLayout, constrainedSize);
+    }
     case ASStackLayoutJustifyContentSpaceBetween: {
       const auto numOfSpacings = numOfItems - 1;
       return stackedLayout(style, 0, std::floor(violation / numOfSpacings), std::fmod(violation, numOfSpacings), unpositionedLayout, constrainedSize);
