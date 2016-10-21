@@ -20,7 +20,7 @@
  * @deprecated Deprecated in version 2.0: Use .debugName instead. This value will display in 
  * results of the -asciiArtString method (@see ASLayoutElementAsciiArtProtocol).
  */
-@property (nullable, nonatomic, copy) NSString *name;
+@property (nullable, nonatomic, copy) NSString *name ASDISPLAYNODE_DEPRECATED_MSG("Use .debugName instead.");
 
 /**
  * @abstract Asks the node to measure and return the size that best fits its subnodes.

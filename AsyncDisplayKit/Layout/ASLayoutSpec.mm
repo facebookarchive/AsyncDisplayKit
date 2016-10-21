@@ -57,20 +57,6 @@
   return YES;
 }
 
-- (NSString *)debugName
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _debugName;
-}
-
-- (void)setDebugName:(NSString *)debugName
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  if (!ASObjectIsEqual(_debugName, debugName)) {
-    _debugName = [debugName copy];
-  }
-}
-
 #pragma mark - Final LayoutElement
 
 - (id<ASLayoutElement>)finalLayoutElement
@@ -288,6 +274,22 @@ ASEnvironmentLayoutExtensibilityForwarding
         [(ASLayoutSpec *)child _findDuplicatedElementsInSubtreeWithWorkingSet:workingSet workingCount:workingCount result:result];
       }
     }
+  }
+}
+
+#pragma mark - Debugging
+
+- (NSString *)debugName
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _debugName;
+}
+
+- (void)setDebugName:(NSString *)debugName
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if (!ASObjectIsEqual(_debugName, debugName)) {
+    _debugName = [debugName copy];
   }
 }
 
