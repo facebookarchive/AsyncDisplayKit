@@ -232,15 +232,15 @@
   XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] isEqualToArray:@[]], @"Deselecting node should update cell selection.");
 
   // selecting cell via collectionView should select node
-  [testController.collectionView selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  [testController.collectionNode selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
   XCTAssertTrue(node.isSelected == YES, @"Selecting cell should update node selection.");
   
   // deselecting cell via collectionView should deselect node
-  [testController.collectionView deselectItemAtIndexPath:indexPath animated:NO];
+  [testController.collectionNode deselectItemAtIndexPath:indexPath animated:NO];
   XCTAssertTrue(node.isSelected == NO, @"Deselecting cell should update node selection.");
   
   // select the cell again, scroll down and back up, and check that the state persisted
-  [testController.collectionView selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  [testController.collectionNode selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
   XCTAssertTrue(node.isSelected == YES, @"Selecting cell should update node selection.");
   
   // reload cell (-prepareForReuse is called) & check that selected state is preserved
