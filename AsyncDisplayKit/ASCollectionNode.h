@@ -313,6 +313,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
 
+/**
+ * Retrieve the index paths of all visible items.
+ *
+ * @return an array containing the index paths of all visible items. This must be called on the main thread.
+ */
+- (NSArray<__kindof NSIndexPath *> *)indexPathsForVisibleItems AS_WARN_UNUSED_RESULT;
 
 /**
  * Retrieves the context object for the given section, as provided by the data source in
