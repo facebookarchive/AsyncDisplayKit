@@ -25,6 +25,10 @@
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
 @property (weak, nonatomic) id <ASTableDataSource> dataSource;
 @property (assign, nonatomic) ASLayoutRangeMode rangeMode;
+@property (nonatomic) BOOL allowsSelection;
+@property (nonatomic) BOOL allowsSelectionDuringEditing;
+@property (nonatomic) BOOL allowsMultipleSelection;
+@property (nonatomic) BOOL allowsMultipleSelectionDuringEditing;
 @end
 
 @implementation _ASTablePendingState
@@ -33,6 +37,10 @@
   self = [super init];
   if (self) {
     _rangeMode = ASLayoutRangeModeCount;
+    _allowsSelection = YES;
+    _allowsSelectionDuringEditing = NO;
+    _allowsMultipleSelection = NO;
+    _allowsMultipleSelectionDuringEditing = NO;
   }
   return self;
 }
@@ -104,6 +112,10 @@
     self.pendingState    = nil;
     view.asyncDelegate   = pendingState.delegate;
     view.asyncDataSource = pendingState.dataSource;
+    view.allowsSelection = pendingState.allowsSelection;
+    view.allowsSelectionDuringEditing = pendingState.allowsSelectionDuringEditing;
+    view.allowsMultipleSelection = pendingState.allowsMultipleSelection;
+    view.allowsMultipleSelectionDuringEditing = pendingState.allowsMultipleSelectionDuringEditing;
     if (pendingState.rangeMode != ASLayoutRangeModeCount) {
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
     }
@@ -215,6 +227,82 @@
   }
 }
 
+- (void)setAllowsSelection:(BOOL)allowsSelection
+{
+  if ([self pendingState]) {
+    _pendingState.allowsSelection = allowsSelection;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
+    self.view.allowsSelection = allowsSelection;
+  }
+}
+
+- (BOOL)allowsSelection
+{
+  if ([self pendingState]) {
+    return _pendingState.allowsSelection;
+  } else {
+    return self.view.allowsSelection;
+  }
+}
+
+- (void)setAllowsSelectionDuringEditing:(BOOL)allowsSelectionDuringEditing
+{
+  if ([self pendingState]) {
+    _pendingState.allowsSelectionDuringEditing = allowsSelectionDuringEditing;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
+    self.view.allowsSelection = allowsSelectionDuringEditing;
+  }
+}
+
+- (BOOL)allowsSelectionDuringEditing
+{
+  if ([self pendingState]) {
+    return _pendingState.allowsSelectionDuringEditing;
+  } else {
+    return self.view.allowsSelectionDuringEditing;
+  }
+}
+
+- (void)setAllowsMultipleSelection:(BOOL)allowsMultipleSelection
+{
+  if ([self pendingState]) {
+    _pendingState.allowsMultipleSelection = allowsMultipleSelection;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
+    self.view.allowsSelection = allowsMultipleSelection;
+  }
+}
+
+- (BOOL)allowsMultipleSelection
+{
+  if ([self pendingState]) {
+    return _pendingState.allowsMultipleSelection;
+  } else {
+    return self.view.allowsMultipleSelection;
+  }
+}
+
+- (void)setAllowsMultipleSelectionDuringEditing:(BOOL)allowsMultipleSelectionDuringEditing
+{
+  if ([self pendingState]) {
+    _pendingState.allowsMultipleSelectionDuringEditing = allowsMultipleSelectionDuringEditing;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
+    self.view.allowsSelection = allowsMultipleSelectionDuringEditing;
+  }
+}
+
+- (BOOL)allowsMultipleSelectionDuringEditing
+{
+  if ([self pendingState]) {
+    return _pendingState.allowsMultipleSelectionDuringEditing;
+  } else {
+    return self.view.allowsMultipleSelectionDuringEditing;
+  }
+}
+
 #pragma mark ASRangeControllerUpdateRangeProtocol
 
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
@@ -253,8 +341,21 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
   return [self.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
-#pragma mark - Querying Data
+#pragma mark - Selection
 
+- (void)selectRowAtIndexPath:(nullable NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition
+{
+  ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded before calling selectRowAtIndexPath");
+  [self.view selectRowAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+}
+
+- (void)deselectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated
+{
+  ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded before calling deselectRowAtIndexPath");
+  [self.view deselectRowAtIndexPath:indexPath animated:animated];
+}
+
+#pragma mark - Querying Data
 - (NSInteger)numberOfRowsInSection:(NSInteger)section
 {
   return [self.dataController numberOfRowsInSection:section];

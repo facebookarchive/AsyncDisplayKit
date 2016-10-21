@@ -35,6 +35,27 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
 @property (weak, nonatomic) id <ASTableDataSource> dataSource;
 
+/*
+ * A Boolean value that determines whether users can select a row.
+ * If the value of this property is YES (the default), users can select rows. If you set it to NO, they cannot select rows. Setting this property affects cell selection only when the table view is not in editing mode. If you want to restrict selection of cells in editing mode, use `allowsSelectionDuringEditing`.
+ */
+@property (nonatomic) BOOL allowsSelection;
+/*
+ * A Boolean value that determines whether users can select cells while the table view is in editing mode.
+ * If the value of this property is YES, users can select rows during editing. The default value is NO. If you want to restrict selection of cells regardless of mode, use allowsSelection.
+ */
+@property (nonatomic) BOOL allowsSelectionDuringEditing;
+/*
+ * A Boolean value that determines whether users can select more than one row outside of editing mode.
+ * This property controls whether multiple rows can be selected simultaneously outside of editing mode. When the value of this property is YES, each row that is tapped acquires a selected appearance. Tapping the row again removes the selected appearance. If you access indexPathsForSelectedRows, you can get the index paths that identify the selected rows.
+ */
+@property (nonatomic) BOOL allowsMultipleSelection;
+/*
+ * A Boolean value that controls whether users can select more than one cell simultaneously in editing mode.
+ * The default value of this property is NO. If you set it to YES, check marks appear next to selected rows in editing mode. In addition, UITableView does not query for editing styles when it goes into editing mode. If you access indexPathsForSelectedRows, you can get the index paths that identify the selected rows.
+ */
+@property (nonatomic) BOOL allowsMultipleSelectionDuringEditing;
+
 /**
  * Tuning parameters for a range type in full mode.
  *
@@ -229,6 +250,38 @@ NS_ASSUME_NONNULL_BEGIN
  * before this method is called.
  */
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
+
+#pragma mark - Selection
+
+/**
+ * Selects a row in the table view identified by index path, optionally scrolling the row to a location in the table view.
+ * This method does not cause any selection-related delegate methods to be called.
+ *
+ * @param indexPath An index path identifying a row in the table view.
+ *
+ * @param animated Specify YES to animate the change in the selection or NO to make the change without animating it.
+ *
+ * @param scrollPosition A constant that identifies a relative position in the table view (top, middle, bottom) for the row when scrolling concludes. See `UITableViewScrollPosition` for descriptions of valid constants.
+ *
+ * @discussion This method must be called from the main thread.
+ */
+- (void)selectRowAtIndexPath:(nullable NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition;
+
+/*
+ * Deselects a given row identified by index path, with an option to animate the deselection.
+ * This method does not cause any selection-related delegate methods to be called.
+ * Calling this method does not cause any scrolling to the deselected row.
+ *
+ * @param indexPath An index path identifying a row in the table view.
+ *
+ * @param animated Specify YES to animate the change in the selection or NO to make the change without animating it.
+ *
+ * @discussion This method must be called from the main thread.
+ */
+- (void)deselectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated;
+
+
+#pragma mark - Querying Data
 
 /**
  * Retrieves the number of rows in the given section.
