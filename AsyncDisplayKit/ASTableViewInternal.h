@@ -37,4 +37,6 @@
 /// Set YES and we'll log every time we call [super insertRows…] etc
 @property (nonatomic) BOOL test_enableSuperUpdateCallLogging;
 
+- (NSIndexPath *)convertIndexPathFromTableNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait;
+
 @end

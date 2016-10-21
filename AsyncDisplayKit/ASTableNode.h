@@ -105,6 +105,17 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
 /**
+ * Scrolls the table to the given row.
+ *
+ * @param indexPath The index path of the row.
+ * @param scrollPosition Where the row should end up after the scroll.
+ * @param animated Whether the scroll should be animated or not.
+ *
+ * This method must be called on the main thread.
+ */
+- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated;
+
+/**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
  * @param completion block to run on completion of asynchronous loading or nil. If supplied, the block is run on
