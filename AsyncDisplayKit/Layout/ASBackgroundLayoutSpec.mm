@@ -10,9 +10,7 @@
 
 #import "ASBackgroundLayoutSpec.h"
 #import "ASLayoutSpec+Subclasses.h"
-
 #import "ASAssert.h"
-#import "ASLayoutPrivate.h"
 
 static NSUInteger const kForegroundChildIndex = 0;
 static NSUInteger const kBackgroundChildIndex = 1;

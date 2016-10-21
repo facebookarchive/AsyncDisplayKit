@@ -30,7 +30,7 @@
 #import "ASLayoutElementStylePrivate.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayoutPrivate.h"
+#import "ASLayoutSpec+Subclasses.h"
 #import "ASLayoutSpec.h"
 #import "ASCellNode+Internal.h"
 #import "ASWeakProxy.h"

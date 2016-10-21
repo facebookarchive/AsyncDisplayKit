@@ -11,7 +11,6 @@
 #import "ASLayoutSpec.h"
 #import "ASLayoutSpecPrivate.h"
 #import "ASLayoutSpec+Subclasses.h"
-#import "ASLayoutPrivate.h"
 #import "ASLayoutElementStylePrivate.h"
 
 @implementation ASLayoutSpec

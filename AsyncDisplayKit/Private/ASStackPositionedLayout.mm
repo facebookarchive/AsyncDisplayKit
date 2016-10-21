@@ -14,7 +14,7 @@
 
 #import "ASInternalHelpers.h"
 #import "ASLayoutSpecUtilities.h"
-#import "ASLayoutPrivate.h"
+#import "ASLayoutSpec+Subclasses.h"
 
 static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
                            const ASStackUnpositionedItem &l,

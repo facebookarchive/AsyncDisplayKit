@@ -8,11 +8,10 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASLayoutPrivate.h"
-
 #import "ASDimension.h"
 #import "ASInternalHelpers.h"
 #import "ASLayoutSpecUtilities.h"
+#import "ASLayoutSpec+Subclasses.h"
 
 #import <queue>
 #import "ASObjectDescriptionHelpers.h"
