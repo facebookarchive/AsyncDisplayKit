@@ -57,7 +57,7 @@
     
     [ASLayoutElementInspectorNode sharedInstance].style.flexBasis = ASDimensionMakeWithFraction(1.0);
     [ASLayoutElementInspectorNode sharedInstance].vizNodeInsetSize = 10.0;
-    
+
     self.shouldVisualizeLayoutSpecs = NO;
     self.shouldCacheLayoutSpec = NO;
   }
@@ -87,8 +87,8 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _playgroundNode.style.flexGrow = YES;
-  _playgroundNode.style.flexShrink = YES;
+  _playgroundNode.style.flexGrow = 1.0;
+  _playgroundNode.style.flexShrink = 1.0;
 
   return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(10, 10, 10, 10)
                                                 child:_playgroundNode];
