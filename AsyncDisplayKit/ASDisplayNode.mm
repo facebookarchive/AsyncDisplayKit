@@ -3510,8 +3510,6 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (void)setPreferredFrameSize:(CGSize)preferredFrameSize
 {
-  ASDN::MutexLocker l(__instanceLock__);
-
   // Deprecated preferredFrameSize just calls through to set width and height
   self.style.preferredSize = preferredFrameSize;
   [self invalidateCalculatedLayout];
@@ -3519,14 +3517,9 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (CGSize)preferredFrameSize
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  ASLayoutElementStyle *style = self.style;
-  if (style.width.unit == ASDimensionUnitPoints && style.height.unit == ASDimensionUnitPoints) {
-    return CGSizeMake(style.width.value, style.height.value);
-  }
-
-  return CGSizeZero;
+  ASLayoutSize size = self.style.preferredLayoutSize;
+  BOOL isPoints = (size.width.unit == ASDimensionUnitPoints && size.height.unit == ASDimensionUnitPoints);
+  return isPoints ? CGSizeMake(size.width.value, size.height.value) : CGSizeZero;
 }
 
 @end
