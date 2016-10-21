@@ -218,6 +218,8 @@
   [[controllerMock expect] secondAction];
   [[controllerMock expect] thirdAction];
   
+  [node sendActionsForControlEvents:ASControlNodeEventTouchUpInside withEvent:nil];
+  
   [controllerMock verify];
 }
 
