@@ -267,7 +267,8 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 
 - (NSArray<__kindof ASCellNode *> *)visibleNodes
 {
-  return [self.view visibleNodes];
+  ASDisplayNodeAssertMainThread();
+  return self.isNodeLoaded ? [self.view visibleNodes] : @[];
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode

@@ -291,7 +291,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Similar to -visibleCells.
  *
- * @return an array containing the nodes being displayed on screen.
+ * @return an array containing the nodes being displayed on screen. This must be called on the main thread.
  */
 - (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
 
