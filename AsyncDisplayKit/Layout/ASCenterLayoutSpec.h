@@ -49,9 +49,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Initializer.
  *
  * @param centeringOptions How the child is centered.
- *
  * @param sizingOptions How much space will be taken up.
- *
  * @param child The child to center.
  */
 + (instancetype)centerLayoutSpecWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions

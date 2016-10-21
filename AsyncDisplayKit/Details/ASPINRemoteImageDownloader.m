@@ -27,7 +27,7 @@
 
 #import <PINRemoteImage/PINRemoteImageManager.h>
 #import <PINRemoteImage/NSData+ImageDetectors.h>
-#import <PINCache/PINCache.h>
+#import <PINRemoteImage/PINRemoteImageCaching.h>
 
 #if PIN_ANIMATED_AVAILABLE
 
@@ -75,7 +75,7 @@
 @implementation ASPINRemoteImageManager
 
 //Share image cache with sharedImageManager image cache.
-- (PINCache *)defaultImageCache
+- (id <PINRemoteImageCaching>)defaultImageCache
 {
     return [[PINRemoteImageManager sharedImageManager] cache];
 }
@@ -124,6 +124,16 @@
   return sharedPINRemoteImageManager;
 }
 
+- (BOOL)sharedImageManagerSupportsMemoryRemoval
+{
+  static BOOL sharedImageManagerSupportsMemoryRemoval = NO;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    sharedImageManagerSupportsMemoryRemoval = [[[self sharedPINRemoteImageManager] cache] respondsToSelector:@selector(removeObjectForKeyFromMemory:)];
+  });
+  return sharedImageManagerSupportsMemoryRemoval;
+}
+
 #pragma mark ASImageProtocols
 
 #if PIN_ANIMATED_AVAILABLE
@@ -163,9 +173,11 @@
 
 - (void)clearFetchedImageFromCacheWithURL:(NSURL *)URL
 {
-  PINRemoteImageManager *manager = [self sharedPINRemoteImageManager];
-  NSString *key = [manager cacheKeyForURL:URL processorKey:nil];
-  [[[manager cache] memoryCache] removeObjectForKey:key];
+  if ([self sharedImageManagerSupportsMemoryRemoval]) {
+    PINRemoteImageManager *manager = [self sharedPINRemoteImageManager];
+    NSString *key = [manager cacheKeyForURL:URL processorKey:nil];
+    [[manager cache] removeObjectForKeyFromMemory:key];
+  }
 }
 
 - (nullable id)downloadImageWithURL:(NSURL *)URL

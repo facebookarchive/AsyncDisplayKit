@@ -10,7 +10,6 @@
 
 #pragma once
 
-#import <sys/kdebug_signpost.h>
 #import "ASAvailability.h"
 
 #define ASMultiplexImageNodeLogDebug(...)
@@ -19,7 +18,11 @@
 #define ASMultiplexImageNodeLogError(...)
 #define ASMultiplexImageNodeCLogError(...)
 
-#if PROFILE
+// Note: `<sys/kdebug_signpost.h>` only exists in Xcode 8 and later.
+#if PROFILE && __has_include("<sys/kdebug_signpost.h>")
+
+#import <sys/kdebug_signpost.h>
+
 // These definitions are required to build the backward-compatible kdebug trace
 // on the iOS 10 SDK.  The kdebug_trace function crashes if run on iOS 9 and earlier.
 // It's valuable to support trace signposts on iOS 9, because A5 devices don't support iOS 10.

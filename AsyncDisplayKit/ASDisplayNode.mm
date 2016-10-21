@@ -30,10 +30,15 @@
 #import "ASLayoutElementStylePrivate.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayout.h"
+#import "ASLayoutPrivate.h"
 #import "ASLayoutSpec.h"
 #import "ASCellNode+Internal.h"
 #import "ASWeakProxy.h"
+#import "ASLayoutSpecPrivate.h"
+
+#if DEBUG
+  #define AS_DEDUPE_LAYOUT_SPEC_TREE 1
+#endif
 
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
@@ -2426,6 +2431,15 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       [self layoutSpecThatFits:constrainedSize];
     });
 
+#if AS_DEDUPE_LAYOUT_SPEC_TREE
+    NSSet *duplicateElements = [layoutSpec findDuplicatedElementsInSubtree];
+    if (duplicateElements.count > 0) {
+      ASDisplayNodeFailAssert(@"Node %@ returned a layout spec that contains the same elements in multiple positions. Elements: %@", self, duplicateElements);
+      // Use an empty layout spec to avoid crash.
+      layoutSpec = [[ASLayoutSpec alloc] init];
+    }
+#endif
+
     ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
 
     layoutSpec.parent = self; // This causes upward propogation of any non-default layoutElement values.
@@ -2491,7 +2505,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssert(!(_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits), @"Overwriting layoutSpecThatFits: and providing a layoutSpecBlock block is currently not supported");
 
   ASDN::MutexLocker l(__instanceLock__);
-  _layoutSpecBlock = [layoutSpecBlock copy];
+  _layoutSpecBlock = layoutSpecBlock;
 }
 
 - (ASLayoutSpecBlock)layoutSpecBlock
