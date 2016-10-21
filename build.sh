@@ -1,9 +1,13 @@
 #!/bin/bash
 
-# **** Update me when new Xcode versions are released! ****
-PLATFORM="platform=iOS Simulator,OS=10.0,name=iPhone 7"
-SDK="iphonesimulator10.0"
-
+# If they pass $2 and $3, use them. Else use defaults.
+if [ -n $3 ]; then
+  PLATFORM=$2
+  SDK=$3
+else
+  PLATFORM="platform=iOS Simulator,OS=10.0,name=iPhone 7"
+  SDK="iphonesimulator10.0"
+fi
 
 # It is pitch black.
 set -e
