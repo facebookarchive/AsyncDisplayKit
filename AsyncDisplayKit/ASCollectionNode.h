@@ -78,14 +78,14 @@ NS_ASSUME_NONNULL_BEGIN
  * A Boolean value that indicates whether users can select items in the collection node.
  * If the value of this property is YES (the default), users can select items. If you want more fine-grained control over the selection of items, you must provide a delegate object and implement the appropriate methods of the UICollectionNodeDelegate protocol.
  */
-@property (nonatomic) BOOL allowsSelection;
+@property (nonatomic, assign) BOOL allowsSelection;
 
 /**
  * A Boolean value that determines whether users can select more than one item in the collection node.
  * This property controls whether multiple items can be selected simultaneously. The default value of this property is NO.
  * When the value of this property is YES, tapping a cell adds it to the current selection (assuming the delegate permits the cell to be selected). Tapping the cell again removes it from the selection.
  */
-@property (nonatomic) BOOL allowsMultipleSelection;
+@property (nonatomic, assign) BOOL allowsMultipleSelection;
 
 
 /**

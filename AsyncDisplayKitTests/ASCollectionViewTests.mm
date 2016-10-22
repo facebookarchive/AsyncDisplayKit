@@ -223,7 +223,7 @@
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
   ASCellNode *node = [testController.collectionView nodeForItemAtIndexPath:indexPath];
 
-  int setSelectedCount = 0;
+  NSInteger setSelectedCount = 0;
   // selecting node should select cell
   node.selected = YES;
   ++setSelectedCount;

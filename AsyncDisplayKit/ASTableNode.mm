@@ -24,11 +24,11 @@
 @interface _ASTablePendingState : NSObject
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
 @property (weak, nonatomic) id <ASTableDataSource> dataSource;
-@property (assign, nonatomic) ASLayoutRangeMode rangeMode;
-@property (nonatomic) BOOL allowsSelection;
-@property (nonatomic) BOOL allowsSelectionDuringEditing;
-@property (nonatomic) BOOL allowsMultipleSelection;
-@property (nonatomic) BOOL allowsMultipleSelectionDuringEditing;
+@property (nonatomic, assign) ASLayoutRangeMode rangeMode;
+@property (nonatomic, assign) BOOL allowsSelection;
+@property (nonatomic, assign) BOOL allowsSelectionDuringEditing;
+@property (nonatomic, assign) BOOL allowsMultipleSelection;
+@property (nonatomic, assign) BOOL allowsMultipleSelectionDuringEditing;
 @end
 
 @implementation _ASTablePendingState
@@ -360,6 +360,7 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 }
 
 #pragma mark - Querying Data
+
 - (NSInteger)numberOfRowsInSection:(NSInteger)section
 {
   return [self.dataController numberOfRowsInSection:section];

@@ -27,9 +27,9 @@
 @interface _ASCollectionPendingState : NSObject
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
-@property (assign, nonatomic) ASLayoutRangeMode rangeMode;
-@property (nonatomic) BOOL allowsSelection; // default is YES
-@property (nonatomic) BOOL allowsMultipleSelection; // default is NO
+@property (nonatomic, assign) ASLayoutRangeMode rangeMode;
+@property (nonatomic, assign) BOOL allowsSelection; // default is YES
+@property (nonatomic, assign) BOOL allowsMultipleSelection; // default is NO
 @end
 
 @implementation _ASCollectionPendingState

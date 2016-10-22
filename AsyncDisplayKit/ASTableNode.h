@@ -39,22 +39,22 @@ NS_ASSUME_NONNULL_BEGIN
  * A Boolean value that determines whether users can select a row.
  * If the value of this property is YES (the default), users can select rows. If you set it to NO, they cannot select rows. Setting this property affects cell selection only when the table view is not in editing mode. If you want to restrict selection of cells in editing mode, use `allowsSelectionDuringEditing`.
  */
-@property (nonatomic) BOOL allowsSelection;
+@property (nonatomic, assign) BOOL allowsSelection;
 /*
  * A Boolean value that determines whether users can select cells while the table view is in editing mode.
  * If the value of this property is YES, users can select rows during editing. The default value is NO. If you want to restrict selection of cells regardless of mode, use allowsSelection.
  */
-@property (nonatomic) BOOL allowsSelectionDuringEditing;
+@property (nonatomic, assign) BOOL allowsSelectionDuringEditing;
 /*
  * A Boolean value that determines whether users can select more than one row outside of editing mode.
  * This property controls whether multiple rows can be selected simultaneously outside of editing mode. When the value of this property is YES, each row that is tapped acquires a selected appearance. Tapping the row again removes the selected appearance. If you access indexPathsForSelectedRows, you can get the index paths that identify the selected rows.
  */
-@property (nonatomic) BOOL allowsMultipleSelection;
+@property (nonatomic, assign) BOOL allowsMultipleSelection;
 /*
  * A Boolean value that controls whether users can select more than one cell simultaneously in editing mode.
  * The default value of this property is NO. If you set it to YES, check marks appear next to selected rows in editing mode. In addition, UITableView does not query for editing styles when it goes into editing mode. If you access indexPathsForSelectedRows, you can get the index paths that identify the selected rows.
  */
-@property (nonatomic) BOOL allowsMultipleSelectionDuringEditing;
+@property (nonatomic, assign) BOOL allowsMultipleSelectionDuringEditing;
 
 /**
  * Tuning parameters for a range type in full mode.
