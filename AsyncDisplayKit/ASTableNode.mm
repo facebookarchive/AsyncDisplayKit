@@ -252,7 +252,7 @@
     _pendingState.allowsSelectionDuringEditing = allowsSelectionDuringEditing;
   } else {
     ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
-    self.view.allowsSelection = allowsSelectionDuringEditing;
+    self.view.allowsSelectionDuringEditing = allowsSelectionDuringEditing;
   }
 }
 
@@ -271,7 +271,7 @@
     _pendingState.allowsMultipleSelection = allowsMultipleSelection;
   } else {
     ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
-    self.view.allowsSelection = allowsMultipleSelection;
+    self.view.allowsMultipleSelection = allowsMultipleSelection;
   }
 }
 
@@ -290,7 +290,7 @@
     _pendingState.allowsMultipleSelectionDuringEditing = allowsMultipleSelectionDuringEditing;
   } else {
     ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
-    self.view.allowsSelection = allowsMultipleSelectionDuringEditing;
+    self.view.allowsMultipleSelectionDuringEditing = allowsMultipleSelectionDuringEditing;
   }
 }
 
@@ -345,12 +345,16 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 
 - (void)selectRowAtIndexPath:(nullable NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition
 {
+  ASDisplayNodeAssertMainThread();
+  // TODO: Solve this in a way to be able to remove this restriction (https://github.com/facebook/AsyncDisplayKit/pull/2453#discussion_r84515457)
   ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded before calling selectRowAtIndexPath");
   [self.view selectRowAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
 }
 
 - (void)deselectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated
 {
+  ASDisplayNodeAssertMainThread();
+  // TODO: Solve this in a way to be able to remove this restriction (https://github.com/facebook/AsyncDisplayKit/pull/2453#discussion_r84515457)
   ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded before calling deselectRowAtIndexPath");
   [self.view deselectRowAtIndexPath:indexPath animated:animated];
 }

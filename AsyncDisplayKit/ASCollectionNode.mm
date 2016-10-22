@@ -282,7 +282,7 @@
     _pendingState.allowsMultipleSelection = allowsMultipleSelection;
   } else {
     ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded if pendingState doesn't exist");
-    self.view.allowsSelection = allowsMultipleSelection;
+    self.view.allowsMultipleSelection = allowsMultipleSelection;
   }
 }
 
@@ -321,12 +321,16 @@
 
 - (void)selectItemAtIndexPath:(nullable NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
 {
+  ASDisplayNodeAssertMainThread();
+  // TODO: Solve this in a way to be able to remove this restriction (https://github.com/facebook/AsyncDisplayKit/pull/2453#discussion_r84515457)
   ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded before calling selectItemAtIndexPath");
   [self.view selectItemAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
 }
 
 - (void)deselectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated
 {
+  ASDisplayNodeAssertMainThread();
+  // TODO: Solve this in a way to be able to remove this restriction (https://github.com/facebook/AsyncDisplayKit/pull/2453#discussion_r84515457)
   ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded before calling deselectItemAtIndexPath");
   [self.view deselectItemAtIndexPath:indexPath animated:animated];
 }
