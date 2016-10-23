@@ -23,10 +23,10 @@ struct ASStackLayoutSpecChild {
   ASLayoutElementSize size;
 };
 
-struct ASStackUnpositionedItem {
+struct ASStackLayoutSpecItem {
   /** The original source child. */
   ASStackLayoutSpecChild child;
-  /** The proposed layout. */
+  /** The proposed layout or nil if no is calculated yet. */
   ASLayout *layout;
 };
 
@@ -34,7 +34,7 @@ struct ASStackUnpositionedItem {
 /** Represents a set of stack layout children that have their final layout computed, but are not yet positioned. */
 struct ASStackUnpositionedLayout {
   /** A set of proposed child layouts, not yet positioned. */
-  const std::vector<ASStackUnpositionedItem> items;
+  const std::vector<ASStackLayoutSpecItem> items;
   /** The total size of the children in the stack dimension, including all spacing. */
   const CGFloat stackDimensionSum;
   /** The amount by which stackDimensionSum violates constraints. If positive, less than min; negative, greater than max. */

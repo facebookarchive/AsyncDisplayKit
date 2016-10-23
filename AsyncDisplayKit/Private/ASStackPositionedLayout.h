@@ -12,16 +12,9 @@
 #import "ASDimension.h"
 #import "ASStackUnpositionedLayout.h"
 
-struct ASStackPositionedItem {
-  /** The original source child. */
-  ASStackLayoutSpecChild child;
-  /** The proposed layout. */
-  ASLayout *layout;
-};
-
 /** Represents a set of laid out and positioned stack layout children. */
 struct ASStackPositionedLayout {
-  const std::vector<ASStackPositionedItem> items;
+  const std::vector<ASStackLayoutSpecItem> items;
   const CGFloat crossSize;
 
   /** Given an unpositioned layout, computes the positions each child should be placed at. */

@@ -12,16 +12,8 @@
 #import "ASDimension.h"
 #import "ASStackPositionedLayout.h"
 
-struct ASStackBaselinePositionedLayoutItem {
-  /** The original source child. */
-  ASStackLayoutSpecChild child;
-  /** The proposed layout. */
-  ASLayout *layout;
-};
-
 struct ASStackBaselinePositionedLayout {
-  const std::vector<ASStackBaselinePositionedLayoutItem> items;
-  //const std::vector<ASLayout *> sublayouts;
+  const std::vector<ASStackLayoutSpecItem> items;
   const CGFloat crossSize;
   const CGFloat ascender;
   const CGFloat descender;
@@ -30,4 +22,6 @@ struct ASStackBaselinePositionedLayout {
   static ASStackBaselinePositionedLayout compute(const ASStackPositionedLayout &positionedLayout,
                                                  const ASStackLayoutSpecStyle &style,
                                                  const ASSizeRange &constrainedSize);
+    
+  static BOOL needsBaselineAlignment(const ASStackLayoutSpecStyle &style);
 };

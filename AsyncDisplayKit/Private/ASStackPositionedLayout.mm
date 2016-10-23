@@ -17,7 +17,7 @@
 #import "ASLayoutSpec+Subclasses.h"
 
 static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
-                           const ASStackUnpositionedItem &l,
+                           const ASStackLayoutSpecItem &l,
                            const CGFloat crossSize)
 {
   switch (alignment(l.child.style.alignSelf, style.alignItems)) {
@@ -50,9 +50,10 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
                                              const ASStackUnpositionedLayout &unpositionedLayout,
                                              const ASSizeRange &constrainedSize)
 {
+    
   // The cross dimension is the max of the childrens' cross dimensions (clamped to our constraint below).
   const auto it = std::max_element(unpositionedLayout.items.begin(), unpositionedLayout.items.end(),
-                                   [&](const ASStackUnpositionedItem &a, const ASStackUnpositionedItem &b){
+                                   [&](const ASStackLayoutSpecItem &a, const ASStackLayoutSpecItem &b){
                                      return compareCrossDimension(style.direction, a.layout.size, b.layout.size);
                                    });
   const auto largestChildCrossSize = it == unpositionedLayout.items.end() ? 0 : crossDimension(style.direction, it->layout.size);
@@ -64,7 +65,10 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
   BOOL first = YES;
   const auto lastChild = unpositionedLayout.items.back().child;
   CGFloat offset = 0;
-  const auto stackedChildren = AS::map(unpositionedLayout.items, [&](const ASStackUnpositionedItem &l) -> ASStackPositionedItem {
+    
+  // Adjust the position of the unpositioned layouts to be positioned
+  const auto stackedChildren = unpositionedLayout.items;
+  for (const auto &l : stackedChildren) {
     offset = (l.child.element == lastChild.element) ? lastChildOffset : 0;
     p = p + directionPoint(style.direction, l.child.style.spacingBefore + offset, 0);
     if (!first) {
@@ -74,9 +78,8 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
     l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize));
     
     p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.style.spacingAfter, 0);
-    return {l.child, l.layout};
-  });
-  
+  }
+
   return {std::move(stackedChildren), crossSize};
 }
 
