@@ -40,7 +40,7 @@
   if (self.target != nil && otherObject.target != nil && self.target == otherObject.target) {
     areTargetsEqual = YES;
   }
-  else if (self.target == nil && otherObject.target == nil && _createdWithNoTarget && otherObject->_createdWithNoTarget) {
+  else if (self.target == nil && otherObject.target == nil && self.createdWithNoTarget && otherObject.createdWithNoTarget) {
     areTargetsEqual = YES;
   }
   else {

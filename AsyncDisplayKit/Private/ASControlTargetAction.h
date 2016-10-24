@@ -25,4 +25,9 @@
  */
 @property (nonatomic, readwrite, weak) id target;
 
+/**
+ Indicated whether this target was created without a target, so the action should travel up in the responder chain.
+ */
+@property (nonatomic, readonly) BOOL createdWithNoTarget;
+
 @end

@@ -283,27 +283,19 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
       NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[eventKey];
       
+      // Create new target action pair
+      ASControlTargetAction *newTargetAction = [[ASControlTargetAction alloc] init];
+      newTargetAction.action = action;
+      newTargetAction.target = target;
+      
       // Create it if necessary.
       if (eventTargetActionArray) {
         NSMutableArray *newEventTargetActionArray;
-        NSString *actionString;
         
         // UIControl does not support duplicate target-action-events entries, so we replicate that behavior.
         // See: https://github.com/facebook/AsyncDisplayKit/files/205466/DuplicateActionsTest.playground.zip
         for (ASControlTargetAction *targetAction in eventTargetActionArray) {
-          BOOL shouldRemove = NO;
-          
-          if ((target == nil && targetAction.target == nil) || targetAction.target == target) {
-            if (!actionString) {
-              actionString = NSStringFromSelector(action);
-            }
-            
-            if ([NSStringFromSelector(targetAction.action) isEqualToString:actionString]) {
-              shouldRemove = YES;
-            }
-          }
-          
-          if (shouldRemove) {
+          if ([newTargetAction isEqual:targetAction]) {
             continue;
           }
           
@@ -325,13 +317,8 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
         [_controlEventDispatchTable setObject:eventTargetActionArray forKey:eventKey];
       }
       
-      // Create new target action pair
-      ASControlTargetAction *targetAction = [[ASControlTargetAction alloc] init];
-      targetAction.action = action;
-      targetAction.target = target;
-      
       // Store it in the array, so all the target action pairs will be triggered in the same order as they were added
-      [eventTargetActionArray addObject:targetAction];
+      [eventTargetActionArray addObject:newTargetAction];
     });
 
   self.userInteractionEnabled = YES;
@@ -354,7 +341,11 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   
   // Collect all actions for this target.
   for (ASControlTargetAction *targetAction in eventTargetActionArray) {
-    if (targetAction.target != target) {
+    if (target != nil && targetAction.target != nil && target != targetAction.target) {
+      continue;
+    }
+    
+    if (target == nil && !targetAction.createdWithNoTarget) {
       continue;
     }
     
