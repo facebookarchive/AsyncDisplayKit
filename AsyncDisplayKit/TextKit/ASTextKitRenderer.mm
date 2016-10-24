@@ -120,6 +120,11 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
   if (_stringDrawingContext == nil) {
     _stringDrawingContext = [[NSStringDrawingContext alloc] init];
+
+    if (isinf(_constrainedSize.width) == NO && _attributes.maximumNumberOfLines > 0) {
+      ASDisplayNodeAssert(_attributes.maximumNumberOfLines != 1, @"Max line count 1 is not supported in fast-path.");
+      [_stringDrawingContext setValue:@(_attributes.maximumNumberOfLines) forKey:@"maximumNumberOfLines"];
+    }
   }
   return _stringDrawingContext;
 }
@@ -163,9 +168,8 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     _currentScaleFactor = [[self fontSizeAdjuster] scaleFactor];
   }
 
-  // If we do not scale, do exclusion, or do custom truncation, we should just use TextKit for a fast-path.
-  BOOL isScaled = [self isScaled];
-  if (isScaled == NO && self.usesCustomTruncation == NO && self.usesExclusionPaths == NO) {
+  // If we do not scale, do exclusion, or do custom truncation, we should just use NSAttributedString drawing for a fast-path.
+  if (self.canUseFastPath) {
     CGRect rect = [_attributes.attributedString boundingRectWithSize:_constrainedSize options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:self.stringDrawingContext];
     // Intersect with constrained rect, in case text kit goes out-of-bounds.
     rect = CGRectIntersection(rect, {CGPointZero, _constrainedSize});
@@ -173,6 +177,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     return;
   }
 
+  BOOL isScaled = [self isScaled];
   __block NSTextStorage *scaledTextStorage = nil;
   if (isScaled) {
     // apply the string scale before truncating or else we may truncate the string after we've done the work to shrink it.
@@ -225,6 +230,16 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   return _attributes.exclusionPaths.count > 0;
 }
 
+- (BOOL)canUseFastPath
+{
+  return self.isScaled == NO
+    && self.usesCustomTruncation == NO
+    && self.usesExclusionPaths == NO
+    // NSAttributedString drawing methods ignore usesLineFragmentOrigin if max line count 1,
+    // rendering them useless:
+    && (_attributes.maximumNumberOfLines != 1 || isinf(_constrainedSize.width));
+}
+
 #pragma mark - Drawing
 
 - (void)drawInContext:(CGContextRef)context bounds:(CGRect)bounds;
@@ -233,7 +248,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   ASDisplayNodeAssertNotNil(context, @"This is no good without a context.");
   
   // This renderer may not be the one that did the sizing. If that is the case its truncation and currentScaleFactor may not have been evaluated.
-  // If there's any possibility we need to truncate or scale (e.g. width is not infinite, perform the size calculation.
+  // If there's any possibility we need to truncate or scale (i.e. width is not infinite), perform the size calculation.
   if (_sizeIsCalculated == NO && isinf(_constrainedSize.width) == NO) {
     [self _calculateSize];
   }
@@ -246,13 +261,13 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   UIGraphicsPushContext(context);
 
   LOG(@"%@, shadowInsetBounds = %@",self, NSStringFromCGRect(shadowInsetBounds));
-  BOOL isScaled = [self isScaled];
 
   // If we use default options, we can use NSAttributedString for a
   // fast path.
-  if (isScaled == NO && self.usesCustomTruncation == NO && self.usesExclusionPaths == NO) {
+  if (self.canUseFastPath) {
     [_attributes.attributedString drawWithRect:shadowInsetBounds options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:self.stringDrawingContext];
   } else {
+    BOOL isScaled = [self isScaled];
     [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
       
       NSTextStorage *scaledTextStorage = nil;

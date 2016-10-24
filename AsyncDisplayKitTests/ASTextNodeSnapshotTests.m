@@ -80,7 +80,6 @@
   ASTextNode *textNode = [[ASTextNode alloc] init];
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
   [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
-  textNode.maximumNumberOfLines = 1;
   ASSnapshotVerifyNode(textNode, nil);
 }
 
@@ -90,7 +89,6 @@
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
   [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
   textNode.exclusionPaths = @[ [UIBezierPath bezierPath] ];
-  textNode.maximumNumberOfLines = 1;
   ASSnapshotVerifyNode(textNode, nil);
 }
 
