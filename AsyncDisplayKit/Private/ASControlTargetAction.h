@@ -23,6 +23,6 @@
 /**
  Event handler target. The specified action will be called on this object.
  */
-@property (nonatomic, readwrite, strong) id target;
+@property (nonatomic, readwrite, weak) id target;
 
 @end
