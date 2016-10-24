@@ -293,7 +293,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return an array containing the nodes being displayed on screen. This must be called on the main thread.
  */
-- (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
+@property(readonly, copy) NSArray<__kindof ASCellNode *> *visibleNodes;
 
 /**
  * Retrieves the node for the item at the given index path.
