@@ -75,6 +75,20 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
 
 /**
+ * A Boolean value that indicates whether users can select items in the collection node.
+ * If the value of this property is YES (the default), users can select items. If you want more fine-grained control over the selection of items, you must provide a delegate object and implement the appropriate methods of the UICollectionNodeDelegate protocol.
+ */
+@property (nonatomic, assign) BOOL allowsSelection;
+
+/**
+ * A Boolean value that determines whether users can select more than one item in the collection node.
+ * This property controls whether multiple items can be selected simultaneously. The default value of this property is NO.
+ * When the value of this property is YES, tapping a cell adds it to the current selection (assuming the delegate permits the cell to be selected). Tapping the cell again removes it from the selection.
+ */
+@property (nonatomic, assign) BOOL allowsMultipleSelection;
+
+
+/**
  * Tuning parameters for a range type in full mode.
  *
  * @param rangeType The range type to get the tuning parameters for.
@@ -272,6 +286,36 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)relayoutItems;
 
+#pragma mark - Selection
+
+/**
+ * Selects the item at the specified index path and optionally scrolls it into view.
+ * If the `allowsSelection` property is NO, calling this method has no effect. If there is an existing selection with a different index path and the `allowsMultipleSelection` property is NO, calling this method replaces the previous selection.
+ * This method does not cause any selection-related delegate methods to be called.
+ *
+ * @param indexPath The index path of the item to select. Specifying nil for this parameter clears the current selection.
+ *
+ * @param animated Specify YES to animate the change in the selection or NO to make the change without animating it.
+ *
+ * @param scrollPosition An option that specifies where the item should be positioned when scrolling finishes. For a list of possible values, see `UICollectionViewScrollPosition`.
+ *
+ * @discussion This method must be called from the main thread.
+ */
+- (void)selectItemAtIndexPath:(nullable NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition;
+
+/**
+ * Deselects the item at the specified index.
+ * If the allowsSelection property is NO, calling this method has no effect.
+ * This method does not cause any selection-related delegate methods to be called.
+ *
+ * @param indexPath The index path of the item to select. Specifying nil for this parameter clears the current selection.
+ *
+ * @param animated Specify YES to animate the change in the selection or NO to make the change without animating it.
+ *
+ * @discussion This method must be called from the main thread.
+ */
+- (void)deselectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated;
+
 #pragma mark - Querying Data
 
 /**
@@ -291,9 +335,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Similar to -visibleCells.
  *
- * @return an array containing the nodes being displayed on screen.
+ * @return an array containing the nodes being displayed on screen. This must be called on the main thread.
  */
-- (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
+@property(readonly, copy) NSArray<__kindof ASCellNode *> *visibleNodes;
 
 /**
  * Retrieves the node for the item at the given index path.
