@@ -284,13 +284,8 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[eventKey];
       
       // Create it if necessary.
-      if (!eventTargetActionArray)
-      {
-        // Create a target action array for this event.
-        eventTargetActionArray = [[NSMutableArray alloc] init];
-      }
-      else {
-        NSMutableArray *newEventTargetActionArray = [[NSMutableArray alloc] init];
+      if (eventTargetActionArray) {
+        NSMutableArray *newEventTargetActionArray;
         NSString *actionString;
         
         // UIControl does not support duplicate target-action-events entries, so we replicate that behavior.
@@ -299,15 +294,22 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
           BOOL shouldRemove = NO;
           
           if ((target == nil && targetAction.target == nil) || targetAction.target == target) {
-            if (!actionString)
+            if (!actionString) {
               actionString = NSStringFromSelector(action);
+            }
             
-            if ([NSStringFromSelector(targetAction.action) isEqualToString:actionString])
+            if ([NSStringFromSelector(targetAction.action) isEqualToString:actionString]) {
               shouldRemove = YES;
+            }
           }
           
-          if (shouldRemove)
+          if (shouldRemove) {
             continue;
+          }
+          
+          if (!newEventTargetActionArray) {
+            newEventTargetActionArray = [[NSMutableArray alloc] init];
+          }
           
           [newEventTargetActionArray addObject:targetAction];
         }
@@ -316,6 +318,10 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       }
       
       if (eventKey) {
+        if (!eventTargetActionArray) {
+          eventTargetActionArray = [[NSMutableArray alloc] init];
+        }
+        
         [_controlEventDispatchTable setObject:eventTargetActionArray forKey:eventKey];
       }
       
@@ -340,16 +346,18 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   
   // Grab the event target action array for this event.
   NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)];
-  if (!eventTargetActionArray)
+  if (!eventTargetActionArray) {
     return nil;
+  }
 
   NSMutableArray *actions = [[NSMutableArray alloc] init];
   
   // Collect all actions for this target.
   for (ASControlTargetAction *targetAction in eventTargetActionArray) {
-    if (targetAction.target != target)
+    if (targetAction.target != target) {
       continue;
-      
+    }
+    
     [actions addObject:NSStringFromSelector(targetAction.action)];
   }
   
@@ -363,11 +371,11 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSMutableSet *targets = [[NSMutableSet alloc] init];
 
   // Look at each event...
-  for (NSMutableArray *eventTargetActionArray in [_controlEventDispatchTable objectEnumerator])
-  {
+  for (NSMutableArray *eventTargetActionArray in [_controlEventDispatchTable objectEnumerator]) {
     // and each event's targets...
-    for (ASControlTargetAction *targetAction in eventTargetActionArray)
+    for (ASControlTargetAction *targetAction in eventTargetActionArray) {
       [targets addObject:targetAction.target];
+    }
   }
 
   return targets;
@@ -386,8 +394,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       // Grab the dispatch table for this event (if we have it).
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
       NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[eventKey];
-      if (!eventTargetActionArray)
+      if (!eventTargetActionArray) {
         return;
+      }
       
       NSMutableArray *newEventTargetActionArray;
       
@@ -410,8 +419,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
         }
         
         // Create new target action array if necessary
-        if (!newEventTargetActionArray)
+        if (!newEventTargetActionArray) {
           newEventTargetActionArray = [[NSMutableArray alloc] init];
+        }
         
         [newEventTargetActionArray addObject:targetAction];
       }
