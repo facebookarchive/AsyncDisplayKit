@@ -36,6 +36,14 @@
   ASDisplayNode *_viewControllerNode;
   UIViewController *_viewController;
   BOOL _suspendInteractionDelegate;
+
+  struct {
+    unsigned int isTableView:1;
+    unsigned int isTableNode:1;
+    unsigned int isCollectionView:1;
+    unsigned int isCollectionNode:1;
+  } _scrollViewType;
+
 }
 
 @end
@@ -186,6 +194,38 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   }
 }
 
+- (void)setScrollView:(UIScrollView *)scrollView
+{
+  _scrollView = scrollView;
+
+  if ([scrollView isKindOfClass:[ASTableView class]]) {
+    _scrollViewType.isTableView      = 1;
+    _scrollViewType.isTableNode      = 0;
+    _scrollViewType.isCollectionView = 0;
+    _scrollViewType.isCollectionNode = 0;
+  } else if ([scrollView isKindOfClass:[ASTableNode class]]) {
+    _scrollViewType.isTableView      = 0;
+    _scrollViewType.isTableNode      = 1;
+    _scrollViewType.isCollectionView = 0;
+    _scrollViewType.isCollectionNode = 0;
+  } else if ([scrollView isKindOfClass:[ASCollectionView class]]) {
+    _scrollViewType.isTableView      = 0;
+    _scrollViewType.isTableNode      = 0;
+    _scrollViewType.isCollectionView = 1;
+    _scrollViewType.isCollectionNode = 0;
+  } else if ([scrollView isKindOfClass:[ASCollectionNode class]]) {
+    _scrollViewType.isTableView      = 0;
+    _scrollViewType.isTableNode      = 0;
+    _scrollViewType.isCollectionView = 0;
+    _scrollViewType.isCollectionNode = 1;
+  } else {
+    _scrollViewType.isTableView      = 0;
+    _scrollViewType.isTableNode      = 0;
+    _scrollViewType.isCollectionView = 0;
+    _scrollViewType.isCollectionNode = 0;
+  }
+}
+
 - (void)__setSelectedFromUIKit:(BOOL)selected;
 {
   if (selected != _selected) {
@@ -211,14 +251,14 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   UIScrollView *scrollView = self.scrollView;
 
   ASDisplayNode *owningNode = scrollView.asyncdisplaykit_node;
-  if ([owningNode isKindOfClass:[ASCollectionNode class]]) {
-    return [(ASCollectionNode *)owningNode indexPathForNode:self];
-  } else if ([owningNode isKindOfClass:[ASTableNode class]]) {
+  if (_scrollViewType.isTableView) {
+    return [(ASTableView *)owningNode indexPathForNode:self];
+  } else if (_scrollViewType.isTableNode) {
     return [(ASTableNode *)owningNode indexPathForNode:self];
-  } else if ([scrollView isKindOfClass:[ASCollectionView class]]) {
-    return [(ASCollectionView *)scrollView indexPathForNode:self];
-  } else if ([scrollView isKindOfClass:[ASTableView class]]) {
-    return [(ASTableView *)scrollView indexPathForNode:self];
+  } else if (_scrollViewType.isCollectionView) {
+    return [(ASCollectionView *)owningNode indexPathForNode:self];
+  } else if (_scrollViewType.isCollectionNode) {
+    return [(ASCollectionNode *)owningNode indexPathForNode:self];
   }
 
   return nil;

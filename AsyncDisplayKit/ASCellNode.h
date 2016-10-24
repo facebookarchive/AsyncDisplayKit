@@ -114,7 +114,7 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  *
  * @note This property must be accessed on the main thread.
  */
-@property (nonatomic, readonly, nullable) NSIndexPath *indexPath;
+@property (nonatomic, strong, readonly, nullable) NSIndexPath *indexPath;
 
 /*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
