@@ -119,7 +119,7 @@
           selector == @selector(collectionNode:nodeForItemAtIndexPath:) ||
           selector == @selector(collectionNode:nodeBlockForItemAtIndexPath:) ||
           selector == @selector(collectionNode:numberOfItemsInSection:) ||
-          selector == @selector(collectionView:constrainedSizeForNodeAtIndexPath:)
+          selector == @selector(collectionNode:constrainedSizeForItemAtIndexPath:)
           );
 }
 

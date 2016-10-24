@@ -593,7 +593,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return A constrained size range for layout the node at this index path.
  */
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's constrainedSizeForItemAtIndexPath: instead.");
 
 /**
  * Informs the delegate that the collection view will add the given node
