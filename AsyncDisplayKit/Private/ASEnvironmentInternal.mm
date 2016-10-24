@@ -153,6 +153,9 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
     if (parentLayoutOptionsState.ascender == defaultState.ascender) {
       parentLayoutOptionsState.ascender = layoutOptionsState.ascender;
     }
+    if (parentLayoutOptionsState.descender == defaultState.descender) {
+      parentLayoutOptionsState.descender = layoutOptionsState.descender;
+    }
     
     if (CGPointEqualToPoint(parentLayoutOptionsState.layoutPosition, defaultState.layoutPosition)) {
       // For now it is unclear if we should be up-propagating sizeRange or layoutPosition.

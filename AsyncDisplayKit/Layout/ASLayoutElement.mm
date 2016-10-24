@@ -437,21 +437,75 @@ do {\
   return _layoutPosition.load();
 }
 
-#pragma mark - DebuggingminLayoutSize
+#pragma mark - Debugging
 
 - (NSString *)description
 {
-  NSString *str = @"Layout Size =";
-  if (self.minLayoutSize.width.unit != ASDimensionUnitAuto || self.minLayoutSize.height.unit != ASDimensionUnitAuto) {
-    str = [str stringByAppendingString:[NSString stringWithFormat:@" min %@ <=", NSStringFromASLayoutSize(self.minLayoutSize)]];
+  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDescription
+{
+  NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+  
+  if ((self.minLayoutSize.width.unit != ASDimensionUnitAuto ||
+       self.minLayoutSize.height.unit != ASDimensionUnitAuto)) {
+    [result addObject:@{ @"minLayoutSize" : NSStringFromASLayoutSize(self.minLayoutSize) }];
   }
-  if (self.preferredLayoutSize.width.unit != ASDimensionUnitAuto || self.preferredLayoutSize.height.unit != ASDimensionUnitAuto) {
-    str = [str stringByAppendingString:[NSString stringWithFormat:@" preferred %@", NSStringFromASLayoutSize(self.preferredLayoutSize)]];
+  
+  if ((self.preferredLayoutSize.width.unit != ASDimensionUnitAuto ||
+       self.preferredLayoutSize.height.unit != ASDimensionUnitAuto)) {
+    [result addObject:@{ @"preferredSize" : NSStringFromASLayoutSize(self.preferredLayoutSize) }];
   }
-  if (self.maxLayoutSize.width.unit != ASDimensionUnitAuto || self.maxLayoutSize.height.unit != ASDimensionUnitAuto) {
-    str = [str stringByAppendingString:[NSString stringWithFormat:@" <= max %@", NSStringFromASLayoutSize(self.maxLayoutSize)]];
+  
+  if ((self.maxLayoutSize.width.unit != ASDimensionUnitAuto ||
+       self.maxLayoutSize.height.unit != ASDimensionUnitAuto)) {
+    [result addObject:@{ @"maxLayoutSize" : NSStringFromASLayoutSize(self.maxLayoutSize) }];
   }
-  return str;
+  
+  const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentLayoutOptionsStateMakeDefault();
+  
+  if (self.alignSelf != defaultState.alignSelf) {
+    [result addObject:@{ @"alignSelf" : [@[@"ASStackLayoutAlignSelfAuto",
+                                          @"ASStackLayoutAlignSelfStart",
+                                          @"ASStackLayoutAlignSelfEnd",
+                                          @"ASStackLayoutAlignSelfCenter",
+                                          @"ASStackLayoutAlignSelfStretch"] objectAtIndex:self.alignSelf] }];
+  }
+  
+  if (self.ascender != defaultState.ascender) {
+    [result addObject:@{ @"ascender" : [NSNumber numberWithFloat:self.ascender] }];
+  }
+  
+  if (self.descender != defaultState.descender) {
+    [result addObject:@{ @"descender" : [NSNumber numberWithFloat:self.descender] }];
+  }
+  
+  if (ASDimensionEqualToDimension(self.flexBasis, defaultState.flexBasis) == NO) {
+    [result addObject:@{ @"flexBasis" : NSStringFromASDimension(self.flexBasis) }];
+  }
+  
+  if (self.flexGrow != defaultState.flexGrow) {
+    [result addObject:@{ @"flexGrow" : [NSNumber numberWithFloat:self.flexGrow] }];
+  }
+  
+  if (self.flexShrink != defaultState.flexShrink) {
+    [result addObject:@{ @"flexShrink" : [NSNumber numberWithFloat:self.flexShrink] }];
+  }
+  
+  if (self.spacingAfter != defaultState.spacingAfter) {
+    [result addObject:@{ @"spacingAfter" : [NSNumber numberWithFloat:self.spacingAfter] }];
+  }
+  
+  if (self.spacingBefore != defaultState.spacingBefore) {
+    [result addObject:@{ @"spacingBefore" : [NSNumber numberWithFloat:self.spacingBefore] }];
+  }
+  
+  if (CGPointEqualToPoint(self.layoutPosition, defaultState.layoutPosition) == NO) {
+    [result addObject:@{ @"layoutPosition" : NSStringFromCGPoint(self.layoutPosition) }];
+  }
+
+  return result;
 }
 
 @end
