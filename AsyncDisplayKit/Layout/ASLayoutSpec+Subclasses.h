@@ -61,4 +61,15 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@interface ASLayout ()
+
+/**
+ * Position in parent. Default to CGPointNull.
+ *
+ * @discussion When being used as a sublayout, this property must not equal CGPointNull.
+ */
+@property (nonatomic, assign, readwrite) CGPoint position;
+
+@end
+
 NS_ASSUME_NONNULL_END

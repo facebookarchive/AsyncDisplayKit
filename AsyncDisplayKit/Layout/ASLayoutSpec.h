@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * A layout spec is an immutable object that describes a layout, loosely inspired by React.
  */
-@interface ASLayoutSpec : NSObject <ASLayoutElement>
+@interface ASLayoutSpec : NSObject <ASLayoutElement, ASStackLayoutElement, ASAbsoluteLayoutElement>
 
 /** 
  * Creation of a layout spec should only happen by a user in layoutSpecThatFits:. During that method, a
@@ -63,19 +63,31 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 /**
- * An ASLayoutSpec subclass that can wrap a ASLayoutElement and calculates the layout of the child.
+ * An ASLayoutSpec subclass that can wrap one or more ASLayoutElement and calculates the layout based on the
+ * sizes of the children. If multiple children are provided the size of the biggest child will be used to for
+ * size of this layout spec.
  */
 @interface ASWrapperLayoutSpec : ASLayoutSpec
 
 /*
- * Returns an ASWrapperLayoutSpec object with the given layoutElement as child
+ * Returns an ASWrapperLayoutSpec object with the given layoutElement as child.
  */
 + (instancetype)wrapperWithLayoutElement:(id<ASLayoutElement>)layoutElement AS_WARN_UNUSED_RESULT;
 
 /*
- * Returns an ASWrapperLayoutSpec object initialized with the given layoutElement as child
+ * Returns an ASWrapperLayoutSpec object with the given layoutElements as children.
  */
-- (instancetype)initWithLayoutElement:(id<ASLayoutElement>)layoutElement NS_DESIGNATED_INITIALIZER;
++ (instancetype)wrapperWithLayoutElements:(NSArray<id<ASLayoutElement>> *)layoutElements AS_WARN_UNUSED_RESULT;
+
+/*
+ * Returns an ASWrapperLayoutSpec object initialized with the given layoutElement as child.
+ */
+- (instancetype)initWithLayoutElement:(id<ASLayoutElement>)layoutElement AS_WARN_UNUSED_RESULT;
+
+/*
+ * Returns an ASWrapperLayoutSpec object initialized with the given layoutElements as children.
+ */
+- (instancetype)initWithLayoutElements:(NSArray<id<ASLayoutElement>> *)layoutElements AS_WARN_UNUSED_RESULT;
 
 /*
  * Init not available for ASWrapperLayoutSpec

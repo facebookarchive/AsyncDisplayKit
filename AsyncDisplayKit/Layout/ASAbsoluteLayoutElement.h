@@ -20,6 +20,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) CGPoint layoutPosition;
 
+
+#pragma mark Deprecated
+
+@property (nonatomic, assign) ASRelativeSizeRange sizeRange ASDISPLAYNODE_DEPRECATED;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -222,27 +222,60 @@
   
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
   ASCellNode *node = [testController.collectionView nodeForItemAtIndexPath:indexPath];
-  
+
+  NSInteger setSelectedCount = 0;
   // selecting node should select cell
   node.selected = YES;
+  ++setSelectedCount;
   XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath], @"Selecting node should update cell selection.");
   
   // deselecting node should deselect cell
   node.selected = NO;
+  ++setSelectedCount;
   XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] isEqualToArray:@[]], @"Deselecting node should update cell selection.");
 
-  // selecting cell via collectionView should select node
-  [testController.collectionView selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  // selecting cell via collectionNode should select node
+  ++setSelectedCount;
+  [testController.collectionNode selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
   XCTAssertTrue(node.isSelected == YES, @"Selecting cell should update node selection.");
   
-  // deselecting cell via collectionView should deselect node
-  [testController.collectionView deselectItemAtIndexPath:indexPath animated:NO];
+  // deselecting cell via collectionNode should deselect node
+  ++setSelectedCount;
+  [testController.collectionNode deselectItemAtIndexPath:indexPath animated:NO];
   XCTAssertTrue(node.isSelected == NO, @"Deselecting cell should update node selection.");
   
   // select the cell again, scroll down and back up, and check that the state persisted
-  [testController.collectionView selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  [testController.collectionNode selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  ++setSelectedCount;
   XCTAssertTrue(node.isSelected == YES, @"Selecting cell should update node selection.");
-  
+
+  testController.collectionNode.allowsMultipleSelection = YES;
+
+  NSIndexPath *indexPath2 = [NSIndexPath indexPathForItem:1 inSection:0];
+  ASCellNode *node2 = [testController.collectionView nodeForItemAtIndexPath:indexPath2];
+
+  // selecting cell via collectionNode should select node
+  [testController.collectionNode selectItemAtIndexPath:indexPath2 animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  XCTAssertTrue(node2.isSelected == YES, @"Selecting cell should update node selection.");
+
+  XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath] &&
+                [[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath2],
+                @"Selecting multiple cells should result in those cells being in the array of selectedItems.");
+
+  // deselecting node should deselect cell
+  node.selected = NO;
+  ++setSelectedCount;
+  XCTAssertTrue(![[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath] &&
+                [[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath2], @"Deselecting node should update array of selectedItems.");
+
+  node.selected = YES;
+  ++setSelectedCount;
+  XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath], @"Selecting node should update cell selection.");
+
+  node2.selected = NO;
+  XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath] &&
+                ![[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath2], @"Deselecting node should update array of selectedItems.");
+
   // reload cell (-prepareForReuse is called) & check that selected state is preserved
   [testController.collectionView setContentOffset:CGPointMake(0,testController.collectionView.bounds.size.height)];
   [testController.collectionView layoutIfNeeded];
@@ -256,7 +289,7 @@
   XCTAssertTrue(node.isSelected == NO, @"Deselecting cell should update node selection.");
   
   // check setSelected not called extra times
-  XCTAssertTrue([(ASTextCellNodeWithSetSelectedCounter *)node setSelectedCounter] == 6, @"setSelected: should not be called on node multiple times.");
+  XCTAssertTrue([(ASTextCellNodeWithSetSelectedCounter *)node setSelectedCounter] == (setSelectedCount + 1), @"setSelected: should not be called on node multiple times.");
 }
 
 - (void)testTuningParametersWithExplicitRangeMode
@@ -462,12 +495,12 @@
   [[[dataSource stub] andDo:^(NSInvocation *invocation) {
     __autoreleasing ASCellNode *suppNode = [[ASCellNode alloc] init];
     int thisNodeIdx = nodeIdx++;
-    suppNode.name = [NSString stringWithFormat:@"Cell #%d", thisNodeIdx];
+    suppNode.debugName = [NSString stringWithFormat:@"Cell #%d", thisNodeIdx];
     [keepaliveNodes addObject:suppNode];
 
     ASDisplayNode *layerBacked = [[ASDisplayNode alloc] init];
     layerBacked.layerBacked = YES;
-    layerBacked.name = [NSString stringWithFormat:@"Subnode #%d", thisNodeIdx];
+    layerBacked.debugName = [NSString stringWithFormat:@"Subnode #%d", thisNodeIdx];
     [suppNode addSubnode:layerBacked];
     [invocation setReturnValue:&suppNode];
   }] collectionNode:cn nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];

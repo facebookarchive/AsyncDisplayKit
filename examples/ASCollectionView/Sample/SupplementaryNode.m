@@ -32,12 +32,14 @@ static CGFloat kInsets = 15.0;
 - (instancetype)initWithText:(NSString *)text
 {
   self = [super init];
+  
   if (self != nil) {
     _textNode = [[ASTextNode alloc] init];
     _textNode.attributedText = [[NSAttributedString alloc] initWithString:text
                                                                  attributes:[self textAttributes]];
     [self addSubnode:_textNode];
   }
+  
   return self;
 }
 
@@ -47,6 +49,7 @@ static CGFloat kInsets = 15.0;
   center.centeringOptions = ASCenterLayoutSpecCenteringXY;
   center.child = self.textNode;
   UIEdgeInsets insets = UIEdgeInsetsMake(kInsets, kInsets, kInsets, kInsets);
+  
   return [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:center];
 }
 
