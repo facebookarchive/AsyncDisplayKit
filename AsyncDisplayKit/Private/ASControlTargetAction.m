@@ -11,5 +11,52 @@
 #import "ASControlTargetAction.h"
 
 @implementation ASControlTargetAction
+{
+  id _target;
+  BOOL _createdWithNoTarget;
+}
+
+- (void)setTarget:(id)target {
+  _target = target;
+  
+  if (!target) {
+    _createdWithNoTarget = YES;
+  }
+}
+
+- (id)target {
+  return _target;
+}
+
+- (BOOL)isEqual:(id)object {
+  if (![object isKindOfClass:[ASControlTargetAction class]]) {
+    return NO;
+  }
+  
+  ASControlTargetAction *otherObject = (ASControlTargetAction *)object;
+  
+  BOOL areTargetsEqual;
+  
+  if (self.target != nil && otherObject.target != nil && self.target == otherObject.target) {
+    areTargetsEqual = YES;
+  }
+  else if (self.target == nil && otherObject.target == nil && _createdWithNoTarget && otherObject->_createdWithNoTarget) {
+    areTargetsEqual = YES;
+  }
+  else {
+    areTargetsEqual = NO;
+  }
+  
+  if (!areTargetsEqual) {
+    return NO;
+  }
+  
+  if (self.action && otherObject.action && [NSStringFromSelector(self.action) isEqualToString:NSStringFromSelector(otherObject.action)]) {
+    return YES;
+  }
+  else {
+    return NO;
+  }
+}
 
 @end
