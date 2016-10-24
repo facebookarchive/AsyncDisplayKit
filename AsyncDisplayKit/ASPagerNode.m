@@ -14,7 +14,6 @@
 #import "ASDelegateProxy.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASPagerFlowLayout.h"
-#import "ASCollectionView+Undeprecated.h"
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
@@ -107,12 +106,12 @@
 
 - (ASCellNode *)nodeForPageAtIndex:(NSInteger)index
 {
-  return [self.view nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
+  return [self nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
 }
 
 #pragma mark - ASCollectionDataSource
 
-- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
   if (!_pagerDataSourceImplementsNodeBlockAtIndex) {
@@ -122,19 +121,19 @@
   return [_pagerDataSource pagerNode:self nodeBlockAtIndex:indexPath.item];
 }
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+- (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
 {
   ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
   return [_pagerDataSource numberOfPagesInPagerNode:self];
 }
 
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   if (_pagerDelegateImplementsConstrainedSizeForNode) {
     return [_pagerDelegate pagerNode:self constrainedSizeForNodeAtIndex:indexPath.item];
   }
 
-  return ASSizeRangeMake(CGSizeZero, self.view.bounds.size);
+  return ASSizeRangeMake(CGSizeZero, self.bounds.size);
 }
 
 #pragma mark - Data Source Proxy
