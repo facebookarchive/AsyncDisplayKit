@@ -1,6 +1,6 @@
 import AsyncDisplayKit
 
-let fontSize: CGFloat = 20
+fileprivate let fontSize: CGFloat = 20
 
 public class HorizontalStackWithSpacer: ASDisplayNode, ASPlayground {
   public let usernameNode     = ASTextNode()

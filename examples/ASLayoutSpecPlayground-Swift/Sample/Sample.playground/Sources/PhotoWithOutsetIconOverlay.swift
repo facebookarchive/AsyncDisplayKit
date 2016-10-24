@@ -1,6 +1,6 @@
 import AsyncDisplayKit
 
-let userImageHeight = 60
+fileprivate let userImageHeight = 60
 
 public class PhotoWithOutsetIconOverlay: ASDisplayNode, ASPlayground {
   public let photoNode = ASNetworkImageNode()
