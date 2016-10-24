@@ -204,6 +204,26 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   }
 }
 
+- (NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertMainThread();
+
+  UIScrollView *scrollView = self.scrollView;
+
+  ASDisplayNode *owningNode = scrollView.asyncdisplaykit_node;
+  if ([owningNode isKindOfClass:[ASCollectionNode class]]) {
+    return [(ASCollectionNode *)owningNode indexPathForNode:self];
+  } else if ([owningNode isKindOfClass:[ASTableNode class]]) {
+    return [(ASTableNode *)owningNode indexPathForNode:self];
+  } else if ([scrollView isKindOfClass:[ASCollectionView class]]) {
+    return [(ASCollectionView *)scrollView indexPathForNode:self];
+  } else if ([scrollView isKindOfClass:[ASTableView class]]) {
+    return [(ASTableView *)scrollView indexPathForNode:self];
+  }
+
+  return nil;
+}
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 
