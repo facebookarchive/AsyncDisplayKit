@@ -116,9 +116,9 @@
 {
   return (
           // handled by ASPagerDataSource node<->cell machinery
-          selector == @selector(collectionView:nodeForItemAtIndexPath:) ||
-          selector == @selector(collectionView:nodeBlockForItemAtIndexPath:) ||
-          selector == @selector(collectionView:numberOfItemsInSection:) ||
+          selector == @selector(collectionNode:nodeForItemAtIndexPath:) ||
+          selector == @selector(collectionNode:nodeBlockForItemAtIndexPath:) ||
+          selector == @selector(collectionNode:numberOfItemsInSection:) ||
           selector == @selector(collectionView:constrainedSizeForNodeAtIndexPath:)
           );
 }
