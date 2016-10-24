@@ -12,7 +12,6 @@
 
 /**
  @abstract ASControlTargetAction stores target action pairs registered for specific ASControlNodeEvent values.
- ASControlNode This class stores target action pairs similar to the UIControlTargetAction class.
  */
 @interface ASControlTargetAction : NSObject
 
