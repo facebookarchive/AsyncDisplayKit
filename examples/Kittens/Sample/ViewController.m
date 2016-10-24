@@ -132,7 +132,7 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 
 - (void)tableNode:(ASTableNode *)tableNode didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  [_tableNode.view deselectRowAtIndexPath:indexPath animated:YES];
+  [_tableNode deselectRowAtIndexPath:indexPath animated:YES];
   
   // Assume only kitten nodes are selectable (see -tableNode:shouldHighlightRowAtIndexPath:).
   KittenNode *node = (KittenNode *)[_tableNode nodeForRowAtIndexPath:indexPath];

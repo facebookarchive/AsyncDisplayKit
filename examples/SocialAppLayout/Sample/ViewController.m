@@ -144,7 +144,7 @@
     
     NSLog(@"%@ rasterization for %@'s post: %@", shouldRasterize ? @"Enabling" : @"Disabling", post.name, postNode);
     
-    [tableNode.view deselectRowAtIndexPath:indexPath animated:YES];
+    [tableNode deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 @end

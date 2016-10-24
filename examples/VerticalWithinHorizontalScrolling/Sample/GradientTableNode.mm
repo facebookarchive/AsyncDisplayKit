@@ -73,7 +73,7 @@
 
 - (void)tableNode:(ASTableNode *)tableNode didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  [tableNode.view deselectRowAtIndexPath:indexPath animated:NO];
+  [tableNode deselectRowAtIndexPath:indexPath animated:NO];
   [_tableNode reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
 }
 
