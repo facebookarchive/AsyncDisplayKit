@@ -43,4 +43,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+
+#pragma mark - Deprecated
+
+@interface ASStaticLayoutSpec : ASAbsoluteLayoutSpec
+
++ (instancetype)staticLayoutSpecWithChildren:(NSArray<id<ASLayoutElement>> *)children AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED;
+
+@end
+
 NS_ASSUME_NONNULL_END

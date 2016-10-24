@@ -11,7 +11,6 @@
 #import "ASLayoutSpec.h"
 #import "ASLayoutSpecPrivate.h"
 #import "ASLayoutSpec+Subclasses.h"
-#import "ASLayoutPrivate.h"
 #import "ASLayoutElementStylePrivate.h"
 
 @implementation ASLayoutSpec
@@ -82,12 +81,6 @@
 }
 
 #pragma mark - Layout
-
-// Deprecated
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
-{
-    return [self layoutThatFits:constrainedSize];
-}
 
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
 {
@@ -292,6 +285,15 @@ ASEnvironmentLayoutExtensibilityForwarding
     _debugName = [debugName copy];
   }
 }
+
+#pragma mark - Deprecated
+
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+{
+  return [self layoutThatFits:constrainedSize];
+}
+
+ASLayoutElementStyleForwarding
 
 @end
 

@@ -8,11 +8,10 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASLayoutPrivate.h"
-
 #import "ASDimension.h"
 #import "ASInternalHelpers.h"
 #import "ASLayoutSpecUtilities.h"
+#import "ASLayoutSpec+Subclasses.h"
 
 #import <queue>
 #import "ASObjectDescriptionHelpers.h"
@@ -239,6 +238,30 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     [description appendString:[self _recursiveDescriptionForLayout:sublayout level:level + 1]];
   }
   return description;
+}
+
+@end
+
+@implementation ASLayout (Deprecation)
+
+- (id <ASLayoutElement>)layoutableObject
+{
+  return self.layoutElement;
+}
+
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutElement>)layoutElement
+                      constrainedSizeRange:(ASSizeRange)constrainedSizeRange
+                                      size:(CGSize)size
+{
+  return [self layoutWithLayoutElement:layoutElement size:size];
+}
+
++ (instancetype)layoutWithLayoutableObject:(id<ASLayoutElement>)layoutElement
+                      constrainedSizeRange:(ASSizeRange)constrainedSizeRange
+                                      size:(CGSize)size
+                                sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
+{
+  return [self layoutWithLayoutElement:layoutElement size:size sublayouts:sublayouts];
 }
 
 @end

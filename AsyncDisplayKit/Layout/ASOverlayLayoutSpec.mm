@@ -12,7 +12,7 @@
 #import "ASLayoutSpec+Subclasses.h"
 
 #import "ASAssert.h"
-#import "ASLayoutPrivate.h"
+#import "ASLayoutSpec+Subclasses.h"
 
 static NSUInteger const kUnderlayChildIndex = 0;
 static NSUInteger const kOverlayChildIndex = 1;
