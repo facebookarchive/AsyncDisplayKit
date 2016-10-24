@@ -462,12 +462,12 @@
   [[[dataSource stub] andDo:^(NSInvocation *invocation) {
     __autoreleasing ASCellNode *suppNode = [[ASCellNode alloc] init];
     int thisNodeIdx = nodeIdx++;
-    suppNode.name = [NSString stringWithFormat:@"Cell #%d", thisNodeIdx];
+    suppNode.debugName = [NSString stringWithFormat:@"Cell #%d", thisNodeIdx];
     [keepaliveNodes addObject:suppNode];
 
     ASDisplayNode *layerBacked = [[ASDisplayNode alloc] init];
     layerBacked.layerBacked = YES;
-    layerBacked.name = [NSString stringWithFormat:@"Subnode #%d", thisNodeIdx];
+    layerBacked.debugName = [NSString stringWithFormat:@"Subnode #%d", thisNodeIdx];
     [suppNode addSubnode:layerBacked];
     [invocation setReturnValue:&suppNode];
   }] collectionNode:cn nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];

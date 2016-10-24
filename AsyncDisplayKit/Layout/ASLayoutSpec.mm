@@ -11,13 +11,13 @@
 #import "ASLayoutSpec.h"
 #import "ASLayoutSpecPrivate.h"
 #import "ASLayoutSpec+Subclasses.h"
-#import "ASLayoutPrivate.h"
 #import "ASLayoutElementStylePrivate.h"
 
 @implementation ASLayoutSpec
 
 // Dynamic properties for ASLayoutElements
 @dynamic layoutElementType;
+@synthesize debugName = _debugName;
 @synthesize isFinalLayoutElement = _isFinalLayoutElement;
 
 #pragma mark - Class
@@ -81,12 +81,6 @@
 }
 
 #pragma mark - Layout
-
-// Deprecated
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
-{
-    return [self layoutThatFits:constrainedSize];
-}
 
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
 {
@@ -276,6 +270,31 @@ ASEnvironmentLayoutExtensibilityForwarding
   }
 }
 
+#pragma mark - Debugging
+
+- (NSString *)debugName
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _debugName;
+}
+
+- (void)setDebugName:(NSString *)debugName
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if (!ASObjectIsEqual(_debugName, debugName)) {
+    _debugName = [debugName copy];
+  }
+}
+
+#pragma mark - Deprecated
+
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+{
+  return [self layoutThatFits:constrainedSize];
+}
+
+ASLayoutElementStyleForwarding
+
 @end
 
 #pragma mark - ASWrapperLayoutSpec
@@ -304,7 +323,6 @@ ASEnvironmentLayoutExtensibilityForwarding
 }
 
 @end
-
 
 #pragma mark - ASLayoutSpec (Debugging)
 
@@ -340,7 +358,11 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (NSString *)asciiArtName
 {
-  return NSStringFromClass([self class]);
+  NSString *string = NSStringFromClass([self class]);
+  if (_debugName) {
+    string = [string stringByAppendingString:[NSString stringWithFormat:@" (debugName = %@)",_debugName]];
+  }
+  return string;
 }
 
 @end

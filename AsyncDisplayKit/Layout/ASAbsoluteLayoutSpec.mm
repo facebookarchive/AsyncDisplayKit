@@ -10,10 +10,10 @@
 
 #import "ASAbsoluteLayoutSpec.h"
 
+#import "ASLayout.h"
+#import "ASLayoutSpec+Subclasses.h"
 #import "ASLayoutSpecUtilities.h"
-#import "ASLayoutPrivate.h"
 #import "ASLayoutElementStylePrivate.h"
-
 
 #pragma mark - ASAbsoluteLayoutSpec
 
@@ -48,7 +48,7 @@
   if (!(self = [super init])) {
     return nil;
   }
-  
+
   _sizing = sizing;
   self.children = children;
 
@@ -100,6 +100,8 @@
 
 @end
 
+#pragma mark - ASEnvironment
+
 @implementation ASAbsoluteLayoutSpec (ASEnvironment)
 
 - (BOOL)supportsUpwardPropagation
@@ -109,13 +111,30 @@
 
 @end
 
-@implementation ASAbsoluteLayoutSpec (Debugging)
+#pragma mark - Debugging
 
-#pragma mark - ASLayoutElementAsciiArtProtocol
+@implementation ASAbsoluteLayoutSpec (Debugging)
 
 - (NSString *)debugBoxString
 {
   return [ASLayoutSpec asciiArtStringForChildren:self.children parentName:[self asciiArtName]];
+}
+
+@end
+
+
+#pragma mark - ASStaticLayoutSpec
+
+@implementation ASStaticLayoutSpec : ASAbsoluteLayoutSpec
+
++ (instancetype)staticLayoutSpecWithChildren:(NSArray<id<ASLayoutElement>> *)children
+{
+  return [self absoluteLayoutSpecWithSizing:ASAbsoluteLayoutSpecSizingSizeToFit children:children];
+}
+
+- (instancetype)initWithChildren:(NSArray *)children
+{
+  return [super initWithSizing:ASAbsoluteLayoutSpecSizingSizeToFit children:children];
 }
 
 @end

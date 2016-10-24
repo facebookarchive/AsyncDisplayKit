@@ -295,6 +295,19 @@
   return [self.dataController indexPathForNode:cellNode];
 }
 
+- (NSArray<__kindof NSIndexPath *> *)indexPathsForVisibleItems
+{
+  NSMutableArray *indexPathsArray = [NSMutableArray new];
+  for (ASCellNode *cell in [self visibleNodes]) {
+    NSIndexPath *indexPath = [self indexPathForNode:cell];
+    if (indexPath) {
+      [indexPathsArray addObject:indexPath];
+    }
+  }
+  return indexPathsArray;
+}
+
+
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   return [self.dataController nodeAtIndexPath:indexPath];

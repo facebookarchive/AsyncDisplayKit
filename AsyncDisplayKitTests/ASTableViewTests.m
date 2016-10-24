@@ -256,7 +256,7 @@
   return indexPaths;
 }
 
-- (void)testReloadData
+- (void)DISABLED_testReloadData
 {
   // Keep the viewport moderately sized so that new cells are loaded on scrolling
   ASTableView *tableView = [[ASTestTableView alloc] __initWithFrame:CGRectMake(0, 0, 100, 500)
