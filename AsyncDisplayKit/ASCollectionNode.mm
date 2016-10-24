@@ -27,7 +27,9 @@
 @interface _ASCollectionPendingState : NSObject
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
-@property (assign, nonatomic) ASLayoutRangeMode rangeMode;
+@property (nonatomic, assign) ASLayoutRangeMode rangeMode;
+@property (nonatomic, assign) BOOL allowsSelection; // default is YES
+@property (nonatomic, assign) BOOL allowsMultipleSelection; // default is NO
 @end
 
 @implementation _ASCollectionPendingState
@@ -37,6 +39,8 @@
   self = [super init];
   if (self) {
     _rangeMode = ASLayoutRangeModeCount;
+    _allowsSelection = YES;
+    _allowsMultipleSelection = NO;
   }
   return self;
 }
@@ -143,9 +147,11 @@
   
   if (_pendingState) {
     _ASCollectionPendingState *pendingState = _pendingState;
-    self.pendingState      = nil;
-    view.asyncDelegate     = pendingState.delegate;
-    view.asyncDataSource   = pendingState.dataSource;
+    self.pendingState            = nil;
+    view.asyncDelegate           = pendingState.delegate;
+    view.asyncDataSource         = pendingState.dataSource;
+    view.allowsSelection         = pendingState.allowsSelection;
+    view.allowsMultipleSelection = pendingState.allowsMultipleSelection;
 
     if (pendingState.rangeMode != ASLayoutRangeModeCount) {
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
@@ -251,6 +257,44 @@
   }
 }
 
+- (void)setAllowsSelection:(BOOL)allowsSelection
+{
+  if ([self pendingState]) {
+    _pendingState.allowsSelection = allowsSelection;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded if pendingState doesn't exist");
+    self.view.allowsSelection = allowsSelection;
+  }
+}
+
+- (BOOL)allowsSelection
+{
+  if ([self pendingState]) {
+    return _pendingState.allowsSelection;
+  } else {
+    return self.view.allowsSelection;
+  }
+}
+
+- (void)setAllowsMultipleSelection:(BOOL)allowsMultipleSelection
+{
+  if ([self pendingState]) {
+    _pendingState.allowsMultipleSelection = allowsMultipleSelection;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded if pendingState doesn't exist");
+    self.view.allowsMultipleSelection = allowsMultipleSelection;
+  }
+}
+
+- (BOOL)allowsMultipleSelection
+{
+  if ([self pendingState]) {
+    return _pendingState.allowsMultipleSelection;
+  } else {
+    return self.view.allowsMultipleSelection;
+  }
+}
+
 #pragma mark - Range Tuning
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
@@ -271,6 +315,24 @@
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   return [self.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+}
+
+#pragma mark - Selection
+
+- (void)selectItemAtIndexPath:(nullable NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
+{
+  ASDisplayNodeAssertMainThread();
+  // TODO: Solve this in a way to be able to remove this restriction (https://github.com/facebook/AsyncDisplayKit/pull/2453#discussion_r84515457)
+  ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded before calling selectItemAtIndexPath");
+  [self.view selectItemAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+}
+
+- (void)deselectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated
+{
+  ASDisplayNodeAssertMainThread();
+  // TODO: Solve this in a way to be able to remove this restriction (https://github.com/facebook/AsyncDisplayKit/pull/2453#discussion_r84515457)
+  ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded before calling deselectItemAtIndexPath");
+  [self.view deselectItemAtIndexPath:indexPath animated:animated];
 }
 
 #pragma mark - Querying Data
