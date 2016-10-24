@@ -340,6 +340,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section;
 
 /**
+ * Similar to -visibleCells.
+ *
+ * @return an array containing the nodes being displayed on screen. This must be called on the main thread.
+ */
+@property(readonly, copy) NSArray<__kindof ASCellNode *> *visibleNodes;
+
+/**
  * Asks the data source for a block to create a node to represent the row at the given index path.
  * The block will be run by the table node concurrently in the background before the row is inserted
  * into the table view.

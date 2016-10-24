@@ -371,6 +371,12 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
   return [self.dataController numberOfSections];
 }
 
+- (NSArray<__kindof ASCellNode *> *)visibleNodes
+{
+  ASDisplayNodeAssertMainThread();
+  return self.isNodeLoaded ? [self.view visibleNodes] : @[];
+}
+
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
   return [self.dataController indexPathForNode:cellNode];
