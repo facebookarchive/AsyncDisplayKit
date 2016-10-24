@@ -127,6 +127,8 @@
   return [_pagerDataSource numberOfPagesInPagerNode:self];
 }
 
+#pragma mark - ASCollectionDelegate
+
 - (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   if (_pagerDelegateImplementsConstrainedSizeForNode) {
