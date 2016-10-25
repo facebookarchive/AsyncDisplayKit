@@ -555,6 +555,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition
 {
   ASDisplayNodeAssertMainThread();
+  // If they passed nil, just forward it and be done.
+  if (indexPath == nil) {
+    [super selectRowAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+    return;
+  }
   
   indexPath = [self convertIndexPathFromTableNode:indexPath waitingIfNeeded:YES];
   if (indexPath != nil) {

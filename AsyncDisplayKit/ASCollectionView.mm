@@ -612,6 +612,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
 {
   ASDisplayNodeAssertMainThread();
+  // If they passed nil, just forward it and be done.
+  if (indexPath == nil) {
+    [super selectItemAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+    return;
+  }
 
   NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
   if (viewIndexPath != nil) {
