@@ -281,7 +281,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     {
       // Do we already have an event table for this control event?
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[eventKey];
+      NSMutableOrderedSet *eventTargetActionArray = _controlEventDispatchTable[eventKey];
       
       // Create new target action pair
       ASControlTargetAction *newTargetAction = [[ASControlTargetAction alloc] init];
@@ -290,7 +290,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       
       // Create it if necessary.
       if (eventTargetActionArray) {
-        NSMutableArray *newEventTargetActionArray;
+        NSMutableOrderedSet *newEventTargetActionArray;
         
         // UIControl does not support duplicate target-action-events entries, so we replicate that behavior.
         // See: https://github.com/facebook/AsyncDisplayKit/files/205466/DuplicateActionsTest.playground.zip
@@ -300,7 +300,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
           }
           
           if (!newEventTargetActionArray) {
-            newEventTargetActionArray = [[NSMutableArray alloc] init];
+            newEventTargetActionArray = [[NSMutableOrderedSet alloc] init];
           }
           
           [newEventTargetActionArray addObject:targetAction];
@@ -311,7 +311,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       
       if (eventKey) {
         if (!eventTargetActionArray) {
-          eventTargetActionArray = [[NSMutableArray alloc] init];
+          eventTargetActionArray = [[NSMutableOrderedSet alloc] init];
         }
         
         [_controlEventDispatchTable setObject:eventTargetActionArray forKey:eventKey];
@@ -332,7 +332,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   ASDN::MutexLocker l(_controlLock);
   
   // Grab the event target action array for this event.
-  NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)];
+  NSMutableOrderedSet *eventTargetActionArray = _controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)];
   if (!eventTargetActionArray) {
     return nil;
   }
@@ -362,7 +362,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSMutableSet *targets = [[NSMutableSet alloc] init];
 
   // Look at each event...
-  for (NSMutableArray *eventTargetActionArray in [_controlEventDispatchTable objectEnumerator]) {
+  for (NSMutableOrderedSet *eventTargetActionArray in [_controlEventDispatchTable objectEnumerator]) {
     // and each event's targets...
     for (ASControlTargetAction *targetAction in eventTargetActionArray) {
       [targets addObject:targetAction.target];
@@ -384,12 +384,12 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     {
       // Grab the dispatch table for this event (if we have it).
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[eventKey];
+      NSMutableOrderedSet *eventTargetActionArray = _controlEventDispatchTable[eventKey];
       if (!eventTargetActionArray) {
         return;
       }
       
-      NSMutableArray *newEventTargetActionArray;
+      NSMutableOrderedSet *newEventTargetActionArray;
       
       for (ASControlTargetAction *targetAction in eventTargetActionArray) {
         BOOL shouldRemove = NO;
@@ -411,7 +411,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
         
         // Create new target action array if necessary
         if (!newEventTargetActionArray) {
-          newEventTargetActionArray = [[NSMutableArray alloc] init];
+          newEventTargetActionArray = [[NSMutableOrderedSet alloc] init];
         }
         
         [newEventTargetActionArray addObject:targetAction];
