@@ -31,12 +31,15 @@
 
 typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constrainedSize);
 
+
 #pragma mark - OverviewDisplayNodeWithSizeBlock
 
 @interface OverviewDisplayNodeWithSizeBlock : ASDisplayNode<ASLayoutSpecListEntry>
+
 @property (nonatomic, copy) NSString *entryTitle;
 @property (nonatomic, copy) NSString *entryDescription;
 @property (nonatomic, copy) OverviewDisplayNodeSizeThatFitsBlock sizeThatFitsBlock;
+
 @end
 
 @implementation OverviewDisplayNodeWithSizeBlock
@@ -54,11 +57,14 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 
 @end
 
+
 #pragma mark - OverviewTitleDescriptionCellNode
 
 @interface OverviewTitleDescriptionCellNode : ASCellNode
+
 @property (nonatomic, strong) ASTextNode *titleNode;
 @property (nonatomic, strong) ASTextNode *descriptionNode;
+
 @end
 
 @implementation OverviewTitleDescriptionCellNode
@@ -91,16 +97,35 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 
 @end
 
+
 #pragma mark - OverviewComponentsViewController
 
 @interface OverviewComponentsViewController ()
+
 @property (nonatomic, copy) NSArray *data;
 @property (nonatomic, strong) ASTableNode *tableNode;
+
 @end
 
 @implementation OverviewComponentsViewController
 
-#pragma mark - UIViewController
+
+#pragma mark - Lifecycle Methods
+
+- (instancetype)init
+{
+  _tableNode = [ASTableNode new];
+  
+  self = [super initWithNode:_tableNode];
+  
+  if (self) {
+    _tableNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    _tableNode.delegate =  (id<ASTableDelegate>)self;
+    _tableNode.dataSource = (id<ASTableDataSource>)self;
+  }
+  
+  return self;
+}
 
 - (void)viewDidLoad
 {
@@ -109,18 +134,17 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     self.title = @"AsyncDisplayKit";
     
     [self setupData];
-    [self setupTableNode];
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     
-    ASTableView *tableView = self.tableNode.view;
-    [tableView deselectRowAtIndexPath:tableView.indexPathForSelectedRow animated:YES];
+    [_tableNode deselectRowAtIndexPath:_tableNode.view.indexPathForSelectedRow animated:YES];
 }
 
-#pragma mark - Setup
+
+#pragma mark - Data Model
 
 - (void)setupData
 {
@@ -452,16 +476,6 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     self.data  = mutableData;
 }
 
-- (void)setupTableNode
-{
-    _tableNode = [ASTableNode new];
-    _tableNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    _tableNode.frame = self.view.bounds;
-    _tableNode.delegate =  (id<ASTableDelegate>)self;
-    _tableNode.dataSource = (id<ASTableDataSource>)self;
-    [self.view addSubnode:_tableNode];
-}
-
 #pragma mark - Parent / Child Helper
 
 - (OverviewDisplayNodeWithSizeBlock *)parentNodeWithChild:(ASDisplayNode *)child
@@ -505,22 +519,22 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 
 #pragma mark - <ASTableDataSource / ASTableDelegate>
 
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
+- (NSInteger)numberOfSectionsInTableNode:(ASTableNode *)tableNode
 {
     return self.data.count;
 }
 
-- (nullable NSString *)tableView:(UITableView *)tableView titleForHeaderInSection:(NSInteger)section
+- (nullable NSString *)tableNode:(ASTableNode *)tableNode titleForHeaderInSection:(NSInteger)section
 {
     return self.data[section][@"title"];
 }
 
-- (NSInteger)tableView:(ASTableView *)tableView numberOfRowsInSection:(NSInteger)section
+- (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
 {
     return [self.data[section][@"data"] count];
 }
 
-- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)tableNode:(ASTableNode *)tableNode nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     // You should get the node or data you want to pass to the cell node outside of the ASCellNodeBlock
     ASDisplayNode<ASLayoutSpecListEntry> *node = self.data[indexPath.section][@"data"][indexPath.row];
@@ -542,7 +556,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     };
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)tableNode:(ASTableNode *)tableNode didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     ASDisplayNode *node = self.data[indexPath.section][@"data"][indexPath.row];
     OverviewDetailViewController *detail = [[OverviewDetailViewController alloc] initWithNode:node];

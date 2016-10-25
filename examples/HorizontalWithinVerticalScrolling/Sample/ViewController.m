@@ -34,13 +34,13 @@
 
 - (instancetype)init
 {
-  if (!(self = [super initWithNode:_tableNode]))
-    return nil;
-
   _tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
   _tableNode.dataSource = self;
   _tableNode.delegate = self;
-  
+
+  if (!(self = [super initWithNode:_tableNode]))
+    return nil;
+
   self.title = @"Horizontal Scrolling Gradients";
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRedo
                                                                                          target:self
@@ -61,14 +61,14 @@
   [_tableNode reloadData];
 }
 
-#pragma mark - ASTableView.
+#pragma mark - ASTableNode
 
-- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNode *)tableNode:(ASTableNode *)tableNode nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   return [[HorizontalScrollCellNode alloc] initWithElementSize:CGSizeMake(100, 100)];
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+- (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
 {
   return 100;
 }

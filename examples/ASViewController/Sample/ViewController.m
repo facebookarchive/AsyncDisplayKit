@@ -66,7 +66,7 @@
 {
     [super viewWillAppear:animated];
     
-    [self.tableNode.view deselectRowAtIndexPath:self.tableNode.view.indexPathForSelectedRow animated:YES];
+    [self.tableNode deselectRowAtIndexPath:self.tableNode.view.indexPathForSelectedRow animated:YES];
 }
 
 
