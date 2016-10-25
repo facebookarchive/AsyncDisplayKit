@@ -449,11 +449,11 @@
 
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:2 inSection:0];
   ASCellNode *cell = [cn nodeForItemAtIndexPath:indexPath];
-  XCTAssertEqual(cell.indexPath.section == indexPath.section && cell.indexPath.item == indexPath.item, YES, @"Expected the cell's indexPath to be the same as the indexPath in question.");
+  XCTAssertTrue(cell.indexPath.section == indexPath.section && cell.indexPath.item == indexPath.item, @"Expected the cell's indexPath to be the same as the indexPath in question.");
 
   --del->_itemCounts[0];
   [cn deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:0]]];
-  XCTAssertEqual(cell.indexPath.section == indexPath.section && cell.indexPath.item == (indexPath.item - 1), YES, @"Expected the cell's indexPath to be updated once a cell with a lower index is deleted.");
+  XCTAssertTrue(cell.indexPath.section == indexPath.section && cell.indexPath.item == (indexPath.item - 1), @"Expected the cell's indexPath to be updated once a cell with a lower index is deleted.");
 
   del->_itemCounts.erase(del->_itemCounts.begin());
   [cn deleteSections:[NSIndexSet indexSetWithIndex:0]];
