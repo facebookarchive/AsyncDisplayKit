@@ -337,6 +337,7 @@ ASLayoutElementStyleForwarding
   CGSize size = constrainedSize.min;
   for (id<ASLayoutElement> child in children) {
     ASLayout *sublayout = [child layoutThatFits:constrainedSize parentSize:constrainedSize.max];
+    sublayout.position = CGPointZero;
     
     size.width = MAX(size.width,  sublayout.size.width);
     size.height = MAX(size.height, sublayout.size.height);
