@@ -315,11 +315,36 @@ ASLayoutElementStyleForwarding
   return self;
 }
 
++ (instancetype)wrapperWithLayoutElements:(NSArray<id<ASLayoutElement>> *)layoutElements
+{
+  return [[self alloc] initWithLayoutElements:layoutElements];
+}
+
+- (instancetype)initWithLayoutElements:(NSArray<id<ASLayoutElement>> *)layoutElements
+{
+  self = [super init];
+  if (self) {
+    self.children = layoutElements;
+  }
+  return self;
+}
+
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
-  ASLayout *sublayout = [self.child layoutThatFits:constrainedSize parentSize:constrainedSize.max];
-  sublayout.position = CGPointZero;
-  return [ASLayout layoutWithLayoutElement:self size:sublayout.size sublayouts:@[sublayout]];
+  NSArray *children = self.children;
+  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:children.count];
+  
+  CGSize size = constrainedSize.min;
+  for (id<ASLayoutElement> child in children) {
+    ASLayout *sublayout = [child layoutThatFits:constrainedSize parentSize:constrainedSize.max];
+    
+    size.width = MAX(size.width,  sublayout.size.width);
+    size.height = MAX(size.height, sublayout.size.height);
+    
+    [sublayouts addObject:sublayout];
+  }
+  
+  return [ASLayout layoutWithLayoutElement:self size:size sublayouts:sublayouts];
 }
 
 @end
