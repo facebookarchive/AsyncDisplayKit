@@ -254,10 +254,6 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSParameterAssert(controlEventMask != 0);
   
   ASDN::MutexLocker l(_controlLock);
-  
-  // Convert nil to [NSNull null] so that it can be used as a key for NSMapTable.
-  if (!target)
-    target = [NSNull null];
 
   if (!_controlEventDispatchTable) {
     _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
@@ -284,18 +280,18 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       NSMutableOrderedSet *eventTargetActionArray = _controlEventDispatchTable[eventKey];
       
       // Create new target action pair
-      ASControlTargetAction *newTargetAction = [[ASControlTargetAction alloc] init];
-      newTargetAction.action = action;
-      newTargetAction.target = target;
+      ASControlTargetAction *targetAtion = [[ASControlTargetAction alloc] init];
+      targetAtion.action = action;
+      targetAtion.target = target;
       
       // Create it if necessary.
       if (eventTargetActionArray) {
-        NSMutableOrderedSet *newEventTargetActionArray;
-        
         // UIControl does not support duplicate target-action-events entries, so we replicate that behavior.
         // See: https://github.com/facebook/AsyncDisplayKit/files/205466/DuplicateActionsTest.playground.zip
-        for (ASControlTargetAction *targetAction in eventTargetActionArray) {
-          if ([newTargetAction isEqual:targetAction]) {
+        NSMutableOrderedSet *newEventTargetActionArray;
+        
+        for (ASControlTargetAction *storedTargetAction in eventTargetActionArray) {
+          if ([storedTargetAction isEqual:targetAtion]) {
             continue;
           }
           
@@ -303,22 +299,24 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
             newEventTargetActionArray = [[NSMutableOrderedSet alloc] init];
           }
           
-          [newEventTargetActionArray addObject:targetAction];
+          [newEventTargetActionArray addObject:storedTargetAction];
+        }
+        
+        if (!newEventTargetActionArray) {
+          newEventTargetActionArray = [[NSMutableOrderedSet alloc] init];
         }
         
         eventTargetActionArray = newEventTargetActionArray;
       }
-      
-      if (eventKey) {
-        if (!eventTargetActionArray) {
-          eventTargetActionArray = [[NSMutableOrderedSet alloc] init];
-        }
-        
-        [_controlEventDispatchTable setObject:eventTargetActionArray forKey:eventKey];
+      else {
+        eventTargetActionArray = [[NSMutableOrderedSet alloc] init];
       }
       
-      // Store it in the array, so all the target action pairs will be triggered in the same order as they were added
-      [eventTargetActionArray addObject:newTargetAction];
+      [eventTargetActionArray addObject:targetAtion];
+      
+      if (eventKey) {
+        [_controlEventDispatchTable setObject:eventTargetActionArray forKey:eventKey];
+      }
     });
 
   self.userInteractionEnabled = YES;
@@ -341,11 +339,11 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   
   // Collect all actions for this target.
   for (ASControlTargetAction *targetAction in eventTargetActionArray) {
-    if (target != nil && targetAction.target != nil && target != targetAction.target) {
+    if (target && targetAction.target && target != targetAction.target) {
       continue;
     }
     
-    if (target == nil && !targetAction.createdWithNoTarget) {
+    if (!target && !targetAction.createdWithNoTarget) {
       continue;
     }
     
@@ -448,7 +446,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
         id responder = targetAction.target;
         
         // NSNull means that a nil target was set, so start at self and travel the responder chain
-        if (responder == [NSNull null]) {
+        if (!responder && targetAction.createdWithNoTarget) {
           // if the target cannot perform the action, travel the responder chain to try to find something that does
           responder = [self.view targetForAction:action withSender:self];
         }

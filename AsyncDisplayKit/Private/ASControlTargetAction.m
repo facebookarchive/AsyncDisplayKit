@@ -59,4 +59,8 @@
   }
 }
 
+- (NSUInteger)hash {
+  return [self.target hash];
+}
+
 @end
