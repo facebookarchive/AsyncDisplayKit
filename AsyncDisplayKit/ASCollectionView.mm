@@ -489,6 +489,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   if (_layoutInspector == nil) {
     UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
+    if (layout == nil) {
+      // Layout hasn't been set yet, we're still init'ing
+      return nil;
+    }
+    
     if ([layout asdk_isFlowLayout]) {
       // Register the default layout inspector delegate for flow layouts only
       _defaultLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self flowLayout:layout];
