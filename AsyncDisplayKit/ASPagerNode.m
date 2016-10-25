@@ -101,7 +101,7 @@
 - (void)scrollToPageAtIndex:(NSInteger)index animated:(BOOL)animated
 {
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:index inSection:0];
-  [self.view scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionLeft animated:animated];
+  [self scrollToItemAtIndexPath:indexPath atScrollPosition:UICollectionViewScrollPositionLeft animated:animated];
 }
 
 - (ASCellNode *)nodeForPageAtIndex:(NSInteger)index
