@@ -192,6 +192,8 @@ typedef struct {
   ASDimension height;
 } ASLayoutSize;
 
+extern ASLayoutSize const ASLayoutSizeAuto;
+
 /*
  * Creates an ASLayoutSize with provided min and max dimensions.
  */
