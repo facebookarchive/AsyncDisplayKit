@@ -44,7 +44,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   ASDisplayNodeMethodOverrideTouchesCancelled   = 1 << 1,
   ASDisplayNodeMethodOverrideTouchesEnded       = 1 << 2,
   ASDisplayNodeMethodOverrideTouchesMoved       = 1 << 3,
-  ASDisplayNodeMethodOverrideLayoutSpecThatFits = 1 << 4
+  ASDisplayNodeMethodOverrideLayoutSpecThatFits = 1 << 4,
+  ASDisplayNodeMethodOverrideLayoutElementThatFits = 1 << 5
 };
 
 FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification;

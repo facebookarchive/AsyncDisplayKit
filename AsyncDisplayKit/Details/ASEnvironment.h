@@ -110,8 +110,9 @@ ASDISPLAYNODE_EXTERN_C_END
 /// Returns all children of an object which class conforms to the ASEnvironment protocol
 - (nullable NSArray<id<ASEnvironment>> *)children;
 
-/// Classes should implement this method and return YES / NO dependent if upward propagation is enabled or not 
-- (BOOL)supportsUpwardPropagation;
+/// Classes should implement this method and return YES / NO dependent if upward propagation is enabled or not
+// Currently disabled as it was used previously and propagation is not implemented at the moment
+// - (BOOL)supportsUpwardPropagation;
 
 /// Classes should implement this method and return YES / NO dependent if downware propagation is enabled or not
 - (BOOL)supportsTraitsCollectionPropagation;

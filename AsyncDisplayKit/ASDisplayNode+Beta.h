@@ -63,9 +63,6 @@ typedef struct {
 + (BOOL)suppressesInvalidCollectionUpdateExceptions AS_WARN_UNUSED_RESULT;
 + (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses;
 
-/** @name Layout */
-
-
 /**
  * @abstract Recursively ensures node and all subnodes are displayed.
  * @see Full documentation in ASDisplayNode+FrameworkPrivate.h
@@ -88,6 +85,23 @@ typedef struct {
 @property (nonatomic, copy, nullable) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
 
 /**
+ * @abstract Return a layout element that describes the layout of the receiver and its children.
+ *
+ * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
+ *
+ * @discussion Subclasses that override should expect this method to be called on a non-main thread. The returned layout element
+ * is used to calculate an ASLayout and cached by ASDisplayNode for quick access during -layout. Other expensive work that needs to
+ * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
+ * encouraged.
+ *
+ * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
+ *
+ * @warning Subclasses that implement -layoutElementThatFits: must not also implement -layoutSpecThatFits: or use
+ * .layoutSpecBlock. Doing so will trigger an exception.
+ */
+- (id<ASLayoutElement>)layoutElementThatFits:(ASSizeRange)constrainedSize;
+
+/**
  * @abstract A bitmask representing which actions (layout spec, layout generation) should be measured.
  */
 @property (nonatomic, assign) ASDisplayNodePerformanceMeasurementOptions measurementOptions;
@@ -96,8 +110,6 @@ typedef struct {
  * @abstract A simple struct representing performance measurements collected.
  */
 @property (nonatomic, assign, readonly) ASDisplayNodePerformanceMeasurements performanceMeasurements;
-
-/** @name Layout Transitioning */
 
 /**
  * @abstract Currently used by ASNetworkImageNode and ASMultiplexImageNode to allow their placeholders to stay if they are loading an image from the network.
