@@ -404,8 +404,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
   
+  //Cache results of layoutInspector to ensure flags are up to date if getter lazily loads a new one.
+  id<ASCollectionViewLayoutInspecting> layoutInspector = self.layoutInspector;
   if (_layoutInspectorFlags.didChangeCollectionViewDataSource) {
-    [self.layoutInspector didChangeCollectionViewDataSource:asyncDataSource];
+    [layoutInspector didChangeCollectionViewDataSource:asyncDataSource];
   }
 }
 
@@ -465,8 +467,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
   
+  //Cache results of layoutInspector to ensure flags are up to date if getter lazily loads a new one.
+  id<ASCollectionViewLayoutInspecting> layoutInspector = self.layoutInspector;
   if (_layoutInspectorFlags.didChangeCollectionViewDelegate) {
-    [self.layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
+    [layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
   }
 }
 
@@ -485,6 +489,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   if (_layoutInspector == nil) {
     UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
+    if (layout == nil) {
+      // Layout hasn't been set yet, we're still init'ing
+      return nil;
+    }
+    
     if ([layout asdk_isFlowLayout]) {
       // Register the default layout inspector delegate for flow layouts only
       _defaultLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self flowLayout:layout];
@@ -1118,8 +1127,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASScrollDirection)scrollableDirections
 {
+  //Cache results of layoutInspector to ensure flags are up to date if getter lazily loads a new one.
+  id<ASCollectionViewLayoutInspecting> layoutInspector = self.layoutInspector;
   if (_layoutInspectorFlags.scrollableDirections) {
-    return [self.layoutInspector scrollableDirections];
+    return [layoutInspector scrollableDirections];
   } else {
     ASScrollDirection scrollableDirection = ASScrollDirectionNone;
     CGFloat totalContentWidth = self.contentSize.width + self.contentInset.left + self.contentInset.right;
