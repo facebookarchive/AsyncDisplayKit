@@ -136,6 +136,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
+/**
+ * Scrolls the collection to the given item.
+ *
+ * @param indexPath The index path of the item.
+ * @param scrollPosition Where the item should end up after the scroll.
+ * @param animated Whether the scroll should be animated or not.
+ *
+ * This method must be called on the main thread.
+ */
+- (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated;
+
 #pragma mark - Editing
 
 /**

@@ -335,6 +335,20 @@
   [self.view deselectItemAtIndexPath:indexPath animated:animated];
 }
 
+- (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated
+{
+  ASDisplayNodeAssertMainThread();
+  ASCollectionView *collectionView = self.view;
+
+  indexPath = [collectionView convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
+
+  if (indexPath != nil) {
+    [collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+  } else {
+    NSLog(@"Failed to scroll to item at index path %@ because the item never reached the view.", indexPath);
+  }
+}
+
 #pragma mark - Querying Data
 
 - (NSInteger)numberOfItemsInSection:(NSInteger)section
