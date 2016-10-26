@@ -63,9 +63,6 @@ typedef struct {
 + (BOOL)suppressesInvalidCollectionUpdateExceptions AS_WARN_UNUSED_RESULT;
 + (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses;
 
-/** @name Layout */
-
-
 /**
  * @abstract Recursively ensures node and all subnodes are displayed.
  * @see Full documentation in ASDisplayNode+FrameworkPrivate.h
@@ -96,8 +93,6 @@ typedef struct {
  * @abstract A simple struct representing performance measurements collected.
  */
 @property (nonatomic, assign, readonly) ASDisplayNodePerformanceMeasurements performanceMeasurements;
-
-/** @name Layout Transitioning */
 
 /**
  * @abstract Currently used by ASNetworkImageNode and ASMultiplexImageNode to allow their placeholders to stay if they are loading an image from the network.

@@ -88,10 +88,6 @@
   
   // Replace object at the given index with the layoutElement
   _childrenArray[index] = layoutElement;
-  
-  // TODO: Should we propagate up the layoutElement at it could happen that multiple children will propagated up their
-  //       layout options and one child will overwrite values from another child
-  // [self propagateUpLayoutElement:finalLayoutElement];
 }
 
 - (id<ASLayoutElement>)childAtIndex:(NSUInteger)index
