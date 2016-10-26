@@ -125,6 +125,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /**
+ * Scrolls the table to the given row.
+ *
+ * @param indexPath The index path of the row.
+ * @param scrollPosition Where the row should end up after the scroll.
+ * @param animated Whether the scroll should be animated or not.
+ */
+- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
+
+/**
  * Similar to -visibleCells.
  *
  * @return an array containing the cell nodes being displayed on screen.

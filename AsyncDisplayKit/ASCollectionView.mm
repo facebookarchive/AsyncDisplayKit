@@ -555,19 +555,31 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait
 {
-  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  NSIndexPath *viewIndexPath = [self indexPathForNode:node];
-  if (viewIndexPath == nil && wait) {
-    [self waitUntilAllUpdatesAreCommitted];
-    viewIndexPath = [self indexPathForNode:node];
+  // If this is a section index path, we don't currently have a method
+  // to do a mapping.
+  if (indexPath.item == NSNotFound) {
+    return indexPath;
+  } else {
+    ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+    NSIndexPath *viewIndexPath = [self indexPathForNode:node];
+    if (viewIndexPath == nil && wait) {
+      [self waitUntilAllUpdatesAreCommitted];
+      viewIndexPath = [self indexPathForNode:node];
+    }
+    return viewIndexPath;
   }
-  return viewIndexPath;
 }
 
 - (NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath
 {
-  ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-  return [_dataController indexPathForNode:node];
+  // If this is a section index path, we don't currently have a method
+  // to do a mapping.
+  if (indexPath.item == NSNotFound) {
+    return indexPath;
+  } else {
+    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
+    return [_dataController indexPathForNode:node];
+  }
 }
 
 - (ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
@@ -594,23 +606,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   return visibleNodes;
-}
-
-/**
- * TODO: This method was built when the distinction between data source
- * index paths and view index paths was unclear. For compatibility, it
- * still expects data source index paths for the time being.
- */
-- (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated
-{
-  ASDisplayNodeAssertMainThread();
-
-  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
-  if (viewIndexPath != nil) {
-    [super scrollToItemAtIndexPath:viewIndexPath atScrollPosition:scrollPosition animated:animated];
-  } else {
-    NSLog(@"Warning: Ignoring request to scroll to item at index path %@ because the item did not reach the collection view.", indexPath);
-  }
 }
 
 /**
