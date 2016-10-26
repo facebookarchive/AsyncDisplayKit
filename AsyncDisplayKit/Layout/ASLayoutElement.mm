@@ -474,11 +474,11 @@ do {\
   }
   
   if (self.ascender != defaultState.ascender) {
-    [result addObject:@{ @"ascender" : [NSNumber numberWithFloat:self.ascender] }];
+    [result addObject:@{ @"ascender" : @(self.ascender) }];
   }
   
   if (self.descender != defaultState.descender) {
-    [result addObject:@{ @"descender" : [NSNumber numberWithFloat:self.descender] }];
+    [result addObject:@{ @"descender" : @(self.descender) }];
   }
   
   if (ASDimensionEqualToDimension(self.flexBasis, defaultState.flexBasis) == NO) {
@@ -486,23 +486,23 @@ do {\
   }
   
   if (self.flexGrow != defaultState.flexGrow) {
-    [result addObject:@{ @"flexGrow" : [NSNumber numberWithFloat:self.flexGrow] }];
+    [result addObject:@{ @"flexGrow" : @(self.flexGrow) }];
   }
   
   if (self.flexShrink != defaultState.flexShrink) {
-    [result addObject:@{ @"flexShrink" : [NSNumber numberWithFloat:self.flexShrink] }];
+    [result addObject:@{ @"flexShrink" : @(self.flexShrink) }];
   }
   
   if (self.spacingAfter != defaultState.spacingAfter) {
-    [result addObject:@{ @"spacingAfter" : [NSNumber numberWithFloat:self.spacingAfter] }];
+    [result addObject:@{ @"spacingAfter" : @(self.spacingAfter) }];
   }
   
   if (self.spacingBefore != defaultState.spacingBefore) {
-    [result addObject:@{ @"spacingBefore" : [NSNumber numberWithFloat:self.spacingBefore] }];
+    [result addObject:@{ @"spacingBefore" : @(self.spacingBefore) }];
   }
   
   if (CGPointEqualToPoint(self.layoutPosition, defaultState.layoutPosition) == NO) {
-    [result addObject:@{ @"layoutPosition" : NSStringFromCGPoint(self.layoutPosition) }];
+    [result addObject:@{ @"layoutPosition" : [NSValue valueWithCGPoint:self.layoutPosition] }];
   }
 
   return result;
