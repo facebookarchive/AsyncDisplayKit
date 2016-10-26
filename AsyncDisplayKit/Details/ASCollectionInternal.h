@@ -26,6 +26,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, strong, readonly) ASDataController *dataController;
 @property (nonatomic, strong, readonly) ASRangeController *rangeController;
 
+/**
+ * Attempt to get the view-layer index path for the item with the given index path.
+ *
+ * @param indexPath The index path of the item.
+ * @param wait If the item hasn't reached the view yet, this attempts to wait for updates to commit.
+ */
 - (nullable NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait;
 
 @end
