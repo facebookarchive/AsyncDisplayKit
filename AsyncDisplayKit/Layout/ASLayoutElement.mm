@@ -257,12 +257,12 @@ do {\
 - (CGSize)preferredSize
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if (_size.width.unit != ASDimensionUnitPoints) {
+  if (_size.width.unit == ASDimensionUnitFraction) {
     NSCAssert(NO, @"Cannot get preferredSize of element with fractional width. Width: %@.", NSStringFromASDimension(_size.width));
     return CGSizeZero;
   }
   
-  if (_size.height.unit != ASDimensionUnitPoints) {
+  if (_size.height.unit == ASDimensionUnitFraction) {
     NSCAssert(NO, @"Cannot get preferredSize of element with fractional height. Height: %@.", NSStringFromASDimension(_size.height));
     return CGSizeZero;
   }

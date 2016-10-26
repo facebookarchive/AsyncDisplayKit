@@ -58,6 +58,8 @@
 {
   ASLayoutElementStyle *style = [ASLayoutElementStyle new];
   
+  ASXCTAssertEqualSizes(style.preferredSize, CGSizeZero);
+  
   CGSize size = CGSizeMake(100, 100);
   
   style.preferredSize = size;
@@ -78,7 +80,7 @@
 {
   ASLayoutElementStyle *style = [ASLayoutElementStyle new];
   
-  XCTAssertThrows(style.preferredSize);
+  XCTAssertNoThrow(style.preferredSize);
   
   style.width = ASDimensionMake(ASDimensionUnitFraction, 0.5);
   XCTAssertThrows(style.preferredSize);
