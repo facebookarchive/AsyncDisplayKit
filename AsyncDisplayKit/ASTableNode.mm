@@ -361,13 +361,22 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 
 #pragma mark - Querying Data
 
+- (void)reloadDataInitiallyIfNeeded
+{
+  if (!self.dataController.initialReloadDataHasBeenCalled) {
+    [self reloadData];
+  }
+}
+
 - (NSInteger)numberOfRowsInSection:(NSInteger)section
 {
+  [self reloadDataInitiallyIfNeeded];
   return [self.dataController numberOfRowsInSection:section];
 }
 
 - (NSInteger)numberOfSections
 {
+  [self reloadDataInitiallyIfNeeded];
   return [self.dataController numberOfSections];
 }
 
@@ -384,6 +393,7 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+  [self reloadDataInitiallyIfNeeded];
   return [self.dataController nodeAtIndexPath:indexPath];
 }
 

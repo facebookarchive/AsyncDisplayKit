@@ -210,6 +210,34 @@
   XCTAssertEqualObjects([collectionView supplementaryNodeKindsInDataController:nil], @[UICollectionElementKindSectionHeader]);
 }
 
+- (void)testReloadIfNeeded
+{
+  [ASDisplayNode setSuppressesInvalidCollectionUpdateExceptions:NO];
+
+  __block ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  __block ASCollectionViewTestDelegate *del = testController.asyncDelegate;
+  __block ASCollectionNode *cn = testController.collectionNode;
+
+  void (^reset)() = ^void() {
+    testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+    del = testController.asyncDelegate;
+    cn = testController.collectionNode;
+  };
+
+  // Check if the number of sections matches the data source
+  XCTAssertEqual(cn.numberOfSections, del->_itemCounts.size(), @"Section count doesn't match the data source");
+
+  // Reset everything and then check if numberOfItemsInSection matches the data source
+  reset();
+  XCTAssertEqual([cn numberOfItemsInSection:0], del->_itemCounts[0], @"Number of items in Section doesn't match the data source");
+
+  // Reset and check if we can get the node corresponding to a specific indexPath
+  reset();
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  ASTextCellNodeWithSetSelectedCounter *node = (ASTextCellNodeWithSetSelectedCounter*)[cn nodeForItemAtIndexPath:indexPath];
+  XCTAssertTrue([node.text isEqualToString:indexPath.description], @"Node's text should match the initial text it was created with");
+}
+
 - (void)testSelection
 {
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
