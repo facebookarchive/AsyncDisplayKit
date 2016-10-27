@@ -40,7 +40,7 @@
   struct {
     unsigned int isTableNode:1;
     unsigned int isCollectionNode:1;
-  } _scrollViewType;
+  } _owningNodeType;
 
 }
 
@@ -192,17 +192,16 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   }
 }
 
-- (void)setScrollView:(UIScrollView *)scrollView
+- (void)setOwningNode:(ASDisplayNode *)owningNode
 {
-  _scrollView = scrollView;
+  _owningNode = owningNode;
 
-  memset(&_scrollViewType, 0, sizeof(_scrollViewType));
+  memset(&_owningNodeType, 0, sizeof(_owningNodeType));
 
-  ASDisplayNode *owningNode = scrollView.asyncdisplaykit_node;
   if ([owningNode isKindOfClass:[ASTableNode class]]) {
-    _scrollViewType.isTableNode      = 1;
+    _owningNodeType.isTableNode      = 1;
   } else if ([owningNode isKindOfClass:[ASCollectionNode class]]) {
-    _scrollViewType.isCollectionNode = 1;
+    _owningNodeType.isCollectionNode = 1;
   }
 }
 
@@ -228,13 +227,10 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
 {
   ASDisplayNodeAssertMainThread();
 
-  UIScrollView *scrollView = self.scrollView;
-
-  ASDisplayNode *owningNode = scrollView.asyncdisplaykit_node;
-  if (_scrollViewType.isTableNode) {
-    return [(ASTableNode *)owningNode indexPathForNode:self];
-  } else if (_scrollViewType.isCollectionNode) {
-    return [(ASCollectionNode *)owningNode indexPathForNode:self];
+  if (_owningNodeType.isTableNode) {
+    return [(ASTableNode *)self.owningNode indexPathForNode:self];
+  } else if (_owningNodeType.isCollectionNode) {
+    return [(ASCollectionNode *)self.owningNode indexPathForNode:self];
   }
 
   return nil;

@@ -233,15 +233,14 @@
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withSections:(NSIndexSet *)sections mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
 {
-  id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
-  ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
-  
+  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+
   [sections enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
     for (NSUInteger sec = range.location; sec < NSMaxRange(range); sec++) {
       NSUInteger itemCount = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:sec];
       for (NSUInteger i = 0; i < itemCount; i++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sec];
-        [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
+        [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environment:environment];
       }
     }
   }];
@@ -249,8 +248,7 @@
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
 {
-  id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
-  ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
+  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
 
   NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
   for (NSIndexPath *indexPath in indexPaths) {
@@ -262,13 +260,13 @@
       NSUInteger itemCount = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:sec];
       for (NSUInteger i = 0; i < itemCount; i++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sec];
-        [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environmentTraitCollection:environmentTraitCollection];
+        [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environment:environment];
       }
     }
   }];
 }
 
-- (void)_populateSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts environmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
+- (void)_populateSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts environment:(id<ASEnvironment>)environment
 {
   ASCellNodeBlock supplementaryCellBlock;
   if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
@@ -283,7 +281,7 @@
                                                                         indexPath:indexPath
                                                          supplementaryElementKind:kind
                                                                   constrainedSize:constrainedSize
-                                                       environmentTraitCollection:environmentTraitCollection];
+                                                                      environment:environment];
   [contexts addObject:context];
 }
 
