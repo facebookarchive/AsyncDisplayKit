@@ -131,7 +131,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param scrollPosition Where the row should end up after the scroll.
  * @param animated Whether the scroll should be animated or not.
  */
-- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 - (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition; ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 

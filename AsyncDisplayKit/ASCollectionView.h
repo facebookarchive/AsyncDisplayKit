@@ -212,7 +212,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param scrollPosition Where the row should end up after the scroll.
  * @param animated Whether the scroll should be animated or not.
  */
-- (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 - (void)selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
