@@ -487,8 +487,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 {
   ASDisplayNodeAssertMainThread();
   
-  id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
-  ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
+  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   std::vector<NSInteger> counts = [self itemCountsFromDataSource];
   NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
@@ -504,7 +503,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
                                                                   indexPath:indexPath
                                                    supplementaryElementKind:nil
                                                             constrainedSize:constrainedSize
-                                                 environmentTraitCollection:environmentTraitCollection]];
+                                                                environment:environment]];
       }
     }
   }];
@@ -751,8 +750,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
   NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
 
-  id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
-  ASEnvironmentTraitCollection environmentTraitCollection = environment.environmentTraitCollection;
+  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   for (NSIndexPath *indexPath in sortedIndexPaths) {
     ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
@@ -761,7 +759,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
                                                               indexPath:indexPath
                                                supplementaryElementKind:nil
                                                         constrainedSize:constrainedSize
-                                             environmentTraitCollection:environmentTraitCollection]];
+                                                            environment:environment]];
   }
 
   ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(_nodeContexts[ASDataControllerRowNodeKind], sortedIndexPaths, contexts);

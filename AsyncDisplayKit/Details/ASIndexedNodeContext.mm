@@ -31,7 +31,7 @@
                         indexPath:(NSIndexPath *)indexPath
          supplementaryElementKind:(nullable NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
-       environmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
+                      environment:(id<ASEnvironment>)environment
 {
   NSAssert(nodeBlock != nil && indexPath != nil, @"Node block and index path must not be nil");
   self = [super init];
@@ -40,7 +40,8 @@
     _indexPath = indexPath;
     _supplementaryElementKind = [supplementaryElementKind copy];
     _constrainedSize = constrainedSize;
-    _environmentTraitCollection = environmentTraitCollection;
+    _environment = environment;
+    _environmentTraitCollection = environment.environmentTraitCollection;
   }
   return self;
 }
@@ -57,6 +58,7 @@
     }
     node.cachedIndexPath = _indexPath;
     node.supplementaryElementKind = _supplementaryElementKind;
+    node.owningNode = (ASDisplayNode *)_environment;
     ASEnvironmentStatePropagateDown(node, _environmentTraitCollection);
     _node = node;
   }
