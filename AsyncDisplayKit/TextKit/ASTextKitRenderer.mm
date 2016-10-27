@@ -265,7 +265,12 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   // If we use default options, we can use NSAttributedString for a
   // fast path.
   if (self.canUseFastPath) {
-    [_attributes.attributedString drawWithRect:shadowInsetBounds options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:self.stringDrawingContext];
+    CGRect drawingBounds = shadowInsetBounds;
+    // Add a fudge-factor to the height, to workaround a bug in iOS 7
+    if (AS_AT_LEAST_IOS8 == NO) {
+      drawingBounds.size.height += 3;
+    }
+    [_attributes.attributedString drawWithRect:drawingBounds options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:self.stringDrawingContext];
   } else {
     BOOL isScaled = [self isScaled];
     [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
