@@ -427,8 +427,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     LOG(@"Edit Transaction - reloadData");
     
     // Remove everything that existed before the reload, now that we're ready to insert replacements
-    NSMutableArray *editingNodes = _editingNodes[ASDataControllerRowNodeKind];
-    NSUInteger oldSectionCount = editingNodes.count;
+    NSUInteger oldSectionCount = [_editingNodes[ASDataControllerRowNodeKind] count];
 
     // If we have old sections, we should delete them inside beginUpdates/endUpdates with inserting the new ones.
     if (oldSectionCount) {
@@ -453,7 +452,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     if (oldSectionCount) {
       // -endUpdates
       [_mainSerialQueue performBlockOnMainThread:^{
-        [_delegate dataController:self endUpdatesAnimated:YES completion:nil];
+        [_delegate dataController:self endUpdatesAnimated:NO completion:nil];
       }];
     }
     
