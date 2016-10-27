@@ -51,7 +51,7 @@
     return NO;
   }
   
-  if (self.action && otherObject.action && [NSStringFromSelector(self.action) isEqualToString:NSStringFromSelector(otherObject.action)]) {
+  if (self.action && otherObject.action && self.action == otherObject.action) {
     return YES;
   }
   else {

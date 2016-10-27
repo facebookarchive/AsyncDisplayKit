@@ -275,43 +275,23 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEventMask, ^
     (ASControlNodeEvent controlEvent)
     {
-      // Do we already have an event table for this control event?
-      id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMutableOrderedSet *eventTargetActionArray = _controlEventDispatchTable[eventKey];
-      
       // Create new target action pair
       ASControlTargetAction *targetAtion = [[ASControlTargetAction alloc] init];
       targetAtion.action = action;
       targetAtion.target = target;
       
-      // Create it if necessary.
-      if (eventTargetActionArray) {
-        // UIControl does not support duplicate target-action-events entries, so we replicate that behavior.
-        // See: https://github.com/facebook/AsyncDisplayKit/files/205466/DuplicateActionsTest.playground.zip
-        NSMutableOrderedSet *newEventTargetActionArray;
-        
-        for (ASControlTargetAction *storedTargetAction in eventTargetActionArray) {
-          if ([storedTargetAction isEqual:targetAtion]) {
-            continue;
-          }
-          
-          if (!newEventTargetActionArray) {
-            newEventTargetActionArray = [[NSMutableOrderedSet alloc] init];
-          }
-          
-          [newEventTargetActionArray addObject:storedTargetAction];
-        }
-        
-        if (!newEventTargetActionArray) {
-          newEventTargetActionArray = [[NSMutableOrderedSet alloc] init];
-        }
-        
-        eventTargetActionArray = newEventTargetActionArray;
-      }
-      else {
+      // Do we already have an event table for this control event?
+      id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
+      NSMutableOrderedSet *eventTargetActionArray = _controlEventDispatchTable[eventKey];
+      
+      if (!eventTargetActionArray) {
         eventTargetActionArray = [[NSMutableOrderedSet alloc] init];
       }
       
+      // Remove any prior target-action pair for this event, as UIKit does.
+      [eventTargetActionArray removeObject:targetAtion];
+      
+      // Register the new target-action as the last one to be sent.
       [eventTargetActionArray addObject:targetAtion];
       
       if (eventKey) {
@@ -339,15 +319,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   
   // Collect all actions for this target.
   for (ASControlTargetAction *targetAction in eventTargetActionArray) {
-    if (target && targetAction.target && target != targetAction.target) {
-      continue;
+    if ((target == nil && targetAction.createdWithNoTarget) || (target != nil && target == targetAction.target)) {
+      [actions addObject:NSStringFromSelector(targetAction.action)];
     }
-    
-    if (!target && !targetAction.createdWithNoTarget) {
-      continue;
-    }
-    
-    [actions addObject:NSStringFromSelector(targetAction.action)];
   }
   
   return actions;
@@ -387,39 +361,20 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
         return;
       }
       
-      NSMutableOrderedSet *newEventTargetActionArray;
-      
-      for (ASControlTargetAction *targetAction in eventTargetActionArray) {
-        BOOL shouldRemove = NO;
-        
-        // Unlike addTarget:, if target is nil here we remove all targets with action.
-        // If target is not nil then check whether it's the same target
-        if (!target || targetAction.target == target) {
+      NSPredicate *filterPredicate = [NSPredicate predicateWithBlock:^BOOL(ASControlTargetAction *_Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+        if (!target || evaluatedObject.target == target) {
           if (!action) {
-            shouldRemove = YES;
+            return NO;
+          } else if (evaluatedObject.action == action) {
+            return NO;
           }
-          else if ([NSStringFromSelector(targetAction.action) isEqualToString:NSStringFromSelector(action)]) {
-            shouldRemove = YES;
-          }
         }
         
-        if (shouldRemove) {
-          continue;
-        }
-        
-        // Create new target action array if necessary
-        if (!newEventTargetActionArray) {
-          newEventTargetActionArray = [[NSMutableOrderedSet alloc] init];
-        }
-        
-        [newEventTargetActionArray addObject:targetAction];
-      }
+        return YES;
+      }];
+      [eventTargetActionArray filterUsingPredicate:filterPredicate];
       
-      if (newEventTargetActionArray.count > 0) {
-        // Replace the old array with the new one
-        _controlEventDispatchTable[eventKey] = newEventTargetActionArray;
-      }
-      else {
+      if (eventTargetActionArray.count == 0) {
         // If there are no targets for this event anymore, remove it.
         [_controlEventDispatchTable removeObjectForKey:eventKey];
       }
