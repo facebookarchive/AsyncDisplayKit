@@ -108,6 +108,20 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  */
 @property (nonatomic, assign, getter=isHighlighted) BOOL highlighted;
 
+/**
+ * The current index path of this cell node, or @c nil if this node is
+ * not a valid item inside a table node or collection node.
+ *
+ * @note This property must be accessed on the main thread.
+ */
+@property (nonatomic, readonly, nullable) NSIndexPath *indexPath;
+
+/**
+ * The owning node (ASCollectionNode/ASTableNode) of this cell node, or @c nil if this node is
+ * not a valid item inside a table node or collection node or if those nodes are nil.
+ */
+@property (weak, nonatomic, readonly, nullable) ASDisplayNode *owningNode;
+
 /*
  * ASCellNode must forward touch events in order for UITableView and UICollectionView tap handling to work. Overriding
  * these methods (e.g. for highlighting) requires the super method be called.

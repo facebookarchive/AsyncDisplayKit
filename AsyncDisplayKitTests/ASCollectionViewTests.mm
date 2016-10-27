@@ -504,6 +504,45 @@
   }
 }
 
+- (void)testCellNodeIndexPathConsistency
+{
+  updateValidationTestPrologue
+
+  // Test with a visible cell
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:2 inSection:0];
+  ASCellNode *cell = [cn nodeForItemAtIndexPath:indexPath];
+
+  // Check if cell's indexPath corresponds to the indexPath being tested
+  XCTAssertTrue(cell.indexPath.section == indexPath.section && cell.indexPath.item == indexPath.item, @"Expected the cell's indexPath to be the same as the indexPath being tested.");
+
+  // Remove an item prior to the cell's indexPath from the same section and check for indexPath consistency
+  --del->_itemCounts[indexPath.section];
+  [cn deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:indexPath.section]]];
+  XCTAssertTrue(cell.indexPath.section == indexPath.section && cell.indexPath.item == (indexPath.item - 1), @"Expected the cell's indexPath to be updated once a cell with a lower index is deleted.");
+
+  // Remove the section that includes the indexPath and check if the cell's indexPath is now nil
+  del->_itemCounts.erase(del->_itemCounts.begin());
+  [cn deleteSections:[NSIndexSet indexSetWithIndex:indexPath.section]];
+  XCTAssertNil(cell.indexPath, @"Expected the cell's indexPath to be nil once the section that contains the node is deleted.");
+
+  // Run the same tests but with a non-displayed cell
+  indexPath = [NSIndexPath indexPathForItem:2 inSection:(del->_itemCounts.size() - 1)];
+  cell = [cn nodeForItemAtIndexPath:indexPath];
+
+  // Check if cell's indexPath corresponds to the indexPath being tested
+  XCTAssertTrue(cell.indexPath.section == indexPath.section && cell.indexPath.item == indexPath.item, @"Expected the cell's indexPath to be the same as the indexPath in question.");
+
+  // Remove an item prior to the cell's indexPath from the same section and check for indexPath consistency
+  --del->_itemCounts[indexPath.section];
+  [cn deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:indexPath.section]]];
+  XCTAssertTrue(cell.indexPath.section == indexPath.section && cell.indexPath.item == (indexPath.item - 1), @"Expected the cell's indexPath to be updated once a cell with a lower index is deleted.");
+
+  // Remove the section that includes the indexPath and check if the cell's indexPath is now nil
+  del->_itemCounts.pop_back();
+  [cn deleteSections:[NSIndexSet indexSetWithIndex:indexPath.section]];
+  XCTAssertNil(cell.indexPath, @"Expected the cell's indexPath to be nil once the section that contains the node is deleted.");
+}
+
 /**
  * https://github.com/facebook/AsyncDisplayKit/issues/2011
  *
