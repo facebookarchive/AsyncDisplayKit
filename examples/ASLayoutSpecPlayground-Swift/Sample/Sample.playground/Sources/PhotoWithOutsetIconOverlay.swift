@@ -14,7 +14,7 @@ public class PhotoWithOutsetIconOverlay: ASDisplayNode, ASPlayground {
     setupNodes()
   }
 
-  func setupNodes() {
+  private func setupNodes() {
     photoNode.url = URL(string: "http://asyncdisplaykit.org/static/images/layout-examples-photo-with-outset-icon-overlay-photo.png")
     photoNode.backgroundColor = .black
 

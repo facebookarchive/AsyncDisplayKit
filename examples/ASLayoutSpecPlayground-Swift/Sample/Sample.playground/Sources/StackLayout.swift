@@ -12,7 +12,7 @@ public class StackLayout: ASDisplayNode, ASPlayground {
     setupNodes()
   }
 
-  func setupNodes() {
+  private func setupNodes() {
     titleNode.backgroundColor = .blue
     titleNode.attributedText = NSAttributedString.attributedString(string: "Headline!", fontSize: 14, color: .white, firstWordColor: nil)
 

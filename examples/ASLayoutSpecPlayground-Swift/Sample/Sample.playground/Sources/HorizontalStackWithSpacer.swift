@@ -15,7 +15,7 @@ public class HorizontalStackWithSpacer: ASDisplayNode, ASPlayground {
     setupNodes()
   }
 
-  func setupNodes() {
+  private func setupNodes() {
     usernameNode.backgroundColor = .yellow
     usernameNode.attributedText = NSAttributedString.attributedString(string: "hannahmbanana", fontSize: fontSize, color: .darkBlueColor(), firstWordColor: nil)
 

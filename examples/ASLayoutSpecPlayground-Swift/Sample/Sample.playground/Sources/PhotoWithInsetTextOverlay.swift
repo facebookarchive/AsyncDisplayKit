@@ -12,7 +12,7 @@ public class PhotoWithInsetTextOverlay: ASDisplayNode, ASPlayground {
     setupNodes()
   }
 
-  func setupNodes() {
+  private func setupNodes() {
     photoNode.url = URL(string: "http://asyncdisplaykit.org/static/images/layout-examples-photo-with-inset-text-overlay-photo.png")
     photoNode.backgroundColor = .black
 
