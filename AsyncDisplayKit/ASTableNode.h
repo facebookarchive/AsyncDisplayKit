@@ -461,7 +461,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @return a node for display at this indexpath. This will be called on the main thread and should not implement reuse (it will be called once per row). Unlike UITableView's version, this method
  * is not called when the row is about to display.
  */
-- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's method instead.");
+- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's method instead.");
 
 /**
  * Similar to -tableView:nodeForRowAtIndexPath:
@@ -474,7 +474,7 @@ NS_ASSUME_NONNULL_BEGIN
  *   Must be thread-safe (can be called on the main thread or a background
  *   queue) and should not implement reuse (it will be called once per row).
  */
-- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's method instead.");
+- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's method instead.");
 
 /**
  * Indicator to lock the data source for data fetching in async mode.
@@ -594,7 +594,7 @@ NS_ASSUME_NONNULL_BEGIN
  *   passed into this method may not correspond to the same item in your data source
  *   if your data source has been updated since the last edit was processed.
  */
-- (void)tableView:(ASTableView *)tableView didEndDisplayingNode:(ASCellNode *)node forRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's method instead.");
+- (void)tableView:(ASTableView *)tableView didEndDisplayingNode:(ASCellNode *)node forRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's method instead.");
 
 /**
  * Receive a message that the tableView is near the end of its data set and more data should be fetched if necessary.
@@ -608,7 +608,7 @@ NS_ASSUME_NONNULL_BEGIN
  * ASTableView currently only supports batch events for tail loads. If you require a head load, consider implementing a
  * UIRefreshControl.
  */
-- (void)tableView:(ASTableView *)tableView willBeginBatchFetchWithContext:(ASBatchContext *)context ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's method instead.");
+- (void)tableView:(ASTableView *)tableView willBeginBatchFetchWithContext:(ASBatchContext *)context ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's method instead.");
 
 /**
  * Tell the tableView if batch fetching should begin.
@@ -621,7 +621,7 @@ NS_ASSUME_NONNULL_BEGIN
  * If not implemented, the tableView assumes that it should notify its asyncDelegate when batch fetching
  * should occur.
  */
-- (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's method instead.");
+- (BOOL)shouldBatchFetchForTableView:(ASTableView *)tableView AS_WARN_UNUSED_RESULT ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's method instead.");
 
 /**
  * Provides the constrained size range for measuring the row at the index path.
@@ -648,7 +648,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * This method is deprecated. Use @c tableView:willDisplayNode:forRowAtIndexPath: instead.
  */
-- (void)tableView:(ASTableView *)tableView willDisplayNodeForRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's method instead.");
+- (void)tableView:(ASTableView *)tableView willDisplayNodeForRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's method instead.");
 
 @end
 
