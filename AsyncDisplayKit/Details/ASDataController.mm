@@ -636,9 +636,6 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
     // remove elements
     LOG(@"Edit Transaction - deleteSections: %@", sections);
-    NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(_editingNodes[ASDataControllerRowNodeKind], sections);
-    
-    [self _deleteNodesAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
     [self _deleteSectionsAtIndexSet:sections withAnimationOptions:animationOptions];
   });
 }
