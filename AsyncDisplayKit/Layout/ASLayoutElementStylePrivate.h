@@ -10,7 +10,9 @@
 
 #pragma once
 
-@interface ASLayoutElementStyle ()
+#import "ASObjectDescriptionHelpers.h"
+
+@interface ASLayoutElementStyle () <ASDescriptionProvider>
 
 /**
  * @abstract The object that acts as the delegate of the style.

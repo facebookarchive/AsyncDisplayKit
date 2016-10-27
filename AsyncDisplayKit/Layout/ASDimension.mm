@@ -81,14 +81,6 @@ ASDISPLAYNODE_INLINE CGSize ASLayoutSizeResolveSize(ASLayoutSize layoutSize, CGS
                     ASDimensionResolve(layoutSize.height, parentSize.height, autoSize.height));
 }
 
-// ** Returns a string formatted to contain the data from an ASLayoutSize. */
-ASDISPLAYNODE_INLINE NSString *NSStringFromASLayoutSize(ASLayoutSize size)
-{
-  return [NSString stringWithFormat:@"{%@, %@}",
-          NSStringFromASDimension(size.width),
-          NSStringFromASDimension(size.height)];
-}
-
 
 #pragma mark - ASLayoutElementSize
 
