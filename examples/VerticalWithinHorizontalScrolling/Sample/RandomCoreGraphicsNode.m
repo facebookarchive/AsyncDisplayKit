@@ -22,6 +22,8 @@
 
 @implementation RandomCoreGraphicsNode
 
+@synthesize indexPath=_indexPath;
+
 + (UIColor *)randomColor
 {
   CGFloat hue = ( arc4random() % 256 / 256.0 );  //  0.0 to 1.0
