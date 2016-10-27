@@ -276,23 +276,23 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     (ASControlNodeEvent controlEvent)
     {
       // Create new target action pair
-      ASControlTargetAction *targetAtion = [[ASControlTargetAction alloc] init];
-      targetAtion.action = action;
-      targetAtion.target = target;
+      ASControlTargetAction *targetAction = [[ASControlTargetAction alloc] init];
+      targetAction.action = action;
+      targetAction.target = target;
       
       // Do we already have an event table for this control event?
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMutableOrderedSet *eventTargetActionArray = _controlEventDispatchTable[eventKey];
+      NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[eventKey];
       
       if (!eventTargetActionArray) {
-        eventTargetActionArray = [[NSMutableOrderedSet alloc] init];
+        eventTargetActionArray = [[NSMutableArray alloc] init];
       }
       
       // Remove any prior target-action pair for this event, as UIKit does.
-      [eventTargetActionArray removeObject:targetAtion];
+      [eventTargetActionArray removeObject:targetAction];
       
       // Register the new target-action as the last one to be sent.
-      [eventTargetActionArray addObject:targetAtion];
+      [eventTargetActionArray addObject:targetAction];
       
       if (eventKey) {
         [_controlEventDispatchTable setObject:eventTargetActionArray forKey:eventKey];
@@ -310,7 +310,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   ASDN::MutexLocker l(_controlLock);
   
   // Grab the event target action array for this event.
-  NSMutableOrderedSet *eventTargetActionArray = _controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)];
+  NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)];
   if (!eventTargetActionArray) {
     return nil;
   }
@@ -334,7 +334,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSMutableSet *targets = [[NSMutableSet alloc] init];
 
   // Look at each event...
-  for (NSMutableOrderedSet *eventTargetActionArray in [_controlEventDispatchTable objectEnumerator]) {
+  for (NSMutableArray *eventTargetActionArray in [_controlEventDispatchTable objectEnumerator]) {
     // and each event's targets...
     for (ASControlTargetAction *targetAction in eventTargetActionArray) {
       [targets addObject:targetAction.target];
@@ -356,7 +356,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     {
       // Grab the dispatch table for this event (if we have it).
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMutableOrderedSet *eventTargetActionArray = _controlEventDispatchTable[eventKey];
+      NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[eventKey];
       if (!eventTargetActionArray) {
         return;
       }
