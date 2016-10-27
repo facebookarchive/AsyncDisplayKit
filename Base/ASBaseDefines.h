@@ -71,7 +71,7 @@
 #endif
 
 #ifndef ASDISPLAYNODE_WARN_DEPRECATED
-# define ASDISPLAYNODE_WARN_DEPRECATED 0
+# define ASDISPLAYNODE_WARN_DEPRECATED 1
 #endif
 
 #ifndef ASDISPLAYNODE_DEPRECATED
@@ -88,6 +88,14 @@
 # else
 #   define  ASDISPLAYNODE_DEPRECATED_MSG(msg)
 # endif
+#endif
+
+#ifndef ASDISPLAYNODE_SOON_DEPRECATED
+# define ASDISPLAYNODE_SOON_DEPRECATED
+#endif
+
+#ifndef ASDISPLAYNODE_SOON_DEPRECATED_MSG
+# define  ASDISPLAYNODE_SOON_DEPRECATED_MSG(msg)
 #endif
 
 #if defined (__cplusplus) && defined (__GNUC__)

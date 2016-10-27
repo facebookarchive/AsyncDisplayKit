@@ -145,7 +145,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
  */
-- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout ASDISPLAYNODE_DEPRECATED_MSG("Please use ASCollectionNode instead of ASCollectionView.");
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout ASDISPLAYNODE_SOON_DEPRECATED_MSG("Please use ASCollectionNode instead of ASCollectionView.");
 
 /**
  * Initializes an ASCollectionView
@@ -155,7 +155,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param frame The frame rectangle for the collection view, measured in points. The origin of the frame is relative to the superview in which you plan to add it. This frame is passed to the superclass during initialization.
  * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
  */
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout ASDISPLAYNODE_DEPRECATED_MSG("Please use ASCollectionNode instead of ASCollectionView.");
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout ASDISPLAYNODE_SOON_DEPRECATED_MSG("Please use ASCollectionNode instead of ASCollectionView.");
 
 /**
  * Tuning parameters for a range type in full mode.
@@ -215,7 +215,7 @@ NS_ASSUME_NONNULL_BEGIN
  *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
-- (void)performBatchAnimated:(BOOL)animated updates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (void)performBatchAnimated:(BOOL)animated updates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 /**
  *  Perform a batch of updates asynchronously.  This method must be called from the main thread.
@@ -226,7 +226,7 @@ NS_ASSUME_NONNULL_BEGIN
  *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
-- (void)performBatchUpdates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (void)performBatchUpdates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
@@ -235,14 +235,14 @@ NS_ASSUME_NONNULL_BEGIN
  * the main thread.
  * @warning This method is substantially more expensive than UICollectionView's version.
  */
-- (void)reloadDataWithCompletion:(nullable void (^)())completion ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (void)reloadDataWithCompletion:(nullable void (^)())completion ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
  * @warning This method is substantially more expensive than UICollectionView's version.
  */
-- (void)reloadData ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (void)reloadData ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 /**
  * Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.
@@ -250,7 +250,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @warning This method is substantially more expensive than UICollectionView's version and will block the main thread
  * while all the cells load.
  */
-- (void)reloadDataImmediately ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's -reloadDataWithCompletion: followed by -waitUntilAllUpdatesAreCommitted instead.");
+- (void)reloadDataImmediately ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode's -reloadDataWithCompletion: followed by -waitUntilAllUpdatesAreCommitted instead.");
 
 /**
  * Triggers a relayout of all nodes.
@@ -262,7 +262,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
  */
-- (void)waitUntilAllUpdatesAreCommitted ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (void)waitUntilAllUpdatesAreCommitted ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 /**
  * Registers the given kind of supplementary node for use in creating node-backed supplementary views.
@@ -274,7 +274,7 @@ NS_ASSUME_NONNULL_BEGIN
  * methods. This method will register an internal backing view that will host the contents of the supplementary nodes
  * returned from the data source.
  */
-- (void)registerSupplementaryNodeOfKind:(NSString *)elementKind ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (void)registerSupplementaryNodeOfKind:(NSString *)elementKind ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 /**
  * Inserts one or more sections.
@@ -304,7 +304,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)reloadSections:(NSIndexSet *)sections ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (void)reloadSections:(NSIndexSet *)sections ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 /**
  * Moves a section to a new location.
@@ -326,7 +326,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)insertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (void)insertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 /**
  * Deletes the items specified by an array of index paths.
@@ -336,7 +336,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
  * before this method is called.
  */
-- (void)deleteItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (void)deleteItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 /**
  * Reloads the specified items.
@@ -367,14 +367,14 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * This method is deprecated. Call @c calculatedSize on the node of interest instead. First deprecated in version 2.0.
  */
-- (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Call -calculatedSize on the node of interest instead.");
+- (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_SOON_DEPRECATED_MSG("Call -calculatedSize on the node of interest instead.");
 
 /**
  * Similar to -visibleCells.
  *
  * @return an array containing the nodes being displayed on screen.
  */
-- (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 /**
  * Similar to -indexPathForCell:.
@@ -388,15 +388,15 @@ NS_ASSUME_NONNULL_BEGIN
  *    for use with your data source and @c ASCollectionNode, call @c indexPathForNode: on the
  *    collection node instead.
  */
-- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 @end
 
-ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASCollectionDataSource.")
+ASDISPLAYNODE_SOON_DEPRECATED_MSG("Renamed to ASCollectionDataSource.")
 @protocol ASCollectionViewDataSource <ASCollectionDataSource>
 @end
 
-ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASCollectionDelegate.")
+ASDISPLAYNODE_SOON_DEPRECATED_MSG("Renamed to ASCollectionDelegate.")
 @protocol ASCollectionViewDelegate <ASCollectionDelegate>
 @end
 
