@@ -428,11 +428,16 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     
     // Remove everything that existed before the reload, now that we're ready to insert replacements
     NSMutableArray *editingNodes = _editingNodes[ASDataControllerRowNodeKind];
-    NSUInteger editingNodesSectionCount = editingNodes.count;
-    
-    if (editingNodesSectionCount) {
-      NSIndexSet *indexSet = [[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodesSectionCount)];
-      [self _deleteNodesAtIndexPaths:ASIndexPathsForTwoDimensionalArray(editingNodes) withAnimationOptions:animationOptions];
+    NSUInteger oldSectionCount = editingNodes.count;
+
+    // If we have old sections, we should delete them inside beginUpdates/endUpdates with inserting the new ones.
+    if (oldSectionCount) {
+      // -beginUpdates
+      [_mainSerialQueue performBlockOnMainThread:^{
+        [_delegate dataControllerBeginUpdates:self];
+      }];
+
+      NSIndexSet *indexSet = [[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, oldSectionCount)];
       [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
     }
     
@@ -445,6 +450,13 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
     }
     [self _insertSections:sections atIndexSet:sectionIndexes withAnimationOptions:animationOptions];
 
+    if (oldSectionCount) {
+      // -endUpdates
+      [_mainSerialQueue performBlockOnMainThread:^{
+        [_delegate dataController:self endUpdatesAnimated:YES completion:nil];
+      }];
+    }
+    
     [self _batchLayoutAndInsertNodesFromContexts:newContexts withAnimationOptions:animationOptions];
 
     if (completion) {
