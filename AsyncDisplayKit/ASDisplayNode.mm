@@ -2491,7 +2491,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
 
-  return CGSizeZero;
+  return constrainedSize;
 }
 
 - (id<ASLayoutElement>)_layoutElementThatFits:(ASSizeRange)constrainedSize
