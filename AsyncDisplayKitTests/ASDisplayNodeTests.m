@@ -2159,7 +2159,7 @@ static bool stringContainsPointer(NSString *description, id p) {
     return [ASWrapperLayoutSpec wrapperWithLayoutElement:displayNode];
   };
   
-  XCTAssertThrows([node layoutThatFits:ASSizeRangeMake(CGSizeMake(0, CGFLOAT_MAX))]);
+  XCTAssertThrows([node layoutThatFits:ASSizeRangeMake(CGSizeMake(0, FLT_MAX))]);
   
   // This dance is necessary as we would assert in case we create an ASDimension that is not real numbers
   ASDimension width = displayNode.style.width;
