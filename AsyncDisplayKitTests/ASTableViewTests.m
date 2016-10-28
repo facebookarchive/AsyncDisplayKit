@@ -17,6 +17,7 @@
 #import "ASCellNode.h"
 #import "ASTableNode.h"
 #import "ASTableView+Undeprecated.h"
+#import <JGMethodSwizzler/JGMethodSwizzler.h>
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20
@@ -34,6 +35,13 @@
   [super relayoutAllNodes];
 }
 
+@end
+
+@interface UITableView (Testing)
+// This will start recording all editing calls to UITableView
+// into the provided array.
+// Make sure to call [UITableView deswizzleInstanceMethods] to reset this.
++ (void)as_recordEditingCallsIntoArray:(NSMutableArray<NSString *> *)selectors;
 @end
 
 @interface ASTestTableView : ASTableView
@@ -542,6 +550,118 @@
 {
   ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
   XCTAssert([node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]);
+}
+
+- (void)testThatInitialDataLoadHappensInOneShot
+{
+  NSMutableArray *selectors = [NSMutableArray array];
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  node.frame = CGRectMake(0, 0, 100, 100);
+
+  node.dataSource = dataSource;
+  node.delegate = dataSource;
+
+  [UITableView as_recordEditingCallsIntoArray:selectors];
+  XCTAssertGreaterThan(node.numberOfSections, 0);
+  [node waitUntilAllUpdatesAreCommitted];
+  XCTAssertGreaterThan(node.view.numberOfSections, 0);
+
+  // Assert that the beginning of the call pattern is correct.
+  // There is currently noise that comes after that we will allow for this test.
+  NSArray *expectedSelectors = @[ NSStringFromSelector(@selector(reloadData)),
+                                  NSStringFromSelector(@selector(insertSections:withRowAnimation:)),
+                                  NSStringFromSelector(@selector(insertRowsAtIndexPaths:withRowAnimation:))];
+  NSArray *firstSelectors = [selectors subarrayWithRange:NSMakeRange(0, expectedSelectors.count)];
+  XCTAssertEqualObjects(firstSelectors, expectedSelectors);
+
+  [UITableView deswizzleAllInstanceMethods];
+}
+
+- (void)testThatReloadDataHappensInOneShot
+{
+  NSMutableArray *selectors = [NSMutableArray array];
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  node.frame = CGRectMake(0, 0, 100, 100);
+
+  node.dataSource = dataSource;
+  node.delegate = dataSource;
+
+  // Load initial data.
+  XCTAssertGreaterThan(node.numberOfSections, 0);
+  [node waitUntilAllUpdatesAreCommitted];
+  XCTAssertGreaterThan(node.view.numberOfSections, 0);
+
+  // Reload data.
+  [UITableView as_recordEditingCallsIntoArray:selectors];
+  [node reloadData];
+  [node waitUntilAllUpdatesAreCommitted];
+
+  // Assert that the beginning of the call pattern is correct.
+  // There is currently noise that comes after that we will allow for this test.
+  NSArray *expectedSelectors = @[NSStringFromSelector(@selector(reloadData)),
+                                 NSStringFromSelector(@selector(beginUpdates)),
+                                 NSStringFromSelector(@selector(deleteSections:withRowAnimation:)),
+                                 NSStringFromSelector(@selector(insertSections:withRowAnimation:)),
+                                 NSStringFromSelector(@selector(endUpdates)),
+                                 NSStringFromSelector(@selector(insertRowsAtIndexPaths:withRowAnimation:))];
+  NSArray *firstSelectors = [selectors subarrayWithRange:NSMakeRange(0, expectedSelectors.count)];
+  XCTAssertEqualObjects(firstSelectors, expectedSelectors);
+
+  [UITableView deswizzleAllInstanceMethods];
+}
+
+@end
+
+@implementation UITableView (Testing)
+
++ (void)as_recordEditingCallsIntoArray:(NSMutableArray<NSString *> *)selectors
+{
+  [UITableView swizzleInstanceMethod:@selector(reloadData) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *) {
+      JGOriginalImplementation(void);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(beginUpdates) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *) {
+      JGOriginalImplementation(void);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(endUpdates) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *) {
+      JGOriginalImplementation(void);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(insertRowsAtIndexPaths:withRowAnimation:) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *, NSArray *indexPaths, UITableViewRowAnimation anim) {
+      JGOriginalImplementation(void, indexPaths, anim);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(deleteRowsAtIndexPaths:withRowAnimation:) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *, NSArray *indexPaths, UITableViewRowAnimation anim) {
+      JGOriginalImplementation(void, indexPaths, anim);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(insertSections:withRowAnimation:) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *, NSIndexSet *indexes, UITableViewRowAnimation anim) {
+      JGOriginalImplementation(void, indexes, anim);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(deleteSections:withRowAnimation:) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *, NSIndexSet *indexes, UITableViewRowAnimation anim) {
+      JGOriginalImplementation(void, indexes, anim);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
 }
 
 @end
