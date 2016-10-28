@@ -134,7 +134,6 @@
     return {child, style, style.size};
   });
   
-  // TOOD: Does this needs locking?
   const ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
   
   // First pass is to get the children into a positioned state
@@ -149,8 +148,12 @@
   NSMutableArray *sublayouts = [NSMutableArray array];
   CGSize finalSize = CGSizeZero;
   if (needsBaselinePositioning) {
-    // Regardless of whether or not this stack aligns to baseline, we need to let ASStackBaselinePositionedLayout::compute find the max ascender
-    // and min descender in case this spec is a child in another spec that wants to align to a baseline.
+    // All horizontal stacks, regardless of whether or not they are baseline aligned, should go through a baseline
+    // computation. They could be used in another horizontal stack that is baseline aligned and will need to have
+    // computed the proper ascender/descender.
+    
+    // Vertical stacks do not need to go through this computation since we can easily compute ascender/descender by
+    // looking at their first/last child's ascender/descender.
     const auto baselinePositionedLayout = ASStackBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
 
     if (directionIsVertical == NO) {

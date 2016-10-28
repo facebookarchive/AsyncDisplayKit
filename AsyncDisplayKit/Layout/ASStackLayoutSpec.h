@@ -13,7 +13,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-
 /**
  A simple layout spec that stacks a list of children vertically or horizontally.
 

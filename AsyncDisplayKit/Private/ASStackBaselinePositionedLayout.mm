@@ -69,7 +69,7 @@ ASStackBaselinePositionedLayout ASStackBaselinePositionedLayout::compute(const A
 {
   const auto stackedChildren = positionedLayout.items;
   
-  /* Step 1: Look at each child and determine the distance from the top of the child node it's baseline.
+  /* Step 1: Look at each child and determine the distance from the top of the child node to its baseline.
      For  example, let's say we have the following two text nodes and want to align them to the first baseline:
    
      Hello!    Why, hello there! How
