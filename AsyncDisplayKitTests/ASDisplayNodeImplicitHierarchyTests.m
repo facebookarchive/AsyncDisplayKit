@@ -59,11 +59,20 @@
 
 - (void)testInitialNodeInsertionWithOrdering
 {
+  static CGSize kSize = {100, 100};
+  
   ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
   ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
   ASDisplayNode *node3 = [[ASDisplayNode alloc] init];
   ASDisplayNode *node4 = [[ASDisplayNode alloc] init];
   ASDisplayNode *node5 = [[ASDisplayNode alloc] init];
+  
+  // As we will involve a stack spec we have to give the nodes an intrinsic content size
+  node1.style.preferredSize = kSize;
+  node2.style.preferredSize = kSize;
+  node3.style.preferredSize = kSize;
+  node4.style.preferredSize = kSize;
+  node5.style.preferredSize = kSize;
 
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
   node.automaticallyManagesSubnodes = YES;
@@ -88,9 +97,16 @@
 
 - (void)testCalculatedLayoutHierarchyTransitions
 {
+  static CGSize kSize = {100, 100};
+  
   ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
   ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
   ASDisplayNode *node3 = [[ASDisplayNode alloc] init];
+  
+  // As we will involve a stack spec we have to give the nodes an intrinsic content size
+  node1.style.preferredSize = kSize;
+  node2.style.preferredSize = kSize;
+  node3.style.preferredSize = kSize;
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
   node.automaticallyManagesSubnodes = YES;
@@ -99,7 +115,9 @@
     if ([strongNode.layoutState isEqualToNumber:@1]) {
       return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node1, node2]];
     } else {
-      ASStackLayoutSpec *stackLayout = [[ASStackLayoutSpec alloc] init];
+      ASStackLayoutSpec *stackLayout = [ASStackLayoutSpec horizontalStackLayoutSpec];
+      stackLayout.alignItems = ASStackLayoutAlignItemsStart;
+
       [stackLayout setChildren:@[node3, node2]];
       return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[node1, stackLayout]];
     }
