@@ -8,9 +8,10 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import "ASObjectDescriptionHelpers.h"
 #pragma once
 
-@interface ASLayoutElementStyle ()
+@interface ASLayoutElementStyle () <ASDescriptionProvider>
 
 /**
  * @abstract The object that acts as the delegate of the style.

@@ -208,7 +208,7 @@ ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASLayoutSize ASLayoutSizeMake(ASDimen
 /*
  * Returns a string representation of a relative size.
  */
-ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT NSString *NSStringFromASLayoutSize(ASLayoutSize size);
+AS_WARN_UNUSED_RESULT NSString *NSStringFromASLayoutSize(ASLayoutSize size);
 
 #pragma mark - ASSizeRange
 

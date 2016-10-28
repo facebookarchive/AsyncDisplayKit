@@ -428,7 +428,7 @@
 		CC3B208C1C3F7A5400798563 /* ASWeakSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20881C3F7A5400798563 /* ASWeakSet.m */; };
 		CC3B208E1C3F7D0A00798563 /* ASWeakSetTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */; };
 		CC3B20901C3F892D00798563 /* ASBridgedPropertiesTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208F1C3F892D00798563 /* ASBridgedPropertiesTests.mm */; };
-		CC446A2F1D80AAE00071FD03 /* ASObjectDescriptionHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = CC446A2D1D80AAE00071FD03 /* ASObjectDescriptionHelpers.h */; };
+		CC446A2F1D80AAE00071FD03 /* ASObjectDescriptionHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = CC446A2D1D80AAE00071FD03 /* ASObjectDescriptionHelpers.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC446A301D80AAE00071FD03 /* ASObjectDescriptionHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = CC446A2E1D80AAE00071FD03 /* ASObjectDescriptionHelpers.m */; };
 		CC446A311D80AAE00071FD03 /* ASObjectDescriptionHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = CC446A2E1D80AAE00071FD03 /* ASObjectDescriptionHelpers.m */; };
 		CC4981B31D1A02BE004E13CC /* ASTableViewThrashTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4981B21D1A02BE004E13CC /* ASTableViewThrashTests.m */; };

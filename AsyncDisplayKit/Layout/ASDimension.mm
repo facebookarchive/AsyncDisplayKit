@@ -82,7 +82,7 @@ ASDISPLAYNODE_INLINE CGSize ASLayoutSizeResolveSize(ASLayoutSize layoutSize, CGS
 }
 
 // ** Returns a string formatted to contain the data from an ASLayoutSize. */
-ASDISPLAYNODE_INLINE NSString *NSStringFromASLayoutSize(ASLayoutSize size)
+NSString *NSStringFromASLayoutSize(ASLayoutSize size)
 {
   return [NSString stringWithFormat:@"{%@, %@}",
           NSStringFromASDimension(size.width),

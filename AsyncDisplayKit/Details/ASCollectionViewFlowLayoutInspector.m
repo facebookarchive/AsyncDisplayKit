@@ -9,7 +9,7 @@
 //
 
 #import "ASCollectionViewFlowLayoutInspector.h"
-#import "ASCollectionView.h"
+#import "ASCollectionNode.h"
 #import "ASAssert.h"
 #import "ASEqualityHelpers.h"
 #import "ASCollectionView+Undeprecated.h"
