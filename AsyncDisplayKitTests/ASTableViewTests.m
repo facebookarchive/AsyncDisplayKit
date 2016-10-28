@@ -638,9 +638,6 @@
 /**
  * This tests an issue where, if the table is loaded before the first layout pass,
  * the nodes are first measured with a constrained width of 0 which isn't ideal.
- *
- * The implementation fix might be, in reloadDataInitiallyIfNeeded, to call
- * [self layoutIfNeeded] if the initial reload hasn't happened.
  */
 - (void)testThatNodeConstrainedSizesAreCorrectIfReloadIsPreempted
 {
