@@ -129,6 +129,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL _isDeallocating;
   BOOL _performingBatchUpdates;
   NSMutableSet *_cellsForVisibilityUpdates;
+
+  // The section index overlay view, if there is one present.
+  // This is useful because we need to measure our row nodes against (width - indexView.width).
+  __weak UIView *_sectionIndexView;
   
   struct {
     unsigned int scrollViewDidScroll:1;
@@ -181,6 +185,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     unsigned int tableNodeCanMoveRow:1;
     unsigned int tableViewMoveRow:1;
     unsigned int tableNodeMoveRow:1;
+    unsigned int sectionIndexMethods:1; // if both section index methods are implemented
   } _asyncDataSourceFlags;
 }
 
@@ -321,6 +326,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDataSourceFlags.tableNodeNodeBlockForRow = [_asyncDataSource respondsToSelector:@selector(tableNode:nodeBlockForRowAtIndexPath:)];
     _asyncDataSourceFlags.tableViewCanMoveRow = [_asyncDataSource respondsToSelector:@selector(tableView:canMoveRowAtIndexPath:)];
     _asyncDataSourceFlags.tableViewMoveRow = [_asyncDataSource respondsToSelector:@selector(tableView:moveRowAtIndexPath:toIndexPath:)];
+    _asyncDataSourceFlags.sectionIndexMethods = [_asyncDataSource respondsToSelector:@selector(sectionIndexTitlesForTableView:)] && [_asyncDataSource respondsToSelector:@selector(tableView:sectionForSectionIndexTitle:atIndex:)];
     
     ASDisplayNodeAssert(_asyncDataSourceFlags.tableViewNodeBlockForRow
                         || _asyncDataSourceFlags.tableViewNodeForRow
@@ -559,8 +565,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)layoutSubviews
 {
-  if (_nodesConstrainedWidth != self.bounds.size.width) {
-    _nodesConstrainedWidth = self.bounds.size.width;
+  CGFloat constrainedWidth = self.bounds.size.width - [self sectionIndexWidth];
+  if (_nodesConstrainedWidth != constrainedWidth) {
+    _nodesConstrainedWidth = constrainedWidth;
 
     // First width change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
     // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
@@ -1583,6 +1590,31 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 }
 
 #pragma mark - Helper Methods
+
+// Note: This is called every layout, and so it is very performance sensitive.
+- (CGFloat)sectionIndexWidth
+{
+  // If they don't implement the methods, then there's no section index.
+  if (_asyncDataSourceFlags.sectionIndexMethods == NO) {
+    return 0;
+  }
+
+  UIView *indexView = _sectionIndexView;
+  if (indexView.superview == self) {
+    return indexView.frame.size.width;
+  }
+
+  CGRect bounds = self.bounds;
+  for (UIView *view in self.subviews) {
+    CGRect frame = view.frame;
+    // Section index is right-aligned and less than half-width.
+    if (CGRectGetMaxX(frame) == CGRectGetMaxX(bounds) && frame.size.width * 2 < bounds.size.width) {
+      _sectionIndexView = view;
+      return frame.size.width;
+    }
+  }
+  return 0;
+}
 
 /// @note This should be a UIKit index path.
 - (BOOL)isIndexPath:(NSIndexPath *)indexPath immediateSuccessorOfIndexPath:(NSIndexPath *)anchor

@@ -18,6 +18,7 @@
 #import "ASTableNode.h"
 #import "ASTableView+Undeprecated.h"
 #import <JGMethodSwizzler/JGMethodSwizzler.h>
+#import "ASXCTExtensions.h"
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20
@@ -117,9 +118,19 @@
 @end
 
 @interface ASTableViewFilledDataSource : NSObject <ASTableDataSource, ASTableDelegate>
+@property (nonatomic) BOOL usesSectionIndex;
 @end
 
 @implementation ASTableViewFilledDataSource
+
+- (BOOL)respondsToSelector:(SEL)aSelector
+{
+  if (aSelector == @selector(sectionIndexTitlesForTableView:) || aSelector == @selector(tableView:sectionForSectionIndexTitle:atIndex:)) {
+    return _usesSectionIndex;
+  } else {
+    return [super respondsToSelector:aSelector];
+  }
+}
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -146,6 +157,16 @@
     textCellNode.text = indexPath.description;
     return textCellNode;
   };
+}
+
+- (nullable NSArray<NSString *> *)sectionIndexTitlesForTableView:(UITableView *)tableView
+{
+  return @[ @"A", @"B", @"C" ];
+}
+
+- (NSInteger)tableView:(UITableView *)tableView sectionForSectionIndexTitle:(NSString *)title atIndex:(NSInteger)index
+{
+  return 0;
 }
 
 @end
@@ -612,6 +633,78 @@
   XCTAssertEqualObjects(firstSelectors, expectedSelectors);
 
   [UITableView deswizzleAllInstanceMethods];
+}
+
+/**
+ * This tests an issue where, if the table is loaded before the first layout pass,
+ * the nodes are first measured with a constrained width of 0 which isn't ideal.
+ *
+ * The implementation fix might be, in reloadDataInitiallyIfNeeded, to call
+ * [self layoutIfNeeded] if the initial reload hasn't happened.
+ */
+- (void)testThatNodeConstrainedSizesAreCorrectIfReloadIsPreempted
+{
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  CGFloat cellWidth = 320;
+  node.frame = CGRectMake(0, 0, cellWidth, 480);
+
+  node.dataSource = dataSource;
+  node.delegate = dataSource;
+
+  // Trigger data load BEFORE first layout pass, to ensure constrained size is correct.
+  XCTAssertGreaterThan(node.numberOfSections, 0);
+  [node waitUntilAllUpdatesAreCommitted];
+
+  ASSizeRange expectedSizeRange = ASSizeRangeMakeExactSize(CGSizeMake(cellWidth, 0));
+  expectedSizeRange.max.height = CGFLOAT_MAX;
+
+  for (NSInteger i = 0; i < node.numberOfSections; i++) {
+    for (NSInteger j = 0; j < [node numberOfRowsInSection:i]; j++) {
+      NSIndexPath *indexPath = [NSIndexPath indexPathForItem:j inSection:i];
+      ASTestTextCellNode *cellNode = (id)[node nodeForRowAtIndexPath:indexPath];
+      ASXCTAssertEqualSizeRanges(cellNode.constrainedSizeForCalculatedLayout, expectedSizeRange);
+      XCTAssertEqual(cellNode.numberOfLayoutsOnMainThread, 0);
+    }
+  }
+}
+
+- (void)testSectionIndexHandling
+{
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  dataSource.usesSectionIndex = YES;
+  node.frame = CGRectMake(0, 0, 320, 480);
+
+  node.dataSource = dataSource;
+  node.delegate = dataSource;
+
+  // Trigger data load
+  XCTAssertGreaterThan(node.numberOfSections, 0);
+  XCTAssertGreaterThan([node numberOfRowsInSection:0], 0);
+  [node waitUntilAllUpdatesAreCommitted];
+
+  UITableViewCell *cell = [node.view cellForRowAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  XCTAssertNotNil(cell);
+
+  CGFloat cellWidth = cell.contentView.frame.size.width;
+  XCTAssert(cellWidth > 0 && cellWidth < 320, @"Expected cell width to be about 305. Width: %@", @(cellWidth));
+
+  ASSizeRange expectedSizeRange = ASSizeRangeMakeExactSize(CGSizeMake(cellWidth, 0));
+  expectedSizeRange.max.height = CGFLOAT_MAX;
+  
+  for (NSInteger i = 0; i < node.numberOfSections; i++) {
+    for (NSInteger j = 0; j < [node numberOfRowsInSection:i]; j++) {
+      NSIndexPath *indexPath = [NSIndexPath indexPathForItem:j inSection:i];
+      ASTestTextCellNode *cellNode = (id)[node nodeForRowAtIndexPath:indexPath];
+      ASXCTAssertEqualSizeRanges(cellNode.constrainedSizeForCalculatedLayout, expectedSizeRange);
+      // We will have to accept a relayout on main thread, since the index bar won't show
+      // up until some of the cells are inserted.
+      XCTAssertLessThanOrEqual(cellNode.numberOfLayoutsOnMainThread, 1);
+    }
+  }
 }
 
 @end
