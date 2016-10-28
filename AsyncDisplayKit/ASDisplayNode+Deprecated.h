@@ -52,7 +52,7 @@
  *
  * @deprecated Deprecated in version 2.0: Use ASCalculateRootLayout() or ASCalculateLayout() instead
  */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize ASDISPLAYNODE_DEPRECATED_MSG("Use layoutThatFits: instead.");
+- (nonnull ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize ASDISPLAYNODE_DEPRECATED_MSG("Use layoutThatFits: instead.");
 
 /**
  * @abstract Called whenever the visiblity of the node changed.

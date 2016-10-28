@@ -814,7 +814,7 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 @end
 
-@interface ASDisplayNode (Deprecated) <ASStackLayoutElement, ASAbsoluteLayoutElement>
+@interface ASDisplayNode (DeprecatedProtocolMethods) <ASStackLayoutElement, ASAbsoluteLayoutElement>
 
 #pragma mark - Deprecated
 
