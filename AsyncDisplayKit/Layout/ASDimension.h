@@ -102,7 +102,7 @@ ASOVERLOADABLE ASDISPLAYNODE_INLINE ASDimension ASDimensionMake(ASDimensionUnit 
   if (unit == ASDimensionUnitAuto ) {
     ASDisplayNodeCAssert(value == 0, @"ASDimension auto value must be 0.");
   } else if (unit == ASDimensionUnitPoints) {
-    ASDisplayNodeCAssertPositiveReal(@"Points", value);
+    ASDisplayNodeCAssert(ASPointsValidForSize(value), @"ASDimension points value (%f) must be valid for size.", value);
   } else if (unit == ASDimensionUnitFraction) {
     ASDisplayNodeCAssert( 0 <= value && value <= 1.0, @"ASDimension fraction value (%f) must be between 0 and 1.", value);
   }
@@ -132,7 +132,7 @@ ASOVERLOADABLE AS_WARN_UNUSED_RESULT extern ASDimension ASDimensionMake(NSString
  */
 ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASDimension ASDimensionMakeWithPoints(CGFloat points)
 {
-  ASDisplayNodeCAssertPositiveReal(@"Points", points);
+  ASDisplayNodeCAssert(ASPointsValidForSize(points), @"ASDimension points value (%f) must be valid for size.", points);
   return ASDimensionMake(ASDimensionUnitPoints, points);
 }
 
