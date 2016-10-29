@@ -392,7 +392,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion This method must be called from the main thread.
  */
-- (NSArray<__kindof NSIndexPath *> *)indexPathsForVisibleRows AS_WARN_UNUSED_RESULT;
+- (NSArray<NSIndexPath *> *)indexPathsForVisibleRows AS_WARN_UNUSED_RESULT;
 
 @end
 

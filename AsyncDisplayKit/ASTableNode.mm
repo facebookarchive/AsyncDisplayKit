@@ -474,7 +474,7 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
   return [tableView convertIndexPathsToTableNode:[tableView indexPathsForRowsInRect:rect]];
 }
 
-- (NSArray<__kindof NSIndexPath *> *)indexPathsForVisibleRows
+- (NSArray<NSIndexPath *> *)indexPathsForVisibleRows
 {
   ASDisplayNodeAssertMainThread();
   NSMutableArray *indexPathsArray = [NSMutableArray new];

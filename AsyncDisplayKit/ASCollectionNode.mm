@@ -399,7 +399,7 @@
   return [self.dataController indexPathForNode:cellNode];
 }
 
-- (NSArray<__kindof NSIndexPath *> *)indexPathsForVisibleItems
+- (NSArray<NSIndexPath *> *)indexPathsForVisibleItems
 {
   ASDisplayNodeAssertMainThread();
   NSMutableArray *indexPathsArray = [NSMutableArray new];

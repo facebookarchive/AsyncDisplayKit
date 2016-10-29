@@ -380,7 +380,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param point The point of the requested item.
  *
- * @return an array containing the index paths of all visible items. This must be called on the main thread.
+ * @return The indexPath for the item at the given point. This must be called on the main thread.
  */
 - (nullable NSIndexPath *)indexPathForItemAtPoint:(CGPoint)point AS_WARN_UNUSED_RESULT;
 
