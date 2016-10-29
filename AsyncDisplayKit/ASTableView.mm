@@ -486,6 +486,23 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
+- (NSArray<NSIndexPath *> *)convertIndexPathsToTableNode:(NSArray<NSIndexPath *> *)indexPaths
+{
+  if (indexPaths == nil) {
+    return nil;
+  }
+
+  NSMutableArray<NSIndexPath *> *indexPathsArray = [NSMutableArray new];
+
+  for (NSIndexPath *indexPathInView in indexPaths) {
+    NSIndexPath *indexPath = [self convertIndexPathToTableNode:indexPathInView];
+    if (indexPath != nil) {
+      [indexPathsArray addObject:indexPath];
+    }
+  }
+  return indexPathsArray;
+}
+
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
   return [self indexPathForNode:cellNode waitingIfNeeded:NO];
@@ -538,28 +555,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   ASDisplayNodeAssertMainThread();
   [_dataController waitUntilAllUpdatesAreCommitted];
-}
-
-/**
- * TODO: This method was built when the distinction between data source
- * index paths and view index paths was unclear. For compatibility, it
- * still expects data source index paths for the time being.
- */
-- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition
-{
-  ASDisplayNodeAssertMainThread();
-  // If they passed nil, just forward it and be done.
-  if (indexPath == nil) {
-    [super selectRowAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
-    return;
-  }
-  
-  indexPath = [self convertIndexPathFromTableNode:indexPath waitingIfNeeded:YES];
-  if (indexPath != nil) {
-    [super selectRowAtIndexPath:indexPath animated:YES scrollPosition:scrollPosition];
-  } else {
-    NSLog(@"Warning: Ignoring request to select row at index path %@ because the item did not reach the table view.", indexPath);
-  }
 }
 
 - (void)layoutSubviews

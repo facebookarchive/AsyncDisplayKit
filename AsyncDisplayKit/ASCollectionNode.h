@@ -376,6 +376,24 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSArray<__kindof NSIndexPath *> *)indexPathsForVisibleItems AS_WARN_UNUSED_RESULT;
 
 /**
+ * Retrieve the index path of the item at the given point.
+ *
+ * @param point The point of the requested item.
+ *
+ * @return The indexPath for the item at the given point. This must be called on the main thread.
+ */
+- (nullable NSIndexPath *)indexPathForItemAtPoint:(CGPoint)point AS_WARN_UNUSED_RESULT;
+
+/**
+ * Retrieve the cell at the given index path.
+ *
+ * @param indexPath The index path of the requested item.
+ *
+ * @return The cell for the given index path. This must be called on the main thread.
+ */
+- (nullable UICollectionViewCell *)cellForItemAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
  * Retrieves the context object for the given section, as provided by the data source in
  * the @c collectionNode:contextForSection: method.
  *

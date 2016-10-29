@@ -608,28 +608,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return visibleNodes;
 }
 
-/**
- * TODO: This method was built when the distinction between data source
- * index paths and view index paths was unclear. For compatibility, it
- * still expects data source index paths for the time being.
- */
-- (void)selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
-{
-  ASDisplayNodeAssertMainThread();
-  // If they passed nil, just forward it and be done.
-  if (indexPath == nil) {
-    [super selectItemAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
-    return;
-  }
-
-  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
-  if (viewIndexPath != nil) {
-    [super selectItemAtIndexPath:viewIndexPath animated:animated scrollPosition:scrollPosition];
-  } else {
-    NSLog(@"Warning: Ignoring request to select item at index path %@ because the item did not reach the collection view.", indexPath);
-  }
-}
-
 #pragma mark Internal
 
 /**

@@ -346,17 +346,28 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 - (void)selectRowAtIndexPath:(nullable NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition
 {
   ASDisplayNodeAssertMainThread();
-  // TODO: Solve this in a way to be able to remove this restriction (https://github.com/facebook/AsyncDisplayKit/pull/2453#discussion_r84515457)
-  ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded before calling selectRowAtIndexPath");
-  [self.view selectRowAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+  ASTableView *tableView = self.view;
+
+  indexPath = [tableView convertIndexPathFromTableNode:indexPath waitingIfNeeded:YES];
+  if (indexPath != nil) {
+    [tableView selectRowAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+  } else {
+    NSLog(@"Failed to select row at index path %@ because the row never reached the view.", indexPath);
+  }
+
 }
 
 - (void)deselectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated
 {
   ASDisplayNodeAssertMainThread();
-  // TODO: Solve this in a way to be able to remove this restriction (https://github.com/facebook/AsyncDisplayKit/pull/2453#discussion_r84515457)
-  ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded before calling deselectRowAtIndexPath");
-  [self.view deselectRowAtIndexPath:indexPath animated:animated];
+  ASTableView *tableView = self.view;
+
+  indexPath = [tableView convertIndexPathFromTableNode:indexPath waitingIfNeeded:YES];
+  if (indexPath != nil) {
+    [tableView deselectRowAtIndexPath:indexPath animated:animated];
+  } else {
+    NSLog(@"Failed to deselect row at index path %@ because the row never reached the view.", indexPath);
+  }
 }
 
 - (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
@@ -409,6 +420,71 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 {
   [self reloadDataInitiallyIfNeeded];
   return [self.dataController nodeAtIndexPath:indexPath];
+}
+
+- (CGRect)rectForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertMainThread();
+  ASTableView *tableView = self.view;
+
+  indexPath = [tableView convertIndexPathFromTableNode:indexPath waitingIfNeeded:YES];
+  return [tableView rectForRowAtIndexPath:indexPath];
+}
+
+- (nullable __kindof UITableViewCell *)cellForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertMainThread();
+  ASTableView *tableView = self.view;
+
+  indexPath = [tableView convertIndexPathFromTableNode:indexPath waitingIfNeeded:YES];
+  if (indexPath == nil) {
+    return nil;
+  }
+  return [tableView cellForRowAtIndexPath:indexPath];
+}
+
+- (nullable NSIndexPath *)indexPathForSelectedRow
+{
+  ASDisplayNodeAssertMainThread();
+  ASTableView *tableView = self.view;
+
+  NSIndexPath *indexPath = tableView.indexPathForSelectedRow;
+  if (indexPath != nil) {
+    return [tableView convertIndexPathToTableNode:indexPath];
+  }
+  return indexPath;
+}
+
+- (nullable NSIndexPath *)indexPathForRowAtPoint:(CGPoint)point
+{
+  ASDisplayNodeAssertMainThread();
+  ASTableView *tableView = self.view;
+
+  NSIndexPath *indexPath = [tableView indexPathForRowAtPoint:point];
+  if (indexPath != nil) {
+    return [tableView convertIndexPathToTableNode:indexPath];
+  }
+  return indexPath;
+}
+
+- (nullable NSArray<NSIndexPath *> *)indexPathsForRowsInRect:(CGRect)rect
+{
+  ASDisplayNodeAssertMainThread();
+  ASTableView *tableView = self.view;
+  return [tableView convertIndexPathsToTableNode:[tableView indexPathsForRowsInRect:rect]];
+}
+
+- (NSArray<NSIndexPath *> *)indexPathsForVisibleRows
+{
+  ASDisplayNodeAssertMainThread();
+  NSMutableArray *indexPathsArray = [NSMutableArray new];
+  for (ASCellNode *cell in [self visibleNodes]) {
+    NSIndexPath *indexPath = [self indexPathForNode:cell];
+    if (indexPath) {
+      [indexPathsArray addObject:indexPath];
+    }
+  }
+  return indexPathsArray;
 }
 
 #pragma mark - Editing

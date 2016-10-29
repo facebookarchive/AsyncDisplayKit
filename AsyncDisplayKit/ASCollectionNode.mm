@@ -322,17 +322,29 @@
 - (void)selectItemAtIndexPath:(nullable NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
 {
   ASDisplayNodeAssertMainThread();
-  // TODO: Solve this in a way to be able to remove this restriction (https://github.com/facebook/AsyncDisplayKit/pull/2453#discussion_r84515457)
-  ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded before calling selectItemAtIndexPath");
-  [self.view selectItemAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+  ASCollectionView *collectionView = self.view;
+
+  indexPath = [collectionView convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
+
+  if (indexPath != nil) {
+    [collectionView selectItemAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+  } else {
+    NSLog(@"Failed to select item at index path %@ because the item never reached the view.", indexPath);
+  }
 }
 
 - (void)deselectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated
 {
   ASDisplayNodeAssertMainThread();
-  // TODO: Solve this in a way to be able to remove this restriction (https://github.com/facebook/AsyncDisplayKit/pull/2453#discussion_r84515457)
-  ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded before calling deselectItemAtIndexPath");
-  [self.view deselectItemAtIndexPath:indexPath animated:animated];
+  ASCollectionView *collectionView = self.view;
+
+  indexPath = [collectionView convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
+
+  if (indexPath != nil) {
+    [collectionView deselectItemAtIndexPath:indexPath animated:animated];
+  } else {
+    NSLog(@"Failed to deselect item at index path %@ because the item never reached the view.", indexPath);
+  }
 }
 
 - (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated
@@ -376,13 +388,20 @@
   return self.isNodeLoaded ? [self.view visibleNodes] : @[];
 }
 
+- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  [self reloadDataInitiallyIfNeeded];
+  return [self.dataController nodeAtIndexPath:indexPath];
+}
+
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
   return [self.dataController indexPathForNode:cellNode];
 }
 
-- (NSArray<__kindof NSIndexPath *> *)indexPathsForVisibleItems
+- (NSArray<NSIndexPath *> *)indexPathsForVisibleItems
 {
+  ASDisplayNodeAssertMainThread();
   NSMutableArray *indexPathsArray = [NSMutableArray new];
   for (ASCellNode *cell in [self visibleNodes]) {
     NSIndexPath *indexPath = [self indexPathForNode:cell];
@@ -393,11 +412,28 @@
   return indexPathsArray;
 }
 
-
-- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+- (nullable NSIndexPath *)indexPathForItemAtPoint:(CGPoint)point
 {
-  [self reloadDataInitiallyIfNeeded];
-  return [self.dataController nodeAtIndexPath:indexPath];
+  ASDisplayNodeAssertMainThread();
+  ASCollectionView *collectionView = self.view;
+
+  NSIndexPath *indexPath = [collectionView indexPathForItemAtPoint:point];
+  if (indexPath != nil) {
+    return [collectionView convertIndexPathToCollectionNode:indexPath];
+  }
+  return indexPath;
+}
+
+- (nullable UICollectionViewCell *)cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertMainThread();
+  ASCollectionView *collectionView = self.view;
+
+  indexPath = [collectionView convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
+  if (indexPath == nil) {
+    return nil;
+  }
+  return [collectionView cellForItemAtIndexPath:indexPath];
 }
 
 - (id<ASSectionContext>)contextForSection:(NSInteger)section

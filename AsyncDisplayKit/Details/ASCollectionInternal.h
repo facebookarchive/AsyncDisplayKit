@@ -34,6 +34,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait;
 
+/**
+ * Attempt to get the node index path given the view-layer index path.
+ *
+ * @param indexPath The index path of the row.
+ */
+- (NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath;
+
 @end
 
 NS_ASSUME_NONNULL_END
