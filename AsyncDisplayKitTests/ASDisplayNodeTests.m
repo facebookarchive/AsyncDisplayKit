@@ -2151,4 +2151,21 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertThrowsSpecificNamed([node calculateLayoutThatFits:ASSizeRangeMake(CGSizeMake(100, 100))], NSException, NSInternalInconsistencyException);
 }
 
+- (void)testThatLayoutWithInvalidSizeCausesException
+{
+  ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode *node, ASSizeRange constrainedSize) {
+    return [ASWrapperLayoutSpec wrapperWithLayoutElement:displayNode];
+  };
+  
+  XCTAssertThrows([node layoutThatFits:ASSizeRangeMake(CGSizeMake(0, FLT_MAX))]);
+  
+  // This dance is necessary as we would assert in case we create an ASDimension that is not real numbers
+  ASDimension width = displayNode.style.width;
+  width.value = INFINITY;
+  displayNode.style.width = width;
+  XCTAssertThrows([node layoutThatFits:ASSizeRangeMake(CGSizeMake(0, 0), CGSizeMake(INFINITY, INFINITY))]);
+}
+
 @end

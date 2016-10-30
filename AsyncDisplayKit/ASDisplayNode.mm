@@ -2490,8 +2490,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
-  
-  ASDisplayNodeAssert(ASIsCGSizeValidForSize(constrainedSize), @"Cannot calculate size of node because constrained size is infinite and node does not override -calculateSizeThatFits:. Try setting style.preferredSize on the node. Node: %@", self);
 
   return constrainedSize;
 }
