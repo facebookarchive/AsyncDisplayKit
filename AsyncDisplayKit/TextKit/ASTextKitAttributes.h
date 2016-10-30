@@ -59,7 +59,7 @@ struct ASTextKitAttributes {
   /**
    An array of UIBezierPath objects representing the exclusion paths inside the receiver's bounding rectangle. Default value: nil.
    */
-  NSArray *exclusionPaths;
+  NSArray<UIBezierPath *> *exclusionPaths;
   /**
    The shadow offset for any shadows applied to the text.  The coordinate space for this is the same as UIKit, so a
    positive width means towards the right, and a positive height means towards the bottom.

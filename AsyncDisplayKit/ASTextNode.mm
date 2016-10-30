@@ -102,10 +102,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   if (self = [super init]) {
     // Load default values from superclass.
     _shadowOffset = [super shadowOffset];
-    CGColorRef superColor = [super shadowColor];
-    if (superColor != NULL) {
-      _shadowColor = CGColorRetain(superColor);
-    }
+    _shadowColor = CGColorRetain([super shadowColor]);
     _shadowOpacity = [super shadowOpacity];
     _shadowRadius = [super shadowRadius];
 
@@ -140,10 +137,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)dealloc
 {
-  if (_shadowColor != NULL) {
-    CGColorRelease(_shadowColor);
-  }
-  
+  CGColorRelease(_shadowColor);
+
   [self _invalidateRenderer];
 
   if (_longPressGestureRecognizer) {
@@ -548,9 +543,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   CGContextTranslateCTM(context, _textContainerInset.left, _textContainerInset.top);
   
   ASTextKitRenderer *renderer = [self _rendererWithBounds:drawParameterBounds];
-  UIEdgeInsets shadowPadding = [self shadowPaddingWithRenderer:renderer];
-  CGPoint boundsOrigin = drawParameterBounds.origin;
-  CGPoint textOrigin = CGPointMake(boundsOrigin.x - shadowPadding.left, boundsOrigin.y - shadowPadding.top);
   
   // Fill background
   if (backgroundColor != nil) {
@@ -558,12 +550,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     UIRectFillUsingBlendMode(CGContextGetClipBoundingBox(context), kCGBlendModeCopy);
   }
   
-  // Draw shadow
-  [renderer.shadower setShadowInContext:context];
-  
   // Draw text
-  bounds.origin = textOrigin;
-  [renderer drawInContext:context bounds:bounds];
+  [renderer drawInContext:context bounds:drawParameterBounds];
   
   CGContextRestoreGState(context);
 }
@@ -1133,14 +1121,9 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
 {
   ASDN::MutexLocker l(__instanceLock__);
   
-  if (_shadowColor != shadowColor) {
-    if (shadowColor != NULL) {
-      CGColorRetain(shadowColor);
-    }
-    if (_shadowColor != NULL) {
-      CGColorRelease(_shadowColor);
-    }
-    _shadowColor = shadowColor;
+  if (_shadowColor != shadowColor && CGColorEqualToColor(shadowColor, _shadowColor) == NO) {
+    CGColorRelease(_shadowColor);
+    _shadowColor = CGColorRetain(shadowColor);
     _cachedShadowUIColor = [UIColor colorWithCGColor:shadowColor];
     [self _invalidateRenderer];
     [self setNeedsDisplay];

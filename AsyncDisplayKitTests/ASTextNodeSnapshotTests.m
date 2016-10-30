@@ -92,4 +92,16 @@
   ASSnapshotVerifyNode(textNode, nil);
 }
 
+- (void)testShadowing
+{
+  ASTextNode *textNode = [[ASTextNode alloc] init];
+  textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important"];
+  textNode.shadowColor = [UIColor blackColor].CGColor;
+  textNode.shadowOpacity = 0.3;
+  textNode.shadowRadius = 3;
+  textNode.shadowOffset = CGSizeMake(0, 1);
+  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
+  ASSnapshotVerifyNode(textNode, nil);
+}
+
 @end
