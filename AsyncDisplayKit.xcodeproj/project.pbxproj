@@ -288,6 +288,9 @@
 		9CFFC6C01CCAC73C006A6476 /* ASViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9CFFC6BF1CCAC73C006A6476 /* ASViewController.mm */; };
 		9CFFC6C21CCAC768006A6476 /* ASTableNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9CFFC6C11CCAC768006A6476 /* ASTableNode.mm */; };
 		9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.mm */; };
+		9F98C0251DBDF2A300476D92 /* ASControlTargetAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F98C0241DBDF2A300476D92 /* ASControlTargetAction.m */; };
+		9F98C0261DBE29E000476D92 /* ASControlTargetAction.m in Sources */ = {isa = PBXBuildFile; fileRef = 9F98C0241DBDF2A300476D92 /* ASControlTargetAction.m */; };
+		9F98C0271DBE29FC00476D92 /* ASControlTargetAction.h in Headers */ = {isa = PBXBuildFile; fileRef = 9F98C0231DBDF2A300476D92 /* ASControlTargetAction.h */; };
 		A2763D7A1CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h in Headers */ = {isa = PBXBuildFile; fileRef = A2763D771CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h */; };
 		A37320101C571B740011FC94 /* ASTextNode+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = A373200E1C571B050011FC94 /* ASTextNode+Beta.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		AC026B581BD3F61800BBC17E /* ASAbsoluteLayoutSpecSnapshotTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AC026B571BD3F61800BBC17E /* ASAbsoluteLayoutSpecSnapshotTests.m */; };
@@ -1039,6 +1042,8 @@
 		9CFFC6BF1CCAC73C006A6476 /* ASViewController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASViewController.mm; sourceTree = "<group>"; };
 		9CFFC6C11CCAC768006A6476 /* ASTableNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASTableNode.mm; sourceTree = "<group>"; };
 		9F06E5CC1B4CAF4200F015D8 /* ASCollectionViewTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = ASCollectionViewTests.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		9F98C0231DBDF2A300476D92 /* ASControlTargetAction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASControlTargetAction.h; sourceTree = "<group>"; };
+		9F98C0241DBDF2A300476D92 /* ASControlTargetAction.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASControlTargetAction.m; sourceTree = "<group>"; };
 		A2763D771CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASPINRemoteImageDownloader.h; path = Details/ASPINRemoteImageDownloader.h; sourceTree = "<group>"; };
 		A2763D781CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = ASPINRemoteImageDownloader.m; path = Details/ASPINRemoteImageDownloader.m; sourceTree = "<group>"; };
 		A32FEDD31C501B6A004F642A /* ASTextKitFontSizeAdjuster.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASTextKitFontSizeAdjuster.h; path = TextKit/ASTextKitFontSizeAdjuster.h; sourceTree = "<group>"; };
@@ -1537,6 +1542,8 @@
 		058D0A01195D050800B7D73C /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				9F98C0231DBDF2A300476D92 /* ASControlTargetAction.h */,
+				9F98C0241DBDF2A300476D92 /* ASControlTargetAction.m */,
 				058D0A02195D050800B7D73C /* _AS-objc-internal.h */,
 				058D0A03195D050800B7D73C /* _ASCoreAnimationExtras.h */,
 				058D0A04195D050800B7D73C /* _ASCoreAnimationExtras.mm */,
@@ -1850,6 +1857,7 @@
 				34EFC7691B701CE100AD841F /* ASLayoutElement.h in Headers */,
 				9CDC18CD1B910E12004965E2 /* ASLayoutElementPrivate.h in Headers */,
 				68B8A4E21CBDB958007E4543 /* ASWeakProxy.h in Headers */,
+				9F98C0271DBE29FC00476D92 /* ASControlTargetAction.h in Headers */,
 				B35062201B010EFD0018CF92 /* ASLayoutController.h in Headers */,
 				B35062211B010EFD0018CF92 /* ASLayoutRangeType.h in Headers */,
 				34EFC76A1B701CE600AD841F /* ASLayoutSpec.h in Headers */,
@@ -2154,6 +2162,7 @@
 				AC6456091B0A335000CF11B8 /* ASCellNode.mm in Sources */,
 				DE8BEAC31C2DF3FC00D57C12 /* ASDelegateProxy.m in Sources */,
 				ACF6ED1D1B17843500DA7C62 /* ASCenterLayoutSpec.mm in Sources */,
+				9F98C0251DBDF2A300476D92 /* ASControlTargetAction.m in Sources */,
 				18C2ED801B9B7DE800F627B3 /* ASCollectionNode.mm in Sources */,
 				92DD2FE41BF4B97E0074C9DD /* ASMapNode.mm in Sources */,
 				DBC452DC1C5BF64600B16017 /* NSArray+Diffing.m in Sources */,
@@ -2311,6 +2320,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				9F98C0261DBE29E000476D92 /* ASControlTargetAction.m in Sources */,
 				9C70F2091CDABA36007D6C76 /* ASViewController.mm in Sources */,
 				8BBBAB8D1CEBAF1E00107FC6 /* ASDefaultPlaybackButton.m in Sources */,
 				DE4843DB1C93EAB100A1F33B /* ASLayoutTransition.mm in Sources */,

@@ -11,6 +11,7 @@
 #import <AsyncDisplayKit/ASControlNode.h>
 
 #import <XCTest/XCTest.h>
+#import <OCMock/OCMock.h>
 
 #define ACTION @selector(action)
 #define ACTION_SENDER @selector(action:)
@@ -27,6 +28,9 @@
 @end
 @implementation ASActionController
 - (void)action { self.hits++; }
+- (void)firstAction { }
+- (void)secondAction { }
+- (void)thirdAction { }
 @end
 
 @interface ASActionSenderController : ReceiverController
@@ -198,6 +202,25 @@
 
   [node sendActionsForControlEvents:EVENT withEvent:nil];
   XCTAssert(controller.hits == 1, @"Controller did not receive the tap event");
+}
+
+- (void)testActionsAreCalledInTheSameOrderAsTheyWereAdded {
+  ASActionController *controller = [[ASActionController alloc] init];
+  ASControlNode *node = [[ASControlNode alloc] init];
+  [node addTarget:controller action:@selector(firstAction) forControlEvents:ASControlNodeEventTouchUpInside];
+  [node addTarget:controller action:@selector(secondAction) forControlEvents:ASControlNodeEventTouchUpInside];
+  [node addTarget:controller action:@selector(thirdAction) forControlEvents:ASControlNodeEventTouchUpInside];
+  [controller.view addSubnode:node];
+  
+  id controllerMock = [OCMockObject partialMockForObject:controller];
+  [controllerMock setExpectationOrderMatters:YES];
+  [[controllerMock expect] firstAction];
+  [[controllerMock expect] secondAction];
+  [[controllerMock expect] thirdAction];
+  
+  [node sendActionsForControlEvents:ASControlNodeEventTouchUpInside withEvent:nil];
+  
+  [controllerMock verify];
 }
 
 @end
