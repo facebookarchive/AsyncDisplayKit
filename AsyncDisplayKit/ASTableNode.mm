@@ -388,19 +388,24 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 
 - (void)reloadDataInitiallyIfNeeded
 {
+  ASDisplayNodeAssertMainThread();
   if (!self.dataController.initialReloadDataHasBeenCalled) {
-    [self reloadData];
+    // Note: Just calling reloadData isn't enough here – we need to
+    // ensure that _nodesConstrainedWidth is updated first.
+    [self.view layoutIfNeeded];
   }
 }
 
 - (NSInteger)numberOfRowsInSection:(NSInteger)section
 {
+  ASDisplayNodeAssertMainThread();
   [self reloadDataInitiallyIfNeeded];
   return [self.dataController numberOfRowsInSection:section];
 }
 
 - (NSInteger)numberOfSections
 {
+  ASDisplayNodeAssertMainThread();
   [self reloadDataInitiallyIfNeeded];
   return [self.dataController numberOfSections];
 }

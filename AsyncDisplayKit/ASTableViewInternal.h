@@ -59,4 +59,7 @@
  */
 - (NSArray<NSIndexPath *> *)convertIndexPathsToTableNode:(NSArray<NSIndexPath *> *)indexPaths;
 
+/// Returns the width of the section index view on the right-hand side of the table, if one is present.
+- (CGFloat)sectionIndexWidth;
+
 @end
