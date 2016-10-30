@@ -63,8 +63,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, copy, nullable) NSIndexPath *cachedIndexPath;
 
-@property (weak, nonatomic, nullable) ASDisplayNode *owningNode;
-
 @end
 
 NS_ASSUME_NONNULL_END
