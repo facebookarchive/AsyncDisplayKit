@@ -37,20 +37,9 @@
   BOOL _tracking;
   BOOL _touchInside;
 
-  // Target Messages.
-  /*
-     The table structure is as follows:
-
-   {
-    AnEvent -> {
-                  target1 -> (action1, ...)
-                  target2 -> (action1, ...)
-                  ...
-               }
-    ...
-   }
-   */
-  NSMutableDictionary *_controlEventDispatchTable;
+  // Target action pairs stored in an array for each event type
+  // ASControlEvent -> [ASTargetAction0, ASTargetAction1]
+  NSMutableDictionary<id<NSCopying>, NSMutableArray<ASControlTargetAction *> *> *_controlEventDispatchTable;
 }
 
 // Read-write overrides.
@@ -270,16 +259,16 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       });
     }
   }
+  
+  // Create new target action pair
+  ASControlTargetAction *targetAction = [[ASControlTargetAction alloc] init];
+  targetAction.action = action;
+  targetAction.target = target;
 
   // Enumerate the events in the mask, adding the target-action pair for each control event included in controlEventMask
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEventMask, ^
     (ASControlNodeEvent controlEvent)
     {
-      // Create new target action pair
-      ASControlTargetAction *targetAction = [[ASControlTargetAction alloc] init];
-      targetAction.action = action;
-      targetAction.target = target;
-      
       // Do we already have an event table for this control event?
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
       NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[eventKey];
