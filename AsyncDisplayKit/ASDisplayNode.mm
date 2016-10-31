@@ -1242,7 +1242,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
  */
 - (BOOL)_displaysAsynchronously
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   return _flags.synchronous == NO && _flags.displaysAsynchronously;
 }
 
