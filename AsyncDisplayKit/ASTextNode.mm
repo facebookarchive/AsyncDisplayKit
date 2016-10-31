@@ -354,12 +354,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // as this would essentially serve to set its constrainedSize to be its calculatedSize (unnecessary).
     ASLayout *layout = self.calculatedLayout;
     if (layout != nil && CGSizeEqualToSize(boundsSize, layout.size)) {
-      if (boundsSize.width != rendererConstrainedSize.width) {
-        // Don't bother changing _constrainedSize, as ASDisplayNode's -measure: method would have a cache miss
-        // and ask us to recalculate layout if it were called with the same calculatedSize that got us to this point!
-        _renderer.constrainedSize = boundsSize;
-      }
-      return NO;
+      return (boundsSize.width != rendererConstrainedSize.width);
     } else {
       return YES;
     }
@@ -382,7 +377,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     
     if (CGSizeEqualToSize(_constrainedSize, layoutSize) == NO) {
       _constrainedSize = layoutSize;
-      _renderer.constrainedSize = layoutSize;
+      [self _invalidateRenderer];
     }
   }
 }
@@ -403,9 +398,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   _constrainedSize = constrainedSize;
   
-  // Instead of invalidating the renderer, in case this is a new call with a different constrained size,
-  // just update the size of the NSTextContainer that is owned by the renderer's internal context object.
-  [self _renderer].constrainedSize = _constrainedSize;
+  [self _invalidateRenderer];
 
   [self setNeedsDisplay];
   
