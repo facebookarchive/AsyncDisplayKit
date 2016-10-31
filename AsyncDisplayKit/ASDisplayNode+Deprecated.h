@@ -23,6 +23,18 @@
 @property (nullable, nonatomic, copy) NSString *name ASDISPLAYNODE_DEPRECATED_MSG("Use .debugName instead.");
 
 /**
+ * @abstract Provides a default intrinsic content size for calculateSizeThatFits:. This is useful when laying out
+ * a node that either has no intrinsic content size or should be laid out at a different size than its intrinsic content
+ * size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
+ * image size.
+ *
+ * @return Try to create a CGSize for preferredFrameSize of this node from the width and height property of this node. It will return CGSizeZero if width and height dimensions are not of type ASDimensionUnitPoints.
+ *
+ * @deprecated Deprecated in version 2.0: Just calls through to set the height and width property of the node. Convert to use sizing properties instead: height, minHeight, maxHeight, width, minWidth, maxWidth.
+ */
+@property (nonatomic, assign, readwrite) CGSize preferredFrameSize ASDISPLAYNODE_DEPRECATED_MSG("Use .style.preferredSize instead OR set individual values with .style.height and .style.width.");
+
+/**
  * @abstract Asks the node to measure and return the size that best fits its subnodes.
  *
  * @param constrainedSize The maximum size the receiver should fit in.
@@ -43,16 +55,7 @@
  */
 - (CGSize)measure:(CGSize)constrainedSize ASDISPLAYNODE_DEPRECATED_MSG("Use layoutThatFits: with a constrained size of (CGSizeZero, constrainedSize) and call size on the returned ASLayout.");
 
-/**
- * @abstract Calculate a layout based on given size range.
- *
- * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
- *
- * @return An ASLayout instance defining the layout of the receiver and its children.
- *
- * @deprecated Deprecated in version 2.0: Use ASCalculateRootLayout() or ASCalculateLayout() instead
- */
-- (nonnull ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize ASDISPLAYNODE_DEPRECATED_MSG("Use layoutThatFits: instead.");
+ASLayoutElementStyleForwardingDeclaration
 
 /**
  * @abstract Called whenever the visiblity of the node changed.
