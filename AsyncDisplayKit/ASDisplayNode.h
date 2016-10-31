@@ -814,7 +814,7 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 @end
 
-@interface ASDisplayNode (DeprecatedProtocolMethods) <ASStackLayoutElement, ASAbsoluteLayoutElement>
+@interface ASDisplayNode (DeprecatedProtocolMethods)
 
 #pragma mark - Deprecated
 
@@ -837,19 +837,9 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  * @deprecated Deprecated in version 2.0: Use layoutThatFits: with a constrained size of (CGSizeZero, constrainedSize) and call size on the returned ASLayout
  */
-- (CGSize)measure:(CGSize)constrainedSize ASDISPLAYNODE_DEPRECATED;
+- (CGSize)measure:(CGSize)constrainedSize ASDISPLAYNODE_DEPRECATED_MSG("Use layoutThatFits: with a constrained size of (CGSizeZero, constrainedSize) and call size on the returned ASLayout.");
 
-/**
- * @abstract Provides a default intrinsic content size for calculateSizeThatFits:. This is useful when laying out
- * a node that either has no intrinsic content size or should be laid out at a different size than its intrinsic content
- * size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
- * image size.
- *
- * @return Try to create a CGSize for preferredFrameSize of this node from the width and height property of this node. It will return CGSizeZero if widht and height dimensions are not of type ASDimensionUnitPoints.
- *
- * @deprecated Deprecated in version 2.0: Just calls through to set the height and width property of the node. Convert to use sizing properties instead: height, minHeight, maxHeight, width, minWidth, maxWidth.
- */
-@property (nonatomic, assign, readwrite) CGSize preferredFrameSize ASDISPLAYNODE_DEPRECATED_MSG("Use .style.preferredSize instead OR set individual values with .style.height and .style.width.");
+ASLayoutElementStyleForwardingDeclaration
 
 @end
 

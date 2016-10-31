@@ -16,7 +16,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * A layout spec is an immutable object that describes a layout, loosely inspired by React.
  */
-@interface ASLayoutSpec : NSObject <ASLayoutElement, ASStackLayoutElement, ASAbsoluteLayoutElement>
+@interface ASLayoutSpec : NSObject <ASLayoutElement>
 
 /** 
  * Creation of a layout spec should only happen by a user in layoutSpecThatFits:. During that method, a
@@ -102,6 +102,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName direction:(ASStackLayoutDirection)direction;
 + (NSString *)asciiArtStringForChildren:(NSArray *)children parentName:(NSString *)parentName;
+
+@end
+
+@interface ASLayoutSpec (DeprecatedProtocolMethods)
+
+ASLayoutElementStyleForwardingDeclaration
 
 @end
 

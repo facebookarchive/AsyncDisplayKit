@@ -3471,8 +3471,6 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 #pragma mark - Deprecated
 
-ASLayoutElementStyleForwarding
-
 - (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
 {
   return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];
@@ -3642,11 +3640,6 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   self.debugName = name;
 }
 
-- (CGSize)measure:(CGSize)constrainedSize
-{
-  return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
-}
-
 - (void)setPreferredFrameSize:(CGSize)preferredFrameSize
 {
   // Deprecated preferredFrameSize just calls through to set width and height
@@ -3659,6 +3652,42 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   ASLayoutSize size = self.style.preferredLayoutSize;
   BOOL isPoints = (size.width.unit == ASDimensionUnitPoints && size.height.unit == ASDimensionUnitPoints);
   return isPoints ? CGSizeMake(size.width.value, size.height.value) : CGSizeZero;
+}
+
+- (void)visibilityDidChange:(BOOL)isVisible
+{
+  if (isVisible) {
+    [self didEnterVisibleState];
+  } else {
+    [self didExitVisibleState];
+  }
+}
+
+- (void)visibleStateDidChange:(BOOL)isVisible
+{
+  if (isVisible) {
+    [self didEnterVisibleState];
+  } else {
+    [self didExitVisibleState];
+  }
+}
+
+- (void)displayStateDidChange:(BOOL)inDisplayState
+{
+  if (inDisplayState) {
+    [self didEnterVisibleState];
+  } else {
+    [self didExitVisibleState];
+  }
+}
+
+- (void)loadStateDidChange:(BOOL)inLoadState
+{
+  if (inLoadState) {
+    [self didEnterPreloadState];
+  } else {
+    [self didExitPreloadState];
+  }
 }
 
 - (void)cancelLayoutTransitionsInProgress
@@ -3675,5 +3704,17 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 {
   self.automaticallyManagesSubnodes = enabled;
 }
+
+
+@end
+
+@implementation ASDisplayNode (DeprecatedProtocolMethods)
+
+- (CGSize)measure:(CGSize)constrainedSize
+{
+  return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
+}
+
+ASLayoutElementStyleForwarding
 
 @end

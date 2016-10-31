@@ -95,6 +95,20 @@ extern void ASLayoutElementClearCurrentContext();
 }\
 
 
+#pragma mark ASLayoutElementStyleForwardingDeclaration (Deprecated)
+
+#define ASLayoutElementStyleForwardingDeclaration \
+@property (nonatomic, readwrite) CGFloat spacingBefore ASDISPLAYNODE_DEPRECATED_MSG("Use style.spacingBefore"); \
+@property (nonatomic, readwrite) CGFloat spacingAfter ASDISPLAYNODE_DEPRECATED_MSG("Use style.spacingAfter"); \
+@property (nonatomic, readwrite) CGFloat flexGrow ASDISPLAYNODE_DEPRECATED_MSG("Use style.flexGrow"); \
+@property (nonatomic, readwrite) CGFloat flexShrink ASDISPLAYNODE_DEPRECATED_MSG("Use style.flexShrink"); \
+@property (nonatomic, readwrite) ASDimension flexBasis ASDISPLAYNODE_DEPRECATED_MSG("Use style.flexBasis"); \
+@property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf ASDISPLAYNODE_DEPRECATED_MSG("Use style.alignSelf"); \
+@property (nonatomic, readwrite) CGFloat ascender ASDISPLAYNODE_DEPRECATED_MSG("Use style.ascender"); \
+@property (nonatomic, readwrite) CGFloat descender ASDISPLAYNODE_DEPRECATED_MSG("Use style.descender"); \
+@property (nonatomic, assign) ASRelativeSizeRange sizeRange ASDISPLAYNODE_DEPRECATED_MSG("Don't use sizeRange anymore instead set style.width or style.height"); \
+@property (nonatomic, assign) CGPoint layoutPosition ASDISPLAYNODE_DEPRECATED_MSG("Use style.layoutPosition"); \
+
 
 #pragma mark - ASLayoutElementStyleForwarding (Deprecated)
 
