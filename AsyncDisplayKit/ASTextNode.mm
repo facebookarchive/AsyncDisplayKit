@@ -398,7 +398,9 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   _constrainedSize = constrainedSize;
   
-  [self _invalidateRenderer];
+  if (_renderer != nil && CGSizeEqualToSize(constrainedSize, _renderer.constrainedSize) == NO) {
+    [self _invalidateRenderer];
+  }
 
   [self setNeedsDisplay];
   
