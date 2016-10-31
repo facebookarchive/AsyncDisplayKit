@@ -140,27 +140,6 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   return _calculatedSize;
 }
 
-- (void)setConstrainedSize:(CGSize)constrainedSize
-{
-  if (!CGSizeEqualToSize(constrainedSize, _constrainedSize)) {
-    _sizeIsCalculated = NO;
-    _constrainedSize = constrainedSize;
-    _calculatedSize = CGSizeZero;
-    
-    // Throw away the all subcomponents to create them with the new constrained size new as well as let the
-    // truncater do it's job again for the new constrained size. This is necessary as after a truncation did happen
-    // the context would use the truncated string and not the original string to truncate based on the new
-    // constrained size
-
-    ASPerformBackgroundDeallocation(_context);
-    ASPerformBackgroundDeallocation(_truncater);
-    ASPerformBackgroundDeallocation(_fontSizeAdjuster);
-    _context = nil;
-    _truncater = nil;
-    _fontSizeAdjuster = nil;
-  }
-}
-
 - (void)_calculateSize
 {
   // if we have no scale factors or an unconstrained width, there is no reason to try to adjust the font size
