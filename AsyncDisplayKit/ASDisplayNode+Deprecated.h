@@ -35,6 +35,29 @@
 @property (nonatomic, assign, readwrite) CGSize preferredFrameSize ASDISPLAYNODE_DEPRECATED_MSG("Use .style.preferredSize instead OR set individual values with .style.height and .style.width.");
 
 /**
+ * @abstract Asks the node to measure and return the size that best fits its subnodes.
+ *
+ * @param constrainedSize The maximum size the receiver should fit in.
+ *
+ * @return A new size that fits the receiver's subviews.
+ *
+ * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
+ * constraint and the result.
+ *
+ * @warning Subclasses must not override this; it calls -measureWithSizeRange: with zero min size.
+ * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may
+ * be expensive if result is not cached.
+ *
+ * @see measureWithSizeRange:
+ * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
+ *
+ * @deprecated Deprecated in version 2.0: Use layoutThatFits: with a constrained size of (CGSizeZero, constrainedSize) and call size on the returned ASLayout
+ */
+- (CGSize)measure:(CGSize)constrainedSize ASDISPLAYNODE_DEPRECATED_MSG("Use layoutThatFits: with a constrained size of (CGSizeZero, constrainedSize) and call size on the returned ASLayout.");
+
+ASLayoutElementStyleForwardingDeclaration
+
+/**
  * @abstract Called whenever the visiblity of the node changed.
  *
  * @discussion Subclasses may use this to monitor when they become visible.

@@ -360,9 +360,9 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 @end
 
-#pragma mark - ASLayoutSpec (DeprecatedProtocolMethods)
+#pragma mark - ASLayoutSpec (Deprecated)
 
-@implementation ASLayoutSpec (DeprecatedProtocolMethods)
+@implementation ASLayoutSpec (Deprecated)
 
 ASLayoutElementStyleForwarding
 

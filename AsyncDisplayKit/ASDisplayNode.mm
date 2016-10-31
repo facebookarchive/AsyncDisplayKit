@@ -3654,6 +3654,13 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   return isPoints ? CGSizeMake(size.width.value, size.height.value) : CGSizeZero;
 }
 
+- (CGSize)measure:(CGSize)constrainedSize
+{
+  return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
+}
+
+ASLayoutElementStyleForwarding
+
 - (void)visibilityDidChange:(BOOL)isVisible
 {
   if (isVisible) {
@@ -3704,17 +3711,5 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 {
   self.automaticallyManagesSubnodes = enabled;
 }
-
-
-@end
-
-@implementation ASDisplayNode (DeprecatedProtocolMethods)
-
-- (CGSize)measure:(CGSize)constrainedSize
-{
-  return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
-}
-
-ASLayoutElementStyleForwarding
 
 @end
