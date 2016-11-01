@@ -308,6 +308,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly) NSInteger numberOfSections;
 
 /**
+ * Similar to -visibleCells.
+ *
+ * @return an array containing the nodes being displayed on screen. This must be called on the main thread.
+ */
+@property(readonly, copy) NSArray<__kindof ASCellNode *> *visibleNodes;
+
+/**
  * Retrieves the node for the row at the given index path.
  */
 - (nullable ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
@@ -416,13 +423,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @see @c numberOfSectionsInTableView:
  */
 - (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section;
-
-/**
- * Similar to -visibleCells.
- *
- * @return an array containing the nodes being displayed on screen. This must be called on the main thread.
- */
-@property(readonly, copy) NSArray<__kindof ASCellNode *> *visibleNodes;
 
 /**
  * Asks the data source for a block to create a node to represent the row at the given index path.
