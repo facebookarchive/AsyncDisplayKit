@@ -654,7 +654,7 @@
   XCTAssertGreaterThan(node.numberOfSections, 0);
   [node waitUntilAllUpdatesAreCommitted];
 
-  ASSizeRange expectedSizeRange = ASSizeRangeMakeExactSize(CGSizeMake(cellWidth, 0));
+  ASSizeRange expectedSizeRange = ASSizeRangeMake(CGSizeMake(cellWidth, 0));
   expectedSizeRange.max.height = CGFLOAT_MAX;
 
   for (NSInteger i = 0; i < node.numberOfSections; i++) {
@@ -689,7 +689,7 @@
   CGFloat cellWidth = cell.contentView.frame.size.width;
   XCTAssert(cellWidth > 0 && cellWidth < 320, @"Expected cell width to be about 305. Width: %@", @(cellWidth));
 
-  ASSizeRange expectedSizeRange = ASSizeRangeMakeExactSize(CGSizeMake(cellWidth, 0));
+  ASSizeRange expectedSizeRange = ASSizeRangeMake(CGSizeMake(cellWidth, 0));
   expectedSizeRange.max.height = CGFLOAT_MAX;
   
   for (NSInteger i = 0; i < node.numberOfSections; i++) {

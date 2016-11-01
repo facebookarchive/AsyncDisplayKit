@@ -814,45 +814,6 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 @end
 
-@interface ASDisplayNode (DeprecatedProtocolMethods) <ASStackLayoutElement, ASAbsoluteLayoutElement>
-
-#pragma mark - Deprecated
-
-/**
- * @abstract Asks the node to measure and return the size that best fits its subnodes.
- *
- * @param constrainedSize The maximum size the receiver should fit in.
- *
- * @return A new size that fits the receiver's subviews.
- *
- * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
- * constraint and the result.
- *
- * @warning Subclasses must not override this; it calls -measureWithSizeRange: with zero min size.
- * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may
- * be expensive if result is not cached.
- *
- * @see measureWithSizeRange:
- * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
- *
- * @deprecated Deprecated in version 2.0: Use layoutThatFits: with a constrained size of (CGSizeZero, constrainedSize) and call size on the returned ASLayout
- */
-- (CGSize)measure:(CGSize)constrainedSize ASDISPLAYNODE_DEPRECATED;
-
-/**
- * @abstract Provides a default intrinsic content size for calculateSizeThatFits:. This is useful when laying out
- * a node that either has no intrinsic content size or should be laid out at a different size than its intrinsic content
- * size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
- * image size.
- *
- * @return Try to create a CGSize for preferredFrameSize of this node from the width and height property of this node. It will return CGSizeZero if widht and height dimensions are not of type ASDimensionUnitPoints.
- *
- * @deprecated Deprecated in version 2.0: Just calls through to set the height and width property of the node. Convert to use sizing properties instead: height, minHeight, maxHeight, width, minWidth, maxWidth.
- */
-@property (nonatomic, assign, readwrite) CGSize preferredFrameSize ASDISPLAYNODE_DEPRECATED_MSG("Use .style.preferredSize instead OR set individual values with .style.height and .style.width.");
-
-@end
-
 /*
  * ASDisplayNode support for automatic subnode management.
  */

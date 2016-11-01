@@ -133,7 +133,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition; ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /**
  * Similar to -visibleCells.

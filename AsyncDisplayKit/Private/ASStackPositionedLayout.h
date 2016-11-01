@@ -14,7 +14,7 @@
 
 /** Represents a set of laid out and positioned stack layout children. */
 struct ASStackPositionedLayout {
-  const std::vector<ASLayout *> sublayouts;
+  const std::vector<ASStackLayoutSpecItem> items;
   const CGFloat crossSize;
 
   /** Given an unpositioned layout, computes the positions each child should be placed at. */

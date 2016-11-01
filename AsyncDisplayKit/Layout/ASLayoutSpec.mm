@@ -262,8 +262,6 @@ ASEnvironmentLayoutExtensibilityForwarding
   return [self layoutThatFits:constrainedSize];
 }
 
-ASLayoutElementStyleForwarding
-
 @end
 
 #pragma mark - ASWrapperLayoutSpec
@@ -359,5 +357,13 @@ ASLayoutElementStyleForwarding
   }
   return string;
 }
+
+@end
+
+#pragma mark - ASLayoutSpec (Deprecated)
+
+@implementation ASLayoutSpec (Deprecated)
+
+ASLayoutElementStyleForwarding
 
 @end

@@ -15,10 +15,10 @@
  */
 @interface ASTextKitShadower : NSObject
 
-- (instancetype)initWithShadowOffset:(CGSize)shadowOffset
-                         shadowColor:(UIColor *)shadowColor
-                       shadowOpacity:(CGFloat)shadowOpacity
-                        shadowRadius:(CGFloat)shadowRadius;
++ (ASTextKitShadower *)shadowerWithShadowOffset:(CGSize)shadowOffset
+                                    shadowColor:(UIColor *)shadowColor
+                                  shadowOpacity:(CGFloat)shadowOpacity
+                                   shadowRadius:(CGFloat)shadowRadius;
 
 /**
  * @abstract The offset from the top-left corner at which the shadow starts.

@@ -68,10 +68,10 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
   if (!_shadower) {
     ASTextKitAttributes attributes = _attributes;
-    _shadower = [[ASTextKitShadower alloc] initWithShadowOffset:attributes.shadowOffset
-                                                    shadowColor:attributes.shadowColor
-                                                  shadowOpacity:attributes.shadowOpacity
-                                                   shadowRadius:attributes.shadowRadius];
+    _shadower = [ASTextKitShadower shadowerWithShadowOffset:attributes.shadowOffset
+                                                shadowColor:attributes.shadowColor
+                                              shadowOpacity:attributes.shadowOpacity
+                                               shadowRadius:attributes.shadowRadius];
   }
   return _shadower;
 }
