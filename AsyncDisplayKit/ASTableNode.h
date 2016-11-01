@@ -312,12 +312,12 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return an array containing the nodes being displayed on screen. This must be called on the main thread.
  */
-@property(readonly, copy) NSArray<__kindof ASCellNode *> *visibleNodes;
+@property (nonatomic, readonly) NSArray<__kindof ASCellNode *> *visibleNodes;
 
 /**
  * Retrieves the node for the row at the given index path.
  */
-- (nullable ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+- (nullable __kindof ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
  * Similar to -indexPathForCell:.
@@ -366,6 +366,8 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion This method must be called from the main thread.
  */
 - (nullable NSIndexPath *)indexPathForSelectedRow AS_WARN_UNUSED_RESULT;
+
+@property (nonatomic, readonly, nullable) NSArray<NSIndexPath *> *indexPathsForSelectedRows;
 
 /**
  * Similar to -[UITableView indexPathForRowAtPoint:]

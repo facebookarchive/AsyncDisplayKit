@@ -460,6 +460,14 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
   return indexPath;
 }
 
+- (NSArray<NSIndexPath *> *)indexPathsForSelectedRows
+{
+  ASDisplayNodeAssertMainThread();
+  ASTableView *tableView = self.view;
+
+  return [tableView convertIndexPathsToTableNode:tableView.indexPathsForSelectedRows];
+}
+
 - (nullable NSIndexPath *)indexPathForRowAtPoint:(CGPoint)point
 {
   ASDisplayNodeAssertMainThread();

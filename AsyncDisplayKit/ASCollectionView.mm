@@ -582,6 +582,23 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
+- (NSArray<NSIndexPath *> *)convertIndexPathsToCollectionNode:(NSArray<NSIndexPath *> *)indexPaths
+{
+  if (indexPaths == nil) {
+    return nil;
+  }
+
+  NSMutableArray<NSIndexPath *> *indexPathsArray = [NSMutableArray arrayWithCapacity:indexPaths.count];
+
+  for (NSIndexPath *indexPathInView in indexPaths) {
+    NSIndexPath *indexPath = [self convertIndexPathToCollectionNode:indexPathInView];
+    if (indexPath != nil) {
+      [indexPathsArray addObject:indexPath];
+    }
+  }
+  return indexPathsArray;
+}
+
 - (ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
   return [_dataController supplementaryNodeOfKind:elementKind atIndexPath:indexPath];
