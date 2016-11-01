@@ -360,9 +360,9 @@ typedef NS_ENUM(NSInteger, ASRelativeDimensionType) {
 #define ASRelativeDimensionMakeWithFraction ASDimensionMakeWithFraction
 
 /**
- * Function is deprecated. Use ASSizeRangeMakeWithExactCGSize instead.
+ * Function is deprecated. Use ASSizeRangeMake instead.
  */
-extern AS_WARN_UNUSED_RESULT ASSizeRange ASSizeRangeMakeExactSize(CGSize size) ASDISPLAYNODE_DEPRECATED_MSG("Use ASSizeRangeMakeWithExactCGSize instead.");
+extern AS_WARN_UNUSED_RESULT ASSizeRange ASSizeRangeMakeExactSize(CGSize size) ASDISPLAYNODE_DEPRECATED_MSG("Use ASSizeRangeMake instead.");
 
 /**
  Expresses an inclusive range of relative sizes. Used to provide additional constraint to layout.
