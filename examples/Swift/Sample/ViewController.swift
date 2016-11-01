@@ -55,7 +55,9 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
     let rowCount = self.tableNode(tableNode, numberOfRowsInSection: 0)
 
     if state.fetchingMore && indexPath.row == rowCount - 1 {
-      return TailLoadingCellNode()
+      let node = TailLoadingCellNode()
+      node.style.height = ASDimensionMake(44.0)
+      return node;
     }
 
     let node = ASTextCellNode()
