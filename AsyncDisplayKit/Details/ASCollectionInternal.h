@@ -41,6 +41,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath;
 
+/**
+ * Attempt to get the node index paths given the view-layer index paths.
+ *
+ * @param indexPaths An array of index paths in the view space
+ */
+- (nullable NSArray<NSIndexPath *> *)convertIndexPathsToCollectionNode:(nullable NSArray<NSIndexPath *> *)indexPaths;
+
 @end
 
 NS_ASSUME_NONNULL_END

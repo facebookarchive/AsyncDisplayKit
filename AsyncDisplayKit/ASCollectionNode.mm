@@ -319,6 +319,13 @@
 
 #pragma mark - Selection
 
+- (NSArray<NSIndexPath *> *)indexPathsForSelectedItems
+{
+  ASDisplayNodeAssertMainThread();
+  ASCollectionView *view = self.view;
+  return [view convertIndexPathsToCollectionNode:view.indexPathsForSelectedItems];
+}
+
 - (void)selectItemAtIndexPath:(nullable NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
 {
   ASDisplayNodeAssertMainThread();

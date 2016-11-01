@@ -124,16 +124,21 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-/**
- * Scrolls the table to the given row.
- *
- * @param indexPath The index path of the row.
- * @param scrollPosition Where the row should end up after the scroll.
- * @param animated Whether the scroll should be animated or not.
- */
+- (nullable __kindof UITableViewCell *)cellForRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+
 - (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+
+@property (nonatomic, readonly, nullable) NSIndexPath *indexPathForSelectedRow  ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode property instead.");
+
+@property (nonatomic, readonly, nullable) NSArray<NSIndexPath *> *indexPathsForSelectedRows ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode property instead.");
+
+@property (nonatomic, readonly, nullable) NSArray<NSIndexPath *> *indexPathsForVisibleRows ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode property instead.");
+
+- (nullable NSIndexPath *)indexPathForRowAtPoint:(CGPoint)point ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+
+- (nullable NSArray<NSIndexPath *> *)indexPathsForRowsInRect:(CGRect)rect ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /**
  * Similar to -visibleCells.
@@ -182,26 +187,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)relayoutItems ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-/**
- *  Begins a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
- *
- *  @discussion You call this method to bracket a series of method calls that ends with endUpdates and that consists of operations
- *  to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
- *  the operations simultaneously. It's important to remember that the ASTableView will be processing the updates asynchronously after this call is completed.
- *
- *  @warning This method must be called from the main thread.
- */
 - (void)beginUpdates ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's -performBatchUpdates:completion: instead.");
 
-/**
- *  Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view, with animation enabled and no completion block.
- *
- *  @discussion You call this method to bracket a series of method calls that begins with beginUpdates and that consists of operations
- *  to insert, delete, select, and reload rows and sections of the table view. When you call endUpdates, ASTableView begins animating
- *  the operations simultaneously. It's important to remember that the ASTableView will be processing the updates asynchronously after this call is completed.
- *
- *  @warning This method is must be called from the main thread.
- */
 - (void)endUpdates ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's -performBatchUpdates:completion: instead.");
 
 /**
@@ -224,100 +211,20 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)waitUntilAllUpdatesAreCommitted ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-/**
- * Inserts one or more sections, with an option to animate the insertion.
- *
- * @param sections An index set that specifies the sections to insert.
- *
- * @param animation A constant that indicates how the insertion is to be animated. See UITableViewRowAnimation.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
 - (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-/**
- * Deletes one or more sections, with an option to animate the deletion.
- *
- * @param sections An index set that specifies the sections to delete.
- *
- * @param animation A constant that indicates how the deletion is to be animated. See UITableViewRowAnimation.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
 - (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-/**
- * Reloads the specified sections using a given animation effect.
- *
- * @param sections An index set that specifies the sections to reload.
- *
- * @param animation A constant that indicates how the reloading is to be animated. See UITableViewRowAnimation.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
 - (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-/**
- * Moves a section to a new location.
- *
- * @param section The index of the section to move.
- *
- * @param newSection The index that is the destination of the move for the section.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-/**
- * Inserts rows at the locations identified by an array of index paths, with an option to animate the insertion.
- *
- * @param indexPaths An array of NSIndexPath objects, each representing a row index and section index that together identify a row.
- *
- * @param animation A constant that indicates how the insertion is to be animated. See UITableViewRowAnimation.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
 - (void)insertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-/**
- * Deletes the rows specified by an array of index paths, with an option to animate the deletion.
- *
- * @param indexPaths An array of NSIndexPath objects identifying the rows to delete.
- *
- * @param animation A constant that indicates how the deletion is to be animated. See UITableViewRowAnimation.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
 - (void)deleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-/**
- * Reloads the specified rows using a given animation effect.
- *
- * @param indexPaths An array of NSIndexPath objects identifying the rows to reload.
- *
- * @param animation A constant that indicates how the reloading is to be animated. See UITableViewRowAnimation.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
 - (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-/**
- * Moves the row at a specified location to a destination location.
- *
- * @param indexPath The index path identifying the row to move.
- *
- * @param newIndexPath The index path that is the destination of the move for the row.
- *
- * @discussion This method must be called from the main thread. The asyncDataSource must be updated to reflect the changes
- * before this method is called.
- */
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /// Deprecated in 2.0. You should not call this method.
