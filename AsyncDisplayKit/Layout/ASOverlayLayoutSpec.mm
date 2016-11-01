@@ -74,14 +74,3 @@ static NSUInteger const kOverlayChildIndex = 1;
 }
 
 @end
-
-@implementation ASOverlayLayoutSpec (Debugging)
-
-#pragma mark - ASLayoutElementAsciiArtProtocol
-
-- (NSString *)debugBoxString
-{
-  return [ASLayoutSpec asciiArtStringForChildren:@[self.overlay, self.child] parentName:[self asciiArtName]];
-}
-
-@end
