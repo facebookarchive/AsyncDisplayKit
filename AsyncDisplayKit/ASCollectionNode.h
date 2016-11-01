@@ -300,6 +300,11 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Selection
 
 /**
+ * The index paths of the selected items, or @c nil if no items are selected.
+ */
+@property (nonatomic, readonly, nullable) NSArray<NSIndexPath *> *indexPathsForSelectedItems;
+
+/**
  * Selects the item at the specified index path and optionally scrolls it into view.
  * If the `allowsSelection` property is NO, calling this method has no effect. If there is an existing selection with a different index path and the `allowsMultipleSelection` property is NO, calling this method replaces the previous selection.
  * This method does not cause any selection-related delegate methods to be called.
@@ -348,7 +353,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return an array containing the nodes being displayed on screen. This must be called on the main thread.
  */
-@property(readonly, copy) NSArray<__kindof ASCellNode *> *visibleNodes;
+@property (nonatomic, readonly) NSArray<__kindof ASCellNode *> *visibleNodes;
 
 /**
  * Retrieves the node for the item at the given index path.
@@ -357,7 +362,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return The node for the given item, or @c nil if no item exists at the specified path.
  */
-- (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+- (nullable __kindof ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
  * Retrieve the index path for the item with the given node.
@@ -373,7 +378,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return an array containing the index paths of all visible items. This must be called on the main thread.
  */
-- (NSArray<__kindof NSIndexPath *> *)indexPathsForVisibleItems AS_WARN_UNUSED_RESULT;
+@property (nonatomic, readonly) NSArray<NSIndexPath *> *indexPathsForVisibleItems;
 
 /**
  * Retrieve the index path of the item at the given point.
