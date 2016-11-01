@@ -419,7 +419,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @deprecated This method is deprecated in 2.0. Use @c reloadDataWithCompletion: and
  *   then @c waitUntilAllUpdatesAreCommitted instead.
  */
-- (void)reloadDataImmediately ASDISPLAYNODE_DEPRECATED_MSG("Use -reloadDataWithCompletion: followed by -waitUntilAllUpdatesAreCommitted instead.");
+- (void)reloadDataImmediately ASDISPLAYNODE_DEPRECATED_MSG("Use -reloadData / -reloadDataWithCompletion: followed by -waitUntilAllUpdatesAreCommitted instead.");
 
 @end
 
