@@ -437,6 +437,77 @@ do {\
   return _layoutPosition.load();
 }
 
+#pragma mark - Debugging
+
+- (NSString *)description
+{
+  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDescription
+{
+  NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+  
+  if ((self.minLayoutSize.width.unit != ASDimensionUnitAuto ||
+    self.minLayoutSize.height.unit != ASDimensionUnitAuto)) {
+    [result addObject:@{ @"minLayoutSize" : NSStringFromASLayoutSize(self.minLayoutSize) }];
+  }
+  
+  if ((self.preferredLayoutSize.width.unit != ASDimensionUnitAuto ||
+    self.preferredLayoutSize.height.unit != ASDimensionUnitAuto)) {
+    [result addObject:@{ @"preferredSize" : NSStringFromASLayoutSize(self.preferredLayoutSize) }];
+  }
+  
+  if ((self.maxLayoutSize.width.unit != ASDimensionUnitAuto ||
+    self.maxLayoutSize.height.unit != ASDimensionUnitAuto)) {
+    [result addObject:@{ @"maxLayoutSize" : NSStringFromASLayoutSize(self.maxLayoutSize) }];
+  }
+  
+  const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentLayoutOptionsStateMakeDefault();
+  
+  if (self.alignSelf != defaultState.alignSelf) {
+    [result addObject:@{ @"alignSelf" : [@[@"ASStackLayoutAlignSelfAuto",
+                                          @"ASStackLayoutAlignSelfStart",
+                                          @"ASStackLayoutAlignSelfEnd",
+                                          @"ASStackLayoutAlignSelfCenter",
+                                          @"ASStackLayoutAlignSelfStretch"] objectAtIndex:self.alignSelf] }];
+  }
+  
+  if (self.ascender != defaultState.ascender) {
+    [result addObject:@{ @"ascender" : @(self.ascender) }];
+  }
+  
+  if (self.descender != defaultState.descender) {
+    [result addObject:@{ @"descender" : @(self.descender) }];
+  }
+  
+  if (ASDimensionEqualToDimension(self.flexBasis, defaultState.flexBasis) == NO) {
+    [result addObject:@{ @"flexBasis" : NSStringFromASDimension(self.flexBasis) }];
+  }
+  
+  if (self.flexGrow != defaultState.flexGrow) {
+    [result addObject:@{ @"flexGrow" : @(self.flexGrow) }];
+  }
+  
+  if (self.flexShrink != defaultState.flexShrink) {
+    [result addObject:@{ @"flexShrink" : @(self.flexShrink) }];
+  }
+  
+  if (self.spacingAfter != defaultState.spacingAfter) {
+    [result addObject:@{ @"spacingAfter" : @(self.spacingAfter) }];
+  }
+  
+  if (self.spacingBefore != defaultState.spacingBefore) {
+    [result addObject:@{ @"spacingBefore" : @(self.spacingBefore) }];
+  }
+  
+  if (CGPointEqualToPoint(self.layoutPosition, defaultState.layoutPosition) == NO) {
+    [result addObject:@{ @"layoutPosition" : [NSValue valueWithCGPoint:self.layoutPosition] }];
+  }
+
+  return result;
+}
+
 #pragma mark Deprecated
 
 #pragma clang diagnostic push
