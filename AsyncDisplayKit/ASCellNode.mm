@@ -119,8 +119,11 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
 
 - (void)__setNeedsLayout
 {
-  CGSize oldSize = self.calculatedSize;
+  CGSize oldSize = self.bounds.size;
   [super __setNeedsLayout];
+    
+  // TODO: coalayout: We have to get rid of that
+  [super __layoutIfNeeded];
   
   //Adding this lock because lock used to be held when this method was called. Not sure if it's necessary for
   //didRelayoutFromOldSize:toNewSize:

@@ -83,11 +83,10 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
  *
- * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
- * constraint and the result.
+ * @discussion Though this method does not set the bounds of the view it reuses the calculated layout if constrainedSize
+ * or parentSize didn't change.
  *
- * @warning Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
- * be expensive if result is not cached.
+ * @warning Subclasses must not override this. Calling this method may be expensive if result is not cached.
  *
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
  */
@@ -104,8 +103,8 @@ NS_ASSUME_NONNULL_BEGIN
  *                  then it should be passed as ASLayoutElementParentDimensionUndefined (for example, if the parent's width
  *                  depends on the child's size).
  *
- * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the
- * constraint and the result.
+ * @discussion Though this method does not set the bounds of the view it reuses the calculated layout if constrainedSize
+ * or parentSize didn't change.
  *
  * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
  */
