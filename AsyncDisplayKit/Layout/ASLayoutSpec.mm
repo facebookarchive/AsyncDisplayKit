@@ -345,7 +345,7 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (NSString *)asciiArtString
 {
-  NSArray *children = self.child ? @[self.child] : self.children;
+  NSArray *children = self.children.count < 2 && self.child ? @[self.child] : self.children;
   return [ASLayoutSpec asciiArtStringForChildren:children parentName:[self asciiArtName]];
 }
 

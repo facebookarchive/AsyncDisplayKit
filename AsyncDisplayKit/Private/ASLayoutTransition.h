@@ -50,12 +50,12 @@ NS_ASSUME_NONNULL_BEGIN
               previousLayout:(std::shared_ptr<ASDisplayNodeLayout>)previousLayout NS_DESIGNATED_INITIALIZER;
 
 /**
- * Insert and remove subnodes that where added or removed between the previousLayout and the pendingLayout
+ * Insert and remove subnodes that were added or removed between the previousLayout and the pendingLayout
  */
 - (void)commitTransition;
 
 /**
- * Insert all new subnodes that where added between the previous layout and the pending layout
+ * Insert all new subnodes that were added between the previous layout and the pending layout
  */
 - (void)applySubnodeInsertions;
 
