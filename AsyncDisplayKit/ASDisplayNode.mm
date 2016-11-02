@@ -1383,49 +1383,42 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self displayImmediately];
 }
 
-//Calling this with the lock held can lead to deadlocks. Always call *unlocked*
+// Calling this with the lock held can lead to deadlocks. Always call *unlocked*
 - (void)__setNeedsLayout
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+
+  // Invalidate the current calculated layout so it can be recalculated in the next layout pass
+  [self invalidateCalculatedLayout];
+}
+
+// The node's super supernodes are traversed until a ancestor layer is found that does not require layout. Then layout
+// is performed on the entire node-tree beneath that ancestor
+- (void)__layoutIfNeeded
 {
   ASDisplayNodeAssertThreadAffinity(self);
   
   __instanceLock__.lock();
   
-  if (_calculatedDisplayNodeLayout->layout == nil) {
-    // Can't proceed without a layout as no constrained size would be available. If not layout exists at this moment
-    // no measurement pass did happen just bail out for now
-    __instanceLock__.unlock();
-    return;
-  }
-    
+  // Invalidate the current calculated layout so in the next layout pass it get's recalculated
   [self invalidateCalculatedLayout];
   
+  // TODO: coalayout: We should only walk up to the first node that don't need layout
   if (_supernode) {
     ASDisplayNode *supernode = _supernode;
     __instanceLock__.unlock();
     // Cause supernode's layout to be invalidated
     // We need to release the lock to prevent a deadlock
-    [supernode setNeedsLayout];
+    [supernode layoutIfNeeded];
     return;
   }
   
   // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
   [self layoutThatFits:_calculatedDisplayNodeLayout->constrainedSize];
-  
-  CGRect oldBounds = self.bounds;
-  CGSize oldSize = oldBounds.size;
-  CGSize newSize = _calculatedDisplayNodeLayout->layout.size;
-  
-  if (! CGSizeEqualToSize(oldSize, newSize)) {
-    self.bounds = (CGRect){ oldBounds.origin, newSize };
-    
-    // Frame's origin must be preserved. Since it is computed from bounds size, anchorPoint
-    // and position (see frame setter in ASDisplayNode+UIViewBridge), position needs to be adjusted.
-    CGPoint anchorPoint = self.anchorPoint;
-    CGPoint oldPosition = self.position;
-    CGFloat xDelta = (newSize.width - oldSize.width) * anchorPoint.x;
-    CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
-    self.position = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
-  }
+
+
+  // Layout all subviews from the root node
+  [self __layout];
   
   __instanceLock__.unlock();
 }
@@ -1440,16 +1433,17 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 }
 
-// These private methods ensure that subclasses are not required to call super in order for _renderingSubnodes to be properly managed.
-
+// Called from [CALayer layoutSublayers:]: All subnode layout related code should happen in there
 - (void)__layout
 {
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(__instanceLock__);
   CGRect bounds = self.bounds;
 
+  // Node needs measurement in case the bounds changed from the current calculated layout
   [self measureNodeWithBoundsIfNecessary:bounds];
 
+  // Prevent zero bounds view view adjustments
   if (CGRectEqualToRect(bounds, CGRectZero)) {
     // Performing layout on a zero-bounds view often results in frame calculations
     // with negative sizes after applying margins, which will cause
@@ -3027,10 +3021,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   });
 }
 
+/// Default implementation of layout subclass hook uses the current calculated layout and applies the frame to all subnodes. Similar to layoutSubviews in UIView.
 - (void)layout
 {
   ASDisplayNodeAssertMainThread();
 
+  // If the layout is dirty we don't need to do a layout pass as it was invalided before
   if (_calculatedDisplayNodeLayout->isDirty()) {
     return;
   }
@@ -3038,6 +3034,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   [self __layoutSublayouts];
 }
 
+/// Internal helper method to layout all sublayouts based on calculated display node layout
 - (void)__layoutSublayouts
 {
   for (ASLayout *subnodeLayout in _calculatedDisplayNodeLayout->layout.sublayouts) {

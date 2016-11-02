@@ -209,6 +209,13 @@
   [self.layer setNeedsDisplay];
 }
 
+- (void)layoutIfNeeded
+{
+  ASPerformBlockOnMainThread(^{
+    [super layoutIfNeeded];
+  });
+}
+
 - (UIViewContentMode)contentMode
 {
   return ASDisplayNodeUIContentModeFromCAContentsGravity(self.layer.contentsGravity);

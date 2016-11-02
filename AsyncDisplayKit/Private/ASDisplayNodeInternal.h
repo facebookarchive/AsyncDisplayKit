@@ -206,6 +206,11 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)__setNeedsLayout;
 
 /**
+ 
+ */
+- (void)__layoutIfNeeded;
+
+/**
  Invoked after a call to setNeedsDisplay to the underlying view
  */
 - (void)__setNeedsDisplay;
