@@ -671,7 +671,8 @@ static NSString * const kRate = @"rate";
   return YES;
 }
 
-- (void)reset {
+- (void)resetToPlaceholder
+{
   ASDN::MutexLocker l(__instanceLock__);
   
   if (_playerNode != nil) {

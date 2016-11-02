@@ -668,8 +668,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   return [_videoNode isPlaying];
 }
 
-- (void)reset {
-  [_videoNode reset];
+- (void)resetToPlaceholder
+{
+  [_videoNode resetToPlaceholder];
 }
 
 - (NSArray *)controlsForLayoutSpec

@@ -68,7 +68,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)play;
 - (void)pause;
 - (BOOL)isPlaying;
-- (void)reset;
+- (void)resetToPlaceholder;
 
 @end
 
