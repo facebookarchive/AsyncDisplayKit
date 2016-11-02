@@ -15,8 +15,10 @@
 #import <AsyncDisplayKit/ASDealloc2MainObject.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
-#import <AsyncDisplayKit/ASLayoutable.h>
+#import <AsyncDisplayKit/ASLayoutElement.h>
 #import <AsyncDisplayKit/ASContextTransitioning.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 #define ASDisplayNodeLoggingEnabled 0
 
@@ -40,17 +42,17 @@ typedef CALayer * _Nonnull(^ASDisplayNodeLayerBlock)();
 /**
  * ASDisplayNode loaded callback block. This block is called BEFORE the -didLoad method and is always called on the main thread.
  */
-typedef void (^ASDisplayNodeDidLoadBlock)(ASDisplayNode * _Nonnull node);
+typedef void (^ASDisplayNodeDidLoadBlock)(__kindof ASDisplayNode * node);
 
 /**
  * ASDisplayNode will / did render node content in context.
  */
-typedef void (^ASDisplayNodeContextModifier)(_Nonnull CGContextRef context);
+typedef void (^ASDisplayNodeContextModifier)(CGContextRef context);
 
 /**
  * ASDisplayNode layout spec block. This block can be used instead of implementing layoutSpecThatFits: in subclass
  */
-typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize);
+typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize);
 
 /**
  Interface state is available on ASDisplayNode and ASViewController, and
@@ -102,9 +104,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  */
 
-NS_ASSUME_NONNULL_BEGIN
-@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutable>
-
+@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutElement>
 
 /** @name Initializing a node object */
 
@@ -160,13 +160,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
 
-
-/** @name Properties */
-
 /**
- * @abstract The name of this node, which will be displayed in `description`. The default value is nil.
+ * @abstract Add a block of work to be performed on the main thread when the node's view or layer is loaded. Thread safe.
+ * @warning Be careful not to retain self in `body`. Change the block parameter list to `^(MYCustomNode *self) {}` if you
+ *   want to shadow self (e.g. if calling this during `init`).
+ *
+ * @param body The work to be performed when the node is loaded.
+ *
+ * @precondition The node is not already loaded.
+ * @note This will only be called the next time the node is loaded. If the node is later added to a subtree of a node
+ *    that has `shouldRasterizeDescendants=YES`, and is unloaded, this block will not be called if it is loaded again.
  */
-@property (nullable, nonatomic, copy) NSString *name;
+- (void)onDidLoad:(ASDisplayNodeDidLoadBlock)body;
 
 /** 
  * @abstract Returns whether the node is synchronous.
@@ -248,26 +253,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** @name Managing dimensions */
 
 /**
- * @abstract Asks the node to measure and return the size that best fits its subnodes.
- *
- * @param constrainedSize The maximum size the receiver should fit in.
- *
- * @return A new size that fits the receiver's subviews.
- *
- * @discussion Though this method does not set the bounds of the view, it does have side effects--caching both the 
- * constraint and the result.
- *
- * @warning Subclasses must not override this; it calls -measureWithSizeRange: with zero min size. 
- * -measureWithSizeRange: caches results from -calculateLayoutThatFits:.  Calling this method may 
- * be expensive if result is not cached.
- *
- * @see measureWithSizeRange:
- * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
- */
-- (CGSize)measure:(CGSize)constrainedSize;
-
-/**
- * @abstract Asks the node to measure a layout based on given size range.
+ * @abstract Asks the node to return a layout based on given size range.
  *
  * @param constrainedSize The minimum and maximum sizes the receiver should fit in.
  *
@@ -281,8 +267,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @see [ASDisplayNode(Subclassing) calculateLayoutThatFits:]
  */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize;
-
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize;
 
 /**
  * @abstract Provides a way to declare a block to provide an ASLayoutSpec without having to subclass ASDisplayNode and
@@ -316,16 +301,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @return The minimum and maximum constrained sizes used by calculateLayoutThatFits:.
  */
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSizeForCalculatedLayout;
-
-/**
- * @abstract Provides a default intrinsic content size for calculateSizeThatFits:. This is useful when laying out
- * a node that either has no intrinsic content size or should be laid out at a different size than its intrinsic content
- * size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
- * image size.
- *
- * @return The preferred frame size of this node
- */
-@property (nonatomic, assign, readwrite) CGSize preferredFrameSize;
 
 /** @name Managing the nodes hierarchy */
 
@@ -572,7 +547,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return YES if point is inside the receiver's bounds; otherwise, NO.
  */
-- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event;
+- (BOOL)pointInside:(CGPoint)point withEvent:(nullable UIEvent *)event AS_WARN_UNUSED_RESULT;
 
 
 /** @name Converting Between View Coordinate Systems */
@@ -586,7 +561,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return The point converted to the coordinate system of node.
  */
-- (CGPoint)convertPoint:(CGPoint)point toNode:(nullable ASDisplayNode *)node;
+- (CGPoint)convertPoint:(CGPoint)point toNode:(nullable ASDisplayNode *)node AS_WARN_UNUSED_RESULT;
 
 
 /** 
@@ -597,7 +572,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return The point converted to the local coordinate system (bounds) of the receiver.
  */
-- (CGPoint)convertPoint:(CGPoint)point fromNode:(nullable ASDisplayNode *)node;
+- (CGPoint)convertPoint:(CGPoint)point fromNode:(nullable ASDisplayNode *)node AS_WARN_UNUSED_RESULT;
 
 
 /** 
@@ -608,7 +583,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return The converted rectangle.
  */
-- (CGRect)convertRect:(CGRect)rect toNode:(nullable ASDisplayNode *)node;
+- (CGRect)convertRect:(CGRect)rect toNode:(nullable ASDisplayNode *)node AS_WARN_UNUSED_RESULT;
 
 /** 
  * @abstract Converts a rectangle from the coordinate system of another node to that of the receiver.
@@ -618,22 +593,21 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return The converted rectangle.
  */
-- (CGRect)convertRect:(CGRect)rect fromNode:(nullable ASDisplayNode *)node;
+- (CGRect)convertRect:(CGRect)rect fromNode:(nullable ASDisplayNode *)node AS_WARN_UNUSED_RESULT;
 
 @end
 
 /**
  * Convenience methods for debugging.
  */
-
-@interface ASDisplayNode (Debugging) <ASLayoutableAsciiArtProtocol>
+@interface ASDisplayNode (Debugging) <ASLayoutElementAsciiArtProtocol>
 
 /**
  * @abstract Return a description of the node hierarchy.
  *
  * @discussion For debugging: (lldb) po [node displayNodeRecursiveDescription]
  */
-- (NSString *)displayNodeRecursiveDescription;
+- (NSString *)displayNodeRecursiveDescription AS_WARN_UNUSED_RESULT;
 
 @end
 
@@ -672,6 +646,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign)           BOOL clipsToBounds;                    // default==NO
 @property (nonatomic, getter=isOpaque)  BOOL opaque;                           // default==YES
 
+@property (nonatomic, assign)           BOOL allowsGroupOpacity;
 @property (nonatomic, assign)           BOOL allowsEdgeAntialiasing;
 @property (nonatomic, assign)           unsigned int edgeAntialiasingMask;     // default==all values from CAEdgeAntialiasingMask
 
@@ -837,7 +812,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)cancelLayoutTransition;
 
-
 @end
 
 /*
@@ -860,7 +834,7 @@ NS_ASSUME_NONNULL_BEGIN
  * ASDisplayNode participates in ASAsyncTransactions, so you can determine when your subnodes are done rendering.
  * See: -(void)asyncdisplaykit_asyncTransactionContainerStateDidChange in ASDisplayNodeSubclass.h
  */
-@interface ASDisplayNode (ASDisplayNodeAsyncTransactionContainer) <ASDisplayNodeAsyncTransactionContainer>
+@interface ASDisplayNode (ASAsyncTransactionContainer) <ASAsyncTransactionContainer>
 @end
 
 /** UIVIew(AsyncDisplayKit) defines convenience method for adding sub-ASDisplayNode to an UIView. */

@@ -33,14 +33,14 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion If `cache` is nil, the receiver will not attempt to retrieve images from a cache before downloading them.
  *
- * @returns An initialized ASNetworkImageNode.
+ * @return An initialized ASNetworkImageNode.
  */
 - (instancetype)initWithCache:(nullable id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader NS_DESIGNATED_INITIALIZER;
 
 /**
  * Convenience initialiser.
  *
- * @returns An ASNetworkImageNode configured to use the NSURLSession-powered ASBasicImageDownloader, and no extra cache.
+ * @return An ASNetworkImageNode configured to use the NSURLSession-powered ASBasicImageDownloader, and no extra cache.
  */
 - (instancetype)init;
 

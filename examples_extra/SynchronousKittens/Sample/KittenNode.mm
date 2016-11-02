@@ -140,8 +140,10 @@ static const CGFloat kInnerPadding = 10.0f;
 #if UseAutomaticLayout
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _imageNode.preferredFrameSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize) : CGSizeMake(kImageSize, kImageSize);
-  _textNode.flexShrink = YES;
+  CGSize imageSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize)
+                                      : CGSizeMake(kImageSize, kImageSize);
+  _imageNode.size = ASRelativeSizeRangeMakeWithExactCGSize(imageSize);
+  _textNode.flexShrink = 1.0;
   
   ASStackLayoutSpec *stackSpec = [[ASStackLayoutSpec alloc] init];
   stackSpec.direction = ASStackLayoutDirectionHorizontal;

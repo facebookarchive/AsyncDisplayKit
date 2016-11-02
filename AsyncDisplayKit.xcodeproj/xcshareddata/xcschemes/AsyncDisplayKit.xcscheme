@@ -56,6 +56,9 @@
                <Test
                   Identifier = "ASTextNodePerformanceTests">
                </Test>
+               <Test
+                  Identifier = "ASUIViewTests">
+               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>

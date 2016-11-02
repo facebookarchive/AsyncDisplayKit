@@ -11,11 +11,23 @@
 #import <AsyncDisplayKit/ASTextNode.h>
 #import <AsyncDisplayKit/ASImageNode.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ Image alignment defines where the image will be placed relative to the text.
+ */
+typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
+  /** Places the image before the text. */
+  ASButtonNodeImageAlignmentBeginning,
+  /** Places the image after the text. */
+  ASButtonNodeImageAlignmentEnd
+};
+
 @interface ASButtonNode : ASControlNode
 
-@property (nonatomic, readonly) ASTextNode  * _Nonnull titleNode;
-@property (nonatomic, readonly) ASImageNode * _Nonnull imageNode;
-@property (nonatomic, readonly) ASImageNode * _Nonnull backgroundImageNode;
+@property (nonatomic, readonly) ASTextNode  * titleNode;
+@property (nonatomic, readonly) ASImageNode * imageNode;
+@property (nonatomic, readonly) ASImageNode * backgroundImageNode;
 
 /**
  Spacing between image and title. Defaults to 8.0.
@@ -45,13 +57,18 @@
 @property (nonatomic, assign) UIEdgeInsets contentEdgeInsets;
 
 /**
+ * @discusstion Whether the image should be aligned at the beginning or at the end of node. Default is `ASButtonNodeImageAlignmentBeginning`.
+ */
+@property (nonatomic, assign) ASButtonNodeImageAlignment imageAlignment;
+
+/**
  *  Returns the styled title associated with the specified state.
  *
  *  @param state The state that uses the styled title. The possible values are described in ASControlState.
  *
  *  @return The title for the specified state.
  */
-- (NSAttributedString * _Nullable)attributedTitleForState:(ASControlState)state;
+- (NSAttributedString * _Nullable)attributedTitleForState:(ASControlState)state AS_WARN_UNUSED_RESULT;
 
 /**
  *  Sets the styled title to use for the specified state. This will reset styled title previously set with -setTitle:withFont:withColor:forState.
@@ -70,7 +87,7 @@
  *  @param color The color to use for the title.
  *  @param state The state that uses the specified title. The possible values are described in ASControlState.
  */
-- (void)setTitle:(nonnull NSString *)title withFont:(nullable UIFont *)font withColor:(nullable UIColor *)color forState:(ASControlState)state;
+- (void)setTitle:(NSString *)title withFont:(nullable UIFont *)font withColor:(nullable UIColor *)color forState:(ASControlState)state;
 #endif
 /**
  *  Returns the image used for a button state.
@@ -79,7 +96,7 @@
  *
  *  @return The image used for the specified state.
  */
-- (UIImage * _Nullable)imageForState:(ASControlState)state;
+- (nullable UIImage *)imageForState:(ASControlState)state AS_WARN_UNUSED_RESULT;
 
 /**
  *  Sets the image to use for the specified state.
@@ -105,6 +122,8 @@
  *
  *  @return The background image used for the specified state.
  */
-- (UIImage * _Nullable)backgroundImageForState:(ASControlState)state;
+- (nullable UIImage *)backgroundImageForState:(ASControlState)state AS_WARN_UNUSED_RESULT;
 
 @end
+
+NS_ASSUME_NONNULL_END

@@ -75,8 +75,8 @@ const CGFloat kSoldOutGBHeight = 50.0;
   
   self.titleLabel = [[ASTextNode alloc] init];
   self.titleLabel.maximumNumberOfLines = 2;
-  self.titleLabel.alignSelf = ASStackLayoutAlignSelfStart;
-  self.titleLabel.flexGrow = YES;
+  self.titleLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
+  self.titleLabel.style.flexGrow = 1.0;
   self.titleLabel.layerBacked = YES;
   
   self.firstInfoLabel = [[ASTextNode alloc] init];
@@ -107,13 +107,14 @@ const CGFloat kSoldOutGBHeight = 50.0;
   self.soldOutLabelFlat.layerBacked = YES;
 
   self.soldOutLabelBackground = [[ASDisplayNode alloc] init];
-  self.soldOutLabelBackground.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(1), ASRelativeDimensionMakeWithPoints(kSoldOutGBHeight)), ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(1), ASRelativeDimensionMakeWithPoints(kSoldOutGBHeight)));
+  self.soldOutLabelBackground.style.width = ASDimensionMakeWithFraction(1.0);
+  self.soldOutLabelBackground.style.height = ASDimensionMakeWithPoints(kSoldOutGBHeight);
   self.soldOutLabelBackground.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.9];
-  self.soldOutLabelBackground.flexGrow = YES;
+  self.soldOutLabelBackground.style.flexGrow = 1.0;
   self.soldOutLabelBackground.layerBacked = YES;
   
   self.soldOutOverlay = [[ASDisplayNode alloc] init];
-  self.soldOutOverlay.flexGrow = YES;
+  self.soldOutOverlay.style.flexGrow = 1.0;
   self.soldOutOverlay.backgroundColor = [[UIColor whiteColor] colorWithAlphaComponent:0.5];
   self.soldOutOverlay.layerBacked = YES;
   
@@ -134,18 +135,18 @@ const CGFloat kSoldOutGBHeight = 50.0;
   self.soldOutLabelFlat.hidden = YES;
   
   if ([ItemNode isRTL]) {
-    self.titleLabel.alignSelf = ASStackLayoutAlignSelfEnd;
-    self.firstInfoLabel.alignSelf = ASStackLayoutAlignSelfEnd;
-    self.distanceLabel.alignSelf = ASStackLayoutAlignSelfEnd;
-    self.secondInfoLabel.alignSelf = ASStackLayoutAlignSelfEnd;
-    self.originalPriceLabel.alignSelf = ASStackLayoutAlignSelfStart;
-    self.finalPriceLabel.alignSelf = ASStackLayoutAlignSelfStart;
+    self.titleLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.firstInfoLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.distanceLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.secondInfoLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.originalPriceLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
+    self.finalPriceLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
   } else {
-    self.firstInfoLabel.alignSelf = ASStackLayoutAlignSelfStart;
-    self.distanceLabel.alignSelf = ASStackLayoutAlignSelfStart;
-    self.secondInfoLabel.alignSelf = ASStackLayoutAlignSelfStart;
-    self.originalPriceLabel.alignSelf = ASStackLayoutAlignSelfEnd;
-    self.finalPriceLabel.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.firstInfoLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
+    self.distanceLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
+    self.secondInfoLabel.style.alignSelf = ASStackLayoutAlignSelfStart;
+    self.originalPriceLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
+    self.finalPriceLabel.style.alignSelf = ASStackLayoutAlignSelfEnd;
   }
 }
 
@@ -256,13 +257,13 @@ const CGFloat kSoldOutGBHeight = 50.0;
   UIEdgeInsets textInsets = UIEdgeInsetsMake(kInsetTop, kInsetHorizontal, kInsetBottom, kInsetHorizontal);
   
   ASLayoutSpec *verticalSpacer = [[ASLayoutSpec alloc] init];
-  verticalSpacer.flexGrow = YES;
+  verticalSpacer.style.flexGrow = 1.0;
   
   ASLayoutSpec *horizontalSpacer1 = [[ASLayoutSpec alloc] init];
-  horizontalSpacer1.flexGrow = YES;
+  horizontalSpacer1.style.flexGrow = 1.0;
   
   ASLayoutSpec *horizontalSpacer2 = [[ASLayoutSpec alloc] init];
-  horizontalSpacer2.flexGrow = YES;
+  horizontalSpacer2.style.flexGrow = 1.0;
   
   NSArray *info1Children = @[self.firstInfoLabel, self.distanceLabel, horizontalSpacer1, self.originalPriceLabel];
   NSArray *info2Children = @[self.secondInfoLabel, horizontalSpacer2, self.finalPriceLabel];
@@ -278,7 +279,7 @@ const CGFloat kSoldOutGBHeight = 50.0;
   ASStackLayoutSpec *textStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical spacing:0.0 justifyContent:ASStackLayoutJustifyContentEnd alignItems:ASStackLayoutAlignItemsStretch children:@[self.titleLabel, verticalSpacer, info1Stack, info2Stack]];
   
   ASInsetLayoutSpec *textWrapper = [ASInsetLayoutSpec insetLayoutSpecWithInsets:textInsets child:textStack];
-  textWrapper.flexGrow = YES;
+  textWrapper.style.flexGrow = 1.0;
   
   return textWrapper;
 }
@@ -288,20 +289,19 @@ const CGFloat kSoldOutGBHeight = 50.0;
   
   ASRatioLayoutSpec *imagePlace = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:imageRatio child:self.dealImageView];
   
-  self.badge.layoutPosition = CGPointMake(0, constrainedSize.max.height - kFixedLabelsAreaHeight - kBadgeHeight);
-  self.badge.sizeRange = ASRelativeSizeRangeMake(ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(0), ASRelativeDimensionMakeWithPoints(kBadgeHeight)), ASRelativeSizeMake(ASRelativeDimensionMakeWithFraction(1), ASRelativeDimensionMakeWithPoints(kBadgeHeight)));
-  ASStaticLayoutSpec *badgePosition = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.badge]];
+  self.badge.style.layoutPosition = CGPointMake(0, constrainedSize.max.height - kFixedLabelsAreaHeight - kBadgeHeight);
+  self.badge.style.height = ASDimensionMakeWithPoints(kBadgeHeight);
+  ASAbsoluteLayoutSpec *badgePosition = [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[self.badge]];
   
   ASOverlayLayoutSpec *badgeOverImage = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:imagePlace overlay:badgePosition];
-  badgeOverImage.flexGrow = YES;
+  badgeOverImage.style.flexGrow = 1.0;
   
   return badgeOverImage;
 }
 
 - (ASLayoutSpec *)soldOutLabelSpec {
   ASCenterLayoutSpec *centerSoldOutLabel = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionMinimumXY child:self.soldOutLabelFlat];
-  ASStaticLayoutSpec *soldOutBG = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.soldOutLabelBackground]];
-  ASCenterLayoutSpec *centerSoldOut = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:soldOutBG];
+  ASCenterLayoutSpec *centerSoldOut = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:self.soldOutLabelBackground];
   ASBackgroundLayoutSpec *soldOutLabelOverBackground = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:centerSoldOutLabel background:centerSoldOut];
   return soldOutLabelOverBackground;
 }

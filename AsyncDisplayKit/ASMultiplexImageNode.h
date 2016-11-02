@@ -66,7 +66,7 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
  * @param cache The object that implements a cache of images for the image node.
  * @param downloader The object that implements image downloading for the image node.
  * @discussion If `cache` is nil, the receiver will not attempt to retrieve images from a cache before downloading them.
- * @returns An initialized ASMultiplexImageNode.
+ * @return An initialized ASMultiplexImageNode.
  */
 - (instancetype)initWithCache:(nullable id<ASImageCacheProtocol>)cache downloader:(nullable id<ASImageDownloaderProtocol>)downloader NS_DESIGNATED_INITIALIZER;
 
@@ -223,7 +223,7 @@ didFinishDownloadingImageWithIdentifier:(ASImageIdentifier)imageIdentifier
  * @param imageIdentifier The identifier for the image that should be returned.
  * @discussion If the image is already available to the data source, this method should be used in lieu of providing the
  * URL to the image via -multiplexImageNode:URLForImageIdentifier:.
- * @returns A UIImage corresponding to `imageIdentifier`, or nil if none is available.
+ * @return A UIImage corresponding to `imageIdentifier`, or nil if none is available.
  */
 - (nullable UIImage *)multiplexImageNode:(ASMultiplexImageNode *)imageNode imageForImageIdentifier:(ASImageIdentifier)imageIdentifier;
 
@@ -270,7 +270,7 @@ didFinishDownloadingImageWithIdentifier:(ASImageIdentifier)imageIdentifier
 + (NSURL *)URLWithAssetLocalIdentifier:(NSString *)assetLocalIdentifier
                             targetSize:(CGSize)targetSize
                            contentMode:(PHImageContentMode)contentMode
-                               options:(PHImageRequestOptions *)options;
+                               options:(PHImageRequestOptions *)options AS_WARN_UNUSED_RESULT;
 
 @end
 #endif

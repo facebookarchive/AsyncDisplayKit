@@ -14,7 +14,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
-#import "ASStaticLayoutSpec.h"
+#import "ASAbsoluteLayoutSpec.h"
 
 @interface ASButtonNode ()
 {
@@ -48,6 +48,7 @@
 @synthesize contentVerticalAlignment = _contentVerticalAlignment;
 @synthesize contentHorizontalAlignment = _contentHorizontalAlignment;
 @synthesize contentEdgeInsets = _contentEdgeInsets;
+@synthesize imageAlignment = _imageAlignment;
 @synthesize titleNode = _titleNode;
 @synthesize imageNode = _imageNode;
 @synthesize backgroundImageNode = _backgroundImageNode;
@@ -62,6 +63,7 @@
     _contentHorizontalAlignment = ASHorizontalAlignmentMiddle;
     _contentVerticalAlignment = ASVerticalAlignmentCenter;
     _contentEdgeInsets = UIEdgeInsetsZero;
+    _imageAlignment = ASButtonNodeImageAlignmentBeginning;
     self.accessibilityTraits = UIAccessibilityTraitButton;
   }
   return self;
@@ -76,7 +78,7 @@
       // of the button node to add a touch handler.
     [_titleNode setLayerBacked:YES];
 #endif
-    [_titleNode setFlexShrink:YES];
+    _titleNode.style.flexShrink = 1.0;
   }
   return _titleNode;
 }
@@ -108,25 +110,31 @@
 
 - (void)setEnabled:(BOOL)enabled
 {
-  [super setEnabled:enabled];
-  if (enabled) {
-    self.accessibilityTraits = UIAccessibilityTraitButton;
-  } else {
-    self.accessibilityTraits = UIAccessibilityTraitButton | UIAccessibilityTraitNotEnabled;
+  if (self.enabled != enabled) {
+    [super setEnabled:enabled];
+    if (enabled) {
+      self.accessibilityTraits = UIAccessibilityTraitButton;
+    } else {
+      self.accessibilityTraits = UIAccessibilityTraitButton | UIAccessibilityTraitNotEnabled;
+    }
+    [self updateButtonContent];
   }
-  [self updateButtonContent];
 }
 
 - (void)setHighlighted:(BOOL)highlighted
 {
-  [super setHighlighted:highlighted];
-  [self updateButtonContent];
+  if (self.highlighted != highlighted) {
+    [super setHighlighted:highlighted];
+    [self updateButtonContent];
+  }
 }
 
 - (void)setSelected:(BOOL)selected
 {
-  [super setSelected:selected];
-  [self updateButtonContent];
+  if (self.selected != selected) {
+    [super setSelected:selected];
+    [self updateButtonContent];
+  }
 }
 
 - (void)updateButtonContent
@@ -279,6 +287,18 @@
 {
   ASDN::MutexLocker l(__instanceLock__);
   _contentEdgeInsets = contentEdgeInsets;
+}
+
+- (ASButtonNodeImageAlignment)imageAlignment
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _imageAlignment;
+}
+
+- (void)setImageAlignment:(ASButtonNodeImageAlignment)imageAlignment
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _imageAlignment = imageAlignment;
 }
 
 
@@ -462,6 +482,7 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   UIEdgeInsets contentEdgeInsets;
+  ASButtonNodeImageAlignment imageAlignment;
   ASLayoutSpec *spec;
   ASStackLayoutSpec *stack = [[ASStackLayoutSpec alloc] init];
   {
@@ -472,6 +493,7 @@
     stack.verticalAlignment = _contentVerticalAlignment;
     
     contentEdgeInsets = _contentEdgeInsets;
+    imageAlignment = _imageAlignment;
   }
   
   NSMutableArray *children = [[NSMutableArray alloc] initWithCapacity:2];
@@ -480,7 +502,11 @@
   }
   
   if (_titleNode.attributedText.length > 0) {
-    [children addObject:_titleNode];
+    if (imageAlignment == ASButtonNodeImageAlignmentBeginning) {
+      [children addObject:_titleNode];
+    } else {
+      [children insertObject:_titleNode atIndex:0];
+    }
   }
   
   stack.children = children;
@@ -490,12 +516,7 @@
   if (UIEdgeInsetsEqualToEdgeInsets(UIEdgeInsetsZero, contentEdgeInsets) == NO) {
     spec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:contentEdgeInsets child:spec];
   }
-  
-  if (CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero) == NO) {
-    stack.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(self.preferredFrameSize);
-    spec = [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[stack]];
-  }
-  
+
   if (_backgroundImageNode.image) {
     spec = [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:spec background:_backgroundImageNode];
   }

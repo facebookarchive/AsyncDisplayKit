@@ -10,6 +10,7 @@
 
 #import "ASDisplayNode.h"
 #import "ASLayoutRangeType.h"
+#import "ASTraceEvent.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,6 +18,35 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
 void ASPerformBlockOnMainThread(void (^block)());
 void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
 ASDISPLAYNODE_EXTERN_C_END
+
+#ifndef ASDISPLAYNODE_EVENTLOG_CAPACITY
+#define ASDISPLAYNODE_EVENTLOG_CAPACITY 20
+#endif
+
+#ifndef ASDISPLAYNODE_EVENTLOG_ENABLE
+#define ASDISPLAYNODE_EVENTLOG_ENABLE DEBUG
+#endif
+
+#if ASDISPLAYNODE_EVENTLOG_ENABLE
+#define ASDisplayNodeLogEvent(node, ...) [node _logEventWithBacktrace:[NSThread callStackSymbols] format:__VA_ARGS__]
+#else
+#define ASDisplayNodeLogEvent(node, ...)
+#endif
+
+/**
+ * Bitmask to indicate what performance measurements the cell should record.
+ */
+typedef NS_OPTIONS(NSUInteger, ASDisplayNodePerformanceMeasurementOptions) {
+  ASDisplayNodePerformanceMeasurementOptionLayoutSpec = 1 << 0,
+  ASDisplayNodePerformanceMeasurementOptionLayoutComputation = 1 << 1
+};
+
+typedef struct {
+  CFTimeInterval layoutSpecTotalTime;
+  NSInteger layoutSpecNumberOfPasses;
+  CFTimeInterval layoutComputationTotalTime;
+  NSInteger layoutComputationNumberOfPasses;
+} ASDisplayNodePerformanceMeasurements;
 
 @interface ASDisplayNode (Beta)
 
@@ -30,11 +60,8 @@ ASDISPLAYNODE_EXTERN_C_END
  *
  * This property defaults to NO. It will be removed in a future release.
  */
-+ (BOOL)suppressesInvalidCollectionUpdateExceptions;
++ (BOOL)suppressesInvalidCollectionUpdateExceptions AS_WARN_UNUSED_RESULT;
 + (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses;
-
-/** @name Layout */
-
 
 /**
  * @abstract Recursively ensures node and all subnodes are displayed.
@@ -57,13 +84,21 @@ ASDISPLAYNODE_EXTERN_C_END
  */
 @property (nonatomic, copy, nullable) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
 
-/** @name Layout Transitioning */
+/**
+ * @abstract A bitmask representing which actions (layout spec, layout generation) should be measured.
+ */
+@property (nonatomic, assign) ASDisplayNodePerformanceMeasurementOptions measurementOptions;
+
+/**
+ * @abstract A simple struct representing performance measurements collected.
+ */
+@property (nonatomic, assign, readonly) ASDisplayNodePerformanceMeasurements performanceMeasurements;
 
 /**
  * @abstract Currently used by ASNetworkImageNode and ASMultiplexImageNode to allow their placeholders to stay if they are loading an image from the network.
  * Otherwise, a display pass is scheduled and completes, but does not actually draw anything - and ASDisplayNode considers the element finished.
  */
-- (BOOL)placeholderShouldPersist;
+- (BOOL)placeholderShouldPersist AS_WARN_UNUSED_RESULT;
 
 /**
  * @abstract Indicates that the receiver and all subnodes have finished displaying. May be called more than once, for example if the receiver has
@@ -82,6 +117,20 @@ ASDISPLAYNODE_EXTERN_C_END
  * enabling .neverShowPlaceholders on ASCellNodes so that the navigation operation is blocked on redisplay completing, etc.
  */
 + (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode;
+
+#if ASDISPLAYNODE_EVENTLOG_ENABLE
+
+/**
+ * The primitive event tracing method. You shouldn't call this. Use the ASDisplayNodeLogEvent macro instead.
+ */
+- (void)_logEventWithBacktrace:(NSArray<NSString *> *)backtrace format:(NSString *)format, ... NS_FORMAT_FUNCTION(2, 3);
+
+/**
+ * @abstract The most recent trace events for this node. Max count is ASDISPLAYNODE_EVENTLOG_CAPACITY.
+ */
+@property (readonly, copy) NSArray *eventLog;
+
+#endif
 
 @end
 

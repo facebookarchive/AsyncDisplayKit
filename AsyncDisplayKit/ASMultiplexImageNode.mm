@@ -50,8 +50,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 {
 @private
   // Core.
-  id<ASImageCacheProtocol, ASImageCacheProtocolDeprecated> _cache;
-  id<ASImageDownloaderProtocol, ASImageDownloaderProtocolDeprecated> _downloader;
+  id<ASImageCacheProtocol> _cache;
+  id<ASImageDownloaderProtocol> _downloader;
 
   __weak id<ASMultiplexImageNodeDelegate> _delegate;
   struct {
@@ -91,7 +91,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   BOOL _downloaderSupportsNewProtocol;
   BOOL _downloaderImplementsSetProgress;
   BOOL _downloaderImplementsSetPriority;
-  BOOL _cacheSupportsNewProtocol;
+  BOOL _cacheSupportsCachedImage;
   BOOL _cacheSupportsClearing;
 }
 
@@ -173,19 +173,19 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   if (!(self = [super init]))
     return nil;
 
-  _cache = (id<ASImageCacheProtocol, ASImageCacheProtocolDeprecated>)cache;
-  _downloader = (id<ASImageDownloaderProtocol, ASImageDownloaderProtocolDeprecated>)downloader;
+  _cache = (id<ASImageCacheProtocol>)cache;
+  _downloader = (id<ASImageDownloaderProtocol>)downloader;
   
-  ASDisplayNodeAssert([downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)] || [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:)], @"downloader must respond to either downloadImageWithURL:callbackQueue:downloadProgress:completion: or downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:.");
+  ASDisplayNodeAssert([downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)], @"downloader must respond to either downloadImageWithURL:callbackQueue:downloadProgress:completion:.");
   
   _downloaderSupportsNewProtocol = [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)];
   
-  ASDisplayNodeAssert(cache == nil || [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)] || [cache respondsToSelector:@selector(fetchCachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion: or fetchCachedImageWithURL:callbackQueue:completion:");
+  ASDisplayNodeAssert(cache == nil || [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion:");
   
   _downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)];
   _downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)];
   
-  _cacheSupportsNewProtocol = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
+  _cacheSupportsCachedImage = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
   _cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
   
   _shouldRenderProgressImages = YES;
@@ -531,14 +531,12 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   // Destruction of bigger images on the main thread can be expensive
   // and can take some time, so we dispatch onto a bg queue to
   // actually dealloc.
-  __block UIImage *image = self.image;
+  UIImage *image = self.image;
   CGSize imageSize = image.size;
   BOOL shouldReleaseImageOnBackgroundThread = imageSize.width > kMinReleaseImageOnBackgroundSize.width ||
   imageSize.height > kMinReleaseImageOnBackgroundSize.height;
   if (shouldReleaseImageOnBackgroundThread) {
-    ASPerformBlockOnDeallocationQueue(^{
-      image = nil;
-    });
+    ASPerformBackgroundDeallocation(image);
   }
   self.image = nil;
 }
@@ -785,18 +783,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   ASDisplayNodeAssertNotNil(completionBlock, @"completionBlock is required");
 
   if (_cache) {
-    if (_cacheSupportsNewProtocol) {
+    if (_cacheSupportsCachedImage) {
       [_cache cachedImageWithURL:imageURL callbackQueue:dispatch_get_main_queue() completion:^(id <ASImageContainerProtocol> imageContainer) {
         completionBlock([imageContainer asdk_image]);
       }];
-    } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-      [_cache fetchCachedImageWithURL:imageURL callbackQueue:dispatch_get_main_queue() completion:^(CGImageRef coreGraphicsImageFromCache) {
-        UIImage *imageFromCache = (coreGraphicsImageFromCache ? [UIImage imageWithCGImage:coreGraphicsImageFromCache] : nil);
-        completionBlock(imageFromCache);
-      }];
-#pragma clang diagnostic pop
     }
   }
   // If we don't have a cache, just fail immediately.
@@ -850,26 +840,6 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
                                                             if (strongSelf->_delegateFlags.downloadFinish)
                                                               [strongSelf->_delegate multiplexImageNode:weakSelf didFinishDownloadingImageWithIdentifier:imageIdentifier error:error];
                                                           }]];
-    } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-      [self _setDownloadIdentifier:[_downloader downloadImageWithURL:imageURL
-                                                       callbackQueue:dispatch_get_main_queue()
-                                               downloadProgressBlock:downloadProgressBlock
-                                                          completion:^(CGImageRef coreGraphicsImage, NSError *error) {
-                                                            // We dereference iVars directly, so we can't have weakSelf going nil on us.
-                                                            __typeof__(self) strongSelf = weakSelf;
-                                                            if (!strongSelf)
-                                                              return;
-                                                            
-                                                            UIImage *downloadedImage = (coreGraphicsImage ? [UIImage imageWithCGImage:coreGraphicsImage] : nil);
-                                                            completionBlock(downloadedImage, error);
-                                                            
-                                                            // Delegateify.
-                                                            if (strongSelf->_delegateFlags.downloadFinish)
-                                                              [strongSelf->_delegate multiplexImageNode:weakSelf didFinishDownloadingImageWithIdentifier:imageIdentifier error:error];
-                                                          }]];
-#pragma clang diagnostic pop
     }
     [self _updateProgressImageBlockOnDownloaderIfNeeded];
   });

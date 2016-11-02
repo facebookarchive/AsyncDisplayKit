@@ -15,7 +15,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-typedef void (^ASTestPerformanceCaseBlock)(dispatch_block_t startMeasuring, dispatch_block_t stopMeasuring);
+typedef void (^ASTestPerformanceCaseBlock)(NSUInteger i, dispatch_block_t startMeasuring, dispatch_block_t stopMeasuring);
 
 @interface ASPerformanceTestResult : NSObject
 @property (nonatomic, readonly) NSTimeInterval timePer1000;

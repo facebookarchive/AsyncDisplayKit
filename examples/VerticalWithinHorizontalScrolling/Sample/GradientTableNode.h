@@ -21,7 +21,7 @@
  * This ASCellNode contains an ASTableNode.  It intelligently interacts with a containing ASCollectionView,
  * to preload and clean up contents as the user scrolls around both vertically and horizontally — in a way that minimizes memory usage.
  */
-@interface GradientTableNode : ASCellNode <ASTableViewDelegate, ASTableViewDataSource>
+@interface GradientTableNode : ASCellNode 
 
 - (instancetype)initWithElementSize:(CGSize)size;
 

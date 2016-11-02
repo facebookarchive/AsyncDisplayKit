@@ -77,7 +77,7 @@ static const CGFloat kInnerPadding = 10.0f;
   // kitten image, with a solid background colour serving as placeholder
   _imageNode = [[ASNetworkImageNode alloc] init];
   _imageNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
-  _imageNode.preferredFrameSize = _kittenSize;
+  _imageNode.style.preferredSize = _kittenSize;
   [_imageNode addTarget:self action:@selector(imageTapped:) forControlEvents:ASControlNodeEventTouchUpInside];
   
   CGFloat scale = [UIScreen mainScreen].scale;
@@ -91,8 +91,8 @@ static const CGFloat kInnerPadding = 10.0f;
   _textNode = [[ASTextNode alloc] init];
   _textNode.attributedText = [[NSAttributedString alloc] initWithString:[self kittyIpsum]
                                                                attributes:[self textStyle]];
-  _textNode.flexShrink = YES;
-  _textNode.flexGrow = YES;
+  _textNode.style.flexShrink = 1.0;
+  _textNode.style.flexGrow = 1.0;
   [self addSubnode:_textNode];
   
   return self;
@@ -141,10 +141,10 @@ static const CGFloat kInnerPadding = 10.0f;
   [stackSpec setChildren:@[_imageNode, _textNode]];
   
   if (self.asyncTraitCollection.horizontalSizeClass == UIUserInterfaceSizeClassRegular) {
-    _imageNode.alignSelf = ASStackLayoutAlignSelfStart;
+    _imageNode.style.alignSelf = ASStackLayoutAlignSelfStart;
     stackSpec.direction = ASStackLayoutDirectionHorizontal;
   } else {
-    _imageNode.alignSelf = ASStackLayoutAlignSelfCenter;
+    _imageNode.style.alignSelf = ASStackLayoutAlignSelfCenter;
     stackSpec.direction = ASStackLayoutDirectionVertical;
   }
   

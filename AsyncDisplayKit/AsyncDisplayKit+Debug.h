@@ -14,6 +14,8 @@
 #import "ASImageNode.h"
 #import "ASRangeController.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface ASImageNode (Debugging)
 
 /**
@@ -67,3 +69,4 @@
 
 @end
 
+NS_ASSUME_NONNULL_END

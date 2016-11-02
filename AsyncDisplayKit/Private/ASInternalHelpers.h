@@ -9,7 +9,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <CoreGraphics/CGBase.h>
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
@@ -27,8 +26,8 @@ void ASPerformBlockOnMainThread(void (^block)());
 /// Dispatches the given block to a background queue with priority of DISPATCH_QUEUE_PRIORITY_DEFAULT if not already run on a background queue
 void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
 
-/// Dispatches a block on to a serial queue that's main purpose is for deallocation of objects on a background thread
-void ASPerformBlockOnDeallocationQueue(void (^block)());
+/// For deallocation of objects on a background thread without GCD overhead / thread explosion
+void ASPerformBackgroundDeallocation(id object);
 
 CGFloat ASScreenScale();
 
@@ -39,6 +38,17 @@ CGFloat ASCeilPixelValue(CGFloat f);
 CGFloat ASRoundPixelValue(CGFloat f);
 
 ASDISPLAYNODE_EXTERN_C_END
+
+ASDISPLAYNODE_INLINE BOOL ASImageAlphaInfoIsOpaque(CGImageAlphaInfo info) {
+  switch (info) {
+    case kCGImageAlphaNone:
+    case kCGImageAlphaNoneSkipLast:
+    case kCGImageAlphaNoneSkipFirst:
+      return YES;
+    default:
+      return NO;
+  }
+}
 
 /**
  @summary Conditionally performs UIView geometry changes in the given block without animation.

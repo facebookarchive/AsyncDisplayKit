@@ -16,16 +16,20 @@
 //
 
 #import "DetailRootNode.h"
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
-
 #import "DetailCellNode.h"
+
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 static const NSInteger kImageHeight = 200;
 
-@interface DetailRootNode () <ASCollectionViewDataSource, ASCollectionViewDelegate>
+
+@interface DetailRootNode () <ASCollectionDataSource, ASCollectionDelegate>
+
 @property (nonatomic, copy) NSString *imageCategory;
 @property (nonatomic, strong) ASCollectionNode *collectionNode;
+
 @end
+
 
 @implementation DetailRootNode
 
@@ -63,18 +67,18 @@ static const NSInteger kImageHeight = 200;
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
     self.collectionNode.position = CGPointZero;
-    self.collectionNode.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.collectionNode]];
+    self.collectionNode.style.preferredSize = constrainedSize.max;
+    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[self.collectionNode]];
 }
 
 #pragma mark - ASCollectionDataSource
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+- (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
 {
     return 10;
 }
 
-- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString *imageCategory = self.imageCategory;
     return ^{
@@ -85,9 +89,9 @@ static const NSInteger kImageHeight = 200;
     };
 }
 
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    CGSize imageSize = CGSizeMake(CGRectGetWidth(collectionView.frame), kImageHeight);
+    CGSize imageSize = CGSizeMake(CGRectGetWidth(collectionNode.view.frame), kImageHeight);
     return ASSizeRangeMake(imageSize, imageSize);
 }
 

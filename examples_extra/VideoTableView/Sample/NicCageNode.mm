@@ -165,8 +165,10 @@ static const CGFloat kInnerPadding = 10.0f;
 #if UseAutomaticLayout
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _videoNode.preferredFrameSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize) : CGSizeMake(kImageSize, kImageSize);
-  _textNode.flexShrink = YES;
+  CGSize videoNodeSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize)
+                                          : CGSizeMake(kImageSize, kImageSize);
+  _videoNode.size = ASRelativeSizeRangeMakeWithExactCGSize(videoNodeSize);
+  _textNode.flexShrink = 1.0;
   
   ASStackLayoutSpec *stackSpec = [[ASStackLayoutSpec alloc] init];
   stackSpec.direction = ASStackLayoutDirectionHorizontal;

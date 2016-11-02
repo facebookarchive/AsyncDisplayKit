@@ -695,6 +695,18 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   _setToLayer(borderColor, colorValue);
 }
 
+- (BOOL)allowsGroupOpacity
+{
+  _bridge_prologue_read;
+  return _getFromLayer(allowsGroupOpacity);
+}
+
+- (void)setAllowsGroupOpacity:(BOOL)allowsGroupOpacity
+{
+  _bridge_prologue_write;
+  _setToLayer(allowsGroupOpacity, allowsGroupOpacity);
+}
+
 - (BOOL)allowsEdgeAntialiasing
 {
   _bridge_prologue_read;
@@ -962,8 +974,14 @@ nodeProperty = nodeValueExpr; _setToViewOnly(viewAndPendingViewStateProperty, vi
   [_layer asyncdisplaykit_cancelAsyncTransactions];
 }
 
-- (void)asyncdisplaykit_asyncTransactionContainerStateDidChange
+- (void)asyncdisplaykit_setCurrentAsyncTransaction:(_ASAsyncTransaction *)transaction
 {
+  _layer.asyncdisplaykit_currentAsyncTransaction = transaction;
+}
+
+- (_ASAsyncTransaction *)asyncdisplaykit_currentAsyncTransaction
+{
+  return _layer.asyncdisplaykit_currentAsyncTransaction;
 }
 
 @end

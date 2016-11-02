@@ -11,6 +11,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -20,7 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, getter=isEmpty) BOOL empty;
 
 /// Returns YES if `object` is in the receiver, NO otherwise.
-- (BOOL)containsObject:(ObjectType)object;
+- (BOOL)containsObject:(ObjectType)object AS_WARN_UNUSED_RESULT;
 
 /// Insets `object` into the set.
 - (void)addObject:(ObjectType)object;
@@ -32,7 +33,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)removeAllObjects;
 
 /// Returns a standard *retained* NSArray of all objects.  Not free to generate, but useful for iterating over contents.
-- (NSArray *)allObjects;
+- (NSArray *)allObjects AS_WARN_UNUSED_RESULT;
 
 /**
  * How many objects are contained in this set.

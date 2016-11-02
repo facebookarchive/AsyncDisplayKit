@@ -11,11 +11,17 @@
 #import "ASCellNode+Internal.h"
 
 #import "ASEqualityHelpers.h"
+#import "ASInternalHelpers.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASCollectionView+Undeprecated.h"
+#import "ASTableView+Undeprecated.h"
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASTextNode.h>
+#import <AsyncDisplayKit/ASCollectionNode.h>
+#import <AsyncDisplayKit/ASTableNode.h>
 
 #import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
@@ -30,12 +36,19 @@
   ASDisplayNode *_viewControllerNode;
   UIViewController *_viewController;
   BOOL _suspendInteractionDelegate;
+
+  struct {
+    unsigned int isTableNode:1;
+    unsigned int isCollectionNode:1;
+  } _owningNodeType;
+
 }
 
 @end
 
 @implementation ASCellNode
 @synthesize interactionDelegate = _interactionDelegate;
+static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +initialize.
 
 - (instancetype)init
 {
@@ -179,6 +192,19 @@
   }
 }
 
+- (void)setOwningNode:(ASDisplayNode *)owningNode
+{
+  _owningNode = owningNode;
+
+  memset(&_owningNodeType, 0, sizeof(_owningNodeType));
+
+  if ([owningNode isKindOfClass:[ASTableNode class]]) {
+    _owningNodeType.isTableNode      = 1;
+  } else if ([owningNode isKindOfClass:[ASCollectionNode class]]) {
+    _owningNodeType.isCollectionNode = 1;
+  }
+}
+
 - (void)__setSelectedFromUIKit:(BOOL)selected;
 {
   if (selected != _selected) {
@@ -195,6 +221,19 @@
     self.highlighted = highlighted;
     _suspendInteractionDelegate = NO;
   }
+}
+
+- (NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertMainThread();
+
+  if (_owningNodeType.isTableNode) {
+    return [(ASTableNode *)self.owningNode indexPathForNode:self];
+  } else if (_owningNodeType.isCollectionNode) {
+    return [(ASCollectionNode *)self.owningNode indexPathForNode:self];
+  }
+
+  return nil;
 }
 
 #pragma clang diagnostic push
@@ -230,6 +269,17 @@
 
 #pragma clang diagnostic pop
 
+- (void)setLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
+{
+  ASDisplayNodeAssertMainThread();
+  if (ASObjectIsEqual(layoutAttributes, _layoutAttributes) == NO) {
+    _layoutAttributes = layoutAttributes;
+    if (layoutAttributes != nil) {
+      [self applyLayoutAttributes:layoutAttributes];
+    }
+  }
+}
+
 - (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
 {
   // To be overriden by subclasses
@@ -255,10 +305,26 @@
   [self handleVisibilityChange:NO];
 }
 
++ (void)initialize
+{
+  [super initialize];
+  if (ASSubclassOverridesSelector([ASCellNode class], self, @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:))) {
+    if (__cellClassesForVisibilityNotifications == nil) {
+      __cellClassesForVisibilityNotifications = [NSMutableSet set];
+    }
+    [__cellClassesForVisibilityNotifications addObject:self];
+  }
+}
+
 - (void)handleVisibilityChange:(BOOL)isVisible
 {
+  if ([__cellClassesForVisibilityNotifications containsObject:[self class]] == NO) {
+    return; // The work below is expensive, and only valuable for subclasses watching visibility events.
+  }
+  
   // NOTE: This assertion is failing in some apps and will be enabled soon.
   // ASDisplayNodeAssert(self.isNodeLoaded, @"Node should be loaded in order for it to become visible or invisible.  If not in this situation, we shouldn't trigger creating the view.");
+  
   UIView *view = self.view;
   CGRect cellFrame = CGRectZero;
   
@@ -271,11 +337,49 @@
   
   // If we did not convert, we'll pass along CGRectZero and a nil scrollView.  The EventInvisible call is thus equivalent to
   // didExitVisibileState, but is more convenient for the developer than implementing multiple methods.
-  [self cellNodeVisibilityEvent:isVisible ? ASCellNodeVisibilityEventVisible : ASCellNodeVisibilityEventInvisible
+  [self cellNodeVisibilityEvent:isVisible ? ASCellNodeVisibilityEventVisible
+                                          : ASCellNodeVisibilityEventInvisible
                    inScrollView:scrollView
                   withCellFrame:cellFrame];
 }
 
+- (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
+{
+  NSMutableArray *result = [super propertiesForDebugDescription];
+  
+  UIScrollView *scrollView = self.scrollView;
+  
+  ASDisplayNode *owningNode = scrollView.asyncdisplaykit_node;
+  if ([owningNode isKindOfClass:[ASCollectionNode class]]) {
+    NSIndexPath *ip = [(ASCollectionNode *)owningNode indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
+    [result addObject:@{ @"collectionNode" : ASObjectDescriptionMakeTiny(owningNode) }];
+  } else if ([owningNode isKindOfClass:[ASTableNode class]]) {
+    NSIndexPath *ip = [(ASTableNode *)owningNode indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
+    [result addObject:@{ @"tableNode" : ASObjectDescriptionMakeTiny(owningNode) }];
+  
+  } else if ([scrollView isKindOfClass:[ASCollectionView class]]) {
+    NSIndexPath *ip = [(ASCollectionView *)scrollView indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
+    [result addObject:@{ @"collectionView" : ASObjectDescriptionMakeTiny(scrollView) }];
+    
+  } else if ([scrollView isKindOfClass:[ASTableView class]]) {
+    NSIndexPath *ip = [(ASTableView *)scrollView indexPathForNode:self];
+    if (ip != nil) {
+      [result addObject:@{ @"indexPath" : ip }];
+    }
+    [result addObject:@{ @"tableView" : ASObjectDescriptionMakeTiny(scrollView) }];
+  }
+
+  return result;
+}
 @end
 
 
@@ -306,8 +410,8 @@ static const CGFloat kASTextCellNodeDefaultVerticalPadding = 11.0f;
   if (self) {
     _textInsets = textInsets;
     _textAttributes = [textAttributes copy];
-    self.automaticallyManagesSubnodes = YES;
     _textNode = [[ASTextNode alloc] init];
+    [self addSubnode:_textNode];
   }
   return self;
 }

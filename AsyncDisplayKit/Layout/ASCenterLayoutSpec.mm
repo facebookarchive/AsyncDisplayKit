@@ -20,7 +20,7 @@
 
 - (instancetype)initWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
                            sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
-                                   child:(id<ASLayoutable>)child;
+                                   child:(id<ASLayoutElement>)child;
 {
   ASRelativeLayoutSpecPosition verticalPosition = [self verticalPositionFromCenteringOptions:centeringOptions];
   ASRelativeLayoutSpecPosition horizontalPosition = [self horizontalPositionFromCenteringOptions:centeringOptions];
@@ -35,7 +35,7 @@
 
 + (instancetype)centerLayoutSpecWithCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
                                        sizingOptions:(ASCenterLayoutSpecSizingOptions)sizingOptions
-                                               child:(id<ASLayoutable>)child
+                                               child:(id<ASLayoutElement>)child
 {
   return [[self alloc] initWithCenteringOptions:centeringOptions sizingOptions:sizingOptions child:child];
 }
@@ -58,21 +58,19 @@
 
 - (ASRelativeLayoutSpecPosition)horizontalPositionFromCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
 {
-  BOOL centerX =  (centeringOptions & ASCenterLayoutSpecCenteringX) != 0;
-  if (centerX) {
+  if ((centeringOptions & ASCenterLayoutSpecCenteringX) != 0) {
     return ASRelativeLayoutSpecPositionCenter;
   } else {
-    return ASRelativeLayoutSpecPositionStart;
+    return ASRelativeLayoutSpecPositionNone;
   }
 }
 
 - (ASRelativeLayoutSpecPosition)verticalPositionFromCenteringOptions:(ASCenterLayoutSpecCenteringOptions)centeringOptions
 {
-  BOOL centerY =  (centeringOptions & ASCenterLayoutSpecCenteringY) != 0;
-  if (centerY) {
+  if ((centeringOptions & ASCenterLayoutSpecCenteringY) != 0) {
     return ASRelativeLayoutSpecPositionCenter;
   } else {
-    return ASRelativeLayoutSpecPositionStart;
+    return ASRelativeLayoutSpecPositionNone;
   }
 }
 

@@ -324,7 +324,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_playbackButtonNode == nil) {
     _playbackButtonNode = [[ASDefaultPlaybackButton alloc] init];
-    _playbackButtonNode.preferredFrameSize = CGSizeMake(16.0, 22.0);
+    _playbackButtonNode.style.preferredSize = CGSizeMake(16.0, 22.0);
+
     if (_delegateFlags.delegatePlaybackButtonTint) {
       _playbackButtonNode.tintColor = [_delegate videoPlayerNodePlaybackButtonTint:self];
     } else {
@@ -404,7 +405,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       return slider;
     }];
 
-    _scrubberNode.flexShrink = YES;
+    _scrubberNode.style.flexShrink = 1;
 
     [_cachedControls setObject:_scrubberNode forKey:@(ASVideoPlayerNodeControlTypeScrubber)];
   }
@@ -416,7 +417,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   if (_controlFlexGrowSpacerSpec == nil) {
     _controlFlexGrowSpacerSpec = [[ASStackLayoutSpec alloc] init];
-    _controlFlexGrowSpacerSpec.flexGrow = YES;
+    _controlFlexGrowSpacerSpec.style.flexGrow = 1.0;
   }
 
   [_cachedControls setObject:_controlFlexGrowSpacerSpec forKey:@(ASVideoPlayerNodeControlTypeFlexGrowSpacer)];
@@ -598,7 +599,8 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       
       return spinnnerView;
     }];
-    _spinnerNode.preferredFrameSize = CGSizeMake(44.0, 44.0);
+    
+    _spinnerNode.style.preferredSize = CGSizeMake(44.0, 44.0);
 
     [self addSubnode:_spinnerNode];
     [self setNeedsLayout];
@@ -693,23 +695,22 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   return controls;
 }
 
+
 #pragma mark - Layout
-- (ASLayoutSpec*)layoutSpecThatFits:(ASSizeRange)constrainedSize
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   CGSize maxSize = constrainedSize.max;
-  if (!CGSizeEqualToSize(self.preferredFrameSize, CGSizeZero)) {
-    maxSize = self.preferredFrameSize;
-  }
 
   // Prevent crashes through if infinite width or height
   if (isinf(maxSize.width) || isinf(maxSize.height)) {
     ASDisplayNodeAssert(NO, @"Infinite width or height in ASVideoPlayerNode");
     maxSize = CGSizeZero;
   }
-  _videoNode.preferredFrameSize = maxSize;
+
+  _videoNode.style.preferredSize = maxSize;
 
   ASLayoutSpec *layoutSpec;
-
   if (_delegateFlags.delegateLayoutSpecForControls) {
     layoutSpec = [_delegate videoPlayerNodeLayoutSpec:self forControls:_cachedControls forMaximumSize:maxSize];
   } else {
@@ -720,37 +721,36 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   if (_spinnerNode) {
     ASCenterLayoutSpec *centerLayoutSpec = [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY sizingOptions:ASCenterLayoutSpecSizingOptionDefault child:_spinnerNode];
-    centerLayoutSpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
+    centerLayoutSpec.style.preferredSize = maxSize;
     [children addObject:centerLayoutSpec];
   }
 
   ASOverlayLayoutSpec *overlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_videoNode overlay:layoutSpec];
-  overlaySpec.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(maxSize);
-
+  overlaySpec.style.preferredSize = maxSize;
   [children addObject:overlaySpec];
 
-  return [ASStaticLayoutSpec staticLayoutSpecWithChildren:children];
+  return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:children];
 }
 
-- (ASLayoutSpec*)defaultLayoutSpecThatFits:(CGSize)maxSize
+- (ASLayoutSpec *)defaultLayoutSpecThatFits:(CGSize)maxSize
 {
-  _scrubberNode.preferredFrameSize = CGSizeMake(maxSize.width, 44.0);
+  _scrubberNode.style.preferredSize = CGSizeMake(maxSize.width, 44.0);
 
   ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
-  spacer.flexGrow = YES;
+  spacer.style.flexGrow = 1.0;
 
   ASStackLayoutSpec *controlbarSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
                                                                             spacing:10.0
                                                                      justifyContent:ASStackLayoutJustifyContentStart
                                                                          alignItems:ASStackLayoutAlignItemsCenter
                                                                            children: [self controlsForLayoutSpec] ];
-  controlbarSpec.alignSelf = ASStackLayoutAlignSelfStretch;
+  controlbarSpec.style.alignSelf = ASStackLayoutAlignSelfStretch;
 
   UIEdgeInsets insets = UIEdgeInsetsMake(10.0, 10.0, 10.0, 10.0);
 
   ASInsetLayoutSpec *controlbarInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:controlbarSpec];
 
-  controlbarInsetSpec.alignSelf = ASStackLayoutAlignSelfStretch;
+  controlbarInsetSpec.style.alignSelf = ASStackLayoutAlignSelfStretch;
 
   ASStackLayoutSpec *mainVerticalStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
                                                                                  spacing:0.0

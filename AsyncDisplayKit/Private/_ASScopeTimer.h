@@ -37,4 +37,21 @@ namespace ASDN {
       outT = CACurrentMediaTime() - begin;
     }
   };
+
+  // variant where repeated calls are summed
+  struct SumScopeTimer {
+    NSTimeInterval begin;
+    NSTimeInterval &outT;
+    BOOL enable;
+    SumScopeTimer(NSTimeInterval &outRef, BOOL enable = YES) : outT(outRef), enable(enable) {
+      if (enable) {
+        begin = CACurrentMediaTime();
+      }
+    }
+    ~SumScopeTimer() {
+      if (enable) {
+        outT += CACurrentMediaTime() - begin;
+      }
+    }
+  };
 }

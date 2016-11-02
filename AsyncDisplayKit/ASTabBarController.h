@@ -14,6 +14,18 @@
 
 #import "ASVisibilityProtocols.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
+/**
+ * ASTabBarController
+ *
+ * @discussion ASTabBarController is a drop in replacement for UITabBarController
+ * which implements the memory efficiency improving @c ASManagesChildVisibilityDepth protocol.
+ *
+ * @see ASManagesChildVisibilityDepth
+ */
 @interface ASTabBarController : UITabBarController <ASManagesChildVisibilityDepth>
 
 @end
+
+NS_ASSUME_NONNULL_END

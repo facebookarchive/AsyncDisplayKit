@@ -24,44 +24,46 @@
 
 #include <stdlib.h>
 
-@interface ViewController () <ASTableViewDataSource, ASTableViewDelegate>
+@interface ViewController () <ASTableDataSource, ASTableDelegate>
 
-@property (nonatomic, strong) ASTableView *tableView;
+@property (nonatomic, strong) ASTableNode *tableNode;
 @property (nonatomic, strong) NSMutableArray *socialAppDataSource;
 
 @end
 
+#pragma mark - Lifecycle
 
 @implementation ViewController
 
 - (instancetype)init
 {
-    self = [super init];
+    _tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+  
+    self = [super initWithNode:_tableNode];
+  
     if (self) {
+    
+        _tableNode.delegate = self;
+        _tableNode.dataSource = self;
+        _tableNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+      
         self.title = @"Timeline";
+
         [self createSocialAppDataSource];
     }
+  
     return self;
-}
-
-
-- (void)dealloc
-{
-    _tableView.asyncDataSource = nil;
-    _tableView.asyncDelegate = nil;
 }
 
 - (void)viewDidLoad
 {
     [super viewDidLoad];
-    
-    self.tableView = [[ASTableView alloc] initWithFrame:self.view.bounds style:UITableViewStylePlain asyncDataFetching:YES];
-    self.tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-    self.tableView.separatorStyle = UITableViewCellSeparatorStyleNone; // SocialAppNode has its own separator
-    self.tableView.asyncDataSource = self;
-    self.tableView.asyncDelegate = self;
-    [self.view addSubview:self.tableView];
+  
+    // SocialAppNode has its own separator
+    self.tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
 }
+
+#pragma mark - Data Model
 
 - (void)createSocialAppDataSource
 {
@@ -116,9 +118,9 @@
     [_socialAppDataSource addObject:newPost];
 }
 
-#pragma mark - ASTableView
+#pragma mark - ASTableNode
 
-- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(nonnull NSIndexPath *)indexPath
+- (ASCellNodeBlock)tableNode:(ASTableNode *)tableNode nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
     Post *post = self.socialAppDataSource[indexPath.row];
     return ^{
@@ -126,14 +128,14 @@
     };
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+- (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
 {
     return self.socialAppDataSource.count;
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)tableNode:(ASTableNode *)tableNode didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-    PostNode *postNode = (PostNode *)[_tableView nodeForRowAtIndexPath:indexPath];
+    PostNode *postNode = (PostNode *)[_tableNode nodeForRowAtIndexPath:indexPath];
     Post *post = self.socialAppDataSource[indexPath.row];
   
     BOOL shouldRasterize = postNode.shouldRasterizeDescendants;
@@ -142,7 +144,7 @@
     
     NSLog(@"%@ rasterization for %@'s post: %@", shouldRasterize ? @"Enabling" : @"Disabling", post.name, postNode);
     
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    [tableNode deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 @end

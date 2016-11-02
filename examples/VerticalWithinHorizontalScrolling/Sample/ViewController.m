@@ -77,7 +77,7 @@
   CGSize boundsSize = pagerNode.bounds.size;
   CGSize gradientRowSize = CGSizeMake(boundsSize.width, 100);
   GradientTableNode *node = [[GradientTableNode alloc] initWithElementSize:gradientRowSize];
-  node.preferredFrameSize = boundsSize;
+  node.style.preferredSize = boundsSize;
   node.pageNumber = index;
   return node;
 }

@@ -14,6 +14,7 @@
 #import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASInternalHelpers.h"
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>
 @end
@@ -113,11 +114,13 @@
       if (displayBlock) {
         UIImage *image = (UIImage *)displayBlock();
         if (image) {
-          [image drawInRect:bounds];
+          BOOL opaque = ASImageAlphaInfoIsOpaque(CGImageGetAlphaInfo(image.CGImage));
+          CGBlendMode blendMode = opaque ? kCGBlendModeCopy : kCGBlendModeNormal;
+          [image drawInRect:bounds blendMode:blendMode alpha:1];
         }
       }
     };
-    [displayBlocks addObject:[pushAndDisplayBlock copy]];
+    [displayBlocks addObject:pushAndDisplayBlock];
   }
 
   // Recursively capture displayBlocks for all descendants.
@@ -127,11 +130,16 @@
 
   // If we pushed a transform, pop it by adding a display block that does nothing other than that.
   if (shouldDisplay) {
-    dispatch_block_t popBlock = ^{
-      CGContextRef context = UIGraphicsGetCurrentContext();
-      CGContextRestoreGState(context);
-    };
-    [displayBlocks addObject:[popBlock copy]];
+    // Since this block is pure, we can store it statically.
+    static dispatch_block_t popBlock;
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+      popBlock = ^{
+        CGContextRef context = UIGraphicsGetCurrentContext();
+        CGContextRestoreGState(context);
+      };
+    });
+    [displayBlocks addObject:popBlock];
   }
 }
 
@@ -179,7 +187,7 @@
   ASDisplayNodeAssert(rasterizing || !(_hierarchyState & ASHierarchyStateRasterized),
                       @"Rasterized descendants should never display unless being drawn into the rasterized container.");
 
-  if (shouldBeginRasterizing == YES) {
+  if (shouldBeginRasterizing) {
     // Collect displayBlocks for all descendants.
     NSMutableArray *displayBlocks = [NSMutableArray array];
     [self _recursivelyRasterizeSelfAndSublayersWithIsCancelledBlock:isCancelledBlock displayBlocks:displayBlocks];
@@ -249,7 +257,7 @@
     };
   }
 
-  return [displayBlock copy];
+  return displayBlock;
 }
 
 - (void)displayAsyncLayer:(_ASDisplayLayer *)asyncLayer asynchronously:(BOOL)asynchronously
@@ -264,16 +272,23 @@
 
   // for async display, capture the current displaySentinel value to bail early when the job is executed if another is
   // enqueued
-  // for sync display, just use nil for the displaySentinel and go
+  // for sync display, do not support cancellation
   
   // FIXME: what about the degenerate case where we are calling setNeedsDisplay faster than the jobs are dequeuing
   // from the displayQueue?  Need to not cancel early fails from displaySentinel changes.
-  ASSentinel *displaySentinel = (asynchronously ? _displaySentinel : nil);
-  int32_t displaySentinelValue = [displaySentinel increment];
-
-  asdisplaynode_iscancelled_block_t isCancelledBlock = ^{
-    return BOOL(displaySentinelValue != displaySentinel.value);
-  };
+  asdisplaynode_iscancelled_block_t isCancelledBlock = nil;
+  if (asynchronously) {
+    uint displaySentinelValue = ++_displaySentinel;
+    __weak ASDisplayNode *weakSelf = self;
+    isCancelledBlock = ^BOOL{
+      __strong ASDisplayNode *self = weakSelf;
+      return self == nil || (displaySentinelValue != self->_displaySentinel.load());
+    };
+  } else {
+    isCancelledBlock = ^BOOL{
+      return NO;
+    };
+  }
 
   // Set up displayBlock to call either display or draw on the delegate and return a UIImage contents
   asyncdisplaykit_async_transaction_operation_block_t displayBlock = [self _displayBlockWithAsynchronous:asynchronously isCancelledBlock:isCancelledBlock rasterizing:NO];
@@ -301,7 +316,7 @@
   };
 
   // Call willDisplay immediately in either case
-  [self willDisplayAsyncLayer:self.asyncLayer];
+  [self willDisplayAsyncLayer:self.asyncLayer asynchronously:asynchronously];
 
   if (asynchronously) {
     // Async rendering operations are contained by a transaction, which allows them to proceed and concurrently
@@ -326,7 +341,7 @@
 
 - (void)cancelDisplayAsyncLayer:(_ASDisplayLayer *)asyncLayer
 {
-  [_displaySentinel increment];
+  _displaySentinel.fetch_add(1);
 }
 
 - (ASDisplayNodeContextModifier)willDisplayNodeContentWithRenderingContext

@@ -11,6 +11,7 @@
 #import <AsyncDisplayKit/ASControlNode.h>
 
 #import "ASImageProtocols.h"
+#import "ASBaseDefines.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -19,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param image The image to be displayed.
  *
- * @returns A transformed image.
+ * @return A transformed image.
  */
 typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
 
@@ -120,7 +121,7 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
  * `displaySuspended` is YES, `displayCompletionBlock` is will be
  * performed immediately and `YES` will be passed for `canceled`.
  */
-- (void)setNeedsDisplayWithCompletion:(void (^ _Nullable)(BOOL canceled))displayCompletionBlock;
+- (void)setNeedsDisplayWithCompletion:(nullable void (^)(BOOL canceled))displayCompletionBlock;
 
 #if TARGET_OS_TV
 /** 
@@ -164,9 +165,9 @@ typedef UIImage * _Nullable (^asimagenode_modification_block_t)(UIImage *image);
 
 @interface ASImageNode (Unavailable)
 
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock AS_UNAVAILABLE();
 
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock AS_UNAVAILABLE();
 
 @end
 
@@ -180,7 +181,7 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
  *
  * @see <imageModificationBlock>
  *
- * @returns An ASImageNode image modification block.
+ * @return An ASImageNode image modification block.
  */
 asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat borderWidth, UIColor * _Nullable borderColor);
 
@@ -192,7 +193,7 @@ asimagenode_modification_block_t ASImageNodeRoundBorderModificationBlock(CGFloat
  *
  * @see <imageModificationBlock>
  *
- * @returns An ASImageNode image modification block.
+ * @return An ASImageNode image modification block.
  */
 asimagenode_modification_block_t ASImageNodeTintColorModificationBlock(UIColor *color);
 

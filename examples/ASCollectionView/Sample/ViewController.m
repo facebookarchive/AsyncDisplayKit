@@ -21,17 +21,16 @@
 #import "SupplementaryNode.h"
 #import "ItemNode.h"
 
-@interface ViewController ()
+@interface ViewController () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout>
+
 @property (nonatomic, strong) ASCollectionView *collectionView;
 @property (nonatomic, strong) NSArray *data;
-@end
-
-@interface ViewController () <ASCollectionViewDataSource, ASCollectionViewDelegateFlowLayout>
 
 @end
-
 
 @implementation ViewController
+
+#pragma mark - Lifecycle
 
 - (void)dealloc
 {
@@ -49,19 +48,27 @@
   layout.headerReferenceSize = CGSizeMake(50.0, 50.0);
   layout.footerReferenceSize = CGSizeMake(50.0, 50.0);
   
+  // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
+  // This functionality & example project remains for users who insist on using ASCollectionView.
   self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
-  self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   self.collectionView.asyncDataSource = self;
   self.collectionView.asyncDelegate = self;
+  
+  self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   self.collectionView.backgroundColor = [UIColor whiteColor];
   
+  // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
+  // This functionality & example project remains for users who insist on using ASCollectionView.
   [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
+  
   [self.view addSubview:self.collectionView];
   
 #if !SIMULATE_WEB_RESPONSE
   self.navigationItem.leftItemsSupplementBackButton = YES;
-  self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh target:self action:@selector(reloadTapped)];
+  self.navigationItem.leftBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRefresh
+                                                                                        target:self
+                                                                                        action:@selector(reloadTapped)];
 #endif
 
 #if SIMULATE_WEB_RESPONSE
@@ -90,13 +97,16 @@
 #endif
 }
 
+#pragma mark - Button Actions
+
 - (void)reloadTapped
 {
+  // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
+  // This functionality & example project remains for users who insist on using ASCollectionView.
   [self.collectionView reloadData];
 }
 
-#pragma mark -
-#pragma mark ASCollectionView data source.
+#pragma mark - ASCollectionView Data Source
 
 - (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath;
 {

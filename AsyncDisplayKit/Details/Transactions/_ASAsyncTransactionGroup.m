@@ -22,7 +22,7 @@ static void _transactionGroupRunLoopObserverCallback(CFRunLoopObserverRef observ
 @end
 
 @implementation _ASAsyncTransactionGroup {
-  NSHashTable *_containerLayers;
+  NSHashTable<id<ASAsyncTransactionContainer>> *_containers;
 }
 
 + (_ASAsyncTransactionGroup *)mainTransactionGroup
@@ -67,31 +67,31 @@ static void _transactionGroupRunLoopObserverCallback(CFRunLoopObserverRef observ
 - (instancetype)init
 {
   if ((self = [super init])) {
-    _containerLayers = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];
+    _containers = [NSHashTable hashTableWithOptions:NSHashTableObjectPointerPersonality];
   }
   return self;
 }
 
-- (void)addTransactionContainer:(CALayer *)containerLayer
+- (void)addTransactionContainer:(id<ASAsyncTransactionContainer>)container
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(containerLayer != nil, @"No container");
-  [_containerLayers addObject:containerLayer];
+  ASDisplayNodeAssert(container != nil, @"No container");
+  [_containers addObject:container];
 }
 
 - (void)commit
 {
   ASDisplayNodeAssertMainThread();
 
-  if ([_containerLayers count]) {
-    NSHashTable *containerLayersToCommit = _containerLayers;
-    _containerLayers = [NSHashTable hashTableWithOptions:NSPointerFunctionsObjectPointerPersonality];
+  if ([_containers count]) {
+    NSHashTable *containersToCommit = _containers;
+    _containers = [NSHashTable hashTableWithOptions:NSHashTableObjectPointerPersonality];
 
-    for (CALayer *containerLayer in containerLayersToCommit) {
+    for (id<ASAsyncTransactionContainer> container in containersToCommit) {
       // Note that the act of committing a transaction may open a new transaction,
       // so we must nil out the transaction we're committing first.
-      _ASAsyncTransaction *transaction = containerLayer.asyncdisplaykit_currentAsyncLayerTransaction;
-      containerLayer.asyncdisplaykit_currentAsyncLayerTransaction = nil;
+      _ASAsyncTransaction *transaction = container.asyncdisplaykit_currentAsyncTransaction;
+      container.asyncdisplaykit_currentAsyncTransaction = nil;
       [transaction commit];
     }
   }

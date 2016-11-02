@@ -15,15 +15,14 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import <AsyncDisplayKit/ASAssert.h>
 
 #import "ViewController.h"
 #import "HorizontalScrollCellNode.h"
 
-@interface ViewController () <ASTableViewDataSource, ASTableViewDelegate>
+@interface ViewController () <ASTableDataSource, ASTableDelegate>
 {
-  ASTableView *_tableView;
+  ASTableNode *_tableNode;
 }
 
 @end
@@ -35,14 +34,13 @@
 
 - (instancetype)init
 {
-  if (!(self = [super init]))
+  _tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+  _tableNode.dataSource = self;
+  _tableNode.delegate = self;
+
+  if (!(self = [super initWithNode:_tableNode]))
     return nil;
 
-  _tableView = [[ASTableView alloc] initWithFrame:CGRectZero style:UITableViewStylePlain];
-  _tableView.separatorStyle = UITableViewCellSeparatorStyleNone;
-  _tableView.asyncDataSource = self;
-  _tableView.asyncDelegate = self;
-  
   self.title = @"Horizontal Scrolling Gradients";
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemRedo
                                                                                          target:self
@@ -51,33 +49,26 @@
   return self;
 }
 
-- (void)reloadEverything
-{
-  [_tableView reloadData];
-}
-
 - (void)viewDidLoad
 {
   [super viewDidLoad];
 
-  [self.view addSubview:_tableView];
+  _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
 }
 
-- (void)viewWillLayoutSubviews
+- (void)reloadEverything
 {
-  _tableView.frame = self.view.bounds;
+  [_tableNode reloadData];
 }
 
-#pragma mark -
-#pragma mark ASTableView.
+#pragma mark - ASTableNode
 
-- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNode *)tableNode:(ASTableNode *)tableNode nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  HorizontalScrollCellNode *node = [[HorizontalScrollCellNode alloc] initWithElementSize:CGSizeMake(100, 100)];
-  return node;
+  return [[HorizontalScrollCellNode alloc] initWithElementSize:CGSizeMake(100, 100)];
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+- (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
 {
   return 100;
 }

@@ -12,7 +12,7 @@
 #import "ASMultidimensionalArrayUtils.h"
 
 // Import UIKit to get [NSIndexPath indexPathForItem:inSection:] which uses
-// static memory addresses rather than allocating new index path objects.
+// tagged pointers.
 #import <UIKit/UIKit.h>
 
 #pragma mark - Internal Methods
@@ -182,6 +182,15 @@ NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *multidimensiona
   return res;
 }
 
+void ASMoveElementInTwoDimensionalArray(NSMutableArray *mutableArray, NSIndexPath *sourceIndexPath, NSIndexPath *destinationIndexPath)
+{
+  NSMutableArray *oldSection = mutableArray[sourceIndexPath.section];
+  NSInteger oldItem = sourceIndexPath.item;
+  id object = oldSection[oldItem];
+  [oldSection removeObjectAtIndex:oldItem];
+  [mutableArray[destinationIndexPath.section] insertObject:object atIndex:destinationIndexPath.item];
+}
+
 NSArray<NSIndexPath *> *ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths(NSArray *multidimensionalArray, NSArray<NSIndexPath *> *indexPaths)
 {
   NSMutableArray *res = [NSMutableArray array];
@@ -213,4 +222,20 @@ NSArray *ASIndexPathsForMultidimensionalArray(NSArray *multidimensionalArray)
   NSMutableArray *res = [NSMutableArray array];
   ASRecursivelyFindIndexPathsForMultidimensionalArray(multidimensionalArray, [[NSIndexPath alloc] init], res);
   return res;
+}
+
+id ASGetElementInTwoDimensionalArray(NSArray *array, NSIndexPath *indexPath)
+{
+  ASDisplayNodeCAssert(indexPath.length == 2, @"Expected index path of length 2. Index path: %@", indexPath);
+  NSInteger section = indexPath.section;
+  if (array.count <= section) {
+    return nil;
+  }
+
+  NSArray *innerArray = array[section];
+  NSInteger item = indexPath.item;
+  if (innerArray.count <= item) {
+    return nil;
+  }
+  return innerArray[item];
 }

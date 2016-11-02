@@ -10,39 +10,43 @@
 
 #import <QuartzCore/QuartzCore.h>
 
+#import "ASXCTExtensions.h"
 #import <XCTest/XCTest.h>
 
 #import "_ASDisplayLayer.h"
 #import "_ASDisplayView.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Deprecated.h"
 #import "ASDisplayNodeTestsHelper.h"
 #import "UIView+ASConvenience.h"
 #import "ASCellNode.h"
 #import "ASImageNode.h"
+#import "ASOverlayLayoutSpec.h"
+#import "ASInsetLayoutSpec.h"
 
 // Conveniences for making nodes named a certain way
-#define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
+#define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.debugName = @#n
 #define DeclareViewNamed(v) \
     ASDisplayNode *node_##v = [[ASDisplayNode alloc] init]; \
-    node_##v.name = @#v; \
+    node_##v.debugName = @#v; \
     UIView *v = node_##v.view;
 #define DeclareLayerNamed(l) \
    ASDisplayNode *node_##l = [[ASDisplayNode alloc] init]; \
-   node_##l.name = @#l; \
+   node_##l.debugName = @#l; \
    node_##l.layerBacked = YES; \
    CALayer *l = node_##l.layer;
 
 static NSString *orderStringFromSublayers(CALayer *l) {
-  return [[[l.sublayers valueForKey:@"asyncdisplaykit_node"] valueForKey:@"name"] componentsJoinedByString:@","];
+  return [[[l.sublayers valueForKey:@"asyncdisplaykit_node"] valueForKey:@"debugName"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubviews(UIView *v) {
-  return [[[v.subviews valueForKey:@"asyncdisplaykit_node"] valueForKey:@"name"] componentsJoinedByString:@","];
+  return [[[v.subviews valueForKey:@"asyncdisplaykit_node"] valueForKey:@"debugName"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubnodes(ASDisplayNode *n) {
-  return [[n.subnodes valueForKey:@"name"] componentsJoinedByString:@","];
+  return [[n.subnodes valueForKey:@"debugName"] componentsJoinedByString:@","];
 }
 
 // Asserts subnode, subview, sublayer order match what you provide here
@@ -57,17 +61,17 @@ if (loaded) {\
 
 #define XCTAssertNodesHaveParent(parent, nodes ...) \
 for (ASDisplayNode *n in @[ nodes ]) {\
-  XCTAssertEqualObjects(parent, n.supernode, @"%@ has the wrong parent", n.name);\
+  XCTAssertEqualObjects(parent, n.supernode, @"%@ has the wrong parent", n.debugName);\
 }
 
 #define XCTAssertNodesLoaded(nodes ...) \
 for (ASDisplayNode *n in @[ nodes ]) {\
-  XCTAssertTrue(n.nodeLoaded, @"%@ should be loaded", n.name);\
+  XCTAssertTrue(n.nodeLoaded, @"%@ should be loaded", n.debugName);\
 }
 
 #define XCTAssertNodesNotLoaded(nodes ...) \
 for (ASDisplayNode *n in @[ nodes ]) {\
-  XCTAssertFalse(n.nodeLoaded, @"%@ should not be loaded", n.name);\
+  XCTAssertFalse(n.nodeLoaded, @"%@ should not be loaded", n.debugName);\
 }
 
 
@@ -80,7 +84,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @end
 
 @interface ASTestDisplayNode : ASDisplayNode
-@property (nonatomic, copy) void (^willDeallocBlock)(ASTestDisplayNode *node);
+@property (nonatomic, copy) void (^willDeallocBlock)(__unsafe_unretained ASTestDisplayNode *node);
 @property (nonatomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
 @property (nonatomic) BOOL hasFetchedData;
 
@@ -303,6 +307,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(NO, node.clipsToBounds, @"default clipsToBounds broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.opaque, @"default opaque broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.needsDisplayOnBoundsChange, @"default needsDisplayOnBoundsChange broken %@", hasLoadedView);
+  XCTAssertEqual(YES, node.allowsGroupOpacity, @"default allowsGroupOpacity broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.allowsEdgeAntialiasing, @"default allowsEdgeAntialiasing broken %@", hasLoadedView);
   XCTAssertEqual((unsigned int)(kCALayerLeftEdge | kCALayerRightEdge | kCALayerBottomEdge | kCALayerTopEdge), node.edgeAntialiasingMask, @"default edgeAntialisingMask broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.hidden, @"default hidden broken %@", hasLoadedView);
@@ -326,7 +331,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(NO, node.displaySuspended, @"default displaySuspended broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.displaysAsynchronously, @"default displaysAsynchronously broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.asyncdisplaykit_asyncTransactionContainer, @"default asyncdisplaykit_asyncTransactionContainer broken %@", hasLoadedView);
-  XCTAssertEqualObjects(nil, node.name, @"default name broken %@", hasLoadedView);
+  XCTAssertEqualObjects(nil, node.debugName, @"default name broken %@", hasLoadedView);
   
   XCTAssertEqual(NO, node.isAccessibilityElement, @"default isAccessibilityElement is broken %@", hasLoadedView);
   XCTAssertEqual((id)nil, node.accessibilityLabel, @"default accessibilityLabel is broken %@", hasLoadedView);
@@ -400,6 +405,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(YES, node.clipsToBounds, @"clipsToBounds broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.opaque, @"opaque broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.needsDisplayOnBoundsChange, @"needsDisplayOnBoundsChange broken %@", hasLoadedView);
+  XCTAssertEqual(NO, node.allowsGroupOpacity, @"allowsGroupOpacity broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.allowsEdgeAntialiasing, @"allowsEdgeAntialiasing broken %@", hasLoadedView);
   XCTAssertTrue((unsigned int)(kCALayerLeftEdge | kCALayerTopEdge) == node.edgeAntialiasingMask, @"edgeAntialiasingMask broken: %@", hasLoadedView);
   XCTAssertEqual(YES, node.hidden, @"hidden broken %@", hasLoadedView);
@@ -423,7 +429,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(YES, node.asyncdisplaykit_asyncTransactionContainer, @"asyncTransactionContainer broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.userInteractionEnabled, @"userInteractionEnabled broken %@", hasLoadedView);
   XCTAssertEqual((BOOL)!isLayerBacked, node.exclusiveTouch, @"exclusiveTouch broken %@", hasLoadedView);
-  XCTAssertEqualObjects(@"quack like a duck", node.name, @"name broken %@", hasLoadedView);
+  XCTAssertEqualObjects(@"quack like a duck", node.debugName, @"debugName broken %@", hasLoadedView);
   
   XCTAssertEqual(YES, node.isAccessibilityElement, @"accessibilityElement broken %@", hasLoadedView);
   XCTAssertEqualObjects(@"Ship love", node.accessibilityLabel, @"accessibilityLabel broken %@", hasLoadedView);
@@ -458,6 +464,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
     node.clipsToBounds = YES;
     node.opaque = NO;
     node.needsDisplayOnBoundsChange = YES;
+    node.allowsGroupOpacity = NO;
     node.allowsEdgeAntialiasing = YES;
     node.edgeAntialiasingMask = (kCALayerLeftEdge | kCALayerTopEdge);
     node.hidden = YES;
@@ -480,7 +487,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
     node.displaysAsynchronously = NO;
     node.asyncdisplaykit_asyncTransactionContainer = YES;
     node.userInteractionEnabled = NO;
-    node.name = @"quack like a duck";
+    node.debugName = @"quack like a duck";
     
     node.isAccessibilityElement = YES;
     node.accessibilityLabel = @"Ship love";
@@ -1044,7 +1051,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   [self executeOffThread:^{
     @autoreleasepool {
       ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
-      node.willDeallocBlock = ^(ASDisplayNode *n){
+      node.willDeallocBlock = ^(__unsafe_unretained ASDisplayNode *n){
         XCTAssertTrue([NSThread isMainThread], @"unexpected node dealloc %@ %@", n, [NSThread currentThread]);
         didDealloc = YES;
       };
@@ -1845,14 +1852,14 @@ static bool stringContainsPointer(NSString *description, id p) {
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
   node.layerBacked = isLayerBacked;
 
-  XCTAssertFalse([node.description rangeOfString:@"name"].location != NSNotFound, @"Shouldn't reference 'name' in description");
-  node.name = @"big troll eater name";
+  XCTAssertFalse([node.description rangeOfString:@"debugName"].location != NSNotFound, @"Shouldn't reference 'debugName' in description");
+  node.debugName = @"big troll eater name";
 
-  XCTAssertTrue([node.description rangeOfString:node.name].location != NSNotFound, @"Name didn't end up in description");
-  XCTAssertTrue([node.description rangeOfString:@"name"].location != NSNotFound, @"Shouldn't reference 'name' in description");
+  XCTAssertFalse([node.description rangeOfString:node.debugName].location == NSNotFound, @"debugName didn't end up in description");
+  XCTAssertFalse([node.description rangeOfString:@"debugName"].location == NSNotFound, @"Shouldn't reference 'debugName' in description");
   [node layer];
-  XCTAssertTrue([node.description rangeOfString:node.name].location != NSNotFound, @"Name didn't end up in description");
-  XCTAssertTrue([node.description rangeOfString:@"name"].location != NSNotFound, @"Shouldn't reference 'name' in description");
+  XCTAssertFalse([node.description rangeOfString:node.debugName].location == NSNotFound, @"debugName didn't end up in description");
+  XCTAssertFalse([node.description rangeOfString:@"debugName"].location == NSNotFound, @"Shouldn't reference 'debugName' in description");
 }
 
 - (void)testNameInDescriptionLayer
@@ -1941,6 +1948,36 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertEqual(contentsAfterRedisplay, node.contents);
 }
 
+// Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
+- (void)DISABLED_testThatNodesAreMarkedInvisibleWhenRemovedFromAVisibleRasterizedHierarchy
+{
+  ASCellNode *supernode = [[ASCellNode alloc] init];
+  supernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  [supernode addSubnode:node];
+  [window addSubnode:supernode];
+  [window makeKeyAndVisible];
+  XCTAssertTrue(node.isVisible);
+  [node removeFromSupernode];
+  XCTAssertFalse(node.isVisible);
+}
+
+// Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
+- (void)DISABLED_testThatNodesAreMarkedVisibleWhenAddedToARasterizedHierarchyAlreadyOnscreen
+{
+  ASCellNode *supernode = [[ASCellNode alloc] init];
+  supernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  [window addSubnode:supernode];
+  [window makeKeyAndVisible];
+  [supernode addSubnode:node];
+  XCTAssertTrue(node.isVisible);
+  [node removeFromSupernode];
+  XCTAssertFalse(node.isVisible);
+}
+
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2011
 - (void)testThatLayerBackedSubnodesAreMarkedInvisibleBeforeDeallocWhenSupernodesViewIsRemovedFromHierarchyWhileBeingRetained
 {
@@ -1950,12 +1987,12 @@ static bool stringContainsPointer(NSString *description, id p) {
   {
     NS_VALID_UNTIL_END_OF_SCOPE ASDisplayNode *node = [[ASDisplayNode alloc] init];
     nodeView = node.view;
-    node.name = @"Node";
+    node.debugName = @"Node";
 
     NS_VALID_UNTIL_END_OF_SCOPE ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
     subnode.layerBacked = YES;
     [node addSubnode:subnode];
-    subnode.name = @"Subnode";
+    subnode.debugName = @"Subnode";
     
     [window addSubview:nodeView];
   }
@@ -1964,15 +2001,34 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertNoThrow([nodeView removeFromSuperview]);
 }
 
+// Running on main thread
+// Cause retain count of node to fall to zero synchronously on a background thread (pausing main thread)
+// ASDealloc2MainObject queues actual call to -dealloc to occur on the main thread
+// Continue execution on main, before the dealloc can run, to dealloc the host view
+// Node is in an invalid state (about to dealloc, not valid to retain) but accesses to sublayer delegates
+// causes attempted retain — unless weak variable works correctly
+- (void)testThatLayerDelegateDoesntDangleAndCauseCrash
+{
+  NS_VALID_UNTIL_END_OF_SCOPE UIView *host = [[UIView alloc] init];
+
+  __block NS_VALID_UNTIL_END_OF_SCOPE ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.layerBacked = YES;
+
+  [host addSubnode:node];
+  [self executeOffThread:^{
+    node = nil;
+  }];
+  host = nil; // <- Would crash here, when UIView accesses its sublayers' delegates in -dealloc.
+}
 
 - (void)testThatSubnodeGetsInterfaceStateSetIfRasterized
 {
   ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
-  node.name = @"Node";
+  node.debugName = @"Node";
   node.shouldRasterizeDescendants = YES;
   
   ASTestDisplayNode *subnode = [[ASTestDisplayNode alloc] init];
-  subnode.name = @"Subnode";
+  subnode.debugName = @"Subnode";
   [node addSubnode:subnode];
   
   [node view]; // Node needs to be loaded
@@ -1984,6 +2040,116 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertTrue((subnode.interfaceState & ASInterfaceStatePreload) == ASInterfaceStatePreload);
   XCTAssertTrue(node.hasFetchedData);
   XCTAssertTrue(subnode.hasFetchedData);
+}
+
+// FIXME
+// Supernode is measured, subnode isnt, transition starts, UIKit does a layout pass before measurement finishes
+- (void)testThatItsSafeToAutomeasureANodeMidTransition
+{
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
+  [supernode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))];
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.bounds = CGRectMake(0, 0, 50, 50);
+  [supernode addSubnode:node];
+  
+  XCTAssertNil(node.calculatedLayout);
+  XCTAssertTrue(node.layer.needsLayout);
+
+  [supernode transitionLayoutWithAnimation:NO shouldMeasureAsync:YES measurementCompletion:nil];
+
+  XCTAssertNoThrow([node.view layoutIfNeeded]);
+}
+
+- (void)testThatOnDidLoadThrowsIfCalledOnLoaded
+{
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  [node view];
+  XCTAssertThrows([node onDidLoad:^(ASDisplayNode * _Nonnull node) { }]);
+}
+
+- (void)testThatOnDidLoadWorks
+{
+  ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  NSMutableArray *calls = [NSMutableArray array];
+  [node onDidLoad:^(ASTestDisplayNode * _Nonnull node) {
+    [calls addObject:@0];
+  }];
+  [node onDidLoad:^(ASTestDisplayNode * _Nonnull node) {
+    [calls addObject:@1];
+  }];
+  [node onDidLoad:^(ASTestDisplayNode * _Nonnull node) {
+    [calls addObject:@2];
+  }];
+  [node view];
+  NSArray *expected = @[ @0, @1, @2 ];
+  XCTAssertEqualObjects(calls, expected);
+}
+
+- (void)testPreferredFrameSizeDeprecated
+{
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+  ASDisplayNode *node = [ASDisplayNode new];
+  
+  // Default auto preferred frame size will be CGSizeZero
+  XCTAssert(CGSizeEqualToSize(node.preferredFrameSize, CGSizeZero));
+  
+  // Set a specific preferredFrameSize
+  node.preferredFrameSize = CGSizeMake(100, 100);
+  ASXCTAssertEqualSizes(node.preferredFrameSize, CGSizeMake(100, 100));
+  
+  // CGSizeZero should be returned if width or height is not of unit type points
+  node.style.width = ASDimensionMakeWithFraction(0.5);
+  ASXCTAssertEqualSizes(node.preferredFrameSize, CGSizeZero);
+  
+#pragma clang diagnostic pop
+}
+
+- (void)testSettingPropertiesViaStyllableProtocol
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  id<ASLayoutElement> returnedNode =
+   [node styledWithBlock:^(ASLayoutElementStyle * _Nonnull style) {
+     style.width = ASDimensionMake(100);
+     style.flexGrow = 1.0;
+     style.flexShrink = 1.0;
+   }];
+  
+  XCTAssertEqualObjects(node, returnedNode);
+  ASXCTAssertEqualDimensions(node.style.width, ASDimensionMake(100));
+  XCTAssertEqual(node.style.flexGrow, 1.0, @"flexGrow should have have the value 1.0");
+  XCTAssertEqual(node.style.flexShrink, 1.0, @"flexShrink should have have the value 1.0");
+}
+
+- (void)testSubnodesFastEnumeration
+{
+  DeclareNodeNamed(parentNode);
+  DeclareNodeNamed(a);
+  DeclareNodeNamed(b);
+  DeclareNodeNamed(c);
+  DeclareViewNamed(d);
+
+  NSArray *subnodes = @[a, b, c, d];  
+  for (ASDisplayNode *node in subnodes) {
+    [parentNode addSubnode:node];
+  }
+  
+  NSInteger i = 0;
+  for (ASDisplayNode *subnode in parentNode.subnodes) {
+    XCTAssertEqualObjects(subnode, subnodes[i]);
+    i++;
+  }
+}
+
+- (void)testThatHavingTheSameNodeTwiceInALayoutSpecCausesExceptionOnLayoutCalculation
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  node.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode *node, ASSizeRange constrainedSize) {
+    return [ASOverlayLayoutSpec overlayLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:subnode] overlay:subnode];
+  };
+  XCTAssertThrowsSpecificNamed([node calculateLayoutThatFits:ASSizeRangeMake(CGSizeMake(100, 100))], NSException, NSInternalInconsistencyException);
 }
 
 @end

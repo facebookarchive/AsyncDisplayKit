@@ -188,7 +188,8 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
     return; // don't do anything for this update, but leave _rangeIsValid == NO to make sure we update it later
   }
-  
+  ASProfilingSignpostStart(1, self);
+
   ASScrollDirection scrollDirection = [_dataSource scrollDirectionForRangeController:self];
   if (_layoutControllerImplementsSetViewportSize) {
     [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
@@ -375,6 +376,8 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   NSLog(@"Range update complete; modifiedIndexPaths: %@", [self descriptionWithIndexPaths:modifiedIndexPaths]);
 #endif
   [_delegate didCompleteUpdatesInRangeController:self];
+  
+  ASProfilingSignpostEnd(1, self);
 }
 
 #pragma mark - Notification observers

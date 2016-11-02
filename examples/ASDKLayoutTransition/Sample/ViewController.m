@@ -98,13 +98,13 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   ASTextNode *nextTextNode = self.enabled ? self.textNodeTwo : self.textNodeOne;
-  nextTextNode.flexGrow = YES;
-  nextTextNode.flexShrink = YES;
+  nextTextNode.style.flexGrow = 1.0;
+  nextTextNode.style.flexShrink = 1.0;
   
   ASStackLayoutSpec *horizontalStackLayout = [ASStackLayoutSpec horizontalStackLayoutSpec];
   horizontalStackLayout.children = @[nextTextNode];
   
-  self.buttonNode.alignSelf = ASStackLayoutAlignSelfCenter;
+  self.buttonNode.style.alignSelf = ASStackLayoutAlignSelfCenter;
   
   ASStackLayoutSpec *verticalStackLayout = [ASStackLayoutSpec verticalStackLayoutSpec];
   verticalStackLayout.spacing = 10.0;
@@ -192,7 +192,7 @@
 {
   [super viewDidLayoutSubviews];
   
-  CGSize size = [self.transitionNode measure:self.view.frame.size];
+  CGSize size = [self.transitionNode layoutThatFits:ASSizeRangeMake(CGSizeZero, self.view.frame.size)].size;
   self.transitionNode.frame = CGRectMake(0, 20, size.width, size.height);
 }
 

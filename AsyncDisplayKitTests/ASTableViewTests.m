@@ -16,6 +16,9 @@
 #import "ASChangeSetDataController.h"
 #import "ASCellNode.h"
 #import "ASTableNode.h"
+#import "ASTableView+Undeprecated.h"
+#import <JGMethodSwizzler/JGMethodSwizzler.h>
+#import "ASXCTExtensions.h"
 
 #define NumberOfSections 10
 #define NumberOfRowsPerSection 20
@@ -35,6 +38,13 @@
 
 @end
 
+@interface UITableView (Testing)
+// This will start recording all editing calls to UITableView
+// into the provided array.
+// Make sure to call [UITableView deswizzleInstanceMethods] to reset this.
++ (void)as_recordEditingCallsIntoArray:(NSMutableArray<NSString *> *)selectors;
+@end
+
 @interface ASTestTableView : ASTableView
 @property (nonatomic, copy) void (^willDeallocBlock)(ASTableView *tableView);
 @end
@@ -43,7 +53,7 @@
 
 - (instancetype)__initWithFrame:(CGRect)frame style:(UITableViewStyle)style
 {
-  return [super _initWithFrame:frame style:style dataControllerClass:[ASTestDataController class] ownedByNode:NO];
+  return [super _initWithFrame:frame style:style dataControllerClass:[ASTestDataController class]];
 }
 
 - (ASTestDataController *)testDataController
@@ -60,7 +70,7 @@
 
 @end
 
-@interface ASTableViewTestDelegate : NSObject <ASTableViewDataSource, ASTableViewDelegate>
+@interface ASTableViewTestDelegate : NSObject <ASTableDataSource, ASTableDelegate>
 @property (nonatomic, copy) void (^willDeallocBlock)(ASTableViewTestDelegate *delegate);
 @end
 
@@ -107,10 +117,20 @@
 
 @end
 
-@interface ASTableViewFilledDataSource : NSObject <ASTableViewDataSource, ASTableViewDelegate>
+@interface ASTableViewFilledDataSource : NSObject <ASTableDataSource, ASTableDelegate>
+@property (nonatomic) BOOL usesSectionIndex;
 @end
 
 @implementation ASTableViewFilledDataSource
+
+- (BOOL)respondsToSelector:(SEL)aSelector
+{
+  if (aSelector == @selector(sectionIndexTitlesForTableView:) || aSelector == @selector(tableView:sectionForSectionIndexTitle:atIndex:)) {
+    return _usesSectionIndex;
+  } else {
+    return [super respondsToSelector:aSelector];
+  }
+}
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
@@ -139,16 +159,26 @@
   };
 }
 
+- (nullable NSArray<NSString *> *)sectionIndexTitlesForTableView:(UITableView *)tableView
+{
+  return @[ @"A", @"B", @"C" ];
+}
+
+- (NSInteger)tableView:(UITableView *)tableView sectionForSectionIndexTitle:(NSString *)title atIndex:(NSInteger)index
+{
+  return 0;
+}
+
 @end
 
-@interface ASTableViewFilledDelegate : NSObject <ASTableViewDelegate>
+@interface ASTableViewFilledDelegate : NSObject <ASTableDelegate>
 @end
 
 @implementation ASTableViewFilledDelegate
 
 - (ASSizeRange)tableView:(ASTableView *)tableView constrainedSizeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  return ASSizeRangeMakeExactSize(CGSizeMake(10, 42));
+  return ASSizeRangeMake(CGSizeMake(10, 42));
 }
 
 @end
@@ -158,6 +188,20 @@
 @end
 
 @implementation ASTableViewTests
+
+- (void)testDataSourceImplementsNecessaryMethods
+{
+  ASTestTableView *tableView = [[ASTestTableView alloc] __initWithFrame:CGRectMake(0, 0, 100, 400)
+                                                                  style:UITableViewStylePlain];
+  
+  
+  
+  ASTableViewFilledDataSource *dataSource = (ASTableViewFilledDataSource *)[NSObject new];
+  XCTAssertThrows((tableView.asyncDataSource = dataSource));
+  
+  dataSource = [ASTableViewFilledDataSource new];
+  XCTAssertNoThrow((tableView.asyncDataSource = dataSource));
+}
 
 - (void)testConstrainedSizeForRowAtIndexPath
 {
@@ -241,7 +285,7 @@
   return indexPaths;
 }
 
-- (void)testReloadData
+- (void)DISABLED_testReloadData
 {
   // Keep the viewport moderately sized so that new cells are loaded on scrolling
   ASTableView *tableView = [[ASTestTableView alloc] __initWithFrame:CGRectMake(0, 0, 100, 500)
@@ -527,6 +571,187 @@
 {
   ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
   XCTAssert([node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]);
+}
+
+- (void)testThatInitialDataLoadHappensInOneShot
+{
+  NSMutableArray *selectors = [NSMutableArray array];
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  node.frame = CGRectMake(0, 0, 100, 100);
+
+  node.dataSource = dataSource;
+  node.delegate = dataSource;
+
+  [UITableView as_recordEditingCallsIntoArray:selectors];
+  XCTAssertGreaterThan(node.numberOfSections, 0);
+  [node waitUntilAllUpdatesAreCommitted];
+  XCTAssertGreaterThan(node.view.numberOfSections, 0);
+
+  // Assert that the beginning of the call pattern is correct.
+  // There is currently noise that comes after that we will allow for this test.
+  NSArray *expectedSelectors = @[ NSStringFromSelector(@selector(reloadData)),
+                                  NSStringFromSelector(@selector(insertSections:withRowAnimation:)),
+                                  NSStringFromSelector(@selector(insertRowsAtIndexPaths:withRowAnimation:))];
+  NSArray *firstSelectors = [selectors subarrayWithRange:NSMakeRange(0, expectedSelectors.count)];
+  XCTAssertEqualObjects(firstSelectors, expectedSelectors);
+
+  [UITableView deswizzleAllInstanceMethods];
+}
+
+- (void)testThatReloadDataHappensInOneShot
+{
+  NSMutableArray *selectors = [NSMutableArray array];
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  node.frame = CGRectMake(0, 0, 100, 100);
+
+  node.dataSource = dataSource;
+  node.delegate = dataSource;
+
+  // Load initial data.
+  XCTAssertGreaterThan(node.numberOfSections, 0);
+  [node waitUntilAllUpdatesAreCommitted];
+  XCTAssertGreaterThan(node.view.numberOfSections, 0);
+
+  // Reload data.
+  [UITableView as_recordEditingCallsIntoArray:selectors];
+  [node reloadData];
+  [node waitUntilAllUpdatesAreCommitted];
+
+  // Assert that the beginning of the call pattern is correct.
+  // There is currently noise that comes after that we will allow for this test.
+  NSArray *expectedSelectors = @[NSStringFromSelector(@selector(reloadData)),
+                                 NSStringFromSelector(@selector(beginUpdates)),
+                                 NSStringFromSelector(@selector(deleteSections:withRowAnimation:)),
+                                 NSStringFromSelector(@selector(insertSections:withRowAnimation:)),
+                                 NSStringFromSelector(@selector(endUpdates)),
+                                 NSStringFromSelector(@selector(insertRowsAtIndexPaths:withRowAnimation:))];
+  NSArray *firstSelectors = [selectors subarrayWithRange:NSMakeRange(0, expectedSelectors.count)];
+  XCTAssertEqualObjects(firstSelectors, expectedSelectors);
+
+  [UITableView deswizzleAllInstanceMethods];
+}
+
+/**
+ * This tests an issue where, if the table is loaded before the first layout pass,
+ * the nodes are first measured with a constrained width of 0 which isn't ideal.
+ */
+- (void)testThatNodeConstrainedSizesAreCorrectIfReloadIsPreempted
+{
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  CGFloat cellWidth = 320;
+  node.frame = CGRectMake(0, 0, cellWidth, 480);
+
+  node.dataSource = dataSource;
+  node.delegate = dataSource;
+
+  // Trigger data load BEFORE first layout pass, to ensure constrained size is correct.
+  XCTAssertGreaterThan(node.numberOfSections, 0);
+  [node waitUntilAllUpdatesAreCommitted];
+
+  ASSizeRange expectedSizeRange = ASSizeRangeMake(CGSizeMake(cellWidth, 0));
+  expectedSizeRange.max.height = CGFLOAT_MAX;
+
+  for (NSInteger i = 0; i < node.numberOfSections; i++) {
+    for (NSInteger j = 0; j < [node numberOfRowsInSection:i]; j++) {
+      NSIndexPath *indexPath = [NSIndexPath indexPathForItem:j inSection:i];
+      ASTestTextCellNode *cellNode = (id)[node nodeForRowAtIndexPath:indexPath];
+      ASXCTAssertEqualSizeRanges(cellNode.constrainedSizeForCalculatedLayout, expectedSizeRange);
+      XCTAssertEqual(cellNode.numberOfLayoutsOnMainThread, 0);
+    }
+  }
+}
+
+- (void)testSectionIndexHandling
+{
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+
+  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
+  dataSource.usesSectionIndex = YES;
+  node.frame = CGRectMake(0, 0, 320, 480);
+
+  node.dataSource = dataSource;
+  node.delegate = dataSource;
+
+  // Trigger data load
+  XCTAssertGreaterThan(node.numberOfSections, 0);
+  XCTAssertGreaterThan([node numberOfRowsInSection:0], 0);
+  [node waitUntilAllUpdatesAreCommitted];
+
+  UITableViewCell *cell = [node.view cellForRowAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  XCTAssertNotNil(cell);
+
+  CGFloat cellWidth = cell.contentView.frame.size.width;
+  XCTAssert(cellWidth > 0 && cellWidth < 320, @"Expected cell width to be about 305. Width: %@", @(cellWidth));
+
+  ASSizeRange expectedSizeRange = ASSizeRangeMake(CGSizeMake(cellWidth, 0));
+  expectedSizeRange.max.height = CGFLOAT_MAX;
+  
+  for (NSInteger i = 0; i < node.numberOfSections; i++) {
+    for (NSInteger j = 0; j < [node numberOfRowsInSection:i]; j++) {
+      NSIndexPath *indexPath = [NSIndexPath indexPathForItem:j inSection:i];
+      ASTestTextCellNode *cellNode = (id)[node nodeForRowAtIndexPath:indexPath];
+      ASXCTAssertEqualSizeRanges(cellNode.constrainedSizeForCalculatedLayout, expectedSizeRange);
+      // We will have to accept a relayout on main thread, since the index bar won't show
+      // up until some of the cells are inserted.
+      XCTAssertLessThanOrEqual(cellNode.numberOfLayoutsOnMainThread, 1);
+    }
+  }
+}
+
+@end
+
+@implementation UITableView (Testing)
+
++ (void)as_recordEditingCallsIntoArray:(NSMutableArray<NSString *> *)selectors
+{
+  [UITableView swizzleInstanceMethod:@selector(reloadData) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *) {
+      JGOriginalImplementation(void);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(beginUpdates) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *) {
+      JGOriginalImplementation(void);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(endUpdates) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *) {
+      JGOriginalImplementation(void);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(insertRowsAtIndexPaths:withRowAnimation:) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *, NSArray *indexPaths, UITableViewRowAnimation anim) {
+      JGOriginalImplementation(void, indexPaths, anim);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(deleteRowsAtIndexPaths:withRowAnimation:) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *, NSArray *indexPaths, UITableViewRowAnimation anim) {
+      JGOriginalImplementation(void, indexPaths, anim);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(insertSections:withRowAnimation:) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *, NSIndexSet *indexes, UITableViewRowAnimation anim) {
+      JGOriginalImplementation(void, indexes, anim);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
+  [UITableView swizzleInstanceMethod:@selector(deleteSections:withRowAnimation:) withReplacement:JGMethodReplacementProviderBlock {
+    return JGMethodReplacement(void, UITableView *, NSIndexSet *indexes, UITableViewRowAnimation anim) {
+      JGOriginalImplementation(void, indexes, anim);
+      [selectors addObject:NSStringFromSelector(_cmd)];
+    };
+  }];
 }
 
 @end
