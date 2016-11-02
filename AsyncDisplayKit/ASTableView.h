@@ -97,7 +97,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @see ASLayoutRangeMode
  * @see ASLayoutRangeType
  */
-- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /**
  * Tuning parameters for a range type in the specified mode.
@@ -124,28 +124,28 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (nullable __kindof UITableViewCell *)cellForRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (nullable __kindof UITableViewCell *)cellForRowAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-@property (nonatomic, readonly, nullable) NSIndexPath *indexPathForSelectedRow  ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode property instead.");
+@property (nonatomic, readonly, nullable) NSIndexPath *indexPathForSelectedRow  ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode property instead.");
 
-@property (nonatomic, readonly, nullable) NSArray<NSIndexPath *> *indexPathsForSelectedRows ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode property instead.");
+@property (nonatomic, readonly, nullable) NSArray<NSIndexPath *> *indexPathsForSelectedRows ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode property instead.");
 
-@property (nonatomic, readonly, nullable) NSArray<NSIndexPath *> *indexPathsForVisibleRows ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode property instead.");
+@property (nonatomic, readonly, nullable) NSArray<NSIndexPath *> *indexPathsForVisibleRows ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode property instead.");
 
-- (nullable NSIndexPath *)indexPathForRowAtPoint:(CGPoint)point ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (nullable NSIndexPath *)indexPathForRowAtPoint:(CGPoint)point ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (nullable NSArray<NSIndexPath *> *)indexPathsForRowsInRect:(CGRect)rect ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (nullable NSArray<NSIndexPath *> *)indexPathsForRowsInRect:(CGRect)rect ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /**
  * Similar to -visibleCells.
  *
  * @return an array containing the cell nodes being displayed on screen.
  */
-- (NSArray<ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (NSArray<ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /**
  * Similar to -indexPathForCell:.
@@ -154,7 +154,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return an indexPath for this cellNode
  */
-- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
@@ -163,14 +163,14 @@ NS_ASSUME_NONNULL_BEGIN
  * the main thread.
  * @warning This method is substantially more expensive than UITableView's version.
  */
--(void)reloadDataWithCompletion:(void (^ _Nullable)())completion ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+-(void)reloadDataWithCompletion:(void (^ _Nullable)())completion ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.
  *
  * @warning This method is substantially more expensive than UITableView's version.
  */
-- (void)reloadData ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)reloadData ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /**
  * Reload everything from scratch entirely on the main thread, destroying the working range and all cached nodes.
@@ -178,7 +178,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @warning This method is substantially more expensive than UITableView's version and will block the main thread while
  * all the cells load.
  */
-- (void)reloadDataImmediately ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's reloadDataWithCompletion: followed by ASTableNode's -waitUntilAllUpdatesAreCommitted instead.");
+- (void)reloadDataImmediately ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's reloadDataWithCompletion: followed by ASTableNode's -waitUntilAllUpdatesAreCommitted instead.");
 
 /**
  * Triggers a relayout of all nodes.
@@ -187,9 +187,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)relayoutItems ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (void)beginUpdates ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's -performBatchUpdates:completion: instead.");
+- (void)beginUpdates ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's -performBatchUpdates:completion: instead.");
 
-- (void)endUpdates ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's -performBatchUpdates:completion: instead.");
+- (void)endUpdates ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's -performBatchUpdates:completion: instead.");
 
 /**
  *  Concludes a series of method calls that insert, delete, select, or reload rows and sections of the table view.
@@ -204,42 +204,42 @@ NS_ASSUME_NONNULL_BEGIN
  *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
-- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL completed))completion ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode's -performBatchUpdates:completion: instead.");
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL completed))completion ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's -performBatchUpdates:completion: instead.");
 
 /**
  *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.
  */
-- (void)waitUntilAllUpdatesAreCommitted ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)waitUntilAllUpdatesAreCommitted ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (void)insertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)insertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (void)deleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)deleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
-- (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_SOON_DEPRECATED_MSG("Use ASTableNode method instead.");
+- (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode method instead.");
 
 /// Deprecated in 2.0. You should not call this method.
-- (void)clearContents ASDISPLAYNODE_SOON_DEPRECATED_MSG("You should not call this method directly. Intead, rely on the Interstate State callback methods.");
+- (void)clearContents ASDISPLAYNODE_DEPRECATED_MSG("You should not call this method directly. Intead, rely on the Interstate State callback methods.");
 
 /// Deprecated in 2.0. You should not call this method.
 - (void)clearFetchedData ASDISPLAYNODE_DEPRECATED_MSG("You should not call this method directly. Intead, rely on the Interstate State callback methods.");
 
 @end
 
-ASDISPLAYNODE_SOON_DEPRECATED_MSG("Renamed to ASTableDataSource.")
+ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASTableDataSource.")
 @protocol ASTableViewDataSource <ASTableDataSource>
 @end
 
-ASDISPLAYNODE_SOON_DEPRECATED_MSG("Renamed to ASTableDelegate.")
+ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASTableDelegate.")
 @protocol ASTableViewDelegate <ASTableDelegate>
 @end
 
