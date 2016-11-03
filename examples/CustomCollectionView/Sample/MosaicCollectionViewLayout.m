@@ -214,6 +214,11 @@
   return ASSizeRangeMake(CGSizeZero, [layout _headerSizeForSection:indexPath.section]);
 }
 
+- (ASScrollDirection)scrollableDirections
+{
+  return ASScrollDirectionVerticalDirections;
+}
+
 /**
  * Asks the inspector for the number of supplementary views for the given kind in the specified section.
  */

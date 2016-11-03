@@ -27,6 +27,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
 
+/**
+ * Return the directions in which your collection view can scroll
+ */
+- (ASScrollDirection)scrollableDirections;
+
 @optional
 
 /**
@@ -52,11 +57,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion A great time to update perform selector caches!
  */
 - (void)didChangeCollectionViewDataSource:(nullable id<ASCollectionDataSource>)dataSource;
-
-/**
- * Return the directions in which your collection view can scroll
- */
-- (ASScrollDirection)scrollableDirections;
 
 #pragma mark Deprecated Methods
 

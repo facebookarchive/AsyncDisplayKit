@@ -1115,27 +1115,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return direction;
 }
 
-- (ASScrollDirection)scrollableDirections
-{
-  //Cache results of layoutInspector to ensure flags are up to date if getter lazily loads a new one.
-  id<ASCollectionViewLayoutInspecting> layoutInspector = self.layoutInspector;
-  if (_layoutInspectorFlags.scrollableDirections) {
-    return [layoutInspector scrollableDirections];
-  } else {
-    ASScrollDirection scrollableDirection = ASScrollDirectionNone;
-    CGFloat totalContentWidth = self.contentSize.width + self.contentInset.left + self.contentInset.right;
-    CGFloat totalContentHeight = self.contentSize.height + self.contentInset.top + self.contentInset.bottom;
-    
-    if (self.alwaysBounceHorizontal || totalContentWidth > self.bounds.size.width) { // Can scroll horizontally.
-      scrollableDirection |= ASScrollDirectionHorizontalDirections;
-    }
-    if (self.alwaysBounceVertical || totalContentHeight > self.bounds.size.height) { // Can scroll vertically.
-      scrollableDirection |= ASScrollDirectionVerticalDirections;
-    }
-    return scrollableDirection;
-  }
-}
-
 - (ASScrollDirection)flowLayoutScrollableDirections:(UICollectionViewFlowLayout *)flowLayout {
   return (flowLayout.scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASScrollDirectionHorizontalDirections : ASScrollDirectionVerticalDirections;
 }
