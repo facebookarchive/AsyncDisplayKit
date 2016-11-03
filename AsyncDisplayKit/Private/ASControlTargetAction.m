@@ -12,7 +12,7 @@
 
 @implementation ASControlTargetAction
 {
-  id _target;
+  __weak id _target;
   BOOL _createdWithNoTarget;
 }
 
