@@ -85,6 +85,11 @@
  */
 - (NSUInteger)lineCount;
 
+/**
+ Whether or not the text is truncated.
+ */
+- (BOOL)isTruncated;
+
 @end
 
 @interface ASTextKitRenderer (ASTextKitRendererConvenience)

@@ -299,6 +299,16 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   return lineCount;
 }
 
+- (BOOL)isTruncated
+{
+  if (self.canUseFastPath) {
+    CGRect boundedRect = [_attributes.attributedString boundingRectWithSize:CGSizeMake(_constrainedSize.width, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:nil];
+    return boundedRect.size.height > _constrainedSize.height;
+  } else {
+    return self.firstVisibleRange.length < _attributes.attributedString.length;
+  t }
+}
+
 - (std::vector<NSRange>)visibleRanges
 {
   ASTextKitTailTruncater *truncater = [self truncater];
