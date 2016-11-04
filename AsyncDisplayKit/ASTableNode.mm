@@ -13,6 +13,7 @@
 #import "ASTableNode.h"
 #import "ASTableViewInternal.h"
 #import "ASEnvironmentInternal.h"
+#import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
@@ -79,7 +80,7 @@
 - (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
 {
   ASDisplayNodeViewBlock tableViewBlock = ^UIView *{
-    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass];
+    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass eventLog:ASDisplayNodeGetEventLog(self)];
   };
 
   if (self = [super initWithViewBlock:tableViewBlock]) {
@@ -572,6 +573,16 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 - (void)waitUntilAllUpdatesAreCommitted
 {
   [self.view waitUntilAllUpdatesAreCommitted];
+}
+
+#pragma mark - Debugging (Private)
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
+{
+  NSMutableArray<NSDictionary *> *result = [super propertiesForDebugDescription];
+  [result addObject:@{ @"dataSource" : ASObjectDescriptionMakeTiny(self.dataSource) }];
+  [result addObject:@{ @"delegate" : ASObjectDescriptionMakeTiny(self.delegate) }];
+  return result;
 }
 
 @end

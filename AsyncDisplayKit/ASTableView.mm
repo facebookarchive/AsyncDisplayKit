@@ -212,7 +212,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 #pragma mark -
 #pragma mark Lifecycle
 
-- (void)configureWithDataControllerClass:(Class)dataControllerClass
+- (void)configureWithDataControllerClass:(Class)dataControllerClass eventLog:(ASEventLog *)eventLog
 {
   _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
   
@@ -221,7 +221,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _rangeController.dataSource = self;
   _rangeController.delegate = self;
   
-  _dataController = [[dataControllerClass alloc] initWithDataSource:self];
+  _dataController = [[dataControllerClass alloc] initWithDataSource:self eventLog:eventLog];
   _dataController.delegate = _rangeController;
   _dataController.environmentDelegate = self;
   
@@ -248,10 +248,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (instancetype)initWithFrame:(CGRect)frame style:(UITableViewStyle)style
 {
-  return [self _initWithFrame:frame style:style dataControllerClass:nil];
+  return [self _initWithFrame:frame style:style dataControllerClass:nil eventLog:nil];
 }
 
-- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
+- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass eventLog:(ASEventLog *)eventLog
 {
   if (!(self = [super initWithFrame:frame style:style])) {
     return nil;
@@ -261,7 +261,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     dataControllerClass = [[self class] dataControllerClass];
   }
   
-  [self configureWithDataControllerClass:dataControllerClass];
+  [self configureWithDataControllerClass:dataControllerClass eventLog:eventLog];
   
   if (!AS_AT_LEAST_IOS9) {
     _retainedLayer = self.layer;
