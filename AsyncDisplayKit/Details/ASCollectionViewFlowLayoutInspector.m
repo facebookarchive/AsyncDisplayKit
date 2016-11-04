@@ -36,7 +36,6 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
   struct {
     unsigned int implementsConstrainedSizeForNodeAtIndexPathDeprecated:1;
     unsigned int implementsConstrainedSizeForNodeAtIndexPath:1;
-    unsigned int implementsScrollableDirections:1;
   } _delegateFlags;
 }
 
@@ -60,7 +59,6 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
   } else {
     _delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
     _delegateFlags.implementsConstrainedSizeForNodeAtIndexPath = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForItemAtIndexPath:)];
-    _delegateFlags.implementsScrollableDirections = [delegate respondsToSelector:@selector(scrollableDirections)];
   }
 }
 
@@ -83,12 +81,8 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
 
 - (ASScrollDirection)scrollableDirections
 {
-  if (_delegateFlags.implementsScrollableDirections) {
-    return [self scrollableDirections];
-  } else {
-    ASDisplayNodeAssert([self respondsToSelector:@selector(scrollableDirections)] == NO, @"As of the 2.0 release, -scrollableDirections is a required method for the layoutInspector.");
-  }
-  return ASScrollDirectionVerticalDirections;
+  ASDisplayNodeAssert(NO, @"layoutInspector object must implement -scrollableDirections %@", self);
+  return ASScrollDirectionNone;
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -118,7 +112,6 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
     unsigned int implementsReferenceSizeForFooter:1;
     unsigned int implementsConstrainedSizeForNodeAtIndexPathDeprecated:1;
     unsigned int implementsConstrainedSizeForItemAtIndexPath:1;
-    unsigned int implementsScrollableDirections:1;
   } _delegateFlags;
   
   struct {
@@ -153,7 +146,6 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
     _delegateFlags.implementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
     _delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
     _delegateFlags.implementsConstrainedSizeForItemAtIndexPath = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForItemAtIndexPath:)];
-    _delegateFlags.implementsScrollableDirections = [delegate respondsToSelector:@selector(scrollableDirections)];
   }
 }
 
@@ -188,16 +180,6 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
   return NodeConstrainedSizeForScrollDirection(collectionView);
 }
 
-- (ASScrollDirection)scrollableDirections
-{
-  if (_delegateFlags.implementsScrollableDirections) {
-    return [self scrollableDirections];
-  } else {
-    ASDisplayNodeAssert([self respondsToSelector:@selector(scrollableDirections)] == NO, @"As of the 2.0 release, -scrollableDirections is a required method for the layoutInspector.");
-  }
-  return ASScrollDirectionVerticalDirections;
-}
-
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   CGSize constrainedSize;
@@ -213,6 +195,11 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
   return [self layoutHasSupplementaryViewOfKind:kind inSection:section collectionView:collectionView] ? 1 : 0;
+}
+
+- (ASScrollDirection)scrollableDirections
+{
+  return (self.layout.scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASScrollDirectionHorizontalDirections : ASScrollDirectionVerticalDirections;
 }
 
 #pragma mark - Private helpers

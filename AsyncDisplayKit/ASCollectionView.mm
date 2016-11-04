@@ -212,7 +212,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   struct {
     unsigned int didChangeCollectionViewDataSource:1;
     unsigned int didChangeCollectionViewDelegate:1;
-	unsigned int scrollableDirections:1;
   } _layoutInspectorFlags;
 }
 
@@ -515,7 +514,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   _layoutInspectorFlags.didChangeCollectionViewDataSource = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDataSource:)];
   _layoutInspectorFlags.didChangeCollectionViewDelegate = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDelegate:)];
-  _layoutInspectorFlags.scrollableDirections = [_layoutInspector respondsToSelector:@selector(scrollableDirections)];
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
@@ -1113,6 +1111,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   return direction;
+}
+
+- (ASScrollDirection)scrollableDirections
+{
+  return [self.layoutInspector scrollableDirections];
 }
 
 - (ASScrollDirection)flowLayoutScrollableDirections:(UICollectionViewFlowLayout *)flowLayout {
