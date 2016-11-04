@@ -22,6 +22,7 @@
 #import "ASDispatch.h"
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
+#import "ASCollectionDataInternal.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -49,7 +50,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   NSMutableArray *_externalCompletedNodes;    // Main thread only.  External data access can immediately query this if available.
   NSMutableDictionary *_completedNodes;       // Main thread only.  External data access can immediately query this if _externalCompletedNodes is unavailable.
   NSMutableDictionary *_editingNodes;         // Modified on _editingTransactionQueue only.  Updates propagated to _completedNodes.
-  BOOL _itemCountsFromDataSourceAreValid;     // Main thread only.
+  BOOL _dataFromDataSourceIsValid;     // Main thread only.
   std::vector<NSInteger> _itemCountsFromDataSource;         // Main thread only.
   
   ASMainSerialQueue *_mainSerialQueue;
@@ -63,6 +64,8 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   BOOL _delegateDidDeleteNodes;
   BOOL _delegateDidInsertSections;
   BOOL _delegateDidDeleteSections;
+  ASCollectionData *_data;
+  std::atomic<BOOL> _supportsDeclarativeData;
 }
 
 @end
@@ -123,6 +126,16 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   _delegateDidDeleteNodes     = [_delegate respondsToSelector:@selector(dataController:didDeleteNodes:atIndexPaths:withAnimationOptions:)];
   _delegateDidInsertSections  = [_delegate respondsToSelector:@selector(dataController:didInsertSections:atIndexSet:withAnimationOptions:)];
   _delegateDidDeleteSections  = [_delegate respondsToSelector:@selector(dataController:didDeleteSectionsAtIndexSet:withAnimationOptions:)];
+}
+
+- (void)setSupportsDeclarativeData:(BOOL)supportsDeclarativeData
+{
+  _supportsDeclarativeData = supportsDeclarativeData;
+}
+
+- (BOOL)supportsDeclarativeData
+{
+  return _supportsDeclarativeData;
 }
 
 + (NSUInteger)parallelProcessorCount
@@ -416,7 +429,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   _initialReloadDataHasBeenCalled = YES;
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
 
-  [self invalidateDataSourceItemCounts];
+  [self invalidateDataSourceData];
   NSUInteger sectionCount = [self itemCountsFromDataSource].size();
   NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
   NSArray<ASIndexedNodeContext *> *newContexts = [self _populateNodeContextsFromDataSourceForSections:sectionIndexes];
@@ -521,7 +534,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
       NSUInteger itemCount = counts[sectionIndex];
       for (NSUInteger i = 0; i < itemCount; i++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sectionIndex];
-        ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
+        ASCellNodeBlock nodeBlock = [self nodeBlockForItemAtIndexPath:indexPath];
         
         ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
         [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
@@ -535,16 +548,31 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   return contexts;
 }
 
-- (void)invalidateDataSourceItemCounts
+- (void)invalidateDataSourceData
 {
   ASDisplayNodeAssertMainThread();
-  _itemCountsFromDataSourceAreValid = NO;
+  _dataFromDataSourceIsValid = NO;
 }
 
-- (std::vector<NSInteger>)itemCountsFromDataSource
+- (ASCellNodeBlock)nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayNodeAssertMainThread();
-  if (NO == _itemCountsFromDataSourceAreValid) {
+  if (self.supportsDeclarativeData) {
+    return [self.currentData elementOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath].nodeBlock;
+  } else {
+    return [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
+  }
+}
+
+- (void)_fetchDataFromSourceIfNeeded
+{
+  if (_dataFromDataSourceIsValid) {
+    return;
+  }
+
+  if (self.supportsDeclarativeData) {
+    _data = [self.dataSource dataForDataController:self];
+    [_data markCompleted];
+  } else {
     id<ASDataControllerSource> source = self.dataSource;
     NSInteger sectionCount = [source numberOfSectionsInDataController:self];
     std::vector<NSInteger> newCounts;
@@ -553,9 +581,31 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
       newCounts.push_back([source dataController:self rowsInSection:i]);
     }
     _itemCountsFromDataSource = newCounts;
-    _itemCountsFromDataSourceAreValid = YES;
   }
-  return _itemCountsFromDataSource;
+  _dataFromDataSourceIsValid = YES;
+}
+
+- (ASCollectionData *)currentData
+{
+  [self _fetchDataFromSourceIfNeeded];
+  return _data;
+}
+
+- (ASCollectionData *)previousData
+{
+  return _data;
+}
+
+- (std::vector<NSInteger>)itemCountsFromDataSource
+{
+  ASDisplayNodeAssertMainThread();
+
+  if (self.supportsDeclarativeData) {
+    return self.currentData.itemCounts;
+  } else {
+    [self _fetchDataFromSourceIfNeeded];
+    return _itemCountsFromDataSource;
+  }
 }
 
 #pragma mark - Batching (External API)
@@ -778,7 +828,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   for (NSIndexPath *indexPath in sortedIndexPaths) {
-    ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
+    ASCellNodeBlock nodeBlock = [self nodeBlockForItemAtIndexPath:indexPath];
     ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
     [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
                                                               indexPath:indexPath

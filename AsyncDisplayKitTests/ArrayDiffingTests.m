@@ -15,7 +15,7 @@
 #import "NSArray+Diffing.h"
 
 @interface NSArray (ArrayDiffingTests)
-- (NSIndexSet *)_asdk_commonIndexesWithArray:(NSArray *)array compareBlock:(BOOL (^)(id lhs, id rhs))comparison;
+- (NSIndexSet *)_asdk_commonIndexesWithArray:(NSArray *)array selfHashes:(NSUInteger *)selfHashes arrayHashes:(NSUInteger *)arrayHashes compareBlock:(BOOL (^)(id lhs, id rhs))comparison;
 @end
 
 @interface ArrayDiffingTests : XCTestCase
@@ -55,7 +55,7 @@
   ];
 
   for (NSArray *test in tests) {
-    NSIndexSet *indexSet = [test[0] _asdk_commonIndexesWithArray:test[1] compareBlock:^BOOL(id lhs, id rhs) {
+    NSIndexSet *indexSet = [test[0] _asdk_commonIndexesWithArray:test[1] selfHashes:NULL arrayHashes:NULL compareBlock:^BOOL(id lhs, id rhs) {
       return [lhs isEqual:rhs];
     }];
     

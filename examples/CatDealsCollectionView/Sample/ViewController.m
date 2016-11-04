@@ -32,7 +32,7 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
 @interface ViewController () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionViewDelegateFlowLayout>
 {
   ASCollectionNode *_collectionNode;
-  NSMutableArray *_data;
+  NSMutableArray<ItemViewModel *> *_data;
 }
 
 @end
@@ -117,8 +117,6 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
   dispatch_async(dispatch_get_main_queue(), ^{
     [_collectionNode performBatchAnimated:YES updates:^{
       [_data addObjectsFromArray:newData];
-      NSArray *addedIndexPaths = [self indexPathsForObjects:newData];
-      [_collectionNode insertItemsAtIndexPaths:addedIndexPaths];
     } completion:completion];
   });
 }
@@ -153,12 +151,17 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
 
 #pragma mark - ASCollectionNodeDelegate / ASCollectionNodeDataSource
 
-- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCollectionData *)dataForCollectionNode:(ASCollectionNode *)collectionNode
 {
-  ItemViewModel *viewModel = _data[indexPath.item];
-  return ^{
-    return [[ItemNode alloc] initWithViewModel:viewModel];
-  };
+  ASCollectionData *data = [collectionNode createNewData];
+  [data addSectionWithIdentifier:@"Single Section" block:^(ASCollectionData * _Nonnull data) {
+    for (ItemViewModel *item in _data) {
+      [data addItemWithIdentifier:item.uuid nodeBlock:^ASCellNode * _Nonnull{
+        return [[ItemNode alloc] initWithViewModel:item];
+      }];
+    }
+  }];
+  return data;
 }
 
 - (ASCellNode *)collectionNode:(ASCollectionNode *)collectionNode nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -183,16 +186,6 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
   CGFloat itemWidth = ((collectionViewWidth - totalSpaceBetweenColumns) / numColumns);
   CGSize itemSize = [ItemNode sizeForWidth:itemWidth];
   return ASSizeRangeMake(itemSize, itemSize);
-}
-
-- (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
-{
-  return [_data count];
-}
-
-- (NSInteger)numberOfSectionsInCollectionNode:(ASCollectionNode *)collectionNode
-{
-  return 1;
 }
 
 - (void)collectionNode:(ASCollectionNode *)collectionNode willBeginBatchFetchWithContext:(ASBatchContext *)context

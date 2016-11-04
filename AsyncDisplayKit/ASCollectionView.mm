@@ -26,6 +26,8 @@
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASSectionContext.h"
 #import "ASCollectionView+Undeprecated.h"
+#import "ASCollectionInternal.h"
+#import "ASCollectionDataInternal.h"
 
 /**
  * A macro to get self.collectionNode and assign it to a local variable, or return
@@ -226,6 +228,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     unsigned int numberOfSectionsInCollectionNode:1;
     unsigned int collectionNodeNumberOfItemsInSection:1;
     unsigned int collectionNodeContextForSection:1;
+    unsigned int dataForCollectionNode:1;
   } _asyncDataSourceFlags;
   
   struct {
@@ -233,8 +236,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     unsigned int didChangeCollectionViewDelegate:1;
   } _layoutInspectorFlags;
 }
-
-@property (nonatomic, weak)   ASCollectionNode *collectionNode;
 
 @end
 
@@ -414,6 +415,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDataSource = asyncDataSource;
     _proxyDataSource = [[ASCollectionViewProxy alloc] initWithTarget:_asyncDataSource interceptor:self];
     
+    _asyncDataSourceFlags.dataForCollectionNode = [_asyncDataSource respondsToSelector:@selector(dataForCollectionNode:)];
     _asyncDataSourceFlags.collectionViewNodeForItem = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForItemAtIndexPath:)];
     _asyncDataSourceFlags.collectionViewNodeBlockForItem = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
     _asyncDataSourceFlags.numberOfSectionsInCollectionView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
@@ -428,11 +430,33 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     _asyncDataSourceFlags.collectionNodeNodeForSupplementaryElement = [_asyncDataSource respondsToSelector:@selector(collectionNode:nodeForSupplementaryElementOfKind:atIndexPath:)];
 
 
-    ASDisplayNodeAssert(_asyncDataSourceFlags.collectionNodeNumberOfItemsInSection || _asyncDataSourceFlags.collectionViewNumberOfItemsInSection, @"Data source must implement collectionNode:numberOfItemsInSection:");
-    ASDisplayNodeAssert(_asyncDataSourceFlags.collectionNodeNodeBlockForItem
-                        || _asyncDataSourceFlags.collectionNodeNodeForItem
-                        || _asyncDataSourceFlags.collectionViewNodeBlockForItem
-                        || _asyncDataSourceFlags.collectionViewNodeForItem, @"Data source must implement collectionNode:nodeBlockForItemAtIndexPath: or collectionNode:nodeForItemAtIndexPath:");
+    // Make assertions about what they implement, unless they are suppressed.
+    if (self.test_suppressCallbackImplementationAssertions == NO) {
+      // If they implement the functional method, they should not implement the classic ones.
+      if (_asyncDataSourceFlags.dataForCollectionNode) {
+        SEL legacySelectors[] = {
+          @selector(numberOfSectionsInCollectionNode:),
+          @selector(numberOfSectionsInCollectionView:),
+          @selector(collectionNode:nodeForItemAtIndexPath:),
+          @selector(collectionView:nodeForItemAtIndexPath:),
+          @selector(collectionNode:nodeBlockForItemAtIndexPath:),
+          @selector(collectionView:nodeBlockForItemAtIndexPath:),
+          @selector(collectionNode:numberOfItemsInSection:),
+          @selector(collectionView:numberOfItemsInSection:),
+          @selector(collectionNode:nodeForSupplementaryElementOfKind:atIndexPath:),
+          @selector(collectionView:nodeForSupplementaryElementOfKind:atIndexPath:)
+        };
+        for (SEL s : legacySelectors) {
+          ASDisplayNodeAssert([_asyncDataSource respondsToSelector:s] == NO, @"If data source implements dataForCollectionNode:, it should not implement %@", NSStringFromSelector(s));
+        }
+      } else {
+        ASDisplayNodeAssert(_asyncDataSourceFlags.collectionNodeNumberOfItemsInSection || _asyncDataSourceFlags.collectionViewNumberOfItemsInSection, @"Data source must implement collectionNode:numberOfItemsInSection:");
+        ASDisplayNodeAssert(_asyncDataSourceFlags.collectionNodeNodeBlockForItem
+                            || _asyncDataSourceFlags.collectionNodeNodeForItem
+                            || _asyncDataSourceFlags.collectionViewNodeBlockForItem
+                            || _asyncDataSourceFlags.collectionViewNodeForItem, @"Data source must implement collectionNode:nodeBlockForItemAtIndexPath: or collectionNode:nodeForItemAtIndexPath:");
+      }
+    }
   }
   
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
@@ -442,6 +466,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_layoutInspectorFlags.didChangeCollectionViewDataSource) {
     [layoutInspector didChangeCollectionViewDataSource:asyncDataSource];
   }
+  _dataController.supportsDeclarativeData = _asyncDataSourceFlags.dataForCollectionNode;
 }
 
 - (id<ASCollectionDelegate>)asyncDelegate
@@ -803,7 +828,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   NSString *identifier = [self __reuseIdentifierForKind:kind];
   UICollectionReusableView *view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:identifier forIndexPath:indexPath];
   ASCellNode *node = [_dataController supplementaryNodeOfKind:kind atIndexPath:indexPath];
-  ASDisplayNodeAssert(node != nil, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self);
+  ASDisplayNodeAssert(node != nil, @"Layout included a supplementary element that we don't have a node for! Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self);
   [_rangeController configureContentView:view forCellNode:node];
   return view;
 }
@@ -1290,7 +1315,28 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 }
 
 
+// We will move these methods into ASCollectionNode
+// when the initializer for ASCollectionView is made unavailable (currently deprecated.)
 #pragma mark - ASDataControllerSource
+
+- (ASCollectionData *)dataForDataController:(ASDataController *)dataController
+{
+  if (_asyncDataSourceFlags.dataForCollectionNode) {
+    ASCollectionData *data = [_asyncDataSource dataForCollectionNode:self.collectionNode];
+
+    // Automatically update our supplementary node registrations.
+    NSMutableSet *supplementaryKindsToRegister = [data allSupplementaryKinds];
+    [supplementaryKindsToRegister minusSet:_registeredSupplementaryKinds];
+    for (ASSupplementaryElementKind kind in supplementaryKindsToRegister) {
+      [self registerSupplementaryNodeOfKind:kind];
+    }
+
+    return data;
+  } else {
+    ASDisplayNodeFailAssert(@"Data controller called %@ but our data source doesn't implement it.", NSStringFromSelector(_cmd));
+    return nil;
+  }
+}
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
   ASCellNodeBlock block = nil;
@@ -1335,15 +1381,19 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   // Wrap the node block
   __weak __typeof__(self) weakSelf = self;
   return ^{
-    __typeof__(self) strongSelf = weakSelf;
     ASCellNode *node = (block != nil ? block() : [[ASCellNode alloc] init]);
-    [node enterHierarchyState:ASHierarchyStateRangeManaged];
-    if (node.interactionDelegate == nil) {
-      node.interactionDelegate = strongSelf;
-    }
+    [weakSelf didCreateNode:node];
     return node;
   };
   return block;
+}
+
+- (void)didCreateNode:(ASCellNode *)node
+{
+  [node enterHierarchyState:ASHierarchyStateRangeManaged];
+  if (node.interactionDelegate == nil) {
+    node.interactionDelegate = self;
+  }
 }
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath

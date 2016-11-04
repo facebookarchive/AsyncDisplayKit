@@ -14,6 +14,7 @@
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASFlowLayoutController.h>
 #import <AsyncDisplayKit/ASEventLog.h>
+#import <AsyncDisplayKit/ASCollectionData.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -28,11 +29,6 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ASEnvironment;
 
 typedef NSUInteger ASDataControllerAnimationOptions;
-
-/**
- * ASCellNode creation block. Used to lazily create the ASCellNode instance for a specified indexPath.
- */
-typedef ASCellNode * _Nonnull(^ASCellNodeBlock)();
 
 FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 
@@ -62,6 +58,13 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  Fetch the number of sections.
  */
 - (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController;
+
+@optional
+
+/**
+ * Fetch the new data set. This is called in endUpdates.
+ */
+- (ASCollectionData *)dataForDataController:(ASDataController *)dataController;
 
 @end
 
@@ -116,6 +119,29 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 @interface ASDataController : NSObject <ASFlowLayoutControllerDataSource>
 
 - (instancetype)initWithDataSource:(id<ASDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
+
+/**
+ * Whether or not our upstream data source supports dataForCollectionNode:. 
+ * If YES, then we read the new data and perform a diff after each update.
+ * Otherwise we rely on them calling insertItemsAtIndexPaths: etc.
+ */
+@property (assign) BOOL supportsDeclarativeData;
+
+/**
+ * The valid ASCollectionData most recently fetched from the data source, if functional data
+ * updating is active.
+ * 
+ * If the data has been invalidated, this property will request new data from the data source before returning.
+ */
+@property (nonatomic, readonly, strong, nullable) ASCollectionData * currentData;
+
+/**
+ * The ASCollectionData most recently fetched from the data source, if functional data
+ * updating is active.
+ *
+ * This method will return a data, even if it has been invalidated.
+ */
+@property (nonatomic, readonly, strong, nullable) ASCollectionData * previousData;
 
 /**
  Data source for fetching data info.

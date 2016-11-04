@@ -68,6 +68,7 @@
 #import <AsyncDisplayKit/ASTextNode+Beta.h>
 #import <AsyncDisplayKit/ASTextNodeTypes.h>
 #import <AsyncDisplayKit/ASAvailability.h>
+#import <AsyncDisplayKit/ASCollectionData.h>
 #import <AsyncDisplayKit/ASCollectionViewLayoutController.h>
 #import <AsyncDisplayKit/ASContextTransitioning.h>
 #import <AsyncDisplayKit/ASControlNode+Subclasses.h>

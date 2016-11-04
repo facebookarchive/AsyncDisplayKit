@@ -25,7 +25,7 @@ static NSUInteger kNumberOfImages = 14;
 
 @interface ViewController () <ASCollectionDataSource, ASCollectionDelegate>
 {
-  NSMutableArray *_sections;
+  NSMutableArray<NSMutableArray<UIImage *> *> *_sections;
   ASCollectionNode *_collectionNode;
   MosaicCollectionViewLayoutInspector *_layoutInspector;
 }
@@ -76,21 +76,22 @@ static NSUInteger kNumberOfImages = 14;
   _collectionNode.view.layoutInspector = _layoutInspector;
 }
 
-- (void)reloadTapped
-{
-  [_collectionNode reloadData];
-}
-
 #pragma mark - ASCollectionNode data source.
 
-- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCollectionData *)dataForCollectionNode:(ASCollectionNode *)collectionNode
 {
-  UIImage *image = _sections[indexPath.section][indexPath.item];
-  return ^{
-    return [[ImageCellNode alloc] initWithImage:image];
-  };
+  ASCollectionData *data = [collectionNode createNewData];
+  for (NSArray *section in _sections) {
+    [data addSectionWithIdentifier:[NSString stringWithFormat:@"Section %p", section] block:^(ASCollectionData * _Nonnull data) {
+      for (UIImage *image in section) {
+        [data addItemWithIdentifier:[NSString stringWithFormat:@"Item %p", image] nodeBlock:^ASCellNode * _Nonnull{
+          return [[ImageCellNode alloc] initWithImage:image];
+        }];
+      }
+    }];
+  }
+  return data;
 }
-
 
 - (ASCellNode *)collectionNode:(ASCollectionNode *)collectionNode nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
@@ -102,16 +103,6 @@ static NSUInteger kNumberOfImages = 14;
   ASTextCellNode *textCellNode = [[ASTextCellNode alloc] initWithAttributes:textAttributes insets:textInsets];
   textCellNode.text = [NSString stringWithFormat:@"Section %zd", indexPath.section + 1];
   return textCellNode;
-}
-
-- (NSInteger)numberOfSectionsInCollectionNode:(ASCollectionNode *)collectionNode
-{
-  return _sections.count;
-}
-
-- (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
-{
-  return [_sections[section] count];
 }
 
 - (CGSize)collectionView:(ASCollectionNode *)collectionNode layout:(UICollectionViewLayout *)collectionViewLayout originalItemSizeAtIndexPath:(NSIndexPath *)indexPath

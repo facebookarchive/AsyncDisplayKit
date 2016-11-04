@@ -37,25 +37,25 @@ NSArray *badges;
 }
 
 - (instancetype)init {
-    self = [super init];
-    if (self) {
-        _titleText = [self randomObjectFromArray:titles];
-        _firstInfoText = [self randomObjectFromArray:firstInfos];
-        _secondInfoText = [NSString stringWithFormat:@"%zd+ bought", [self randomNumberInRange:5 to:6000]];
-        _originalPriceText = [NSString stringWithFormat:@"$%zd", [self randomNumberInRange:40 to:90]];
-        _finalPriceText = [NSString stringWithFormat:@"$%zd", [self randomNumberInRange:5 to:30]];
-        BOOL isSoldOut = arc4random() % 5 == 0;
-        _soldOutText = isSoldOut ? @"SOLD OUT" : nil;
-        _distanceLabelText = [NSString stringWithFormat:@"%zd mi", [self randomNumberInRange:1 to:20]];
-        BOOL isBadged = arc4random() % 2 == 0;
-        if (isBadged) {
-            _badgeText = [self randomObjectFromArray:badges];
-        }
-        _catNumber = [self randomNumberInRange:1 to:10];
-        _labelNumber = [self randomNumberInRange:1 to:10000];
-        
+  self = [super init];
+  if (self) {
+    _uuid = [NSUUID UUID].UUIDString;
+    _titleText = [self randomObjectFromArray:titles];
+    _firstInfoText = [self randomObjectFromArray:firstInfos];
+    _secondInfoText = [NSString stringWithFormat:@"%zd+ bought", [self randomNumberInRange:5 to:6000]];
+    _originalPriceText = [NSString stringWithFormat:@"$%zd", [self randomNumberInRange:40 to:90]];
+    _finalPriceText = [NSString stringWithFormat:@"$%zd", [self randomNumberInRange:5 to:30]];
+    BOOL isSoldOut = arc4random() % 5 == 0;
+    _soldOutText = isSoldOut ? @"SOLD OUT" : nil;
+    _distanceLabelText = [NSString stringWithFormat:@"%zd mi", [self randomNumberInRange:1 to:20]];
+    BOOL isBadged = arc4random() % 2 == 0;
+    if (isBadged) {
+      _badgeText = [self randomObjectFromArray:badges];
     }
-    return self;
+    _catNumber = [self randomNumberInRange:1 to:10];
+    _labelNumber = [self randomNumberInRange:1 to:10000];
+  }
+  return self;
 }
 
 - (NSURL *)imageURLWithSize:(CGSize)size {

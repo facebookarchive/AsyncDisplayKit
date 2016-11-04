@@ -18,6 +18,7 @@
 @protocol ASCollectionViewLayoutFacilitatorProtocol;
 @protocol ASCollectionDelegate;
 @protocol ASCollectionDataSource;
+@protocol ASCollectionData;
 @class ASCollectionView;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -158,6 +159,8 @@ NS_ASSUME_NONNULL_BEGIN
  * `registerClass:forSupplementaryViewOfKind:withReuseIdentifier:` and `registerNib:forSupplementaryViewOfKind:withReuseIdentifier:`
  * methods. This method will register an internal backing view that will host the contents of the supplementary nodes
  * returned from the data source.
+ *
+ * @note If the data source implements @c dataForCollectionNode: you do not need to call this method.
  */
 - (void)registerSupplementaryNodeOfKind:(NSString *)elementKind;
 
@@ -412,6 +415,15 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable id<ASSectionContext>)contextForSection:(NSInteger)section AS_WARN_UNUSED_RESULT;
 
+/**
+ * Creates a new data object for this collection node.
+ *
+ * You call this method in your implementation of @c dataForCollectionNode:. 
+ * You should not store or reuse the returned object.
+ * You should not call this method outside of @c dataForCollectionNode: .
+ */
+- (ASCollectionData *)createNewData;
+
 @end
 
 @interface ASCollectionNode (Deprecated)
@@ -434,6 +446,17 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ASCollectionDataSource <ASCommonCollectionDataSource>
 
 @optional
+
+/**
+ * Asks the data source to provide the new data.
+ *
+ * @param collectionNode The sender.
+ *
+ * The data source should call @c -createNewData , configure the data object
+ * and then return it. You should not store or reuse the data object.
+ * This method will be called on the main thread.
+ */
+- (ASCollectionData *)dataForCollectionNode:(ASCollectionNode *)collectionNode;
 
 /**
  * Asks the data source for the number of items in the given section of the collection node.
