@@ -1143,7 +1143,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [self setCalculatedDisplayNodeLayout:_pendingLayoutTransition.pendingLayout];
     [self _completeLayoutTransition:_pendingLayoutTransition];
   }
-  [self _pendingLayoutTransitionDidComplete];
+  
+  // Trampoline to the main thread if necessary
+  if (_pendingLayoutTransition && _pendingLayoutTransition.isSynchronous == NO) {
+    [self _pendingLayoutTransitionDidComplete];
+  } else {
+    ASPerformBlockOnMainThread(^{
+      [self _pendingLayoutTransitionDidComplete];
+    });
+  }
 }
 
 /*
@@ -1158,7 +1166,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   // Trampoline to the main thread if necessary
-  if (ASDisplayNodeThreadIsMain() || layoutTransition.isSynchronous == NO) {
+  if (layoutTransition.isSynchronous == NO) {
     [layoutTransition commitTransition];
   } else {
     // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
@@ -1186,7 +1194,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     if (CGSizeEqualToSize(layoutSize, CGSizeZero)) {
       return;
     }
-
+    
     if (!_placeholderImage) {
       _placeholderImage = [self placeholderImage];
     }
