@@ -34,6 +34,7 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
 
 @implementation ASCollectionViewLayoutInspector {
   struct {
+    unsigned int implementsConstrainedSizeForNodeAtIndexPathDeprecated:1;
     unsigned int implementsConstrainedSizeForNodeAtIndexPath:1;
   } _delegateFlags;
 }
@@ -56,14 +57,16 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
   if (delegate == nil) {
     memset(&_delegateFlags, 0, sizeof(_delegateFlags));
   } else {
-    _delegateFlags.implementsConstrainedSizeForNodeAtIndexPath = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
+    _delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
+    _delegateFlags.implementsConstrainedSizeForNodeAtIndexPath = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForItemAtIndexPath:)];
   }
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
   if (_delegateFlags.implementsConstrainedSizeForNodeAtIndexPath) {
-    // TODO: Handle collection node
+    return [collectionView.asyncDelegate collectionNode:collectionView.collectionNode constrainedSizeForItemAtIndexPath:indexPath];
+  } else if (_delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [collectionView.asyncDelegate collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
@@ -101,7 +104,8 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
   struct {
     unsigned int implementsReferenceSizeForHeader:1;
     unsigned int implementsReferenceSizeForFooter:1;
-    unsigned int implementsConstrainedSizeForNodeAtIndexPath:1;
+    unsigned int implementsConstrainedSizeForNodeAtIndexPathDeprecated:1;
+    unsigned int implementsConstrainedSizeForItemAtIndexPath:1;
   } _delegateFlags;
   
   struct {
@@ -134,7 +138,8 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
   } else {
     _delegateFlags.implementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
     _delegateFlags.implementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
-    _delegateFlags.implementsConstrainedSizeForNodeAtIndexPath = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
+    _delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
+    _delegateFlags.implementsConstrainedSizeForItemAtIndexPath = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForItemAtIndexPath:)];
   }
 }
 
@@ -149,7 +154,9 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  if (_delegateFlags.implementsConstrainedSizeForNodeAtIndexPath) {
+  if (_delegateFlags.implementsConstrainedSizeForItemAtIndexPath) {
+    return [collectionView.asyncDelegate collectionNode:collectionView.collectionNode constrainedSizeForItemAtIndexPath:indexPath];
+  } else if (_delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     return [collectionView.asyncDelegate collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];

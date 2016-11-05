@@ -17,6 +17,7 @@
 #import "_ASDisplayView.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Deprecated.h"
 #import "ASDisplayNodeTestsHelper.h"
 #import "UIView+ASConvenience.h"
 #import "ASCellNode.h"
@@ -25,27 +26,27 @@
 #import "ASInsetLayoutSpec.h"
 
 // Conveniences for making nodes named a certain way
-#define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.name = @#n
+#define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.debugName = @#n
 #define DeclareViewNamed(v) \
     ASDisplayNode *node_##v = [[ASDisplayNode alloc] init]; \
-    node_##v.name = @#v; \
+    node_##v.debugName = @#v; \
     UIView *v = node_##v.view;
 #define DeclareLayerNamed(l) \
    ASDisplayNode *node_##l = [[ASDisplayNode alloc] init]; \
-   node_##l.name = @#l; \
+   node_##l.debugName = @#l; \
    node_##l.layerBacked = YES; \
    CALayer *l = node_##l.layer;
 
 static NSString *orderStringFromSublayers(CALayer *l) {
-  return [[[l.sublayers valueForKey:@"asyncdisplaykit_node"] valueForKey:@"name"] componentsJoinedByString:@","];
+  return [[[l.sublayers valueForKey:@"asyncdisplaykit_node"] valueForKey:@"debugName"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubviews(UIView *v) {
-  return [[[v.subviews valueForKey:@"asyncdisplaykit_node"] valueForKey:@"name"] componentsJoinedByString:@","];
+  return [[[v.subviews valueForKey:@"asyncdisplaykit_node"] valueForKey:@"debugName"] componentsJoinedByString:@","];
 }
 
 static NSString *orderStringFromSubnodes(ASDisplayNode *n) {
-  return [[n.subnodes valueForKey:@"name"] componentsJoinedByString:@","];
+  return [[n.subnodes valueForKey:@"debugName"] componentsJoinedByString:@","];
 }
 
 // Asserts subnode, subview, sublayer order match what you provide here
@@ -60,17 +61,17 @@ if (loaded) {\
 
 #define XCTAssertNodesHaveParent(parent, nodes ...) \
 for (ASDisplayNode *n in @[ nodes ]) {\
-  XCTAssertEqualObjects(parent, n.supernode, @"%@ has the wrong parent", n.name);\
+  XCTAssertEqualObjects(parent, n.supernode, @"%@ has the wrong parent", n.debugName);\
 }
 
 #define XCTAssertNodesLoaded(nodes ...) \
 for (ASDisplayNode *n in @[ nodes ]) {\
-  XCTAssertTrue(n.nodeLoaded, @"%@ should be loaded", n.name);\
+  XCTAssertTrue(n.nodeLoaded, @"%@ should be loaded", n.debugName);\
 }
 
 #define XCTAssertNodesNotLoaded(nodes ...) \
 for (ASDisplayNode *n in @[ nodes ]) {\
-  XCTAssertFalse(n.nodeLoaded, @"%@ should not be loaded", n.name);\
+  XCTAssertFalse(n.nodeLoaded, @"%@ should not be loaded", n.debugName);\
 }
 
 
@@ -330,7 +331,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(NO, node.displaySuspended, @"default displaySuspended broken %@", hasLoadedView);
   XCTAssertEqual(YES, node.displaysAsynchronously, @"default displaysAsynchronously broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.asyncdisplaykit_asyncTransactionContainer, @"default asyncdisplaykit_asyncTransactionContainer broken %@", hasLoadedView);
-  XCTAssertEqualObjects(nil, node.name, @"default name broken %@", hasLoadedView);
+  XCTAssertEqualObjects(nil, node.debugName, @"default name broken %@", hasLoadedView);
   
   XCTAssertEqual(NO, node.isAccessibilityElement, @"default isAccessibilityElement is broken %@", hasLoadedView);
   XCTAssertEqual((id)nil, node.accessibilityLabel, @"default accessibilityLabel is broken %@", hasLoadedView);
@@ -428,7 +429,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertEqual(YES, node.asyncdisplaykit_asyncTransactionContainer, @"asyncTransactionContainer broken %@", hasLoadedView);
   XCTAssertEqual(NO, node.userInteractionEnabled, @"userInteractionEnabled broken %@", hasLoadedView);
   XCTAssertEqual((BOOL)!isLayerBacked, node.exclusiveTouch, @"exclusiveTouch broken %@", hasLoadedView);
-  XCTAssertEqualObjects(@"quack like a duck", node.name, @"name broken %@", hasLoadedView);
+  XCTAssertEqualObjects(@"quack like a duck", node.debugName, @"debugName broken %@", hasLoadedView);
   
   XCTAssertEqual(YES, node.isAccessibilityElement, @"accessibilityElement broken %@", hasLoadedView);
   XCTAssertEqualObjects(@"Ship love", node.accessibilityLabel, @"accessibilityLabel broken %@", hasLoadedView);
@@ -486,7 +487,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
     node.displaysAsynchronously = NO;
     node.asyncdisplaykit_asyncTransactionContainer = YES;
     node.userInteractionEnabled = NO;
-    node.name = @"quack like a duck";
+    node.debugName = @"quack like a duck";
     
     node.isAccessibilityElement = YES;
     node.accessibilityLabel = @"Ship love";
@@ -1851,14 +1852,14 @@ static bool stringContainsPointer(NSString *description, id p) {
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
   node.layerBacked = isLayerBacked;
 
-  XCTAssertFalse([node.description rangeOfString:@"name"].location != NSNotFound, @"Shouldn't reference 'name' in description");
-  node.name = @"big troll eater name";
+  XCTAssertFalse([node.description rangeOfString:@"debugName"].location != NSNotFound, @"Shouldn't reference 'debugName' in description");
+  node.debugName = @"big troll eater name";
 
-  XCTAssertTrue([node.description rangeOfString:node.name].location != NSNotFound, @"Name didn't end up in description");
-  XCTAssertTrue([node.description rangeOfString:@"name"].location != NSNotFound, @"Shouldn't reference 'name' in description");
+  XCTAssertFalse([node.description rangeOfString:node.debugName].location == NSNotFound, @"debugName didn't end up in description");
+  XCTAssertFalse([node.description rangeOfString:@"debugName"].location == NSNotFound, @"Shouldn't reference 'debugName' in description");
   [node layer];
-  XCTAssertTrue([node.description rangeOfString:node.name].location != NSNotFound, @"Name didn't end up in description");
-  XCTAssertTrue([node.description rangeOfString:@"name"].location != NSNotFound, @"Shouldn't reference 'name' in description");
+  XCTAssertFalse([node.description rangeOfString:node.debugName].location == NSNotFound, @"debugName didn't end up in description");
+  XCTAssertFalse([node.description rangeOfString:@"debugName"].location == NSNotFound, @"Shouldn't reference 'debugName' in description");
 }
 
 - (void)testNameInDescriptionLayer
@@ -1986,12 +1987,12 @@ static bool stringContainsPointer(NSString *description, id p) {
   {
     NS_VALID_UNTIL_END_OF_SCOPE ASDisplayNode *node = [[ASDisplayNode alloc] init];
     nodeView = node.view;
-    node.name = @"Node";
+    node.debugName = @"Node";
 
     NS_VALID_UNTIL_END_OF_SCOPE ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
     subnode.layerBacked = YES;
     [node addSubnode:subnode];
-    subnode.name = @"Subnode";
+    subnode.debugName = @"Subnode";
     
     [window addSubview:nodeView];
   }
@@ -2023,11 +2024,11 @@ static bool stringContainsPointer(NSString *description, id p) {
 - (void)testThatSubnodeGetsInterfaceStateSetIfRasterized
 {
   ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
-  node.name = @"Node";
+  node.debugName = @"Node";
   node.shouldRasterizeDescendants = YES;
   
   ASTestDisplayNode *subnode = [[ASTestDisplayNode alloc] init];
-  subnode.name = @"Subnode";
+  subnode.debugName = @"Subnode";
   [node addSubnode:subnode];
   
   [node view]; // Node needs to be loaded

@@ -12,7 +12,7 @@
 #import "ASLayoutSpec+Subclasses.h"
 
 #import "ASAssert.h"
-#import "ASLayoutPrivate.h"
+#import "ASLayoutSpec+Subclasses.h"
 
 static NSUInteger const kUnderlayChildIndex = 0;
 static NSUInteger const kOverlayChildIndex = 1;
@@ -71,17 +71,6 @@ static NSUInteger const kOverlayChildIndex = 1;
   }
   
   return [ASLayout layoutWithLayoutElement:self size:contentsLayout.size sublayouts:sublayouts];
-}
-
-@end
-
-@implementation ASOverlayLayoutSpec (Debugging)
-
-#pragma mark - ASLayoutElementAsciiArtProtocol
-
-- (NSString *)debugBoxString
-{
-  return [ASLayoutSpec asciiArtStringForChildren:@[self.overlay, self.child] parentName:[self asciiArtName]];
 }
 
 @end

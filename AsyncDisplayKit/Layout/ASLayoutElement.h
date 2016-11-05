@@ -69,6 +69,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign, readonly) ASLayoutElementStyle *style;
 
+/**
+ * @abstract Optional name that is printed by ascii art string and displayed in description. 
+ */
+@property (nullable, nonatomic, copy) NSString *debugName;
 
 #pragma mark - Calculate layout
 
@@ -145,9 +149,10 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return An ASLayout instance defining the layout of the receiver and its children.
  *
- * @deprecated Deprecated in version 2.0: Use ASCalculateRootLayout or ASCalculateLayout instead
+ * @deprecated Deprecated in version 2.0: Use layoutThatFits: or layoutThatFits:parentSize: if used in
+ * ASLayoutSpec subclasses
  */
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize ASDISPLAYNODE_DEPRECATED;
+- (nonnull ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize ASDISPLAYNODE_DEPRECATED_MSG("Use layoutThatFits: instead.");
 
 @end
 
@@ -250,10 +255,11 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  * @discussion This method is optional, but one of either preferredSize or preferredLayoutSize is required
  * for nodes that either have no intrinsic content size or 
  * should be laid out at a different size than its intrinsic content size. For example, this property could be 
- * set on an ASImageNode to display at a size different from the underlying image size. 
+ * set on an ASImageNode to display at a size different from the underlying image size.
+ *
+ * @warning Calling the getter when the size's width or height are relative will cause an assert.
  */
 @property (nonatomic, assign) CGSize preferredSize;
-- (CGSize)preferredSize UNAVAILABLE_ATTRIBUTE;
 
  /**
  * @abstract An optional property that provides a minimum size bound for a layout element. If provided, this restriction will 

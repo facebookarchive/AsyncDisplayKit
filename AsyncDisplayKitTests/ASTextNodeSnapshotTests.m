@@ -72,7 +72,36 @@
   textNode.highlightRange = NSMakeRange(0, textNode.attributedText.length);
 
   [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:textNode];
-  ASSnapshotVerifyLayer(backgroundView.layer, nil);
+  ASSnapshotVerifyView(backgroundView, nil);
+}
+
+- (void)testThatFastPathTruncationWorks
+{
+  ASTextNode *textNode = [[ASTextNode alloc] init];
+  textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
+  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
+  ASSnapshotVerifyNode(textNode, nil);
+}
+
+- (void)testThatSlowPathTruncationWorks
+{
+  ASTextNode *textNode = [[ASTextNode alloc] init];
+  textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
+  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
+  textNode.exclusionPaths = @[ [UIBezierPath bezierPath] ];
+  ASSnapshotVerifyNode(textNode, nil);
+}
+
+- (void)testShadowing
+{
+  ASTextNode *textNode = [[ASTextNode alloc] init];
+  textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important"];
+  textNode.shadowColor = [UIColor blackColor].CGColor;
+  textNode.shadowOpacity = 0.3;
+  textNode.shadowRadius = 3;
+  textNode.shadowOffset = CGSizeMake(0, 1);
+  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
+  ASSnapshotVerifyNode(textNode, nil);
 }
 
 @end

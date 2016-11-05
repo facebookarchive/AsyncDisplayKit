@@ -26,6 +26,7 @@ final class TailLoadingCellNode: ASCellNode {
 
   override init() {
     super.init()
+    
     addSubnode(text)
     text.attributedText = NSAttributedString(
       string: "Loading…",
@@ -38,6 +39,7 @@ final class TailLoadingCellNode: ASCellNode {
   }
 
   override func layoutSpecThatFits(constrainedSize: ASSizeRange) -> ASLayoutSpec {
+    
     return ASStackLayoutSpec(
       direction: .Horizontal,
       spacing: 16,
@@ -55,11 +57,13 @@ final class SpinnerNode: ASDisplayNode {
   override init() {
     super.init(viewBlock: { UIActivityIndicatorView(activityIndicatorStyle: .Gray) }, didLoadBlock: nil)
     
-    self.style.minHeight = ASDimensionMakeWithPoints(44.0)
+    // Set spinner node to default size of the activitiy indicator view
+    self.style.preferredSize = CGSizeMake(20.0, 20.0)
   }
 
   override func didLoad() {
     super.didLoad()
+    
     activityIndicatorView.startAnimating()
   }
 }

@@ -43,11 +43,12 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  verticalStack.spacing            = INTER_COMMENT_SPACING;
-  [verticalStack setChildren:_commentNodes];
-  
-  return verticalStack;
+  return [ASStackLayoutSpec
+          stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+          spacing:INTER_COMMENT_SPACING
+          justifyContent:ASStackLayoutJustifyContentStart
+          alignItems:ASStackLayoutAlignItemsStretch
+          children:[_commentNodes copy]];
 }
 
 #pragma mark - Instance Methods

@@ -36,7 +36,7 @@ NSInteger const ASDefaultTransactionPriority = 0;
 - (instancetype)initWithOperationCompletionBlock:(asyncdisplaykit_async_transaction_operation_completion_block_t)operationCompletionBlock
 {
   if ((self = [super init])) {
-    _operationCompletionBlock = [operationCompletionBlock copy];
+    _operationCompletionBlock = operationCompletionBlock;
   }
   return self;
 }
@@ -339,7 +339,7 @@ ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
       callbackQueue = dispatch_get_main_queue();
     }
     _callbackQueue = callbackQueue;
-    _completionBlock = [completionBlock copy];
+    _completionBlock = completionBlock;
 
     _state = ATOMIC_VAR_INIT(ASAsyncTransactionStateOpen);
   }

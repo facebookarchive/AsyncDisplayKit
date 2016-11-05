@@ -27,7 +27,9 @@
 @interface _ASCollectionPendingState : NSObject
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
-@property (assign, nonatomic) ASLayoutRangeMode rangeMode;
+@property (nonatomic, assign) ASLayoutRangeMode rangeMode;
+@property (nonatomic, assign) BOOL allowsSelection; // default is YES
+@property (nonatomic, assign) BOOL allowsMultipleSelection; // default is NO
 @end
 
 @implementation _ASCollectionPendingState
@@ -37,6 +39,8 @@
   self = [super init];
   if (self) {
     _rangeMode = ASLayoutRangeModeCount;
+    _allowsSelection = YES;
+    _allowsMultipleSelection = NO;
   }
   return self;
 }
@@ -143,9 +147,11 @@
   
   if (_pendingState) {
     _ASCollectionPendingState *pendingState = _pendingState;
-    self.pendingState      = nil;
-    view.asyncDelegate     = pendingState.delegate;
-    view.asyncDataSource   = pendingState.dataSource;
+    self.pendingState            = nil;
+    view.asyncDelegate           = pendingState.delegate;
+    view.asyncDataSource         = pendingState.dataSource;
+    view.allowsSelection         = pendingState.allowsSelection;
+    view.allowsMultipleSelection = pendingState.allowsMultipleSelection;
 
     if (pendingState.rangeMode != ASLayoutRangeModeCount) {
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
@@ -251,6 +257,44 @@
   }
 }
 
+- (void)setAllowsSelection:(BOOL)allowsSelection
+{
+  if ([self pendingState]) {
+    _pendingState.allowsSelection = allowsSelection;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded if pendingState doesn't exist");
+    self.view.allowsSelection = allowsSelection;
+  }
+}
+
+- (BOOL)allowsSelection
+{
+  if ([self pendingState]) {
+    return _pendingState.allowsSelection;
+  } else {
+    return self.view.allowsSelection;
+  }
+}
+
+- (void)setAllowsMultipleSelection:(BOOL)allowsMultipleSelection
+{
+  if ([self pendingState]) {
+    _pendingState.allowsMultipleSelection = allowsMultipleSelection;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASCollectionNode should be loaded if pendingState doesn't exist");
+    self.view.allowsMultipleSelection = allowsMultipleSelection;
+  }
+}
+
+- (BOOL)allowsMultipleSelection
+{
+  if ([self pendingState]) {
+    return _pendingState.allowsMultipleSelection;
+  } else {
+    return self.view.allowsMultipleSelection;
+  }
+}
+
 #pragma mark - Range Tuning
 
 - (ASRangeTuningParameters)tuningParametersForRangeType:(ASLayoutRangeType)rangeType
@@ -273,21 +317,88 @@
   return [self.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
+#pragma mark - Selection
+
+- (NSArray<NSIndexPath *> *)indexPathsForSelectedItems
+{
+  ASDisplayNodeAssertMainThread();
+  ASCollectionView *view = self.view;
+  return [view convertIndexPathsToCollectionNode:view.indexPathsForSelectedItems];
+}
+
+- (void)selectItemAtIndexPath:(nullable NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
+{
+  ASDisplayNodeAssertMainThread();
+  ASCollectionView *collectionView = self.view;
+
+  indexPath = [collectionView convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
+
+  if (indexPath != nil) {
+    [collectionView selectItemAtIndexPath:indexPath animated:animated scrollPosition:scrollPosition];
+  } else {
+    NSLog(@"Failed to select item at index path %@ because the item never reached the view.", indexPath);
+  }
+}
+
+- (void)deselectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated
+{
+  ASDisplayNodeAssertMainThread();
+  ASCollectionView *collectionView = self.view;
+
+  indexPath = [collectionView convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
+
+  if (indexPath != nil) {
+    [collectionView deselectItemAtIndexPath:indexPath animated:animated];
+  } else {
+    NSLog(@"Failed to deselect item at index path %@ because the item never reached the view.", indexPath);
+  }
+}
+
+- (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated
+{
+  ASDisplayNodeAssertMainThread();
+  ASCollectionView *collectionView = self.view;
+
+  indexPath = [collectionView convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
+
+  if (indexPath != nil) {
+    [collectionView scrollToItemAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+  } else {
+    NSLog(@"Failed to scroll to item at index path %@ because the item never reached the view.", indexPath);
+  }
+}
+
 #pragma mark - Querying Data
+
+- (void)reloadDataInitiallyIfNeeded
+{
+  if (!self.dataController.initialReloadDataHasBeenCalled) {
+    [self reloadData];
+  }
+}
 
 - (NSInteger)numberOfItemsInSection:(NSInteger)section
 {
+  [self reloadDataInitiallyIfNeeded];
   return [self.dataController numberOfRowsInSection:section];
 }
 
 - (NSInteger)numberOfSections
 {
+  [self reloadDataInitiallyIfNeeded];
   return [self.dataController numberOfSections];
 }
 
 - (NSArray<__kindof ASCellNode *> *)visibleNodes
 {
-  return [self.view visibleNodes];
+  ASDisplayNodeAssertMainThread();
+  return self.isNodeLoaded ? [self.view visibleNodes] : @[];
+}
+
+- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  [self reloadDataInitiallyIfNeeded];
+  return [self.dataController nodeAtIndexPath:indexPath];
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
@@ -295,9 +406,41 @@
   return [self.dataController indexPathForNode:cellNode];
 }
 
-- (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
+- (NSArray<NSIndexPath *> *)indexPathsForVisibleItems
 {
-  return [self.dataController nodeAtIndexPath:indexPath];
+  ASDisplayNodeAssertMainThread();
+  NSMutableArray *indexPathsArray = [NSMutableArray new];
+  for (ASCellNode *cell in [self visibleNodes]) {
+    NSIndexPath *indexPath = [self indexPathForNode:cell];
+    if (indexPath) {
+      [indexPathsArray addObject:indexPath];
+    }
+  }
+  return indexPathsArray;
+}
+
+- (nullable NSIndexPath *)indexPathForItemAtPoint:(CGPoint)point
+{
+  ASDisplayNodeAssertMainThread();
+  ASCollectionView *collectionView = self.view;
+
+  NSIndexPath *indexPath = [collectionView indexPathForItemAtPoint:point];
+  if (indexPath != nil) {
+    return [collectionView convertIndexPathToCollectionNode:indexPath];
+  }
+  return indexPath;
+}
+
+- (nullable UICollectionViewCell *)cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASDisplayNodeAssertMainThread();
+  ASCollectionView *collectionView = self.view;
+
+  indexPath = [collectionView convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
+  if (indexPath == nil) {
+    return nil;
+  }
+  return [collectionView cellForItemAtIndexPath:indexPath];
 }
 
 - (id<ASSectionContext>)contextForSection:(NSInteger)section
@@ -323,6 +466,11 @@
   [self.view performBatchUpdates:updates completion:completion];
 }
 
+- (void)waitUntilAllUpdatesAreCommitted
+{
+  [self.view waitUntilAllUpdatesAreCommitted];
+}
+
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   [self.view reloadDataWithCompletion:completion];
@@ -331,6 +479,11 @@
 - (void)reloadData
 {
   [self.view reloadData];
+}
+
+- (void)relayoutItems
+{
+  [self.view relayoutItems];
 }
 
 - (void)reloadDataImmediately

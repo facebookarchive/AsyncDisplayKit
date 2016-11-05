@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <XCTest/XCTest.h>
+#import "ASXCTExtensions.h"
 #import "ASLayoutElement.h"
 
 #pragma mark - ASLayoutElementStyleTestsDelegate
@@ -58,9 +58,12 @@
 {
   ASLayoutElementStyle *style = [ASLayoutElementStyle new];
   
+  ASXCTAssertEqualSizes(style.preferredSize, CGSizeZero);
+  
   CGSize size = CGSizeMake(100, 100);
   
   style.preferredSize = size;
+  ASXCTAssertEqualSizes(style.preferredSize, size);
   XCTAssertTrue(ASDimensionEqualToDimension(style.width, ASDimensionMakeWithPoints(size.width)));
   XCTAssertTrue(ASDimensionEqualToDimension(style.height, ASDimensionMakeWithPoints(size.height)));
   
@@ -71,6 +74,19 @@
   style.maxSize = size;
   XCTAssertTrue(ASDimensionEqualToDimension(style.maxWidth, ASDimensionMakeWithPoints(size.width)));
   XCTAssertTrue(ASDimensionEqualToDimension(style.maxHeight, ASDimensionMakeWithPoints(size.height)));
+}
+
+- (void)testReadingInvalidSizeForPreferredSize
+{
+  ASLayoutElementStyle *style = [ASLayoutElementStyle new];
+  
+  XCTAssertNoThrow(style.preferredSize);
+  
+  style.width = ASDimensionMake(ASDimensionUnitFraction, 0.5);
+  XCTAssertThrows(style.preferredSize);
+  
+  style.preferredSize = CGSizeMake(100, 100);
+  XCTAssertNoThrow(style.preferredSize);
 }
 
 - (void)testSettingSizeViaLayoutSize

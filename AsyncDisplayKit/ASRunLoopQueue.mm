@@ -164,7 +164,7 @@ static void runLoopSourceCallback(void *info) {
   if (self = [super init]) {
     _runLoop = runloop;
     _internalQueue = std::deque<id>();
-    _queueConsumer = [handlerBlock copy];
+    _queueConsumer = handlerBlock;
     _batchSize = 1;
     _ensureExclusiveMembership = YES;
     

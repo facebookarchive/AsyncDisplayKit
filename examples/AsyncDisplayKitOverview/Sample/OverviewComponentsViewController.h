@@ -17,7 +17,7 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 
 @protocol ASLayoutSpecListEntry <NSObject>
@@ -27,7 +27,7 @@
 
 @end
 
-@interface OverviewComponentsViewController : UIViewController
+@interface OverviewComponentsViewController : ASViewController
 
 
 @end

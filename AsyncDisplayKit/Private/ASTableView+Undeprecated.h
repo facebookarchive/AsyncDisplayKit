@@ -77,6 +77,29 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
+- (nullable __kindof UITableViewCell *)cellForRowAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Scrolls the table to the given row.
+ *
+ * @param indexPath The index path of the row.
+ * @param scrollPosition Where the row should end up after the scroll.
+ * @param animated Whether the scroll should be animated or not.
+ */
+- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated;
+
+- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition;
+
+@property (nonatomic, readonly, nullable) NSArray<NSIndexPath *> *indexPathsForVisibleRows;
+
+@property (nonatomic, readonly, nullable) NSArray<NSIndexPath *> *indexPathsForSelectedRows;
+
+@property (nonatomic, readonly, nullable) NSIndexPath *indexPathForSelectedRow;
+
+- (nullable NSIndexPath *)indexPathForRowAtPoint:(CGPoint)point;
+
+- (nullable NSArray<NSIndexPath *> *)indexPathsForRowsInRect:(CGRect)rect;
+
 /**
  * Similar to -visibleCells.
  *

@@ -75,6 +75,20 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
 
 /**
+ * A Boolean value that indicates whether users can select items in the collection node.
+ * If the value of this property is YES (the default), users can select items. If you want more fine-grained control over the selection of items, you must provide a delegate object and implement the appropriate methods of the UICollectionNodeDelegate protocol.
+ */
+@property (nonatomic, assign) BOOL allowsSelection;
+
+/**
+ * A Boolean value that determines whether users can select more than one item in the collection node.
+ * This property controls whether multiple items can be selected simultaneously. The default value of this property is NO.
+ * When the value of this property is YES, tapping a cell adds it to the current selection (assuming the delegate permits the cell to be selected). Tapping the cell again removes it from the selection.
+ */
+@property (nonatomic, assign) BOOL allowsMultipleSelection;
+
+
+/**
  * Tuning parameters for a range type in full mode.
  *
  * @param rangeType The range type to get the tuning parameters for.
@@ -122,6 +136,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
+/**
+ * Scrolls the collection to the given item.
+ *
+ * @param indexPath The index path of the item.
+ * @param scrollPosition Where the item should end up after the scroll.
+ * @param animated Whether the scroll should be animated or not.
+ *
+ * This method must be called on the main thread.
+ */
+- (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated;
+
 #pragma mark - Editing
 
 /**
@@ -158,6 +183,11 @@ NS_ASSUME_NONNULL_BEGIN
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
 - (void)performBatchUpdates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
+
+/**
+ *  Blocks execution of the main thread until all section and item updates are committed to the view. This method must be called from the main thread.
+ */
+- (void)waitUntilAllUpdatesAreCommitted;
 
 /**
  * Inserts one or more sections.
@@ -260,6 +290,48 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)reloadData;
 
+/**
+ * Triggers a relayout of all nodes.
+ *
+ * @discussion This method invalidates and lays out every cell node in the collection view.
+ */
+- (void)relayoutItems;
+
+#pragma mark - Selection
+
+/**
+ * The index paths of the selected items, or @c nil if no items are selected.
+ */
+@property (nonatomic, readonly, nullable) NSArray<NSIndexPath *> *indexPathsForSelectedItems;
+
+/**
+ * Selects the item at the specified index path and optionally scrolls it into view.
+ * If the `allowsSelection` property is NO, calling this method has no effect. If there is an existing selection with a different index path and the `allowsMultipleSelection` property is NO, calling this method replaces the previous selection.
+ * This method does not cause any selection-related delegate methods to be called.
+ *
+ * @param indexPath The index path of the item to select. Specifying nil for this parameter clears the current selection.
+ *
+ * @param animated Specify YES to animate the change in the selection or NO to make the change without animating it.
+ *
+ * @param scrollPosition An option that specifies where the item should be positioned when scrolling finishes. For a list of possible values, see `UICollectionViewScrollPosition`.
+ *
+ * @discussion This method must be called from the main thread.
+ */
+- (void)selectItemAtIndexPath:(nullable NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition;
+
+/**
+ * Deselects the item at the specified index.
+ * If the allowsSelection property is NO, calling this method has no effect.
+ * This method does not cause any selection-related delegate methods to be called.
+ *
+ * @param indexPath The index path of the item to select. Specifying nil for this parameter clears the current selection.
+ *
+ * @param animated Specify YES to animate the change in the selection or NO to make the change without animating it.
+ *
+ * @discussion This method must be called from the main thread.
+ */
+- (void)deselectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated;
+
 #pragma mark - Querying Data
 
 /**
@@ -279,9 +351,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Similar to -visibleCells.
  *
- * @return an array containing the nodes being displayed on screen.
+ * @return an array containing the nodes being displayed on screen. This must be called on the main thread.
  */
-- (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT;
+@property (nonatomic, readonly) NSArray<__kindof ASCellNode *> *visibleNodes;
 
 /**
  * Retrieves the node for the item at the given index path.
@@ -290,7 +362,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return The node for the given item, or @c nil if no item exists at the specified path.
  */
-- (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
+- (nullable __kindof ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
  * Retrieve the index path for the item with the given node.
@@ -301,6 +373,30 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
 
+/**
+ * Retrieve the index paths of all visible items.
+ *
+ * @return an array containing the index paths of all visible items. This must be called on the main thread.
+ */
+@property (nonatomic, readonly) NSArray<NSIndexPath *> *indexPathsForVisibleItems;
+
+/**
+ * Retrieve the index path of the item at the given point.
+ *
+ * @param point The point of the requested item.
+ *
+ * @return The indexPath for the item at the given point. This must be called on the main thread.
+ */
+- (nullable NSIndexPath *)indexPathForItemAtPoint:(CGPoint)point AS_WARN_UNUSED_RESULT;
+
+/**
+ * Retrieve the cell at the given index path.
+ *
+ * @param indexPath The index path of the requested item.
+ *
+ * @return The cell for the given index path. This must be called on the main thread.
+ */
+- (nullable UICollectionViewCell *)cellForItemAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
  * Retrieves the context object for the given section, as provided by the data source in
@@ -328,7 +424,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @deprecated This method is deprecated in 2.0. Use @c reloadDataWithCompletion: and
  *   then @c waitUntilAllUpdatesAreCommitted instead.
  */
-- (void)reloadDataImmediately ASDISPLAYNODE_DEPRECATED;
+- (void)reloadDataImmediately ASDISPLAYNODE_DEPRECATED_MSG("Use -reloadData / -reloadDataWithCompletion: followed by -waitUntilAllUpdatesAreCommitted instead.");
 
 @end
 
@@ -410,7 +506,7 @@ NS_ASSUME_NONNULL_BEGIN
  *   not implement reuse (it will be called once per row).  Unlike UICollectionView's version,
  *   this method is not called when the row is about to display.
  */
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Similar to -collectionView:nodeForItemAtIndexPath:
@@ -424,7 +520,7 @@ NS_ASSUME_NONNULL_BEGIN
  *   Must be thread-safe (can be called on the main thread or a background
  *   queue) and should not implement reuse (it will be called once per row).
  */
-- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Asks the collection view to provide a supplementary node to display in the collection view.
@@ -433,7 +529,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param kind           The kind of supplementary node to provide.
  * @param indexPath      The index path that specifies the location of the new supplementary node.
  */
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Indicator to lock the data source for data fetching in async mode.
@@ -443,7 +539,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param collectionView The sender.
  * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED_MSG("Data source accesses are on the main thread. Method will not be called.");
 
 /**
  * Indicator to unlock the data source for data fetching in async mode.
@@ -453,7 +549,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param collectionView The sender.
  * @deprecated The data source is always accessed on the main thread, and this method will not be called.
  */
-- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED_MSG("Data source accesses are on the main thread. Method will not be called.");
 
 @end
 
@@ -531,7 +627,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return A constrained size range for layout the node at this index path.
  */
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's constrainedSizeForItemAtIndexPath: instead. PLEASE NOTE the very subtle method name change.");
 
 /**
  * Informs the delegate that the collection view will add the given node
@@ -545,7 +641,7 @@ NS_ASSUME_NONNULL_BEGIN
  *   passed into this method may not correspond to the same item in your data source
  *   if your data source has been updated since the last edit was processed.
  */
-- (void)collectionView:(ASCollectionView *)collectionView willDisplayNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (void)collectionView:(ASCollectionView *)collectionView willDisplayNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Informs the delegate that the collection view did remove the provided node from the view hierarchy.
@@ -560,9 +656,9 @@ NS_ASSUME_NONNULL_BEGIN
  *   passed into this method may not correspond to the same item in your data source
  *   if your data source has been updated since the last edit was processed.
  */
-- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
-- (void)collectionView:(ASCollectionView *)collectionView willBeginBatchFetchWithContext:(ASBatchContext *)context ASDISPLAYNODE_DEPRECATED;
+- (void)collectionView:(ASCollectionView *)collectionView willBeginBatchFetchWithContext:(ASBatchContext *)context ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Tell the collectionView if batch fetching should begin.
@@ -575,7 +671,7 @@ NS_ASSUME_NONNULL_BEGIN
  * If not implemented, the collectionView assumes that it should notify its asyncDelegate when batch fetching
  * should occur.
  */
-- (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED;
+- (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 /**
  * Informs the delegate that the collection view will add the node
@@ -590,7 +686,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * This method is deprecated. Use @c collectionView:willDisplayNode:forItemAtIndexPath: instead.
  */
-- (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED;
+- (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
 
 @end
 

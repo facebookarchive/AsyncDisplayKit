@@ -24,7 +24,8 @@
 #import <AsyncDisplayKit/ASStackLayoutSpec.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 
-@interface GradientTableNode ()
+
+@interface GradientTableNode () <ASTableDelegate, ASTableDataSource>
 {
   ASTableNode *_tableNode;
   CGSize _elementSize;
@@ -43,40 +44,37 @@
   _elementSize = size;
 
   _tableNode = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+  _tableNode.delegate = self;
+  _tableNode.dataSource = self;
+  
+  ASRangeTuningParameters rangeTuningParameters;
+  rangeTuningParameters.leadingBufferScreenfuls = 1.0;
+  rangeTuningParameters.trailingBufferScreenfuls = 0.5;
+  [_tableNode setTuningParameters:rangeTuningParameters forRangeType:ASLayoutRangeTypeDisplay];
+  
   [self addSubnode:_tableNode];
   
   return self;
 }
 
-- (void)didLoad
-{
-  [super didLoad];
-  _tableNode.view.asyncDelegate = self;
-  _tableNode.view.asyncDataSource = self;
-  
-  ASRangeTuningParameters rangeTuningParameters;
-  rangeTuningParameters.leadingBufferScreenfuls = 1.0;
-  rangeTuningParameters.trailingBufferScreenfuls = 0.5;
-  [_tableNode.view setTuningParameters:rangeTuningParameters forRangeType:ASLayoutRangeTypeDisplay];
-}
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+- (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
 {
   return 100;
 }
 
-- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNode *)tableNode:(ASTableNode *)tableNode nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   RandomCoreGraphicsNode *elementNode = [[RandomCoreGraphicsNode alloc] init];
   elementNode.style.preferredSize = _elementSize;
   elementNode.indexPath = [NSIndexPath indexPathForRow:indexPath.row inSection:_pageNumber];
+  
   return elementNode;
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)tableNode:(ASTableNode *)tableNode didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  [tableView deselectRowAtIndexPath:indexPath animated:NO];
-  [_tableNode.view reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
+  [tableNode deselectRowAtIndexPath:indexPath animated:NO];
+  [_tableNode reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationNone];
 }
 
 - (void)layout

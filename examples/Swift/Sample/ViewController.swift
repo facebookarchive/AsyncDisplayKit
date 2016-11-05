@@ -47,15 +47,17 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
     fatalError("storyboards are incompatible with truth and beauty")
   }
 
-  // MARK: ASTableView data source and delegate.
+  // MARK: ASTableNode data source and delegate.
 
-  func tableView(tableView: ASTableView, nodeForRowAtIndexPath indexPath: NSIndexPath) -> ASCellNode {
+  func tableNode(tableNode: ASTableNode, nodeForRowAtIndexPath indexPath: NSIndexPath) -> ASCellNode {
     // Should read the row count directly from table view but
     // https://github.com/facebook/AsyncDisplayKit/issues/1159
-    let rowCount = self.tableView(tableView, numberOfRowsInSection: 0)
+    let rowCount = self.tableNode(tableNode, numberOfRowsInSection: 0)
 
     if state.fetchingMore && indexPath.row == rowCount - 1 {
-      return TailLoadingCellNode()
+      let node = TailLoadingCellNode()
+      node.style.height = ASDimensionMake(44.0)
+      return node;
     }
 
     let node = ASTextCellNode()
@@ -64,11 +66,11 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
     return node
   }
 
-  func numberOfSectionsInTableView(tableView: UITableView) -> Int {
+  func numberOfSectionsInTableNode(tableNode: ASTableNode) -> Int {
     return 1
   }
 
-  func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+  func tableNode(tableNode: ASTableNode, numberOfRowsInSection section: Int) -> Int {
     var count = state.itemCount
     if state.fetchingMore {
       count += 1
@@ -76,7 +78,7 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
     return count
   }
 
-  func tableView(tableView: ASTableView, willBeginBatchFetchWithContext context: ASBatchContext) {
+  func tableNode(tableNode: ASTableNode, willBeginBatchFetchWithContext context: ASBatchContext) {
     /// This call will come in on a background thread. Switch to main
     /// to add our spinner, then fire off our fetch.
     dispatch_async(dispatch_get_main_queue()) {
@@ -95,33 +97,33 @@ final class ViewController: ASViewController, ASTableDataSource, ASTableDelegate
   }
 
   private func renderDiff(oldState: State) {
-    let tableView = tableNode.view
-    tableView.beginUpdates()
-
-    // Add or remove items
-    let rowCountChange = state.itemCount - oldState.itemCount
-    if rowCountChange > 0 {
-      let indexPaths = (oldState.itemCount..<state.itemCount).map { index in
-        NSIndexPath(forRow: index, inSection: 0)
+    
+    self.tableNode.performBatchUpdates({
+      
+      // Add or remove items
+      let rowCountChange = state.itemCount - oldState.itemCount
+      if rowCountChange > 0 {
+        let indexPaths = (oldState.itemCount..<state.itemCount).map { index in
+          NSIndexPath(forRow: index, inSection: 0)
+        }
+        tableNode.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .None)
+      } else if rowCountChange < 0 {
+        assertionFailure("Deleting rows is not implemented. YAGNI.")
       }
-      tableView.insertRowsAtIndexPaths(indexPaths, withRowAnimation: .None)
-    } else if rowCountChange < 0 {
-      assertionFailure("Deleting rows is not implemented. YAGNI.")
-    }
 
-    // Add or remove spinner.
-    if state.fetchingMore != oldState.fetchingMore {
-      if state.fetchingMore {
-        // Add spinner.
-        let spinnerIndexPath = NSIndexPath(forRow: state.itemCount, inSection: 0)
-        tableView.insertRowsAtIndexPaths([ spinnerIndexPath ], withRowAnimation: .None)
-      } else {
-        // Remove spinner.
-        let spinnerIndexPath = NSIndexPath(forRow: oldState.itemCount, inSection: 0)
-        tableView.deleteRowsAtIndexPaths([ spinnerIndexPath ], withRowAnimation: .None)
+      // Add or remove spinner.
+      if state.fetchingMore != oldState.fetchingMore {
+        if state.fetchingMore {
+          // Add spinner.
+          let spinnerIndexPath = NSIndexPath(forRow: state.itemCount, inSection: 0)
+          tableNode.insertRowsAtIndexPaths([ spinnerIndexPath ], withRowAnimation: .None)
+        } else {
+          // Remove spinner.
+          let spinnerIndexPath = NSIndexPath(forRow: oldState.itemCount, inSection: 0)
+          tableNode.deleteRowsAtIndexPaths([ spinnerIndexPath ], withRowAnimation: .None)
+        }
       }
-    }
-    tableView.endUpdatesAnimated(false, completion: nil)
+    }, completion:nil)
   }
 
   /// (Pretend) fetches some new items and calls the

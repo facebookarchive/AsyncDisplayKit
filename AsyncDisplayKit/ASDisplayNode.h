@@ -175,13 +175,6 @@ extern NSInteger const ASDefaultDrawingPriority;
  */
 - (void)onDidLoad:(ASDisplayNodeDidLoadBlock)body;
 
-/** @name Properties */
-
-/**
- * @abstract The name of this node, which will be displayed in `description`. The default value is nil.
- */
-@property (nullable, nonatomic, copy) NSString *name;
-
 /** 
  * @abstract Returns whether the node is synchronous.
  *
@@ -820,21 +813,6 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @abstract Cancels all performing layout transitions. Can be called on any thread.
  */
 - (void)cancelLayoutTransition;
-
-
-#pragma mark - Deprecated
-
-/**
- * @abstract Provides a default intrinsic content size for calculateSizeThatFits:. This is useful when laying out
- * a node that either has no intrinsic content size or should be laid out at a different size than its intrinsic content
- * size. For example, this property could be set on an ASImageNode to display at a size different from the underlying
- * image size.
- *
- * @return Try to create a CGSize for preferredFrameSize of this node from the width and height property of this node. It will return CGSizeZero if widht and height dimensions are not of type ASDimensionUnitPoints.
- *
- * @deprecated Deprecated in version 2.0: Just calls through to set the height and width property of the node. Convert to use sizing properties instead: height, minHeight, maxHeight, width, minWidth, maxWidth.
- */
-@property (nonatomic, assign, readwrite) CGSize preferredFrameSize ASDISPLAYNODE_DEPRECATED;
 
 @end
 

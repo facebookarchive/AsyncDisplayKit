@@ -31,7 +31,7 @@
 #import "ASLayoutElementStylePrivate.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayoutPrivate.h"
+#import "ASLayoutSpec+Subclasses.h"
 #import "ASLayoutSpec.h"
 #import "ASCellNode+Internal.h"
 #import "ASWeakProxy.h"
@@ -86,7 +86,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 @dynamic layoutElementType;
 
-@synthesize name = _name;
+@synthesize debugName = _debugName;
 @synthesize isFinalLayoutElement = _isFinalLayoutElement;
 @synthesize threadSafeBounds = _threadSafeBounds;
 @synthesize layoutSpecBlock = _layoutSpecBlock;
@@ -195,10 +195,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // At most a layoutSpecBlock or one of the three layout methods is overridden
 #define __ASDisplayNodeCheckForLayoutMethodOverrides \
     ASDisplayNodeAssert(_layoutSpecBlock != NULL || \
-    (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateSizeThatFits:)) ? 1 : 0) \
+    ((ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateSizeThatFits:)) ? 1 : 0) \
     + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(layoutSpecThatFits:)) ? 1 : 0) \
-    + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateLayoutThatFits:)) ? 1 : 0) <= 1, \
-    @"Subclass %@ must at least provide a layoutSpecBlock or override at most one of the three layout methods: calculateLayoutThatFits, layoutSpecThatFits or calculateSizeThatFits", NSStringFromClass(self.class))
+    + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateLayoutThatFits:)) ? 1 : 0)) <= 1, \
+    @"Subclass %@ must at least provide a layoutSpecBlock or override at most one of the three layout methods: calculateLayoutThatFits:, layoutSpecThatFits:, or calculateSizeThatFits:", NSStringFromClass(self.class))
 
 + (void)initialize
 {
@@ -208,14 +208,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // Subclasses should never override these. Use unused to prevent warnings
     __unused NSString *classString = NSStringFromClass(self);
     
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method", classString);
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedSize)), @"Subclass %@ must not override calculatedSize method.", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(calculatedLayout)), @"Subclass %@ must not override calculatedLayout method.", classString);
     ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measure:)), @"Subclass %@ must not override measure: method", classString);
     ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange: method. Instead overwrite calculateLayoutThatFits:", classString);
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutThatFits:)), @"Subclass %@ must not override layoutThatFits: method", classString);
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutThatFits:parentSize:)), @"Subclass %@ must not override layoutThatFits:parentSize method", classString);
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method", classString);
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutThatFits:)), @"Subclass %@ must not override layoutThatFits: method. Instead overwrite calculateLayoutThatFits:.", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutThatFits:parentSize:)), @"Subclass %@ must not override layoutThatFits:parentSize method. Instead overwrite calculateLayoutThatFits:.", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method.", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method.", classString);
   }
 
   // Below we are pre-calculating values per-class and dynamically adding a method (_staticInitialize) to populate these values
@@ -241,18 +241,17 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   
 #if DEBUG
-  // Check if subnodes where modified during layoutSpecThatFits:
-  if (self == [ASDisplayNode class] || ASSubclassOverridesSelector([ASDisplayNode class], self, @selector(layoutSpecThatFits:)))
-  {
-    __block IMP originalLayoutSpecThatFitsIMP = ASReplaceMethodWithBlock(self, @selector(layoutSpecThatFits:), ^(ASDisplayNode *_self, ASSizeRange sizeRange) {
+  // Check if subnodes where modified during the creation of the layout
+  if (self == [ASDisplayNode class]) {
+    __block IMP originalLayoutSpecThatFitsIMP = ASReplaceMethodWithBlock(self, @selector(_layoutElementThatFits:), ^(ASDisplayNode *_self, ASSizeRange sizeRange) {
       NSArray *oldSubnodes = _self.subnodes;
-      ASLayoutSpec *layoutSpec = ((ASLayoutSpec *( *)(id, SEL, ASSizeRange))originalLayoutSpecThatFitsIMP)(_self, @selector(layoutSpecThatFits:), sizeRange);
+      ASLayoutSpec *layoutElement = ((ASLayoutSpec *( *)(id, SEL, ASSizeRange))originalLayoutSpecThatFitsIMP)(_self, @selector(_layoutElementThatFits:), sizeRange);
       NSArray *subnodes = _self.subnodes;
-      ASDisplayNodeAssert(oldSubnodes.count == subnodes.count, @"Adding or removing nodes in layoutSpecThatFits: is verboten.");
+      ASDisplayNodeAssert(oldSubnodes.count == subnodes.count, @"Adding or removing nodes in layoutSpecBlock or layoutSpecThatFits: is not allowed and can cause unexpected behavior.");
       for (NSInteger i = 0; i < oldSubnodes.count; i++) {
-        ASDisplayNodeAssert(oldSubnodes[i] == subnodes[i], @"Adding and removing nodes in layoutSpecThatFits: is verboten.");
+        ASDisplayNodeAssert(oldSubnodes[i] == subnodes[i], @"Adding or removing nodes in layoutSpecBlock or layoutSpecThatFits: is not allowed and can cause unexpected behavior.");
       }
-      return layoutSpec;
+      return layoutElement;
     });
   }
 #endif
@@ -505,7 +504,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   // Update flags related to special handling of UIImageView layers. More details on the flags
-  if (_flags.synchronous && [_viewClass isSubclassOfClass:[UIImageView class]]) {
+  if (_flags.synchronous && ([_viewClass isSubclassOfClass:[UIImageView class]] || [_viewClass isSubclassOfClass:[UIActivityIndicatorView class]])) {
     _flags.canClearContentsOfLayer = NO;
     _flags.canCallSetNeedsDisplayOfLayer = NO;
   }
@@ -686,17 +685,17 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return (_view != nil || (_layer != nil && _flags.layerBacked));
 }
 
-- (NSString *)name
+- (NSString *)debugName
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return _name;
+  return _debugName;
 }
 
-- (void)setName:(NSString *)name
+- (void)setDebugName:(NSString *)debugName
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if (!ASObjectIsEqual(_name, name)) {
-    _name = [name copy];
+  if (!ASObjectIsEqual(_debugName, debugName)) {
+    _debugName = [debugName copy];
   }
 }
 
@@ -1180,7 +1179,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [self setCalculatedDisplayNodeLayout:_pendingLayoutTransition.pendingLayout];
     [self _completeLayoutTransition:_pendingLayoutTransition];
   }
-  [self _pendingLayoutTransitionDidComplete];
+  
+  // Trampoline to the main thread if necessary
+  if (_pendingLayoutTransition && _pendingLayoutTransition.isSynchronous == NO) {
+    [self _pendingLayoutTransitionDidComplete];
+  } else {
+    ASPerformBlockOnMainThread(^{
+      [self _pendingLayoutTransitionDidComplete];
+    });
+  }
 }
 
 /*
@@ -1195,7 +1202,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   // Trampoline to the main thread if necessary
-  if (ASDisplayNodeThreadIsMain() || layoutTransition.isSynchronous == NO) {
+  if (layoutTransition.isSynchronous == NO) {
     [layoutTransition commitTransition];
   } else {
     // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
@@ -1223,7 +1230,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     if (CGSizeEqualToSize(layoutSize, CGSizeZero)) {
       return;
     }
-
+    
     if (!_placeholderImage) {
       _placeholderImage = [self placeholderImage];
     }
@@ -1279,7 +1286,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
  */
 - (BOOL)_displaysAsynchronously
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   return _flags.synchronous == NO && _flags.displaysAsynchronously;
 }
 
@@ -1679,8 +1685,7 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 
 #pragma mark - Managing the Node Hierarchy
 
-static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASDisplayNode *to)
-{
+ASDISPLAYNODE_INLINE bool shouldDisableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASDisplayNode *to) {
   if (!from || !to) return NO;
   if (from->_flags.synchronous) return NO;
   if (to->_flags.synchronous) return NO;
@@ -1688,9 +1693,118 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   return YES;
 }
 
+/// Returns incremented value of i if i is not NSNotFound
+ASDISPLAYNODE_INLINE NSInteger incrementIfFound(NSInteger i) {
+  return i == NSNotFound ? NSNotFound : i + 1;
+}
+
+/// Returns if a node is a member of a rasterized tree
+ASDISPLAYNODE_INLINE BOOL canUseViewAPI(ASDisplayNode *node, ASDisplayNode *subnode) {
+  return (subnode.isLayerBacked == NO && node.isLayerBacked == NO);
+}
+
+/// Returns if node is a member of a rasterized tree
+ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
+  return (node->_flags.shouldRasterizeDescendants || (node->_hierarchyState & ASHierarchyStateRasterized));
+}
+
+/*
+ * Central private helper method that should eventually be called if submethods add, insert or replace subnodes
+ * You must hold __instanceLock__ to call this.
+ *
+ * @param subnode       The subnode to insert
+ * @param subnodeIndex  The index in _subnodes to insert it
+ * @param viewSublayerIndex The index in layer.sublayers (not view.subviews) at which to insert the view (use if we can use the view API) otherwise pass NSNotFound
+ * @param sublayerIndex The index in layer.sublayers at which to insert the layer (use if either parent or subnode is layer-backed) otherwise pass NSNotFound
+ * @param oldSubnode Remove this subnode before inserting; ok to be nil if no removal is desired
+ */
+- (void)_insertSubnode:(ASDisplayNode *)subnode atSubnodeIndex:(NSInteger)subnodeIndex sublayerIndex:(NSInteger)sublayerIndex andRemoveSubnode:(ASDisplayNode *)oldSubnode
+{
+  if (subnode == nil || subnode == self) {
+    ASDisplayNodeFailAssert(@"Cannot insert a nil subnode or self as subnode");
+    return;
+  }
+  
+  if (subnodeIndex == NSNotFound) {
+    ASDisplayNodeFailAssert(@"Try to insert node on an index that was not found");
+    return;
+  }
+  
+  if (subnodeIndex > _subnodes.count || subnodeIndex < 0) {
+    ASDisplayNodeFailAssert(@"Cannot insert a subnode at index %zd. Count is %zd", subnodeIndex, _subnodes.count);
+    return;
+  }
+  
+  // Disable appearance methods during move between supernodes, but make sure we restore their state after we do our thing
+  ASDisplayNode *oldParent = subnode.supernode;
+  BOOL disableNotifications = shouldDisableNotificationsForMovingBetweenParents(oldParent, self);
+  if (disableNotifications) {
+    [subnode __incrementVisibilityNotificationsDisabled];
+  }
+  
+  [subnode _removeFromSupernode];
+  [oldSubnode _removeFromSupernode];
+  
+  if (_subnodes == nil) {
+    _subnodes = [[NSMutableArray alloc] init];
+  }
+  
+  ASDisplayNodeLogEvent(self, @"%@: %@", NSStringFromSelector(_cmd), subnode);
+    
+  [_subnodes insertObject:subnode atIndex:subnodeIndex];
+  
+  // This call will apply our .hierarchyState to the new subnode.
+  // If we are a managed hierarchy, as in ASCellNode trees, it will also apply our .interfaceState.
+  [subnode __setSupernode:self];
+  
+  // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and
+  // none of this could possibly work.
+  if (nodeIsInRasterizedTree(self) == NO && self.nodeLoaded) {
+    // If node is loaded insert the subnode otherwise wait until the node get's loaded
+    ASPerformBlockOnMainThread(^{
+      [self _insertSubnodeSubviewOrSublayer:subnode atIndex:sublayerIndex];
+    });
+  }
+
+  ASDisplayNodeAssert(disableNotifications == shouldDisableNotificationsForMovingBetweenParents(oldParent, self), @"Invariant violated");
+  if (disableNotifications) {
+    [subnode __decrementVisibilityNotificationsDisabled];
+  }
+}
+
+/*
+ * Inserts the view or layer of the given node at the given index
+ * You must hold __instanceLock__ to call this.
+ *
+ * @param subnode       The subnode to insert
+ * @param idx           The index in _view.subviews or _layer.sublayers at which to insert the subnode.view or
+ *                      subnode.layer of the subnode
+ */
+- (void)_insertSubnodeSubviewOrSublayer:(ASDisplayNode *)subnode atIndex:(NSInteger)idx
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssert(self.nodeLoaded, @"_insertSubnodeSubviewOrSublayer:atIndex: should never be called before our own view is created");
+
+  ASDisplayNodeAssert(idx != NSNotFound, @"Try to insert node on an index that was not found");
+  if (idx == NSNotFound) {
+    return;
+  }
+  
+  // If we can use view API, do. Due to an apple bug, -insertSubview:atIndex: actually wants a LAYER index, which we pass in
+  if (canUseViewAPI(self, subnode)) {
+    [_view insertSubview:subnode.view atIndex:idx];
+  } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconversion"
+    [_layer insertSublayer:subnode.layer atIndex:idx];
+#pragma clang diagnostic pop
+  }
+}
+
 - (void)addSubnode:(ASDisplayNode *)subnode
 {
-  ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually add subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
+  // TODO: 2.0 Conversion: Reenable and fix within product code
+  //ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually add subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
   [self _addSubnode:subnode];
 }
 
@@ -1698,115 +1812,37 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
-
+  
   ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
+    
+  // Don't add subnode if it's already if it's already a subnodes
   ASDisplayNode *oldParent = subnode.supernode;
   if (!subnode || subnode == self || oldParent == self) {
     return;
   }
 
-  // Disable appearance methods during move between supernodes, but make sure we restore their state after we do our thing
-  BOOL isMovingEquivalentParents = disableNotificationsForMovingBetweenParents(oldParent, self);
-  if (isMovingEquivalentParents) {
-    [subnode __incrementVisibilityNotificationsDisabled];
-  }
-  [subnode _removeFromSupernode];
+  [self _insertSubnode:subnode atSubnodeIndex:_subnodes.count sublayerIndex:_layer.sublayers.count andRemoveSubnode:nil];
+}
 
-  if (!_subnodes) {
-    _subnodes = [[NSMutableArray alloc] init];
-  }
-
-  ASDisplayNodeLogEvent(self, @"%@ %@", NSStringFromSelector(_cmd), subnode);
-  [_subnodes addObject:subnode];
-  
-  // This call will apply our .hierarchyState to the new subnode.
-  // If we are a managed hierarchy, as in ASCellNode trees, it will also apply our .interfaceState.
-  [subnode __setSupernode:self];
-  
-  if (self.nodeLoaded) {
-    // If this node has a view or layer, force the subnode to also create its view or layer and add it to the hierarchy here.
-    // Otherwise there is no way for the subnode's view or layer to enter the hierarchy, except recursing down all
-    // subnodes on the main thread after the node tree has been created but before the first display (which
-    // could introduce performance problems).
-    ASPerformBlockOnMainThread(^{
-      [self _addSubnodeSubviewOrSublayer:subnode];
-    });
-  }
-
-  ASDisplayNodeAssert(isMovingEquivalentParents == disableNotificationsForMovingBetweenParents(oldParent, self), @"Invariant violated");
-  if (isMovingEquivalentParents) {
-    [subnode __decrementVisibilityNotificationsDisabled];
+- (void)_addSubnodeViewsAndLayers
+{
+  for (ASDisplayNode *node in [_subnodes copy]) {
+    [self _addSubnodeSubviewOrSublayer:node];
   }
 }
 
-/*
- Private helper function.
- You must hold __instanceLock__ to call this.
-
- @param subnode       The subnode to insert
- @param subnodeIndex  The index in _subnodes to insert it
- @param viewSublayerIndex The index in layer.sublayers (not view.subviews) at which to insert the view (use if we can use the view API) otherwise pass NSNotFound
- @param sublayerIndex The index in layer.sublayers at which to insert the layer (use if either parent or subnode is layer-backed) otherwise pass NSNotFound
- @param oldSubnode Remove this subnode before inserting; ok to be nil if no removal is desired
- */
-- (void)_insertSubnode:(ASDisplayNode *)subnode atSubnodeIndex:(NSInteger)subnodeIndex sublayerIndex:(NSInteger)sublayerIndex andRemoveSubnode:(ASDisplayNode *)oldSubnode
+- (void)_addSubnodeSubviewOrSublayer:(ASDisplayNode *)subnode
 {
-  if (subnodeIndex == NSNotFound) {
-    return;
-  }
-  
-  ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
-  if (!subnode) {
-    return;
-  }
-
-  ASDisplayNode *oldParent = [subnode _deallocSafeSupernode];
-  // Disable appearance methods during move between supernodes, but make sure we restore their state after we do our thing
-  BOOL isMovingEquivalentParents = disableNotificationsForMovingBetweenParents(oldParent, self);
-  if (isMovingEquivalentParents) {
-    [subnode __incrementVisibilityNotificationsDisabled];
-  }
-  
-  [subnode _removeFromSupernode];
-  [oldSubnode _removeFromSupernode];
-  
-  if (!_subnodes)
-    _subnodes = [[NSMutableArray alloc] init];
-  ASDisplayNodeLogEvent(self, @"%@: %@", NSStringFromSelector(_cmd), subnode);
-  [_subnodes insertObject:subnode atIndex:subnodeIndex];
-  [subnode __setSupernode:self];
-  
-  // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and none of this could possibly work.
-  if (!_flags.shouldRasterizeDescendants && [self __shouldLoadViewOrLayer]) {
-    if (_layer) {
-      ASDisplayNodeCAssertMainThread();
-
-      ASDisplayNodeAssert(sublayerIndex != NSNotFound, @"Should pass either a valid sublayerIndex");
-
-      if (sublayerIndex != NSNotFound) {
-        BOOL canUseViewAPI = !subnode.isLayerBacked && !self.isLayerBacked;
-        // If we can use view API, do. Due to an apple bug, -insertSubview:atIndex: actually wants a LAYER index, which we pass in
-        if (canUseViewAPI && sublayerIndex != NSNotFound) {
-          [_view insertSubview:subnode.view atIndex:sublayerIndex];
-        } else if (sublayerIndex != NSNotFound) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wconversion"
-          [_layer insertSublayer:subnode.layer atIndex:sublayerIndex];
-#pragma clang diagnostic pop
-        }
-      }
-    }
-  }
-
-  ASDisplayNodeAssert(isMovingEquivalentParents == disableNotificationsForMovingBetweenParents(oldParent, self), @"Invariant violated");
-  if (isMovingEquivalentParents) {
-    [subnode __decrementVisibilityNotificationsDisabled];
-  }
+    // Due to a bug in Apple's framework we have to use the layer index to insert a subview
+    // so just use th ecount of the sublayers to add the subnode
+  NSInteger idx = _layer.sublayers.count;
+  [self _insertSubnodeSubviewOrSublayer:subnode atIndex:idx];
 }
 
 - (void)replaceSubnode:(ASDisplayNode *)oldSubnode withSubnode:(ASDisplayNode *)replacementSubnode
 {
-  ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually replace old node with replacement node to node with automaticallyManagesSubnodes=YES. Old Node: %@, replacement node: %@", oldSubnode, replacementSubnode);
+  // TODO: 2.0 Conversion: Reenable and fix within product code
+  //ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually replace old node with replacement node to node with automaticallyManagesSubnodes=YES. Old Node: %@, replacement node: %@", oldSubnode, replacementSubnode);
   [self _replaceSubnode:oldSubnode withSubnode:replacementSubnode];
 }
 
@@ -1815,34 +1851,41 @@ static bool disableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASD
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
 
-  if (!replacementSubnode || [oldSubnode _deallocSafeSupernode] != self) {
-    ASDisplayNodeAssert(0, @"Bad use of api. Invalid subnode to replace async.");
+  if (replacementSubnode == nil) {
+    ASDisplayNodeFailAssert(@"Invalid subnode to replace");
+    return;
+  }
+  
+  if ([oldSubnode _deallocSafeSupernode] != self) {
+    ASDisplayNodeFailAssert(@"Old Subnode to replace must be a subnode");
     return;
   }
 
-  ASDisplayNodeAssert(!(self.nodeLoaded && !oldSubnode.nodeLoaded), @"ASDisplayNode corruption bug. We have view loaded, but child node does not.");
+  ASDisplayNodeAssert(!(self.nodeLoaded && !oldSubnode.nodeLoaded), @"We have view loaded, but child node does not.");
   ASDisplayNodeAssert(_subnodes, @"You should have subnodes if you have a subnode");
 
   NSInteger subnodeIndex = [_subnodes indexOfObjectIdenticalTo:oldSubnode];
   NSInteger sublayerIndex = NSNotFound;
 
-  if (_layer) {
-    sublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:oldSubnode.layer];
-    ASDisplayNodeAssert(sublayerIndex != NSNotFound, @"Somehow oldSubnode's supernode is self, yet we could not find it in our layers to replace");
-    if (sublayerIndex == NSNotFound) return;
+  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
+  // hierarchy and none of this could possibly work.
+  if (nodeIsInRasterizedTree(self) == NO) {
+    if (_layer) {
+      sublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:oldSubnode.layer];
+      ASDisplayNodeAssert(sublayerIndex != NSNotFound, @"Somehow oldSubnode's supernode is self, yet we could not find it in our layers to replace");
+      if (sublayerIndex == NSNotFound) {
+        return;
+      }
+    }
   }
 
   [self _insertSubnode:replacementSubnode atSubnodeIndex:subnodeIndex sublayerIndex:sublayerIndex andRemoveSubnode:oldSubnode];
 }
 
-// This is just a convenience to avoid a bunch of conditionals
-static NSInteger incrementIfFound(NSInteger i) {
-  return i == NSNotFound ? NSNotFound : i + 1;
-}
-
 - (void)insertSubnode:(ASDisplayNode *)subnode belowSubnode:(ASDisplayNode *)below
 {
-  ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
+  // TODO: 2.0 Conversion: Reenable and fix within product code
+  //ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
   [self _insertSubnode:subnode belowSubnode:below];
 }
 
@@ -1851,13 +1894,13 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
 
-  ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
-  if (!subnode) {
+  if (subnode == nil) {
+    ASDisplayNodeFailAssert(@"Cannot insert a nil subnode");
     return;
   }
 
-  ASDisplayNodeAssert([below _deallocSafeSupernode] == self, @"Node to insert below must be a subnode");
   if ([below _deallocSafeSupernode] != self) {
+    ASDisplayNodeFailAssert(@"Node to insert below must be a subnode");
     return;
   }
 
@@ -1866,22 +1909,31 @@ static NSInteger incrementIfFound(NSInteger i) {
   NSInteger belowSubnodeIndex = [_subnodes indexOfObjectIdenticalTo:below];
   NSInteger belowSublayerIndex = NSNotFound;
 
-  if (_layer) {
-    belowSublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:below.layer];
-    ASDisplayNodeAssert(belowSublayerIndex != NSNotFound, @"Somehow below's supernode is self, yet we could not find it in our layers to reference");
-    if (belowSublayerIndex == NSNotFound)
-      return;
-  }
-  // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to insert it will mess up our calculation
-  if ([subnode _deallocSafeSupernode] == self) {
-    NSInteger currentIndexInSubnodes = [_subnodes indexOfObjectIdenticalTo:subnode];
-    if (currentIndexInSubnodes < belowSubnodeIndex) {
-      belowSubnodeIndex--;
-    }
+  
+  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
+  // hierarchy and none of this could possibly work.
+  if (nodeIsInRasterizedTree(self) == NO) {
     if (_layer) {
-      NSInteger currentIndexInSublayers = [_layer.sublayers indexOfObjectIdenticalTo:subnode.layer];
-      if (currentIndexInSublayers < belowSublayerIndex) {
-        belowSublayerIndex--;
+      belowSublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:below.layer];
+      ASDisplayNodeAssert(belowSublayerIndex != NSNotFound, @"Somehow below's supernode is self, yet we could not find it in our layers to reference");
+      if (belowSublayerIndex == NSNotFound)
+        return;
+    }
+    
+    ASDisplayNodeAssert(belowSubnodeIndex != NSNotFound, @"Couldn't find above in subnodes");
+    
+    // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to
+    // insert it will mess up our calculation
+    if ([subnode _deallocSafeSupernode] == self) {
+      NSInteger currentIndexInSubnodes = [_subnodes indexOfObjectIdenticalTo:subnode];
+      if (currentIndexInSubnodes < belowSubnodeIndex) {
+        belowSubnodeIndex--;
+      }
+      if (_layer) {
+        NSInteger currentIndexInSublayers = [_layer.sublayers indexOfObjectIdenticalTo:subnode.layer];
+        if (currentIndexInSublayers < belowSublayerIndex) {
+          belowSublayerIndex--;
+        }
       }
     }
   }
@@ -1893,7 +1945,8 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 - (void)insertSubnode:(ASDisplayNode *)subnode aboveSubnode:(ASDisplayNode *)above
 {
-  ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
+  // TODO: 2.0 Conversion: Reenable and fix within product code
+  //ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
   [self _insertSubnode:subnode aboveSubnode:above];
 }
 
@@ -1902,13 +1955,13 @@ static NSInteger incrementIfFound(NSInteger i) {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
 
-  ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
-  if (!subnode) {
+  if (subnode == nil) {
+    ASDisplayNodeFailAssert(@"Cannot insert a nil subnode");
     return;
   }
 
-  ASDisplayNodeAssert([above _deallocSafeSupernode] == self, @"Node to insert above must be a subnode");
   if ([above _deallocSafeSupernode] != self) {
+    ASDisplayNodeFailAssert(@"Node to insert above must be a subnode");
     return;
   }
 
@@ -1917,17 +1970,20 @@ static NSInteger incrementIfFound(NSInteger i) {
   NSInteger aboveSubnodeIndex = [_subnodes indexOfObjectIdenticalTo:above];
   NSInteger aboveSublayerIndex = NSNotFound;
 
-  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the hierarchy and none of this could possibly work.
-  if (!_flags.shouldRasterizeDescendants && [self __shouldLoadViewOrLayer]) {
+  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
+  // hierarchy and none of this could possibly work.
+  if (nodeIsInRasterizedTree(self) == NO) {
     if (_layer) {
       aboveSublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:above.layer];
       ASDisplayNodeAssert(aboveSublayerIndex != NSNotFound, @"Somehow above's supernode is self, yet we could not find it in our layers to replace");
       if (aboveSublayerIndex == NSNotFound)
         return;
     }
+    
     ASDisplayNodeAssert(aboveSubnodeIndex != NSNotFound, @"Couldn't find above in subnodes");
 
-    // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to insert it will mess up our calculation
+    // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to
+    // insert it will mess up our calculation
     if ([subnode _deallocSafeSupernode] == self) {
       NSInteger currentIndexInSubnodes = [_subnodes indexOfObjectIdenticalTo:subnode];
       if (currentIndexInSubnodes <= aboveSubnodeIndex) {
@@ -1947,7 +2003,8 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 - (void)insertSubnode:(ASDisplayNode *)subnode atIndex:(NSInteger)idx
 {
-  ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
+  // TODO: 2.0 Conversion: Reenable and fix within product code
+  //ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
   [self _insertSubnode:subnode atIndex:idx];
 }
 
@@ -1955,55 +2012,34 @@ static NSInteger incrementIfFound(NSInteger i) {
 {
   ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
+  
+  if (subnode == nil) {
+    ASDisplayNodeFailAssert(@"Cannot insert a nil subnode");
+    return;
+  }
 
   if (idx > _subnodes.count || idx < 0) {
     ASDisplayNodeFailAssert(@"Cannot insert a subnode at index %zd. Count is %zd", idx, _subnodes.count);
     return;
   }
-
-  if (subnode == nil) {
-    ASDisplayNodeFailAssert(@"Attempt to insert a nil subnode into node %@", self);
-    return;
-  }
   
   NSInteger sublayerIndex = NSNotFound;
 
-  // Account for potentially having other subviews
-  if (_layer && idx == 0) {
-    sublayerIndex = 0;
-  } else if (_layer) {
-    ASDisplayNode *positionInRelationTo = (_subnodes.count > 0 && idx > 0) ? _subnodes[idx - 1] : nil;
-    if (positionInRelationTo) {
-      sublayerIndex = incrementIfFound([_layer.sublayers indexOfObjectIdenticalTo:positionInRelationTo.layer]);
+  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
+  // hierarchy and none of this could possibly work.
+  if (nodeIsInRasterizedTree(self) == NO) {
+    // Account for potentially having other subviews
+    if (_layer && idx == 0) {
+      sublayerIndex = 0;
+    } else if (_layer) {
+      ASDisplayNode *positionInRelationTo = (_subnodes.count > 0 && idx > 0) ? _subnodes[idx - 1] : nil;
+      if (positionInRelationTo) {
+        sublayerIndex = incrementIfFound([_layer.sublayers indexOfObjectIdenticalTo:positionInRelationTo.layer]);
+      }
     }
   }
 
   [self _insertSubnode:subnode atSubnodeIndex:idx sublayerIndex:sublayerIndex andRemoveSubnode:nil];
-}
-
-
-- (void)_addSubnodeSubviewOrSublayer:(ASDisplayNode *)subnode
-{
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssert(self.nodeLoaded, @"_addSubnodeSubview: should never be called before our own view is created");
-
-  BOOL canUseViewAPI = !self.isLayerBacked && !subnode.isLayerBacked;
-  if (canUseViewAPI) {
-    [_view addSubview:subnode.view];
-  } else {
-    // Disallow subviews in a layer-backed node
-    ASDisplayNodeAssert(subnode.isLayerBacked, @"Cannot add a subview to a layer-backed node; only sublayers permitted.");
-    [_layer addSublayer:subnode.layer];
-  }
-}
-
-- (void)_addSubnodeViewsAndLayers
-{
-  ASDisplayNodeAssertMainThread();
-
-  for (ASDisplayNode *node in [_subnodes copy]) {
-    [self _addSubnodeSubviewOrSublayer:node];
-  }
 }
 
 - (void)_removeSubnode:(ASDisplayNode *)subnode
@@ -2025,7 +2061,7 @@ static NSInteger incrementIfFound(NSInteger i) {
 
 - (void)removeFromSupernode
 {
-  ASDisplayNodeAssert(self.supernode.automaticallyManagesSubnodes == NO, @"Attempt to manually remove subnode from node with automaticallyManagesSubnodes=YES. Node: %@", self);
+  //ASDisplayNodeAssert(self.supernode.automaticallyManagesSubnodes == NO, @"Attempt to manually remove subnode from node with automaticallyManagesSubnodes=YES. Node: %@", self);
     
   [self _removeFromSupernode];
 }
@@ -2456,93 +2492,110 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   __ASDisplayNodeCheckForLayoutMethodOverrides;
 
   ASDN::MutexLocker l(__instanceLock__);
-  if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) || _layoutSpecBlock != NULL) {
-    BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
-    
-    ASLayoutSpec *layoutSpec = _shouldCacheLayoutSpec ? _layoutSpec : nil;
-    
-    if (layoutSpec == nil) {
-      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-      if (measureLayoutSpec) {
-        _layoutSpecNumberOfPasses++;
-      }
-      
-      if (ASLayoutElementGetCurrentContext().needsVisualizeNode) {
-        layoutSpec = [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[[self layoutSpecThatFits:constrainedSize]]];
-      } else {
-        layoutSpec = [self layoutSpecThatFits:constrainedSize];
-      }
-      
-    }
 
-#if AS_DEDUPE_LAYOUT_SPEC_TREE
+  // Manual size calculation via calculateSizeThatFits:
+  if (((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) ||
+      (_layoutSpecBlock != NULL)) == NO) {
+    CGSize size = [self calculateSizeThatFits:constrainedSize.max];
+    ASDisplayNodeLogEvent(self, @"calculatedSize: %@", NSStringFromCGSize(size));
+    return [ASLayout layoutWithLayoutElement:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:nil];
+  }
+  
+  // Size calcualtion with layout elements
+  BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
+  if (measureLayoutSpec) {
+    _layoutSpecNumberOfPasses++;
+  }
+
+  // Get layout element from the node
+  id<ASLayoutElement> layoutElement = [self _layoutElementThatFits:constrainedSize];
+
+  // Certain properties are necessary to set on an element of type ASLayoutSpec
+  if (layoutElement.layoutElementType == ASLayoutElementTypeLayoutSpec) {
+    ASLayoutSpec *layoutSpec = (ASLayoutSpec *)layoutElement;
+    
     NSSet *duplicateElements = [layoutSpec findDuplicatedElementsInSubtree];
     if (duplicateElements.count > 0) {
       ASDisplayNodeFailAssert(@"Node %@ returned a layout spec that contains the same elements in multiple positions. Elements: %@", self, duplicateElements);
-      // Use an empty layout spec to avoid crash.
+      // Use an empty layout spec to avoid crashes
       layoutSpec = [[ASLayoutSpec alloc] init];
     }
-#endif
 
     if (_shouldCacheLayoutSpec) {
       _layoutSpec = layoutSpec;
     } else {
       ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
     }
-
-    layoutSpec.parent = self; // This causes upward propogation of any non-default layoutElement values.
-    layoutSpec.isMutable = NO;
-  
-    // manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
-    {
-      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-      ASEnvironmentStatePropagateDown(layoutSpec, self.environmentTraitCollection);
-    }
     
-    BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
-    if (measureLayoutComputation) {
-      _layoutComputationNumberOfPasses++;
-    }
-
-    ASLayout *layout = ({
-      ASDN::SumScopeTimer t(_layoutComputationTotalTime, measureLayoutComputation);
-      [layoutSpec layoutThatFits:constrainedSize];
-    });
-
-    ASDisplayNodeAssertNotNil(layout, @"[ASLayoutSpec measureWithSizeRange:] should never return nil! %@, %@", self, layoutSpec);
-      
-    // Make sure layoutElementObject of the root layout is `self`, so that the flattened layout will be structurally correct.
-    BOOL isFinalLayoutElement = (layout.layoutElement != self);
-    if (isFinalLayoutElement) {
-      layout.position = CGPointZero;
-      layout = [ASLayout layoutWithLayoutElement:self size:layout.size sublayouts:@[layout]];
-    }
-
-    ASDisplayNodeLogEvent(self, @"computedLayout: %@", layout);
-    return [layout filteredNodeLayoutTree];
-  } else {
-    CGSize size = [self calculateSizeThatFits:constrainedSize.max];
-    ASDisplayNodeLogEvent(self, @"calculatedSize: %@", NSStringFromCGSize(size));
-    return [ASLayout layoutWithLayoutElement:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:nil];
+    layoutSpec.parent = self;
+    layoutSpec.isMutable = NO;
   }
+  
+  // Manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
+  {
+    ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+    ASEnvironmentStatePropagateDown(layoutElement, [self environmentTraitCollection]);
+  }
+  
+  BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
+  if (measureLayoutComputation) {
+    _layoutComputationNumberOfPasses++;
+  }
+
+  // Layout element layout creation
+  ASLayout *layout = ({
+    ASDN::SumScopeTimer t(_layoutComputationTotalTime, measureLayoutComputation);
+    [layoutElement layoutThatFits:constrainedSize];
+  });
+  ASDisplayNodeAssertNotNil(layout, @"[ASLayoutElement layoutThatFits:] should never return nil! %@, %@", self, layout);
+    
+  // Make sure layoutElementObject of the root layout is `self`, so that the flattened layout will be structurally correct.
+  BOOL isFinalLayoutElement = (layout.layoutElement != self);
+  if (isFinalLayoutElement) {
+    layout.position = CGPointZero;
+    layout = [ASLayout layoutWithLayoutElement:self size:layout.size sublayouts:@[layout]];
+  }
+  ASDisplayNodeLogEvent(self, @"computedLayout: %@", layout);
+
+  return [layout filteredNodeLayoutTree];
 }
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
+  
+  ASDisplayNodeAssert(ASIsCGSizeValidForSize(constrainedSize), @"Cannot calculate size of node because constrained size is infinite and node does not override -calculateSizeThatFits:. Try setting style.preferredSize on the node. Node: %@", self);
 
-  return CGSizeZero;
+  return constrainedSize;
+}
+
+- (id<ASLayoutElement>)_layoutElementThatFits:(ASSizeRange)constrainedSize
+{
+  __ASDisplayNodeCheckForLayoutMethodOverrides;
+  
+  ASLayoutSpec *layoutSpec = _shouldCacheLayoutSpec ? _layoutSpec : nil;
+
+  if (layoutSpec == nil) {
+    if (_layoutSpecBlock != NULL) {
+      layoutSpec = ({
+        ASDN::MutexLocker l(__instanceLock__);
+        ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+        _layoutSpecBlock(self, constrainedSize);
+      });
+    } else {
+      layoutSpec = ({
+        ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+        [self layoutSpecThatFits:constrainedSize];
+      });
+    }
+  }
+  
+  return layoutSpec;
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
-
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_layoutSpecBlock != NULL) {
-    return _layoutSpecBlock(self, constrainedSize);
-  }
   
   ASDisplayNodeAssert(NO, @"-[ASDisplayNode layoutSpecThatFits:] should never return an empty value. One way this is caused is by calling -[super layoutSpecThatFits:] which is not currently supported.");
   return [[ASLayoutSpec alloc] init];
@@ -2550,11 +2603,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)setLayoutSpecBlock:(ASLayoutSpecBlock)layoutSpecBlock
 {
-  // For now there should never be a overwrite of layoutSpecThatFits: and a layoutSpecThatFitsBlock: be provided
+  // For now there should never be an overwrite of layoutSpecThatFits: / layoutElementThatFits: and a layoutSpecBlock
   ASDisplayNodeAssert(!(_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits), @"Overwriting layoutSpecThatFits: and providing a layoutSpecBlock block is currently not supported");
 
   ASDN::MutexLocker l(__instanceLock__);
-  _layoutSpecBlock = [layoutSpecBlock copy];
+  _layoutSpecBlock = layoutSpecBlock;
 }
 
 - (ASLayoutSpecBlock)layoutSpecBlock
@@ -3348,8 +3401,8 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 - (NSMutableArray<NSDictionary *> *)propertiesForDescription
 {
   NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
-  if (self.name.length > 0) {
-    [result addObject:@{ @"name" : ASStringWithQuotesIfMultiword(self.name) }];
+  if (self.debugName.length > 0) {
+    [result addObject:@{ @"debugName" : ASStringWithQuotesIfMultiword(self.debugName) }];
   }
   return result;
 }
@@ -3358,8 +3411,8 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 {
   NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
   
-  if (self.name.length > 0) {
-    [result addObject:@{ @"name" : ASStringWithQuotesIfMultiword(self.name)}];
+  if (self.debugName.length > 0) {
+    [result addObject:@{ @"debugName" : ASStringWithQuotesIfMultiword(self.debugName)}];
   }
   
   CGRect windowFrame = [self _frameInWindow];
@@ -3465,11 +3518,6 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   return self.subnodes;
 }
 
-- (BOOL)supportsUpwardPropagation
-{
-  return ASEnvironmentStatePropagationEnabled();
-}
-
 - (BOOL)supportsTraitsCollectionPropagation
 {
   return ASEnvironmentStateTraitCollectionPropagationEnabled();
@@ -3498,6 +3546,13 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 - (void)asyncTraitCollectionDidChange
 {
   // Subclass override
+}
+
+#pragma mark - Deprecated
+
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+{
+  return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];
 }
 
 ASEnvironmentLayoutExtensibilityForwarding
@@ -3535,39 +3590,6 @@ ASEnvironmentLayoutExtensibilityForwarding
 }
 #endif
 
-#pragma mark - Deprecated
-
-- (CGSize)measure:(CGSize)constrainedSize
-{
-  return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
-}
-
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
-{
-  return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];
-}
-
-- (void)setPreferredFrameSize:(CGSize)preferredFrameSize
-{
-  ASDN::MutexLocker l(__instanceLock__);
-
-  // Deprecated preferredFrameSize just calls through to set width and height
-  self.style.preferredSize = preferredFrameSize;
-  [self invalidateCalculatedLayout];
-}
-
-- (CGSize)preferredFrameSize
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  ASLayoutElementStyle *style = self.style;
-  if (style.width.unit == ASDimensionUnitPoints && style.height.unit == ASDimensionUnitPoints) {
-    return CGSizeMake(style.width.value, style.height.value);
-  }
-
-  return CGSizeZero;
-}
-
 @end
 
 @implementation ASDisplayNode (Debugging)
@@ -3600,12 +3622,16 @@ ASEnvironmentLayoutExtensibilityForwarding
 
 - (NSString *)asciiArtString
 {
-    return [ASLayoutSpec asciiArtStringForChildren:@[] parentName:[self asciiArtName]];
+  return [ASLayoutSpec asciiArtStringForChildren:@[] parentName:[self asciiArtName]];
 }
 
 - (NSString *)asciiArtName
 {
-    return NSStringFromClass([self class]);
+  NSString *string = NSStringFromClass([self class]);
+  if (_debugName) {
+    string = [string stringByAppendingString:[NSString stringWithFormat:@"\"%@\"",_debugName]];
+  }
+  return string;
 }
 
 @end
@@ -3679,8 +3705,76 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 
 @end
 
+#pragma mark - Deprecated
 
 @implementation ASDisplayNode (Deprecated)
+
+- (NSString *)name
+{
+  return self.debugName;
+}
+
+- (void)setName:(NSString *)name
+{
+  self.debugName = name;
+}
+
+- (void)setPreferredFrameSize:(CGSize)preferredFrameSize
+{
+  // Deprecated preferredFrameSize just calls through to set width and height
+  self.style.preferredSize = preferredFrameSize;
+  [self invalidateCalculatedLayout];
+}
+
+- (CGSize)preferredFrameSize
+{
+  ASLayoutSize size = self.style.preferredLayoutSize;
+  BOOL isPoints = (size.width.unit == ASDimensionUnitPoints && size.height.unit == ASDimensionUnitPoints);
+  return isPoints ? CGSizeMake(size.width.value, size.height.value) : CGSizeZero;
+}
+
+- (CGSize)measure:(CGSize)constrainedSize
+{
+  return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, constrainedSize)].size;
+}
+
+ASLayoutElementStyleForwarding
+
+- (void)visibilityDidChange:(BOOL)isVisible
+{
+  if (isVisible) {
+    [self didEnterVisibleState];
+  } else {
+    [self didExitVisibleState];
+  }
+}
+
+- (void)visibleStateDidChange:(BOOL)isVisible
+{
+  if (isVisible) {
+    [self didEnterVisibleState];
+  } else {
+    [self didExitVisibleState];
+  }
+}
+
+- (void)displayStateDidChange:(BOOL)inDisplayState
+{
+  if (inDisplayState) {
+    [self didEnterVisibleState];
+  } else {
+    [self didExitVisibleState];
+  }
+}
+
+- (void)loadStateDidChange:(BOOL)inLoadState
+{
+  if (inLoadState) {
+    [self didEnterPreloadState];
+  } else {
+    [self didExitPreloadState];
+  }
+}
 
 - (void)cancelLayoutTransitionsInProgress
 {

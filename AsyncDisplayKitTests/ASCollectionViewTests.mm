@@ -210,6 +210,34 @@
   XCTAssertEqualObjects([collectionView supplementaryNodeKindsInDataController:nil], @[UICollectionElementKindSectionHeader]);
 }
 
+- (void)testReloadIfNeeded
+{
+  [ASDisplayNode setSuppressesInvalidCollectionUpdateExceptions:NO];
+
+  __block ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  __block ASCollectionViewTestDelegate *del = testController.asyncDelegate;
+  __block ASCollectionNode *cn = testController.collectionNode;
+
+  void (^reset)() = ^void() {
+    testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+    del = testController.asyncDelegate;
+    cn = testController.collectionNode;
+  };
+
+  // Check if the number of sections matches the data source
+  XCTAssertEqual(cn.numberOfSections, del->_itemCounts.size(), @"Section count doesn't match the data source");
+
+  // Reset everything and then check if numberOfItemsInSection matches the data source
+  reset();
+  XCTAssertEqual([cn numberOfItemsInSection:0], del->_itemCounts[0], @"Number of items in Section doesn't match the data source");
+
+  // Reset and check if we can get the node corresponding to a specific indexPath
+  reset();
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+  ASTextCellNodeWithSetSelectedCounter *node = (ASTextCellNodeWithSetSelectedCounter*)[cn nodeForItemAtIndexPath:indexPath];
+  XCTAssertTrue([node.text isEqualToString:indexPath.description], @"Node's text should match the initial text it was created with");
+}
+
 - (void)testSelection
 {
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
@@ -222,27 +250,60 @@
   
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
   ASCellNode *node = [testController.collectionView nodeForItemAtIndexPath:indexPath];
-  
+
+  NSInteger setSelectedCount = 0;
   // selecting node should select cell
   node.selected = YES;
+  ++setSelectedCount;
   XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath], @"Selecting node should update cell selection.");
   
   // deselecting node should deselect cell
   node.selected = NO;
+  ++setSelectedCount;
   XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] isEqualToArray:@[]], @"Deselecting node should update cell selection.");
 
-  // selecting cell via collectionView should select node
-  [testController.collectionView selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  // selecting cell via collectionNode should select node
+  ++setSelectedCount;
+  [testController.collectionNode selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
   XCTAssertTrue(node.isSelected == YES, @"Selecting cell should update node selection.");
   
-  // deselecting cell via collectionView should deselect node
-  [testController.collectionView deselectItemAtIndexPath:indexPath animated:NO];
+  // deselecting cell via collectionNode should deselect node
+  ++setSelectedCount;
+  [testController.collectionNode deselectItemAtIndexPath:indexPath animated:NO];
   XCTAssertTrue(node.isSelected == NO, @"Deselecting cell should update node selection.");
   
   // select the cell again, scroll down and back up, and check that the state persisted
-  [testController.collectionView selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  [testController.collectionNode selectItemAtIndexPath:indexPath animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  ++setSelectedCount;
   XCTAssertTrue(node.isSelected == YES, @"Selecting cell should update node selection.");
-  
+
+  testController.collectionNode.allowsMultipleSelection = YES;
+
+  NSIndexPath *indexPath2 = [NSIndexPath indexPathForItem:1 inSection:0];
+  ASCellNode *node2 = [testController.collectionView nodeForItemAtIndexPath:indexPath2];
+
+  // selecting cell via collectionNode should select node
+  [testController.collectionNode selectItemAtIndexPath:indexPath2 animated:NO scrollPosition:UICollectionViewScrollPositionNone];
+  XCTAssertTrue(node2.isSelected == YES, @"Selecting cell should update node selection.");
+
+  XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath] &&
+                [[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath2],
+                @"Selecting multiple cells should result in those cells being in the array of selectedItems.");
+
+  // deselecting node should deselect cell
+  node.selected = NO;
+  ++setSelectedCount;
+  XCTAssertTrue(![[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath] &&
+                [[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath2], @"Deselecting node should update array of selectedItems.");
+
+  node.selected = YES;
+  ++setSelectedCount;
+  XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath], @"Selecting node should update cell selection.");
+
+  node2.selected = NO;
+  XCTAssertTrue([[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath] &&
+                ![[testController.collectionView indexPathsForSelectedItems] containsObject:indexPath2], @"Deselecting node should update array of selectedItems.");
+
   // reload cell (-prepareForReuse is called) & check that selected state is preserved
   [testController.collectionView setContentOffset:CGPointMake(0,testController.collectionView.bounds.size.height)];
   [testController.collectionView layoutIfNeeded];
@@ -256,7 +317,7 @@
   XCTAssertTrue(node.isSelected == NO, @"Deselecting cell should update node selection.");
   
   // check setSelected not called extra times
-  XCTAssertTrue([(ASTextCellNodeWithSetSelectedCounter *)node setSelectedCounter] == 6, @"setSelected: should not be called on node multiple times.");
+  XCTAssertTrue([(ASTextCellNodeWithSetSelectedCounter *)node setSelectedCounter] == (setSelectedCount + 1), @"setSelected: should not be called on node multiple times.");
 }
 
 - (void)testTuningParametersWithExplicitRangeMode
@@ -443,6 +504,45 @@
   }
 }
 
+- (void)testCellNodeIndexPathConsistency
+{
+  updateValidationTestPrologue
+
+  // Test with a visible cell
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:2 inSection:0];
+  ASCellNode *cell = [cn nodeForItemAtIndexPath:indexPath];
+
+  // Check if cell's indexPath corresponds to the indexPath being tested
+  XCTAssertTrue(cell.indexPath.section == indexPath.section && cell.indexPath.item == indexPath.item, @"Expected the cell's indexPath to be the same as the indexPath being tested.");
+
+  // Remove an item prior to the cell's indexPath from the same section and check for indexPath consistency
+  --del->_itemCounts[indexPath.section];
+  [cn deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:indexPath.section]]];
+  XCTAssertTrue(cell.indexPath.section == indexPath.section && cell.indexPath.item == (indexPath.item - 1), @"Expected the cell's indexPath to be updated once a cell with a lower index is deleted.");
+
+  // Remove the section that includes the indexPath and check if the cell's indexPath is now nil
+  del->_itemCounts.erase(del->_itemCounts.begin());
+  [cn deleteSections:[NSIndexSet indexSetWithIndex:indexPath.section]];
+  XCTAssertNil(cell.indexPath, @"Expected the cell's indexPath to be nil once the section that contains the node is deleted.");
+
+  // Run the same tests but with a non-displayed cell
+  indexPath = [NSIndexPath indexPathForItem:2 inSection:(del->_itemCounts.size() - 1)];
+  cell = [cn nodeForItemAtIndexPath:indexPath];
+
+  // Check if cell's indexPath corresponds to the indexPath being tested
+  XCTAssertTrue(cell.indexPath.section == indexPath.section && cell.indexPath.item == indexPath.item, @"Expected the cell's indexPath to be the same as the indexPath in question.");
+
+  // Remove an item prior to the cell's indexPath from the same section and check for indexPath consistency
+  --del->_itemCounts[indexPath.section];
+  [cn deleteItemsAtIndexPaths:@[[NSIndexPath indexPathForItem:0 inSection:indexPath.section]]];
+  XCTAssertTrue(cell.indexPath.section == indexPath.section && cell.indexPath.item == (indexPath.item - 1), @"Expected the cell's indexPath to be updated once a cell with a lower index is deleted.");
+
+  // Remove the section that includes the indexPath and check if the cell's indexPath is now nil
+  del->_itemCounts.pop_back();
+  [cn deleteSections:[NSIndexSet indexSetWithIndex:indexPath.section]];
+  XCTAssertNil(cell.indexPath, @"Expected the cell's indexPath to be nil once the section that contains the node is deleted.");
+}
+
 /**
  * https://github.com/facebook/AsyncDisplayKit/issues/2011
  *
@@ -462,12 +562,12 @@
   [[[dataSource stub] andDo:^(NSInvocation *invocation) {
     __autoreleasing ASCellNode *suppNode = [[ASCellNode alloc] init];
     int thisNodeIdx = nodeIdx++;
-    suppNode.name = [NSString stringWithFormat:@"Cell #%d", thisNodeIdx];
+    suppNode.debugName = [NSString stringWithFormat:@"Cell #%d", thisNodeIdx];
     [keepaliveNodes addObject:suppNode];
 
     ASDisplayNode *layerBacked = [[ASDisplayNode alloc] init];
     layerBacked.layerBacked = YES;
-    layerBacked.name = [NSString stringWithFormat:@"Subnode #%d", thisNodeIdx];
+    layerBacked.debugName = [NSString stringWithFormat:@"Subnode #%d", thisNodeIdx];
     [suppNode addSubnode:layerBacked];
     [invocation setReturnValue:&suppNode];
   }] collectionNode:cn nodeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:OCMOCK_ANY];

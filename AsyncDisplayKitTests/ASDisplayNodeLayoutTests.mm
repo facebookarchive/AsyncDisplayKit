@@ -102,4 +102,29 @@
   XCTAssertEqual(numberOfLayoutSpecThatFitsCalls, 1, @"Should not remeasure with same bounds");
 }
 
+- (void)testThatLayoutWithInvalidSizeCausesException
+{
+  ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.layoutSpecBlock = ^ASLayoutSpec *(ASDisplayNode *node, ASSizeRange constrainedSize) {
+    return [ASWrapperLayoutSpec wrapperWithLayoutElement:displayNode];
+  };
+  
+  XCTAssertThrows([node layoutThatFits:ASSizeRangeMake(CGSizeMake(0, FLT_MAX))]);
+  
+  // This dance is necessary as we would assert in case we create an ASDimension that is not real numbers
+  ASDimension width = displayNode.style.width;
+  width.value = INFINITY;
+  displayNode.style.width = width;
+  XCTAssertThrows([node layoutThatFits:ASSizeRangeMake(CGSizeMake(0, 0), CGSizeMake(INFINITY, INFINITY))]);
+}
+
+- (void)testThatLayoutCreatedWithInvalidSizeCausesException
+{
+  ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
+  XCTAssertThrows([ASLayout layoutWithLayoutElement:displayNode size:CGSizeMake(FLT_MAX, FLT_MAX)]);
+  XCTAssertThrows([ASLayout layoutWithLayoutElement:displayNode size:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)]);
+  XCTAssertThrows([ASLayout layoutWithLayoutElement:displayNode size:CGSizeMake(INFINITY, INFINITY)]);
+}
+
 @end

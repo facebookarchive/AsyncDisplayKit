@@ -17,7 +17,7 @@
 #import "ASAssert.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayoutPrivate.h"
+#import "ASLayoutSpec+Subclasses.h"
 
 #pragma mark - ASRatioLayoutSpec
 
@@ -60,15 +60,15 @@
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   std::vector<CGSize> sizeOptions;
-  // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
-  if (!isinf(constrainedSize.max.width) && ASPointsValidForLayout(constrainedSize.max.width)) {
+  
+  if (ASPointsValidForSize(constrainedSize.max.width)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
       constrainedSize.max.width,
       ASFloorPixelValue(_ratio * constrainedSize.max.width)
     }));
   }
-  // TODO: layout: isValidForLayout() call should not be necessary if INFINITY is used
-  if (!isinf(constrainedSize.max.height) && ASPointsValidForLayout(constrainedSize.max.width)) {
+  
+  if (ASPointsValidForSize(constrainedSize.max.width)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
       ASFloorPixelValue(constrainedSize.max.height / _ratio),
       constrainedSize.max.height

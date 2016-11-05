@@ -39,6 +39,17 @@ static NSUInteger kNumberOfImages = 14;
 
 - (instancetype)init
 {
+  MosaicCollectionViewLayout *layout = [[MosaicCollectionViewLayout alloc] init];
+  layout.numberOfColumns = 2;
+  layout.headerHeight = 44.0;
+  
+  _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
+  _collectionNode.dataSource = self;
+  _collectionNode.delegate = self;
+  _collectionNode.backgroundColor = [UIColor whiteColor];
+  
+  _layoutInspector = [[MosaicCollectionViewLayoutInspector alloc] init];
+
   if (!(self = [super initWithNode:_collectionNode]))
     return nil;
   
@@ -53,16 +64,6 @@ static NSUInteger kNumberOfImages = 14;
     }
   }
   
-  MosaicCollectionViewLayout *layout = [[MosaicCollectionViewLayout alloc] init];
-  layout.numberOfColumns = 2;
-  layout.headerHeight = 44.0;
-  
-  _layoutInspector = [[MosaicCollectionViewLayoutInspector alloc] init];
-  
-  _collectionNode.dataSource = self;
-  _collectionNode.delegate = self;
-  _collectionNode.backgroundColor = [UIColor whiteColor];
-  
   [_collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   
   return self;
@@ -75,19 +76,12 @@ static NSUInteger kNumberOfImages = 14;
   _collectionNode.view.layoutInspector = _layoutInspector;
 }
 
-- (void)dealloc
-{
-  _collectionNode.dataSource = nil;
-  _collectionNode.delegate = nil;
-}
-
 - (void)reloadTapped
 {
   [_collectionNode reloadData];
 }
 
-#pragma mark -
-#pragma mark ASCollectionView data source.
+#pragma mark - ASCollectionNode data source.
 
 - (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
@@ -110,12 +104,12 @@ static NSUInteger kNumberOfImages = 14;
   return textCellNode;
 }
 
-- (NSInteger)numberOfSectionsInCollectionView:(ASCollectionNode *)collectionNode
+- (NSInteger)numberOfSectionsInCollectionNode:(ASCollectionNode *)collectionNode
 {
   return _sections.count;
 }
 
-- (NSInteger)collectionView:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
+- (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
 {
   return [_sections[section] count];
 }

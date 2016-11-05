@@ -9,11 +9,9 @@
 //
 
 #import "ASInsetLayoutSpec.h"
-
 #import "ASAssert.h"
-
+#import "ASLayoutSpec+Subclasses.h"
 #import "ASInternalHelpers.h"
-#import "ASLayoutPrivate.h"
 
 @interface ASInsetLayoutSpec ()
 {

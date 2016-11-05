@@ -13,6 +13,7 @@
 #import "ASDisplayNodeInternal.h"
 
 #import <map>
+#import <atomic>
 
 CGFloat const ASLayoutElementParentDimensionUndefined = NAN;
 CGSize const ASLayoutElementParentSizeUndefined = {ASLayoutElementParentDimensionUndefined, ASLayoutElementParentDimensionUndefined};
@@ -110,20 +111,20 @@ do {\
 @implementation ASLayoutElementStyle {
   ASDN::RecursiveMutex __instanceLock__;
   ASLayoutElementSize _size;
+  
+  std::atomic<CGFloat> _spacingBefore;
+  std::atomic<CGFloat> _spacingAfter;
+  std::atomic<CGFloat> _flexGrow;
+  std::atomic<CGFloat> _flexShrink;
+  std::atomic<ASDimension> _flexBasis;
+  std::atomic<ASStackLayoutAlignSelf> _alignSelf;
+  std::atomic<CGFloat> _ascender;
+  std::atomic<CGFloat> _descender;
+  std::atomic<CGPoint> _layoutPosition;
 }
 
 @dynamic width, height, minWidth, maxWidth, minHeight, maxHeight;
 @dynamic preferredSize, minSize, maxSize, preferredLayoutSize, minLayoutSize, maxLayoutSize;
-
-@synthesize spacingBefore = _spacingBefore;
-@synthesize spacingAfter = _spacingAfter;
-@synthesize flexGrow = _flexGrow;
-@synthesize flexShrink = _flexShrink;
-@synthesize flexBasis = _flexBasis;
-@synthesize alignSelf = _alignSelf;
-@synthesize ascender = _ascender;
-@synthesize descender = _descender;
-@synthesize layoutPosition = _layoutPosition;
 
 #pragma mark - Lifecycle
 
@@ -242,22 +243,49 @@ do {\
 
 #pragma mark - ASLayoutElementStyleSizeHelpers
 
+// We explicitly not call the setter for (max/min) width and height to avoid locking overhead
+
 - (void)setPreferredSize:(CGSize)preferredSize
 {
-  self.width = ASDimensionMakeWithPoints(preferredSize.width);
-  self.height = ASDimensionMakeWithPoints(preferredSize.height);
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.width = ASDimensionMakeWithPoints(preferredSize.width);
+  _size.height = ASDimensionMakeWithPoints(preferredSize.height);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleHeightProperty);
+}
+
+- (CGSize)preferredSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if (_size.width.unit == ASDimensionUnitFraction) {
+    NSCAssert(NO, @"Cannot get preferredSize of element with fractional width. Width: %@.", NSStringFromASDimension(_size.width));
+    return CGSizeZero;
+  }
+  
+  if (_size.height.unit == ASDimensionUnitFraction) {
+    NSCAssert(NO, @"Cannot get preferredSize of element with fractional height. Height: %@.", NSStringFromASDimension(_size.height));
+    return CGSizeZero;
+  }
+  
+  return CGSizeMake(_size.width.value, _size.height.value);
 }
 
 - (void)setMinSize:(CGSize)minSize
 {
-  self.minWidth = ASDimensionMakeWithPoints(minSize.width);
-  self.minHeight = ASDimensionMakeWithPoints(minSize.height);
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.minWidth = ASDimensionMakeWithPoints(minSize.width);
+  _size.minHeight = ASDimensionMakeWithPoints(minSize.height);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMinWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMinHeightProperty);
 }
 
 - (void)setMaxSize:(CGSize)maxSize
 {
-  self.maxWidth = ASDimensionMakeWithPoints(maxSize.width);
-  self.maxHeight = ASDimensionMakeWithPoints(maxSize.height);
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.maxWidth = ASDimensionMakeWithPoints(maxSize.width);
+  _size.maxHeight = ASDimensionMakeWithPoints(maxSize.height);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMaxWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMaxHeightProperty);
 }
 
 - (ASLayoutSize)preferredLayoutSize
@@ -268,8 +296,11 @@ do {\
 
 - (void)setPreferredLayoutSize:(ASLayoutSize)preferredLayoutSize
 {
-  self.width = preferredLayoutSize.width;
-  self.height = preferredLayoutSize.height;
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.width = preferredLayoutSize.width;
+  _size.height = preferredLayoutSize.height;
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleHeightProperty);
 }
 
 - (ASLayoutSize)minLayoutSize
@@ -280,8 +311,11 @@ do {\
 
 - (void)setMinLayoutSize:(ASLayoutSize)minLayoutSize
 {
-  self.minWidth = minLayoutSize.width;
-  self.minHeight = minLayoutSize.height;
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.minWidth = minLayoutSize.width;
+  _size.minHeight = minLayoutSize.height;
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMinWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMinHeightProperty);
 }
 
 - (ASLayoutSize)maxLayoutSize
@@ -292,8 +326,11 @@ do {\
 
 - (void)setMaxLayoutSize:(ASLayoutSize)maxLayoutSize
 {
-  self.maxWidth = maxLayoutSize.width;
-  self.maxHeight = maxLayoutSize.height;
+  ASDN::MutexLocker l(__instanceLock__);
+  _size.maxWidth = maxLayoutSize.width;
+  _size.maxHeight = maxLayoutSize.height;
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMaxWidthProperty);
+  ASLayoutElementStyleCallDelegate(ASLayoutElementStyleMaxHeightProperty);
 }
 
 
@@ -301,122 +338,193 @@ do {\
 
 - (void)setSpacingBefore:(CGFloat)spacingBefore
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _spacingBefore = spacingBefore;
+  _spacingBefore.store(spacingBefore);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleSpacingBeforeProperty);
 }
 
 - (CGFloat)spacingBefore
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _spacingBefore;
+  return _spacingBefore.load();
 }
 
 - (void)setSpacingAfter:(CGFloat)spacingAfter
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _spacingAfter = spacingAfter;
+  _spacingAfter.store(spacingAfter);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleSpacingAfterProperty);
 }
 
 - (CGFloat)spacingAfter
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _spacingAfter;
+  return _spacingAfter.load();
 }
 
 - (void)setFlexGrow:(CGFloat)flexGrow
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _flexGrow = flexGrow;
+  _flexGrow.store(flexGrow);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleFlexGrowProperty);
 }
 
 - (CGFloat)flexGrow
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _flexGrow;
+  return _flexGrow.load();
 }
 
 - (void)setFlexShrink:(CGFloat)flexShrink
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _flexShrink = flexShrink;
+  _flexShrink.store(flexShrink);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleFlexShrinkProperty);
 }
 
 - (CGFloat)flexShrink
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _flexShrink;
+  return _flexShrink.load();
 }
 
 - (void)setFlexBasis:(ASDimension)flexBasis
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _flexBasis = flexBasis;
+  _flexBasis.store(flexBasis);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleFlexBasisProperty);
 }
 
 - (ASDimension)flexBasis
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _flexBasis;
+  return _flexBasis.load();
 }
 
 - (void)setAlignSelf:(ASStackLayoutAlignSelf)alignSelf
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _alignSelf = alignSelf;
+  _alignSelf.store(alignSelf);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleAlignSelfProperty);
 }
 
 - (ASStackLayoutAlignSelf)alignSelf
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _alignSelf;
+  return _alignSelf.load();
 }
 
 - (void)setAscender:(CGFloat)ascender
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _ascender = ascender;
+  _ascender.store(ascender);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleAscenderProperty);
 }
 
 - (CGFloat)ascender
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _ascender;
+  return _ascender.load();
 }
 
 - (void)setDescender:(CGFloat)descender
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _descender = descender;
+  _descender.store(descender);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleDescenderProperty);
 }
 
 - (CGFloat)descender
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _descender;
+  return _descender.load();
 }
 
 #pragma mark - ASAbsoluteLayoutElement
 
 - (void)setLayoutPosition:(CGPoint)layoutPosition
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _layoutPosition = layoutPosition;
+  _layoutPosition.store(layoutPosition);
   ASLayoutElementStyleCallDelegate(ASLayoutElementStyleLayoutPositionProperty);
 }
 
 - (CGPoint)layoutPosition
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return _layoutPosition;
+  return _layoutPosition.load();
 }
+
+#pragma mark - Debugging
+
+- (NSString *)description
+{
+  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDescription
+{
+  NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+  
+  if ((self.minLayoutSize.width.unit != ASDimensionUnitAuto ||
+    self.minLayoutSize.height.unit != ASDimensionUnitAuto)) {
+    [result addObject:@{ @"minLayoutSize" : NSStringFromASLayoutSize(self.minLayoutSize) }];
+  }
+  
+  if ((self.preferredLayoutSize.width.unit != ASDimensionUnitAuto ||
+    self.preferredLayoutSize.height.unit != ASDimensionUnitAuto)) {
+    [result addObject:@{ @"preferredSize" : NSStringFromASLayoutSize(self.preferredLayoutSize) }];
+  }
+  
+  if ((self.maxLayoutSize.width.unit != ASDimensionUnitAuto ||
+    self.maxLayoutSize.height.unit != ASDimensionUnitAuto)) {
+    [result addObject:@{ @"maxLayoutSize" : NSStringFromASLayoutSize(self.maxLayoutSize) }];
+  }
+  
+  const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentLayoutOptionsStateMakeDefault();
+  
+  if (self.alignSelf != defaultState.alignSelf) {
+    [result addObject:@{ @"alignSelf" : [@[@"ASStackLayoutAlignSelfAuto",
+                                          @"ASStackLayoutAlignSelfStart",
+                                          @"ASStackLayoutAlignSelfEnd",
+                                          @"ASStackLayoutAlignSelfCenter",
+                                          @"ASStackLayoutAlignSelfStretch"] objectAtIndex:self.alignSelf] }];
+  }
+  
+  if (self.ascender != defaultState.ascender) {
+    [result addObject:@{ @"ascender" : @(self.ascender) }];
+  }
+  
+  if (self.descender != defaultState.descender) {
+    [result addObject:@{ @"descender" : @(self.descender) }];
+  }
+  
+  if (ASDimensionEqualToDimension(self.flexBasis, defaultState.flexBasis) == NO) {
+    [result addObject:@{ @"flexBasis" : NSStringFromASDimension(self.flexBasis) }];
+  }
+  
+  if (self.flexGrow != defaultState.flexGrow) {
+    [result addObject:@{ @"flexGrow" : @(self.flexGrow) }];
+  }
+  
+  if (self.flexShrink != defaultState.flexShrink) {
+    [result addObject:@{ @"flexShrink" : @(self.flexShrink) }];
+  }
+  
+  if (self.spacingAfter != defaultState.spacingAfter) {
+    [result addObject:@{ @"spacingAfter" : @(self.spacingAfter) }];
+  }
+  
+  if (self.spacingBefore != defaultState.spacingBefore) {
+    [result addObject:@{ @"spacingBefore" : @(self.spacingBefore) }];
+  }
+  
+  if (CGPointEqualToPoint(self.layoutPosition, defaultState.layoutPosition) == NO) {
+    [result addObject:@{ @"layoutPosition" : [NSValue valueWithCGPoint:self.layoutPosition] }];
+  }
+
+  return result;
+}
+
+#pragma mark Deprecated
+
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+- (ASRelativeSizeRange)sizeRange
+{
+  return ASRelativeSizeRangeMake(self.minLayoutSize, self.maxLayoutSize);
+}
+
+- (void)setSizeRange:(ASRelativeSizeRange)sizeRange
+{
+  self.minLayoutSize = sizeRange.min;
+  self.maxLayoutSize = sizeRange.max;
+}
+
+#pragma clang diagnostic pop
 
 @end
 

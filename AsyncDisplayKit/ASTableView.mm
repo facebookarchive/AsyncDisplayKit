@@ -129,6 +129,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL _isDeallocating;
   BOOL _performingBatchUpdates;
   NSMutableSet *_cellsForVisibilityUpdates;
+
+  // The section index overlay view, if there is one present.
+  // This is useful because we need to measure our row nodes against (width - indexView.width).
+  __weak UIView *_sectionIndexView;
   
   struct {
     unsigned int scrollViewDidScroll:1;
@@ -181,6 +185,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     unsigned int tableNodeCanMoveRow:1;
     unsigned int tableViewMoveRow:1;
     unsigned int tableNodeMoveRow:1;
+    unsigned int sectionIndexMethods:1; // if both section index methods are implemented
   } _asyncDataSourceFlags;
 }
 
@@ -321,6 +326,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDataSourceFlags.tableNodeNodeBlockForRow = [_asyncDataSource respondsToSelector:@selector(tableNode:nodeBlockForRowAtIndexPath:)];
     _asyncDataSourceFlags.tableViewCanMoveRow = [_asyncDataSource respondsToSelector:@selector(tableView:canMoveRowAtIndexPath:)];
     _asyncDataSourceFlags.tableViewMoveRow = [_asyncDataSource respondsToSelector:@selector(tableView:moveRowAtIndexPath:toIndexPath:)];
+    _asyncDataSourceFlags.sectionIndexMethods = [_asyncDataSource respondsToSelector:@selector(sectionIndexTitlesForTableView:)] && [_asyncDataSource respondsToSelector:@selector(tableView:sectionForSectionIndexTitle:atIndex:)];
     
     ASDisplayNodeAssert(_asyncDataSourceFlags.tableViewNodeBlockForRow
                         || _asyncDataSourceFlags.tableViewNodeForRow
@@ -352,10 +358,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     _asyncDelegateFlags.scrollViewDidScroll = [_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)];
 
     _asyncDelegateFlags.tableViewWillDisplayNodeForRow = [_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNode:forRowAtIndexPath:)];
+    _asyncDelegateFlags.tableNodeWillDisplayNodeForRow = [_asyncDelegate respondsToSelector:@selector(tableNode:willDisplayRowWithNode:)];
     if (_asyncDelegateFlags.tableViewWillDisplayNodeForRow == NO) {
       _asyncDelegateFlags.tableViewWillDisplayNodeForRowDeprecated = [_asyncDelegate respondsToSelector:@selector(tableView:willDisplayNodeForRowAtIndexPath:)];
     }
     _asyncDelegateFlags.tableViewDidEndDisplayingNodeForRow = [_asyncDelegate respondsToSelector:@selector(tableView:didEndDisplayingNode:forRowAtIndexPath:)];
+    _asyncDelegateFlags.tableNodeDidEndDisplayingNodeForRow = [_asyncDelegate respondsToSelector:@selector(tableNode:didEndDisplayingRowWithNode:)];
     _asyncDelegateFlags.scrollViewWillEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
     _asyncDelegateFlags.tableViewWillBeginBatchFetch = [_asyncDelegate respondsToSelector:@selector(tableView:willBeginBatchFetchWithContext:)];
     _asyncDelegateFlags.tableNodeWillBeginBatchFetch = [_asyncDelegate respondsToSelector:@selector(tableNode:willBeginBatchFetchWithContext:)];
@@ -462,14 +470,43 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (NSIndexPath *)convertIndexPathFromTableNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait
 {
-  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  return [self indexPathForNode:node waitingIfNeeded:wait];
+  // If this is a section index path, we don't currently have a method
+  // to do a mapping.
+  if (indexPath.row == NSNotFound) {
+    return indexPath;
+  } else {
+    ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+    return [self indexPathForNode:node waitingIfNeeded:wait];
+  }
 }
 
 - (NSIndexPath *)convertIndexPathToTableNode:(NSIndexPath *)indexPath
 {
-  ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-  return [_dataController indexPathForNode:node];
+  // If this is a section index path, we don't currently have a method
+  // to do a mapping.
+  if (indexPath.row == NSNotFound) {
+    return indexPath;
+  } else {
+    ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
+    return [_dataController indexPathForNode:node];
+  }
+}
+
+- (NSArray<NSIndexPath *> *)convertIndexPathsToTableNode:(NSArray<NSIndexPath *> *)indexPaths
+{
+  if (indexPaths == nil) {
+    return nil;
+  }
+
+  NSMutableArray<NSIndexPath *> *indexPathsArray = [NSMutableArray new];
+
+  for (NSIndexPath *indexPathInView in indexPaths) {
+    NSIndexPath *indexPath = [self convertIndexPathToTableNode:indexPathInView];
+    if (indexPath != nil) {
+      [indexPathsArray addObject:indexPath];
+    }
+  }
+  return indexPathsArray;
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
@@ -526,46 +563,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [_dataController waitUntilAllUpdatesAreCommitted];
 }
 
-/**
- * TODO: This method was built when the distinction between data source
- * index paths and view index paths was unclear. For compatibility, it
- * still expects data source index paths for the time being.
- * When the behavior is changed (to use the view index path directly)
- * we should also remove the @c convertIndexPathFromTableNode: method.
- */
-- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
-{
-  ASDisplayNodeAssertMainThread();
-
-  indexPath = [self convertIndexPathFromTableNode:indexPath waitingIfNeeded:YES];
-  if (indexPath != nil) {
-    [super scrollToRowAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
-  } else {
-    NSLog(@"Warning: Ignoring request to scroll to row at index path %@ because the item did not reach the table view.", indexPath);
-  }
-}
-
-/**
- * TODO: This method was built when the distinction between data source
- * index paths and view index paths was unclear. For compatibility, it
- * still expects data source index paths for the time being.
- */
-- (void)selectRowAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UITableViewScrollPosition)scrollPosition
-{
-  ASDisplayNodeAssertMainThread();
-  
-  indexPath = [self convertIndexPathFromTableNode:indexPath waitingIfNeeded:YES];
-  if (indexPath != nil) {
-    [super selectRowAtIndexPath:indexPath animated:YES scrollPosition:scrollPosition];
-  } else {
-    NSLog(@"Warning: Ignoring request to select row at index path %@ because the item did not reach the table view.", indexPath);
-  }
-}
-
 - (void)layoutSubviews
 {
-  if (_nodesConstrainedWidth != self.bounds.size.width) {
-    _nodesConstrainedWidth = self.bounds.size.width;
+  CGFloat constrainedWidth = self.bounds.size.width - [self sectionIndexWidth];
+  if (_nodesConstrainedWidth != constrainedWidth) {
+    _nodesConstrainedWidth = constrainedWidth;
 
     // First width change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
     // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
@@ -1517,10 +1519,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     // is the same for all cells (because there is no easy way to get that individual value before the node being assigned to a _ASTableViewCell).
     // Also, in many cases, some nodes may not need to be re-measured at all, such as when user enters and then immediately leaves editing mode.
     // To avoid premature optimization and making such assumption, as well as to keep ASTableView simple, re-measurement is strictly done on main.
-    [self beginUpdates];
+    CGSize oldSize = node.bounds.size;
     const CGSize calculatedSize = [node layoutThatFits:constrainedSize].size;
-    node.frame = CGRectMake(0, 0, calculatedSize.width, calculatedSize.height);
-    [self endUpdates];
+    node.frame = { .size = calculatedSize };
+
+    // If the node height changed, trigger a height requery.
+    if (oldSize.height != calculatedSize.height) {
+      [self beginUpdates];
+      [self endUpdates];
+    }
   }
 }
 
@@ -1583,6 +1590,31 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 }
 
 #pragma mark - Helper Methods
+
+// Note: This is called every layout, and so it is very performance sensitive.
+- (CGFloat)sectionIndexWidth
+{
+  // If they don't implement the methods, then there's no section index.
+  if (_asyncDataSourceFlags.sectionIndexMethods == NO) {
+    return 0;
+  }
+
+  UIView *indexView = _sectionIndexView;
+  if (indexView.superview == self) {
+    return indexView.frame.size.width;
+  }
+
+  CGRect bounds = self.bounds;
+  for (UIView *view in self.subviews) {
+    CGRect frame = view.frame;
+    // Section index is right-aligned and less than half-width.
+    if (CGRectGetMaxX(frame) == CGRectGetMaxX(bounds) && frame.size.width * 2 < bounds.size.width) {
+      _sectionIndexView = view;
+      return frame.size.width;
+    }
+  }
+  return 0;
+}
 
 /// @note This should be a UIKit index path.
 - (BOOL)isIndexPath:(NSIndexPath *)indexPath immediateSuccessorOfIndexPath:(NSIndexPath *)anchor

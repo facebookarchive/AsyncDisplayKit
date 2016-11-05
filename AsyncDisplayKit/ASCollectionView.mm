@@ -404,8 +404,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
   
+  //Cache results of layoutInspector to ensure flags are up to date if getter lazily loads a new one.
+  id<ASCollectionViewLayoutInspecting> layoutInspector = self.layoutInspector;
   if (_layoutInspectorFlags.didChangeCollectionViewDataSource) {
-    [self.layoutInspector didChangeCollectionViewDataSource:asyncDataSource];
+    [layoutInspector didChangeCollectionViewDataSource:asyncDataSource];
   }
 }
 
@@ -465,8 +467,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
   
+  //Cache results of layoutInspector to ensure flags are up to date if getter lazily loads a new one.
+  id<ASCollectionViewLayoutInspecting> layoutInspector = self.layoutInspector;
   if (_layoutInspectorFlags.didChangeCollectionViewDelegate) {
-    [self.layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
+    [layoutInspector didChangeCollectionViewDelegate:asyncDelegate];
   }
 }
 
@@ -485,6 +489,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   if (_layoutInspector == nil) {
     UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
+    if (layout == nil) {
+      // Layout hasn't been set yet, we're still init'ing
+      return nil;
+    }
+    
     if ([layout asdk_isFlowLayout]) {
       // Register the default layout inspector delegate for flow layouts only
       _defaultLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self flowLayout:layout];
@@ -546,19 +555,48 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait
 {
-  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  NSIndexPath *viewIndexPath = [self indexPathForNode:node];
-  if (viewIndexPath == nil && wait) {
-    [self waitUntilAllUpdatesAreCommitted];
-    viewIndexPath = [self indexPathForNode:node];
+  // If this is a section index path, we don't currently have a method
+  // to do a mapping.
+  if (indexPath.item == NSNotFound) {
+    return indexPath;
+  } else {
+    ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+    NSIndexPath *viewIndexPath = [self indexPathForNode:node];
+    if (viewIndexPath == nil && wait) {
+      [self waitUntilAllUpdatesAreCommitted];
+      viewIndexPath = [self indexPathForNode:node];
+    }
+    return viewIndexPath;
   }
-  return viewIndexPath;
 }
 
 - (NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath
 {
-  ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-  return [_dataController indexPathForNode:node];
+  // If this is a section index path, we don't currently have a method
+  // to do a mapping.
+  if (indexPath.item == NSNotFound) {
+    return indexPath;
+  } else {
+    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
+    return [_dataController indexPathForNode:node];
+  }
+}
+
+- (NSArray<NSIndexPath *> *)convertIndexPathsToCollectionNode:(NSArray<NSIndexPath *> *)indexPaths
+{
+  if (indexPaths == nil) {
+    return nil;
+  }
+
+  NSMutableArray<NSIndexPath *> *indexPathsArray = [NSMutableArray arrayWithCapacity:indexPaths.count];
+
+  for (NSIndexPath *indexPathInView in indexPaths) {
+    NSIndexPath *indexPath = [self convertIndexPathToCollectionNode:indexPathInView];
+    if (indexPath != nil) {
+      [indexPathsArray addObject:indexPath];
+    }
+  }
+  return indexPathsArray;
 }
 
 - (ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
@@ -585,40 +623,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   return visibleNodes;
-}
-
-/**
- * TODO: This method was built when the distinction between data source
- * index paths and view index paths was unclear. For compatibility, it
- * still expects data source index paths for the time being.
- */
-- (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated
-{
-  ASDisplayNodeAssertMainThread();
-
-  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
-  if (viewIndexPath != nil) {
-    [super scrollToItemAtIndexPath:viewIndexPath atScrollPosition:scrollPosition animated:animated];
-  } else {
-    NSLog(@"Warning: Ignoring request to scroll to item at index path %@ because the item did not reach the collection view.", indexPath);
-  }
-}
-
-/**
- * TODO: This method was built when the distinction between data source
- * index paths and view index paths was unclear. For compatibility, it
- * still expects data source index paths for the time being.
- */
-- (void)selectItemAtIndexPath:(NSIndexPath *)indexPath animated:(BOOL)animated scrollPosition:(UICollectionViewScrollPosition)scrollPosition
-{
-  ASDisplayNodeAssertMainThread();
-
-  NSIndexPath *viewIndexPath = [self convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:YES];
-  if (viewIndexPath != nil) {
-    [super selectItemAtIndexPath:viewIndexPath animated:animated scrollPosition:scrollPosition];
-  } else {
-    NSLog(@"Warning: Ignoring request to select item at index path %@ because the item did not reach the collection view.", indexPath);
-  }
 }
 
 #pragma mark Internal
@@ -1113,8 +1117,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASScrollDirection)scrollableDirections
 {
+  //Cache results of layoutInspector to ensure flags are up to date if getter lazily loads a new one.
+  id<ASCollectionViewLayoutInspecting> layoutInspector = self.layoutInspector;
   if (_layoutInspectorFlags.scrollableDirections) {
-    return [self.layoutInspector scrollableDirections];
+    return [layoutInspector scrollableDirections];
   } else {
     ASScrollDirection scrollableDirection = ASScrollDirectionNone;
     CGFloat totalContentWidth = self.contentSize.width + self.contentInset.left + self.contentInset.right;
@@ -1224,7 +1230,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)_beginBatchFetching
 {
   [_batchContext beginBatchFetching];
-  if (_asyncDelegateFlags.collectionViewWillBeginBatchFetch) {
+  if (_asyncDelegateFlags.collectionNodeWillBeginBatchFetch) {
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+      [_asyncDelegate collectionNode:self.collectionNode willBeginBatchFetchWithContext:_batchContext];
+    });
+  } else if (_asyncDelegateFlags.collectionViewWillBeginBatchFetch) {
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"

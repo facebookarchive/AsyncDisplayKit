@@ -37,4 +37,29 @@
 /// Set YES and we'll log every time we call [super insertRows…] etc
 @property (nonatomic) BOOL test_enableSuperUpdateCallLogging;
 
+/**
+ * Attempt to get the view-layer index path for the row with the given index path.
+ *
+ * @param indexPath The index path of the row.
+ * @param wait If the item hasn't reached the view yet, this attempts to wait for updates to commit.
+ */
+- (NSIndexPath *)convertIndexPathFromTableNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait;
+
+/**
+ * Attempt to get the node index path given the view-layer index path.
+ *
+ * @param indexPath The index path of the row.
+ */
+- (NSIndexPath *)convertIndexPathToTableNode:(NSIndexPath *)indexPath;
+
+/**
+ * Attempt to get the node index paths given the view-layer index paths.
+ *
+ * @param indexPaths An array of index paths in the view space
+ */
+- (NSArray<NSIndexPath *> *)convertIndexPathsToTableNode:(NSArray<NSIndexPath *> *)indexPaths;
+
+/// Returns the width of the section index view on the right-hand side of the table, if one is present.
+- (CGFloat)sectionIndexWidth;
+
 @end
