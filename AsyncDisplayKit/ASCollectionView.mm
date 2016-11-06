@@ -1115,8 +1115,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASScrollDirection)scrollableDirections
 {
-  ASDisplayNodeAssertNotNil(_layoutInspector, @"Layout inspector should be assigned.");
-  return [_layoutInspector scrollableDirections];
+  ASDisplayNodeAssertNotNil(self.layoutInspector, @"Layout inspector should be assigned.");
+  return [self.layoutInspector scrollableDirections];
 }
 
 - (ASScrollDirection)flowLayoutScrollableDirections:(UICollectionViewFlowLayout *)flowLayout {
@@ -1655,6 +1655,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
  */
 - (void)layer:(CALayer *)layer didChangeBoundsWithOldValue:(CGRect)oldBounds newValue:(CGRect)newBounds
 {
+  if (self.collectionViewLayout == nil) {
+    return;
+  }
   CGSize lastUsedSize = _lastBoundsSizeUsedForMeasuringNodes;
   if (CGSizeEqualToSize(lastUsedSize, newBounds.size)) {
     return;
