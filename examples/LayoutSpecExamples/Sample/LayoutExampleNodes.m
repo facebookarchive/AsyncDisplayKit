@@ -171,8 +171,12 @@
   _photoNode.style.preferredSize = CGSizeMake(150, 150);
   _photoNode.style.layoutPosition = CGPointMake(40 / 2.0, 40 / 2.0);
   
-  return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithSizing:ASAbsoluteLayoutSpecSizingSizeToFit
-                                                   children:@[_photoNode, _iconNode]];
+  ASAbsoluteLayoutSpec *absoluteSpec = [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[_photoNode, _iconNode]];
+  
+  // ASAbsoluteLayoutSpec's .sizing property recreates the behavior of ASDK Layout API 1.0's "ASStaticLayoutSpec"
+  absoluteSpec.sizing = ASAbsoluteLayoutSpecSizingSizeToFit;
+  
+  return absoluteSpec;
 }
 
 
@@ -200,9 +204,7 @@
     self.backgroundColor = [UIColor whiteColor];
 
     _topSeparator = [[ASImageNode alloc] init];
-    _topSeparator.image = [UIImage as_resizableRoundedImageWithCornerRadius:1.0
-                                                                cornerColor:[UIColor blackColor]
-                                                                  fillColor:[UIColor blackColor]];
+    _topSeparator.image = [UIImage as_resizableRoundedImageWithCornerRadius:1.0 cornerColor:[UIColor blackColor] fillColor:[UIColor blackColor]];
     
     _textNode = [[ASTextNode alloc] init];
     _textNode.attributedText = [NSAttributedString attributedStringWithString:@"this is a long text node"
@@ -210,9 +212,7 @@
                                                                         color:[UIColor blackColor]];
     
     _bottomSeparator = [[ASImageNode alloc] init];
-    _bottomSeparator.image = [UIImage as_resizableRoundedImageWithCornerRadius:1.0
-                                                                   cornerColor:[UIColor blackColor]
-                                                                     fillColor:[UIColor blackColor]];
+    _bottomSeparator.image = [UIImage as_resizableRoundedImageWithCornerRadius:1.0 cornerColor:[UIColor blackColor] fillColor:[UIColor blackColor]];
   }
   
   return self;
@@ -224,11 +224,10 @@
   _bottomSeparator.style.flexGrow = YES;
   _textNode.style.alignSelf = ASStackLayoutAlignSelfCenter;
   
-  ASStackLayoutSpec *verticalStackSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
-                                                                                 spacing:20
-                                                                          justifyContent:ASStackLayoutJustifyContentCenter
-                                                                              alignItems:ASStackLayoutAlignItemsStretch
-                                                                                children:@[_topSeparator, _textNode, _bottomSeparator]];
+  ASStackLayoutSpec *verticalStackSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
+  verticalStackSpec.spacing = 20;
+  verticalStackSpec.justifyContent = ASStackLayoutJustifyContentCenter;
+  verticalStackSpec.children = @[_topSeparator, _textNode, _bottomSeparator];
 
   return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(60, 0, 60, 0) child:verticalStackSpec];
 }
