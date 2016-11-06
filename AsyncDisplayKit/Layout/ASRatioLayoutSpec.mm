@@ -68,7 +68,7 @@
     }));
   }
   
-  if (ASPointsValidForSize(constrainedSize.max.width)) {
+  if (ASPointsValidForSize(constrainedSize.max.height)) {
     sizeOptions.push_back(ASSizeRangeClamp(constrainedSize, {
       ASFloorPixelValue(constrainedSize.max.height / _ratio),
       constrainedSize.max.height
