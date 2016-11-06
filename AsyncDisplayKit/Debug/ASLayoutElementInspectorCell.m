@@ -31,9 +31,9 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
 
 @implementation ASLayoutElementInspectorCell
 {
-  ASLayoutElementPropertyType      _propertyType;
+  ASLayoutElementPropertyType   _propertyType;
   CellDataType                  _dataType;
-  id<ASLayoutElement>              _layoutElementToEdit;
+  id<ASLayoutElement>           _layoutElementToEdit;
   
   ASButtonNode                  *_buttonNode;
   ASTextNode                    *_textNode;

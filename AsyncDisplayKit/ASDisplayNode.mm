@@ -2576,6 +2576,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASLayoutSpec *layoutSpec = _shouldCacheLayoutSpec ? _layoutSpec : nil;
 
   if (layoutSpec == nil) {
+    BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
     if (_layoutSpecBlock != NULL) {
       layoutSpec = ({
         ASDN::MutexLocker l(__instanceLock__);
