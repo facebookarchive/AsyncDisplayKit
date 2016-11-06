@@ -74,8 +74,8 @@
     return nil;
   }
   
-  NSDictionary *attributes                    = @{NSForegroundColorAttributeName: color ? : [UIColor blackColor],
-                                                  NSFontAttributeName: [UIFont boldSystemFontOfSize:size]};
+  NSDictionary *attributes = @{NSForegroundColorAttributeName: color ? : [UIColor blackColor],
+                               NSFontAttributeName: [UIFont boldSystemFontOfSize:size]};
   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:string];
   [attributedString addAttributes:attributes range:NSMakeRange(0, string.length)];
   

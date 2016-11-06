@@ -16,23 +16,13 @@
 @end
 
 @interface HeaderWithRightAndLeftItems : LayoutExampleNode
-@property (nonatomic, strong) ASTextNode *usernameNode;
-@property (nonatomic, strong) ASTextNode *postLocationNode;
-@property (nonatomic, strong) ASTextNode *postTimeNode;
 @end
 
 @interface PhotoWithInsetTextOverlay : LayoutExampleNode
-@property (nonatomic, strong) ASNetworkImageNode *photoNode;
-@property (nonatomic, strong) ASTextNode *titleNode;
 @end
 
 @interface PhotoWithOutsetIconOverlay : LayoutExampleNode
-@property (nonatomic, strong) ASNetworkImageNode *photoNode;
-@property (nonatomic, strong) ASNetworkImageNode *iconNode;
 @end
 
 @interface FlexibleSeparatorSurroundingContent : LayoutExampleNode
-@property (nonatomic, strong) ASImageNode *topSeparator;
-@property (nonatomic, strong) ASImageNode *bottomSeparator;
-@property (nonatomic, strong) ASTextNode *textNode;
 @end

@@ -12,6 +12,28 @@
 #import "Utilities.h"
 #import "UIImage+ASConvenience.h"
 
+@interface HeaderWithRightAndLeftItems ()
+@property (nonatomic, strong) ASTextNode *usernameNode;
+@property (nonatomic, strong) ASTextNode *postLocationNode;
+@property (nonatomic, strong) ASTextNode *postTimeNode;
+@end
+
+@interface PhotoWithInsetTextOverlay ()
+@property (nonatomic, strong) ASNetworkImageNode *photoNode;
+@property (nonatomic, strong) ASTextNode *titleNode;
+@end
+
+@interface PhotoWithOutsetIconOverlay ()
+@property (nonatomic, strong) ASNetworkImageNode *photoNode;
+@property (nonatomic, strong) ASNetworkImageNode *iconNode;
+@end
+
+@interface FlexibleSeparatorSurroundingContent ()
+@property (nonatomic, strong) ASImageNode *topSeparator;
+@property (nonatomic, strong) ASImageNode *bottomSeparator;
+@property (nonatomic, strong) ASTextNode *textNode;
+@end
+
 @implementation HeaderWithRightAndLeftItems
 
 + (NSString *)title
@@ -55,31 +77,6 @@
   return self;
 }
 
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
-{
-  // when the username / location text is too long, shrink the stack to fit onscreen rather than push content to the right, offscreen
-  ASStackLayoutSpec *nameLocationStack = [ASStackLayoutSpec verticalStackLayoutSpec];
-  nameLocationStack.style.flexShrink = YES;
-  nameLocationStack.style.flexGrow = YES;
-  
-  // if fetching post location data from server, check if it is available yet and include it if so
-  if (_postLocationNode.attributedText) {
-    nameLocationStack.children = @[_usernameNode, _postLocationNode];
-  } else {
-    nameLocationStack.children = @[_usernameNode];
-  }
-  
-  // horizontal stack
-  ASStackLayoutSpec *headerStackSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
-                                                                               spacing:40
-                                                                        justifyContent:ASStackLayoutJustifyContentStart
-                                                                            alignItems:ASStackLayoutAlignItemsCenter
-                                                                              children:@[nameLocationStack, _postTimeNode]];
-  
-  // inset the horizontal stack
-  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0, 10, 0, 10) child:headerStackSpec];
-}
-
 @end
 
 
@@ -121,16 +118,14 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _photoNode.style.preferredSize = CGSizeMake(constrainedSize.max.width / 4.0, constrainedSize.max.width / 4.0);
+  CGFloat photoDimension = constrainedSize.max.width / 4.0;
+  _photoNode.style.preferredSize = CGSizeMake(photoDimension, photoDimension);
 
   // INFINITY is used to make the inset unbounded
   UIEdgeInsets insets = UIEdgeInsetsMake(INFINITY, 12, 12, 12);
   ASInsetLayoutSpec *textInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_titleNode];
-
-  ASOverlayLayoutSpec *textOverlaySpec = [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_photoNode
-                                                                                 overlay:textInsetSpec];
   
-  return textOverlaySpec;
+  return [ASOverlayLayoutSpec overlayLayoutSpecWithChild:_photoNode overlay:textInsetSpec];;
 }
 
 @end
@@ -220,8 +215,8 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _topSeparator.style.flexGrow = YES;
-  _bottomSeparator.style.flexGrow = YES;
+  _topSeparator.style.flexGrow = 1.0;
+  _bottomSeparator.style.flexGrow = 1.0;
   _textNode.style.alignSelf = ASStackLayoutAlignSelfCenter;
   
   ASStackLayoutSpec *verticalStackSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
