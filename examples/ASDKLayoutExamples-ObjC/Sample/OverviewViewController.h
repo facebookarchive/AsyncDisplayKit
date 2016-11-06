@@ -17,7 +17,5 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
-
 @interface OverviewViewController : ASViewController
-
 @end

@@ -18,5 +18,10 @@
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 @interface OverviewCellNode : ASCellNode
+
 @property (nonatomic, strong) Class layoutExampleClass;
+
+- (instancetype)initWithLayoutExampleClass:(Class)layoutExampleClass NS_DESIGNATED_INITIALIZER;
+- (instancetype)init NS_UNAVAILABLE;
+
 @end

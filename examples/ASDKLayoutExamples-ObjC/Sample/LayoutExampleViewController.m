@@ -24,30 +24,29 @@
 
 @implementation LayoutExampleViewController
 
-- (instancetype)initWithClass:(Class)class
+- (instancetype)initWithLayoutExampleClass:(Class)layoutExampleClass
 {
+  NSAssert([layoutExampleClass isSubclassOfClass:[LayoutExampleNode class]], @"Must pass a subclass of LayoutExampleNode.");
+  
   self = [super initWithNode:[ASDisplayNode new]];
   
   if (self) {
-    _customNode = [class new];
+    self.title = @"Layout Example";
+    
+    _customNode = [layoutExampleClass new];
     [self.node addSubnode:_customNode];
     
+    BOOL needsOnlyYCentering = [layoutExampleClass isEqual:[HeaderWithRightAndLeftItems class]] ||
+                               [layoutExampleClass isEqual:[FlexibleSeparatorSurroundingContent class]];
+                               
+    self.node.backgroundColor = needsOnlyYCentering ? [UIColor lightGrayColor] : [UIColor whiteColor];
+    
     __weak __typeof(self) weakself = self;
-    if ([class isEqual:[HeaderWithRightAndLeftItems class]] || [class isEqual:[FlexibleSeparatorSurroundingContent class]]) {
-      self.node.backgroundColor = [UIColor lightGrayColor];
-      self.node.layoutSpecBlock = ^ASLayoutSpec*(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
-        return [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringY
-                                                          sizingOptions:ASCenterLayoutSpecSizingOptionMinimumXY
-                                                                  child:weakself.customNode];
+    self.node.layoutSpecBlock = ^ASLayoutSpec*(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+      return [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:needsOnlyYCentering ? ASCenterLayoutSpecCenteringY : ASCenterLayoutSpecCenteringXY
+                                                        sizingOptions:ASCenterLayoutSpecSizingOptionMinimumXY
+                                                                child:weakself.customNode];
       };
-    } else {
-      self.node.backgroundColor = [UIColor whiteColor];
-      self.node.layoutSpecBlock = ^ASLayoutSpec*(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
-        return [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY
-                                                          sizingOptions:ASCenterLayoutSpecSizingOptionMinimumXY
-                                                                  child:weakself.customNode];
-        };
-    };
   }
   
   return self;

@@ -60,12 +60,7 @@
   }
 }
 
-#pragma mark - ASTable
-
-- (NSInteger)numberOfSectionsInTableNode:(ASTableNode *)tableNode
-{
-  return 1;
-}
+#pragma mark - ASTableDelegate, ASTableDataSource
 
 - (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
 {
@@ -74,16 +69,13 @@
 
 - (ASCellNode *)tableNode:(ASTableNode *)tableNode nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  OverviewCellNode *cellNode = [OverviewCellNode new];
-  cellNode.layoutExampleClass = _layoutExamples[indexPath.row];
-  return cellNode;
+  return [[OverviewCellNode alloc] initWithLayoutExampleClass:_layoutExamples[indexPath.row]];
 }
 
 - (void)tableNode:(ASTableNode *)tableNode didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  OverviewCellNode *node = [tableNode nodeForRowAtIndexPath:indexPath];
-  LayoutExampleViewController *detail = [[LayoutExampleViewController alloc] initWithClass:node.layoutExampleClass];
-  detail.title = @"Layout Example";
+  Class layoutExampleClass = [[tableNode nodeForRowAtIndexPath:indexPath] layoutExampleClass];
+  LayoutExampleViewController *detail = [[LayoutExampleViewController alloc] initWithLayoutExampleClass:layoutExampleClass];
   [self.navigationController pushViewController:detail animated:YES];
 }
 

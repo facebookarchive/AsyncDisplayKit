@@ -18,23 +18,14 @@
 #import <UIKit/UIKit.h>
 
 @interface UIColor (Additions)
-
 + (UIColor *)darkBlueColor;
 + (UIColor *)lightBlueColor;
-+ (UIColor *)duskColor;
-+ (UIColor *)customOrangeColor;
-
 @end
 
 @interface UIImage (Additions)
-
 - (UIImage *)makeCircularImageWithSize:(CGSize)size withBorderWidth:(CGFloat)width;
-
 @end
 
 @interface NSAttributedString (Additions)
-
-+ (NSAttributedString *)attributedStringWithString:(NSString *)string fontSize:(CGFloat)size
-                                             color:(UIColor *)color firstWordColor:(UIColor *)firstWordColor;
-
++ (NSAttributedString *)attributedStringWithString:(NSString *)string fontSize:(CGFloat)size color:(UIColor *)color;
 @end

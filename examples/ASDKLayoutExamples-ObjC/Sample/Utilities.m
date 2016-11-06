@@ -32,17 +32,6 @@
   return [UIColor colorWithRed:0.0 green:122.0/255.0 blue:1.0 alpha:1.0];
 }
 
-+ (UIColor *)duskColor
-{
-  return [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
-}
-
-+ (UIColor *)customOrangeColor
-{
-  return [UIColor colorWithRed:40/255.0 green:43/255.0 blue:53/255.0 alpha:1.0];
-}
-
-
 @end
 
 @implementation UIImage (Additions)
@@ -87,19 +76,16 @@
 
 @implementation NSAttributedString (Additions)
 
-+ (NSAttributedString *)attributedStringWithString:(NSString *)string fontSize:(CGFloat)size
-                                             color:(nullable UIColor *)color firstWordColor:(nullable UIColor *)firstWordColor
++ (NSAttributedString *)attributedStringWithString:(NSString *)string fontSize:(CGFloat)size color:(nullable UIColor *)color
 {
+  if (string == nil) {
+    return nil;
+  }
+  
   NSDictionary *attributes                    = @{NSForegroundColorAttributeName: color ? : [UIColor blackColor],
                                                   NSFontAttributeName: [UIFont boldSystemFontOfSize:size]};
   NSMutableAttributedString *attributedString = [[NSMutableAttributedString alloc] initWithString:string];
   [attributedString addAttributes:attributes range:NSMakeRange(0, string.length)];
-  
-  if (firstWordColor) {
-    NSRange firstSpaceRange = [string rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]];
-    NSRange firstWordRange  = NSMakeRange(0, firstSpaceRange.location);
-    [attributedString addAttribute:NSForegroundColorAttributeName value:firstWordColor range:firstWordRange];
-  }
   
   return attributedString;
 }

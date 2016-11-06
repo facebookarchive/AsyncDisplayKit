@@ -19,10 +19,6 @@
 #import "Utilities.h"
 #import "UIImage+ASConvenience.h"
 
-#define USER_IMAGE_HEIGHT       60
-#define FONT_SIZE               20
-
-
 @implementation HeaderWithRightAndLeftItems
 
 + (NSString *)title
@@ -41,18 +37,24 @@
   
   if (self) {
     _usernameNode = [[ASTextNode alloc] init];
-    _usernameNode.attributedText = [self usernameAttributedStringWithFontSize:FONT_SIZE];
+    _usernameNode.attributedText = [NSAttributedString attributedStringWithString:@"hannahmbanana"
+                                                                         fontSize:20
+                                                                            color:[UIColor darkBlueColor]];
     _usernameNode.maximumNumberOfLines = 1;
     _usernameNode.truncationMode = NSLineBreakByTruncatingTail;
     
     _postLocationNode = [[ASTextNode alloc] init];
     _postLocationNode.maximumNumberOfLines = 1;
-    _postLocationNode.attributedText = [self locationAttributedStringWithFontSize:FONT_SIZE];
+    _postLocationNode.attributedText = [NSAttributedString attributedStringWithString:@"Sunset Beach, San Fransisco, CA"
+                                                                             fontSize:20
+                                                                                color:[UIColor lightBlueColor]];
     _postLocationNode.maximumNumberOfLines = 1;
     _postLocationNode.truncationMode = NSLineBreakByTruncatingTail;
     
     _postTimeNode = [[ASTextNode alloc] init];
-    _postTimeNode.attributedText = [self uploadDateAttributedStringWithFontSize:FONT_SIZE];
+    _postTimeNode.attributedText = [NSAttributedString attributedStringWithString:@"30m"
+                                                                         fontSize:20
+                                                                            color:[UIColor lightGrayColor]];
     _postLocationNode.maximumNumberOfLines = 1;
     _postLocationNode.truncationMode = NSLineBreakByTruncatingTail;
   }
@@ -117,14 +119,8 @@
     _titleNode = [[ASTextNode alloc] init];
     _titleNode.maximumNumberOfLines = 2;
     _titleNode.truncationMode = NSLineBreakByTruncatingTail;
-    _titleNode.truncationAttributedText = [NSAttributedString attributedStringWithString:@"..."
-                                                                                  fontSize:16
-                                                                            color:[UIColor whiteColor]
-                                                                   firstWordColor:nil];
-    _titleNode.attributedText = [NSAttributedString attributedStringWithString:@"family fall hikes"
-                                                                        fontSize:16
-                                                                           color:[UIColor whiteColor]
-                                                                  firstWordColor:nil];
+    _titleNode.truncationAttributedText = [NSAttributedString attributedStringWithString:@"..." fontSize:16 color:[UIColor whiteColor]];
+    _titleNode.attributedText = [NSAttributedString attributedStringWithString:@"family fall hikes" fontSize:16 color:[UIColor whiteColor]];
   }
   
   return self;
@@ -134,7 +130,7 @@
 {
   _photoNode.style.preferredSize = CGSizeMake(constrainedSize.max.width / 4.0, constrainedSize.max.width / 4.0);
 
-  // INIFINITY is used to make the inset unbounded
+  // INFINITY is used to make the inset unbounded
   UIEdgeInsets insets = UIEdgeInsetsMake(INFINITY, 12, 12, 12);
   ASInsetLayoutSpec *textInsetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_titleNode];
 
@@ -166,7 +162,7 @@
     _iconNode.URL = [NSURL URLWithString:@"http://asyncdisplaykit.org/static/images/layout-examples-photo-with-outset-icon-overlay-icon.png"];
     
     [_iconNode setImageModificationBlock:^UIImage *(UIImage *image) {   // FIXME: in framework autocomplete for setImageModificationBlock line seems broken
-      CGSize profileImageSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+      CGSize profileImageSize = CGSizeMake(60, 60);
       return [image makeCircularImageWithSize:profileImageSize withBorderWidth:10];
     }];
   }
@@ -217,9 +213,8 @@
     
     _textNode = [[ASTextNode alloc] init];
     _textNode.attributedText = [NSAttributedString attributedStringWithString:@"this is a long text node"
-                                                                       fontSize:16
-                                                                          color:[UIColor blackColor]
-                                                                 firstWordColor:nil];
+                                                                     fontSize:16
+                                                                        color:[UIColor blackColor]];
     
     _bottomSeparator = [[ASImageNode alloc] init];
     _bottomSeparator.image = [UIImage as_resizableRoundedImageWithCornerRadius:1.0
@@ -268,49 +263,6 @@
     self.backgroundColor = [UIColor whiteColor];
   }
   return self;
-}
-
-
-- (NSAttributedString *)usernameAttributedStringWithFontSize:(CGFloat)size
-{
-  return [NSAttributedString attributedStringWithString:@"hannahmbanana"
-                                               fontSize:size
-                                                  color:[UIColor darkBlueColor]
-                                         firstWordColor:nil];
-}
-
-- (NSAttributedString *)locationAttributedStringWithFontSize:(CGFloat)size
-{
-  return [NSAttributedString attributedStringWithString:@"Sunset Beach, San Fransisco, CA"
-                                               fontSize:size
-                                                  color:[UIColor lightBlueColor]
-                                         firstWordColor:nil];
-}
-
-- (NSAttributedString *)uploadDateAttributedStringWithFontSize:(CGFloat)size
-{
-  return [NSAttributedString attributedStringWithString:@"30m"
-                                               fontSize:size
-                                                  color:[UIColor lightGrayColor]
-                                         firstWordColor:nil];
-}
-
-- (NSAttributedString *)likesAttributedStringWithFontSize:(CGFloat)size
-{
-  return [NSAttributedString attributedStringWithString:@"♥︎ 17 likes"
-                                               fontSize:size
-                                                  color:[UIColor darkBlueColor]
-                                         firstWordColor:nil];
-}
-
-- (NSAttributedString *)descriptionAttributedStringWithFontSize:(CGFloat)size
-{
-  NSString *string               = [NSString stringWithFormat:@"hannahmbanana check out this cool pic from the internet!"];
-  NSAttributedString *attrString = [NSAttributedString attributedStringWithString:string
-                                                                         fontSize:size
-                                                                            color:[UIColor darkGrayColor]
-                                                                   firstWordColor:[UIColor darkBlueColor]];
-  return attrString;
 }
 
 @end
