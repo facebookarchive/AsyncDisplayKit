@@ -1115,7 +1115,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (ASScrollDirection)scrollableDirections
 {
-  return [self.layoutInspector scrollableDirections];
+  ASDisplayNodeAssertNotNil(_layoutInspector, @"Layout inspector should be assigned.");
+  return [_layoutInspector scrollableDirections];
 }
 
 - (ASScrollDirection)flowLayoutScrollableDirections:(UICollectionViewFlowLayout *)flowLayout {
