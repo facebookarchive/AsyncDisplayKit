@@ -332,7 +332,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self);
   if (shouldApply) {
     // The node is loaded and we're on main.
-    // Quite the opposite of setNeedsDisplay, we must call __setNeedsLayout before messaging
+    // Quite the opposite of setNeedsLayout, we must call __setNeedsLayout before messaging
     // the view or layer to ensure that measurement and implicitly added subnodes have been handled.
     
     // Calling __setNeedsLayout while holding the property lock can cause deadlocks

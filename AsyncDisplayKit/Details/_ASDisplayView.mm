@@ -209,6 +209,13 @@
   [self.layer setNeedsDisplay];
 }
 
+- (void)setNeedsLayout
+{
+  ASPerformBlockOnMainThread(^{
+    [super setNeedsLayout];
+  });
+}
+
 - (void)layoutIfNeeded
 {
   ASPerformBlockOnMainThread(^{

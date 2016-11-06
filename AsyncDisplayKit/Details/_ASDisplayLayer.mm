@@ -119,14 +119,16 @@
 
 - (void)setNeedsLayout
 {
-  ASDisplayNodeAssertMainThread();
-  [super setNeedsLayout];
+  ASPerformBlockOnMainThread(^{
+    [super setNeedsLayout];
+  });
 }
 
 - (void)layoutIfNeeded
 {
-  ASDisplayNodeAssertMainThread();
-  [super layoutIfNeeded];
+  ASPerformBlockOnMainThread(^{
+    [super layoutIfNeeded];
+  });
 }
 #endif
 

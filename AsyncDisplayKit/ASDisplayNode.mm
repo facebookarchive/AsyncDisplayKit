@@ -799,6 +799,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
  */
 - (BOOL)__needsLayout
 {
+  ASDN::MutexLocker l(__instanceLock__);
+
   return _calculatedDisplayNodeLayout->isDirty();
 }
 
@@ -811,22 +813,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertThreadAffinity(self);
   
   __instanceLock__.lock();
-  
-  // Invalidate the current calculated layout so in the next layout pass it get's recalculated
-  [self invalidateCalculatedLayout];
-  
-  // Walk the node's supernodes until a ancestor node is found that does not require layout
-  if ([_supernode __needsLayout]) {
-    ASDisplayNode *supernode = _supernode;
-    __instanceLock__.unlock();
-    [_supernode __layoutIfNeeded];
-    return;
-  }
-
-  // Layout all subviews starting from the first node that needs layout
-  [self __layout];
-  
+  ASDisplayNode *supernode = _supernode;
   __instanceLock__.unlock();
+
+  if ([supernode __needsLayout]) {
+    [supernode __layoutIfNeeded];
+  } else {
+    // Layout all subviews starting from the first node that needs layout
+    [self __layout];
+  }
 }
 
 /**
@@ -846,38 +841,34 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return;
   }
 
-  // Node needs to be measured in case the bounds changed from the current calculated layout
+  // Node needs to be measured and calculates a new calculatedLayout if needed in case the bounds changed
   [self calculateLayoutIfNecessaryWithBounds:bounds];
   
   // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
   // was created
   if ([self _shouldHavePlaceholderLayer]) {
     [self _setupPlaceholderLayerIfNeeded];
+    _placeholderLayer.frame = bounds;
   }
-  _placeholderLayer.frame = bounds;
   
-  // Layout all subnodes based on the layout determined before
+  // Layout all subnodes based on the calculatedLayout
   [self layout];
   [self layoutDidFinish];
 }
 
-/*
+/**
  * Executes a measure pass if necessary based on the current bounds as constrained size
  */
 - (void)calculateLayoutIfNecessaryWithBounds:(CGRect)bounds
 {
+  __instanceLock__.lock();
   // Setup new constrained and parent size based on bounds
-  ASSizeRange constrainedSize = ASSizeRangeMake(bounds.size);
-  CGSize parentSize = constrainedSize.max;
+  CGSize parentSize = bounds.size;
+  ASSizeRange constrainedSize = ASSizeRangeMake(parentSize);
   
   // Check if we have to create a layout before the layout pass can happen
-  CGSize calculatedDisplayNodeLayoutSize = CGSizeZero;
-  BOOL needsCalculateLayout = NO;
-  {
-    ASDN::MutexLocker l(__instanceLock__);
-    calculatedDisplayNodeLayoutSize = _calculatedDisplayNodeLayout->layout.size;
-    needsCalculateLayout = [self shouldCalculateLayoutWithConstrainedSize:constrainedSize parentSize:parentSize];
-  }
+  CGSize calculatedDisplayNodeLayoutSize = _calculatedDisplayNodeLayout->layout.size;
+  BOOL needsCalculateLayout = [self shouldCalculateLayoutWithConstrainedSize:constrainedSize parentSize:parentSize];
   
   // Check if we can reuse the calculated layout for the layout pass
   if (CGSizeEqualToSize(calculatedDisplayNodeLayoutSize, CGSizeZero) == NO &&
@@ -885,6 +876,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       needsCalculateLayout == NO
       ) {
     // We can use the calculated layout for the layout subnodes so just return
+    __instanceLock__.unlock();
     return;
   }
   
@@ -904,6 +896,33 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                                                         pendingLayout:pendingLayout
                                                        previousLayout:previousLayout];
   [self _completePendingLayoutTransition];
+  __instanceLock__.unlock();
+}
+
+/**
+ * Default implementation of layout subclass hook uses the current calculated layout and applies the frame to all
+ * subnodes. Similar to layoutSubviews in UIView.
+ */
+- (void)layout
+{
+  ASDisplayNodeAssertMainThread();
+  
+  // If the layout is dirty we don't need to do a layout pass as it was invalided before
+  if (_calculatedDisplayNodeLayout->isDirty()) {
+    return;
+  }
+  
+  [self __layoutSublayouts];
+}
+
+/**
+ * Internal helper method to layout all sublayouts based on calculated display node layout
+ */
+- (void)__layoutSublayouts
+{
+  for (ASLayout *subnodeLayout in _calculatedDisplayNodeLayout->layout.sublayouts) {
+    ((ASDisplayNode *)subnodeLayout.layoutElement).frame = subnodeLayout.frame;
+  }
 }
 
 - (void)layoutDidFinish
@@ -3041,33 +3060,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   });
 }
 
-/// Default implementation of layout subclass hook uses the current calculated layout and applies the frame to all subnodes. Similar to layoutSubviews in UIView.
-- (void)layout
-{
-  ASDisplayNodeAssertMainThread();
-
-  // If the layout is dirty we don't need to do a layout pass as it was invalided before
-  if (_calculatedDisplayNodeLayout->isDirty()) {
-    return;
-  }
-  
-  [self __layoutSublayouts];
-}
-
-/// Internal helper method to layout all sublayouts based on calculated display node layout
-- (void)__layoutSublayouts
-{
-  for (ASLayout *subnodeLayout in _calculatedDisplayNodeLayout->layout.sublayouts) {
-    ((ASDisplayNode *)subnodeLayout.layoutElement).frame = subnodeLayout.frame;
-  }
-}
-
 #pragma mark - Display
 
 - (void)displayWillStart {}
 - (void)displayWillStartAsynchronously:(BOOL)asynchronously
 {
-  [self displayWillStart]; // Subclass override
+  [self displayWillStart]; // `Subclass override
   ASDisplayNodeAssertMainThread();
 
   ASDisplayNodeLogEvent(self, @"displayWillStart");
