@@ -160,7 +160,7 @@ NS_ASSUME_NONNULL_BEGIN
  * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
  * encouraged.
  *
- * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
+ * @note This method should not be called directly outside of ASDisplayNode; use -layoutThatFits: instead.
  *
  * @warning Subclasses that implement -layoutSpecThatFits: must not use .layoutSpecBlock. Doing so will trigger an
  * exception. A future version of the framework may support using both, calling them serially, with the .layoutSpecBlock
