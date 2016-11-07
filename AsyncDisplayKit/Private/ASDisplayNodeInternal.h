@@ -18,6 +18,7 @@
 #import "ASDisplayNode.h"
 #import "ASThread.h"
 #import "_ASTransitionContext.h"
+#import "ASLayoutElement.h"
 #import "ASLayoutTransition.h"
 #import "ASEnvironment.h"
 #import "ASObjectDescriptionHelpers.h"
