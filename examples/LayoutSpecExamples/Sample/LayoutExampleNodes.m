@@ -77,6 +77,28 @@
   return self;
 }
 
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+
+  ASStackLayoutSpec *nameLocationStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  nameLocationStack.style.flexShrink = 1.0;
+  nameLocationStack.style.flexGrow = 1.0;
+  
+  if (_postLocationNode.attributedText) {
+    nameLocationStack.children = @[_usernameNode, _postLocationNode];
+  } else {
+    nameLocationStack.children = @[_usernameNode];
+  }
+  
+  ASStackLayoutSpec *headerStackSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+                                                                               spacing:40
+                                                                        justifyContent:ASStackLayoutJustifyContentStart
+                                                                            alignItems:ASStackLayoutAlignItemsCenter
+                                                                              children:@[nameLocationStack, _postTimeNode]];
+  
+  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0, 10, 0, 10) child:headerStackSpec];
+}
+
 @end
 
 
