@@ -23,7 +23,7 @@
 
 @interface ViewController () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout>
 
-@property (nonatomic, strong) ASCollectionView *collectionView;
+@property (nonatomic, strong) ASCollectionNode *collectionNode;
 @property (nonatomic, strong) NSArray *data;
 
 @end
@@ -34,8 +34,8 @@
 
 - (void)dealloc
 {
-  self.collectionView.asyncDataSource = nil;
-  self.collectionView.asyncDelegate = nil;
+  self.collectionNode.dataSource = nil;
+  self.collectionNode.delegate = nil;
   
   NSLog(@"ViewController is deallocing");
 }
@@ -50,19 +50,19 @@
   
   // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
   // This functionality & example project remains for users who insist on using ASCollectionView.
-  self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
-  self.collectionView.asyncDataSource = self;
-  self.collectionView.asyncDelegate = self;
+  self.collectionNode = [[ASCollectionNode alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
+  self.collectionNode.dataSource = self;
+  self.collectionNode.delegate = self;
   
-  self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  self.collectionView.backgroundColor = [UIColor whiteColor];
+  self.collectionNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  self.collectionNode.backgroundColor = [UIColor whiteColor];
   
   // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
   // This functionality & example project remains for users who insist on using ASCollectionView.
-  [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
+  [self.collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+  [self.collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
   
-  [self.view addSubview:self.collectionView];
+  [self.view addSubnode:self.collectionNode];
   
 #if !SIMULATE_WEB_RESPONSE
   self.navigationItem.leftItemsSupplementBackButton = YES;
@@ -103,7 +103,7 @@
 {
   // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
   // This functionality & example project remains for users who insist on using ASCollectionView.
-  [self.collectionView reloadData];
+  [self.collectionNode reloadData];
 }
 
 #pragma mark - ASCollectionView Data Source
