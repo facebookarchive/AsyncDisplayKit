@@ -23,7 +23,7 @@
 
 @interface ViewController () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout>
 
-@property (nonatomic, strong) ASCollectionView *collectionView;
+@property (nonatomic, strong) ASCollectionNode *collectionNode;
 @property (nonatomic, strong) NSArray *data;
 
 @end
@@ -34,8 +34,8 @@
 
 - (void)dealloc
 {
-  self.collectionView.asyncDataSource = nil;
-  self.collectionView.asyncDelegate = nil;
+  self.collectionNode.dataSource = nil;
+  self.collectionNode.delegate = nil;
   
   NSLog(@"ViewController is deallocing");
 }
@@ -50,19 +50,19 @@
   
   // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
   // This functionality & example project remains for users who insist on using ASCollectionView.
-  self.collectionView = [[ASCollectionView alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
-  self.collectionView.asyncDataSource = self;
-  self.collectionView.asyncDelegate = self;
+  self.collectionNode = [[ASCollectionNode alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
+  self.collectionNode.dataSource = self;
+  self.collectionNode.delegate = self;
   
-  self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  self.collectionView.backgroundColor = [UIColor whiteColor];
+  self.collectionNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+  self.collectionNode.backgroundColor = [UIColor whiteColor];
   
   // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
   // This functionality & example project remains for users who insist on using ASCollectionView.
-  [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  [self.collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
+  [self.collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+  [self.collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
   
-  [self.view addSubview:self.collectionView];
+  [self.view addSubnode:self.collectionNode];
   
 #if !SIMULATE_WEB_RESPONSE
   self.navigationItem.leftItemsSupplementBackButton = YES;
@@ -103,12 +103,12 @@
 {
   // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
   // This functionality & example project remains for users who insist on using ASCollectionView.
-  [self.collectionView reloadData];
+  [self.collectionNode reloadData];
 }
 
 #pragma mark - ASCollectionView Data Source
 
-- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath;
+- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath;
 {
   NSString *text = [NSString stringWithFormat:@"[%zd.%zd] says hi", indexPath.section, indexPath.item];
   return ^{
@@ -116,7 +116,7 @@
   };
 }
 
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+- (ASCellNode *)collectionNode:(ASCollectionNode *)collectionNode nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   NSString *text = [kind isEqualToString:UICollectionElementKindSectionHeader] ? @"Header" : @"Footer";
   SupplementaryNode *node = [[SupplementaryNode alloc] initWithText:text];
@@ -125,12 +125,12 @@
   return node;
 }
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+- (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
 {
   return 10;
 }
 
-- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+- (NSInteger)numberOfSectionsInCollectionView:(ASCollectionNode *)collectionNode
 {
 #if SIMULATE_WEB_RESPONSE
   return _data == nil ? 0 : 100;
@@ -150,7 +150,7 @@
   // unlock the data source to enable data source updating.
 }
 
-- (void)collectionView:(UICollectionView *)collectionView willBeginBatchFetchWithContext:(ASBatchContext *)context
+- (void)collectionNode:(ASCollectionNode *)collectionNode willBeginBatchFetchWithContext:(ASBatchContext *)context
 {
   NSLog(@"fetch additional content");
   [context completeBatchFetching:YES];
