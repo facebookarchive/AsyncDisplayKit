@@ -51,14 +51,14 @@ NS_ASSUME_NONNULL_BEGIN
  * calculatedLayout may be accessed on subnodes to retrieved cached information about their size.  
  * This allows -layout to be very fast, saving time on the main thread.  
  * Note: .calculatedLayout will only be set for nodes that have had -measure: called on them.  
- * For manual layout, make sure you call -measure: in your implementation of -calculateSizeThatFits:.
+ * For manual layout, make sure you call -measure: in your implementation of -sizeThatFits:.
  *
  * For node subclasses that use automatic layout (e.g., they implement -layoutSpecThatFits:), 
  * it is typically not necessary to use .calculatedLayout at any point.  For these nodes, 
  * the ASLayoutSpec implementation will automatically call -measureWithSizeRange: on all of the subnodes,
  * and the ASDisplayNode base class implementation of -layout will automatically make use of .calculatedLayout on the subnodes.
  *
- * @return Layout that wraps calculated size returned by -calculateSizeThatFits: (in manual layout mode),
+ * @return Layout that wraps calculated size returned by -sizeThatFits: (in manual layout mode),
  * or layout already calculated from layout spec returned by -layoutSpecThatFits: (in automatic layout mode).
  *
  * @warning Subclasses must not override this; it returns the last cached layout and is never expensive.
@@ -84,15 +84,30 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion Subclasses override this method to layout all subnodes or subviews.
  */
-- (void)layout ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)layout ASDISPLAYNODE_REQUIRES_SUPER ASDISPLAYNODE_DEPRECATED_MSG("Override layoutSubnodes: method instead.");
 
 /**
- * @abstract Called on the main thread by the view's -layoutSubviews, after -layout.
+ * @abstract Called on the main thread by the view's -layoutSubviews.
+ *
+ * @discussion Subclasses override this method to layout all subnodes or subviews.
+ */
+- (void)layoutSubnodes ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called on the main thread by the view's -layoutSubviews, after -layoutSubnodes.
  *
  * @discussion Gives a chance for subclasses to perform actions after the subclass and superclass have finished laying
  * out.
  */
-- (void)layoutDidFinish ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)nodeDidLayoutSubnodes ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called on the main thread by the view's -layoutSubviews, after -layoutSubnodes.
+ *
+ * @discussion Gives a chance for subclasses to perform actions after the subclass and superclass have finished laying
+ * out.
+ */
+- (void)layoutDidFinish ASDISPLAYNODE_REQUIRES_SUPER ASDISPLAYNODE_DEPRECATED_MSG("Override nodeDidLayoutSubnodes method instead.");;
 
 /**
  * @abstract Called on a background thread if !isNodeLoaded - called on the main thread if isNodeLoaded.
@@ -114,8 +129,8 @@ NS_ASSUME_NONNULL_BEGIN
  * @return An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).
  *
  * @discussion This method is called on a non-main thread. The default implementation calls either -layoutSpecThatFits: 
- * or -calculateSizeThatFits:, whichever method is overriden. Subclasses rarely need to override this method,
- * override -layoutSpecThatFits: or -calculateSizeThatFits: instead.
+ * or -sizeThatFits:, whichever method is overriden. Subclasses rarely need to override this method,
+ * override -layoutSpecThatFits: or -sizeThatFits: instead.
  *
  * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
  */
@@ -144,11 +159,29 @@ NS_ASSUME_NONNULL_BEGIN
  * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
  * encouraged.
  *
- * @note Subclasses that override are committed to manual layout. Therefore, -layout: must be overriden to layout all subnodes or subviews.
+ * @note Subclasses that override are committed to manual layout. Therefore, -layoutSubnodes: must be overriden to layout all subnodes or subviews.
  *
  * @note This method should not be called directly outside of ASDisplayNode; use -layoutThatFits: or layoutThatFits:parentSize: instead.
  */
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize;
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize ASDISPLAYNODE_DEPRECATED_MSG("Use calculateSizeThatFits: method instead.");;
+
+/**
+ * @abstract Asks the view to calculate and return the size that best fits the specified size.
+ *
+ * @param constrainedSize The size for which the node should calculate its best-fitting size.
+ *
+ * @discussion The default implementation of this method returns the existing size of the view. Subclasses can
+ * override this method to return a custom value based on the desired layout of any subnodes.
+ * Subclasses that override should expect this method to be called on a non-main thread. The returned size
+ * is wrapped in an ASLayout and cached for quick access during -layout. Other expensive work that needs to
+ * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
+ * encouraged.
+ *
+ * @note Subclasses that override are committed to manual layout. Therefore, -layoutSubnodes: must be overriden to layout all subnodes or subviews.
+ *
+ * @note This method should not be called directly outside of ASDisplayNode; use -layoutThatFits: or layoutThatFits:parentSize: instead.
+ */
+- (CGSize)sizeThatFits:(CGSize)constrainedSize;
 
 /**
  * @abstract Return a layout spec that describes the layout of the receiver and its children.

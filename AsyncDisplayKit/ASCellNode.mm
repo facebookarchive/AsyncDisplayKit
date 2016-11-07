@@ -103,16 +103,16 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   }
 }
 
-- (void)layout
+- (void)layoutSubnodes
 {
-  [super layout];
+  [super layoutSubnodes];
   
   _viewControllerNode.frame = self.bounds;
 }
 
-- (void)layoutDidFinish
+- (void)nodeDidLayoutSubnodes
 {
-  [super layoutDidFinish];
+  [super nodeDidLayoutSubnodes];
 
   _viewControllerNode.frame = self.bounds;
 }

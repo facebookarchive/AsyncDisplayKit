@@ -382,7 +382,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 }
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (CGSize)sizeThatFits:(CGSize)constrainedSize
 {
   ASDN::MutexLocker l(__instanceLock__);
   

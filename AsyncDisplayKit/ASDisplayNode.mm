@@ -192,9 +192,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 #define __ASDisplayNodeCheckForLayoutMethodOverrides \
     ASDisplayNodeAssert(_layoutSpecBlock != NULL || \
     ((ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateSizeThatFits:)) ? 1 : 0) \
+    + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(sizeThatFits:)) ? 1 : 0) \
     + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(layoutSpecThatFits:)) ? 1 : 0) \
     + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateLayoutThatFits:)) ? 1 : 0)) <= 1, \
-    @"Subclass %@ must at least provide a layoutSpecBlock or override at most one of the three layout methods: calculateLayoutThatFits:, layoutSpecThatFits:, or calculateSizeThatFits:", NSStringFromClass(self.class))
+    @"Subclass %@ must at least provide a layoutSpecBlock or override at most one of the three layout methods: calculateLayoutThatFits:, layoutSpecThatFits:, sizeThatFits: or calculateSizeThatFits: (deprecated)", NSStringFromClass(self.class))
 
 + (void)initialize
 {
@@ -1442,7 +1443,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 // These private methods ensure that subclasses are not required to call super in order for _renderingSubnodes to be properly managed.
 
-- (void)__layout
+- (void)__layoutSubnodes
 {
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(__instanceLock__);
@@ -1464,8 +1465,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   _placeholderLayer.frame = bounds;
   
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   [self layout];
   [self layoutDidFinish];
+#pragma clang diagnostic pop
 }
 
 - (void)measureNodeWithBoundsIfNecessary:(CGRect)bounds
@@ -1501,6 +1505,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 }
 
 - (void)layoutDidFinish
+{
+  // Hook for subclasses
+  [self nodeDidLayoutSubnodes];
+}
+
+- (void)nodeDidLayoutSubnodes
 {
   // Hook for subclasses
 }
@@ -2442,10 +2452,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
   ASDN::MutexLocker l(__instanceLock__);
 
-  // Manual size calculation via calculateSizeThatFits:
+  // Manual size calculation via calculateSizeThatFits: / sizeThatFits:
   if (((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) ||
       (_layoutSpecBlock != NULL)) == NO) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     CGSize size = [self calculateSizeThatFits:constrainedSize.max];
+#pragma clang diagnostic pop
     ASDisplayNodeLogEvent(self, @"calculatedSize: %@", NSStringFromCGSize(size));
     return [ASLayout layoutWithLayoutElement:self size:ASSizeRangeClamp(constrainedSize, size) sublayouts:nil];
   }
@@ -2512,9 +2525,15 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
-  
-  ASDisplayNodeAssert(ASIsCGSizeValidForSize(constrainedSize), @"Cannot calculate size of node because constrained size is infinite and node does not override -calculateSizeThatFits:. Try setting style.preferredSize on the node. Node: %@", self);
+  return [self sizeThatFits:constrainedSize];
+}
 
+- (CGSize)sizeThatFits:(CGSize)constrainedSize
+{
+  __ASDisplayNodeCheckForLayoutMethodOverrides;
+  
+  ASDisplayNodeAssert(ASIsCGSizeValidForSize(constrainedSize), @"Cannot calculate size of node because constrained size is infinite and node does not override -calculateSizeThatFits: or -sizeThatFits:. Try setting style.preferredSize on the node. Node: %@", self);
+  
   return constrainedSize;
 }
 
@@ -3030,7 +3049,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)layout
 {
   ASDisplayNodeAssertMainThread();
+  [self layoutSubnodes];
+}
 
+- (void)layoutSubnodes
+{
+  ASDisplayNodeAssertMainThread();
+  
   if (_calculatedDisplayNodeLayout->isDirty()) {
     return;
   }

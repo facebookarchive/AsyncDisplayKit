@@ -390,7 +390,7 @@
   }
 }
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (CGSize)sizeThatFits:(CGSize)constrainedSize
 {
   // FIXME: Need a better way to allow maps to take up the right amount of space in a layout (sizeRange, etc)
   // These fallbacks protect against inheriting a constrainedSize that contains a CGFLOAT_MAX value.
@@ -412,9 +412,10 @@
 }
 
 // -layout isn't usually needed over -layoutSpecThatFits, but this way we can avoid a needless node wrapper for MKMapView.
-- (void)layout
+- (void)layoutSubnodes
 {
-  [super layout];
+  [super layoutSubnodes];
+
   if (self.isLiveMap) {
     _mapView.frame = CGRectMake(0.0f, 0.0f, self.calculatedSize.width, self.calculatedSize.height);
   } else {

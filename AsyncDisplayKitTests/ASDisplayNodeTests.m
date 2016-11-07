@@ -100,7 +100,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 
 @implementation ASTestDisplayNode
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (CGSize)sizeThatFits:(CGSize)constrainedSize
 {
   return _calculateSizeBlock ? _calculateSizeBlock(self, constrainedSize) : CGSizeZero;
 }
