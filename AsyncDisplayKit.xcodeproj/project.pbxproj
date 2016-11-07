@@ -474,7 +474,7 @@
 		DE89C1701DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.h in Headers */ = {isa = PBXBuildFile; fileRef = DE89C16A1DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.h */; };
 		DE89C1711DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DE89C16B1DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.m */; };
 		DE89C1731DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DE89C16B1DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.m */; };
-		DE89C1741DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.h in Headers */ = {isa = PBXBuildFile; fileRef = DE89C16C1DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.h */; };
+		DE89C1741DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.h in Headers */ = {isa = PBXBuildFile; fileRef = DE89C16C1DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		DE89C1751DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DE89C16D1DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.m */; };
 		DE89C1771DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DE89C16D1DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.m */; };
 		DE89C1781DCEB9CC00D49D74 /* ASLayoutSpec+Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = DE89C16E1DCEB9CC00D49D74 /* ASLayoutSpec+Debug.h */; };
@@ -484,6 +484,7 @@
 		DE8BEAC31C2DF3FC00D57C12 /* ASDelegateProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DE8BEAC01C2DF3FC00D57C12 /* ASDelegateProxy.m */; };
 		DE8BEAC41C2DF3FC00D57C12 /* ASDelegateProxy.m in Sources */ = {isa = PBXBuildFile; fileRef = DE8BEAC01C2DF3FC00D57C12 /* ASDelegateProxy.m */; };
 		DEB8ED7C1DD003D300DBDE55 /* ASLayoutTransition.mm in Sources */ = {isa = PBXBuildFile; fileRef = E52405B21C8FEF03004DC8E7 /* ASLayoutTransition.mm */; };
+		DEB8ED7E1DD007F400DBDE55 /* ASLayoutElementInspectorNode.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = DE89C16C1DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.h */; };
 		DEC146B71C37A16A004A0EE7 /* ASCollectionInternal.h in Headers */ = {isa = PBXBuildFile; fileRef = DEC146B41C37A16A004A0EE7 /* ASCollectionInternal.h */; };
 		DEC146B81C37A16A004A0EE7 /* ASCollectionInternal.m in Sources */ = {isa = PBXBuildFile; fileRef = DEC146B51C37A16A004A0EE7 /* ASCollectionInternal.m */; };
 		DEC146B91C37A16A004A0EE7 /* ASCollectionInternal.m in Sources */ = {isa = PBXBuildFile; fileRef = DEC146B51C37A16A004A0EE7 /* ASCollectionInternal.m */; };
@@ -666,6 +667,7 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				DEB8ED7E1DD007F400DBDE55 /* ASLayoutElementInspectorNode.h in CopyFiles */,
 				693117CE1DC7C72700DE4784 /* ASDisplayNode+Deprecated.h in CopyFiles */,
 				69F381A51DA4630D00CF2278 /* NSArray+Diffing.h in CopyFiles */,
 				CC4C2A7A1D8902350039ACAB /* ASTraceEvent.h in CopyFiles */,

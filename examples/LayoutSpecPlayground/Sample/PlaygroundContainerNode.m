@@ -9,8 +9,8 @@
 #import "PlaygroundContainerNode.h"
 #import "LayoutExampleNodes.h"
 #import "PhotoPostNode.h"
-#import "ASLayoutElementInspectorNode.h"  // FIXME: move to ASLayoutSpecDebug
-#import "AsyncDisplayKit+Debug.h"
+#import <AsyncDisplayKit/ASLayoutElementInspectorNode.h>
+#import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
 
 #define RESIZE_HANDLE_SIZE 30
 
