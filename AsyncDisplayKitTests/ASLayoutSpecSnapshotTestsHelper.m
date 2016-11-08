@@ -39,7 +39,8 @@
   
   node.layoutSpecUnderTest = layoutSpec;
   
-  [node layoutThatFits:sizeRange];
+  ASLayout *layout = [node layoutThatFits:sizeRange];
+  node.bounds = CGRectMake(0, 0, layout.size.width, layout.size.height);
   ASSnapshotVerifyNode(node, identifier);
 }
 

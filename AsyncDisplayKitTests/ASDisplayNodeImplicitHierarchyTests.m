@@ -16,6 +16,8 @@
 #import "ASDisplayNode+Beta.h"
 #import "ASDisplayNode+Subclasses.h"
 
+#import "ASLayout.h"
+
 #import "ASAbsoluteLayoutSpec.h"
 #import "ASStackLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
@@ -88,7 +90,10 @@
     
     return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[stack1, stack2, node5]];
   };
-  [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+  ASLayout *l = [node layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY))];
+  node.frame = (CGRect){.size = l.size};
+  [node layoutIfNeeded];
+  
   XCTAssertEqual(node.subnodes[0], node5);
   XCTAssertEqual(node.subnodes[1], node1);
   XCTAssertEqual(node.subnodes[2], node2);
@@ -122,13 +127,17 @@
     }
   };
   
-  [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+  ASLayout *l = [node layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY))];
+  node.frame = (CGRect){.size = l.size};
+  [node layoutIfNeeded];
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
   
   node.layoutState = @2;
-  [node invalidateCalculatedLayout];
-  [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+  l = [node layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY))];
+  node.frame = (CGRect){.size = l.size};
+  [node setNeedsLayout];
+  [node layoutIfNeeded];
 
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node3);
@@ -191,12 +200,15 @@
   
   dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     
-    [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+    ASLayout *l = [node layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY))];
+    node.frame = (CGRect){.size = l.size};
     XCTAssertEqual(node.subnodes[0], node1);
     
     node.layoutState = @2;
-    [node invalidateCalculatedLayout];
-    [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+    l = [node layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY))];
+    node.frame = (CGRect){.size = l.size};
+    [node setNeedsLayout];
+    [node layoutIfNeeded];
     
     // Dispatch back to the main thread to let the insertion / deletion of subnodes happening
     dispatch_async(dispatch_get_main_queue(), ^{

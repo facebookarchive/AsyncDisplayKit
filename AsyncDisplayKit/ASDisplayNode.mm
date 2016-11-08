@@ -755,7 +755,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   // TODO: coalayout: Cache the layout as pending layout
-  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
+  ASLayout *layout = [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
+  _pendingDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>(
+    layout,
+    constrainedSize,
+    parentSize
+  );
+  
+  // Reuse of already calculated layout is not possible create a new one based on the constrained and parent size
+  return layout;
 }
 
 /**
@@ -864,7 +872,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   __instanceLock__.lock();
   // Setup new constrained and parent size based on bounds
   CGSize parentSize = bounds.size;
-  ASSizeRange constrainedSize = ASSizeRangeMake(parentSize);
+  ASSizeRange constrainedSize = ASSizeRangeMake(parentSize, parentSize);
   
   // Check if we have to create a layout before the layout pass can happen
   CGSize calculatedDisplayNodeLayoutSize = _calculatedDisplayNodeLayout->layout.size;
@@ -891,6 +899,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     constrainedSize,
     parentSize
   );
+  
+  calculatedDisplayNodeLayoutSize = _pendingDisplayNodeLayout->layout.size;
+  if (CGSizeEqualToSize(calculatedDisplayNodeLayoutSize, bounds.size) && _pendingDisplayNodeLayout->isDirty() == NO) {
+    pendingLayout = _pendingDisplayNodeLayout;
+  }
+  
 
   _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                         pendingLayout:pendingLayout
@@ -2507,6 +2521,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
     }
     
+    ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
     layoutSpec.parent = self;
     layoutSpec.isMutable = NO;
   }

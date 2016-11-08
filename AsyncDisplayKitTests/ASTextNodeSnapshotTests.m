@@ -25,8 +25,10 @@
   ASTextNode *textNode = [[ASTextNode alloc] init];
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"judar"
                                                             attributes:@{NSFontAttributeName : [UIFont italicSystemFontOfSize:24]}];
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
   textNode.textContainerInset = UIEdgeInsetsMake(0, 2, 0, 2);
+  
+  ASLayout *l = [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
+  textNode.frame = (CGRect){.origin = {0, 0}, .size = l.size};
   
   ASSnapshotVerifyNode(textNode, nil);
 }
@@ -39,10 +41,10 @@
   ASTextNode *textNode = [[ASTextNode alloc] init];
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"judar judar judar judar judar judar"
                                                             attributes:@{ NSFontAttributeName : [UIFont systemFontOfSize:30] }];
-  
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 80))];
-  textNode.frame = CGRectMake(50, 50, textNode.calculatedSize.width, textNode.calculatedSize.height);
   textNode.textContainerInset = UIEdgeInsetsMake(10, 10, 10, 10);
+  
+  ASLayout *l = [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 80))];
+  textNode.frame = CGRectMake(50, 50, l.size.width, l.size.height);
 
   [backgroundView addSubview:textNode.view];
   backgroundView.frame = UIEdgeInsetsInsetRect(textNode.bounds, UIEdgeInsetsMake(-50, -50, -50, -50));
@@ -61,10 +63,10 @@
   ASTextNode *textNode = [[ASTextNode alloc] init];
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"yolo"
                                                             attributes:@{ NSFontAttributeName : [UIFont systemFontOfSize:30] }];
-
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
-  textNode.frame = CGRectMake(50, 50, textNode.calculatedSize.width, textNode.calculatedSize.height);
   textNode.textContainerInset = UIEdgeInsetsMake(5, 10, 10, 5);
+
+  ASLayout *l = [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
+  textNode.frame = CGRectMake(50, 50, l.size.width, l.size.height);
 
   [backgroundView addSubview:textNode.view];
   backgroundView.frame = UIEdgeInsetsInsetRect(textNode.bounds, UIEdgeInsetsMake(-50, -50, -50, -50));
@@ -80,7 +82,9 @@
 {
   ASTextNode *textNode = [[ASTextNode alloc] init];
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
+  ASLayout *l = [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
+  textNode.frame = CGRectMake(0, 0, l.size.width, l.size.height);
+  
   ASSnapshotVerifyNode(textNode, nil);
 }
 
@@ -88,6 +92,10 @@
 {
   ASTextNode *textNode = [[ASTextNode alloc] init];
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
+
+  ASLayout *l = [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
+  textNode.frame = CGRectMake(0, 0, l.size.width, l.size.height);
+  
   // Set exclusion paths to trigger slow path
   textNode.exclusionPaths = @[ [UIBezierPath bezierPath] ];
   [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
@@ -102,7 +110,10 @@
   textNode.shadowOpacity = 0.3;
   textNode.shadowRadius = 3;
   textNode.shadowOffset = CGSizeMake(0, 1);
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
+  ASLayout *l = [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
+  textNode.frame = CGRectMake(0, 0, l.size.width, l.size.height);
+  
+  
   ASSnapshotVerifyNode(textNode, nil);
 }
 
