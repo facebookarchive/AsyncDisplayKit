@@ -116,6 +116,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (ASCellNode *)nodeForPageAtIndex:(NSInteger)index AS_WARN_UNUSED_RESULT;
 
+/**
+ * Returns the index of the page for the cell passed or NSNotFound
+ */
+- (NSInteger)indexOfPageWithNode:(ASCellNode *)node;
+
 @end
 
 NS_ASSUME_NONNULL_END
