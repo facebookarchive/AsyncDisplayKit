@@ -12,6 +12,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
+#import "AsyncDisplayKit+Debug.h"
 
 #import <objc/runtime.h>
 
@@ -49,6 +50,10 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @protocol CALayerDelegate;
 
 @interface ASDisplayNode () <UIGestureRecognizerDelegate, _ASDisplayLayerDelegate, _ASTransitionContextCompletionDelegate>
+{
+  BOOL _shouldCacheLayoutSpec;
+  ASLayoutSpec *_layoutSpec;
+}
 
 /**
  *
@@ -717,6 +722,23 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   [self cancelLayoutTransition];
   
+  BOOL didCreateNewContext = NO;
+  BOOL didOverrideExistingContext = NO;
+  BOOL shouldVisualizeLayout = ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
+  ASLayoutElementContext context;
+  if (ASLayoutElementContextIsNull(ASLayoutElementGetCurrentContext())) {
+    context = ASLayoutElementContextMake(ASLayoutElementContextDefaultTransitionID, shouldVisualizeLayout);
+    ASLayoutElementSetCurrentContext(context);
+    didCreateNewContext = YES;
+  } else {
+    context = ASLayoutElementGetCurrentContext();
+    if (context.needsVisualizeNode != shouldVisualizeLayout) {
+      context.needsVisualizeNode = shouldVisualizeLayout;
+      ASLayoutElementSetCurrentContext(context);
+      didOverrideExistingContext = YES;
+    }
+  }
+  
   // Prepare for layout transition
   auto previousLayout = _calculatedDisplayNodeLayout;
   auto pendingLayout = std::make_shared<ASDisplayNodeLayout>(
@@ -724,6 +746,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     constrainedSize,
     parentSize
   );
+  
+  if (didCreateNewContext) {
+    ASLayoutElementClearCurrentContext();
+  } else if (didOverrideExistingContext) {
+    context.needsVisualizeNode = !context.needsVisualizeNode;
+    ASLayoutElementSetCurrentContext(context);
+  }
+  
   _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                         pendingLayout:pendingLayout
                                                        previousLayout:previousLayout];
@@ -831,9 +861,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     
     ASLayout *newLayout;
     {
-      ASLayoutElementSetCurrentContext(ASLayoutElementContextMake(transitionID, NO));
-
       ASDN::MutexLocker l(__instanceLock__);
+
+      BOOL shouldVisualizeLayout = ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
+      ASLayoutElementSetCurrentContext(ASLayoutElementContextMake(transitionID, shouldVisualizeLayout));
+
       BOOL automaticallyManagesSubnodesDisabled = (self.automaticallyManagesSubnodes == NO);
       self.automaticallyManagesSubnodes = YES; // Temporary flag for 1.9.x
       newLayout = [self calculateLayoutThatFits:constrainedSize
@@ -2437,8 +2469,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
       // Use an empty layout spec to avoid crashes
       layoutSpec = [[ASLayoutSpec alloc] init];
     }
+
+    if (_shouldCacheLayoutSpec) {
+      _layoutSpec = layoutSpec;
+    } else {
+      ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
+    }
     
-    ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
     layoutSpec.parent = self;
     layoutSpec.isMutable = NO;
   }
@@ -2486,7 +2523,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   __ASDisplayNodeCheckForLayoutMethodOverrides;
   
   BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
-  if (_layoutSpecBlock != NULL) {
+  
+  if (_shouldCacheLayoutSpec && _layoutSpec != nil) {
+    return _layoutSpec;
+  } else if (_layoutSpecBlock != NULL) {
     return ({
       ASDN::MutexLocker l(__instanceLock__);
       ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
@@ -3698,6 +3738,44 @@ ASLayoutElementStyleForwarding
 - (void)setUsesImplicitHierarchyManagement:(BOOL)enabled
 {
   self.automaticallyManagesSubnodes = enabled;
+}
+
+#pragma mark - ASDisplayNode(LayoutDebugging)
+
+- (void)setShouldVisualizeLayoutSpecs:(BOOL)shouldVisualizeLayoutSpecs
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if (shouldVisualizeLayoutSpecs != [self shouldVisualizeLayoutSpecs]) {
+    if (shouldVisualizeLayoutSpecs) {
+      [self enterHierarchyState:ASHierarchyStateVisualizeLayout];
+    } else {
+      [self exitHierarchyState:ASHierarchyStateVisualizeLayout];
+    }
+    [self setNeedsLayout];
+  }
+}
+
+- (BOOL)shouldVisualizeLayoutSpecs
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
+}
+
+- (void)setShouldCacheLayoutSpec:(BOOL)shouldCacheLayoutSpec
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if (_shouldCacheLayoutSpec != shouldCacheLayoutSpec) {
+    _shouldCacheLayoutSpec = shouldCacheLayoutSpec;
+    if (_shouldCacheLayoutSpec == NO) {
+      _layoutSpec = nil;
+    }
+  }
+}
+
+- (BOOL)shouldCacheLayoutSpec
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _shouldCacheLayoutSpec;
 }
 
 @end

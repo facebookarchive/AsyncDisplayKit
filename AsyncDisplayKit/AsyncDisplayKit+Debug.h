@@ -10,11 +10,18 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import "ASDisplayNode.h"
 #import "ASControlNode.h"
 #import "ASImageNode.h"
 #import "ASRangeController.h"
 
 NS_ASSUME_NONNULL_BEGIN
+
+@interface ASDisplayNode (Visualization)
+@property (nonatomic, assign) BOOL shouldVisualizeLayoutSpecs;
+@property (nonatomic, assign) BOOL shouldCacheLayoutSpec;
+
+@end
 
 @interface ASImageNode (Debugging)
 

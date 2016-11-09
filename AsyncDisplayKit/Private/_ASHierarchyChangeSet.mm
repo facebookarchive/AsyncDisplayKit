@@ -819,7 +819,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   NSDictionary *map = [self sectionToIndexSetMapFromChanges:changes];
   NSMutableString *str = [NSMutableString stringWithString:@"{ "];
   [map enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull section, NSIndexSet * _Nonnull indexSet, BOOL * _Nonnull stop) {
-    [str appendFormat:@"@%lu : %@ ", section.integerValue, [indexSet as_smallDescription]];
+    [str appendFormat:@"@%lu : %@ ", (long)section.integerValue, [indexSet as_smallDescription]];
   }];
   [str appendString:@"}"];
   return str;

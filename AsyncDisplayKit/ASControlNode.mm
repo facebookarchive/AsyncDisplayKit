@@ -14,6 +14,8 @@
 #import "AsyncDisplayKit+Debug.h"
 #import "ASInternalHelpers.h"
 #import "ASControlTargetAction.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASLayoutElementInspectorNode.h"
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
@@ -241,6 +243,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 {
   NSParameterAssert(action);
   NSParameterAssert(controlEventMask != 0);
+  // This assertion would likely be helpful to users who aren't familiar with the implications of layer-backing.
+  // However, it would represent an API change (in debug) as it did not used to assert.
+  // ASDisplayNodeAssert(!self.isLayerBacked, @"ASControlNode is layer backed, will never be able to call target in target:action: pair.");
   
   ASDN::MutexLocker l(_controlLock);
 
@@ -446,6 +451,23 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (ASImageNode *)debugHighlightOverlay
 {
   return _debugHighlightOverlay;
+}
+
+// methods for visualizing ASLayoutSpecs
+- (void)setHierarchyState:(ASHierarchyState)hierarchyState
+{
+  [super setHierarchyState:hierarchyState];
+  
+  if (self.shouldVisualizeLayoutSpecs) {
+    [self addTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];
+  } else {
+    [self removeTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];
+  }
+}
+
+- (void)inspectElement
+{
+  [ASLayoutElementInspectorNode sharedInstance].layoutElementToEdit = self;
 }
 
 @end
