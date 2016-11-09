@@ -75,7 +75,8 @@
   ASSnapshotVerifyView(backgroundView, nil);
 }
 
-- (void)testThatFastPathTruncationWorks
+//Disabled while fast path is disabled
+- (void)_testThatFastPathTruncationWorks
 {
   ASTextNode *textNode = [[ASTextNode alloc] init];
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
@@ -83,7 +84,8 @@
   ASSnapshotVerifyNode(textNode, nil);
 }
 
-- (void)testThatSlowPathTruncationWorks
+//Disabled while fast path is disabled
+- (void)_testThatSlowPathTruncationWorks
 {
   ASTextNode *textNode = [[ASTextNode alloc] init];
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
