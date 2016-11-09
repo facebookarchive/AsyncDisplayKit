@@ -207,6 +207,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
   return NO;
 //Disable fast path for now as it's crashing in production
+//WHEN RE-ENABLING, MAKE SURE TO ALSO RE-ENABLE TEST! testThatFastPathTruncationWorks and testThatSlowPathTruncationWorks
 //  return self.isScaled == NO
 //    && self.usesCustomTruncation == NO
 //    && self.usesExclusionPaths == NO
