@@ -10,7 +10,7 @@
 
 #import "ASDisplayNode.h"
 #import "ASLayoutRangeType.h"
-#import "ASTraceEvent.h"
+#import "ASEventLog.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -19,18 +19,16 @@ void ASPerformBlockOnMainThread(void (^block)());
 void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
 ASDISPLAYNODE_EXTERN_C_END
 
-#ifndef ASDISPLAYNODE_EVENTLOG_CAPACITY
-#define ASDISPLAYNODE_EVENTLOG_CAPACITY 20
-#endif
-
-#ifndef ASDISPLAYNODE_EVENTLOG_ENABLE
-#define ASDISPLAYNODE_EVENTLOG_ENABLE DEBUG
-#endif
-
-#if ASDISPLAYNODE_EVENTLOG_ENABLE
-#define ASDisplayNodeLogEvent(node, ...) [node _logEventWithBacktrace:[NSThread callStackSymbols] format:__VA_ARGS__]
+#if ASEVENTLOG_ENABLE
+#define ASDisplayNodeLogEvent(node, ...) [node.eventLog logEventWithBacktrace:[NSThread callStackSymbols] format:__VA_ARGS__]
 #else
 #define ASDisplayNodeLogEvent(node, ...)
+#endif
+
+#if ASEVENTLOG_ENABLE
+#define ASDisplayNodeGetEventLog(node) node.eventLog
+#else
+#define ASDisplayNodeGetEventLog(node) nil
 #endif
 
 /**
@@ -94,6 +92,13 @@ typedef struct {
  */
 @property (nonatomic, assign, readonly) ASDisplayNodePerformanceMeasurements performanceMeasurements;
 
+#if ASEVENTLOG_ENABLE
+/*
+ * @abstract The primitive event tracing object. You shouldn't directly use it to log event. Use the ASDisplayNodeLogEvent macro instead.
+ */
+@property (nonatomic, strong, readonly) ASEventLog *eventLog;
+#endif
+
 /**
  * @abstract Currently used by ASNetworkImageNode and ASMultiplexImageNode to allow their placeholders to stay if they are loading an image from the network.
  * Otherwise, a display pass is scheduled and completes, but does not actually draw anything - and ASDisplayNode considers the element finished.
@@ -117,20 +122,6 @@ typedef struct {
  * enabling .neverShowPlaceholders on ASCellNodes so that the navigation operation is blocked on redisplay completing, etc.
  */
 + (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode;
-
-#if ASDISPLAYNODE_EVENTLOG_ENABLE
-
-/**
- * The primitive event tracing method. You shouldn't call this. Use the ASDisplayNodeLogEvent macro instead.
- */
-- (void)_logEventWithBacktrace:(NSArray<NSString *> *)backtrace format:(NSString *)format, ... NS_FORMAT_FUNCTION(2, 3);
-
-/**
- * @abstract The most recent trace events for this node. Max count is ASDISPLAYNODE_EVENTLOG_CAPACITY.
- */
-@property (readonly, copy) NSArray *eventLog;
-
-#endif
 
 @end
 

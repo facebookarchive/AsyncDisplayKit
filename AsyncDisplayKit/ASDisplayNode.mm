@@ -309,7 +309,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)_initializeInstance
 {
   [self _staticInitialize];
-  _eventLogHead = -1;
+
+#if ASEVENTLOG_ENABLE
+  _eventLog = [[ASEventLog alloc] init];
+#endif
+  
   _contentsScaleForDisplay = ASScreenScale();
   
   _environmentState = ASEnvironmentStateMakeDefault();
@@ -583,51 +587,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [self __didLoad];
   }
 }
-
-#if ASDISPLAYNODE_EVENTLOG_ENABLE
-- (void)_logEventWithBacktrace:(NSArray<NSString *> *)backtrace format:(NSString *)format, ...
-{
-  va_list args;
-  va_start(args, format);
-  ASTraceEvent *event = [[ASTraceEvent alloc] initWithObject:self
-                                                   backtrace:backtrace
-                                                      format:format
-                                                   arguments:args];
-  va_end(args);
-
-  ASDN::MutexLocker l(__instanceLock__);
-  // Create the array if needed.
-  if (_eventLog == nil) {
-    _eventLog = [NSMutableArray arrayWithCapacity:ASDISPLAYNODE_EVENTLOG_CAPACITY];
-  }
-
-	// Increment the head index.
-  _eventLogHead = (_eventLogHead + 1) % ASDISPLAYNODE_EVENTLOG_CAPACITY;
-  if (_eventLogHead < _eventLog.count) {
-    [_eventLog replaceObjectAtIndex:_eventLogHead withObject:event];
-  } else {
-    [_eventLog insertObject:event atIndex:_eventLogHead];
-  }
-}
-
-- (NSArray<ASTraceEvent *> *)eventLog
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  NSUInteger tail = (_eventLogHead + 1);
-  NSUInteger count = _eventLog.count;
-
-  NSMutableArray<ASTraceEvent *> *result = [NSMutableArray array];
-
-  // Start from `tail` and go through array, wrapping around when we exceed end index.
-  for (NSUInteger actualIndex = 0; actualIndex < ASDISPLAYNODE_EVENTLOG_CAPACITY; actualIndex++) {
-    NSInteger ringIndex = (tail + actualIndex) % ASDISPLAYNODE_EVENTLOG_CAPACITY;
-    if (ringIndex < count) {
-      [result addObject:_eventLog[ringIndex]];
-    }
-  }
-  return result;
-}
-#endif
 
 - (UIView *)view
 {
@@ -1179,15 +1138,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [self setCalculatedDisplayNodeLayout:_pendingLayoutTransition.pendingLayout];
     [self _completeLayoutTransition:_pendingLayoutTransition];
   }
-  
-  // Trampoline to the main thread if necessary
-  if (_pendingLayoutTransition && _pendingLayoutTransition.isSynchronous == NO) {
-    [self _pendingLayoutTransitionDidComplete];
-  } else {
-    ASPerformBlockOnMainThread(^{
-      [self _pendingLayoutTransitionDidComplete];
-    });
-  }
+  [self _pendingLayoutTransitionDidComplete];
 }
 
 /*
@@ -1202,7 +1153,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   // Trampoline to the main thread if necessary
-  if (layoutTransition.isSynchronous == NO) {
+  if (ASDisplayNodeThreadIsMain() || layoutTransition.isSynchronous == NO) {
     [layoutTransition commitTransition];
   } else {
     // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
@@ -1230,7 +1181,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     if (CGSizeEqualToSize(layoutSize, CGSizeZero)) {
       return;
     }
-    
+
     if (!_placeholderImage) {
       _placeholderImage = [self placeholderImage];
     }
@@ -1748,8 +1699,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   if (_subnodes == nil) {
     _subnodes = [[NSMutableArray alloc] init];
   }
-  
-  ASDisplayNodeLogEvent(self, @"%@: %@", NSStringFromSelector(_cmd), subnode);
     
   [_subnodes insertObject:subnode atIndex:subnodeIndex];
   
@@ -1803,6 +1752,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (void)addSubnode:(ASDisplayNode *)subnode
 {
+  ASDisplayNodeLogEvent(self, @"addSubnode: %@", subnode);
   // TODO: 2.0 Conversion: Reenable and fix within product code
   //ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually add subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
   [self _addSubnode:subnode];
@@ -1841,6 +1791,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (void)replaceSubnode:(ASDisplayNode *)oldSubnode withSubnode:(ASDisplayNode *)replacementSubnode
 {
+  ASDisplayNodeLogEvent(self, @"replaceSubnode: %@ withSubnode:%@", oldSubnode, replacementSubnode);
   // TODO: 2.0 Conversion: Reenable and fix within product code
   //ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually replace old node with replacement node to node with automaticallyManagesSubnodes=YES. Old Node: %@, replacement node: %@", oldSubnode, replacementSubnode);
   [self _replaceSubnode:oldSubnode withSubnode:replacementSubnode];
@@ -1884,6 +1835,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (void)insertSubnode:(ASDisplayNode *)subnode belowSubnode:(ASDisplayNode *)below
 {
+  ASDisplayNodeLogEvent(self, @"insertSubnode: %@ belowSubnode:%@", subnode, below);
   // TODO: 2.0 Conversion: Reenable and fix within product code
   //ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
   [self _insertSubnode:subnode belowSubnode:below];
@@ -1945,6 +1897,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (void)insertSubnode:(ASDisplayNode *)subnode aboveSubnode:(ASDisplayNode *)above
 {
+  ASDisplayNodeLogEvent(self, @"insertSubnode: %@ abodeSubnode: %@", subnode, above);
   // TODO: 2.0 Conversion: Reenable and fix within product code
   //ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
   [self _insertSubnode:subnode aboveSubnode:above];
@@ -2003,6 +1956,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (void)insertSubnode:(ASDisplayNode *)subnode atIndex:(NSInteger)idx
 {
+  ASDisplayNodeLogEvent(self, @"insertSubnode: %@ atIndex: %td", subnode, idx);
   // TODO: 2.0 Conversion: Reenable and fix within product code
   //ASDisplayNodeAssert(self.automaticallyManagesSubnodes == NO, @"Attempt to manually insert subnode to node with automaticallyManagesSubnodes=YES. Node: %@", subnode);
   [self _insertSubnode:subnode atIndex:idx];
@@ -2053,7 +2007,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
 
-  ASDisplayNodeLogEvent(self, @"%@: %@", NSStringFromSelector(_cmd), subnode);
   [_subnodes removeObjectIdenticalTo:subnode];
 
   [subnode __setSupernode:nil];
@@ -2890,10 +2843,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   
   if (nowPreload != wasPreload) {
     if (nowPreload) {
-      ASDisplayNodeLogEvent(self, @"didEnterPreloadState: %@", NSStringFromASInterfaceState(newState));
       [self didEnterPreloadState];
     } else {
-      ASDisplayNodeLogEvent(self, @"didExitPreloadState: %@", NSStringFromASInterfaceState(newState));
       [self didExitPreloadState];
     }
   }
@@ -2940,10 +2891,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     }
     
     if (nowDisplay) {
-      ASDisplayNodeLogEvent(self, @"didEnterDisplayState: %@", NSStringFromASInterfaceState(newState));
       [self didEnterDisplayState];
     } else {
-      ASDisplayNodeLogEvent(self, @"didExitDisplayState: %@", NSStringFromASInterfaceState(newState));
       [self didExitDisplayState];
     }
   }
@@ -2955,14 +2904,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
   if (nowVisible != wasVisible) {
     if (nowVisible) {
-      ASDisplayNodeLogEvent(self, @"didEnterVisibleState: %@", NSStringFromASInterfaceState(newState));
       [self didEnterVisibleState];
     } else {
-      ASDisplayNodeLogEvent(self, @"didExitVisibleState: %@", NSStringFromASInterfaceState(newState));
       [self didExitVisibleState];
     }
   }
 
+  ASDisplayNodeLogEvent(self, @"interfaceStateDidChange: %@, old: %@", NSStringFromASInterfaceState(newState), NSStringFromASInterfaceState(oldState));
   [self interfaceStateDidChange:newState fromState:oldState];
 }
 
@@ -3398,6 +3346,13 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 }
 
 #pragma mark Debugging (Private)
+
+#if ASEVENTLOG_ENABLE
+- (ASEventLog *)eventLog
+{
+  return _eventLog;
+}
+#endif
 
 - (NSMutableArray<NSDictionary *> *)propertiesForDescription
 {

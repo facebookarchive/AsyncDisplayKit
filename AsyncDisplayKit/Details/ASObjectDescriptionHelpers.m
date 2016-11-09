@@ -1,5 +1,5 @@
 //
-//  ASObjectDescriptions.m
+//  ASObjectDescriptionHelpers.m
 //  AsyncDisplayKit
 //
 //  Created by Adlai Holler on 9/7/16.

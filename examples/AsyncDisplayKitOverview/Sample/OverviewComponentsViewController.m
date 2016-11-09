@@ -140,7 +140,7 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
 {
     [super viewWillAppear:animated];
     
-    [_tableNode deselectRowAtIndexPath:_tableNode.view.indexPathForSelectedRow animated:YES];
+    [_tableNode deselectRowAtIndexPath:_tableNode.indexPathForSelectedRow animated:YES];
 }
 
 

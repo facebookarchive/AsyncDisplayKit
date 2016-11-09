@@ -11,6 +11,7 @@
 #import "_ASAsyncTransactionContainer+Private.h"
 
 #import "_ASAsyncTransaction.h"
+#import "_ASAsyncTransactionContainer.h"
 #import "_ASAsyncTransactionGroup.h"
 #import <objc/runtime.h>
 

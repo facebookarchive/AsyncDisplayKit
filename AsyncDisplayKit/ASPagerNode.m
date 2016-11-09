@@ -109,6 +109,15 @@
   return [self nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:index inSection:0]];
 }
 
+- (NSInteger)indexOfPageWithNode:(ASCellNode *)node
+{
+  NSIndexPath *indexPath = [self indexPathForNode:node];
+  if (!indexPath) {
+    return NSNotFound;
+  }
+  return indexPath.row;
+}
+
 #pragma mark - ASCollectionDataSource
 
 - (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath

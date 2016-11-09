@@ -282,6 +282,8 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @warning Subclasses that implement -layoutSpecThatFits: must not also use .layoutSpecBlock. Doing so will trigger
  * an exception. A future version of the framework may support using both, calling them serially, with the
  * .layoutSpecBlock superseding any values set by the method override.
+ *
+ * @code ^ASLayoutSpec *(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {};
  */
 @property (nonatomic, readwrite, copy, nullable) ASLayoutSpecBlock layoutSpecBlock;
 

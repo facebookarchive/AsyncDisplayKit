@@ -71,7 +71,7 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 
 #pragma mark - Lifecycle
 
-- (instancetype)initWithDataSource:(id<ASDataControllerSource>)dataSource
+- (instancetype)initWithDataSource:(id<ASDataControllerSource>)dataSource eventLog:(ASEventLog *)eventLog
 {
   if (!(self = [super init])) {
     return nil;
@@ -79,6 +79,10 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   ASDisplayNodeAssert(![self isMemberOfClass:[ASDataController class]], @"ASDataController is an abstract class and should not be instantiated. Instantiate a subclass instead.");
   
   _dataSource = dataSource;
+  
+#if ASEVENTLOG_ENABLE
+  _eventLog = eventLog;
+#endif
   
   _nodeContexts = [NSMutableDictionary dictionary];
   _completedNodes = [NSMutableDictionary dictionary];
@@ -102,7 +106,8 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 {
   ASDisplayNodeFailAssert(@"Failed to call designated initializer.");
   id<ASDataControllerSource> fakeDataSource = nil;
-  return [self initWithDataSource:fakeDataSource];
+  ASEventLog *eventLog = nil;
+  return [self initWithDataSource:fakeDataSource eventLog:eventLog];
 }
 
 - (void)setDelegate:(id<ASDataControllerDelegate>)delegate

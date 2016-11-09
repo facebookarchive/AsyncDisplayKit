@@ -1,5 +1,5 @@
 //
-//  ASObjectDescriptions.h
+//  ASObjectDescriptionHelpers.h
 //  AsyncDisplayKit
 //
 //  Created by Adlai Holler on 9/7/16.
@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Your base class should conform to this and override `-description`
  * to call `[self propertiesForDescription]` and use `ASObjectDescriptionMake`
- * to return a string. Subclasses of this base class just need to override
+ * to return a string. Subclasses of this base class just need to override 
  * `propertiesForDescription`, call super, and modify the result as needed.
  */
 @protocol ASDescriptionProvider
@@ -35,6 +35,8 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
+
+NSString *ASGetDescriptionValueString(id object);
 
 /// Useful for structs etc. Returns e.g. { position = (0 0); frame = (0 0; 50 50) }
 NSString *ASObjectDescriptionMakeWithoutObject(NSArray<NSDictionary *> * _Nullable propertyGroups);
