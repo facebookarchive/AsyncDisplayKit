@@ -46,9 +46,7 @@
     }
     _threadDescription = threadDescription;
 
-    // The backtrace will be an _NSCallStackArray which is actually pretty
-    // huge and retains other objects. Create an immutable NSArray<NSString *> from it.
-    _backtrace = [[NSArray alloc] initWithArray:backtrace];
+    _backtrace = backtrace;
     _timestamp = CACurrentMediaTime() - refTime;
   }
   return self;

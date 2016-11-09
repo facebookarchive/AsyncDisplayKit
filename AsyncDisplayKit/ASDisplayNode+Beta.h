@@ -20,7 +20,7 @@ void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORI
 ASDISPLAYNODE_EXTERN_C_END
 
 #if ASEVENTLOG_ENABLE
-#define ASDisplayNodeLogEvent(node, ...) [node.eventLog logEventWithBacktrace:[NSThread callStackSymbols] format:__VA_ARGS__]
+#define ASDisplayNodeLogEvent(node, ...) [node.eventLog logEventWithBacktrace:(AS_SAVE_EVENT_BACKTRACES ? [NSThread callStackSymbols] : nil) format:__VA_ARGS__]
 #else
 #define ASDisplayNodeLogEvent(node, ...)
 #endif

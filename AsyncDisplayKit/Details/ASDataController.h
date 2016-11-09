@@ -19,7 +19,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 #if ASEVENTLOG_ENABLE
-#define ASDataControllerLogEvent(dataController, ...) [dataController.eventLog logEventWithBacktrace:[NSThread callStackSymbols] format:__VA_ARGS__]
+#define ASDataControllerLogEvent(dataController, ...) [dataController.eventLog logEventWithBacktrace:(AS_SAVE_EVENT_BACKTRACES ? [NSThread callStackSymbols] : nil) format:__VA_ARGS__]
 #else
 #define ASDataControllerLogEvent(dataController, ...)
 #endif
