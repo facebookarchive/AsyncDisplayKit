@@ -79,6 +79,12 @@ static inline ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView
   return NodeConstrainedSizeForScrollDirection(collectionView);
 }
 
+- (ASScrollDirection)scrollableDirections
+{
+  ASDisplayNodeAssert(NO, @"layoutInspector object must implement -scrollableDirections %@", self);
+  return ASScrollDirectionNone;
+}
+
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
