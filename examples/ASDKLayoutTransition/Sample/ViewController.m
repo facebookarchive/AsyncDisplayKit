@@ -61,11 +61,7 @@
   
   _buttonNode = [[ASButtonNode alloc] init];
   [_buttonNode setTitle:buttonTitle withFont:buttonFont withColor:buttonColor forState:ASControlStateNormal];
-  
-  // Note: Currently we have to set all the button properties to the same one as for ASControlStateNormal. Otherwise
-  //       if the button is involved in the layout transition it would break the transition as it does a layout pass
-  //       while changing the title. This needs and will be fixed in the future!
-  [_buttonNode setTitle:buttonTitle withFont:buttonFont withColor:buttonColor forState:ASControlStateHighlighted];
+  [_buttonNode setTitle:buttonTitle withFont:buttonFont withColor:[buttonColor colorWithAlphaComponent:0.5] forState:ASControlStateHighlighted];
   
   
   // Some debug colors
@@ -80,7 +76,7 @@
 {
   [super didLoad];
   
-  [self.buttonNode addTarget:self action:@selector(buttonPressed:) forControlEvents:ASControlNodeEventTouchDown];
+  [self.buttonNode addTarget:self action:@selector(buttonPressed:) forControlEvents:ASControlNodeEventTouchUpInside];
 }
 
 #pragma mark - Actions
@@ -89,7 +85,16 @@
 {
   self.enabled = !self.enabled;
   
-  [self transitionLayoutWithAnimation:YES shouldMeasureAsync:NO measurementCompletion:nil];
+  // Example for a layout transition that will use the old constrained size and *not* resize itself
+  // [self transitionLayoutWithAnimation:YES shouldMeasureAsync:NO measurementCompletion:nil];
+  
+  // Example for a layout transition that will also resize the node itself
+  ASSizeRange constrainedSize = ASSizeRangeMake(CGSizeMake(self.bounds.size.width, 0.0),
+                                                CGSizeMake(self.bounds.size.width, CGFLOAT_MAX));
+  [self transitionLayoutWithSizeRange:constrainedSize
+                             animated:YES
+                   shouldMeasureAsync:NO
+                measurementCompletion:nil];
 }
 
 

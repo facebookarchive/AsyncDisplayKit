@@ -138,7 +138,9 @@ ASVisibilityDidMoveToParentViewController;
   // We do this early layout because we need to get any ASCollectionNodes etc. into the
   // hierarchy before UIKit applies the scroll view inset adjustments, if you are using
   // automatic subnode management.
-  [_node layoutThatFits:[self nodeConstrainedSize]];
+  ASLayout *l = [_node layoutThatFits:[self nodeConstrainedSize]];
+  _node.frame = (CGRect){.size = l.size};
+  [_node layoutIfNeeded];
 
   [_node recursivelyFetchData];
   

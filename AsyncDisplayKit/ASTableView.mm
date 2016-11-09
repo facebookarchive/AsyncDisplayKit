@@ -1509,7 +1509,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   // Normally the content view width equals to the constrained size width (which equals to the table view width).
   // If there is a mismatch between these values, for example after the table view entered or left editing mode,
   // content view width is preferred and used to re-measure the cell node.
-  if (contentViewWidth != constrainedSize.max.width) {
+  //if (contentViewWidth != constrainedSize.max.width) {
     constrainedSize.min.width = contentViewWidth;
     constrainedSize.max.width = contentViewWidth;
 
@@ -1520,6 +1520,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     // Also, in many cases, some nodes may not need to be re-measured at all, such as when user enters and then immediately leaves editing mode.
     // To avoid premature optimization and making such assumption, as well as to keep ASTableView simple, re-measurement is strictly done on main.
     CGSize oldSize = node.bounds.size;
+    constrainedSize  = ASSizeRangeMake(CGSizeMake(contentViewWidth, 0), CGSizeMake(contentViewWidth, CGFLOAT_MAX));
     const CGSize calculatedSize = [node layoutThatFits:constrainedSize].size;
     node.frame = { .size = calculatedSize };
 
@@ -1528,7 +1529,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
       [self beginUpdates];
       [self endUpdates];
     }
-  }
+  //}
 }
 
 #pragma mark - ASCellNodeDelegate
