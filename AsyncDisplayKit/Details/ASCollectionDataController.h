@@ -43,7 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASCollectionDataController : ASChangeSetDataController
 
-- (instancetype)initWithDataSource:(id<ASCollectionDataControllerSource>)dataSource NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithDataSource:(id<ASCollectionDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
 
 - (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 

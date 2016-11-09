@@ -122,10 +122,11 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
   UIEdgeInsets _hitTestSlop;
   NSMutableArray *_subnodes;
-  NSMutableArray<ASTraceEvent *> *_eventLog;
-  // The index of the most recent log entry. -1 until first entry.
-  NSInteger _eventLogHead;
-
+  
+#if ASEVENTLOG_ENABLE
+  ASEventLog *_eventLog;
+#endif
+  
   // Main thread only
   BOOL _automaticallyManagesSubnodes;
   _ASTransitionContext *_pendingLayoutTransitionContext;

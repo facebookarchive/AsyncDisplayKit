@@ -36,9 +36,9 @@
   NSMutableDictionary<NSString *, NSMutableArray<ASIndexedNodeContext *> *> *_pendingNodeContexts;
 }
 
-- (instancetype)initWithDataSource:(id<ASCollectionDataControllerSource>)dataSource
+- (instancetype)initWithDataSource:(id<ASCollectionDataControllerSource>)dataSource eventLog:(ASEventLog *)eventLog
 {
-  self = [super initWithDataSource:dataSource];
+  self = [super initWithDataSource:dataSource eventLog:eventLog];
   if (self != nil) {
     _pendingNodeContexts = [NSMutableDictionary dictionary];
     _dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath = [dataSource respondsToSelector:@selector(dataController:supplementaryNodeBlockOfKind:atIndexPath:)];

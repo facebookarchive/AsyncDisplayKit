@@ -47,7 +47,7 @@
   
   [_changeSet addCompletionHandler:completion];
   if (_changeSetBatchUpdateCounter == 0) {
-    void (^batchCompletion)(BOOL finished) = _changeSet.completionHandler;
+    void (^batchCompletion)(BOOL) = _changeSet.completionHandler;
     
     /**
      * If the initial reloadData has not been called, just bail because we don't have
@@ -65,6 +65,8 @@
 
     [self invalidateDataSourceItemCounts];
     [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
+    
+    ASDataControllerLogEvent(self, @"triggeredUpdate: %@", _changeSet);
     
     [super beginUpdates];
     
@@ -84,6 +86,16 @@
       [super insertRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
 
+#if ASEVENTLOG_ENABLE
+    NSString *changeSetDescription = ASObjectDescriptionMakeTiny(_changeSet);
+    batchCompletion = ^(BOOL finished) {
+      if (batchCompletion != nil) {
+        batchCompletion(finished);
+      }
+      ASDataControllerLogEvent(self, @"finishedUpdate: %@", changeSetDescription);
+    };
+#endif
+    
     [super endUpdatesAnimated:animated completion:batchCompletion];
     
     _changeSet = nil;

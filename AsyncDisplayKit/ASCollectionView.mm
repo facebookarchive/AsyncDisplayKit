@@ -244,10 +244,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
 {
-  return [self _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:nil];
+  return [self _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:nil eventLog:nil];
 }
 
-- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
+- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator eventLog:(ASEventLog *)eventLog
 {
   if (!(self = [super initWithFrame:frame collectionViewLayout:layout]))
     return nil;
@@ -259,7 +259,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
   
-  _dataController = [[ASCollectionDataController alloc] initWithDataSource:self];
+  _dataController = [[ASCollectionDataController alloc] initWithDataSource:self eventLog:eventLog];
   _dataController.delegate = _rangeController;
   _dataController.environmentDelegate = self;
   

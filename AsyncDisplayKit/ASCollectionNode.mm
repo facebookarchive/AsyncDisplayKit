@@ -13,6 +13,7 @@
 #import "ASCollectionInternal.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASCollectionNode.h"
+#import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASEnvironmentInternal.h"
 #import "ASInternalHelpers.h"
@@ -121,7 +122,7 @@
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator];
+    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(self)];
   };
 
   if (self = [super initWithViewBlock:collectionViewBlock]) {
@@ -560,5 +561,15 @@
 #pragma mark ASEnvironment
 
 ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
+
+#pragma mark - Debugging (Private)
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
+{
+  NSMutableArray<NSDictionary *> *result = [super propertiesForDebugDescription];
+  [result addObject:@{ @"dataSource" : ASObjectDescriptionMakeTiny(self.dataSource) }];
+  [result addObject:@{ @"delegate" : ASObjectDescriptionMakeTiny(self.delegate) }];
+  return result;
+}
 
 @end

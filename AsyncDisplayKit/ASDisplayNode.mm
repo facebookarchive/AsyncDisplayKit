@@ -300,7 +300,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)_initializeInstance
 {
   [self _staticInitialize];
-  _eventLogHead = -1;
+
+#if ASEVENTLOG_ENABLE
+  _eventLog = [[ASEventLog alloc] init];
+#endif
+  
   _contentsScaleForDisplay = ASScreenScale();
   
   _environmentState = ASEnvironmentStateMakeDefault();
@@ -574,51 +578,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [self __didLoad];
   }
 }
-
-#if ASDISPLAYNODE_EVENTLOG_ENABLE
-- (void)_logEventWithBacktrace:(NSArray<NSString *> *)backtrace format:(NSString *)format, ...
-{
-  va_list args;
-  va_start(args, format);
-  ASTraceEvent *event = [[ASTraceEvent alloc] initWithObject:self
-                                                   backtrace:backtrace
-                                                      format:format
-                                                   arguments:args];
-  va_end(args);
-
-  ASDN::MutexLocker l(__instanceLock__);
-  // Create the array if needed.
-  if (_eventLog == nil) {
-    _eventLog = [NSMutableArray arrayWithCapacity:ASDISPLAYNODE_EVENTLOG_CAPACITY];
-  }
-
-	// Increment the head index.
-  _eventLogHead = (_eventLogHead + 1) % ASDISPLAYNODE_EVENTLOG_CAPACITY;
-  if (_eventLogHead < _eventLog.count) {
-    [_eventLog replaceObjectAtIndex:_eventLogHead withObject:event];
-  } else {
-    [_eventLog insertObject:event atIndex:_eventLogHead];
-  }
-}
-
-- (NSArray<ASTraceEvent *> *)eventLog
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  NSUInteger tail = (_eventLogHead + 1);
-  NSUInteger count = _eventLog.count;
-
-  NSMutableArray<ASTraceEvent *> *result = [NSMutableArray array];
-
-  // Start from `tail` and go through array, wrapping around when we exceed end index.
-  for (NSUInteger actualIndex = 0; actualIndex < ASDISPLAYNODE_EVENTLOG_CAPACITY; actualIndex++) {
-    NSInteger ringIndex = (tail + actualIndex) % ASDISPLAYNODE_EVENTLOG_CAPACITY;
-    if (ringIndex < count) {
-      [result addObject:_eventLog[ringIndex]];
-    }
-  }
-  return result;
-}
-#endif
 
 - (UIView *)view
 {
@@ -3343,6 +3302,13 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 }
 
 #pragma mark Debugging (Private)
+
+#if ASEVENTLOG_ENABLE
+- (ASEventLog *)eventLog
+{
+  return _eventLog;
+}
+#endif
 
 - (NSMutableArray<NSDictionary *> *)propertiesForDescription
 {
