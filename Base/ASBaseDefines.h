@@ -182,3 +182,6 @@
 #endif
 
 #define ASOVERLOADABLE __attribute__((overloadable))
+
+/// Ensure that class is of certain kind
+#define ASDynamicCast(x, c) ((c *) ([x isKindOfClass:[c class]] ? x : nil))
