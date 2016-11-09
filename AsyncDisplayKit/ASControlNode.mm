@@ -243,7 +243,9 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 {
   NSParameterAssert(action);
   NSParameterAssert(controlEventMask != 0);
-  ASDisplayNodeAssert(!self.isLayerBacked, @"ASControlNode is layer backed, will never be able to call target in target:action: pair.");
+  // This assertion would likely be helpful to users who aren't familiar with the implications of layer-backing.
+  // However, it would represent an API change (in debug) as it did not used to assert.
+  // ASDisplayNodeAssert(!self.isLayerBacked, @"ASControlNode is layer backed, will never be able to call target in target:action: pair.");
   
   ASDN::MutexLocker l(_controlLock);
 
