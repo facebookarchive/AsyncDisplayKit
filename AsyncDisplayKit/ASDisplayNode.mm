@@ -2184,7 +2184,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (NSArray *)subnodes
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return [_subnodes copy];
+  return ([_subnodes copy] ?: @[]);
 }
 
 - (ASDisplayNode *)supernode

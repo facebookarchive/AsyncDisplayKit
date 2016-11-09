@@ -24,6 +24,8 @@
 #import "ASImageNode.h"
 #import "ASOverlayLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
+#import "ASCenterLayoutSpec.h"
+#import "ASBackgroundLayoutSpec.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.debugName = @#n
@@ -2150,6 +2152,40 @@ static bool stringContainsPointer(NSString *description, id p) {
     return [ASOverlayLayoutSpec overlayLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:subnode] overlay:subnode];
   };
   XCTAssertThrowsSpecificNamed([node calculateLayoutThatFits:ASSizeRangeMake(CGSizeMake(100, 100))], NSException, NSInternalInconsistencyException);
+}
+
+- (void)testThatOverlaySpecOrdersSubnodesCorrectly
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.automaticallyManagesSubnodes = YES;
+  ASDisplayNode *underlay = [[ASDisplayNode alloc] init];
+  ASDisplayNode *overlay = [[ASDisplayNode alloc] init];
+  node.layoutSpecBlock = ^(ASDisplayNode *node, ASSizeRange size) {
+    // The inset spec here is crucial. If the nodes themselves are children, it passed before the fix.
+    return [ASOverlayLayoutSpec overlayLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:underlay] overlay:overlay];
+  };
+  [node layoutThatFits:ASSizeRangeMake(CGSizeMake(100, 100))];
+  node.frame = (CGRect){ .size = node.calculatedSize };
+  NSInteger underlayIndex = [node.subnodes indexOfObjectIdenticalTo:underlay];
+  NSInteger overlayIndex = [node.subnodes indexOfObjectIdenticalTo:overlay];
+  XCTAssertLessThan(underlayIndex, overlayIndex);
+}
+
+- (void)testThatBackgroundLayoutSpecOrdersSubnodesCorrectly
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.automaticallyManagesSubnodes = YES;
+  ASDisplayNode *underlay = [[ASDisplayNode alloc] init];
+  ASDisplayNode *overlay = [[ASDisplayNode alloc] init];
+  node.layoutSpecBlock = ^(ASDisplayNode *node, ASSizeRange size) {
+    // The inset spec here is crucial. If the nodes themselves are children, it passed before the fix.
+    return [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:overlay background:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:underlay]];
+  };
+  [node layoutThatFits:ASSizeRangeMake(CGSizeMake(100, 100))];
+  node.frame = (CGRect){ .size = node.calculatedSize };
+  NSInteger underlayIndex = [node.subnodes indexOfObjectIdenticalTo:underlay];
+  NSInteger overlayIndex = [node.subnodes indexOfObjectIdenticalTo:overlay];
+  XCTAssertLessThan(underlayIndex, overlayIndex);
 }
 
 @end
