@@ -18,8 +18,12 @@
 #define ASEVENTLOG_ENABLE 1
 #endif
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface ASEventLog : NSObject
 
-- (void)logEventWithBacktrace:(NSArray<NSString *> *)backtrace format:(NSString *)format, ... NS_FORMAT_FUNCTION(2, 3);
+- (void)logEventWithBacktrace:(nullable NSArray<NSString *> *)backtrace format:(NSString *)format, ... NS_FORMAT_FUNCTION(2, 3);
 
 @end
+
+NS_ASSUME_NONNULL_END
