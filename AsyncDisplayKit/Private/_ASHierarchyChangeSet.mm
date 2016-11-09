@@ -730,9 +730,11 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 + (void)ensureItemChanges:(NSArray<_ASHierarchyItemChange *> *)changes ofSameType:(_ASHierarchyChangeType)changeType
 {
+#if ASDISPLAYNODE_ASSERTIONS_ENABLED
   for (_ASHierarchyItemChange *change in changes) {
     NSAssert(change.changeType == changeType, @"The map we created must all be of the same changeType as of now");
   }
+#endif
 }
 
 - (_ASHierarchyItemChange *)changeByFinalizingType
