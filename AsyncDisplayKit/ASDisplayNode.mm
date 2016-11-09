@@ -41,10 +41,6 @@
   #define AS_DEDUPE_LAYOUT_SPEC_TREE 1
 #endif
 
-//#import "ASLayoutSpec+Debug.h" // FIXME: remove later
-#import "ASAbsoluteLayoutSpec.h" // FIXME: remove later
-
-
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
 NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp";
@@ -2526,25 +2522,22 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   __ASDisplayNodeCheckForLayoutMethodOverrides;
   
-  ASLayoutSpec *layoutSpec = _shouldCacheLayoutSpec ? _layoutSpec : nil;
-
-  if (layoutSpec == nil) {
-    BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
-    if (_layoutSpecBlock != NULL) {
-      layoutSpec = ({
-        ASDN::MutexLocker l(__instanceLock__);
-        ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-        _layoutSpecBlock(self, constrainedSize);
-      });
-    } else {
-      layoutSpec = ({
-        ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-        [self layoutSpecThatFits:constrainedSize];
-      });
-    }
-  }
+  BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
   
-  return layoutSpec;
+  if (_shouldCacheLayoutSpec && _layoutSpec != nil) {
+    return _layoutSpec;
+  } else if (_layoutSpecBlock != NULL) {
+    return ({
+      ASDN::MutexLocker l(__instanceLock__);
+      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+      _layoutSpecBlock(self, constrainedSize);
+    });
+  } else {
+    return ({
+      ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
+      [self layoutSpecThatFits:constrainedSize];
+    });
+  }
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
@@ -3783,12 +3776,6 @@ ASLayoutElementStyleForwarding
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _shouldCacheLayoutSpec;
-}
-
-- (void)clearCachedLayoutSpec
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _layoutSpec = nil;
 }
 
 @end

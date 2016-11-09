@@ -77,15 +77,12 @@
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   if (indexPath.section == 0) {
-    
     NSDictionary *attributes = @{NSForegroundColorAttributeName : [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1],
                                  NSFontAttributeName : [UIFont fontWithName:@"Menlo-Regular" size:12]};
     ASTextCellNode *textCell = [[ASTextCellNode alloc] initWithAttributes:attributes insets:UIEdgeInsetsMake(0, 4, 0, 0)];
     textCell.text = [_layoutElementToEdit description];
     return textCell;
-    
   } else {
-    
     return [[ASLayoutElementInspectorCell alloc] initWithProperty:(ASLayoutElementPropertyType)indexPath.row layoutElementToEdit:_layoutElementToEdit];
   }
 }
@@ -121,7 +118,6 @@
   
   return headerTitle;
 }
-
 
 //- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 //{
@@ -373,6 +369,11 @@
 //  
 //  [self updateInspectorWithLayoutable];
 //}
+//- (void)setFlexBasisValue:(ASButtonNode *)sender
+//{
+//  [sender setSelected:!sender.isSelected];   // FIXME: fix ASControlNode documentation that this is automatic - unlike highlighted, it is up to the application to decide when a button should be selected or not. Selected is a more persistant thing and highlighted is for the moment, like as a user has a finger on it,
+//   FIXME: finish
+//}
 //
 //- (void)setVizNodeInsets:(ASButtonNode *)sender
 //{
@@ -401,107 +402,5 @@
 //
 //  sender.selected = newState;
 //}
-
-
-
-//
-//- (void)setFlexBasisValue:(ASButtonNode *)sender
-//{
-//  [sender setSelected:!sender.isSelected];   // FIXME: fix ASControlNode documentation that this is automatic - unlike highlighted, it is up to the application to decide when a button should be selected or not. Selected is a more persistant thing and highlighted is for the moment, like as a user has a finger on it,
-//
-//  // FIXME: finish
-//}
-
-#pragma mark - cast layoutElementToEdit
-
-//- (ASDisplayNode *)node                                                         // FIXME: move to ASLayoutSpec? or make a category?
-//{
-//  if ([self.layoutElementToEdit isKindOfClass:[ASDisplayNode class]]) {
-//    return (ASDisplayNode *)self.layoutElementToEdit;
-//  }
-//  return nil;
-//}
-//
-//- (ASLayoutSpec *)layoutSpec
-//{
-//  if ([self.layoutElementToEdit isKindOfClass:[ASLayoutSpec class]]) {
-//    return (ASLayoutSpec *)self.layoutElementToEdit;
-//  }
-//  return nil;
-//}
-
-#pragma mark - helper methods
-
-//- (NSAttributedString *)attributedStringFromLayoutable:(id<ASLayoutElement>)layoutable   // FIXME: move to Utilities.h
-//{
-//  if ([self layoutSpec]) {
-//    return [self attributedStringFromString:[[self layoutSpec] description]];
-//  } else if ([self node]) {
-//    return [self attributedStringFromString:[[self node] description]];
-//  }
-//  return nil;
-//}
-//
-- (NSAttributedString *)attributedStringFromString:(NSString *)string
-{
-  return [self attributedStringFromString:string withTextColor:[UIColor whiteColor]];
-}
-
-- (NSAttributedString *)attributedStringFromString:(NSString *)string withTextColor:(nullable UIColor *)color
-{
-  NSDictionary *attributes = @{NSForegroundColorAttributeName : color,
-                               NSFontAttributeName : [UIFont fontWithName:@"Menlo-Regular" size:12]};
-  
-  return [[NSAttributedString alloc] initWithString:string attributes:attributes];
-}
-
-//- (ASButtonNode *)makeBtnNodeWithTitle:(NSString *)title
-//{
-//  UIColor *orangeColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
-//  UIImage *orangeStretchBtnImg = [ASLayoutElementInspectorNode imageForButtonWithBackgroundColor:orangeColor
-//                                                                                  borderColor:[UIColor whiteColor]
-//                                                                                  borderWidth:3];
-//  UIImage *greyStretchBtnImg = [ASLayoutElementInspectorNode imageForButtonWithBackgroundColor:[UIColor darkGrayColor]
-//                                                                                borderColor:[UIColor lightGrayColor]
-//                                                                                borderWidth:3];
-//  UIImage *clearStretchBtnImg = [ASLayoutElementInspectorNode imageForButtonWithBackgroundColor:[UIColor clearColor]
-//                                                                                 borderColor:[UIColor whiteColor]
-//                                                                                 borderWidth:3];
-//  ASButtonNode *btn = [[ASButtonNode alloc] init];
-//  btn.contentEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
-//  [btn setAttributedTitle:[self attributedStringFromString:title] forState:ASControlStateNormal];
-//  [btn setAttributedTitle:[self attributedStringFromString:title withTextColor:[UIColor lightGrayColor]] forState:ASControlStateDisabled];
-//  [btn setBackgroundImage:clearStretchBtnImg forState:ASControlStateNormal];
-//  [btn setBackgroundImage:orangeStretchBtnImg forState:ASControlStateSelected];
-//  [btn setBackgroundImage:greyStretchBtnImg forState:ASControlStateDisabled];
-//  
-//  return btn;
-//}
-//
-//#define CORNER_RADIUS 3
-//+ (UIImage *)imageForButtonWithBackgroundColor:(UIColor *)backgroundColor borderColor:(UIColor *)borderColor borderWidth:(CGFloat)width
-//{
-//  CGSize unstretchedSize  = CGSizeMake(2 * CORNER_RADIUS + 1, 2 * CORNER_RADIUS + 1);
-//  CGRect rect             = (CGRect) {CGPointZero, unstretchedSize};
-//  UIBezierPath *path      = [UIBezierPath bezierPathWithRoundedRect:rect cornerRadius:CORNER_RADIUS];
-//  
-//  // create a graphics context for the following status button
-//  UIGraphicsBeginImageContextWithOptions(unstretchedSize, NO, 0);
-//  
-//  [path addClip];
-//  [backgroundColor setFill];
-//  [path fill];
-//  
-//  path.lineWidth = width;
-//  [borderColor setStroke];
-//  [path stroke];
-//  
-//  UIImage *btnImage = UIGraphicsGetImageFromCurrentImageContext();
-//  UIGraphicsEndImageContext();
-//  
-//  return [btnImage stretchableImageWithLeftCapWidth:CORNER_RADIUS topCapHeight:CORNER_RADIUS];
-//}
-
-
 
 @end

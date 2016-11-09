@@ -21,8 +21,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL shouldVisualizeLayoutSpecs;
 @property (nonatomic, assign) BOOL shouldCacheLayoutSpec;
 
-- (void)clearCachedLayoutSpec;
-
 @end
 
 @interface ASImageNode (Debugging)

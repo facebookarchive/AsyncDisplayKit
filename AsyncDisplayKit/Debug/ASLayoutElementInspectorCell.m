@@ -293,13 +293,11 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
   [self setNeedsLayout];
 }
 
-
-
 #pragma mark - cast layoutElementToEdit
 
 - (ASDisplayNode *)node
 {
-  if ([_layoutElementToEdit isKindOfClass:[ASDisplayNode class]]) {
+  if (_layoutElementToEdit.layoutElementType == ASLayoutElementTypeDisplayNode) {
     return (ASDisplayNode *)_layoutElementToEdit;
   }
   return nil;
@@ -307,7 +305,7 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
 
 - (ASLayoutSpec *)layoutSpec
 {
-  if ([_layoutElementToEdit isKindOfClass:[ASLayoutSpec class]]) {
+  if (_layoutElementToEdit.layoutElementType == ASLayoutElementTypeLayoutSpec) {
     return (ASLayoutSpec *)_layoutElementToEdit;
   }
   return nil;
@@ -501,8 +499,8 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
 
 - (instancetype)initWithSliderMinValue:(CGFloat)min maxValue:(CGFloat)max currentValue:(CGFloat)current
 {
-  self = [super init];
-  if (self) {
+  if (self = [super init]) {
+    self.userInteractionEnabled = YES;
     self.automaticallyManagesSubnodes = YES;
     self.backgroundColor = [UIColor colorWithRed:255/255.0 green:181/255.0 blue:68/255.0 alpha:1];
     
@@ -517,8 +515,6 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
       return slider;
     }];
     _slider.userInteractionEnabled = YES;
-    self.userInteractionEnabled = YES;
-//    [self addSubnode:_slider];
   }
   return self;
 }

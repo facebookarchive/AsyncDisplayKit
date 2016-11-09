@@ -42,7 +42,7 @@
 //  insetSpec.style.flexShrink = _layoutSpec.style.flexShrink;
 //  insetSpec.alignSelf  = _layoutSpec.alignSelf;
   
-  NSLog(@"%@: vizNode = %f, child = %f", self, insetSpec.style.flexGrow, _layoutSpec.style.flexGrow);
+//  NSLog(@"%@: vizNode = %f, child = %f", self, insetSpec.style.flexGrow, _layoutSpec.style.flexGrow);
   
   return insetSpec;
 }
@@ -56,7 +56,6 @@
     
   } else if ([layoutSpec isKindOfClass:[ASStackLayoutSpec class]]) {
     self.borderColor = [[UIColor greenColor] CGColor];
-
   }
 }
 

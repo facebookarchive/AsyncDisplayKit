@@ -12,11 +12,6 @@
 #import "ASLayoutSpecPrivate.h"
 #import "ASLayoutSpec+Subclasses.h"
 #import "ASLayoutElementStylePrivate.h"
-
-#import "ASDisplayNode+Subclasses.h" // FIXME: remove this later
-#import "ASDisplayNode+Beta.h"       // FIXME: remove this later
-#import "ASInsetLayoutSpec.h"        // FIXME: remove this later
-#import "ASControlNode.h"            // FIXME: remove this later
 #import "ASLayoutSpec+Debug.h"
 
 #import <objc/runtime.h>
@@ -81,9 +76,9 @@
 {
   NSMutableArray *mutableChildren = [self.children mutableCopy];
   
-  for (id<ASLayoutElement>layoutableChild in self.children) {
-    if ([layoutableChild isKindOfClass:[ASLayoutSpec class]]) {
-      ASLayoutSpec *layoutSpec = (ASLayoutSpec *)layoutableChild;
+  for (id<ASLayoutElement>layoutElement in self.children) {
+    if (layoutElement.layoutElementType == ASLayoutElementTypeLayoutSpec) {
+      ASLayoutSpec *layoutSpec = (ASLayoutSpec *)layoutElement;
       
       [mutableChildren replaceObjectAtIndex:[mutableChildren indexOfObjectIdenticalTo:layoutSpec]
                                  withObject:[[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:layoutSpec]];
@@ -150,7 +145,7 @@
   ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
  
   if (child) {
-    if ([child isKindOfClass:[ASLayoutSpec class]]) {
+    if (child.layoutElementType == ASLayoutElementTypeLayoutSpec) {
       [(ASLayoutSpec *)child setShouldVisualize:self.shouldVisualize];
     }
     id<ASLayoutElement> finalLayoutElement = [self layoutElementToAddFromLayoutElement:child];
@@ -183,9 +178,8 @@
   for (id<ASLayoutElement> child in children) {
     ASDisplayNodeAssert([child conformsToProtocol:NSProtocolFromString(@"ASLayoutElement")], @"Child %@ of spec %@ is not an ASLayoutElement!", child, self);
     id <ASLayoutElement> finalLayoutElement = [self layoutElementToAddFromLayoutElement:child];
-    if ([finalLayoutElement isKindOfClass:[ASLayoutSpec class]]) {
+    if (finalLayoutElement.layoutElementType == ASLayoutElementTypeLayoutSpec) {
       [(ASLayoutSpec *)finalLayoutElement setShouldVisualize:self.shouldVisualize];
-      //      NSLog(@"%@ %@ %d", self, child, self.shouldVisualize);
     }
     _childrenArray[i] = finalLayoutElement;
     i += 1;
