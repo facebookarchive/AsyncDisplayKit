@@ -88,9 +88,9 @@
 {
   ASTextNode *textNode = [[ASTextNode alloc] init];
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
   // Set exclusion paths to trigger slow path
   textNode.exclusionPaths = @[ [UIBezierPath bezierPath] ];
+  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
   ASSnapshotVerifyNode(textNode, nil);
 }
 
