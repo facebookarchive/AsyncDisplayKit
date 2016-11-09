@@ -205,12 +205,15 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (BOOL)canUseFastPath
 {
-  return self.isScaled == NO
-    && self.usesCustomTruncation == NO
-    && self.usesExclusionPaths == NO
-    // NSAttributedString drawing methods ignore usesLineFragmentOrigin if max line count 1,
-    // rendering them useless:
-    && (_attributes.maximumNumberOfLines != 1 || isinf(_constrainedSize.width));
+  return NO;
+//  Fast path is temporarily disabled, because it's crashing in production.
+//  NOTE: Remember to re-enable testFastPathTruncation when we re-enable this.
+//  return self.isScaled == NO
+//    && self.usesCustomTruncation == NO
+//    && self.usesExclusionPaths == NO
+//    // NSAttributedString drawing methods ignore usesLineFragmentOrigin if max line count 1,
+//    // rendering them useless:
+//    && (_attributes.maximumNumberOfLines != 1 || isinf(_constrainedSize.width));
 }
 
 #pragma mark - Drawing
