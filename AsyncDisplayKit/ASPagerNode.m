@@ -14,6 +14,8 @@
 #import "ASDelegateProxy.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASPagerFlowLayout.h"
+#import "ASAssert.h"
+#import "ASCellNode.h"
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
@@ -23,6 +25,7 @@
   ASPagerNodeProxy *_proxyDataSource;
   struct {
     unsigned nodeBlockAtIndex:1;
+    unsigned nodeAtIndex:1;
   } _pagerDataSourceFlags;
 
   __weak id <ASPagerDelegate> _pagerDelegate;
@@ -126,12 +129,17 @@
 
 - (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayNodeAssert(_pagerDataSource != nil, @"ASPagerNode must have a data source to load nodes to display");
-  if (_pagerDataSourceFlags.nodeBlockAtIndex == NO) {
+  if (_pagerDataSourceFlags.nodeBlockAtIndex) {
+    return [_pagerDataSource pagerNode:self nodeBlockAtIndex:indexPath.item];
+  } else if (_pagerDataSourceFlags.nodeAtIndex) {
     ASCellNode *node = [_pagerDataSource pagerNode:self nodeAtIndex:indexPath.item];
     return ^{ return node; };
+  } else {
+    ASDisplayNodeFailAssert(@"Pager data source must implement either %@ or %@. Data source: %@", NSStringFromSelector(@selector(pagerNode:nodeBlockAtIndex:)), NSStringFromSelector(@selector(pagerNode:nodeAtIndex:)), _pagerDataSource);
+    return ^{
+      return [[ASCellNode alloc] init];
+    };
   }
-  return [_pagerDataSource pagerNode:self nodeBlockAtIndex:indexPath.item];
 }
 
 - (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
@@ -167,8 +175,7 @@
       memset(&_pagerDataSourceFlags, 0, sizeof(_pagerDataSourceFlags));
     } else {
       _pagerDataSourceFlags.nodeBlockAtIndex = [_pagerDataSource respondsToSelector:@selector(pagerNode:nodeBlockAtIndex:)];
-      // Data source must implement pagerNode:nodeBlockAtIndex: or pagerNode:nodeAtIndex:
-      ASDisplayNodeAssertTrue(_pagerDataSourceFlags.nodeBlockAtIndex || [_pagerDataSource respondsToSelector:@selector(pagerNode:nodeAtIndex:)]);
+      _pagerDataSourceFlags.nodeAtIndex = [_pagerDataSource respondsToSelector:@selector(pagerNode:nodeAtIndex:)];
     }
     
     _proxyDataSource = dataSource ? [[ASPagerNodeProxy alloc] initWithTarget:dataSource interceptor:self] : nil;
