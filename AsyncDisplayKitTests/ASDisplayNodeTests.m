@@ -2159,7 +2159,9 @@ static bool stringContainsPointer(NSString *description, id p) {
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
   node.automaticallyManagesSubnodes = YES;
   ASDisplayNode *underlay = [[ASDisplayNode alloc] init];
+  underlay.debugName = @"underlay";
   ASDisplayNode *overlay = [[ASDisplayNode alloc] init];
+  overlay.debugName = @"overlay";
   node.layoutSpecBlock = ^(ASDisplayNode *node, ASSizeRange size) {
     // The inset spec here is crucial. If the nodes themselves are children, it passed before the fix.
     return [ASOverlayLayoutSpec overlayLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:underlay] overlay:overlay];
@@ -2176,7 +2178,9 @@ static bool stringContainsPointer(NSString *description, id p) {
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
   node.automaticallyManagesSubnodes = YES;
   ASDisplayNode *underlay = [[ASDisplayNode alloc] init];
+  underlay.debugName = @"underlay";
   ASDisplayNode *overlay = [[ASDisplayNode alloc] init];
+  overlay.debugName = @"overlay";
   node.layoutSpecBlock = ^(ASDisplayNode *node, ASSizeRange size) {
     // The inset spec here is crucial. If the nodes themselves are children, it passed before the fix.
     return [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:overlay background:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:underlay]];

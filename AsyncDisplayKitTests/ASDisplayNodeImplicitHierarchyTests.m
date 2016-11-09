@@ -89,11 +89,11 @@
     return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[stack1, stack2, node5]];
   };
   [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
-  XCTAssertEqual(node.subnodes[0], node5);
-  XCTAssertEqual(node.subnodes[1], node1);
-  XCTAssertEqual(node.subnodes[2], node2);
-  XCTAssertEqual(node.subnodes[3], node3);
-  XCTAssertEqual(node.subnodes[4], node4);
+  XCTAssertEqual(node.subnodes[0], node1);
+  XCTAssertEqual(node.subnodes[1], node2);
+  XCTAssertEqual(node.subnodes[2], node3);
+  XCTAssertEqual(node.subnodes[3], node4);
+  XCTAssertEqual(node.subnodes[4], node5);
 }
 
 - (void)testCalculatedLayoutHierarchyTransitions

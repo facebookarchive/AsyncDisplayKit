@@ -148,13 +148,13 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     CGPoint absolutePosition;
   };
   
-  // Queue used to keep track of sublayouts while traversing this layout in a BFS fashion.
-  std::queue<Context> queue;
-  queue.push({self, CGPointMake(0, 0)});
+  // Queue used to keep track of sublayouts while traversing this layout in a DFS fashion.
+  std::deque<Context> queue;
+  queue.push_front({self, CGPointZero});
   
   while (!queue.empty()) {
     Context context = queue.front();
-    queue.pop();
+    queue.pop_front();
 
     if (self != context.layout && context.layout.type == ASLayoutElementTypeDisplayNode) {
       ASLayout *layout = [ASLayout layoutWithLayout:context.layout position:context.absolutePosition];
@@ -162,11 +162,13 @@ static inline NSString * descriptionIndents(NSUInteger indents)
       [flattenedSublayouts addObject:layout];
     }
     
+    std::vector<Context> sublayoutContexts;
     for (ASLayout *sublayout in context.layout.sublayouts) {
       if (sublayout.isFlattened == NO) {
-        queue.push({sublayout, context.absolutePosition + sublayout.position});
+        sublayoutContexts.push_back({sublayout, context.absolutePosition + sublayout.position});
       }
     }
+    queue.insert(queue.cbegin(), sublayoutContexts.begin(), sublayoutContexts.end());
   }
 
   return [ASLayout layoutWithLayoutElement:_layoutElement size:_size sublayouts:flattenedSublayouts];
