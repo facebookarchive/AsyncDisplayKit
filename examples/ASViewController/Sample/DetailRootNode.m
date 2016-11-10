@@ -38,20 +38,20 @@ static const NSInteger kImageHeight = 200;
 - (instancetype)initWithImageCategory:(NSString *)imageCategory
 {
     self = [super init];
-    if (self == nil) { return self; }
-    
-    _imageCategory = imageCategory;
+    if (self) {
+        // Enable automaticallyManagesSubnodes so the first time the layout pass of the node is happening all nodes that are referenced
+        // in the laaout specification within layoutSpecThatFits: will be added automatically
+        self.automaticallyManagesSubnodes = YES;
+        
+        _imageCategory = imageCategory;
 
-    // Create ASCollectionView. We don't have to add it explicitly as subnode as we will set usesImplicitHierarchyManagement to YES
-    UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-    _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
-    _collectionNode.delegate = self;
-    _collectionNode.dataSource = self;
-    _collectionNode.backgroundColor = [UIColor whiteColor];
-    
-    // Enable usesImplicitHierarchyManagement so the first time the layout pass of the node is happening all nodes that are referenced
-    // in layouts within layoutSpecThatFits: will be added automatically
-    self.automaticallyManagesSubnodes = YES;
+        // Create ASCollectionView. We don't have to add it explicitly as subnode as we will set usesImplicitHierarchyManagement to YES
+        UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+        _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
+        _collectionNode.delegate = self;
+        _collectionNode.dataSource = self;
+        _collectionNode.backgroundColor = [UIColor whiteColor];
+    }
     
     return self;
 }
@@ -66,9 +66,7 @@ static const NSInteger kImageHeight = 200;
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    self.collectionNode.position = CGPointZero;
-    self.collectionNode.style.preferredSize = constrainedSize.max;
-    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[self.collectionNode]];
+    return [ASWrapperLayoutSpec wrapperWithLayoutElement:self.collectionNode];
 }
 
 #pragma mark - ASCollectionDataSource

@@ -221,7 +221,7 @@ ASVisibilityDepthImplementation;
 {
   if (AS_AT_LEAST_IOS9) {
     CGSize viewSize = self.view.bounds.size;
-    return ASSizeRangeMake(viewSize, viewSize);
+    return ASSizeRangeMake(viewSize);
   } else {
     return [self _legacyConstrainedSize];
   }
