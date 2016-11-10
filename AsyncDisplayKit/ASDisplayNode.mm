@@ -1392,18 +1392,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDisplayNodeAssertThreadAffinity(self);
   
-  __instanceLock__.lock();
+  /*__instanceLock__.lock();
   
   if (_calculatedDisplayNodeLayout->layout == nil) {
     // Can't proceed without a layout as no constrained size would be available. If not layout exists at this moment
     // no measurement pass did happen just bail out for now
     __instanceLock__.unlock();
     return;
-  }
+  }*/
     
   [self invalidateCalculatedLayout];
   
-  if (_supernode) {
+  /*if (_supernode) {
     ASDisplayNode *supernode = _supernode;
     __instanceLock__.unlock();
     // Cause supernode's layout to be invalidated
@@ -1413,9 +1413,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   // This is the root node. Trigger a full measurement pass on *current* thread. Old constrained size is re-used.
-  [self layoutThatFits:_calculatedDisplayNodeLayout->constrainedSize];
+  [self layoutThatFits:_calculatedDisplayNodeLayout->constrainedSize];*/
   
-  CGRect oldBounds = self.bounds;
+  /*CGRect oldBounds = self.bounds;
   CGSize oldSize = oldBounds.size;
   CGSize newSize = _calculatedDisplayNodeLayout->layout.size;
   
@@ -1429,9 +1429,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     CGFloat xDelta = (newSize.width - oldSize.width) * anchorPoint.x;
     CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
     self.position = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
-  }
+  }*/
   
-  __instanceLock__.unlock();
+  //__instanceLock__.unlock();
 }
 
 - (void)__setNeedsDisplay
@@ -1495,11 +1495,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   // If no measure pass happened or the bounds changed between layout passes we manually trigger a measurement pass
   // for the node using a size range equal to whatever bounds were provided to the node
-  if (supportsRangeManagedInterfaceState == NO && (hasDirtyLayout || CGSizeEqualToSize(calculatedLayoutSize, bounds.size) == NO)) {
+  if (hasDirtyLayout) {
     if (CGRectEqualToRect(bounds, CGRectZero)) {
       LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     } else {
-      [self layoutThatFits:ASSizeRangeMake(bounds.size)];
+      if (CGSizeEqualToSize(calculatedLayoutSize, bounds.size) == NO) {
+        [self layoutThatFits:ASSizeRangeMake(bounds.size)];
+      } else {
+        [self layoutThatFits:_calculatedDisplayNodeLayout->constrainedSize];
+      }
     }
   }
 }
@@ -3039,9 +3043,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDisplayNodeAssertMainThread();
 
-  if (_calculatedDisplayNodeLayout->isDirty()) {
+  /*if (_calculatedDisplayNodeLayout->isDirty()) {
     return;
-  }
+  }*/
   
   [self __layoutSublayouts];
 }

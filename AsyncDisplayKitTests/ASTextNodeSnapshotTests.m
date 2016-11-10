@@ -25,8 +25,8 @@
   ASTextNode *textNode = [[ASTextNode alloc] init];
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"judar"
                                                             attributes:@{NSFontAttributeName : [UIFont italicSystemFontOfSize:24]}];
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
   textNode.textContainerInset = UIEdgeInsetsMake(0, 2, 0, 2);
+  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
   
   ASSnapshotVerifyNode(textNode, nil);
 }
@@ -40,9 +40,9 @@
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"judar judar judar judar judar judar"
                                                             attributes:@{ NSFontAttributeName : [UIFont systemFontOfSize:30] }];
   
+  textNode.textContainerInset = UIEdgeInsetsMake(10, 10, 10, 10);
   [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 80))];
   textNode.frame = CGRectMake(50, 50, textNode.calculatedSize.width, textNode.calculatedSize.height);
-  textNode.textContainerInset = UIEdgeInsetsMake(10, 10, 10, 10);
 
   [backgroundView addSubview:textNode.view];
   backgroundView.frame = UIEdgeInsetsInsetRect(textNode.bounds, UIEdgeInsetsMake(-50, -50, -50, -50));
@@ -62,9 +62,9 @@
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"yolo"
                                                             attributes:@{ NSFontAttributeName : [UIFont systemFontOfSize:30] }];
 
+  textNode.textContainerInset = UIEdgeInsetsMake(5, 10, 10, 5);
   [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
   textNode.frame = CGRectMake(50, 50, textNode.calculatedSize.width, textNode.calculatedSize.height);
-  textNode.textContainerInset = UIEdgeInsetsMake(5, 10, 10, 5);
 
   [backgroundView addSubview:textNode.view];
   backgroundView.frame = UIEdgeInsetsInsetRect(textNode.bounds, UIEdgeInsetsMake(-50, -50, -50, -50));
