@@ -254,6 +254,8 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 /** @name Managing dimensions */
 
+- (CGSize)sizeThatFits:(CGSize)size;
+
 /**
  * @abstract Asks the node to return a layout based on given size range.
  *

@@ -703,6 +703,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Layout
 
+- (CGSize)sizeThatFits:(CGSize)size
+{
+  return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, size)].size;
+}
+
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize
 {
 #pragma clang diagnostic push
@@ -1495,15 +1500,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   // If no measure pass happened or the bounds changed between layout passes we manually trigger a measurement pass
   // for the node using a size range equal to whatever bounds were provided to the node
-  if (hasDirtyLayout) {
-    if (CGRectEqualToRect(bounds, CGRectZero)) {
-      LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
-    } else {
-      if (CGSizeEqualToSize(calculatedLayoutSize, bounds.size) == NO) {
-        [self layoutThatFits:ASSizeRangeMake(bounds.size)];
-      } else {
-        [self layoutThatFits:_calculatedDisplayNodeLayout->constrainedSize];
-      }
+  if (CGRectEqualToRect(bounds, CGRectZero)) {
+    LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
+  } else {
+    if (CGSizeEqualToSize(calculatedLayoutSize, bounds.size) == NO) {
+      [self layoutThatFits:ASSizeRangeMake(bounds.size)];
     }
   }
 }

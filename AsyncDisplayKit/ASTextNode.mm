@@ -237,6 +237,17 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   return [self _rendererWithBounds:self.threadSafeBounds];
 }
 
+- (ASTextKitRenderer *)_rendererWithBoundsSlow:(CGRect)bounds
+{
+  ASDN::MutexLocker l(__instanceLock__);
+
+  CGSize constrainedSize = bounds.size;
+  constrainedSize.width -= (_textContainerInset.left + _textContainerInset.right);
+  constrainedSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
+  return [[ASTextKitRenderer alloc] initWithTextKitAttributes:[self _rendererAttributes]
+                                              constrainedSize:constrainedSize];
+}
+
 - (ASTextKitRenderer *)_rendererWithBounds:(CGRect)bounds
 {
   ASDN::MutexLocker l(__instanceLock__);
@@ -404,7 +415,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   [self setNeedsDisplay];
   
-  CGSize size = [self _renderer].size;
+  CGSize size = [self _rendererWithBoundsSlow:{.size=constrainedSize}].size;
   if (_attributedText.length > 0) {
     self.style.ascender = [[self class] ascenderWithAttributedString:_attributedText];
     self.style.descender = [[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender];
@@ -537,7 +548,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   CGContextTranslateCTM(context, _textContainerInset.left, _textContainerInset.top);
   
-  ASTextKitRenderer *renderer = [self _rendererWithBounds:drawParameterBounds];
+  ASTextKitRenderer *renderer = [self _rendererWithBoundsSlow:drawParameterBounds];
   
   // Fill background
   if (backgroundColor != nil) {
