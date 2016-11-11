@@ -160,6 +160,7 @@ struct ASImageNodeDrawParameters {
   // TODO can this be removed?
   self.contentsScale = ASScreenScale();
   self.contentMode = UIViewContentModeScaleAspectFill;
+  self.needsDisplayOnBoundsChange = YES;
   self.opaque = NO;
   
   // If no backgroundColor is set to the image node and it's a subview of UITableViewCell, UITableView is setting
