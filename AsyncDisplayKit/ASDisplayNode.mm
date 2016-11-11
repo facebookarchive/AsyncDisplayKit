@@ -716,10 +716,20 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 #pragma clang diagnostic pop
 }
 
+- (ASLayout *)cacheLayoutThatFits:(ASSizeRange)constrainedSize
+{
+  return [self cacheLayoutThatFits:constrainedSize parentSize:constrainedSize.max];
+}
+
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
 {
   ASDN::MutexLocker l(__instanceLock__);
+  
+  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
+}
 
+- (ASLayout *)cacheLayoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
+{
   if ([self shouldCalculateLayoutWithConstrainedSize:constrainedSize parentSize:parentSize] == NO) {
     ASDisplayNodeAssertNotNil(_calculatedDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _layout should not be nil! %@", self);
     return _calculatedDisplayNodeLayout->layout ? : [ASLayout layoutWithLayoutElement:self size:{0, 0}];
@@ -1504,7 +1514,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
   } else {
     if (CGSizeEqualToSize(calculatedLayoutSize, bounds.size) == NO) {
-      [self layoutThatFits:ASSizeRangeMake(bounds.size)];
+      [self cacheLayoutThatFits:ASSizeRangeMake(bounds.size)];
     }
   }
 }

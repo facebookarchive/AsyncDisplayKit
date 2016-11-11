@@ -24,12 +24,19 @@
         
         self.automaticallyManagesSubnodes = YES;
         
-        //_subnode = [ASDisplayNode new];
-        //_subnode.backgroundColor = [UIColor redColor];
+        self.backgroundColor = [UIColor greenColor];
         
         _textNode = [ASTextNode new];
         _textNode.backgroundColor = [UIColor blueColor];
-        _textNode.autoresizingMask = UIViewAutoresizingNone;
+        //_textNode.autoresizingMask = UIViewAutoresizingNone;
+        
+        _subnode = [ASDisplayNode new];
+        _subnode.backgroundColor = [UIColor redColor];
+        _subnode.automaticallyManagesSubnodes = YES;
+        _subnode.layoutSpecBlock = ^ASLayoutSpec *(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+            UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
+            return [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_textNode];
+        };
         
         _state = 0;
     }
@@ -61,7 +68,8 @@
     self.textNode.attributedText = [[NSAttributedString alloc] initWithString:text];
     
     // Invalidate the layout for now and bubble it up until the root node to let the size provider know that
-    // that a size change happened
+    // that a size change could have happened
+    // --> Do we even need to invalidate the layout?
     [self setNeedsLayout];
     
     // If someone calls `setNeedsLayout` we have to inform the sizing delegate of the root node to be able
@@ -77,9 +85,14 @@
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
     // Layout description based on state
-    //self.subnode.style.preferredSize = constrainedSize.max;
-    UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
-    return [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_textNode];
+   // UIEdgeInsets insets = UIEdgeInsetsMake(10, 10, 10, 10);
+   // return [ASInsetLayoutSpec insetLayoutSpecWithInsets:insets child:_textNode];
+    
+    //return [ASWrapperLayoutSpec wrapperWithLayoutElement:self.subnode];
+    return [ASCenterLayoutSpec
+            centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY
+            sizingOptions:ASCenterLayoutSpecSizingOptionDefault
+            child:self.subnode];
 }
 
 

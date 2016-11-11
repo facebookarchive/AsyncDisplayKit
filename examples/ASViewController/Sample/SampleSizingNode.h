@@ -8,6 +8,7 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
+// ASDisplayNodeSizingDelegate / ASDisplayNodeSizingHandlers
 @interface ASDisplayNodeSizingDelegate : NSObject
 - (void)displayNodeDidInvalidateSize:(ASDisplayNode *)displayNode;
 @end
