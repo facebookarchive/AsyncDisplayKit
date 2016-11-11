@@ -52,11 +52,13 @@
   NSCharacterSet *truncatableSet = [_avoidTailTruncationSet invertedSet];
   // Start at end of string
   while (YES) {
-    [layoutManager ensureLayoutForBoundingRect:constrainedRect inTextContainer:textContainer];
     NSRange visibleGlyphRange = [layoutManager glyphRangeForBoundingRect:constrainedRect
                                                          inTextContainer:textContainer];
+    if (visibleGlyphRange.length == 0) {
+      return NSNotFound;
+    }
     NSInteger lastVisibleGlyphIndex = (NSMaxRange(visibleGlyphRange) - 1);
-		NSUInteger lastVisibleCharacterIndex = [layoutManager characterIndexForGlyphAtIndex:lastVisibleGlyphIndex];
+    NSInteger lastVisibleCharacterIndex = [layoutManager characterIndexForGlyphAtIndex:lastVisibleGlyphIndex];
 
     if (lastVisibleCharacterIndex == str.length - 1) {
       if (textStorageHasTruncationString) {
@@ -74,15 +76,15 @@
       textStorageHasTruncationString = NO;
     }
 
-    // Find the next un-truncatable character
-    NSUInteger nextTruncatableIndex = [str rangeOfCharacterFromSet:_avoidTailTruncationSet options:NSBackwardsSearch].location;
+    // Find the next visible whitespace character
+    NSUInteger nextTruncatableIndex = [str rangeOfCharacterFromSet:_avoidTailTruncationSet options:NSBackwardsSearch range:NSMakeRange(0, lastVisibleCharacterIndex)].location;
     if (nextTruncatableIndex != NSNotFound) {
-      // Find the next truncatable character before that one, without
-      // crossing into any untruncatable ones
+      // Find the next letter before that one, without
+      // crossing into any whitespace
       nextTruncatableIndex = [str rangeOfCharacterFromSet:truncatableSet options:NSBackwardsSearch range:NSMakeRange(0, nextTruncatableIndex)].location + 1;
     } else {
       // Fall back to just truncating wherever if no untruncatable characters are left (e.g. "Quali…").
-      nextTruncatableIndex = str.length - 1;
+      nextTruncatableIndex = MIN(lastVisibleCharacterIndex, str.length - 1);
     }
 
     // Put the truncation string in and we'll try again.
