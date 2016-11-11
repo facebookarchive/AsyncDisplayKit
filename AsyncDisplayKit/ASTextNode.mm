@@ -242,8 +242,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   ASDN::MutexLocker l(__instanceLock__);
 
   CGSize constrainedSize = bounds.size;
-  constrainedSize.width -= (_textContainerInset.left + _textContainerInset.right);
-  constrainedSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
+  if (_constrainedSize.width == -INFINITY) {
+    constrainedSize.width -= (_textContainerInset.left + _textContainerInset.right);
+    constrainedSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
+  }
   return [[ASTextKitRenderer alloc] initWithTextKitAttributes:[self _rendererAttributes]
                                               constrainedSize:constrainedSize];
 }
