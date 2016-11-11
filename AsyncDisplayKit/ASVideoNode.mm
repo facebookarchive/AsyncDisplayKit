@@ -671,6 +671,19 @@ static NSString * const kRate = @"rate";
   return YES;
 }
 
+- (void)resetToPlaceholder
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  if (_playerNode != nil) {
+    [_playerNode removeFromSupernode];
+    _playerNode = nil;
+  }
+  
+  [_player seekToTime:kCMTimeZero];
+  [self pause];
+}
+
 
 #pragma mark - Playback observers
 
