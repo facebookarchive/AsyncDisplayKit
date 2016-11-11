@@ -40,108 +40,54 @@
 {
   CGRect constrainedRect = (CGRect){ .size = textContainer.size };
 
-  NSRange visibleGlyphRange = [layoutManager glyphRangeForBoundingRect:constrainedRect
-                                                       inTextContainer:textContainer];
-  NSInteger lastVisibleGlyphIndex = (NSMaxRange(visibleGlyphRange) - 1);
+  // Walk backward from the end of the last line, first by word and then by character,
+  // measuring the last line until it fits in the constrained rect.
+  // NOTE: Previously, we would measure the truncation string itself, and subtract
+  // its width from the end of the line. This approach _is unreliable_ because it doesn't
+  // account for kerning. For example, in "y…" the right edge of the y overlaps the ellipsis.
 
-  if (lastVisibleGlyphIndex < 0) {
-    return NSNotFound;
-  }
+  NSMutableString *str = textStorage.mutableString;
 
-  CGRect lastLineRect = [layoutManager lineFragmentRectForGlyphAtIndex:lastVisibleGlyphIndex
-                                                        effectiveRange:NULL];
-  CGRect lastLineUsedRect = [layoutManager lineFragmentUsedRectForGlyphAtIndex:lastVisibleGlyphIndex
-                                                                effectiveRange:NULL];
-  NSParagraphStyle *paragraphStyle = [textStorage attributesAtIndex:[layoutManager characterIndexForGlyphAtIndex:lastVisibleGlyphIndex]
-                                                     effectiveRange:NULL][NSParagraphStyleAttributeName];
-  
-  // We assume LTR so long as the writing direction is not
-  BOOL rtlWritingDirection = paragraphStyle ? paragraphStyle.baseWritingDirection == NSWritingDirectionRightToLeft : NO;
-  // We only want to treat the truncation rect as left-aligned in the case that we are right-aligned and our writing
-  // direction is RTL.
-  BOOL leftAligned = CGRectGetMinX(lastLineRect) == CGRectGetMinX(lastLineUsedRect) || !rtlWritingDirection;
+  BOOL textStorageHasTruncationString = NO;
+  NSCharacterSet *truncatableSet = [_avoidTailTruncationSet invertedSet];
+  // Start at end of string
+  while (YES) {
+    [layoutManager ensureLayoutForBoundingRect:constrainedRect inTextContainer:textContainer];
+    NSRange visibleGlyphRange = [layoutManager glyphRangeForBoundingRect:constrainedRect
+                                                         inTextContainer:textContainer];
+    NSInteger lastVisibleGlyphIndex = (NSMaxRange(visibleGlyphRange) - 1);
+		NSUInteger lastVisibleCharacterIndex = [layoutManager characterIndexForGlyphAtIndex:lastVisibleGlyphIndex];
 
-  // Calculate the bounding rectangle for the truncation message
-  ASTextKitContext *truncationContext = [[ASTextKitContext alloc] initWithAttributedString:_truncationAttributedString
-                                                                             lineBreakMode:NSLineBreakByWordWrapping
-                                                                      maximumNumberOfLines:1
-                                                                            exclusionPaths:nil
-                                                                           constrainedSize:constrainedRect.size];
-  __block CGRect truncationUsedRect;
+    if (lastVisibleCharacterIndex == str.length - 1) {
+      if (textStorageHasTruncationString) {
+        NSUInteger length = str.length;
+        [str deleteCharactersInRange:NSMakeRange(length - _truncationAttributedString.length, _truncationAttributedString.length)];
+        return textStorage.length;
+      } else {
+        return NSNotFound;
+      }
+    }
 
-  [truncationContext performBlockWithLockedTextKitComponents:^(NSLayoutManager *truncationLayoutManager, NSTextStorage *truncationTextStorage, NSTextContainer *truncationTextContainer) {
-    // Size the truncation message
-    [truncationLayoutManager ensureLayoutForTextContainer:truncationTextContainer];
-    NSRange truncationGlyphRange = [truncationLayoutManager glyphRangeForTextContainer:truncationTextContainer];
-    truncationUsedRect = [truncationLayoutManager boundingRectForGlyphRange:truncationGlyphRange
-                                                            inTextContainer:truncationTextContainer];
-  }];
-  CGFloat truncationOriginX = (leftAligned ?
-                               CGRectGetMaxX(constrainedRect) - truncationUsedRect.size.width :
-                               CGRectGetMinX(constrainedRect));
-  CGRect translatedTruncationRect = CGRectMake(truncationOriginX,
-                                               CGRectGetMinY(lastLineRect),
-                                               truncationUsedRect.size.width,
-                                               truncationUsedRect.size.height);
+    if (textStorageHasTruncationString) {
+      NSUInteger length = str.length;
+      [str deleteCharactersInRange:NSMakeRange(length - _truncationAttributedString.length, _truncationAttributedString.length)];
+      textStorageHasTruncationString = NO;
+    }
 
-  // Determine which glyph is the first to be clipped / overlaps the truncation message.
-  CGFloat truncationMessageX = (leftAligned ?
-                                CGRectGetMinX(translatedTruncationRect) :
-                                CGRectGetMaxX(translatedTruncationRect));
-  CGPoint beginningOfTruncationMessage = CGPointMake(truncationMessageX,
-                                                     CGRectGetMidY(translatedTruncationRect));
-  NSUInteger firstClippedGlyphIndex = [layoutManager glyphIndexForPoint:beginningOfTruncationMessage
-                                                        inTextContainer:textContainer
-                                         fractionOfDistanceThroughGlyph:NULL];
-  // If it didn't intersect with any text then it should just return the last visible character index, since the
-  // truncation rect can fully fit on the line without clipping any other text.
-  if (firstClippedGlyphIndex == NSNotFound) {
-    return [layoutManager characterIndexForGlyphAtIndex:lastVisibleGlyphIndex];
-  }
-  NSUInteger firstCharacterIndexToReplace = [layoutManager characterIndexForGlyphAtIndex:firstClippedGlyphIndex];
+    // Find the next un-truncatable character
+    NSUInteger nextTruncatableIndex = [str rangeOfCharacterFromSet:_avoidTailTruncationSet options:NSBackwardsSearch].location;
+    if (nextTruncatableIndex != NSNotFound) {
+      // Find the next truncatable character before that one, without
+      // crossing into any untruncatable ones
+      nextTruncatableIndex = [str rangeOfCharacterFromSet:truncatableSet options:NSBackwardsSearch range:NSMakeRange(0, nextTruncatableIndex)].location + 1;
+    } else {
+      // Fall back to just truncating wherever if no untruncatable characters are left (e.g. "Quali…").
+      nextTruncatableIndex = str.length - 1;
+    }
 
-  // Break on word boundaries
-  return [self _findTruncationInsertionPointAtOrBeforeCharacterIndex:firstCharacterIndexToReplace
-                                                       layoutManager:layoutManager
-                                                         textStorage:textStorage];
-}
-
-/**
- Finds the first whitespace at or before the character index do we don't truncate in the middle of words
- If there are multiple whitespaces together (say a space and a newline), this will backtrack to the first one
- */
-- (NSUInteger)_findTruncationInsertionPointAtOrBeforeCharacterIndex:(NSUInteger)firstCharacterIndexToReplace
-                                                      layoutManager:(NSLayoutManager *)layoutManager
-                                                        textStorage:(NSTextStorage *)textStorage
-{
-  // Don't attempt to truncate beyond the end of the string
-  if (firstCharacterIndexToReplace >= textStorage.length) {
-    return 0;
-  }
-
-  // Find the glyph range of the line fragment containing the first character to replace.
-  NSRange lineGlyphRange;
-  [layoutManager lineFragmentRectForGlyphAtIndex:[layoutManager glyphIndexForCharacterAtIndex:firstCharacterIndexToReplace]
-                                  effectiveRange:&lineGlyphRange];
-
-  // Look for the first whitespace from the end of the line, starting from the truncation point
-  NSUInteger startingSearchIndex = [layoutManager characterIndexForGlyphAtIndex:lineGlyphRange.location];
-  NSUInteger endingSearchIndex = firstCharacterIndexToReplace;
-  NSRange rangeToSearch = NSMakeRange(startingSearchIndex, (endingSearchIndex - startingSearchIndex));
-
-  NSRange rangeOfLastVisibleAvoidedChars = { .location = NSNotFound };
-  if (_avoidTailTruncationSet) {
-    rangeOfLastVisibleAvoidedChars = [textStorage.string rangeOfCharacterFromSet:_avoidTailTruncationSet
-                                                                         options:NSBackwardsSearch
-                                                                           range:rangeToSearch];
-  }
-
-  // Couldn't find a good place to truncate. Might be because there is no whitespace in the text, or we're dealing
-  // with a foreign language encoding. Settle for truncating at the original place, which may be mid-word.
-  if (rangeOfLastVisibleAvoidedChars.location == NSNotFound) {
-    return firstCharacterIndexToReplace;
-  } else {
-    return rangeOfLastVisibleAvoidedChars.location;
+    // Put the truncation string in and we'll try again.
+    [textStorage replaceCharactersInRange:NSMakeRange(nextTruncatableIndex, str.length - nextTruncatableIndex) withAttributedString:_truncationAttributedString];
+    textStorageHasTruncationString = YES;
   }
 }
 
