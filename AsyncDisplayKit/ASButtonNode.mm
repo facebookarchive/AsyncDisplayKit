@@ -172,6 +172,7 @@
   if ((_imageNode != nil || newImage != nil) && newImage != self.imageNode.image) {
     _imageNode.image = newImage;
     [self setNeedsLayout];
+    [self invalidateSize];
   }
 }
 
@@ -195,6 +196,7 @@
     _titleNode.attributedText = newTitle;
     self.accessibilityLabel = _titleNode.accessibilityLabel;
     [self setNeedsLayout];
+    [self invalidateSize];
   }
 }
 
@@ -218,6 +220,7 @@
   if ((_backgroundImageNode != nil || newImage != nil) && newImage != self.backgroundImageNode.image) {
     _backgroundImageNode.image = newImage;
     [self setNeedsLayout];
+    [self invalidateSize];
   }
 }
 
@@ -235,6 +238,7 @@
   
   _contentSpacing = contentSpacing;
   [self setNeedsLayout];
+  [self invalidateSize];
 }
 
 - (BOOL)laysOutHorizontally
@@ -251,6 +255,7 @@
   
   _laysOutHorizontally = laysOutHorizontally;
   [self setNeedsLayout];
+  [self invalidateSize];
 }
 
 - (ASVerticalAlignment)contentVerticalAlignment

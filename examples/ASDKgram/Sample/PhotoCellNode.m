@@ -81,7 +81,7 @@
       // where as local variable will never change
       if (locationModel == _photoModel.location) {
         _photoLocationLabel.attributedText = [photo locationAttributedStringWithFontSize:FONT_SIZE];
-        [self setNeedsLayout];
+        [self invalidateSize];
       }
     }];
     
@@ -224,7 +224,7 @@
   if (photo.commentFeed.numberOfItemsInFeed > 0) {
     [_photoCommentsView updateWithCommentFeedModel:photo.commentFeed];
     
-    [self setNeedsLayout];
+    [self invalidateSize];
   }
 }
 

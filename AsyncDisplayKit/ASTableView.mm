@@ -1509,6 +1509,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 #pragma mark - _ASTableViewCellDelegate
 
+#pragma mark - _ASTableViewCellDelegate
+
 - (void)didLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell
 {
   ASCellNode *node = tableViewCell.node;
@@ -1517,15 +1519,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
   
   CGFloat contentViewWidth = tableViewCell.contentView.bounds.size.width;
-//  ASSizeRange constrainedSize = node.constrainedSizeForCalculatedLayout;
+  ASSizeRange constrainedSize = node.constrainedSizeForCalculatedLayout;
   
   // Table view cells should always fill its content view width.
   // Normally the content view width equals to the constrained size width (which equals to the table view width).
   // If there is a mismatch between these values, for example after the table view entered or left editing mode,
   // content view width is preferred and used to re-measure the cell node.
-  //if (contentViewWidth != constrainedSize.max.width) {
-    //constrainedSize.min.width = contentViewWidth;
-    //constrainedSize.max.width = contentViewWidth;
+  if (contentViewWidth != constrainedSize.max.width) {
+    constrainedSize.min.width = contentViewWidth;
+    constrainedSize.max.width = contentViewWidth;
 
     // Re-measurement is done on main to ensure thread affinity. In the worst case, this is as fast as UIKit's implementation.
     //
@@ -1534,8 +1536,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     // Also, in many cases, some nodes may not need to be re-measured at all, such as when user enters and then immediately leaves editing mode.
     // To avoid premature optimization and making such assumption, as well as to keep ASTableView simple, re-measurement is strictly done on main.
     CGSize oldSize = node.bounds.size;
-    ASSizeRange constrainedSize  = ASSizeRangeMake(CGSizeMake(contentViewWidth, 0.0),
-                                                   CGSizeMake(contentViewWidth, CGFLOAT_MAX));
     const CGSize calculatedSize = [node layoutThatFits:constrainedSize].size;
     node.frame = { .size = calculatedSize };
 
@@ -1544,7 +1544,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
       [self beginUpdates];
       [self endUpdates];
     }
-  //}
+  }
 }
 
 #pragma mark - ASCellNodeDelegate

@@ -339,7 +339,7 @@
 
 - (void)imageNode:(ASNetworkImageNode *)imageNode didLoadImage:(UIImage *)image
 {
-    [self setNeedsLayout];
+    [self invalidateSize];
 }
 
 @end

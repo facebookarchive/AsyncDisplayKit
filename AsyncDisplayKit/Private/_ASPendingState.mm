@@ -24,6 +24,7 @@ typedef struct {
   // Properties
   int needsDisplay:1;
   int needsLayout:1;
+  int layoutIfNeeded:1;
 
   // Flags indicating that a given property should be applied to the view at creation
   int setClipsToBounds:1;
@@ -270,6 +271,11 @@ static BOOL defaultAllowsEdgeAntialiasing = NO;
 - (void)setNeedsLayout
 {
   _flags.needsLayout = YES;
+}
+
+- (void)layoutIfNeeded
+{
+  _flags.layoutIfNeeded = YES;
 }
 
 - (void)setClipsToBounds:(BOOL)flag
@@ -764,6 +770,9 @@ static BOOL defaultAllowsEdgeAntialiasing = NO;
   if (flags.needsLayout)
     [layer setNeedsLayout];
 
+  if (flags.layoutIfNeeded)
+    [layer layoutIfNeeded];
+  
   if (flags.setAsyncTransactionContainer)
     layer.asyncdisplaykit_asyncTransactionContainer = asyncTransactionContainer;
 
@@ -891,6 +900,9 @@ static BOOL defaultAllowsEdgeAntialiasing = NO;
 
   if (flags.needsLayout)
     [view setNeedsLayout];
+  
+  if (flags.layoutIfNeeded)
+    [view layoutIfNeeded];
 
   if (flags.setAsyncTransactionContainer)
     view.asyncdisplaykit_asyncTransactionContainer = asyncTransactionContainer;
@@ -1105,6 +1117,7 @@ static BOOL defaultAllowsEdgeAntialiasing = NO;
   || flags.setEdgeAntialiasingMask
   || flags.needsDisplay
   || flags.needsLayout
+  || flags.layoutIfNeeded
   || flags.setAsyncTransactionContainer
   || flags.setOpaque
   || flags.setIsAccessibilityElement

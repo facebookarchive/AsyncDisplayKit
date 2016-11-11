@@ -21,8 +21,11 @@
 #import "DetailRootNode.h"
 #import "SampleSizingNode.h"
 
-@interface DetailViewController ()
+@interface DetailViewController () <ASDisplayNodeSizingDelegate>
 @property (strong, nonatomic) SampleSizingNode *sizingNode;
+
+@property (strong, nonatomic) ASNetworkImageNode *imageNode;
+@property (strong, nonatomic) ASButtonNode *buttonNode;
 
 @end
 
@@ -35,9 +38,22 @@
     self = [super initWithNode:node];
     
     // Set the sizing delegate of the root node to the container
-    self.sizingNode = [SampleSizingNode new];
-    self.sizingNode.autoresizingMask = UIViewAutoresizingNone;
-    self.sizingNode.delegate = self;
+    _sizingNode = [SampleSizingNode new];
+    _sizingNode.autoresizingMask = UIViewAutoresizingNone;
+    _sizingNode.sizingDelegate = self;
+    
+    _imageNode = [ASNetworkImageNode new];
+    _imageNode.needsDisplayOnBoundsChange = YES;
+    _imageNode.backgroundColor = [UIColor brownColor];
+    _imageNode.style.preferredSize = CGSizeMake(100, 100);
+    _imageNode.URL = [NSURL URLWithString:@"http://www.classicwings-bavaria.com/bavarian-pictures/chitty-chitty-bang-bang-castle.jpg"];
+    
+    _buttonNode = [ASButtonNode new];
+    _buttonNode.backgroundColor = [UIColor yellowColor];
+    [_buttonNode setTitle:@"Some Title" withFont:nil withColor:nil forState:ASControlStateNormal];
+    [_buttonNode setTitle:@"Some Bla" withFont:nil withColor:[UIColor orangeColor] forState:ASControlStateHighlighted];
+    [_buttonNode addTarget:self action:@selector(buttonAction:) forControlEvents:ASControlNodeEventTouchUpInside];
+    _buttonNode.sizingDelegate = self;
     
     return self;
 }
@@ -47,6 +63,8 @@
     [super viewDidLoad];
     
     [self.view addSubnode:self.sizingNode];
+    [self.view addSubnode:self.imageNode];
+    [self.view addSubnode:self.buttonNode];
 }
 
 - (void)viewWillAppear:(BOOL)animated
@@ -54,7 +72,18 @@
     [super viewWillAppear:animated];
     
     // Initial size of sizing node
-    self.sizingNode.frame = CGRectMake(100, 100, 50, 50);
+    //self.sizingNode.frame = CGRectMake(100, 100, 50, 50);
+    
+    self.buttonNode.frame = CGRectMake(100, 100, 200, 10);
+    [self displayNodeDidInvalidateSize:self.buttonNode];
+    
+    // Initial size for image node
+//    self.imageNode.frame = CGRectMake(50, 70, 100, 100);
+//    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        self.imageNode.frame = CGRectMake(50, 70, 70, 50);
+//        //[self.imageNode setNeedsLayout];
+//        //[self.imageNode setNeedsDisplay];
+//    });
     
     // Start some timer  to chang ethe size randomly
     [NSTimer scheduledTimerWithTimeInterval:2.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
@@ -66,6 +95,7 @@
 {
     [super viewDidLayoutSubviews];
     
+    // Update the sizing node layout
     [self updateNodeLayout];
 }
 
@@ -75,6 +105,12 @@
 // to get the new size from the display node and update the frame based on the returned size
 - (void)displayNodeDidInvalidateSize:(ASDisplayNode *)displayNode
 {
+    if (displayNode == self.buttonNode) {
+        CGSize s = [self.buttonNode sizeThatFits:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+        self.buttonNode.frame = CGRectMake(100, 100, s.width, s.height);
+        return;
+    }
+    
     [self updateNodeLayout];
     
     /*dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
@@ -118,6 +154,12 @@
 
 }
 
+#pragma mark - 
+
+- (void)buttonAction:(id)sender
+{
+    NSLog(@"Button Sender");
+}
 
 #pragma mark - Rotation
 

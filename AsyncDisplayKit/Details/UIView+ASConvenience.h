@@ -42,6 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)setNeedsDisplay;
 - (void)setNeedsLayout;
+- (void)layoutIfNeeded;
 
 @end
 

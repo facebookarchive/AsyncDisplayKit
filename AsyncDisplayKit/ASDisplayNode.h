@@ -26,6 +26,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class ASDisplayNode;
 
+// TODO: Extract to ASDisplayNode+Layout.h
+// ASDisplayNodeSizingDelegate / ASDisplayNodeSizingHandlers
+@protocol ASDisplayNodeSizingDelegate<NSObject>
+@required
+/**
+ Called after the display node state update happened (layout invlidation) that could lead to a
+ 
+ The delegate can use this callback to appropriately resize the node frame to fit the new
+ node size. The node will not resize itself.
+ */
+- (void)displayNodeDidInvalidateSize:(ASDisplayNode *)displayNode;
+@end
+
 /**
  * UIView creation block. Used to create the backing view of a new display node.
  */
@@ -253,6 +266,9 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 
 /** @name Managing dimensions */
+
+@property (nonatomic, readwrite, weak, nullable) id<ASDisplayNodeSizingDelegate> sizingDelegate;
+- (void)invalidateSize;
 
 - (CGSize)sizeThatFits:(CGSize)size;
 
@@ -647,6 +663,8 @@ extern NSInteger const ASDefaultDrawingPriority;
  * the containing ASTableView / ASCollectionView that the cell should be resized, if necessary.
  */
 - (void)setNeedsLayout;
+
+- (void)layoutIfNeeded;
 
 @property (nonatomic, strong, nullable) id contents;                           // default=nil
 @property (nonatomic, assign)           BOOL clipsToBounds;                    // default==NO

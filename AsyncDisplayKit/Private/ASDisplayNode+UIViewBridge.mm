@@ -354,6 +354,34 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
   }
 }
 
+- (void)layoutIfNeeded
+{
+  _bridge_prologue_write;
+  BOOL shouldApply = ASDisplayNodeShouldApplyBridgedWriteToView(self);
+  if (shouldApply) {
+    // The node is loaded and we're on main.
+    // Quite the opposite of setNeedsDisplay, we must call __layoutIfNeeded before messaging
+    // the view or layer to ensure that measurement and implicitly added subnodes have been handled.
+    
+    // Calling __layoutIfNeeded while holding the property lock can cause deadlocks
+    _bridge_prologue_write_unlock;
+    [self __layoutIfNeeded];
+    _bridge_prologue_write;
+    _messageToViewOrLayer(layoutIfNeeded);
+  } else if (__loaded(self)) {
+    // The node is loaded but we're not on main.
+    // We will call [self __setNeedsLayout] when we apply
+    // the pending state. We need to call it on main if the node is loaded
+    // to support automatic subnode management.
+    [ASDisplayNodeGetPendingState(self) layoutIfNeeded];
+  } else {
+    // The node is not loaded and we're not on main.
+    _bridge_prologue_write_unlock;
+    [self __layoutIfNeeded];
+    _bridge_prologue_write;
+  }
+}
+
 - (BOOL)isOpaque
 {
   _bridge_prologue_read;
