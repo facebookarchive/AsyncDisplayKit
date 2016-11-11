@@ -218,18 +218,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 }
 
-- (void)setFrame:(CGRect)frame
-{
-  [super setFrame:frame];
-  [self _invalidateRendererIfNeededForBoundsSize:frame.size];
-}
-
-- (void)setBounds:(CGRect)bounds
-{
-  [super setBounds:bounds];
-  [self _invalidateRendererIfNeededForBoundsSize:bounds.size];
-}
-
 #pragma mark - Renderer Management
 
 - (ASTextKitRenderer *)_renderer
@@ -274,11 +262,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     .shadowOpacity = _shadowOpacity,
     .shadowRadius = _shadowRadius
   };
-}
-
-- (void)_invalidateRendererIfNeeded
-{
-  [self _invalidateRendererIfNeededForBoundsSize:self.threadSafeBounds.size];
 }
 
 - (void)_invalidateRendererIfNeededForBoundsSize:(CGSize)boundsSize
@@ -339,6 +322,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   // If the size is not the same as the constraint we provided to the renderer, start out assuming we need
   // a new one.  However, there are common cases where the constrained size doesn't need to be the same as calculated.
   CGSize rendererConstrainedSize = _renderer.constrainedSize;
+  CGSize rendererCalculatedSize = _renderer.size;
   
   //inset bounds
   boundsSize.width -= _textContainerInset.left + _textContainerInset.right;
@@ -354,7 +338,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // as this would essentially serve to set its constrainedSize to be its calculatedSize (unnecessary).
     ASLayout *layout = self.calculatedLayout;
     if (layout != nil && CGSizeEqualToSize(boundsSize, layout.size)) {
-      return (boundsSize.width != rendererConstrainedSize.width);
+      return (boundsSize.width != rendererConstrainedSize.width) && (boundsSize.width != rendererCalculatedSize.width);
     } else {
       return YES;
     }
@@ -374,11 +358,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     // Apply textContainerInset
     layoutSize.width -= (_textContainerInset.left + _textContainerInset.right);
     layoutSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
-    
-    if (CGSizeEqualToSize(_constrainedSize, layoutSize) == NO) {
-      _constrainedSize = layoutSize;
-      [self _invalidateRenderer];
-    }
   }
 }
 
@@ -537,6 +516,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   CGContextTranslateCTM(context, _textContainerInset.left, _textContainerInset.top);
   
+  [self _invalidateRendererIfNeededForBoundsSize:drawParameterBounds.size];
   ASTextKitRenderer *renderer = [self _rendererWithBounds:drawParameterBounds];
   
   // Fill background
@@ -545,6 +525,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     UIRectFillUsingBlendMode(CGContextGetClipBoundingBox(context), kCGBlendModeCopy);
   }
   
+  NSLog(@"sizeForDrawing=%@", NSStringFromCGSize(drawParameterBounds.size));
   // Draw text
   [renderer drawInContext:context bounds:drawParameterBounds];
   

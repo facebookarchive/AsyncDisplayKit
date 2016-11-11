@@ -174,6 +174,8 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   [[self context] performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     [layoutManager ensureLayoutForTextContainer:textContainer];
     boundingRect = [layoutManager usedRectForTextContainer:textContainer];
+    boundingRect.size.width = ASCeilPixelValue(boundingRect.size.width);
+    boundingRect.size.height = ASCeilPixelValue(boundingRect.size.height);
     if (isScaled) {
       // put the non-scaled version back
       [scaledTextStorage removeLayoutManager:layoutManager];
