@@ -74,7 +74,6 @@
     // Initial size of sizing node
     //self.sizingNode.frame = CGRectMake(100, 100, 50, 50);
     
-    self.buttonNode.frame = CGRectMake(100, 100, 200, 10);
     [self displayNodeDidInvalidateSize:self.buttonNode];
     
     // Initial size for image node
@@ -95,19 +94,32 @@
 {
     [super viewDidLayoutSubviews];
     
+    [self updateButtonNodeLayout];
+    
     // Update the sizing node layout
     [self updateNodeLayout];
 }
 
 #pragma mark - Update the node based on the new size
 
+- (void)updateButtonNodeLayout
+{
+    [self.buttonNode sizeToFit];
+    self.buttonNode.frame = CGRectMake((self.view.bounds.size.width - self.buttonNode.bounds.size.width) / 2.0,
+                                       100,
+                                       self.buttonNode.bounds.size.width,
+                                       self.buttonNode.bounds.size.height);
+
+    //CGSize s = [self.buttonNode sizeThatFits:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
+    //self.buttonNode.frame = CGRectMake(100, 100, s.width, s.height);
+}
+
 // The sizing delegate will get callbacks if the size did invalidate of the display node. It's the job of the delegate
 // to get the new size from the display node and update the frame based on the returned size
 - (void)displayNodeDidInvalidateSize:(ASDisplayNode *)displayNode
 {
     if (displayNode == self.buttonNode) {
-        CGSize s = [self.buttonNode sizeThatFits:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
-        self.buttonNode.frame = CGRectMake(100, 100, s.width, s.height);
+        [self updateButtonNodeLayout];
         return;
     }
     

@@ -730,6 +730,36 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   __instanceLock__.unlock();
 }
 
+- (void)sizeToFit
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  
+  __instanceLock__.lock();
+  
+  [self setNeedsLayout];
+  
+  CGSize maxSize = _supernode ? _supernode.bounds.size : CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX);
+  CGSize size = [self sizeThatFits:maxSize];
+  
+  CGRect oldBounds = self.bounds;
+  CGSize oldSize = oldBounds.size;
+  CGSize newSize = _calculatedDisplayNodeLayout->layout.size;
+  
+  if (! CGSizeEqualToSize(oldSize, newSize)) {
+    self.bounds = (CGRect){ oldBounds.origin, newSize };
+    
+    // Frame's origin must be preserved. Since it is computed from bounds size, anchorPoint
+    // and position (see frame setter in ASDisplayNode+UIViewBridge), position needs to be adjusted.
+    CGPoint anchorPoint = self.anchorPoint;
+    CGPoint oldPosition = self.position;
+    CGFloat xDelta = (newSize.width - oldSize.width) * anchorPoint.x;
+    CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
+    self.position = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
+  }
+  
+  __instanceLock__.unlock();
+}
+
 - (CGSize)sizeThatFits:(CGSize)size
 {
   return [self layoutThatFits:ASSizeRangeMake(CGSizeZero, size)].size;
