@@ -142,6 +142,7 @@
   [self updateBackgroundImage];
   [self updateImage];
   [self updateTitle];
+  [self invalidateSize];
 }
 
 - (void)setDisplaysAsynchronously:(BOOL)displaysAsynchronously
@@ -172,7 +173,6 @@
   if ((_imageNode != nil || newImage != nil) && newImage != self.imageNode.image) {
     _imageNode.image = newImage;
     [self setNeedsLayout];
-    [self invalidateSize];
   }
 }
 
@@ -196,7 +196,6 @@
     _titleNode.attributedText = newTitle;
     self.accessibilityLabel = _titleNode.accessibilityLabel;
     [self setNeedsLayout];
-    [self invalidateSize];
   }
 }
 
@@ -220,7 +219,6 @@
   if ((_backgroundImageNode != nil || newImage != nil) && newImage != self.backgroundImageNode.image) {
     _backgroundImageNode.image = newImage;
     [self setNeedsLayout];
-    [self invalidateSize];
   }
 }
 
@@ -532,6 +530,7 @@
 - (void)layout
 {
   [super layout];
+
   _backgroundImageNode.hidden = (_backgroundImageNode.image == nil);
   _imageNode.hidden = (_imageNode.image == nil);
   _titleNode.hidden = (_titleNode.attributedText.length == 0);
