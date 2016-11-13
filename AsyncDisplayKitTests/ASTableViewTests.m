@@ -705,6 +705,15 @@
   }
 }
 
+- (void)testThatNilBatchUpdatesCanBeSubmitted
+{
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+  
+  // Passing nil blocks should not crash
+  [node performBatchUpdates:nil completion:nil];
+  [node performBatchAnimated:NO updates:nil completion:nil];
+}
+
 @end
 
 @implementation UITableView (Testing)

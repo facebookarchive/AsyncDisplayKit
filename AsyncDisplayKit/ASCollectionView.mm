@@ -653,7 +653,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASDisplayNodeAssertMainThread();
   
   [_dataController beginUpdates];
-  updates();
+  if (updates) {
+    updates();
+  }
   [_dataController endUpdatesAnimated:animated completion:completion];
 }
 
