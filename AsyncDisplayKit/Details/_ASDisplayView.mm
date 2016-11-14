@@ -202,6 +202,15 @@
 #endif
 }
 
+- (CGSize)sizeThatFits:(CGSize)size
+{
+  ASDisplayNode *node = _asyncdisplaykit_node; // Create strong reference to weak ivar.
+  if (node) {
+    return [node sizeThatFits:size];
+  }
+  return [super sizeThatFits:size];
+}
+
 - (void)setNeedsDisplay
 {
   ASDisplayNodeAssertMainThread();
