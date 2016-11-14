@@ -798,4 +798,14 @@
   XCTAssertNotEqualObjects(oldHeader, newHeader);
 }
 
+- (void)testThatNilBatchUpdatesCanBeSubmitted
+{
+  __block ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  __block ASCollectionNode *cn = testController.collectionNode;
+  
+  // Passing nil blocks should not crash
+  [cn performBatchUpdates:nil completion:nil];
+  [cn performBatchAnimated:NO updates:nil completion:nil];
+}
+
 @end

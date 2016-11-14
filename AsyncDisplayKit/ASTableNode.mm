@@ -521,7 +521,9 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
   [self.view beginUpdates];
-  updates();
+  if (updates) {
+    updates();
+  }
   [self.view endUpdatesAnimated:animated completion:completion];
 }
 
