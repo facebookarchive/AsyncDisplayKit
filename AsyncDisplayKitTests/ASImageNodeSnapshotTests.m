@@ -30,7 +30,7 @@
   // trivial test case to ensure ASSnapshotTestCase works
   ASImageNode *imageNode = [[ASImageNode alloc] init];
   imageNode.image = [self testImage];
-  [imageNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))];
+  ASDisplayNodeSizeToFitSize(imageNode, CGSizeMake(100, 100));
 
   ASSnapshotVerifyNode(imageNode, nil);
 }
@@ -46,12 +46,14 @@
   // Snapshot testing requires that node is formally laid out.
   imageNode.style.width = ASDimensionMake(forcedImageSize.width);
   imageNode.style.height = ASDimensionMake(forcedImageSize.height);
-  [imageNode layoutThatFits:ASSizeRangeMake(CGSizeZero, forcedImageSize)];
+  ASDisplayNodeSizeToFitSize(imageNode, forcedImageSize);
+  [imageNode layoutIfNeeded];
   ASSnapshotVerifyNode(imageNode, @"first");
   
   imageNode.style.width = ASDimensionMake(200);
   imageNode.style.height = ASDimensionMake(200);
-  [imageNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(200, 200))];
+  ASDisplayNodeSizeToFitSize(imageNode, CGSizeMake(200, 200));
+  [imageNode layoutIfNeeded];
   
   ASSnapshotVerifyNode(imageNode, @"second");
   
@@ -66,7 +68,7 @@
   UIImage *tinted = ASImageNodeTintColorModificationBlock([UIColor redColor])(test);
   ASImageNode *node = [[ASImageNode alloc] init];
   node.image = tinted;
-  [node layoutThatFits:ASSizeRangeMake(test.size)];
+  ASDisplayNodeSizeToFitSize(node, test.size);
   
   ASSnapshotVerifyNode(node, nil);
 }
@@ -81,7 +83,7 @@
   UIImage *rounded = ASImageNodeRoundBorderModificationBlock(2, [UIColor redColor])(result);
   ASImageNode *node = [[ASImageNode alloc] init];
   node.image = rounded;
-  [node layoutThatFits:ASSizeRangeMake(rounded.size)];
+  ASDisplayNodeSizeToFitSize(node, rounded.size);
   
   ASSnapshotVerifyNode(node, nil);
 }

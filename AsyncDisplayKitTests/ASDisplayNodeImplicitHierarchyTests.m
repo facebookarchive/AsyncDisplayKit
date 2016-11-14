@@ -12,6 +12,7 @@
 
 #import <XCTest/XCTest.h>
 
+#import "ASDisplayNodeTestsHelper.h"
 #import "ASDisplayNode.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASDisplayNode+Subclasses.h"
@@ -88,7 +89,10 @@
     
     return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[stack1, stack2, node5]];
   };
-  [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+  
+  ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
+  [node layoutIfNeeded];
+
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
   XCTAssertEqual(node.subnodes[2], node3);
@@ -122,13 +126,14 @@
     }
   };
   
-  [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+  ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
+  [node layoutIfNeeded];
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
   
   node.layoutState = @2;
-  [node invalidateCalculatedLayout];
-  [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+  ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
+  [node layoutIfNeeded];
 
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node3);
@@ -170,10 +175,12 @@
 
 - (void)testMeasurementInBackgroundThreadWithLoadedNode
 {
+  const CGSize kNodeSize = CGSizeMake(100, 100);
   ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
   ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+  node.style.preferredSize = kNodeSize;
   node.automaticallyManagesSubnodes = YES;
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
@@ -191,17 +198,34 @@
   
   dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     
-    [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
-    XCTAssertEqual(node.subnodes[0], node1);
-    
-    node.layoutState = @2;
-    [node invalidateCalculatedLayout];
-    [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+    // Measurement happens in the background
+    ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
     
     // Dispatch back to the main thread to let the insertion / deletion of subnodes happening
     dispatch_async(dispatch_get_main_queue(), ^{
-      XCTAssertEqual(node.subnodes[0], node2);
-      [expectation fulfill];
+      
+      // Layout on main
+      [node layoutIfNeeded];
+      XCTAssertEqual(node.subnodes[0], node1);
+      
+      dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        // Change state and measure in the background
+        node.layoutState = @2;
+        [node setNeedsLayout];
+    
+        ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
+        
+        // Dispatch back to the main thread to let the insertion / deletion of subnodes happening
+        dispatch_async(dispatch_get_main_queue(), ^{
+          
+          // Layout on main again
+          [node layoutIfNeeded];
+          XCTAssertEqual(node.subnodes[0], node2);
+          
+          [expectation fulfill];
+        });
+      });
     });
   });
   
@@ -214,12 +238,13 @@
 
 - (void)testTransitionLayoutWithAnimationWithLoadedNodes
 {
+  const CGSize kNodeSize = CGSizeMake(100, 100);
   ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
   ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
   node.automaticallyManagesSubnodes = YES;
-  
+  node.style.preferredSize = kNodeSize;
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
     if ([strongNode.layoutState isEqualToNumber:@1]) {
@@ -236,7 +261,8 @@
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Fix IHM layout transition also if one node is already loaded"];
   
-  [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+  ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
+  [node layoutIfNeeded];
   XCTAssertEqual(node.subnodes[0], node1);
   
   node.layoutState = @2;

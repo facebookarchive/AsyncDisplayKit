@@ -2166,8 +2166,10 @@ static bool stringContainsPointer(NSString *description, id p) {
     // The inset spec here is crucial. If the nodes themselves are children, it passed before the fix.
     return [ASOverlayLayoutSpec overlayLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:underlay] overlay:overlay];
   };
-  [node layoutThatFits:ASSizeRangeMake(CGSizeMake(100, 100))];
-  node.frame = (CGRect){ .size = node.calculatedSize };
+  
+  ASDisplayNodeSizeToFitSize(node, CGSizeMake(100, 100));
+  [node layoutIfNeeded];
+  
   NSInteger underlayIndex = [node.subnodes indexOfObjectIdenticalTo:underlay];
   NSInteger overlayIndex = [node.subnodes indexOfObjectIdenticalTo:overlay];
   XCTAssertLessThan(underlayIndex, overlayIndex);
@@ -2185,8 +2187,10 @@ static bool stringContainsPointer(NSString *description, id p) {
     // The inset spec here is crucial. If the nodes themselves are children, it passed before the fix.
     return [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:overlay background:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:underlay]];
   };
-  [node layoutThatFits:ASSizeRangeMake(CGSizeMake(100, 100))];
-  node.frame = (CGRect){ .size = node.calculatedSize };
+  
+  ASDisplayNodeSizeToFitSize(node, CGSizeMake(100, 100));
+  [node layoutIfNeeded];
+  
   NSInteger underlayIndex = [node.subnodes indexOfObjectIdenticalTo:underlay];
   NSInteger overlayIndex = [node.subnodes indexOfObjectIdenticalTo:overlay];
   XCTAssertLessThan(underlayIndex, overlayIndex);

@@ -11,7 +11,6 @@
 
 #import "ASSnapshotTestCase.h"
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
-#import "ASLayout.h"
 
 @interface ASTextNodeSnapshotTests : ASSnapshotTestCase
 
@@ -26,7 +25,8 @@
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"judar"
                                                             attributes:@{NSFontAttributeName : [UIFont italicSystemFontOfSize:24]}];
   textNode.textContainerInset = UIEdgeInsetsMake(0, 2, 0, 2);
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
+  ASLayout *layout = [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
+  textNode.frame = CGRectMake(0, 0, layout.size.width, layout.size.height);
   
   ASSnapshotVerifyNode(textNode, nil);
 }
@@ -63,8 +63,8 @@
                                                             attributes:@{ NSFontAttributeName : [UIFont systemFontOfSize:30] }];
 
   textNode.textContainerInset = UIEdgeInsetsMake(5, 10, 10, 5);
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
-  textNode.frame = CGRectMake(50, 50, textNode.calculatedSize.width, textNode.calculatedSize.height);
+  ASLayout *layout = [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY))];
+  textNode.frame = CGRectMake(50, 50, layout.size.width, layout.size.height);
 
   [backgroundView addSubview:textNode.view];
   backgroundView.frame = UIEdgeInsetsInsetRect(textNode.bounds, UIEdgeInsetsMake(-50, -50, -50, -50));
@@ -90,7 +90,7 @@
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
   // Set exclusion paths to trigger slow path
   textNode.exclusionPaths = @[ [UIBezierPath bezierPath] ];
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50))];
+  ASDisplayNodeSizeToFitSize(textNode, CGSizeMake(100, 50));
   ASSnapshotVerifyNode(textNode, nil);
 }
 
@@ -102,7 +102,7 @@
   textNode.shadowOpacity = 0.3;
   textNode.shadowRadius = 3;
   textNode.shadowOffset = CGSizeMake(0, 1);
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))];
+  ASDisplayNodeSizeToFitSize(textNode, CGSizeMake(INFINITY, INFINITY));
   ASSnapshotVerifyNode(textNode, nil);
 }
 
