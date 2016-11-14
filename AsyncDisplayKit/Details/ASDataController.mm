@@ -145,6 +145,11 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 #if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
     [ASDataController _expectToInsertNodes:contexts.count];
 #endif
+  
+  if (contexts.count == 0) {
+    batchCompletionHandler(@[], @[]);
+    return;
+  }
 
   ASProfilingSignpostStart(2, _dataSource);
   
@@ -431,38 +436,53 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     LOG(@"Edit Transaction - reloadData");
     
-    // Remove everything that existed before the reload, now that we're ready to insert replacements
-    NSUInteger oldSectionCount = [_editingNodes[ASDataControllerRowNodeKind] count];
-
-    // If we have old sections, we should delete them inside beginUpdates/endUpdates with inserting the new ones.
-    if (oldSectionCount) {
-      // -beginUpdates
-      [_mainSerialQueue performBlockOnMainThread:^{
-        [_delegate dataControllerBeginUpdates:self];
-      }];
-
-      NSIndexSet *indexSet = [[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, oldSectionCount)];
-      [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-    }
+    /**
+     * Leave the current data in the collection view until the first batch of nodes are laid out.
+     * Once the first batch is laid out, in one operation, replace all the sections and insert
+     * the first batch of items.
+     *
+     * We previously would replace all the sections immediately, and then start adding items as they
+     * were laid out. This resulted in more traffic to the UICollectionView and it also caused all the
+     * section headers to bunch up until the items come and fill out the sections.
+     */
+    __block BOOL isFirstBatch = YES;
+    [self batchLayoutNodesFromContexts:newContexts batchCompletion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
+      if (isFirstBatch) {
+        // -beginUpdates
+        [_mainSerialQueue performBlockOnMainThread:^{
+          [_delegate dataControllerBeginUpdates:self];
+        }];
+        
+        // deleteSections:
+        // Remove everything that existed before the reload, now that we're ready to insert replacements
+        NSUInteger oldSectionCount = [_editingNodes[ASDataControllerRowNodeKind] count];
+        if (oldSectionCount) {
+          NSIndexSet *indexSet = [[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, oldSectionCount)];
+          [self _deleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
+        }
+        
+        [self willReloadDataWithSectionCount:sectionCount];
+        
+        // insertSections:
+        NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
+        for (int i = 0; i < sectionCount; i++) {
+          [sections addObject:[[NSMutableArray alloc] init]];
+        }
+        [self _insertSections:sections atIndexSet:sectionIndexes withAnimationOptions:animationOptions];
+      }
+      
+      // insertItemsAtIndexPaths:
+      [self _insertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+      
+      if (isFirstBatch) {
+        // -endUpdates
+        [_mainSerialQueue performBlockOnMainThread:^{
+          [_delegate dataController:self endUpdatesAnimated:NO completion:nil];
+        }];
+        isFirstBatch = NO;
+      }
+    }];
     
-    [self willReloadDataWithSectionCount:sectionCount];
-    
-    // Insert empty sections
-    NSMutableArray *sections = [NSMutableArray arrayWithCapacity:sectionCount];
-    for (int i = 0; i < sectionCount; i++) {
-      [sections addObject:[[NSMutableArray alloc] init]];
-    }
-    [self _insertSections:sections atIndexSet:sectionIndexes withAnimationOptions:animationOptions];
-
-    if (oldSectionCount) {
-      // -endUpdates
-      [_mainSerialQueue performBlockOnMainThread:^{
-        [_delegate dataController:self endUpdatesAnimated:NO completion:nil];
-      }];
-    }
-    
-    [self _batchLayoutAndInsertNodesFromContexts:newContexts withAnimationOptions:animationOptions];
-
     if (completion) {
       [_mainSerialQueue performBlockOnMainThread:completion];
     }
