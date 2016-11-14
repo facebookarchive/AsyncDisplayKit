@@ -53,11 +53,6 @@ static NSString * const kRate = @"rate";
     unsigned int delegateVideoNodeDidSetCurrentItem:1;
     unsigned int delegateVideoNodeDidStallAtTimeInterval:1;
     unsigned int delegateVideoNodeDidRecoverFromStall:1;
-    
-    //Flags for deprecated methods
-    unsigned int delegateVideoPlaybackDidFinish_deprecated:1;
-    unsigned int delegateVideoNodeWasTapped_deprecated:1;
-    unsigned int delegateVideoNodeDidPlayToSecond_deprecated:1;
   } _delegateFlags;
   
   BOOL _shouldBePlaying;
