@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @abstract If the sum of childrens' stack dimensions is greater than the maximum size, how much should this component shrink?
  * This value represents the "flex shrink factor" and determines how much this component should shink in relation to
- * other flexible children.
+ * other flexible children. Defaults to @c 0.0 except for @c ASTextNode which defaults to @c 1.0.
  */
 @property (nonatomic, readwrite) CGFloat flexShrink;
 

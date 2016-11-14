@@ -117,6 +117,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     self.opaque = NO;
     self.backgroundColor = [UIColor clearColor];
 
+    // Enable flexShrink by default on text nodes. Text is naturally reflowable and
+    // the vast majority of use cases prefer this behavior.
+    self.style.flexShrink = 1.0;
+
     self.linkAttributeNames = DefaultLinkAttributeNames;
 
     // Accessibility
