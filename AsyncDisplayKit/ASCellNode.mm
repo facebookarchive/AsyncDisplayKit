@@ -120,9 +120,8 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
 
 - (void)didInvalidateSize
 {
-  // TODO: coalesc: Ask the UITableView for the proper constrained size it can layout
   CGSize oldSize = self.calculatedSize;
-  CGSize newSize = [self sizeThatFits:CGSizeMake(CGRectGetWidth(self.bounds), CGFLOAT_MAX)];
+  CGSize newSize = [self layoutThatFits:[self constrainedSize]].size;
     
   if (CGSizeEqualToSize(oldSize, newSize) == NO) {
     self.frame = {self.frame.origin, newSize};
@@ -172,6 +171,14 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
       [_interactionDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }
+}
+
+- (ASSizeRange)constrainedSize
+{
+  if (_interactionDelegate != nil) {
+    return [_interactionDelegate constrainedSizeForNode:self];
+  }
+  return ASSizeRangeMake(CGSizeZero, CGSizeMake(CGRectGetWidth(self.bounds), CGFLOAT_MAX));
 }
 
 - (void)setSelected:(BOOL)selected

@@ -1579,6 +1579,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
+- (ASSizeRange)constrainedSizeForNode:(ASCellNode *)node
+{
+  return [self.layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:[self indexPathForNode:node]];
+}
+
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();

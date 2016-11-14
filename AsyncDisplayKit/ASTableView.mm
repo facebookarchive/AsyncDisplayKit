@@ -1568,6 +1568,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
+- (ASSizeRange)constrainedSizeForNode:(ASCellNode *)node
+{
+  return [self dataController:self.dataController constrainedSizeForNodeAtIndexPath:[self indexPathForNode:node]];
+}
+
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();
