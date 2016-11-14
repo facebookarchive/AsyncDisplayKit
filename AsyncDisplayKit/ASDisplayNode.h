@@ -267,8 +267,9 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 /** @name Managing dimensions */
 
-@property (nonatomic, readwrite, weak, nullable) id<ASDisplayNodeSizingDelegate> sizingDelegate;
+//@property (nonatomic, readwrite, weak, nullable) id<ASDisplayNodeSizingDelegate> sizingDelegate;
 - (void)invalidateSize;
+- (void)didInvalidateSize;
 - (void)sizeToFit;
 
 - (CGSize)sizeThatFits:(CGSize)size;

@@ -29,7 +29,7 @@
 #pragma mark -
 #pragma mark ASCellNode
 
-@interface ASCellNode () <ASDisplayNodeSizingDelegate>
+@interface ASCellNode ()
 {
   ASDisplayNodeViewControllerBlock _viewControllerBlock;
   ASDisplayNodeDidLoadBlock _viewControllerDidLoadBlock;
@@ -58,9 +58,6 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   // Use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
-    
-  // ASCellNode acts as sizing container for the node
-  self.sizingDelegate = self;
 
   return self;
 }
@@ -121,19 +118,16 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   _viewControllerNode.frame = self.bounds;
 }
 
-- (void)displayNodeDidInvalidateSize:(ASDisplayNode *)displayNode
+- (void)didInvalidateSize
 {
-    ASDN::MutexLocker l(__instanceLock__);
+  // TODO: coalesc: Ask the UITableView for the proper constrained size it can layout
+  CGSize oldSize = self.calculatedSize;
+  CGSize newSize = [self sizeThatFits:CGSizeMake(CGRectGetWidth(self.bounds), CGFLOAT_MAX)];
     
-    CGSize oldSize = self.calculatedSize;
-    ASLayout *layout = [self layoutThatFits:self.constrainedSizeForCalculatedLayout];
-    
-    // TODO: Needs proper adjustment
-    CGRect f = self.frame;
-    f.size = layout.size;
-    self.frame = f;
-    
-    [self didRelayoutFromOldSize:oldSize toNewSize:layout.size];
+  if (CGSizeEqualToSize(oldSize, newSize) == NO) {
+    self.frame = {self.frame.origin, newSize};
+    [self didRelayoutFromOldSize:oldSize toNewSize:newSize];
+  }
 }
 
 - (void)transitionLayoutWithAnimation:(BOOL)animated

@@ -135,7 +135,7 @@
   ASDisplayNodeAssertMainThread();
   [super layoutSublayers];
 
-  [self.asyncdisplaykit_node __layout];
+  [self.asyncdisplaykit_node __layoutSublayers];
 }
 
 - (void)setNeedsDisplay

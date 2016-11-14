@@ -8,10 +8,27 @@
 
 #import "SampleSizingNode.h"
 
+@interface SampleSizingNodeSubnode : ASDisplayNode
+@property (strong, nonatomic) ASTextNode *textNode;
+@end
+
+@implementation SampleSizingNodeSubnode
+
+- (void)layout
+{
+    [super layout];
+    
+    // Manual layout after the normal layout engine did it's job
+    // Calculated size can be used after the layout spec pass happened
+    //self.textNode.frame = CGRectMake(self.textNode.frame.origin.x, self.textNode.frame.origin.y, self.textNode.calculatedSize.width, 20);
+}
+
+@end
+
 @interface SampleSizingNode ()
-@property (nonatomic, strong) ASDisplayNode *subnode;
 @property (nonatomic, assign) NSInteger state;
 
+@property (nonatomic, strong) SampleSizingNodeSubnode *subnode;
 @property (nonatomic, strong) ASTextNode *textNode;
 @property (nonatomic, strong) ASNetworkImageNode *imageNode;
 @end
@@ -35,13 +52,15 @@
         _imageNode.backgroundColor = [UIColor brownColor];
         _imageNode.needsDisplayOnBoundsChange = YES;
         _imageNode.style.height = ASDimensionMakeWithFraction(1.0);
-        _imageNode.style.width = ASDimensionMake(30.0);
+        _imageNode.style.width = ASDimensionMake(50.0);
         
         
-        _subnode = [ASDisplayNode new];
+        _subnode = [SampleSizingNodeSubnode new];
+        _subnode.textNode = _textNode;
         _subnode.backgroundColor = [UIColor redColor];
         _subnode.automaticallyManagesSubnodes = YES;
         
+        // Layout description via layoutSpecBlock
         __weak __typeof(self) weakSelf = self;
         _subnode.layoutSpecBlock = ^ASLayoutSpec *(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
             
@@ -113,7 +132,6 @@
     [self invalidateSize];
 }
 
-
 #pragma mark - ASDisplayNode
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
@@ -127,6 +145,14 @@
             centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY
             sizingOptions:ASCenterLayoutSpecSizingOptionDefault
             child:self.subnode];
+}
+
+- (void)layout
+{
+    [super layout];
+    
+    // Layout after the official layout pass happened
+    //self.subnode.frame = CGRectMake(self.subnode.frame.origin.x, self.subnode.frame.origin.y, 100, self.calculatedSize.height);
 }
 
 

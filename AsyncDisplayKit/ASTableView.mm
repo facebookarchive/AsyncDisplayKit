@@ -751,6 +751,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+  [node layoutIfNeeded];
   return node.calculatedSize.height;
 }
 
@@ -1509,8 +1510,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 #pragma mark - _ASTableViewCellDelegate
 
-#pragma mark - _ASTableViewCellDelegate
-
 - (void)didLayoutSubviewsOfTableViewCell:(_ASTableViewCell *)tableViewCell
 {
   ASCellNode *node = tableViewCell.node;
@@ -1525,7 +1524,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   // Normally the content view width equals to the constrained size width (which equals to the table view width).
   // If there is a mismatch between these values, for example after the table view entered or left editing mode,
   // content view width is preferred and used to re-measure the cell node.
-  if (contentViewWidth != constrainedSize.max.width) {
+  if (CGSizeEqualToSize(node.calculatedSize, CGSizeZero) == NO && contentViewWidth != constrainedSize.max.width) {
     constrainedSize.min.width = contentViewWidth;
     constrainedSize.max.width = contentViewWidth;
 

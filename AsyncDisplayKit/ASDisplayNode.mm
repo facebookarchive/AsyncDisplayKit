@@ -709,14 +709,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   __instanceLock__.lock();
 
+  // Mark the node for layout in the next layout pass
   [self invalidateCalculatedLayout];
   
   // This is the root node. Let the delegate know that the size changed
   // If someone calls `invalidateBlaBla TBD` we have to inform the sizing delegate of the root node to be able
   // to let them now that a size change happened and it needs to calculate a new layout / size for this node hierarchy
-  if ([self.sizingDelegate respondsToSelector:@selector(displayNodeDidInvalidateSize:)]) {
-    [self.sizingDelegate displayNodeDidInvalidateSize:self];
-  }
+//  if ([self.sizingDelegate respondsToSelector:@selector(displayNodeDidInvalidateSize:)]) {
+//    [self.sizingDelegate displayNodeDidInvalidateSize:self];
+//  }
+    
+  // Hook for subclasses to get size invalidation changes
+  [self didInvalidateSize];
   
   if (_supernode) {
     ASDisplayNode *supernode = _supernode;
@@ -727,7 +731,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return;
   }
   
+  // We are now at the root node trigger a layout pass
+  [self setNeedsLayout];
+  
   __instanceLock__.unlock();
+}
+
+- (void)didInvalidateSize
+{
+    
 }
 
 - (void)sizeToFit
@@ -739,11 +751,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self setNeedsLayout];
   
   CGSize maxSize = _supernode ? _supernode.bounds.size : CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX);
-  CGSize size = [self sizeThatFits:maxSize];
+  CGSize newSize = [self sizeThatFits:maxSize];
   
   CGRect oldBounds = self.bounds;
   CGSize oldSize = oldBounds.size;
-  CGSize newSize = _calculatedDisplayNodeLayout->layout.size;
   
   if (! CGSizeEqualToSize(oldSize, newSize)) {
     self.bounds = (CGRect){ oldBounds.origin, newSize };
@@ -777,74 +788,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(__instanceLock__);
   
-  if ([self shouldCalculateLayoutWithConstrainedSize:constrainedSize parentSize:parentSize] == NO) {
+  if (_calculatedDisplayNodeLayout->isValidForConstrainedSizeParentSize(constrainedSize, parentSize)) {
     ASDisplayNodeAssertNotNil(_calculatedDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _layout should not be nil! %@", self);
     return _calculatedDisplayNodeLayout->layout ? : [ASLayout layoutWithLayoutElement:self size:{0, 0}];
   }
-  
-  [self cancelLayoutTransition];
-  
-  BOOL didCreateNewContext = NO;
-  BOOL didOverrideExistingContext = NO;
-  BOOL shouldVisualizeLayout = ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
-  ASLayoutElementContext context;
-  if (ASLayoutElementContextIsNull(ASLayoutElementGetCurrentContext())) {
-    context = ASLayoutElementContextMake(ASLayoutElementContextDefaultTransitionID, shouldVisualizeLayout);
-    ASLayoutElementSetCurrentContext(context);
-    didCreateNewContext = YES;
-  } else {
-    context = ASLayoutElementGetCurrentContext();
-    if (context.needsVisualizeNode != shouldVisualizeLayout) {
-      context.needsVisualizeNode = shouldVisualizeLayout;
-      ASLayoutElementSetCurrentContext(context);
-      didOverrideExistingContext = YES;
-    }
-  }
-  
-  // Prepare for layout transition
-  auto previousLayout = _calculatedDisplayNodeLayout;
-  auto pendingLayout = std::make_shared<ASDisplayNodeLayout>(
-    [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
-    constrainedSize,
-    parentSize
-  );
-  
-  if (didCreateNewContext) {
-    ASLayoutElementClearCurrentContext();
-  } else if (didOverrideExistingContext) {
-    context.needsVisualizeNode = !context.needsVisualizeNode;
-    ASLayoutElementSetCurrentContext(context);
-  }
-  
-  _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                        pendingLayout:pendingLayout
-                                                       previousLayout:previousLayout];
-  
-  // Only complete the pending layout transition if the node is not a subnode of a node that is currently
-  // in a layout transition
-  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState) == NO) {
-    // Complete the pending layout transition immediately
-    [self _completePendingLayoutTransition];
-  }
-  
-  ASDisplayNodeAssertNotNil(pendingLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] newLayout should not be nil! %@", self);
-  return pendingLayout->layout;
-}
-
-- (BOOL)shouldCalculateLayoutWithConstrainedSize:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
-{
-  ASDN::MutexLocker l(__instanceLock__);
-
-  // Don't remeasure if in layout pending state and a new transition already started
-  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
-    ASLayoutElementContext context =  ASLayoutElementGetCurrentContext();
-    if (ASLayoutElementContextIsNull(context) || _pendingTransitionID != context.transitionID) {
-      return NO;
-    }
-  }
-  
-  // Check if display node layout is still valid
-  return _calculatedDisplayNodeLayout->isValidForConstrainedSizeParentSize(constrainedSize, parentSize) == NO;
+    
+  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
 }
 
 - (ASLayoutElementType)layoutElementType
@@ -883,7 +832,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return;
   }
   
-  [self invalidateCalculatedLayout];
+  [self setNeedsLayout];
   [self transitionLayoutWithSizeRange:_calculatedDisplayNodeLayout->constrainedSize
                              animated:animated
                    shouldMeasureAsync:shouldMeasureAsync
@@ -898,7 +847,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   // Passed constrainedSize is the the same as the node's current constrained size it's a noop
   ASDisplayNodeAssertMainThread();
-  if ([self shouldCalculateLayoutWithConstrainedSize:constrainedSize parentSize:constrainedSize.max] == NO) {
+  if (_calculatedDisplayNodeLayout->isValidForConstrainedSizeParentSize(constrainedSize, constrainedSize.max)) {
     return;
   }
   
@@ -1449,13 +1398,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self displayImmediately];
 }
 
+- (void)invalidateCalculatedLayout
+{
+  // This will cause the next layout pass to compute a new layout instead of returning
+  // the cached layout in case the constrained or parent size did not change
+  _calculatedDisplayNodeLayout->invalidate();
+}
+
 - (void)__setNeedsLayout
 {
   ASDN::MutexLocker l(__instanceLock__);
 
-  // This will cause the next call to -layoutThatFits:parentSize: to compute a new layout instead of returning
-  // the cached layout in case the constrained or parent size did not change
-  _calculatedDisplayNodeLayout->invalidate();
+  [self invalidateCalculatedLayout];
 }
 
 /**
@@ -1482,7 +1436,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [supernode __layoutIfNeeded];
   } else {
     // Layout all subviews starting from the first node that needs layout
-    [self __layout];
+    [self __layoutSublayers];
   }
 }
 
@@ -1498,13 +1452,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 // These private methods ensure that subclasses are not required to call super in order for _renderingSubnodes to be properly managed.
 
-- (void)__layout
+- (void)__layoutSublayers
 {
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(__instanceLock__);
-  CGRect bounds = self.bounds;
-
-  [self measureNodeWithBoundsIfNecessary:bounds];
+  CGRect bounds = _threadSafeBounds;
 
   if (CGRectEqualToRect(bounds, CGRectZero)) {
     // Performing layout on a zero-bounds view often results in frame calculations
@@ -1512,6 +1464,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // measureWithSizeRange: on subnodes to assert.
     return;
   }
+    
+  [self measureNodeWithBoundsIfNecessary:bounds];
   
   // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
   // was created
@@ -1524,18 +1478,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self layoutDidFinish];
 }
 
+/// Needs to be called with lock held
 - (void)measureNodeWithBoundsIfNecessary:(CGRect)bounds
 {
-  BOOL supportsRangeManagedInterfaceState = NO;
-  BOOL hasDirtyLayout = NO;
-  CGSize calculatedLayoutSize = CGSizeZero;
-  {
-    ASDN::MutexLocker l(__instanceLock__);
-    supportsRangeManagedInterfaceState = [self supportsRangeManagedInterfaceState];
-    hasDirtyLayout = _calculatedDisplayNodeLayout->isDirty();
-    calculatedLayoutSize = _calculatedDisplayNodeLayout->layout.size;
-  }
-    
   // Check if it's a subnode in a layout transition. In this case no measurement is needed as it's part of
   // the layout transition
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
@@ -1549,8 +1494,60 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // for the node using a size range equal to whatever bounds were provided to the node
   if (CGRectEqualToRect(bounds, CGRectZero)) {
     LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
-  } else if (hasDirtyLayout || CGSizeEqualToSize(calculatedLayoutSize, bounds.size) == NO) {
-      [self layoutThatFits:ASSizeRangeMake(bounds.size)];
+    return;
+  }
+  
+  if (_calculatedDisplayNodeLayout->isDirty() ||
+      CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, bounds.size) == NO)
+  {
+    [self cancelLayoutTransition];
+      
+    BOOL didCreateNewContext = NO;
+    BOOL didOverrideExistingContext = NO;
+    BOOL shouldVisualizeLayout = ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
+    ASLayoutElementContext context;
+    if (ASLayoutElementContextIsNull(ASLayoutElementGetCurrentContext())) {
+      context = ASLayoutElementContextMake(ASLayoutElementContextDefaultTransitionID, shouldVisualizeLayout);
+      ASLayoutElementSetCurrentContext(context);
+      didCreateNewContext = YES;
+    } else {
+      context = ASLayoutElementGetCurrentContext();
+      if (context.needsVisualizeNode != shouldVisualizeLayout) {
+        context.needsVisualizeNode = shouldVisualizeLayout;
+        ASLayoutElementSetCurrentContext(context);
+        didOverrideExistingContext = YES;
+      }
+    }
+    
+    // Prepare for layout transition
+    CGSize parentSize = bounds.size;
+    ASSizeRange constrainedSize = ASSizeRangeMake(parentSize);
+    auto previousLayout = _calculatedDisplayNodeLayout;
+    auto pendingLayout = std::make_shared<ASDisplayNodeLayout>(
+      [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
+      constrainedSize,
+      parentSize
+    );
+    
+    if (didCreateNewContext) {
+      ASLayoutElementClearCurrentContext();
+    } else if (didOverrideExistingContext) {
+      context.needsVisualizeNode = !context.needsVisualizeNode;
+      ASLayoutElementSetCurrentContext(context);
+    }
+      
+    ASDisplayNodeAssertNotNil(pendingLayout->layout, @"pendintLayout->layout should not be nil! %@", self);
+    
+    _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
+                                                          pendingLayout:pendingLayout
+                                                         previousLayout:previousLayout];
+    
+    // Only complete the pending layout transition if the node is not a subnode of a node that is currently
+    // in a layout transition
+    if (ASHierarchyStateIncludesLayoutPending(_hierarchyState) == NO) {
+      // Complete the pending layout transition immediately
+      [self _completePendingLayoutTransition];
+    }
   }
 }
 
@@ -2680,15 +2677,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   return nil;
 }
 
-- (void)invalidateCalculatedLayout
-{
-  ASDN::MutexLocker l(__instanceLock__);
-
-  // This will cause the next call to -layoutThatFits:parentSize: to compute a new layout instead of returning
-  // the cached layout in case the constrained or parent size did not change
-  _calculatedDisplayNodeLayout->invalidate();
-}
-
 - (void)__didLoad
 {
   ASDN::MutexLocker l(__instanceLock__);
@@ -3730,7 +3718,7 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
 {
   // Deprecated preferredFrameSize just calls through to set width and height
   self.style.preferredSize = preferredFrameSize;
-  [self invalidateCalculatedLayout];
+  [self setNeedsLayout];
 }
 
 - (CGSize)preferredFrameSize

@@ -21,7 +21,7 @@
 #import "DetailRootNode.h"
 #import "SampleSizingNode.h"
 
-@interface DetailViewController () <ASDisplayNodeSizingDelegate>
+@interface DetailViewController ()// <ASDisplayNodeSizingDelegate>
 @property (strong, nonatomic) SampleSizingNode *sizingNode;
 
 @property (strong, nonatomic) ASNetworkImageNode *imageNode;
@@ -40,7 +40,7 @@
     // Set the sizing delegate of the root node to the container
     _sizingNode = [SampleSizingNode new];
     _sizingNode.autoresizingMask = UIViewAutoresizingNone;
-    _sizingNode.sizingDelegate = self;
+    //_sizingNode.sizingDelegate = self;
     
     _imageNode = [ASNetworkImageNode new];
     _imageNode.needsDisplayOnBoundsChange = YES;
@@ -53,7 +53,7 @@
     [_buttonNode setTitle:@"Some Title" withFont:nil withColor:nil forState:ASControlStateNormal];
     [_buttonNode setTitle:@"Some Bla" withFont:nil withColor:[UIColor orangeColor] forState:ASControlStateHighlighted];
     [_buttonNode addTarget:self action:@selector(buttonAction:) forControlEvents:ASControlNodeEventTouchUpInside];
-    _buttonNode.sizingDelegate = self;
+    //_buttonNode.sizingDelegate = self;
     
     return self;
 }
@@ -74,7 +74,7 @@
     // Initial size of sizing node
     //self.sizingNode.frame = CGRectMake(100, 100, 50, 50);
     
-    [self displayNodeDidInvalidateSize:self.buttonNode];
+    //[self displayNodeDidInvalidateSize:self.buttonNode];
     
     // Initial size for image node
 //    self.imageNode.frame = CGRectMake(50, 70, 100, 100);
@@ -94,6 +94,7 @@
 {
     [super viewDidLayoutSubviews];
     
+    // Updat the sizing for the button node
     [self updateButtonNodeLayout];
     
     // Update the sizing node layout
@@ -116,23 +117,23 @@
 
 // The sizing delegate will get callbacks if the size did invalidate of the display node. It's the job of the delegate
 // to get the new size from the display node and update the frame based on the returned size
-- (void)displayNodeDidInvalidateSize:(ASDisplayNode *)displayNode
-{
-    if (displayNode == self.buttonNode) {
-        [self updateButtonNodeLayout];
-        return;
-    }
-    
-    [self updateNodeLayout];
-    
-    /*dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        [self updateNodeLayoutRandom];
-    });*/
-    
-   /*[NSTimer scheduledTimerWithTimeInterval:2.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
-        [self updateNodeLayoutRandom];
-    }];*/
-}
+//- (void)displayNodeDidInvalidateSize:(ASDisplayNode *)displayNode
+//{
+//    if (displayNode == self.buttonNode) {
+//        [self updateButtonNodeLayout];
+//        return;
+//    }
+//    
+//    [self updateNodeLayout];
+//    
+//    /*dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+//        [self updateNodeLayoutRandom];
+//    });*/
+//    
+//   /*[NSTimer scheduledTimerWithTimeInterval:2.0 repeats:YES block:^(NSTimer * _Nonnull timer) {
+//        [self updateNodeLayoutRandom];
+//    }];*/
+//}
 
 - (void)updateNodeLayout
 {
@@ -140,29 +141,34 @@
     //return;
     // Use the bounds of the view and get the fitting size
     // This does not have any side effects, but can be called on the main thread without any problems
-    CGSize size = [self.sizingNode sizeThatFits:CGSizeMake(CGFLOAT_MAX, 100.0)];
+    CGSize size = [self.sizingNode sizeThatFits:CGSizeMake(INFINITY, 100.0)];
     //size.width -= 10;
     //[self.sizingNode setNeedsLayout];
-    self.sizingNode.frame = CGRectMake((self.view.bounds.size.width - size.width) / 2.0,
-                                       (self.view.bounds.size.height - size.height) / 2.0,
-                                       size.width, size.height);
+    self.sizingNode.frame = CGRectMake((CGRectGetWidth(self.view.bounds) - size.width) / 2.0,
+                                       (CGRectGetHeight(self.view.bounds) - size.height) / 2.0,
+                                       size.width,
+                                       size.height);
     
     //dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        // Decrease the frame a bit
         self.sizingNode.frame = CGRectInset(self.sizingNode.frame, 10, 10);
     //});
 }
 
 - (void)updateNodeLayoutRandom
 {
+    CGRect bounds = self.view.bounds;
+    
     // Pick a randome width and height and set the frame of the node
     CGSize size = CGSizeZero;
-    size.width = arc4random_uniform(self.view.bounds.size.width);
-    size.height = arc4random_uniform(self.view.bounds.size.height);
+    size.width = arc4random_uniform(CGRectGetWidth(bounds));
+    size.height = arc4random_uniform(CGRectGetHeight(bounds));
     
     //[self.sizingNode setNeedsLayout];
-    self.sizingNode.frame = CGRectMake((self.view.bounds.size.width - size.width) / 2.0,
-                                       (self.view.bounds.size.height - size.height) / 2.0,
-                                       size.width, size.height);
+    self.sizingNode.frame = CGRectMake((CGRectGetWidth(bounds) - size.width) / 2.0,
+                                       (CGRectGetHeight(bounds) - size.height) / 2.0,
+                                       size.width,
+                                       size.height);
 
 }
 
