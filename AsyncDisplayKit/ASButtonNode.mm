@@ -235,7 +235,6 @@
     return;
   
   _contentSpacing = contentSpacing;
-  [self setNeedsLayout];
   [self invalidateSize];
 }
 
@@ -252,7 +251,6 @@
     return;
   
   _laysOutHorizontally = laysOutHorizontally;
-  [self setNeedsLayout];
   [self invalidateSize];
 }
 

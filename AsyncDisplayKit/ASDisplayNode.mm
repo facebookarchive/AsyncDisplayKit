@@ -712,13 +712,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // Mark the node for layout in the next layout pass
   [self invalidateCalculatedLayout];
   
-  // This is the root node. Let the delegate know that the size changed
-  // If someone calls `invalidateBlaBla TBD` we have to inform the sizing delegate of the root node to be able
-  // to let them now that a size change happened and it needs to calculate a new layout / size for this node hierarchy
-//  if ([self.sizingDelegate respondsToSelector:@selector(displayNodeDidInvalidateSize:)]) {
-//    [self.sizingDelegate displayNodeDidInvalidateSize:self];
-//  }
-    
   // Hook for subclasses to get size invalidation changes
   [self didInvalidateSize];
   

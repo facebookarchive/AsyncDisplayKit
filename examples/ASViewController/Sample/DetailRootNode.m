@@ -28,8 +28,6 @@ static const NSInteger kImageHeight = 200;
 @property (nonatomic, copy) NSString *imageCategory;
 @property (nonatomic, strong) ASCollectionNode *collectionNode;
 
-@property (nonatomic, strong) ASDisplayNode *backgroundNode;
-
 @end
 
 

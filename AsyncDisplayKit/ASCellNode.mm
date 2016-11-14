@@ -121,7 +121,12 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
 - (void)didInvalidateSize
 {
   CGSize oldSize = self.calculatedSize;
-  CGSize newSize = [self layoutThatFits:[self constrainedSize]].size;
+  
+  ASSizeRange constrainedSize = ASSizeRangeMake(CGSizeZero, CGSizeMake(CGRectGetWidth(self.bounds), CGFLOAT_MAX));
+  if (_interactionDelegate != nil) {
+    constrainedSize = [_interactionDelegate constrainedSizeForNode:self];
+  }
+  CGSize newSize = [self layoutThatFits:constrainedSize].size;
     
   if (CGSizeEqualToSize(oldSize, newSize) == NO) {
     self.frame = {self.frame.origin, newSize};
@@ -171,14 +176,6 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
       [_interactionDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
     });
   }
-}
-
-- (ASSizeRange)constrainedSize
-{
-  if (_interactionDelegate != nil) {
-    return [_interactionDelegate constrainedSizeForNode:self];
-  }
-  return ASSizeRangeMake(CGSizeZero, CGSizeMake(CGRectGetWidth(self.bounds), CGFLOAT_MAX));
 }
 
 - (void)setSelected:(BOOL)selected
