@@ -431,6 +431,15 @@ NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     LOG(@"Edit Transaction - reloadData");
     
+    /**
+     * Leave the current data in the collection view until the first batch of nodes are laid out.
+     * Once the first batch is laid out, in one operation, replace all the sections and insert
+     * the first batch of items.
+     *
+     * We previously would replace all the sections immediately, and then start adding items as they
+     * were laid out. This resulted in more traffic to the UICollectionView and it also caused all the
+     * section headers to bunch up until the items come and fill out the sections.
+     */
     __block BOOL isFirstBatch = YES;
     [self batchLayoutNodesFromContexts:newContexts batchCompletion:^(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths) {
       if (isFirstBatch) {
