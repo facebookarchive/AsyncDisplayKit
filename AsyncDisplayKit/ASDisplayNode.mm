@@ -315,7 +315,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _environmentState = ASEnvironmentStateMakeDefault();
   
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
-  _pendingDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
+  _pendingDisplayNodeLayout = nullptr;
   
   _defaultLayoutTransitionDuration = 0.2;
   _defaultLayoutTransitionDelay = 0.0;
@@ -786,11 +786,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     ASDisplayNodeAssertNotNil(_calculatedDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _layout should not be nil! %@", self);
     return _calculatedDisplayNodeLayout->layout ? : [ASLayout layoutWithLayoutElement:self size:{0, 0}];
   }
-    
+  
+  // Creat a pending display node layout for the layout pass
   _pendingDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>(
-      [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
-      constrainedSize,
-      parentSize
+    [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
+    constrainedSize,
+    parentSize
   );
   ASDisplayNodeAssertNotNil(_pendingDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _layout should not be nil! %@", self);
   return _pendingDisplayNodeLayout->layout;
@@ -1403,7 +1404,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // This will cause the next layout pass to compute a new layout instead of returning
   // the cached layout in case the constrained or parent size did not change
   _calculatedDisplayNodeLayout->invalidate();
-  _pendingDisplayNodeLayout->invalidate();
+  if (_pendingDisplayNodeLayout != nullptr) {
+    _pendingDisplayNodeLayout->invalidate();
+  }
 }
 
 - (void)__setNeedsLayout
@@ -1469,6 +1472,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
     
   [self measureNodeWithBoundsIfNecessary:bounds];
+  _pendingDisplayNodeLayout = nullptr;
   
   // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
   // was created
@@ -1527,30 +1531,23 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   // Prepare for layout transition
-  CGSize parentSize = bounds.size;
-  ASSizeRange constrainedSize = ASSizeRangeMake(parentSize);
-  
-  if (CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, bounds.size)) {
-    //constrainedSize = _pendingDisplayNodeLayout->constrainedSize;
-    
-  }
-  
-  // If we are the root node we use the
-  if (_supernode == nil) {
-    if (CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, bounds.size)) {
-      constrainedSize = _pendingDisplayNodeLayout->constrainedSize;
-    }
-    //constrainedSize = _calculatedDisplayNodeLayout->constrainedSize;
-    
-  }
-  
-  
   auto previousLayout = _calculatedDisplayNodeLayout;
-  auto pendingLayout = std::make_shared<ASDisplayNodeLayout>(
-    [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
-    constrainedSize,
-    parentSize
-  );
+  auto pendingLayout = [=]() -> std::shared_ptr<ASDisplayNodeLayout> {
+    // Check if  the pending display node layout can be used
+    if (_pendingDisplayNodeLayout != nullptr && CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, bounds.size)) {
+      return _pendingDisplayNodeLayout;
+    }
+  
+    // Pending layout cannot be used let's use the frame size to calculate the pending layout
+    CGSize parentSize = bounds.size;
+    ASSizeRange constrainedSize = ASSizeRangeMake(parentSize);
+    
+    return std::make_shared<ASDisplayNodeLayout>(
+      [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
+      constrainedSize,
+      parentSize
+    );
+  }();
 
   if (didCreateNewContext) {
     ASLayoutElementClearCurrentContext();
