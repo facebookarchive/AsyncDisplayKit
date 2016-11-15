@@ -41,13 +41,14 @@
                                                             attributes:@{ NSFontAttributeName : [UIFont systemFontOfSize:30] }];
   
   textNode.textContainerInset = UIEdgeInsetsMake(10, 10, 10, 10);
-  [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 80))];
-  textNode.frame = CGRectMake(50, 50, textNode.calculatedSize.width, textNode.calculatedSize.height);
+  
+  ASLayout *layout = [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 80))];
+  textNode.frame = CGRectMake(50, 50, layout.size.width, layout.size.height);
+  
+  textNode.highlightRange = NSMakeRange(0, textNode.attributedText.length);
 
   [backgroundView addSubview:textNode.view];
   backgroundView.frame = UIEdgeInsetsInsetRect(textNode.bounds, UIEdgeInsetsMake(-50, -50, -50, -50));
-
-  textNode.highlightRange = NSMakeRange(0, textNode.attributedText.length);
 
   [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:textNode];
   ASSnapshotVerifyLayer(backgroundView.layer, nil);
