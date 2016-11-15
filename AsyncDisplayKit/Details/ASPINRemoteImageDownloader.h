@@ -28,6 +28,17 @@ NS_ASSUME_NONNULL_BEGIN
  */
 + (ASPINRemoteImageDownloader *)sharedDownloader;
 
+
+/**
+ * Sets the default NSURLSessionConfiguration that will be used by @c ASNetworkImageNodes and @c ASMultiplexImageNodes
+ * while loading images off the network. This must be specified early in the application lifecycle before
+ * `sharedDownloader` is accessed.
+ *
+ * @param configuration The session configuration that will be used by `sharedDownloader`
+ *
+ */
++ (void)setSharedImageManagerWithConfiguration:(nullable NSURLSessionConfiguration *)configuration;
+
 /**
  * The shared instance of a @c PINRemoteImageManager used by all @c ASPINRemoteImageDownloaders
  *

@@ -77,16 +77,22 @@
 //Share image cache with sharedImageManager image cache.
 - (id <PINRemoteImageCaching>)defaultImageCache
 {
-    return [[PINRemoteImageManager sharedImageManager] cache];
+  return [[PINRemoteImageManager sharedImageManager] cache];
 }
 
+@end
+
+
+static ASPINRemoteImageDownloader *sharedDownloader = nil;
+
+@interface ASPINRemoteImageDownloader ()
 @end
 
 @implementation ASPINRemoteImageDownloader
 
 + (instancetype)sharedDownloader
 {
-  static ASPINRemoteImageDownloader *sharedDownloader = nil;
+
   static dispatch_once_t onceToken = 0;
   dispatch_once(&onceToken, ^{
     sharedDownloader = [[ASPINRemoteImageDownloader alloc] init];
@@ -94,31 +100,42 @@
   return sharedDownloader;
 }
 
++ (void)setSharedImageManagerWithConfiguration:(nullable NSURLSessionConfiguration *)configuration
+{
+  NSAssert(sharedDownloader == nil, @"Singleton has been created and session can no longer be configured.");
+  __unused PINRemoteImageManager *sharedManager = [[self class] sharedPINRemoteImageManagerWithConfiguration:configuration];
+}
+
 - (PINRemoteImageManager *)sharedPINRemoteImageManager
 {
-  static ASPINRemoteImageManager *sharedPINRemoteImageManager = nil;
+  return [self sharedPINRemoteImageManagerWithConfiguration:nil];
+}
+
+- (PINRemoteImageManager *)sharedPINRemoteImageManagerWithConfiguration:(NSURLSessionConfiguration *)configuration
+{
+  static ASPINRemoteImageManager *sharedPINRemoteImageManager;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-  
+
 #if PIN_ANIMATED_AVAILABLE
     // Check that Carthage users have linked both PINRemoteImage & PINCache by testing for one file each
     if (!(NSClassFromString(@"PINRemoteImageManager"))) {
-        NSException *e = [NSException
-                          exceptionWithName:@"FrameworkSetupException"
-                          reason:@"Missing the path to the PINRemoteImage framework."
-                          userInfo:nil];
-        @throw e;
+      NSException *e = [NSException
+                        exceptionWithName:@"FrameworkSetupException"
+                        reason:@"Missing the path to the PINRemoteImage framework."
+                        userInfo:nil];
+      @throw e;
     }
     if (!(NSClassFromString(@"PINCache"))) {
-        NSException *e = [NSException
-                          exceptionWithName:@"FrameworkSetupException"
-                          reason:@"Missing the path to the PINCache framework."
-                          userInfo:nil];
-        @throw e;
+      NSException *e = [NSException
+                        exceptionWithName:@"FrameworkSetupException"
+                        reason:@"Missing the path to the PINCache framework."
+                        userInfo:nil];
+      @throw e;
     }
-    sharedPINRemoteImageManager = [[ASPINRemoteImageManager alloc] initWithSessionConfiguration:nil alternativeRepresentationProvider:self];
+    sharedPINRemoteImageManager = [[ASPINRemoteImageManager alloc] initWithSessionConfiguration:configuration alternativeRepresentationProvider:self];
 #else
-    sharedPINRemoteImageManager = [[ASPINRemoteImageManager alloc] initWithSessionConfiguration:nil];
+    sharedPINRemoteImageManager = [[ASPINRemoteImageManager alloc] initWithSessionConfiguration:configuration];
 #endif
   });
   return sharedPINRemoteImageManager;
@@ -187,7 +204,7 @@
 {
   return [[self sharedPINRemoteImageManager] downloadImageWithURL:URL options:PINRemoteImageManagerDownloadOptionsSkipDecode progressDownload:^(int64_t completedBytes, int64_t totalBytes) {
     if (downloadProgress == nil) { return; }
-    
+
     /// If we're targeting the main queue and we're on the main thread, call immediately.
     if (ASDisplayNodeThreadIsMain() && callbackQueue == dispatch_get_main_queue()) {
       downloadProgress(completedBytes / (CGFloat)totalBytes);
@@ -229,7 +246,7 @@
   if (!downloadIdentifier) {
     return;
   }
-  
+
   ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
   [[self sharedPINRemoteImageManager] cancelTaskWithUUID:downloadIdentifier];
 }
@@ -237,7 +254,7 @@
 - (void)setProgressImageBlock:(ASImageDownloaderProgressImage)progressBlock callbackQueue:(dispatch_queue_t)callbackQueue withDownloadIdentifier:(id)downloadIdentifier
 {
   ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
-  
+
   if (progressBlock) {
     [[self sharedPINRemoteImageManager] setProgressImageCallback:^(PINRemoteImageManagerResult * _Nonnull result) {
       dispatch_async(callbackQueue, ^{
@@ -252,17 +269,17 @@
 - (void)setPriority:(ASImageDownloaderPriority)priority withDownloadIdentifier:(id)downloadIdentifier
 {
   ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
-  
+
   PINRemoteImageManagerPriority pi_priority = PINRemoteImageManagerPriorityMedium;
   switch (priority) {
     case ASImageDownloaderPriorityPreload:
       pi_priority = PINRemoteImageManagerPriorityMedium;
       break;
-      
+
     case ASImageDownloaderPriorityImminent:
       pi_priority = PINRemoteImageManagerPriorityHigh;
       break;
-      
+
     case ASImageDownloaderPriorityVisible:
       pi_priority = PINRemoteImageManagerPriorityVeryHigh;
       break;
@@ -275,11 +292,11 @@
 - (id)alternateRepresentationWithData:(NSData *)data options:(PINRemoteImageManagerDownloadOptions)options
 {
 #if PIN_ANIMATED_AVAILABLE
-    if ([data pin_isGIF]) {
-        return data;
-    }
+  if ([data pin_isGIF]) {
+    return data;
+  }
 #endif
-    return nil;
+  return nil;
 }
 
 @end
