@@ -724,14 +724,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   // We are the root node and need to re-flow the layout; one of our children requested to have its size re-set.
   CGSize boundsSize = self.bounds.size;
+  ASSizeRange constrainedSize = [self constrainedSizeForLayoutPass];
+  ASLayout *layout = [self layoutThatFits:constrainedSize];
   
   // Figure out constrainedSize to use
-  ASLayout *layout = nil;
+  /*ASLayout *layout = nil;
   if (_pendingDisplayNodeLayout != nullptr) {
     layout = [self layoutThatFits:_pendingDisplayNodeLayout->constrainedSize];
   } else {
     layout = [self layoutThatFits:_calculatedDisplayNodeLayout->constrainedSize];
-  }
+  }*/
   if (CGSizeEqualToSize(boundsSize, layout.size) == NO) {
     // If the size of the layout changes inform our container (e.g ASTableView, ASCollectionView, ASViewController, ...)
     // that we need it to change our bounds size.
@@ -1532,26 +1534,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
     // Use as default constrained size the bounds
     CGSize parentSize = bounds.size;
-    ASSizeRange constrainedSize = ASSizeRangeMake(parentSize);
-    
-    // Checkout if constrained size of pending or calculated display node layout can be used
-    if (_pendingDisplayNodeLayout != nullptr && CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, bounds.size)) {
-      // We assume the size from the last returned layoutThatFits: layout was applied so use the pejnding display node
-      // layout constrained size
-      constrainedSize = _pendingDisplayNodeLayout->constrainedSize;
-    } else if (CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, CGSizeZero) == NO &&
-               CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, bounds.size)) {
-      // We assume the  _calculatedDisplayNodeLayout is still valid and the frame is not different
-      constrainedSize = _calculatedDisplayNodeLayout->constrainedSize;
-    } else {
-      // In this case neither the _pendingDisplayNodeLayout or the _calculatedDisplayNodeLayout constrained size can
-      // be reused, so the current bounds is used. This is usual the case if a frame was set manually that differs to
-      // the one returned from layoutThatFits: or layoutThatFits: was never called
-    }
+    ASSizeRange constrainedSize = [self constrainedSizeForLayoutPass];
     
     return std::make_shared<ASDisplayNodeLayout>(
       [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
-      constrainedSize,
+      [self constrainedSizeForLayoutPass],
       parentSize
     );
   }();
@@ -1584,15 +1571,25 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 }
 
-- (ASSizeRange)conrainedSizeForCurrentLayout
+- (ASSizeRange)constrainedSizeForLayoutPass
 {
-  ASSizeRange constrainedSize = ASSizeRangeMake(self.bounds.size);
-
-  // Checkout if constrained size of layouts can be reused
-  if (_pendingDisplayNodeLayout != nullptr) {
+  // Use as default constrained size the bounds
+  CGRect bounds = self.threadSafeBounds;
+  ASSizeRange constrainedSize = ASSizeRangeMake(bounds.size);
+  
+  // Checkout if constrained size of pending or calculated display node layout can be used
+  if (_pendingDisplayNodeLayout != nullptr && CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, bounds.size)) {
+    // We assume the size from the last returned layoutThatFits: layout was applied so use the pejnding display node
+    // layout constrained size
     constrainedSize = _pendingDisplayNodeLayout->constrainedSize;
-  } else if (CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, CGSizeZero) == NO) {
+  } else if (CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, CGSizeZero) == NO &&
+             CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, bounds.size)) {
+    // We assume the  _calculatedDisplayNodeLayout is still valid and the frame is not different
     constrainedSize = _calculatedDisplayNodeLayout->constrainedSize;
+  } else {
+    // In this case neither the _pendingDisplayNodeLayout or the _calculatedDisplayNodeLayout constrained size can
+    // be reused, so the current bounds is used. This is usual the case if a frame was set manually that differs to
+    // the one returned from layoutThatFits: or layoutThatFits: was never called
   }
   return constrainedSize;
 }
