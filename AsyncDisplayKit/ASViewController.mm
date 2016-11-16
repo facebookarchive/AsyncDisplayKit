@@ -147,7 +147,7 @@ ASVisibilityDidMoveToParentViewController;
   [_node layoutThatFits:[self nodeConstrainedSize]];
   [_node.view layoutIfNeeded];
 
-  [_node recursivelyFetchData];
+  [_node recursivelyPreload];
   
   if (_parentManagesVisibilityDepth == NO) {
     [self setVisibilityDepth:0];
