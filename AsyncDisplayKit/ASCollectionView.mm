@@ -765,9 +765,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASDisplayNode *node = [self nodeForItemAtIndexPath:indexPath];
-  [node layoutIfNeeded];
-  return node.calculatedSize;
+  return [[self nodeForItemAtIndexPath:indexPath] calculatedSize];
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath

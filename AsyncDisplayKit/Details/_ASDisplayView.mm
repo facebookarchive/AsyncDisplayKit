@@ -16,6 +16,7 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASObjectDescriptionHelpers.h"
+#import "ASLayout.h"
 
 @interface _ASDisplayView ()
 @property (nullable, atomic, weak, readwrite) ASDisplayNode *asyncdisplaykit_node;
@@ -205,10 +206,7 @@
 - (CGSize)sizeThatFits:(CGSize)size
 {
   ASDisplayNode *node = _asyncdisplaykit_node; // Create strong reference to weak ivar.
-  if (node) {
-    return [node sizeThatFits:size];
-  }
-  return [super sizeThatFits:size];
+  return node ? [node layoutThatFits:ASSizeRangeMake(size)].size : [super sizeThatFits:size];
 }
 
 - (void)setNeedsDisplay

@@ -751,7 +751,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  [node layoutIfNeeded];
   return node.calculatedSize.height;
 }
 

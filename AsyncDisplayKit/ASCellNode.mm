@@ -120,10 +120,7 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
 
 - (void)displayNodeDidInvalidateSizeOldSize:(CGSize)oldSize
 {
-  ASSizeRange constrainedSize = ASSizeRangeMake(CGSizeZero, CGSizeMake(CGRectGetWidth(self.bounds), CGFLOAT_MAX));
-  if (_interactionDelegate != nil) {
-    constrainedSize = [_interactionDelegate constrainedSizeForNode:self];
-  }
+  ASSizeRange constrainedSize = [_interactionDelegate constrainedSizeForNode:self];
   CGSize newSize = [self layoutThatFits:constrainedSize].size;
     
   if (CGSizeEqualToSize(oldSize, newSize) == NO) {

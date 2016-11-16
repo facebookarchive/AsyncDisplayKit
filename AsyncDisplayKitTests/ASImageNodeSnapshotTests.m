@@ -47,14 +47,11 @@
   imageNode.style.width = ASDimensionMake(forcedImageSize.width);
   imageNode.style.height = ASDimensionMake(forcedImageSize.height);
   ASDisplayNodeSizeToFitSize(imageNode, forcedImageSize);
-  [imageNode layoutIfNeeded];
   ASSnapshotVerifyNode(imageNode, @"first");
   
   imageNode.style.width = ASDimensionMake(200);
   imageNode.style.height = ASDimensionMake(200);
   ASDisplayNodeSizeToFitSize(imageNode, CGSizeMake(200, 200));
-  [imageNode layoutIfNeeded];
-  
   ASSnapshotVerifyNode(imageNode, @"second");
   
   XCTAssert(CGImageGetWidth((CGImageRef)imageNode.contents) == forcedImageSize.width * imageNode.contentsScale &&

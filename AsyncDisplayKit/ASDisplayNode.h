@@ -256,9 +256,6 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 // TODO: coalesc: Documentation
 - (void)invalidateSize;
-- (void)didInvalidateSize;
-- (void)sizeToFit;
-- (CGSize)sizeThatFits:(CGSize)size;
 
 /**
  * @abstract Asks the node to return a layout based on given size range.
@@ -637,21 +634,21 @@ extern NSInteger const ASDefaultDrawingPriority;
 @interface ASDisplayNode (UIViewBridge)
 
 /**
- * Marks the view as needing display. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
+ * Marks the view as needing display. Convenience for use whether the view / layer is loaded or not. Safe to call
+ * from a background thread.
  */
 - (void)setNeedsDisplay;
 
 /**
  * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
- * 
- * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
- * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
- *
- * Note: ASCellNode has special behavior in that calling this method will automatically notify 
- * the containing ASTableView / ASCollectionView that the cell should be resized, if necessary.
  */
 - (void)setNeedsLayout;
 
+/**
+ * Recalculate the receiver’s layout, if required.
+ *
+ * When this message is received, the layer’s super layers are traversed until a ancestor layer is found that does not require layout. Then layout is performed on the entire layer-tree beneath that ancestor.
+ */
 - (void)layoutIfNeeded;
 
 @property (nonatomic, strong, nullable) id contents;                           // default=nil
