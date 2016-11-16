@@ -443,7 +443,7 @@
 		CC3B20901C3F892D00798563 /* ASBridgedPropertiesTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208F1C3F892D00798563 /* ASBridgedPropertiesTests.mm */; };
 		CC4981B31D1A02BE004E13CC /* ASTableViewThrashTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4981B21D1A02BE004E13CC /* ASTableViewThrashTests.m */; };
 		CC4981BD1D1C7F65004E13CC /* NSIndexSet+ASHelpers.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4981BB1D1C7F65004E13CC /* NSIndexSet+ASHelpers.m */; };
-		CC4C2A771D88E3BF0039ACAB /* ASTraceEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4C2A751D88E3BF0039ACAB /* ASTraceEvent.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CC4C2A771D88E3BF0039ACAB /* ASTraceEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4C2A751D88E3BF0039ACAB /* ASTraceEvent.h */; };
 		CC4C2A781D88E3BF0039ACAB /* ASTraceEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4C2A761D88E3BF0039ACAB /* ASTraceEvent.m */; };
 		CC4C2A791D88E3BF0039ACAB /* ASTraceEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4C2A761D88E3BF0039ACAB /* ASTraceEvent.m */; };
 		CC4C2A7A1D8902350039ACAB /* ASTraceEvent.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = CC4C2A751D88E3BF0039ACAB /* ASTraceEvent.h */; };
@@ -479,7 +479,7 @@
 		DE89C1701DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.h in Headers */ = {isa = PBXBuildFile; fileRef = DE89C16A1DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.h */; };
 		DE89C1711DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DE89C16B1DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.m */; };
 		DE89C1731DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.m in Sources */ = {isa = PBXBuildFile; fileRef = DE89C16B1DCEB9CC00D49D74 /* ASLayoutElementInspectorCell.m */; };
-		DE89C1741DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.h in Headers */ = {isa = PBXBuildFile; fileRef = DE89C16C1DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		DE89C1741DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.h in Headers */ = {isa = PBXBuildFile; fileRef = DE89C16C1DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.h */; };
 		DE89C1751DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DE89C16D1DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.m */; };
 		DE89C1771DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.m in Sources */ = {isa = PBXBuildFile; fileRef = DE89C16D1DCEB9CC00D49D74 /* ASLayoutElementInspectorNode.m */; };
 		DE89C1781DCEB9CC00D49D74 /* ASLayoutSpec+Debug.h in Headers */ = {isa = PBXBuildFile; fileRef = DE89C16E1DCEB9CC00D49D74 /* ASLayoutSpec+Debug.h */; };
