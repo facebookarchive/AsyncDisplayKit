@@ -741,7 +741,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   __instanceLock__.unlock();
 }
 
-// TODO: Pass in oldSize and new layout
+// TODO: coalesc: Pass in oldSize and new layout
 - (void)displayNodeDidInvalidateSizeOldSize:(CGSize)size
 {
   ASDisplayNodeAssertThreadAffinity(self);
@@ -1423,7 +1423,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
  */
 - (void)__layoutIfNeeded
 {
-  // TODO: Nothing in here yet
+  // TODO: calesc: What should happen in here? Especially if we layoutIfNeeded is called and the view / layer is not created yet
+  [self __layoutSublayers];
 }
 
 - (void)__setNeedsDisplay

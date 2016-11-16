@@ -90,7 +90,7 @@
     return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[stack1, stack2, node5]];
   };
   
-  ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
+  ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)));
   [node layoutIfNeeded];
 
   XCTAssertEqual(node.subnodes[0], node1);
@@ -126,7 +126,7 @@
     }
   };
   
-  ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
+  ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)));
   [node layoutIfNeeded];
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
@@ -199,7 +199,7 @@
   dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     
     // Measurement happens in the background
-    ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
+    ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
     
     // Dispatch back to the main thread to let the insertion / deletion of subnodes happening
     dispatch_async(dispatch_get_main_queue(), ^{
@@ -214,7 +214,7 @@
         node.layoutState = @2;
         [node setNeedsLayout];
     
-        ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
+        ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
         
         // Dispatch back to the main thread to let the insertion / deletion of subnodes happening
         dispatch_async(dispatch_get_main_queue(), ^{
@@ -261,7 +261,7 @@
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Fix IHM layout transition also if one node is already loaded"];
   
-  ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
+  ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
   [node layoutIfNeeded];
   XCTAssertEqual(node.subnodes[0], node1);
   

@@ -29,7 +29,7 @@
     return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(5, 5, 5, 5) child:subnode];
   };
 
-  ASDisplayNodeSizeToFitSize(node, CGSizeMake(INFINITY, INFINITY));
+  ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
   ASSnapshotVerifyNode(node, nil);
 }
 

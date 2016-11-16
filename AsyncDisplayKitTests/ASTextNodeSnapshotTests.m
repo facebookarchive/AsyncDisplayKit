@@ -43,11 +43,11 @@
   
   ASLayout *layout = [textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 80))];
   textNode.frame = CGRectMake(50, 50, layout.size.width, layout.size.height);
-  
-  textNode.highlightRange = NSMakeRange(0, textNode.attributedText.length);
 
   [backgroundView addSubview:textNode.view];
   backgroundView.frame = UIEdgeInsetsInsetRect(textNode.bounds, UIEdgeInsetsMake(-50, -50, -50, -50));
+  
+  textNode.highlightRange = NSMakeRange(0, textNode.attributedText.length);
 
   [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:textNode];
   ASSnapshotVerifyLayer(backgroundView.layer, nil);
@@ -90,7 +90,7 @@
   textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Quality is Important" attributes:@{ NSForegroundColorAttributeName: [UIColor blueColor], NSFontAttributeName: [UIFont italicSystemFontOfSize:24] }];
   // Set exclusion paths to trigger slow path
   textNode.exclusionPaths = @[ [UIBezierPath bezierPath] ];
-  ASDisplayNodeSizeToFitSize(textNode, CGSizeMake(100, 50));
+  ASDisplayNodeSizeToFitSizeRange(textNode, ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 50)));
   ASSnapshotVerifyNode(textNode, nil);
 }
 
@@ -102,7 +102,7 @@
   textNode.shadowOpacity = 0.3;
   textNode.shadowRadius = 3;
   textNode.shadowOffset = CGSizeMake(0, 1);
-  ASDisplayNodeSizeToFitSize(textNode, CGSizeMake(INFINITY, INFINITY));
+  ASDisplayNodeSizeToFitSizeRange(textNode, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
   ASSnapshotVerifyNode(textNode, nil);
 }
 
