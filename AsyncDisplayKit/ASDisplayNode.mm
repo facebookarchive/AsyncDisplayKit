@@ -713,9 +713,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // Mark the node for layout in the next layout pass
   [self invalidateCalculatedLayout];
   
-  // Hook for subclasses to get size invalidation changes
-  [self didInvalidateSize];
-  
   if (_supernode) {
     ASDisplayNode *supernode = _supernode;
     __instanceLock__.unlock();
@@ -725,15 +722,35 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return;
   }
   
-  // We are now at the root node trigger a layout pass
-  [self setNeedsLayout];
+  // Calculate a new pending layout. It will be applied in the next layout pass
+  ASLayout *layout = [self layoutThatFits:_calculatedDisplayNodeLayout->constrainedSize];
+  if (CGSizeEqualToSize(self.bounds.size, layout.size) == NO) {
+    // If the size of the layout changes inform the node of this
+    [self displayNodeDidInvalidateSizeOldSize:self.bounds.size];
+  }
+  
   
   __instanceLock__.unlock();
 }
 
-- (void)didInvalidateSize
+- (void)displayNodeDidInvalidateSizeOldSize:(CGSize)size
 {
+  // The default implementation of display node changes the size of itself to the new size
+  CGRect oldBounds = self.bounds;
+  CGSize oldSize = oldBounds.size;
+  CGSize newSize = _calculatedDisplayNodeLayout->layout.size;
+  
+  if (! CGSizeEqualToSize(oldSize, newSize)) {
+    self.bounds = (CGRect){ oldBounds.origin, newSize };
     
+    // Frame's origin must be preserved. Since it is computed from bounds size, anchorPoint
+    // and position (see frame setter in ASDisplayNode+UIViewBridge), position needs to be adjusted.
+    CGPoint anchorPoint = self.anchorPoint;
+    CGPoint oldPosition = self.position;
+    CGFloat xDelta = (newSize.width - oldSize.width) * anchorPoint.x;
+    CGFloat yDelta = (newSize.height - oldSize.height) * anchorPoint.y;
+    self.position = CGPointMake(oldPosition.x + xDelta, oldPosition.y + yDelta);
+  }
 }
 
 - (void)sizeToFit
@@ -1462,8 +1479,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDN::MutexLocker l(__instanceLock__);
   CGRect bounds = _threadSafeBounds;
   
-  NSLog(@"haha");
-
   if (CGRectEqualToRect(bounds, CGRectZero)) {
     // Performing layout on a zero-bounds view often results in frame calculations
     // with negative sizes after applying margins, which will cause
@@ -1503,14 +1518,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     return;
   }
+
   
-  // Check if we have to do a measure pass as the calculated layout cannot be reused
-  if (_calculatedDisplayNodeLayout->isDirty() == NO && CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, bounds.size))
+  // Check if we can reuse the calculated display node layout
+  if (_pendingDisplayNodeLayout == nullptr &&
+      _calculatedDisplayNodeLayout->isDirty() == NO &&
+      CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, bounds.size))
   {
+    // Reuse calculatedDisplayNodeLayout for layout pass
     return;
   }
     
-  // Calculated layout is not reusable try the pending layout
+  // Calcualted layout is not reusable we need to transform to a new one
   [self cancelLayoutTransition];
     
   BOOL didCreateNewContext = NO;
@@ -1529,18 +1548,26 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       didOverrideExistingContext = YES;
     }
   }
-
-  // Prepare for layout transition
+  
+  // Figure out previos and pending layout for layout transition
   auto previousLayout = _calculatedDisplayNodeLayout;
   auto pendingLayout = [=]() -> std::shared_ptr<ASDisplayNodeLayout> {
-    // Check if  the pending display node layout can be used
-    if (_pendingDisplayNodeLayout != nullptr && CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, bounds.size)) {
+    // Check if  the pending display node layout can be used to transition to
+    if (_pendingDisplayNodeLayout != nullptr &&
+        _pendingDisplayNodeLayout->isDirty() == NO &&
+        CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, bounds.size)) {
       return _pendingDisplayNodeLayout;
     }
   
-    // Pending layout cannot be used let's use the frame size to calculate the pending layout
     CGSize parentSize = bounds.size;
     ASSizeRange constrainedSize = ASSizeRangeMake(parentSize);
+    
+    // Checkout if constrained size of layouts can be reused
+    if (_pendingDisplayNodeLayout != nullptr) {
+      constrainedSize = _pendingDisplayNodeLayout->constrainedSize;
+    } else if (CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, CGSizeZero) == NO) {
+      constrainedSize = _calculatedDisplayNodeLayout->constrainedSize;
+    }
     
     return std::make_shared<ASDisplayNodeLayout>(
       [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
@@ -1548,6 +1575,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       parentSize
     );
   }();
+  
+  // If the size of the new layout we wan to apply did change from the current bounds invalidate the whole tree up
+  // so the root node can resize in case it needs to be
+  if (CGSizeEqualToSize(self.bounds.size, pendingLayout->layout.size) == NO) {
+    [self invalidateSize];
+  }
 
   if (didCreateNewContext) {
     ASLayoutElementClearCurrentContext();
@@ -1555,7 +1588,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     context.needsVisualizeNode = !context.needsVisualizeNode;
     ASLayoutElementSetCurrentContext(context);
   }
-    
+
+  // Finally transition to pendingLayout
   ASDisplayNodeAssertNotNil(pendingLayout->layout, @"pendintLayout->layout should not be nil! %@", self);
 
   _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self

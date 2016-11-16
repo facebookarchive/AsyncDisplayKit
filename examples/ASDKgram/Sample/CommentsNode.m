@@ -79,7 +79,7 @@
       labelsIndex++;
     }
     
-    [self invalidateSize];
+    [self setNeedsLayout];
   }
 }
 

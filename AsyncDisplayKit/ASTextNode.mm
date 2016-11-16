@@ -330,7 +330,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   BOOL needsUpdate = !UIEdgeInsetsEqualToEdgeInsets(textContainerInset, _textContainerInset);
   if (needsUpdate) {
     _textContainerInset = textContainerInset;
-    [self invalidateSize];
+    [self setNeedsLayout];
   }
 }
 
@@ -486,7 +486,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 
   // Tell the display node superclasses that the cached layout is incorrect now
-  [self invalidateSize];
+  [self setNeedsLayout];
 
   // Force display to create renderer with new size and redisplay with new string
   [self setNeedsDisplay];
@@ -509,7 +509,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   _exclusionPaths = [exclusionPaths copy];
   [self _invalidateRenderer];
-  [self invalidateSize];
+  [self setNeedsLayout];
   [self setNeedsDisplay];
 }
 

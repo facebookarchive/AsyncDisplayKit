@@ -118,10 +118,8 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   _viewControllerNode.frame = self.bounds;
 }
 
-- (void)didInvalidateSize
+- (void)displayNodeDidInvalidateSizeOldSize:(CGSize)oldSize
 {
-  CGSize oldSize = self.calculatedSize;
-  
   ASSizeRange constrainedSize = ASSizeRangeMake(CGSizeZero, CGSizeMake(CGRectGetWidth(self.bounds), CGFLOAT_MAX));
   if (_interactionDelegate != nil) {
     constrainedSize = [_interactionDelegate constrainedSizeForNode:self];

@@ -142,7 +142,7 @@
   [self updateBackgroundImage];
   [self updateImage];
   [self updateTitle];
-  [self invalidateSize];
+  [self setNeedsLayout];
 }
 
 - (void)setDisplaysAsynchronously:(BOOL)displaysAsynchronously
@@ -235,7 +235,7 @@
     return;
   
   _contentSpacing = contentSpacing;
-  [self invalidateSize];
+  [self setNeedsLayout];
 }
 
 - (BOOL)laysOutHorizontally
@@ -251,7 +251,7 @@
     return;
   
   _laysOutHorizontally = laysOutHorizontally;
-  [self invalidateSize];
+  [self setNeedsLayout];
 }
 
 - (ASVerticalAlignment)contentVerticalAlignment
