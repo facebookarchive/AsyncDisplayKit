@@ -60,7 +60,6 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   
   for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
     //ASDisplayNodeAssert(![indexPathSet containsObject:la.indexPath], @"Shouldn't already contain indexPath");
-    ASDisplayNodeAssert(la.representedElementCategory != UICollectionElementCategoryDecorationView, @"UICollectionView decoration views are not supported by ASCollectionView");
     [indexPathSet addObject:la.indexPath];
   }
 
