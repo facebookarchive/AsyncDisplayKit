@@ -723,21 +723,22 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   // We are the root node and need to re-flow the layout; one of our children requested to have its size re-set.
-  CGSize boundsSize = self.bounds.size;
-  ASSizeRange constrainedSize = [self constrainedSizeForLayoutPass];
-  ASLayout *layout = [self layoutThatFits:constrainedSize];
-  
+  CGSize oldSize = self.bounds.size;
+
   // Figure out constrainedSize to use
-  /*ASLayout *layout = nil;
+  ASSizeRange constrainedSize = ASSizeRangeMake(self.bounds.size);
   if (_pendingDisplayNodeLayout != nullptr) {
-    layout = [self layoutThatFits:_pendingDisplayNodeLayout->constrainedSize];
-  } else {
-    layout = [self layoutThatFits:_calculatedDisplayNodeLayout->constrainedSize];
-  }*/
-  if (CGSizeEqualToSize(boundsSize, layout.size) == NO) {
+    constrainedSize = _pendingDisplayNodeLayout->constrainedSize;
+  } else if (_calculatedDisplayNodeLayout->layout != nil) {
+    constrainedSize = _calculatedDisplayNodeLayout->constrainedSize;
+  }
+
+  // Check if the returned layout has a different size as the current bounds
+  ASLayout *layout = [self layoutThatFits:constrainedSize];
+  if (CGSizeEqualToSize(oldSize, layout.size) == NO) {
     // If the size of the layout changes inform our container (e.g ASTableView, ASCollectionView, ASViewController, ...)
     // that we need it to change our bounds size.
-    [self displayNodeDidInvalidateSizeOldSize:boundsSize];
+    [self displayNodeDidInvalidateSizeOldSize:oldSize];
   }
   
   __instanceLock__.unlock();
@@ -1538,7 +1539,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     
     return std::make_shared<ASDisplayNodeLayout>(
       [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
-      [self constrainedSizeForLayoutPass],
+      constrainedSize,
       parentSize
     );
   }();
