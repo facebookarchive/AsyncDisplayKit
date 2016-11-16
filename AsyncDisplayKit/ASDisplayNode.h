@@ -479,31 +479,6 @@ extern NSInteger const ASDefaultDrawingPriority;
 - (void)recursivelyClearContents;
 
 /**
- * @abstract Calls -clearFetchedData on the receiver and its subnode hierarchy.
- *
- * @discussion Clears any memory-intensive fetched content.
- * This method is used to notify the node that it should purge any content that is both expensive to fetch and to
- * retain in memory.
- *
- * @see [ASDisplayNode(Subclassing) clearFetchedData] and [ASDisplayNode(Subclassing) fetchData]
- */
-- (void)recursivelyClearFetchedData;
-
-/**
- * @abstract Calls -fetchData on the receiver and its subnode hierarchy.
- *
- * @discussion Fetches content from remote sources for the current node and all subnodes.
- *
- * @see [ASDisplayNode(Subclassing) fetchData] and [ASDisplayNode(Subclassing) clearFetchedData]
- */
-- (void)recursivelyFetchData;
-
-/**
- * @abstract Triggers a recursive call to fetchData when the node has an interfaceState of ASInterfaceStatePreload
- */
-- (void)setNeedsDataFetch;
-
-/**
  * @abstract Toggle displaying a placeholder over the node that covers content until the node and all subnodes are
  * displayed.
  *

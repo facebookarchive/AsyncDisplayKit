@@ -55,7 +55,7 @@ typedef void(^ASImageCacherCompletion)(id <ASImageContainerProtocol> _Nullable i
                 completion:(ASImageCacherCompletion)completion;
 
 /**
- @abstract Called during clearFetchedData. Allows the cache to optionally trim items.
+ @abstract Called during clearPreloadedData. Allows the cache to optionally trim items.
  @note Depending on your caches implementation you may *not* wish to respond to this method. It is however useful
  if you have a memory and disk cache in which case you'll likely want to clear out the memory cache.
  */

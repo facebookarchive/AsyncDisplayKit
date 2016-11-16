@@ -1646,7 +1646,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [super endUpdates];
 }
 
-#pragma mark - Memory Management
+#pragma mark - Memory Management (Deprecated in 2.0)
 
 - (void)clearContents
 {
@@ -1655,7 +1655,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)clearFetchedData
 {
-  [_rangeController clearFetchedData];
+  [_rangeController clearPreloadedData];
 }
 
 #pragma mark - Helper Methods

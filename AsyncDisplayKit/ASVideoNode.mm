@@ -11,6 +11,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASVideoNode.h"
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
@@ -365,9 +366,9 @@ static NSString * const kRate = @"rate";
   }
 }
 
-- (void)fetchData
+- (void)preload
 {
-  [super fetchData];
+  [super preload];
   
   ASDN::MutexLocker l(__instanceLock__);
   AVAsset *asset = self.asset;
@@ -405,9 +406,9 @@ static NSString * const kRate = @"rate";
   }
 }
 
-- (void)clearFetchedData
+- (void)clearPreloadedData
 {
-  [super clearFetchedData];
+  [super clearPreloadedData];
   
   {
     ASDN::MutexLocker l(__instanceLock__);
@@ -505,10 +506,10 @@ static NSString * const kRate = @"rate";
 
 - (void)_setAndFetchAsset:(AVAsset *)asset url:(NSURL *)assetURL
 {
-  [self clearFetchedData];
+  [self clearPreloadedData];
   _asset = asset;
   _assetURL = assetURL;
-  [self setNeedsDataFetch];
+  [self setNeedsPreload];
 }
 
 - (void)setVideoComposition:(AVVideoComposition *)videoComposition
@@ -617,7 +618,7 @@ static NSString * const kRate = @"rate";
   }
 
   if (_player == nil) {
-    [self setNeedsDataFetch];
+    [self setNeedsPreload];
   }
 
   if (_playerNode == nil) {
