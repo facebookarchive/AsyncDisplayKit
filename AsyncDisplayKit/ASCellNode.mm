@@ -236,6 +236,12 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   return nil;
 }
 
+- (UIViewController *)viewController
+{
+  ASDisplayNodeAssertMainThread();
+  return _viewController;
+}
+
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 
