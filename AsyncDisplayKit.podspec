@@ -26,7 +26,7 @@ Pod::Spec.new do |spec|
         'AsyncDisplayKit/Layout/*.h',
         'Base/*.h',
         'AsyncDisplayKit/Debug/ASLayoutElementInspectorNode.h',
-	'AsyncDisplayKit/TextKit/ASTextNodeTypes.h',
+        'AsyncDisplayKit/TextKit/ASTextNodeTypes.h',
         'AsyncDisplayKit/TextKit/ASTextKitComponents.h'
     ]
     

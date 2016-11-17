@@ -1,0 +1,22 @@
+[cxx]
+  default_platform = iphonesimulator-x86_64
+  combined_preprocess_and_compile = true
+
+[apple]
+  iphonesimulator_target_sdk_version = 8.0
+  iphoneos_target_sdk_version = 8.0
+  xctool_default_destination_specifier = platform=iOS Simulator, name=iPhone 6, OS=10.2
+
+[alias]
+  lib = //:AsyncDisplayKit
+  tests = //:Tests
+
+[httpserver]
+  port = 8080
+
+[project]
+  ide = xcode
+  ignore = .buckd, \
+           .hg, \
+           .git, \
+           buck-out, \
