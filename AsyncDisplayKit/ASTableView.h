@@ -38,8 +38,8 @@ NS_ASSUME_NONNULL_BEGIN
 /// The corresponding table node, or nil if one does not exist.
 @property (nonatomic, weak, readonly) ASTableNode *tableNode;
 
-@property (nonatomic, weak) id<ASTableDelegate>   asyncDelegate;
-@property (nonatomic, weak) id<ASTableDataSource> asyncDataSource;
+@property (nonatomic, weak) id<ASTableDelegate>   asyncDelegate ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's .delegate property instead.");
+@property (nonatomic, weak) id<ASTableDataSource> asyncDataSource ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode .dataSource property instead.");
 
 /**
  * Retrieves the node for the row at the given index path.
