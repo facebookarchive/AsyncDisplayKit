@@ -16,6 +16,7 @@
 #import "ASCollectionNode.h"
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASCellNode.h"
+#import "ASCollectionView+Undeprecated.h"
 
 @interface ASCollectionView (Private)
 
