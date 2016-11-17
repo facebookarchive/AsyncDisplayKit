@@ -175,6 +175,14 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
  */
 - (BOOL)shouldScheduleDisplayWithNewInterfaceState:(ASInterfaceState)newInterfaceState;
 
+/**
+ * @abstract Informs the root node that the intrinsic size of the receiver is no longer valid.
+ *
+ * @discussion The size of a root node is determined by each subnode. Calling invalidateSize will let the root node know
+ * that the intrinsic size of the receiver node is no longer valid and a resizing of the root node needs to happen.
+ */
+- (void)invalidateSize;
+
 @end
 
 @interface UIView (ASDisplayNodeInternal)

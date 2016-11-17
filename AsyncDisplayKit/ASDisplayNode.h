@@ -254,9 +254,6 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 /** @name Managing dimensions */
 
-// TODO: coalesc: Documentation
-- (void)invalidateSize;
-
 /**
  * @abstract Asks the node to return a layout based on given size range.
  *
@@ -308,6 +305,13 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @return The minimum and maximum constrained sizes used by calculateLayoutThatFits:.
  */
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSizeForCalculatedLayout;
+
+/**
+ * @abstract Sublcass hook for nodes that are acting as root nodes. This method get's called if one of the subnodes
+ * size is invalidated and may need to result in a different size as the current calculated size.
+ */
+- (void)displayNodeDidInvalidateSizeNewSize:(CGSize)newSize;
+
 
 /** @name Managing the nodes hierarchy */
 

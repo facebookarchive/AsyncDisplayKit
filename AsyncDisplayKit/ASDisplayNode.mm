@@ -738,26 +738,21 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (CGSizeEqualToSize(oldSize, layout.size) == NO) {
     // If the size of the layout changes inform our container (e.g ASTableView, ASCollectionView, ASViewController, ...)
     // that we need it to change our bounds size.
-    [self displayNodeDidInvalidateSizeOldSize:oldSize];
+    [self displayNodeDidInvalidateSizeNewSize:layout.size];
   }
   
   __instanceLock__.unlock();
 }
 
 // TODO: coalesc: Pass in oldSize and new layout
-- (void)displayNodeDidInvalidateSizeOldSize:(CGSize)size
+- (void)displayNodeDidInvalidateSizeNewSize:(CGSize)size
 {
   ASDisplayNodeAssertThreadAffinity(self);
   
   // The default implementation of display node changes the size of itself to the new size
   CGRect oldBounds = self.bounds;
   CGSize oldSize = oldBounds.size;
-  CGSize newSize = CGSizeZero;
-  if (_pendingDisplayNodeLayout != nullptr) {
-    newSize = _pendingDisplayNodeLayout->layout.size;
-  } else {
-    newSize = _calculatedDisplayNodeLayout->layout.size;
-  }
+  CGSize newSize = size;
   
   if (! CGSizeEqualToSize(oldSize, newSize)) {
     self.bounds = (CGRect){ oldBounds.origin, newSize };
