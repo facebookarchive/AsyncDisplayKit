@@ -64,9 +64,9 @@ static BOOL __enableHitTestDebug = NO;
 }
 
 // layout method required ONLY when hitTestDebug is enabled
-- (void)layout
+- (void)layoutSubnodes
 {
-  [super layout];
+  [super layoutSubnodes];
   
   if ([ASControlNode enableHitTestDebug]) {
     

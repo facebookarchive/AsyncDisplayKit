@@ -524,9 +524,10 @@
   return spec;
 }
 
-- (void)layout
+- (void)layoutSubnodes
 {
-  [super layout];
+  [super layoutSubnodes];
+    
   _backgroundImageNode.hidden = (_backgroundImageNode.image == nil);
   _imageNode.hidden = (_imageNode.image == nil);
   _titleNode.hidden = (_titleNode.attributedText.length == 0);

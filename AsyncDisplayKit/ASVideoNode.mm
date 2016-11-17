@@ -226,14 +226,15 @@ static NSString * const kRate = @"rate";
   }
 }
 
-- (void)layout
+- (void)layoutSubnodes
 {
-  [super layout];
+  [super layoutSubnodes];
+
   // The _playerNode wraps AVPlayerLayer, and therefore should extend across the entire bounds.
   _playerNode.frame = self.bounds;
 }
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (CGSize)sizeThatFits:(CGSize)constrainedSize
 {
   ASDN::MutexLocker l(__instanceLock__);
   CGSize calculatedSize = constrainedSize;

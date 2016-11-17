@@ -185,12 +185,12 @@ struct ASImageNodeDrawParameters {
 
 #pragma mark - Layout and Sizing
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (CGSize)sizeThatFits:(CGSize)constrainedSize
 {
   ASDN::MutexLocker l(__instanceLock__);
 
   if (_image == nil) {
-    return [super calculateSizeThatFits:constrainedSize];
+    return [super sizeThatFits:constrainedSize];
   }
 
   return _image.size;
@@ -640,9 +640,9 @@ static ASDN::Mutex cacheLock;
 
 #pragma mark - Debug
 
-- (void)layout
+- (void)layoutSubnodes
 {
-  [super layout];
+  [super layoutSubnodes];
   
   if (_debugLabelNode) {
     CGSize boundsSize        = self.bounds.size;

@@ -210,7 +210,8 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  */
 - (void)__setNeedsDisplay;
 
-- (void)__layout;
+- (void)__layoutSubnodes;
+
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 
 /**

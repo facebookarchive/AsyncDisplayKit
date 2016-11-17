@@ -83,7 +83,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
 /**
  * This category implements certain frequently-used properties and methods of UIView and CALayer so that ASDisplayNode clients can just call the view/layer methods on the node,
  * with minimal loss in performance.  Unlike UIView and CALayer methods, these can be called from a non-main thread until the view or layer is created.
- * This allows text sizing in -calculateSizeThatFits: (essentially a simplified layout) to happen off the main thread
+ * This allows text sizing in -sizeThatFits: (essentially a simplified layout) to happen off the main thread
  * without any CALayer or UIView actually existing while still being able to set and read properties from ASDisplayNode instances.
  */
 @implementation ASDisplayNode (UIViewBridge)

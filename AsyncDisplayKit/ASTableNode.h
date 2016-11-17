@@ -504,7 +504,7 @@ NS_ASSUME_NONNULL_BEGIN
  * This is a node-based UITableViewDelegate.
  *
  * Note that -tableView:heightForRowAtIndexPath: has been removed; instead, your custom ASCellNode subclasses are
- * responsible for deciding their preferred onscreen height in -calculateSizeThatFits:.
+ * responsible for deciding their preferred onscreen height in -sizeThatFits:.
  */
 @protocol ASTableDelegate <ASCommonTableViewDelegate, NSObject>
 

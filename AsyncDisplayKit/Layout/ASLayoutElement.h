@@ -250,7 +250,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 /**
  * @abstract Provides a suggested size for a layout element. If the optional minSize or maxSize are provided, 
  * and the preferredSize exceeds these, the minSize or maxSize will be enforced. If this optional value is not 
- * provided, the layout element’s size will default to it’s intrinsic content size provided calculateSizeThatFits:
+ * provided, the layout element’s size will default to it’s intrinsic content size provided sizeThatFits:
  * 
  * @discussion This method is optional, but one of either preferredSize or preferredLayoutSize is required
  * for nodes that either have no intrinsic content size or 
@@ -290,7 +290,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  * than points to specify layout. E.g. width should be 50% of the parent’s width. If the optional minLayoutSize or
  * maxLayoutSize are provided, and the preferredLayoutSize exceeds these, the minLayoutSize or maxLayoutSize 
  * will be enforced. If this optional value is not provided, the layout element’s size will default to its intrinsic content size 
- * provided calculateSizeThatFits:
+ * provided sizeThatFits:
  */
 @property (nonatomic, assign, readwrite) ASLayoutSize preferredLayoutSize;
 

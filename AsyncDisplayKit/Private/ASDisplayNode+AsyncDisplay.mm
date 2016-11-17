@@ -52,7 +52,7 @@
 
   // if super node is rasterizing descendants, subnodes will not have had layout calls because they don't have layers
   if (rasterizingFromAscendent) {
-    [self __layout];
+    [self __layoutSubnodes];
   }
 
   // Capture these outside the display block so they are retained.

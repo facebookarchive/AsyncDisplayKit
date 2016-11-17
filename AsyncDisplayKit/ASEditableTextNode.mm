@@ -235,7 +235,7 @@
   _textInputTraits = nil;
 }
 
-- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+- (CGSize)sizeThatFits:(CGSize)constrainedSize
 {
   ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
   CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
@@ -244,11 +244,11 @@
   return CGSizeMake(std::fmin(width, constrainedSize.width), std::fmin(height, constrainedSize.height));
 }
 
-- (void)layout
+- (void)layoutSubnodes
 {
   ASDisplayNodeAssertMainThread();
 
-  [super layout];
+  [super layoutSubnodes];
   [self _layoutTextView];
 }
 
