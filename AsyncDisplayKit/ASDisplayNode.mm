@@ -1482,12 +1482,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     return;
   }
-
   
   // Check if we can reuse the calculated display node layout. We prefer the _pendingDisplayNodeLayout over the
   // _calculatedDisplayNodeLayout though
   if (_pendingDisplayNodeLayout == nullptr) {
-    if (_calculatedDisplayNodeLayout->isDirty() == NO && CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, bounds.size)) {
+    if (_calculatedDisplayNodeLayout->isDirty() == NO &&
+        CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
       // Reuse calculatedDisplayNodeLayout for layout pass
       return;
     }
@@ -1519,7 +1519,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // Check if  the pending display node layout can be used to transition to
     if (_pendingDisplayNodeLayout != nullptr &&
         _pendingDisplayNodeLayout->isDirty() == NO &&
-        CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, bounds.size)) {
+        CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
       // We assume the _pendingDisplayNodeLayout was created by layoutThatFits: to set the size of the node
       // now it's time to apply it and to become the _calculatedDisplayNodeLayout
       return _pendingDisplayNodeLayout;
@@ -1541,7 +1541,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   // If the size of the new layout to apply did change from the current bounds, invalidate the whole tree up
   // so the root node can handle a resizing if necessary
-  if (CGSizeEqualToSize(CGSizeMake(ASCeilPixelValue(self.bounds.size.width), ASCeilPixelValue(self.bounds.size.height)), pendingLayout->layout.size) == NO) {
+  if (CGSizeEqualToSize(ASCeilSizeValues(bounds.size), pendingLayout->layout.size) == NO) {
     [self invalidateSize];
   }
 
@@ -1574,12 +1574,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASSizeRange constrainedSize = ASSizeRangeMake(bounds.size);
   
   // Checkout if constrained size of pending or calculated display node layout can be used
-  if (_pendingDisplayNodeLayout != nullptr && CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, bounds.size)) {
+  if (_pendingDisplayNodeLayout != nullptr && CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
     // We assume the size from the last returned layoutThatFits: layout was applied so use the pejnding display node
     // layout constrained size
     constrainedSize = _pendingDisplayNodeLayout->constrainedSize;
   } else if (CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, CGSizeZero) == NO &&
-             CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, bounds.size)) {
+             CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
     // We assume the  _calculatedDisplayNodeLayout is still valid and the frame is not different
     constrainedSize = _calculatedDisplayNodeLayout->constrainedSize;
   } else {

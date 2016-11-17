@@ -95,10 +95,20 @@ CGFloat ASScreenScale()
   return __scale;
 }
 
+CGSize ASFloorSizeValues(CGSize s)
+{
+  return CGSizeMake(ASFloorPixelValue(s.width), ASFloorPixelValue(s.height));
+}
+
 CGFloat ASFloorPixelValue(CGFloat f)
 {
   CGFloat scale = ASScreenScale();
   return floor(f * scale) / scale;
+}
+
+CGSize ASCeilSizeValues(CGSize s)
+{
+  return CGSizeMake(ASCeilPixelValue(s.width), ASCeilPixelValue(s.height));
 }
 
 CGFloat ASCeilPixelValue(CGFloat f)
