@@ -1420,14 +1420,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self invalidateCalculatedLayout];
 }
 
-/**
- * The node's supernodes are traversed until a ancestor node is found that does not require layout. Then layout
- * is performed on the entire node-tree beneath that ancestor
- */
 - (void)__layoutIfNeeded
 {
-  // TODO: calesc: What should happen in here? Especially if we layoutIfNeeded is called and the view / layer is not created yet
-  [self __layoutSublayers];
+  // For now this is a no op.
 }
 
 - (void)__setNeedsDisplay
@@ -1546,7 +1541,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   // If the size of the new layout to apply did change from the current bounds, invalidate the whole tree up
   // so the root node can handle a resizing if necessary
-  if (CGSizeEqualToSize(self.bounds.size, pendingLayout->layout.size) == NO) {
+  if (CGSizeEqualToSize(CGSizeMake(ASCeilPixelValue(self.bounds.size.width), ASCeilPixelValue(self.bounds.size.height)), pendingLayout->layout.size) == NO) {
     [self invalidateSize];
   }
 

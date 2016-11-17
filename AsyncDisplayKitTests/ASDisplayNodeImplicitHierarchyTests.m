@@ -91,6 +91,7 @@
   };
   
   ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)));
+  [node view];
   [node layoutIfNeeded];
 
   XCTAssertEqual(node.subnodes[0], node1);
@@ -127,6 +128,7 @@
   };
   
   ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)));
+  [node view];
   [node layoutIfNeeded];
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
@@ -192,6 +194,7 @@
   };
   
   // Intentionally trigger view creation
+  [node view];
   [node2 view];
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Fix IHM layout also if one node is already loaded"];
@@ -205,6 +208,7 @@
     dispatch_async(dispatch_get_main_queue(), ^{
       
       // Layout on main
+      [node setNeedsLayout];
       [node layoutIfNeeded];
       XCTAssertEqual(node.subnodes[0], node1);
       
