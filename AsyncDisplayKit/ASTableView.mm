@@ -197,6 +197,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 @end
 
 @implementation ASTableView
+{
+  id<ASTableDelegate> _asyncDelegate;
+  id<ASTableDataSource> _asyncDataSource;
+}
 
 // Using _ASDisplayLayer ensures things like -layout are properly forwarded to ASTableNode.
 + (Class)layerClass
@@ -299,6 +303,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASDisplayNodeAssert(delegate == nil, @"ASTableView uses asyncDelegate, not UITableView's delegate property.");
 }
 
+- (id<ASTableDataSource>)asyncDataSource
+{
+  return _asyncDataSource;
+}
+
 - (void)setAsyncDataSource:(id<ASTableDataSource>)asyncDataSource
 {
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
@@ -336,6 +345,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
   
   super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
+}
+
+- (id<ASTableDelegate>)asyncDelegate
+{
+  return _asyncDelegate;
 }
 
 - (void)setAsyncDelegate:(id<ASTableDelegate>)asyncDelegate

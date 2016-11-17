@@ -224,8 +224,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 @end
 
 @implementation ASCollectionView
-@synthesize asyncDelegate = _asyncDelegate;
-@synthesize asyncDataSource = _asyncDataSource;
+{
+  id<ASCollectionDelegate> _asyncDelegate;
+  id<ASCollectionDataSource> _asyncDataSource;
+}
 
 // Using _ASDisplayLayer ensures things like -layout are properly forwarded to ASCollectionNode.
 + (Class)layerClass
@@ -363,6 +365,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
+- (id<ASCollectionDataSource>)asyncDataSource
+{
+  return _asyncDataSource;
+}
+
 - (void)setAsyncDataSource:(id<ASCollectionDataSource>)asyncDataSource
 {
   // Note: It's common to check if the value hasn't changed and short-circuit but we aren't doing that here to handle
@@ -408,6 +415,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_layoutInspectorFlags.didChangeCollectionViewDataSource) {
     [layoutInspector didChangeCollectionViewDataSource:asyncDataSource];
   }
+}
+
+- (id<ASCollectionDelegate>)asyncDelegate
+{
+  return _asyncDelegate;
 }
 
 - (void)setAsyncDelegate:(id<ASCollectionDelegate>)asyncDelegate

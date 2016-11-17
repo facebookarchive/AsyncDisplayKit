@@ -16,6 +16,7 @@
 #import "ASPagerFlowLayout.h"
 #import "ASAssert.h"
 #import "ASCellNode.h"
+#import "ASCollectionView+Undeprecated.h"
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
