@@ -237,19 +237,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   return [self _rendererWithBounds:self.threadSafeBounds];
 }
 
-- (ASTextKitRenderer *)_rendererWithBoundsSlow:(CGRect)bounds
-{
-  ASDN::MutexLocker l(__instanceLock__);
-
-  CGSize constrainedSize = bounds.size;
-  if (_constrainedSize.width == -INFINITY) {
-    constrainedSize.width -= (_textContainerInset.left + _textContainerInset.right);
-    constrainedSize.height -= (_textContainerInset.top + _textContainerInset.bottom);
-  }
-  return [[ASTextKitRenderer alloc] initWithTextKitAttributes:[self _rendererAttributes]
-                                              constrainedSize:constrainedSize];
-}
-
 - (ASTextKitRenderer *)_rendererWithBounds:(CGRect)bounds
 {
   ASDN::MutexLocker l(__instanceLock__);
@@ -416,7 +403,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
   [self setNeedsDisplay];
   
-  CGSize size = [self _rendererWithBoundsSlow:{.size=constrainedSize}].size;
+  CGSize size = [self _renderer].size;
   if (_attributedText.length > 0) {
     self.style.ascender = [[self class] ascenderWithAttributedString:_attributedText];
     self.style.descender = [[_attributedText attribute:NSFontAttributeName atIndex:_attributedText.length - 1 effectiveRange:NULL] descender];
@@ -486,7 +473,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 
   // Tell the display node superclasses that the cached layout is incorrect now
-  [self setNeedsLayout];
+  [self invalidateCalculatedLayout];
 
   // Force display to create renderer with new size and redisplay with new string
   [self setNeedsDisplay];
@@ -509,7 +496,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   _exclusionPaths = [exclusionPaths copy];
   [self _invalidateRenderer];
-  [self setNeedsLayout];
+  [self invalidateCalculatedLayout];
   [self setNeedsDisplay];
 }
 
@@ -549,7 +536,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   CGContextTranslateCTM(context, _textContainerInset.left, _textContainerInset.top);
   
-  ASTextKitRenderer *renderer = [self _rendererWithBoundsSlow:drawParameterBounds];
+  ASTextKitRenderer *renderer = [self _rendererWithBounds:drawParameterBounds];
   
   // Fill background
   if (backgroundColor != nil) {
