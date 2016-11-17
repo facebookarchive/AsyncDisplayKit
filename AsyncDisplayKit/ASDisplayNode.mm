@@ -307,7 +307,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self _staticInitialize];
 
 #if ASEVENTLOG_ENABLE
-  _eventLog = [[ASEventLog alloc] init];
+  _eventLog = [[ASEventLog alloc] initWithObject:self];
 #endif
   
   _contentsScaleForDisplay = ASScreenScale();
