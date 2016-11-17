@@ -111,12 +111,6 @@
   };
   
   XCTAssertThrows([node layoutThatFits:ASSizeRangeMake(CGSizeMake(0, FLT_MAX))]);
-  
-  // This dance is necessary as we would assert in case we create an ASDimension that is not real numbers
-  ASDimension width = displayNode.style.width;
-  width.value = INFINITY;
-  displayNode.style.width = width;
-  XCTAssertThrows([node layoutThatFits:ASSizeRangeMake(CGSizeMake(0, 0), CGSizeMake(INFINITY, INFINITY))]);
 }
 
 - (void)testThatLayoutCreatedWithInvalidSizeCausesException
