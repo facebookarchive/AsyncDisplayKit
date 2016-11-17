@@ -473,7 +473,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 
   // Tell the display node superclasses that the cached layout is incorrect now
-  [self invalidateCalculatedLayout];
+  [self setNeedsLayout];
 
   // Force display to create renderer with new size and redisplay with new string
   [self setNeedsDisplay];
