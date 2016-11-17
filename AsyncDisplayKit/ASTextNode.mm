@@ -496,7 +496,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   _exclusionPaths = [exclusionPaths copy];
   [self _invalidateRenderer];
-  [self invalidateCalculatedLayout];
+  [self setNeedsLayout];
   [self setNeedsDisplay];
 }
 
