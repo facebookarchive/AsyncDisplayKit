@@ -15,10 +15,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * This method is dealloc safe.
  */
-- (instancetype)initWithObject:(id)object
-                     backtrace:(nullable NSArray<NSString *> *)backtrace
-                        format:(NSString *)format
-                     arguments:(va_list)arguments NS_FORMAT_FUNCTION(3,0);
+- (instancetype)initWithBacktrace:(nullable NSArray<NSString *> *)backtrace
+                           format:(NSString *)format
+                        arguments:(va_list)arguments NS_FORMAT_FUNCTION(2,0);
 
 // Will be nil unless AS_SAVE_EVENT_BACKTRACES=1 (default=0)
 @property (nonatomic, nullable, readonly) NSArray<NSString *> *backtrace;
