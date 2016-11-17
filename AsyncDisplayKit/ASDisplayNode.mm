@@ -744,7 +744,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   __instanceLock__.unlock();
 }
 
-// TODO: coalesc: Pass in oldSize and new layout
 - (void)displayNodeDidInvalidateSizeNewSize:(CGSize)size
 {
   ASDisplayNodeAssertThreadAffinity(self);
@@ -780,8 +779,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDN::MutexLocker l(__instanceLock__);
   
   if (_calculatedDisplayNodeLayout->isValidForConstrainedSizeParentSize(constrainedSize, parentSize)) {
-    ASDisplayNodeAssertNotNil(_calculatedDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _layout should not be nil! %@", self);
-    return _calculatedDisplayNodeLayout->layout ? : [ASLayout layoutWithLayoutElement:self size:{0, 0}];
+    ASDisplayNodeAssertNotNil(_calculatedDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _calculatedDisplayNodeLayout->layout should not be nil! %@", self);
+    return _calculatedDisplayNodeLayout->layout ?: [ASLayout layoutWithLayoutElement:self size:{0, 0}];
   }
   
   // Creat a pending display node layout for the layout pass
@@ -790,8 +789,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     constrainedSize,
     parentSize
   );
-  ASDisplayNodeAssertNotNil(_pendingDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _layout should not be nil! %@", self);
-  return _pendingDisplayNodeLayout->layout;
+  
+  ASDisplayNodeAssertNotNil(_pendingDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _pendingDisplayNodeLayout->layout should not be nil! %@", self);
+  return _pendingDisplayNodeLayout->layout ?: [ASLayout layoutWithLayoutElement:self size:{0, 0}];
 }
 
 - (ASLayoutElementType)layoutElementType
@@ -1432,7 +1432,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 // These private methods ensure that subclasses are not required to call super in order for _renderingSubnodes to be properly managed.
 
-- (void)__layoutSublayers
+- (void)__layout
 {
   ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(__instanceLock__);
@@ -1444,8 +1444,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // measureWithSizeRange: on subnodes to assert.
     return;
   }
-    
-  [self measureNodeWithBoundsIfNecessary:bounds];
+
+  // This method will confirm that the layout is up to date (and update if needed).
+  // Importantly, it will also APPLY the layout to all of our subnodes if there is not already another layout
+  // transition in progress.
+  [self _locked_measureNodeWithBoundsIfNecessary:bounds];
   _pendingDisplayNodeLayout = nullptr;
   
   // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
@@ -1460,7 +1463,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 }
 
 /// Needs to be called with lock held
-- (void)measureNodeWithBoundsIfNecessary:(CGRect)bounds
+- (void)_locked_measureNodeWithBoundsIfNecessary:(CGRect)bounds
 {
   // Check if it's a subnode in a layout transition. In this case no measurement is needed as it's part of
   // the layout transition
@@ -1488,7 +1491,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
   }
   
-  // calculatedDisplayNodeLayout is not reusable we need to transition to a new one
+  // _calculatedDisplayNodeLayout is not reusable we need to transition to a new one
   [self cancelLayoutTransition];
   
   BOOL didCreateNewContext = NO;
@@ -1548,7 +1551,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   // Finally transition to pendingLayout
-  ASDisplayNodeAssertNotNil(pendingLayout->layout, @"pendintLayout->layout should not be nil! %@", self);
+  ASDisplayNodeAssertNotNil(pendingLayout->layout, @"pendingLayout->layout should not be nil! %@", self);
 
   _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
                                                         pendingLayout:pendingLayout
@@ -1564,25 +1567,23 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (ASSizeRange)constrainedSizeForLayoutPass
 {
-  // Use as default constrained size the bounds
   CGRect bounds = self.threadSafeBounds;
-  ASSizeRange constrainedSize = ASSizeRangeMake(bounds.size);
   
   // Checkout if constrained size of pending or calculated display node layout can be used
   if (_pendingDisplayNodeLayout != nullptr && CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
-    // We assume the size from the last returned layoutThatFits: layout was applied so use the pejnding display node
+    // We assume the size from the last returned layoutThatFits: layout was applied so use the pending display node
     // layout constrained size
-    constrainedSize = _pendingDisplayNodeLayout->constrainedSize;
+    return _pendingDisplayNodeLayout->constrainedSize;
   } else if (CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, CGSizeZero) == NO &&
              CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
     // We assume the  _calculatedDisplayNodeLayout is still valid and the frame is not different
-    constrainedSize = _calculatedDisplayNodeLayout->constrainedSize;
+    return _calculatedDisplayNodeLayout->constrainedSize;
   } else {
     // In this case neither the _pendingDisplayNodeLayout or the _calculatedDisplayNodeLayout constrained size can
     // be reused, so the current bounds is used. This is usual the case if a frame was set manually that differs to
     // the one returned from layoutThatFits: or layoutThatFits: was never called
+    return ASSizeRangeMake(bounds.size);
   }
-  return constrainedSize;
 }
 
 - (void)layoutDidFinish

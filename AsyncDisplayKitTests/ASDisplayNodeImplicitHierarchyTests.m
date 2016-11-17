@@ -91,8 +91,7 @@
   };
   
   ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)));
-  [node view];
-  [node layoutIfNeeded];
+  [node.view layoutIfNeeded];
 
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
@@ -128,14 +127,13 @@
   };
   
   ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)));
-  [node view];
-  [node layoutIfNeeded];
+  [node.view layoutIfNeeded];
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
   
   node.layoutState = @2;
   [node setNeedsLayout]; // After a state change the layout needs to be invalidated
-  [node layoutIfNeeded]; // A new layout pass will trigger the hiearchy transition
+  [node.view layoutIfNeeded]; // A new layout pass will trigger the hiearchy transition
 
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node3);
@@ -209,7 +207,7 @@
       
       // Layout on main
       [node setNeedsLayout];
-      [node layoutIfNeeded];
+      [node.view layoutIfNeeded];
       XCTAssertEqual(node.subnodes[0], node1);
       
       dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -224,7 +222,7 @@
         dispatch_async(dispatch_get_main_queue(), ^{
           
           // Layout on main again
-          [node layoutIfNeeded];
+          [node.view layoutIfNeeded];
           XCTAssertEqual(node.subnodes[0], node2);
           
           [expectation fulfill];
@@ -259,14 +257,13 @@
   };
  
   // Intentionally trigger view creation
-  [node view];
   [node1 view];
   [node2 view];
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Fix IHM layout transition also if one node is already loaded"];
   
   ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
-  [node layoutIfNeeded];
+  [node.view layoutIfNeeded];
   XCTAssertEqual(node.subnodes[0], node1);
   
   node.layoutState = @2;

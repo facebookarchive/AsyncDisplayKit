@@ -142,7 +142,6 @@
   [self updateBackgroundImage];
   [self updateImage];
   [self updateTitle];
-  [self setNeedsLayout];
 }
 
 - (void)setDisplaysAsynchronously:(BOOL)displaysAsynchronously

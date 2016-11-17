@@ -306,12 +306,6 @@ extern NSInteger const ASDefaultDrawingPriority;
  */
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSizeForCalculatedLayout;
 
-/**
- * @abstract Sublcass hook for nodes that are acting as root nodes. This method get's called if one of the subnodes
- * size is invalidated and may need to result in a different size as the current calculated size.
- */
-- (void)displayNodeDidInvalidateSizeNewSize:(CGSize)newSize;
-
 
 /** @name Managing the nodes hierarchy */
 
@@ -647,13 +641,6 @@ extern NSInteger const ASDefaultDrawingPriority;
  * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
  */
 - (void)setNeedsLayout;
-
-/**
- * Recalculate the receiver’s layout, if required.
- *
- * When this message is received, the layer’s super layers are traversed until a ancestor layer is found that does not require layout. Then layout is performed on the entire layer-tree beneath that ancestor.
- */
-- (void)layoutIfNeeded;
 
 @property (nonatomic, strong, nullable) id contents;                           // default=nil
 @property (nonatomic, assign)           BOOL clipsToBounds;                    // default==NO

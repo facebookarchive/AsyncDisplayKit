@@ -29,12 +29,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
 
-/// Returns the constrained size for the given node
-- (ASSizeRange)constrainedSizeForNode:(ASCellNode *)node;
-
-// TODO: coalesc: Maybe we should push the relayout of nodes to the table / collection node?
-//- (void)relayoutNodeIfNeecessary:(ASCellNode *)node;
-
 /*
  * Methods to be called whenever the selection or highlight state changes
  * on ASCellNode. UIKit internally stores these values to update reusable cells.

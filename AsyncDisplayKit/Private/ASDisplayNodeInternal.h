@@ -208,12 +208,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)__setNeedsLayout;
 
 /**
- * The node's supernodes are traversed until a ancestor node is found that does not require layout. Then layout
- * is performed on the entire node-tree beneath that ancestor
- */
-- (void)__layoutIfNeeded;
-
-/**
  * Invoked after a call to setNeedsDisplay to the underlying view
  */
 - (void)__setNeedsDisplay;
@@ -221,7 +215,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 /**
  * Called from [CALayer layoutSublayers:]. Executes the layout pass for the node
  */
-- (void)__layoutSublayers;
+- (void)__layout;
 
 /*
  * Internal method to set the supernode

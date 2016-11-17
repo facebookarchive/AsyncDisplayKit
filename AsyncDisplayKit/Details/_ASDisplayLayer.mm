@@ -122,12 +122,6 @@
   ASDisplayNodeAssertMainThread();
   [super setNeedsLayout];
 }
-
-- (void)layoutIfNeeded
-{
-  ASDisplayNodeAssertMainThread();
-  [super layoutIfNeeded];
-}
 #endif
 
 - (void)layoutSublayers
@@ -135,7 +129,7 @@
   ASDisplayNodeAssertMainThread();
   [super layoutSublayers];
 
-  [self.asyncdisplaykit_node __layoutSublayers];
+  [self.asyncdisplaykit_node __layout];
 }
 
 - (void)setNeedsDisplay

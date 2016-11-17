@@ -183,6 +183,12 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
  */
 - (void)invalidateSize;
 
+/**
+ * @abstract Subclass hook for nodes that are acting as root nodes. This method is called if one of the subnodes
+ * size is invalidated and may need to result in a different size as the current calculated size.
+ */
+- (void)displayNodeDidInvalidateSizeNewSize:(CGSize)newSize;
+
 @end
 
 @interface UIView (ASDisplayNodeInternal)
