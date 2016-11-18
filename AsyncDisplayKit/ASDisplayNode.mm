@@ -1442,6 +1442,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // Performing layout on a zero-bounds view often results in frame calculations
     // with negative sizes after applying margins, which will cause
     // measureWithSizeRange: on subnodes to assert.
+    LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     return;
   }
 
@@ -1451,12 +1452,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self _locked_measureNodeWithBoundsIfNecessary:bounds];
   _pendingDisplayNodeLayout = nullptr;
   
-  // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
-  // was created
-  if ([self _shouldHavePlaceholderLayer]) {
-    [self _setupPlaceholderLayerIfNeeded];
-  }
-  _placeholderLayer.frame = bounds;
+  [self _locked_layoutPlaceholderIfNecessary];
   
   [self layout];
   [self layoutDidFinish];
@@ -1472,13 +1468,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     if (ASLayoutElementContextIsNull(context) || _pendingTransitionID != context.transitionID) {
       return;
     }
-  }
-  
-  // If no measure pass happened or the bounds changed between layout passes we manually trigger a measurement pass
-  // for the node using a size range equal to whatever bounds were provided to the node
-  if (CGRectEqualToRect(bounds, CGRectZero)) {
-    LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
-    return;
   }
   
   // Check if we can reuse the calculated display node layout. We prefer the _pendingDisplayNodeLayout over the
@@ -1528,7 +1517,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
     // Use as default constrained size the bounds
     CGSize parentSize = bounds.size;
-    ASSizeRange constrainedSize = [self constrainedSizeForLayoutPass];
+    ASSizeRange constrainedSize = [self _locked_constrainedSizeForLayoutPass];
     
     return std::make_shared<ASDisplayNodeLayout>(
       [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
@@ -1573,7 +1562,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 }
 
-- (ASSizeRange)constrainedSizeForLayoutPass
+- (ASSizeRange)_locked_constrainedSizeForLayoutPass
 {
   CGRect bounds = self.threadSafeBounds;
   
@@ -1593,6 +1582,16 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // the one returned from layoutThatFits: or layoutThatFits: was never called
     return ASSizeRangeMake(bounds.size);
   }
+}
+
+- (void)_locked_layoutPlaceholderIfNecessary
+{
+  // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
+  // was created
+  if ([self _shouldHavePlaceholderLayer]) {
+    [self _setupPlaceholderLayerIfNeeded];
+  }
+  _placeholderLayer.frame = self.threadSafeBounds;
 }
 
 - (void)layoutDidFinish
