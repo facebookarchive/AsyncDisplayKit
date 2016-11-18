@@ -198,8 +198,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 @implementation ASTableView
 {
-  id<ASTableDelegate> _asyncDelegate;
-  id<ASTableDataSource> _asyncDataSource;
+  __weak id<ASTableDelegate> _asyncDelegate;
+  __weak id<ASTableDataSource> _asyncDataSource;
 }
 
 // Using _ASDisplayLayer ensures things like -layout are properly forwarded to ASTableNode.
