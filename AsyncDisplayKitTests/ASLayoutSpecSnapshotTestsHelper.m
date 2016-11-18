@@ -56,10 +56,6 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  // As the layout spec under test can be used multiple times we set the isMutable to NO in here. This should only
-  // be done in tests and never in production codes
-  _layoutSpecUnderTest.isMutable = YES;
-  
   return _layoutSpecUnderTest;
 }
 
