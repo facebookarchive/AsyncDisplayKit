@@ -135,10 +135,11 @@ ASVisibilityDidMoveToParentViewController;
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
 
-  // We do this early layout because we need to get any ASCollectionNodes etc. into the
-  // hierarchy before UIKit applies the scroll view inset adjustments, if you are using
-  // automatic subnode management.
+  // A measure as well as layout pass is forced this early to get nodes like ASCollectionNode, ASTableNode etc.
+  // into the hierarchy before UIKit applies the scroll view inset adjustments, if automatic subnode management
+  // is enabled. Otherwise the insets would not be applied.
   [_node layoutThatFits:[self nodeConstrainedSize]];
+  [_node.view layoutIfNeeded];
 
   [_node recursivelyFetchData];
   
