@@ -306,7 +306,6 @@ extern NSInteger const ASDefaultDrawingPriority;
  */
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSizeForCalculatedLayout;
 
-
 /** @name Managing the nodes hierarchy */
 
 
@@ -632,13 +631,18 @@ extern NSInteger const ASDefaultDrawingPriority;
 @interface ASDisplayNode (UIViewBridge)
 
 /**
- * Marks the view as needing display. Convenience for use whether the view / layer is loaded or not. Safe to call
- * from a background thread.
+ * Marks the view as needing display. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
  */
 - (void)setNeedsDisplay;
 
 /**
  * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
+ *
+ * If the node determines its own desired layout size will change in the next layout pass, it will propagate this
+ * information up the tree so its parents can have a chance to consider and apply if necessary the new size onto the node.
+ *
+ * Note: ASCellNode has special behavior in that calling this method will automatically notify
+ * the containing ASTableView / ASCollectionView that the cell should be resized, if necessary.
  */
 - (void)setNeedsLayout;
 

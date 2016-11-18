@@ -129,7 +129,7 @@
     /*if ([self.sizingDelegate respondsToSelector:@selector(displayNodeDidInvalidateSize:)]) {
         [self.sizingDelegate performSelector:@selector(displayNodeDidInvalidateSize:) withObject:self];
     }*/
-    [self invalidateSize];
+    //[self invalidateSize];
 }
 
 #pragma mark - ASDisplayNode

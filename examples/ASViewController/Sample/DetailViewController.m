@@ -105,11 +105,12 @@
 
 - (void)updateButtonNodeLayout
 {
-    [self.buttonNode sizeToFit];
-    self.buttonNode.frame = CGRectMake((self.view.bounds.size.width - self.buttonNode.bounds.size.width) / 2.0,
+    //[self.buttonNode sizeToFit];
+    CGSize size = [self.buttonNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY))].size;
+    self.buttonNode.frame = CGRectMake((self.view.bounds.size.width - size.width) / 2.0,
                                        100,
-                                       self.buttonNode.bounds.size.width,
-                                       self.buttonNode.bounds.size.height);
+                                       size.width,
+                                       size.height);
 
     //CGSize s = [self.buttonNode sizeThatFits:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)];
     //self.buttonNode.frame = CGRectMake(100, 100, s.width, s.height);
@@ -141,7 +142,7 @@
     //return;
     // Use the bounds of the view and get the fitting size
     // This does not have any side effects, but can be called on the main thread without any problems
-    CGSize size = [self.sizingNode sizeThatFits:CGSizeMake(INFINITY, 100.0)];
+    CGSize size = [self.sizingNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, 100.0))].size;
     //size.width -= 10;
     //[self.sizingNode setNeedsLayout];
     self.sizingNode.frame = CGRectMake((CGRectGetWidth(self.view.bounds) - size.width) / 2.0,

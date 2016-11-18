@@ -84,7 +84,6 @@
 - (void)buttonPressed:(id)sender
 {
   self.enabled = !self.enabled;
-  
   [self transitionLayoutWithAnimation:YES shouldMeasureAsync:NO measurementCompletion:nil];
 }
 

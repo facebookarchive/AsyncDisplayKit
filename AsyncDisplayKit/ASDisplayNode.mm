@@ -704,7 +704,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark - Layout
 
-- (void)invalidateSize
+- (void)setNeedsLayoutFromAbove
 {
   ASDisplayNodeAssertThreadAffinity(self);
   
@@ -718,7 +718,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     __instanceLock__.unlock();
     // Cause supernode's layout to be invalidated
     // We need to release the lock to prevent a deadlock
-    [supernode invalidateSize];
+    [supernode setNeedsLayoutFromAbove];
     return;
   }
   
@@ -733,8 +733,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     constrainedSize = _calculatedDisplayNodeLayout->constrainedSize;
   }
 
-  // Check if the returned layout has a different size as the current bounds
+  // Perform a measurement pass to get the current layout
+  // It's important to differentiate between layout and measure pass here. Calling `layoutThatFits:` just perform a
+  // measure pass and no layout pass immediately. If a layout pass wold be forced via `layoutIfNeeded` it could cause an
+  // infinite loop as in `__layout` we check if the size changed and we are just to inform the node that the size changed
   ASLayout *layout = [self layoutThatFits:constrainedSize];
+    
+  // Check if the returned layout has a different size as the current bounds
   if (CGSizeEqualToSize(oldSize, layout.size) == NO) {
     // If the size of the layout changes inform our container (e.g ASTableView, ASCollectionView, ASViewController, ...)
     // that we need it to change our bounds size.
@@ -1415,11 +1420,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   [self invalidateCalculatedLayout];
 }
 
-- (void)__layoutIfNeeded
-{
-  // For now this is a no op.
-}
-
 - (void)__setNeedsDisplay
 {
   BOOL nowDisplay = ASInterfaceStateIncludesDisplay(_interfaceState);
@@ -1540,7 +1540,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // If the size of the new layout to apply did change from the current bounds, invalidate the whole tree up
   // so the root node can handle a resizing if necessary
   if (CGSizeEqualToSize(ASCeilSizeValues(bounds.size), pendingLayout->layout.size) == NO) {
-    [self invalidateSize];
+    [self setNeedsLayoutFromAbove];
   }
 
   if (didCreateNewContext) {
@@ -1570,7 +1570,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   CGRect bounds = self.threadSafeBounds;
   
   // Checkout if constrained size of pending or calculated display node layout can be used
-  if (_pendingDisplayNodeLayout != nullptr && CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
+  if (_pendingDisplayNodeLayout != nullptr &&
+      CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
     // We assume the size from the last returned layoutThatFits: layout was applied so use the pending display node
     // layout constrained size
     return _pendingDisplayNodeLayout->constrainedSize;
