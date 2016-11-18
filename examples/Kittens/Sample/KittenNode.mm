@@ -201,7 +201,7 @@ static const CGFloat kInnerPadding = 10.0f;
 - (void)toggleImageEnlargement
 {
   _isImageEnlarged = !_isImageEnlarged;
-  [self invalidateSize];
+  [self setNeedsLayout];
 }
 
 - (void)toggleNodesSwap
@@ -211,7 +211,7 @@ static const CGFloat kInnerPadding = 10.0f;
   [UIView animateWithDuration:0.15 animations:^{
     self.alpha = 0;
   } completion:^(BOOL finished) {
-    [self invalidateSize];
+    [self setNeedsLayout];
     [self.view layoutIfNeeded];
     
     [UIView animateWithDuration:0.15 animations:^{

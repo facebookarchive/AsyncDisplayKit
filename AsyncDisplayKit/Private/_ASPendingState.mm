@@ -763,7 +763,7 @@ static BOOL defaultAllowsEdgeAntialiasing = NO;
 
   if (flags.needsLayout)
     [layer setNeedsLayout];
-  
+
   if (flags.setAsyncTransactionContainer)
     layer.asyncdisplaykit_asyncTransactionContainer = asyncTransactionContainer;
 
