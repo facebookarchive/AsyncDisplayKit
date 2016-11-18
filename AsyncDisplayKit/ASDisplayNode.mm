@@ -782,6 +782,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
 {
   ASDN::MutexLocker l(__instanceLock__);
+ 
+  // If multiple layout transitions are in progress it can happen that an invalid one is still trying to do a measurement
+  // before it get's cancelled. In this case we should not touch any layout and return a no op layout
+  if ([self _isLayoutTransitionInvalid]) {
+    return [ASLayout layoutWithLayoutElement:self size:{0, 0}];
+  }
   
   if (_calculatedDisplayNodeLayout->isValidForConstrainedSizeParentSize(constrainedSize, parentSize)) {
     ASDisplayNodeAssertNotNil(_calculatedDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _calculatedDisplayNodeLayout->layout should not be nil! %@", self);
@@ -846,7 +852,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     
   // Check if it's a subnode in a layout transition. In this case no measurement is needed as it's part of
   // the layout transition
-  if ([self _isInvolvedInLayoutTransition]) {
+  if ([self _isLayoutTransitionInvalid]) {
     return;
   }
   
@@ -971,11 +977,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _transitionInProgress;
 }
 
-- (BOOL)_isInvolvedInLayoutTransition
+- (BOOL)_isLayoutTransitionInvalid
 {
   ASDN::MutexLocker l(__instanceLock__);
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
-    ASLayoutElementContext context =  ASLayoutElementGetCurrentContext();
+    ASLayoutElementContext context = ASLayoutElementGetCurrentContext();
     if (ASLayoutElementContextIsNull(context) || _pendingTransitionID != context.transitionID) {
       return YES;
     }
@@ -1475,7 +1481,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   // Check if it's a subnode in a layout transition. In this case no measurement is needed as it's part of
   // the layout transition
-  if ([self _isInvolvedInLayoutTransition]) {
+  if ([self _isLayoutTransitionInvalid]) {
     return;
   }
   
