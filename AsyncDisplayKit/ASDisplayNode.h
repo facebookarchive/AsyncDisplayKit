@@ -796,7 +796,7 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 
 /**
- * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
+ * @abstract Invalidates the layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
  *
  * @discussion It is called right after the measurement and before -animateLayoutTransition:.
  *

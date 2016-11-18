@@ -44,11 +44,14 @@ BOOL ASDisplayNodeRunRunLoopUntilBlockIsTrue(as_condition_block_t block)
   return passed;
 }
 
-void ASDisplayNodeSizeToFitSize(ASDisplayNode *node, CGSize size) {
+void ASDisplayNodeSizeToFitSize(ASDisplayNode *node, CGSize size)
+{
   CGSize sizeThatFits = [node layoutThatFits:ASSizeRangeMake(size)].size;
   node.bounds = (CGRect){.origin = CGPointZero, .size = sizeThatFits};
 }
-void ASDisplayNodeSizeToFitSizeRange(ASDisplayNode *node, ASSizeRange sizeRange) {
+
+void ASDisplayNodeSizeToFitSizeRange(ASDisplayNode *node, ASSizeRange sizeRange)
+{
   CGSize sizeThatFits = [node layoutThatFits:sizeRange].size;
   node.bounds = (CGRect){.origin = CGPointZero, .size = sizeThatFits};
 }

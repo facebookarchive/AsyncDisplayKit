@@ -735,7 +735,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   // Perform a measurement pass to get the current layout
   // It's important to differentiate between layout and measure pass here. Calling `layoutThatFits:` just perform a
-  // measure pass and no layout pass immediately. If a layout pass wold be forced via `layoutIfNeeded` it could cause an
+  // measure pass and no layout pass immediately. If a layout pass would be forced via `layoutIfNeeded` it could cause an
   // infinite loop as in `__layout` we check if the size changed and we are just to inform the node that the size changed
   ASLayout *layout = [self layoutThatFits:constrainedSize];
     
@@ -743,13 +743,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (CGSizeEqualToSize(oldSize, layout.size) == NO) {
     // If the size of the layout changes inform our container (e.g ASTableView, ASCollectionView, ASViewController, ...)
     // that we need it to change our bounds size.
-    [self displayNodeDidInvalidateSizeNewSize:layout.size];
+    [self _locked_displayNodeDidInvalidateSizeNewSize:layout.size];
   }
   
   __instanceLock__.unlock();
 }
 
-- (void)displayNodeDidInvalidateSizeNewSize:(CGSize)size
+- (void)_locked_displayNodeDidInvalidateSizeNewSize:(CGSize)size
 {
   ASDisplayNodeAssertThreadAffinity(self);
   
@@ -829,14 +829,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(void(^)())completion
 {
-  if (_calculatedDisplayNodeLayout->layout == nil) {
-    // No measure pass happened before, it's not possible to reuse the constrained size for the transition
-    // Using CGSizeZero for the sizeRange can cause negative values in client layout code.
-    return;
-  }
-  
   [self setNeedsLayout];
-  [self transitionLayoutWithSizeRange:_calculatedDisplayNodeLayout->constrainedSize
+  [self transitionLayoutWithSizeRange:[self _locked_constrainedSizeForLayoutPass]
                              animated:animated
                    shouldMeasureAsync:shouldMeasureAsync
                 measurementCompletion:completion];
@@ -848,9 +842,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(void(^)())completion
 {
-  // Passed constrainedSize is the the same as the node's current constrained size it's a noop
   ASDisplayNodeAssertMainThread();
-  if (_calculatedDisplayNodeLayout->isValidForConstrainedSizeParentSize(constrainedSize, constrainedSize.max)) {
+    
+  // Check if it's a subnode in a layout transition. In this case no measurement is needed as it's part of
+  // the layout transition
+  if ([self _isInvolvedInLayoutTransition]) {
     return;
   }
   
@@ -859,20 +855,23 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     ASDisplayNodeAssert(ASHierarchyStateIncludesLayoutPending(_hierarchyState) == NO, @"Can't start a transition when one of the supernodes is performing one.");
   }
 
+  // Every new layout transition has a transition id associated to check in subsequent transitions for cancelling
   int32_t transitionID = [self _startNewTransition];
   
-  // Move all subnodes in a pending state
+  // Move all subnodes in layout pending state for this transition
   ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode * _Nonnull node) {
     ASDisplayNodeAssert([node _isTransitionInProgress] == NO, @"Can't start a transition when one of the subnodes is performing one.");
     node.hierarchyState |= ASHierarchyStateLayoutPending;
     node.pendingTransitionID = transitionID;
   });
   
+  // Transition block that executes the layout transition
   void (^transitionBlock)(void) = ^{
     if ([self _shouldAbortTransitionWithID:transitionID]) {
       return;
     }
     
+    // Perform a full layout creation pass with passed in constrained size to create the new layout for the transition
     ASLayout *newLayout;
     {
       ASDN::MutexLocker l(__instanceLock__);
@@ -905,7 +904,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         return;
       }
 
-      // Update display node layout
+      // Update calculated layout
       auto previousLayout = _calculatedDisplayNodeLayout;
       auto pendingLayout = std::make_shared<ASDisplayNodeLayout>(
         newLayout,
@@ -944,6 +943,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     });
   };
   
+  // Start transition based on flag on current or background thread
   if (shouldMeasureAsync) {
     ASPerformBlockOnBackgroundThread(transitionBlock);
   } else {
@@ -969,6 +969,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _transitionInProgress;
+}
+
+- (BOOL)_isInvolvedInLayoutTransition
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
+    ASLayoutElementContext context =  ASLayoutElementGetCurrentContext();
+    if (ASLayoutElementContextIsNull(context) || _pendingTransitionID != context.transitionID) {
+      return YES;
+    }
+  }
+  return NO;
 }
 
 /// Starts a new transition and returns the transition id
@@ -1463,11 +1475,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   // Check if it's a subnode in a layout transition. In this case no measurement is needed as it's part of
   // the layout transition
-  if (ASHierarchyStateIncludesLayoutPending(_hierarchyState)) {
-    ASLayoutElementContext context =  ASLayoutElementGetCurrentContext();
-    if (ASLayoutElementContextIsNull(context) || _pendingTransitionID != context.transitionID) {
-      return;
-    }
+  if ([self _isInvolvedInLayoutTransition]) {
+    return;
   }
   
   // Check if we can reuse the calculated display node layout. We prefer the _pendingDisplayNodeLayout over the
@@ -1486,13 +1495,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   BOOL didCreateNewContext = NO;
   BOOL didOverrideExistingContext = NO;
   BOOL shouldVisualizeLayout = ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
-  ASLayoutElementContext context;
-  if (ASLayoutElementContextIsNull(ASLayoutElementGetCurrentContext())) {
+  ASLayoutElementContext context = ASLayoutElementGetCurrentContext();
+  if (ASLayoutElementContextIsNull(context)) {
     context = ASLayoutElementContextMake(ASLayoutElementContextDefaultTransitionID, shouldVisualizeLayout);
     ASLayoutElementSetCurrentContext(context);
     didCreateNewContext = YES;
   } else {
-    context = ASLayoutElementGetCurrentContext();
     if (context.needsVisualizeNode != shouldVisualizeLayout) {
       context.needsVisualizeNode = shouldVisualizeLayout;
       ASLayoutElementSetCurrentContext(context);
@@ -1500,7 +1508,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
   }
   
-  // Figure out previos and pending layout for layout transition
+  // Figure out previous and pending layouts for layout transition
   auto previousLayout = _calculatedDisplayNodeLayout;
   auto pendingLayout = [=]() -> std::shared_ptr<ASDisplayNodeLayout> {
     // Check if  the pending display node layout can be used to transition to

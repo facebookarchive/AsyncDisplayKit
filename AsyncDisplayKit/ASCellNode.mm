@@ -118,7 +118,7 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   _viewControllerNode.frame = self.bounds;
 }
 
-- (void)displayNodeDidInvalidateSizeNewSize:(CGSize)newSize
+- (void)_locked_displayNodeDidInvalidateSizeNewSize:(CGSize)newSize
 {
   CGSize oldSize = self.bounds.size;
   if (CGSizeEqualToSize(oldSize, newSize) == NO) {
