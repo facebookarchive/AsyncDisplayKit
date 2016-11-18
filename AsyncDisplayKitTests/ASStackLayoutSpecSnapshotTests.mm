@@ -340,14 +340,14 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
 
 - (void)testJustifiedSpaceBetweenWithRemainingSpace
 {
-  // width 301px; height 0-300px; 1px remaining
+  // width 301px; height 0-300px;
   static ASSizeRange kSize = {{301, 0}, {301, 300}};
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentSpaceBetween flexFactor:0 sizeRange:kSize identifier:nil];
 }
 
 - (void)testJustifiedSpaceAroundWithRemainingSpace
 {
-  // width 305px; height 0-300px; 5px remaining
+  // width 305px; height 0-300px;
   static ASSizeRange kSize = {{305, 0}, {305, 300}};
   [self testStackLayoutSpecWithJustify:ASStackLayoutJustifyContentSpaceAround flexFactor:0 sizeRange:kSize identifier:nil];
 }
