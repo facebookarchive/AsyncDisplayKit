@@ -239,6 +239,11 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
 - (UIViewController *)viewController
 {
   ASDisplayNodeAssertMainThread();
+  // Force the view to load so that we will create the
+  // view controller if we haven't already.
+  if (self.isNodeLoaded == NO) {
+    [self view];
+  }
   return _viewController;
 }
 
