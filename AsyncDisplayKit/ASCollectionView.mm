@@ -225,8 +225,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 @implementation ASCollectionView
 {
-  id<ASCollectionDelegate> _asyncDelegate;
-  id<ASCollectionDataSource> _asyncDataSource;
+  __weak id<ASCollectionDelegate> _asyncDelegate;
+  __weak id<ASCollectionDataSource> _asyncDataSource;
 }
 
 // Using _ASDisplayLayer ensures things like -layout are properly forwarded to ASCollectionNode.
