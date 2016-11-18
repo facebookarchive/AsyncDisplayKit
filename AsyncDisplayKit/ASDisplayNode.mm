@@ -1539,7 +1539,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   // If the size of the new layout to apply did change from the current bounds, invalidate the whole tree up
   // so the root node can handle a resizing if necessary
-  if (CGSizeEqualToSize(ASCeilSizeValues(bounds.size), pendingLayout->layout.size) == NO) {
+  if (pendingLayout->requestedLayoutFromAbove == NO &&
+      CGSizeEqualToSize(ASCeilSizeValues(bounds.size), pendingLayout->layout.size) == NO) {
+    // The layout that we have specifies that this node (self) would like to be a different size
+    // than it currently is.  Because that size has been computed within the constrainedSize, we
+    // expect that doing setNeedsLayoutFromAbove will result in our parent resizing us to this.
+    // However, in some cases apps may manually interfere with this (setting a different bounds).
+    // In this case, we need to detect that we've already asked to be resized to match this
+    // particular ASLayout object, and shouldn't loop asking again unless we have a different ASLayout.
+    pendingLayout->requestedLayoutFromAbove = YES;
     [self setNeedsLayoutFromAbove];
   }
 
