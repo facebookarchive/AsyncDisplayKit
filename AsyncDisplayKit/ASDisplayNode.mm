@@ -832,7 +832,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                    shouldMeasureAsync:(BOOL)shouldMeasureAsync
                 measurementCompletion:(void(^)())completion
 {
-  [self setNeedsLayout];
   [self transitionLayoutWithSizeRange:[self _locked_constrainedSizeForLayoutPass]
                              animated:animated
                    shouldMeasureAsync:shouldMeasureAsync
@@ -858,6 +857,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     ASDisplayNodeAssert(ASHierarchyStateIncludesLayoutPending(_hierarchyState) == NO, @"Can't start a transition when one of the supernodes is performing one.");
   }
 
+  // Invalidate the current layout to be able to measure a new layout based onthe given constrained size
+  [self setNeedsLayout];
+  
   // Every new layout transition has a transition id associated to check in subsequent transitions for cancelling
   int32_t transitionID = [self _startNewTransition];
   
