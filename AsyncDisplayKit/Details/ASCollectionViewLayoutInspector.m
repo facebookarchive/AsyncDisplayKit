@@ -76,7 +76,6 @@ ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView *collectionVi
 
 - (ASScrollDirection)scrollableDirections
 {
-  ASDisplayNodeAssert(NO, @"layoutInspector object must implement -scrollableDirections %@", self);
   return ASScrollDirectionNone;
 }
 
