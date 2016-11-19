@@ -713,36 +713,33 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // Mark the node for layout in the next layout pass
   [self setNeedsLayout];
   
+  // Escalate to the root; entire tree must allow adjustments so the layout fits the new child.
+  // Much of the layout will be re-used as cached (e.g. other items in an unconstrained stack)
   ASDisplayNode *supernode = _supernode;
   if (supernode) {
+    // Threading model requires that we unlock before calling a method on our parent.
     __instanceLock__.unlock();
-    // Cause supernode's layout to be invalidated
-    // We need to release the lock to prevent a deadlock
     [supernode setNeedsLayoutFromAbove];
     return;
   }
   
-  // We are the root node and need to re-flow the layout; one of our children requested to have its size re-set.
-  CGSize oldSize = self.bounds.size;
+  // We are the root node and need to re-flow the layout; at least one child needs a new size.
+  CGSize boundsSizeForLayout = ASCeilSizeValues(self.bounds.size);
 
   // Figure out constrainedSize to use
-  ASSizeRange constrainedSize = ASSizeRangeMake(self.bounds.size);
+  ASSizeRange constrainedSize = ASSizeRangeMake(boundsSizeForLayout);
   if (_pendingDisplayNodeLayout != nullptr) {
     constrainedSize = _pendingDisplayNodeLayout->constrainedSize;
   } else if (_calculatedDisplayNodeLayout->layout != nil) {
     constrainedSize = _calculatedDisplayNodeLayout->constrainedSize;
   }
 
-  // Perform a measurement pass to get the current layout
-  // It's important to differentiate between layout and measure pass here. Calling `layoutThatFits:` just perform a
-  // measure pass and no layout pass immediately. If a layout pass would be forced via `layoutIfNeeded` it could cause an
-  // infinite loop as in `__layout` we check if the size changed and we are just to inform the node that the size changed
+  // Perform a measurement pass to get the full tree layout, adapting to the child's new size.
   ASLayout *layout = [self layoutThatFits:constrainedSize];
-    
-  // Check if the returned layout has a different size as the current bounds
-  if (CGSizeEqualToSize(oldSize, layout.size) == NO) {
-    // If the size of the layout changes inform our container (e.g ASTableView, ASCollectionView, ASViewController, ...)
-    // that we need it to change our bounds size.
+  
+  // Check if the returned layout has a different size than our current bounds.
+  if (CGSizeEqualToSize(boundsSizeForLayout, layout.size) == NO) {
+    // If so, inform our container we need an update (e.g Table, Collection, ViewController, etc).
     [self _locked_displayNodeDidInvalidateSizeNewSize:layout.size];
   }
   
@@ -850,8 +847,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDisplayNodeAssertMainThread();
     
-  // Check if it's a subnode in a layout transition. In this case no measurement is needed as it's part of
-  // the layout transition
+  // Check if we are a subnode in a layout transition.
+  // In this case no measurement is needed as we're part of the layout transition.
   if ([self _isLayoutTransitionInvalid]) {
     return;
   }
@@ -1465,8 +1462,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   // This method will confirm that the layout is up to date (and update if needed).
-  // Importantly, it will also APPLY the layout to all of our subnodes if there is not already another layout
-  // transition in progress.
+  // Importantly, it will also APPLY the layout to all of our subnodes if (unless parent is transitioning).
   [self _locked_measureNodeWithBoundsIfNecessary:bounds];
   _pendingDisplayNodeLayout = nullptr;
   
@@ -1479,18 +1475,20 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 /// Needs to be called with lock held
 - (void)_locked_measureNodeWithBoundsIfNecessary:(CGRect)bounds
 {
-  // Check if it's a subnode in a layout transition. In this case no measurement is needed as it's part of
-  // the layout transition
+  // Check if we are a subnode in a layout transition.
+  // In this case no measurement is needed as it's part of the layout transition
   if ([self _isLayoutTransitionInvalid]) {
     return;
   }
   
-  // Check if we can reuse the calculated display node layout. We prefer the _pendingDisplayNodeLayout over the
-  // _calculatedDisplayNodeLayout though
+  CGSize boundsSizeForLayout = ASCeilSizeValues(bounds.size);
+  
+  // Prefer _pendingDisplayNodeLayout over _calculatedDisplayNodeLayout (if exists, it's the newest)
+  // If there is no _pending, check if _calculated is valid to reuse (avoiding recalculation below).
   if (_pendingDisplayNodeLayout == nullptr) {
-    if (_calculatedDisplayNodeLayout->isDirty() == NO &&
-        CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
-      // Reuse calculatedDisplayNodeLayout for layout pass
+    if (_calculatedDisplayNodeLayout->isDirty() == NO
+        && (_calculatedDisplayNodeLayout->requestedLayoutFromAbove == YES
+            || CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, boundsSizeForLayout))) {
       return;
     }
   }
@@ -1515,96 +1513,89 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   // Figure out previous and pending layouts for layout transition
-  auto previousLayout = _calculatedDisplayNodeLayout;
-  auto pendingLayout = [=]() -> std::shared_ptr<ASDisplayNodeLayout> {
-    // Check if  the pending display node layout can be used to transition to
-    if (_pendingDisplayNodeLayout != nullptr &&
-        _pendingDisplayNodeLayout->isDirty() == NO &&
-        CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
-      // We assume the _pendingDisplayNodeLayout was created by layoutThatFits: to set the size of the node
-      // now it's time to apply it and to become the _calculatedDisplayNodeLayout
-      return _pendingDisplayNodeLayout;
-    }
+  std::shared_ptr<ASDisplayNodeLayout> nextLayout = _pendingDisplayNodeLayout;
+  #define layoutSizeDifferentFromBounds !CGSizeEqualToSize(nextLayout->layout.size, boundsSizeForLayout)
   
-    // The _pendingDisplayNodeLayout can not be used to be applied we need to figure out we need to calculate a new
-    // layout based on a constrainedSize
-  
-    // Use as default constrained size the bounds
-    CGSize parentSize = bounds.size;
+  // nextLayout was likely created by a call to layoutThatFits:, check if is valid and can be applied.
+  // If our bounds size is different than it, or invalid, recalculate.  Use #define to avoid nullptr->
+  if (nextLayout == nullptr || nextLayout->isDirty() == YES || layoutSizeDifferentFromBounds) {
+    // Use the last known constrainedSize passed from a parent during layout (if never, use bounds).
     ASSizeRange constrainedSize = [self _locked_constrainedSizeForLayoutPass];
+    ASLayout *layout = [self calculateLayoutThatFits:constrainedSize
+                                    restrictedToSize:self.style.size
+                                relativeToParentSize:boundsSizeForLayout];
     
-    return std::make_shared<ASDisplayNodeLayout>(
-      [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
-      constrainedSize,
-      parentSize
-    );
-  }();
-  
-  // If the size of the new layout to apply did change from the current bounds, invalidate the whole tree up
-  // so the root node can handle a resizing if necessary
-  if (pendingLayout->requestedLayoutFromAbove == NO &&
-      CGSizeEqualToSize(ASCeilSizeValues(bounds.size), pendingLayout->layout.size) == NO) {
-    // The layout that we have specifies that this node (self) would like to be a different size
-    // than it currently is.  Because that size has been computed within the constrainedSize, we
-    // expect that doing setNeedsLayoutFromAbove will result in our parent resizing us to this.
-    // However, in some cases apps may manually interfere with this (setting a different bounds).
-    // In this case, we need to detect that we've already asked to be resized to match this
-    // particular ASLayout object, and shouldn't loop asking again unless we have a different ASLayout.
-    pendingLayout->requestedLayoutFromAbove = YES;
-    [self setNeedsLayoutFromAbove];
+    nextLayout = std::make_shared<ASDisplayNodeLayout>(layout, constrainedSize, boundsSizeForLayout);
   }
-
+  
   if (didCreateNewContext) {
     ASLayoutElementClearCurrentContext();
   } else if (didOverrideExistingContext) {
     context.needsVisualizeNode = !context.needsVisualizeNode;
     ASLayoutElementSetCurrentContext(context);
   }
+  
+  // If our new layout's desired size for self doesn't match current size, ask our parent to update it.
+  // This can occur for either pre-calculated or newly-calculated layouts.
+  if (nextLayout->requestedLayoutFromAbove == NO
+      && CGSizeEqualToSize(boundsSizeForLayout, nextLayout->layout.size) == NO) {
+    // The layout that we have specifies that this node (self) would like to be a different size
+    // than it currently is.  Because that size has been computed within the constrainedSize, we
+    // expect that calling setNeedsLayoutFromAbove will result in our parent resizing us to this.
+    // However, in some cases apps may manually interfere with this (setting a different bounds).
+    // In this case, we need to detect that we've already asked to be resized to match this
+    // particular ASLayout object, and shouldn't loop asking again unless we have a different ASLayout.
+    nextLayout->requestedLayoutFromAbove = YES;
+    [self setNeedsLayoutFromAbove];
+  }
 
-  // Finally transition to pendingLayout
-  ASDisplayNodeAssertNotNil(pendingLayout->layout, @"pendingLayout->layout should not be nil! %@", self);
-
+  // Prepare to transition to nextLayout
+  ASDisplayNodeAssertNotNil(nextLayout->layout, @"nextLayout->layout should not be nil! %@", self);
   _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                        pendingLayout:pendingLayout
-                                                       previousLayout:previousLayout];
+                                                        pendingLayout:nextLayout
+                                                       previousLayout:_calculatedDisplayNodeLayout];
 
-  // Only complete the pending layout transition if the node is not a subnode of a node that is currently
-  // in a layout transition
+  // If a parent is currently executing a layout transition, perform our layout application after it.
   if (ASHierarchyStateIncludesLayoutPending(_hierarchyState) == NO) {
-    // Complete the pending layout transition immediately
+    // If no transition, apply our new layout immediately (common case).
     [self _completePendingLayoutTransition];
   }
 }
 
 - (ASSizeRange)_locked_constrainedSizeForLayoutPass
 {
-  CGRect bounds = self.threadSafeBounds;
+  // TODO: The logic in -setNeedsLayoutFromAbove seems correct and doesn't use this method.
+  // logic seems correct.  For what case does -this method need to do the CGSizeEqual checks?
+  // IF WE CAN REMOVE BOUNDS CHECKS HERE, THEN WE CAN ALSO REMOVE "REQUESTED FROM ABOVE" CHECK
+  
+  CGSize boundsSizeForLayout = ASCeilSizeValues(self.threadSafeBounds.size);
   
   // Checkout if constrained size of pending or calculated display node layout can be used
-  if (_pendingDisplayNodeLayout != nullptr &&
-      CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
+  if (_pendingDisplayNodeLayout != nullptr
+      && (_pendingDisplayNodeLayout->requestedLayoutFromAbove
+          || CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, boundsSizeForLayout))) {
     // We assume the size from the last returned layoutThatFits: layout was applied so use the pending display node
     // layout constrained size
     return _pendingDisplayNodeLayout->constrainedSize;
-  } else if (CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, CGSizeZero) == NO &&
-             CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, ASCeilSizeValues(bounds.size))) {
+  } else if (_calculatedDisplayNodeLayout->layout != nil
+             && (_calculatedDisplayNodeLayout->requestedLayoutFromAbove
+                 || CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, boundsSizeForLayout))) {
     // We assume the  _calculatedDisplayNodeLayout is still valid and the frame is not different
     return _calculatedDisplayNodeLayout->constrainedSize;
   } else {
     // In this case neither the _pendingDisplayNodeLayout or the _calculatedDisplayNodeLayout constrained size can
     // be reused, so the current bounds is used. This is usual the case if a frame was set manually that differs to
     // the one returned from layoutThatFits: or layoutThatFits: was never called
-    return ASSizeRangeMake(bounds.size);
+    return ASSizeRangeMake(boundsSizeForLayout);
   }
 }
 
 - (void)_locked_layoutPlaceholderIfNecessary
 {
-  // Handle placeholder layer creation in case the size of the node changed after the initial placeholder layer
-  // was created
   if ([self _shouldHavePlaceholderLayer]) {
     [self _setupPlaceholderLayerIfNeeded];
   }
+  // Update the placeholderLayer size in case the node size has changed since the placeholder was added.
   _placeholderLayer.frame = self.threadSafeBounds;
 }
 
