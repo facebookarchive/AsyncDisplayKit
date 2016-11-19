@@ -58,6 +58,7 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   // Use UITableViewCell defaults
   _selectionStyle = UITableViewCellSelectionStyleDefault;
   self.clipsToBounds = YES;
+
   return self;
 }
 
@@ -117,15 +118,13 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   _viewControllerNode.frame = self.bounds;
 }
 
-- (void)__setNeedsLayout
+- (void)_locked_displayNodeDidInvalidateSizeNewSize:(CGSize)newSize
 {
-  CGSize oldSize = self.calculatedSize;
-  [super __setNeedsLayout];
-  
-  //Adding this lock because lock used to be held when this method was called. Not sure if it's necessary for
-  //didRelayoutFromOldSize:toNewSize:
-  ASDN::MutexLocker l(__instanceLock__);
-  [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
+  CGSize oldSize = self.bounds.size;
+  if (CGSizeEqualToSize(oldSize, newSize) == NO) {
+    self.frame = {self.frame.origin, newSize};
+    [self didRelayoutFromOldSize:oldSize toNewSize:newSize];
+  }
 }
 
 - (void)transitionLayoutWithAnimation:(BOOL)animated

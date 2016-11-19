@@ -9,6 +9,7 @@
 //
 
 #import <FBSnapshotTestCase/FBSnapshotTestCase.h>
+#import "ASDisplayNodeTestsHelper.h"
 
 @class ASDisplayNode;
 

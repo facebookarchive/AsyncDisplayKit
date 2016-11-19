@@ -637,11 +637,11 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 /**
  * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
- * 
- * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
- * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
  *
- * Note: ASCellNode has special behavior in that calling this method will automatically notify 
+ * If the node determines its own desired layout size will change in the next layout pass, it will propagate this
+ * information up the tree so its parents can have a chance to consider and apply if necessary the new size onto the node.
+ *
+ * Note: ASCellNode has special behavior in that calling this method will automatically notify
  * the containing ASTableView / ASCollectionView that the cell should be resized, if necessary.
  */
 - (void)setNeedsLayout;
@@ -796,7 +796,7 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 
 /**
- * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
+ * @abstract Invalidates the layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
  *
  * @discussion It is called right after the measurement and before -animateLayoutTransition:.
  *
