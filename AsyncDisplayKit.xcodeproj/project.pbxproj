@@ -188,6 +188,8 @@
 		68C215581DE10D330019C4BC /* ASCollectionViewLayoutInspector.h in Headers */ = {isa = PBXBuildFile; fileRef = 68C215561DE10D330019C4BC /* ASCollectionViewLayoutInspector.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		68C215591DE10D330019C4BC /* ASCollectionViewLayoutInspector.m in Sources */ = {isa = PBXBuildFile; fileRef = 68C215571DE10D330019C4BC /* ASCollectionViewLayoutInspector.m */; };
 		68C2155A1DE10D330019C4BC /* ASCollectionViewLayoutInspector.m in Sources */ = {isa = PBXBuildFile; fileRef = 68C215571DE10D330019C4BC /* ASCollectionViewLayoutInspector.m */; };
+		68C2155B1DE11A790019C4BC /* ASCollectionViewLayoutInspector.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 68C215561DE10D330019C4BC /* ASCollectionViewLayoutInspector.h */; };
+		68C2155C1DE11AA80019C4BC /* ASObjectDescriptionHelpers.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 6907C2561DC4ECFE00374C66 /* ASObjectDescriptionHelpers.h */; };
 		68EE0DBE1C1B4ED300BA1B99 /* ASMainSerialQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 68EE0DBB1C1B4ED300BA1B99 /* ASMainSerialQueue.h */; };
 		68EE0DBF1C1B4ED300BA1B99 /* ASMainSerialQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = 68EE0DBC1C1B4ED300BA1B99 /* ASMainSerialQueue.mm */; };
 		68EE0DC01C1B4ED300BA1B99 /* ASMainSerialQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = 68EE0DBC1C1B4ED300BA1B99 /* ASMainSerialQueue.mm */; };
@@ -675,6 +677,8 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				68C2155C1DE11AA80019C4BC /* ASObjectDescriptionHelpers.h in CopyFiles */,
+				68C2155B1DE11A790019C4BC /* ASCollectionViewLayoutInspector.h in CopyFiles */,
 				DEB8ED7E1DD007F400DBDE55 /* ASLayoutElementInspectorNode.h in CopyFiles */,
 				69127CFE1DD2B387004BF6E2 /* ASEventLog.h in CopyFiles */,
 				693117CE1DC7C72700DE4784 /* ASDisplayNode+Deprecated.h in CopyFiles */,
