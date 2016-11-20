@@ -67,26 +67,15 @@
   ASPerformBackgroundDeallocation(_node);
 }
 
-- (void)loadView
+- (void)viewDidLoad
 {
-  ASDisplayNodeAssertTrue(!_node.layerBacked);
+  [super viewDidLoad];
   
-  // Apple applies a frame and autoresizing masks we need.  Allocating a view is not
-  // nearly as expensive as adding and removing it from a hierarchy, and fortunately
-  // we can avoid that here.  Enabling layerBacking on a single node in the hierarchy
-  // will have a greater performance benefit than the impact of this transient view.
-  [super loadView];
-  UIView *view = self.view;
-  CGRect frame = view.frame;
-  UIViewAutoresizing autoresizingMask = view.autoresizingMask;
+  // Add the root node to the view
+  _node.view.frame = self.view.bounds;
+  [self.view addSubnode:_node];
   
-  // We have what we need, so now create and assign the view we actually want.
-  view = _node.view;
-  _node.frame = frame;
-  _node.autoresizingMask = autoresizingMask;
-  self.view = view;
-  
-  // ensure that self.node has a valid trait collection before a subclass's implementation of viewDidLoad.
+  // Ensure that self.node has a valid trait collection before a subclass's implementation of viewDidLoad.
   // Any subnodes added in viewDidLoad will then inherit the proper environment.
   if (AS_AT_LEAST_IOS8) {
     ASEnvironmentTraitCollection traitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
@@ -117,11 +106,8 @@
       [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
     }];
   } else {
-    [_node layoutThatFits:[self nodeConstrainedSize]];
-  }
-  
-  if (!AS_AT_LEAST_IOS9) {
-    [self _legacyHandleViewDidLayoutSubviews];
+    CGSize size = [_node layoutThatFits:[self nodeConstrainedSize]].size;
+    _node.frame = (CGRect){.origin = CGPointZero, .size = size};
   }
 }
 
@@ -141,12 +127,11 @@ ASVisibilityDidMoveToParentViewController;
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
 
-  // A measure as well as layout pass is forced this early to get nodes like ASCollectionNode, ASTableNode etc.
+  // A layout pass is forced this early to get nodes like ASCollectionNode, ASTableNode etc.
   // into the hierarchy before UIKit applies the scroll view inset adjustments, if automatic subnode management
   // is enabled. Otherwise the insets would not be applied.
-  [_node layoutThatFits:[self nodeConstrainedSize]];
   [_node.view layoutIfNeeded];
-
+    
   [_node recursivelyFetchData];
   
   if (_parentManagesVisibilityDepth == NO) {
@@ -226,62 +211,12 @@ ASVisibilityDepthImplementation;
 
 - (ASSizeRange)nodeConstrainedSize
 {
-  if (AS_AT_LEAST_IOS9) {
-    CGSize viewSize = self.view.bounds.size;
-    return ASSizeRangeMake(viewSize);
-  } else {
-    return [self _legacyConstrainedSize];
-  }
+    return ASSizeRangeMake(self.view.bounds.size);
 }
 
 - (ASInterfaceState)interfaceState
 {
   return _node.interfaceState;
-}
-
-#pragma mark - Legacy Layout Handling
-
-- (BOOL)_shouldLayoutTheLegacyWay
-{
-  BOOL isModalViewController = (self.presentingViewController != nil && self.presentedViewController == nil);
-  BOOL hasNavigationController = (self.navigationController != nil);
-  BOOL hasParentViewController = (self.parentViewController != nil);
-  if (isModalViewController && !hasNavigationController && !hasParentViewController) {
-    return YES;
-  }
-  
-  // Check if the view controller is a root view controller
-  BOOL isRootViewController = self.view.window.rootViewController == self;
-  if (isRootViewController) {
-    return YES;
-  }
-  
-  return NO;
-}
-
-- (ASSizeRange)_legacyConstrainedSize
-{
-  // In modal presentation the view does not have the right bounds in iOS7 and iOS8. As workaround using the superviews
-  // view bounds
-  UIView *view = self.view;
-  CGSize viewSize = view.bounds.size;
-  if ([self _shouldLayoutTheLegacyWay]) {
-    UIView *superview = view.superview;
-    if (superview != nil) {
-      viewSize = superview.bounds.size;
-    }
-  }
-  return ASSizeRangeMake(viewSize, viewSize);
-}
-
-- (void)_legacyHandleViewDidLayoutSubviews
-{
-  // In modal presentation or as root viw controller the view does not automatic resize in iOS7 and iOS8.
-  // As workaround we adjust the frame of the view manually
-  if ([self _shouldLayoutTheLegacyWay]) {
-    CGSize maxConstrainedSize = [self nodeConstrainedSize].max;
-    _node.frame = (CGRect){.origin = CGPointZero, .size = maxConstrainedSize};
-  }
 }
 
 #pragma mark - ASEnvironmentTraitCollection

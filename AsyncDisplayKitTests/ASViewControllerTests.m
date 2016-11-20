@@ -76,7 +76,7 @@
   CGFloat navHeight = CGRectGetMaxY([nav.navigationBar convertRect:nav.navigationBar.bounds toView:window]);
   CGRect expectedRect, slice;
   CGRectDivide(window.bounds, &slice, &expectedRect, navHeight, CGRectMinYEdge);
-  XCTAssertEqualObjects(NSStringFromCGRect(expectedRect), NSStringFromCGRect(node.frame));
+  XCTAssertEqualObjects(NSStringFromCGRect(expectedRect), NSStringFromCGRect([node.view.superview convertRect:node.frame toView:nil]));
   [navDelegate verify];
   [animator verify];
 }
