@@ -216,6 +216,8 @@ class MosaicCollectionViewLayout: UICollectionViewFlowLayout {
 
 class MosaicCollectionViewLayoutInspector: NSObject, ASCollectionViewLayoutInspecting
 {
+ 
+  
   
   func collectionView(_ collectionView: ASCollectionView, constrainedSizeForNodeAt indexPath: IndexPath) -> ASSizeRange {
     let layout: MosaicCollectionViewLayout = collectionView.collectionViewLayout as! MosaicCollectionViewLayout

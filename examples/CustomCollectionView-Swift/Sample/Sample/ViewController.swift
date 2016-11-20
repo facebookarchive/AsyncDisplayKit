@@ -49,8 +49,8 @@ class ViewController: UIViewController, MosaicCollectionViewLayoutDelegate, ASCo
     _layoutInspector = MosaicCollectionViewLayoutInspector.init()
     
     _collectionNode = ASCollectionNode.init(frame: CGRect.zero, collectionViewLayout: layout)
-    _collectionNode?.view.asyncDataSource = self;
-    _collectionNode?.view.asyncDelegate = self;
+    _collectionNode?.dataSource = self;
+    _collectionNode?.delegate = self;
     _collectionNode?.view.layoutInspector = _layoutInspector
     _collectionNode?.backgroundColor = UIColor.white
     _collectionNode?.view.isScrollEnabled = true
@@ -58,8 +58,8 @@ class ViewController: UIViewController, MosaicCollectionViewLayoutDelegate, ASCo
   }
   
   deinit {
-    _collectionNode?.view.asyncDataSource = nil;
-    _collectionNode?.view.asyncDelegate = nil;
+    _collectionNode?.dataSource = nil;
+    _collectionNode?.delegate = nil;
   }
   
   override func viewDidLoad() {
@@ -71,16 +71,13 @@ class ViewController: UIViewController, MosaicCollectionViewLayoutDelegate, ASCo
     _collectionNode?.frame = self.view.bounds;
   }
   
-  
-  // MARK: ASCollectionView data source
-  func collectionView(_ collectionView: ASCollectionView, nodeBlockForItemAt indexPath: IndexPath) -> ASCellNodeBlock {
+  func collectionNode(_ collectionNode: ASCollectionNode, nodeForItemAt indexPath: IndexPath) -> ASCellNode {
     let image = _sections?[indexPath.section][indexPath.item]
-    return {
-      return ImageCellNode.init(with: image!)
-    }
+    return ImageCellNode.init(with: image!)
   }
   
-  func collectionView(_ collectionView: ASCollectionView, nodeForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> ASCellNode {
+  
+  func collectionNode(_ collectionNode: ASCollectionNode, nodeForSupplementaryElementOfKind kind: String, at indexPath: IndexPath) -> ASCellNode {
     let textAttributes : NSDictionary = [
       NSFontAttributeName: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
       NSForegroundColorAttributeName: UIColor.gray
@@ -91,14 +88,15 @@ class ViewController: UIViewController, MosaicCollectionViewLayoutDelegate, ASCo
     return textCellNode;
   }
   
-  func numberOfSections(in collectionView: UICollectionView) -> Int {
+
+  func numberOfSections(in collectionNode: ASCollectionNode) -> Int {
     return _sections!.count
   }
-  
-  func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+
+  func collectionNode(_ collectionNode: ASCollectionNode, numberOfItemsInSection section: Int) -> Int {
     return _sections![section].count
   }
-  
+
   internal func collectionView(_ collectionView: UICollectionView, layout: MosaicCollectionViewLayout, originalItemSizeAtIndexPath: IndexPath) -> CGSize {
     return _sections![originalItemSizeAtIndexPath.section][originalItemSizeAtIndexPath.item].size
   }
