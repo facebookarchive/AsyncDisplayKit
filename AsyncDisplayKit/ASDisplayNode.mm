@@ -284,7 +284,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                                                                 andHandler:^(ASDisplayNode * _Nonnull dequeuedItem, BOOL isQueueDrained) {
       [dequeuedItem _recursivelyTriggerDisplayAndBlock:NO];
       if (isQueueDrained) {
-        CFAbsoluteTime timestamp = CFAbsoluteTimeGetCurrent();
+        CFTimeInterval timestamp = CACurrentMediaTime();
         [[NSNotificationCenter defaultCenter] postNotificationName:ASRenderingEngineDidDisplayScheduledNodesNotification
                                                             object:nil
                                                           userInfo:@{ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp: @(timestamp)}];
