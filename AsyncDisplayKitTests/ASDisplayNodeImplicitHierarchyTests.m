@@ -158,14 +158,17 @@
 
 - (void)testLayoutTransitionMeasurementCompletionBlockIsCalledOnMainThread
 {
+  const CGSize kSize = CGSizeMake(100, 100);
+
   ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
+  displayNode.style.preferredSize = kSize;
   
   // Trigger explicit view creation to be able to use the Transition API
   [displayNode view];
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Call measurement completion block on main"];
   
-  [displayNode transitionLayoutWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero) animated:YES shouldMeasureAsync:YES measurementCompletion:^{
+  [displayNode transitionLayoutWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)) animated:YES shouldMeasureAsync:YES measurementCompletion:^{
     XCTAssertTrue(ASDisplayNodeThreadIsMain(), @"Measurement completion block should be called on main thread");
     [expectation fulfill];
   }];
