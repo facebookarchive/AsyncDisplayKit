@@ -405,20 +405,17 @@ static NSString * const kRate = @"rate";
   }
 }
 
-- (void)_clearPlayer
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  self.player = nil;
-  self.currentItem = nil;
-  self.playerState = ASVideoNodePlayerStateUnknown;
-}
-
 - (void)clearFetchedData
 {
   [super clearFetchedData];
   
-  [self _clearPlayer];
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+
+    self.player = nil;
+    self.currentItem = nil;
+    self.playerState = ASVideoNodePlayerStateUnknown;
+  }
 }
 
 - (void)didEnterVisibleState
@@ -508,7 +505,7 @@ static NSString * const kRate = @"rate";
 
 - (void)_setAndFetchAsset:(AVAsset *)asset url:(NSURL *)assetURL
 {
-  [self _clearPlayer]; // Clear the player but not the underlying ASNetworkImageNode to avoid clearing the placeholder image and showing the background before the video starts.
+  [self clearFetchedData];
   _asset = asset;
   _assetURL = assetURL;
   [self setNeedsDataFetch];
