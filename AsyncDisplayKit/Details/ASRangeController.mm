@@ -34,7 +34,7 @@
   ASLayoutRangeMode _currentRangeMode;
   BOOL _didUpdateCurrentRange;
   BOOL _didRegisterForNodeDisplayNotifications;
-  CFAbsoluteTime _pendingDisplayNodesTimestamp;
+  CFTimeInterval _pendingDisplayNodesTimestamp;
   
 #if AS_RANGECONTROLLER_LOG_UPDATE_FREQ
   NSUInteger _updateCountThisFrame;
@@ -335,7 +335,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
           if (nodeShouldScheduleDisplay) {
             [self registerForNodeDisplayNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
             if (_didRegisterForNodeDisplayNotifications) {
-              _pendingDisplayNodesTimestamp = CFAbsoluteTimeGetCurrent();
+              _pendingDisplayNodesTimestamp = CACurrentMediaTime();
             }
           }
         }
