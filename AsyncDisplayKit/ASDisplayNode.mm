@@ -464,7 +464,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   static ASRunLoopQueue *queue;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    queue = [[ASRunLoopQueue alloc] initWithRunLoop:CFRunLoopGetMain() andHandler:^(id _Nonnull dequeuedItem, BOOL isQueueDrained) { }];
+    queue = [[ASRunLoopQueue alloc] initWithRunLoop:CFRunLoopGetMain() andHandler:nil];
     queue.batchSize = 10;
   });
 
