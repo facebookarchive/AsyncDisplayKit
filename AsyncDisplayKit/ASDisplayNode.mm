@@ -427,7 +427,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)dealloc
 {
-  ASDisplayNodeAssertMainThread();
+  _flags.isDeallocating = YES;
+
   // Synchronous nodes may not be able to call the hierarchy notifications, so only enforce for regular nodes.
   ASDisplayNodeAssert(_flags.synchronous || !ASInterfaceStateIncludesVisible(_interfaceState), @"Node should always be marked invisible before deallocating. Node: %@", self);
   
@@ -443,15 +444,123 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   for (ASDisplayNode *subnode in _subnodes)
     [subnode __setSupernode:nil];
 
-  _view = nil;
+  // Trampoline any UIKit ivars' deallocation to main
+  if (ASDisplayNodeThreadIsMain() == NO) {
+    [self _scheduleIvarsForMainDeallocation];
+  }
+
   _subnodes = nil;
-  _layer = nil;
 
   // TODO: Remove this? If supernode isn't already nil, this method isn't dealloc-safe anyway.
   [self __setSupernode:nil];
-  _pendingViewState = nil;
+}
 
-  _pendingDisplayNodes = nil;
+- (void)_scheduleIvarsForMainDeallocation
+{
+  /**
+   * UIKit components must be deallocated on the main thread. We use this shared
+   * run loop queue to gradually deallocate them across many turns of the main run loop.
+   */
+  static ASRunLoopQueue *queue;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    queue = [[ASRunLoopQueue alloc] initWithRunLoop:CFRunLoopGetMain() andHandler:nil];
+    queue.batchSize = 10;
+  });
+
+  NSValue *ivarsObj = [[self class] _ivarsThatMayNeedMainDeallocation];
+
+  // Unwrap the ivar array
+  unsigned int count = 0;
+  // Will be unused if assertions are disabled.
+  __unused int scanResult = sscanf(ivarsObj.objCType, "[%u^{objc_ivar}]", &count);
+  ASDisplayNodeAssert(scanResult == 1, @"Unexpected type in NSValue: %s", ivarsObj.objCType);
+  Ivar ivars[count];
+  [ivarsObj getValue:ivars];
+
+  for (Ivar ivar : ivars) {
+    id value = object_getIvar(self, ivar);
+    if (ASClassRequiresMainThreadDeallocation(object_getClass(value))) {
+      LOG(@"Trampolining ivar '%s' value %@ for main deallocation.", ivar_getName(ivar), value);
+      [queue enqueue:value];
+    } else {
+      LOG(@"Not trampolining ivar '%s' value %@.", ivar_getName(ivar), value);
+    }
+  }
+}
+
+/**
+ * Returns an NSValue-wrapped array of all the ivars in this class or its superclasses
+ * up through ASDisplayNode, that we expect may need to be deallocated on main.
+ * 
+ * This method caches its results.
+ */
++ (NSValue/*<[Ivar]>*/ * _Nonnull)_ivarsThatMayNeedMainDeallocation
+{
+  static NSCache<Class, NSValue *> *ivarsCache;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    ivarsCache = [[NSCache alloc] init];
+  });
+
+  NSValue *result = [ivarsCache objectForKey:self];
+  if (result != nil) {
+    return result;
+  }
+
+  // Cache miss.
+  unsigned int resultCount = 0;
+  static const int kMaxDealloc2MainIvarsPerClassTree = 64;
+  Ivar resultIvars[kMaxDealloc2MainIvarsPerClassTree];
+
+  // Get superclass results first.
+  Class c = class_getSuperclass(self);
+  if (c != [NSObject class]) {
+    NSValue *ivarsObj = [c _ivarsThatMayNeedMainDeallocation];
+    // Unwrap the ivar array and append it to our working array
+    unsigned int count = 0;
+    // Will be unused if assertions are disabled.
+    __unused int scanResult = sscanf(ivarsObj.objCType, "[%u^{objc_ivar}]", &count);
+    ASDisplayNodeAssert(scanResult == 1, @"Unexpected type in NSValue: %s", ivarsObj.objCType);
+    ASDisplayNodeCAssert(resultCount + count < kMaxDealloc2MainIvarsPerClassTree, @"More than %d dealloc2main ivars are not supported. Count: %d", kMaxDealloc2MainIvarsPerClassTree, resultCount + count);
+    [ivarsObj getValue:resultIvars + resultCount];
+    resultCount += count;
+  }
+
+  // Now gather ivars from this particular class.
+  unsigned int allMyIvarsCount;
+  Ivar *allMyIvars = class_copyIvarList(self, &allMyIvarsCount);
+
+  for (NSUInteger i = 0; i < allMyIvarsCount; i++) {
+    Ivar ivar = allMyIvars[i];
+    const char *type = ivar_getTypeEncoding(ivar);
+
+    if (strcmp(type, @encode(id)) == 0) {
+      // If it's `id` we have to include it just in case.
+      resultIvars[resultCount] = ivar;
+      resultCount += 1;
+      LOG(@"Marking ivar '%s' for possible main deallocation due to type id", ivar_getName(ivar));
+    } else {
+      // If it's an ivar with a static type, check the type.
+      Class c = ASGetClassFromType(type);
+      if (ASClassRequiresMainThreadDeallocation(c)) {
+        resultIvars[resultCount] = ivar;
+        resultCount += 1;
+        LOG(@"Marking ivar '%s' for main deallocation due to class %@", ivar_getName(ivar), c);
+      } else {
+        LOG(@"Skipping ivar '%s' for main deallocation.", ivar_getName(ivar));
+      }
+    }
+  }
+  free(allMyIvars);
+
+  // Encode the type (array of Ivars) into a string and wrap it in an NSValue
+  char arrayType[32];
+  snprintf(arrayType, 32, "[%u^{objc_ivar}]", resultCount);
+  result = [NSValue valueWithBytes:resultIvars objCType:arrayType];
+
+  [ivarsCache setObject:result forKey:self];
+  return result;
 }
 
 #pragma mark - Core
@@ -539,7 +648,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(__instanceLock__);
 
-  if (self._isDeallocating) {
+  if (_flags.isDeallocating) {
     return;
   }
 
