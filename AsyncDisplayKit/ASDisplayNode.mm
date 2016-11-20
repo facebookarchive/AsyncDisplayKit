@@ -845,6 +845,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                 measurementCompletion:(void(^)())completion
 {
   ASDisplayNodeAssertMainThread();
+  
+  if (constrainedSize.max.width <= 0.0 || constrainedSize.max.height <= 0.0) {
+    // Using CGSizeZero for the sizeRange can cause negative values in client layout code.
+    // Most likely called transitionLayout: without providing a size, before first layout pass.
+    return;
+  }
     
   // Check if we are a subnode in a layout transition.
   // In this case no measurement is needed as we're part of the layout transition.
