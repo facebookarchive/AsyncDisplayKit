@@ -457,17 +457,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)_scheduleIvarsForMainDeallocation
 {
-  /**
-   * UIKit components must be deallocated on the main thread. We use this shared
-   * run loop queue to gradually deallocate them across many turns of the main run loop.
-   */
-  static ASRunLoopQueue *queue;
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    queue = [[ASRunLoopQueue alloc] initWithRunLoop:CFRunLoopGetMain() andHandler:nil];
-    queue.batchSize = 10;
-  });
-
   NSValue *ivarsObj = [[self class] _ivarsThatMayNeedMainDeallocation];
 
   // Unwrap the ivar array
@@ -482,7 +471,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     id value = object_getIvar(self, ivar);
     if (ASClassRequiresMainThreadDeallocation(object_getClass(value))) {
       LOG(@"Trampolining ivar '%s' value %@ for main deallocation.", ivar_getName(ivar), value);
-      [queue enqueue:value];
+      ASPerformMainThreadDeallocation(value);
     } else {
       LOG(@"Not trampolining ivar '%s' value %@.", ivar_getName(ivar), value);
     }

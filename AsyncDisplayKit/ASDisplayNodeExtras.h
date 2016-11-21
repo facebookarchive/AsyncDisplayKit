@@ -14,6 +14,9 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+/// For deallocation of objects on the main thread across multiple run loops.
+extern void ASPerformMainThreadDeallocation(_Nullable id object);
+
 // Because inline methods can't be extern'd and need to be part of the translation unit of code
 // that compiles with them to actually inline, we both declare and define these in the header.
 ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesVisible(ASInterfaceState interfaceState)
