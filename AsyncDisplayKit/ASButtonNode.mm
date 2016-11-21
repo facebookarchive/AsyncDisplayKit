@@ -527,6 +527,7 @@
 - (void)layout
 {
   [super layout];
+
   _backgroundImageNode.hidden = (_backgroundImageNode.image == nil);
   _imageNode.hidden = (_imageNode.image == nil);
   _titleNode.hidden = (_titleNode.attributedText.length == 0);

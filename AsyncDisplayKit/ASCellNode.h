@@ -117,6 +117,13 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 @property (nonatomic, readonly, nullable) NSIndexPath *indexPath;
 
 /**
+ * The backing view controller, or @c nil if the node wasn't initialized with backing view controller
+ * @note This property must be accessed on the main thread.
+ */
+@property (nonatomic, readonly, nullable) UIViewController *viewController;
+
+
+/**
  * The owning node (ASCollectionNode/ASTableNode) of this cell node, or @c nil if this node is
  * not a valid item inside a table node or collection node or if those nodes are nil.
  */

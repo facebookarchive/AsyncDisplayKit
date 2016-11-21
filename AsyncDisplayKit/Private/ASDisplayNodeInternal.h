@@ -14,7 +14,6 @@
 //
 
 #import <atomic>
-#import "_AS-objc-internal.h"
 #import "ASDisplayNode.h"
 #import "ASThread.h"
 #import "_ASTransitionContext.h"
@@ -103,6 +102,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
     unsigned isExitingHierarchy:1;
     unsigned isInHierarchy:1;
     unsigned visibilityNotificationsDisabled:VISIBILITY_NOTIFICATIONS_DISABLED_BITS;
+    unsigned isDeallocating:1;
   } _flags;
   
 @protected
@@ -137,6 +137,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   int32_t _pendingTransitionID;
   ASLayoutTransition *_pendingLayoutTransition;
   std::shared_ptr<ASDisplayNodeLayout> _calculatedDisplayNodeLayout;
+  std::shared_ptr<ASDisplayNodeLayout> _pendingDisplayNodeLayout;
   
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
@@ -188,12 +189,13 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 + (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node;
 
-// The _ASDisplayLayer backing the node, if any.
+/// The _ASDisplayLayer backing the node, if any.
 @property (nonatomic, readonly, strong) _ASDisplayLayer *asyncLayer;
 
-// Bitmask to check which methods an object overrides.
+/// Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
 
+/// Thread safe way to access the bounds of the node
 @property (nonatomic, assign) CGRect threadSafeBounds;
 
 
@@ -201,21 +203,28 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (BOOL)__shouldLoadViewOrLayer;
 
 /**
- Invoked before a call to setNeedsLayout to the underlying view
+ * Invoked before a call to setNeedsLayout to the underlying view
  */
 - (void)__setNeedsLayout;
 
 /**
- Invoked after a call to setNeedsDisplay to the underlying view
+ * Invoked after a call to setNeedsDisplay to the underlying view
  */
 - (void)__setNeedsDisplay;
 
+/**
+ * Called from [CALayer layoutSublayers:]. Executes the layout pass for the node
+ */
 - (void)__layout;
+
+/*
+ * Internal method to set the supernode
+ */
 - (void)__setSupernode:(ASDisplayNode *)supernode;
 
 /**
- Internal method to add / replace / insert subnode and remove from supernode without checking if
- node has automaticallyManagesSubnodes set to YES. 
+ * Internal method to add / replace / insert subnode and remove from supernode without checking if
+ * node has automaticallyManagesSubnodes set to YES.
  */
 - (void)_addSubnode:(ASDisplayNode *)subnode;
 - (void)_replaceSubnode:(ASDisplayNode *)oldSubnode withSubnode:(ASDisplayNode *)replacementSubnode;
@@ -230,16 +239,16 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)__incrementVisibilityNotificationsDisabled;
 - (void)__decrementVisibilityNotificationsDisabled;
 
-// Helper method to summarize whether or not the node run through the display process
+/// Helper method to summarize whether or not the node run through the display process
 - (BOOL)__implementsDisplay;
 
-// Display the node's view/layer immediately on the current thread, bypassing the background thread rendering. Will be deprecated.
+/// Display the node's view/layer immediately on the current thread, bypassing the background thread rendering. Will be deprecated.
 - (void)displayImmediately;
 
-// Alternative initialiser for backing with a custom view class.  Supports asynchronous display with _ASDisplayView subclasses.
+/// Alternative initialiser for backing with a custom view class.  Supports asynchronous display with _ASDisplayView subclasses.
 - (instancetype)initWithViewClass:(Class)viewClass;
 
-// Alternative initialiser for backing with a custom layer class.  Supports asynchronous display with _ASDisplayLayer subclasses.
+/// Alternative initialiser for backing with a custom layer class.  Supports asynchronous display with _ASDisplayLayer subclasses.
 - (instancetype)initWithLayerClass:(Class)layerClass;
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;

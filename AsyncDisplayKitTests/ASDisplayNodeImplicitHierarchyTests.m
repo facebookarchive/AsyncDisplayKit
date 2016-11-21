@@ -12,6 +12,7 @@
 
 #import <XCTest/XCTest.h>
 
+#import "ASDisplayNodeTestsHelper.h"
 #import "ASDisplayNode.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASDisplayNode+Subclasses.h"
@@ -88,7 +89,10 @@
     
     return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[stack1, stack2, node5]];
   };
-  [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+  
+  ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)));
+  [node.view layoutIfNeeded];
+
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
   XCTAssertEqual(node.subnodes[2], node3);
@@ -122,13 +126,14 @@
     }
   };
   
-  [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+  ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)));
+  [node.view layoutIfNeeded];
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node2);
   
   node.layoutState = @2;
-  [node invalidateCalculatedLayout];
-  [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+  [node setNeedsLayout]; // After a state change the layout needs to be invalidated
+  [node.view layoutIfNeeded]; // A new layout pass will trigger the hiearchy transition
 
   XCTAssertEqual(node.subnodes[0], node1);
   XCTAssertEqual(node.subnodes[1], node3);
@@ -153,14 +158,17 @@
 
 - (void)testLayoutTransitionMeasurementCompletionBlockIsCalledOnMainThread
 {
+  const CGSize kSize = CGSizeMake(100, 100);
+
   ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
+  displayNode.style.preferredSize = kSize;
   
   // Trigger explicit view creation to be able to use the Transition API
   [displayNode view];
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Call measurement completion block on main"];
   
-  [displayNode transitionLayoutWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeZero) animated:YES shouldMeasureAsync:YES measurementCompletion:^{
+  [displayNode transitionLayoutWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)) animated:YES shouldMeasureAsync:YES measurementCompletion:^{
     XCTAssertTrue(ASDisplayNodeThreadIsMain(), @"Measurement completion block should be called on main thread");
     [expectation fulfill];
   }];
@@ -170,10 +178,12 @@
 
 - (void)testMeasurementInBackgroundThreadWithLoadedNode
 {
+  const CGSize kNodeSize = CGSizeMake(100, 100);
   ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
   ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
+  node.style.preferredSize = kNodeSize;
   node.automaticallyManagesSubnodes = YES;
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
@@ -185,23 +195,42 @@
   };
   
   // Intentionally trigger view creation
+  [node view];
   [node2 view];
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Fix IHM layout also if one node is already loaded"];
   
   dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     
-    [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
-    XCTAssertEqual(node.subnodes[0], node1);
-    
-    node.layoutState = @2;
-    [node invalidateCalculatedLayout];
-    [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+    // Measurement happens in the background
+    ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
     
     // Dispatch back to the main thread to let the insertion / deletion of subnodes happening
     dispatch_async(dispatch_get_main_queue(), ^{
-      XCTAssertEqual(node.subnodes[0], node2);
-      [expectation fulfill];
+      
+      // Layout on main
+      [node setNeedsLayout];
+      [node.view layoutIfNeeded];
+      XCTAssertEqual(node.subnodes[0], node1);
+      
+      dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        // Change state and measure in the background
+        node.layoutState = @2;
+        [node setNeedsLayout];
+    
+        ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
+        
+        // Dispatch back to the main thread to let the insertion / deletion of subnodes happening
+        dispatch_async(dispatch_get_main_queue(), ^{
+          
+          // Layout on main again
+          [node.view layoutIfNeeded];
+          XCTAssertEqual(node.subnodes[0], node2);
+          
+          [expectation fulfill];
+        });
+      });
     });
   });
   
@@ -214,12 +243,13 @@
 
 - (void)testTransitionLayoutWithAnimationWithLoadedNodes
 {
+  const CGSize kNodeSize = CGSizeMake(100, 100);
   ASDisplayNode *node1 = [[ASDisplayNode alloc] init];
   ASDisplayNode *node2 = [[ASDisplayNode alloc] init];
   
   ASSpecTestDisplayNode *node = [[ASSpecTestDisplayNode alloc] init];
   node.automaticallyManagesSubnodes = YES;
-  
+  node.style.preferredSize = kNodeSize;
   node.layoutSpecBlock = ^(ASDisplayNode *weakNode, ASSizeRange constrainedSize) {
     ASSpecTestDisplayNode *strongNode = (ASSpecTestDisplayNode *)weakNode;
     if ([strongNode.layoutState isEqualToNumber:@1]) {
@@ -230,13 +260,13 @@
   };
  
   // Intentionally trigger view creation
-  [node view];
   [node1 view];
   [node2 view];
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Fix IHM layout transition also if one node is already loaded"];
   
-  [node layoutThatFits:ASSizeRangeMake(CGSizeZero)];
+  ASDisplayNodeSizeToFitSizeRange(node, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
+  [node.view layoutIfNeeded];
   XCTAssertEqual(node.subnodes[0], node1);
   
   node.layoutState = @2;

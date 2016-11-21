@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
  * "working ranges" to trigger network calls and rendering, and is responsible for driving asynchronous layout of cells.
  * This includes cancelling those asynchronous operations as cells fall outside of the working ranges.
  */
-@interface ASRangeController : ASDealloc2MainObject <ASDataControllerDelegate>
+@interface ASRangeController : NSObject <ASDataControllerDelegate>
 {
   id<ASLayoutController>                  _layoutController;
   __weak id<ASRangeControllerDataSource>  _dataSource;
