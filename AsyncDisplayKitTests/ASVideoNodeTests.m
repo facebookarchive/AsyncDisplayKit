@@ -384,6 +384,9 @@
   XCTAssertEqual(firstImage, _videoNode.image);
 
   _videoNode.asset = _secondAsset;
+  XCTAssertEqual(firstImage, _videoNode.image);
+  
+  [_videoNode recursivelyClearFetchedData];
   XCTAssertNotEqual(firstImage, _videoNode.image);
 }
 
