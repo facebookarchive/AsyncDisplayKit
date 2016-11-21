@@ -11,6 +11,7 @@
 #import "ASEditableTextNode.h"
 
 #import <objc/message.h>
+#import <tgmath.h>
 
 #import "ASDisplayNode+Subclasses.h"
 #import "ASEqualityHelpers.h"
@@ -167,18 +168,6 @@
   return self;
 }
 
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
-{
-  ASDisplayNodeAssertNotSupported();
-  return nil;
-}
-
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
-{
-  ASDisplayNodeAssertNotSupported();
-  return nil;
-}
-
 - (void)dealloc
 {
   _textKitComponents.textView.delegate = nil;
@@ -250,9 +239,9 @@
 {
   ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
   CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
-  CGFloat width = ceilf(textSize.width + _textContainerInset.left + _textContainerInset.right);
-  CGFloat height = ceilf(textSize.height + _textContainerInset.top + _textContainerInset.bottom);
-  return CGSizeMake(fminf(width, constrainedSize.width), fminf(height, constrainedSize.height));
+  CGFloat width = std::ceil(textSize.width + _textContainerInset.left + _textContainerInset.right);
+  CGFloat height = std::ceil(textSize.height + _textContainerInset.top + _textContainerInset.bottom);
+  return CGSizeMake(std::fmin(width, constrainedSize.width), std::fmin(height, constrainedSize.height));
 }
 
 - (void)layout
@@ -426,7 +415,7 @@
     [_textKitComponents.textStorage setAttributedString:attributedStringToDisplay];
 
   // Calculated size depends on the seeded text.
-  [self invalidateCalculatedLayout];
+  [self setNeedsLayout];
 
   // Update if placeholder is shown.
   [self _updateDisplayingPlaceholder];

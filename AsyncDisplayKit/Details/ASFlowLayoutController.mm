@@ -12,7 +12,7 @@
 #import "ASAssert.h"
 #import "ASDisplayNode.h"
 #import "ASIndexPath.h"
-#import "CGRect+ASConvenience.h"
+#import "CoreGraphics+ASConvenience.h"
 
 #include <map>
 #include <vector>
@@ -113,11 +113,11 @@
   range.start = currentIndexPath;
   range.end = currentIndexPath;
   
-  [indexPaths enumerateObjectsUsingBlock:^(NSIndexPath *indexPath, NSUInteger idx, BOOL *stop) {
+  for (NSIndexPath *indexPath in indexPaths) {
     currentIndexPath = [indexPath ASIndexPathValue];
     range.start = ASIndexPathMinimum(range.start, currentIndexPath);
     range.end = ASIndexPathMaximum(range.end, currentIndexPath);
-  }];
+  }
   return range;
 }
 

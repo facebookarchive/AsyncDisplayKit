@@ -13,11 +13,11 @@
 #import "ASRelativeLayoutSpec.h"
 
 #import "ASInternalHelpers.h"
-#import "ASLayout.h"
+#import "ASLayoutSpec+Subclasses.h"
 
 @implementation ASRelativeLayoutSpec
 
-- (instancetype)initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
+- (instancetype)initWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutElement>)child
 {
   if (!(self = [super init])) {
     return nil;
@@ -30,7 +30,7 @@
   return self;
 }
 
-+ (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutable>)child
++ (instancetype)relativePositionLayoutSpecWithHorizontalPosition:(ASRelativeLayoutSpecPosition)horizontalPosition verticalPosition:(ASRelativeLayoutSpecPosition)verticalPosition sizingOption:(ASRelativeLayoutSpecSizingOption)sizingOption child:(id<ASLayoutElement>)child
 {
   return [[self alloc] initWithHorizontalPosition:horizontalPosition verticalPosition:verticalPosition sizingOption:sizingOption child:child];
 }
@@ -52,28 +52,23 @@
   _sizingOption = sizingOption;
 }
 
-- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
+  // If we have a finite size in any direction, pass this so that the child can resolve percentages against it.
+  // Otherwise pass ASLayoutElementParentDimensionUndefined as the size will depend on the content
   CGSize size = {
-    constrainedSize.max.width,
-    constrainedSize.max.height
+    ASPointsValidForSize(constrainedSize.max.width) == NO ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.width,
+    ASPointsValidForSize(constrainedSize.max.height) == NO ? ASLayoutElementParentDimensionUndefined : constrainedSize.max.height
   };
-  
-  BOOL reduceWidth = (_horizontalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||
-  (_horizontalPosition & ASRelativeLayoutSpecPositionEnd) != 0;
-  
-  BOOL reduceHeight = (_verticalPosition & ASRelativeLayoutSpecPositionCenter) != 0 ||
-  (_verticalPosition & ASRelativeLayoutSpecPositionEnd) != 0;
   
   // Layout the child
   const CGSize minChildSize = {
-    reduceWidth ? 0 : constrainedSize.min.width,
-    reduceHeight ? 0 : constrainedSize.min.height,
+    (_horizontalPosition != ASRelativeLayoutSpecPositionNone) ? 0 : constrainedSize.min.width,
+    (_verticalPosition != ASRelativeLayoutSpecPositionNone) ? 0 : constrainedSize.min.height,
   };
-  ASLayout *sublayout = [self.child measureWithSizeRange:ASSizeRangeMake(minChildSize, constrainedSize.max)];
+  ASLayout *sublayout = [self.child layoutThatFits:ASSizeRangeMake(minChildSize, constrainedSize.max) parentSize:size];
   
-  // If we have an undetermined height or width, use the child size to define the layout
-  // size
+  // If we have an undetermined height or width, use the child size to define the layout size
   size = ASSizeRangeClamp(constrainedSize, {
     isfinite(size.width) == NO ? sublayout.size.width : size.width,
     isfinite(size.height) == NO ? sublayout.size.height : size.height
@@ -94,17 +89,14 @@
     ASRoundPixelValue((size.height - sublayout.size.height) * yPosition)
   };
   
-  return [ASLayout layoutWithLayoutableObject:self
-                         constrainedSizeRange:constrainedSize
-                                         size:size
-                                   sublayouts:@[sublayout]];
+  return [ASLayout layoutWithLayoutElement:self size:size sublayouts:@[sublayout]];
 }
 
 - (CGFloat)proportionOfAxisForAxisPosition:(ASRelativeLayoutSpecPosition)position
 {
-  if ((position & ASRelativeLayoutSpecPositionCenter) != 0) {
+  if (position == ASRelativeLayoutSpecPositionCenter) {
     return 0.5f;
-  } else if ((position & ASRelativeLayoutSpecPositionEnd) != 0) {
+  } else if (position == ASRelativeLayoutSpecPositionEnd) {
     return 1.0f;
   } else {
     return 0.0f;

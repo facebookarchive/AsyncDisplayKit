@@ -11,13 +11,16 @@
 #import "ASRangeController.h"
 
 #import "ASAssert.h"
-#import "ASWeakSet.h"
+#import "ASCellNode.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h"
-#import "ASMultiDimensionalArrayUtils.h"
+#import "ASMultidimensionalArrayUtils.h"
 #import "ASInternalHelpers.h"
+#import "ASMultiDimensionalArrayUtils.h"
+#import "ASWeakSet.h"
+
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASCellNode.h"
+#import "AsyncDisplayKit+Debug.h"
 
 #define AS_RANGECONTROLLER_LOG_UPDATE_FREQ 0
 
@@ -26,11 +29,12 @@
   BOOL _rangeIsValid;
   BOOL _needsRangeUpdate;
   BOOL _layoutControllerImplementsSetVisibleIndexPaths;
+  BOOL _layoutControllerImplementsSetViewportSize;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
   ASLayoutRangeMode _currentRangeMode;
   BOOL _didUpdateCurrentRange;
   BOOL _didRegisterForNodeDisplayNotifications;
-  CFAbsoluteTime _pendingDisplayNodesTimestamp;
+  CFTimeInterval _pendingDisplayNodesTimestamp;
   
 #if AS_RANGECONTROLLER_LOG_UPDATE_FREQ
   NSUInteger _updateCountThisFrame;
@@ -62,6 +66,10 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _displayLink = [CADisplayLink displayLinkWithTarget:self selector:@selector(_updateCountDisplayLinkDidFire)];
   [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
 #endif
+  
+  if ([ASRangeController shouldShowRangeDebugOverlay]) {
+    [self addRangeControllerToRangeDebugOverlay];
+  }
   
   return self;
 }
@@ -143,7 +151,8 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 - (void)setLayoutController:(id<ASLayoutController>)layoutController
 {
   _layoutController = layoutController;
-  _layoutControllerImplementsSetVisibleIndexPaths = [_layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)];
+  _layoutControllerImplementsSetVisibleIndexPaths = [layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)];
+  _layoutControllerImplementsSetViewportSize = [layoutController respondsToSelector:@selector(setViewportSize:)];
   if (layoutController && _dataSource) {
     [self updateIfNeeded];
   }
@@ -179,9 +188,12 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
     return; // don't do anything for this update, but leave _rangeIsValid == NO to make sure we update it later
   }
-  
+  ASProfilingSignpostStart(1, self);
+
   ASScrollDirection scrollDirection = [_dataSource scrollDirectionForRangeController:self];
-  [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
+  if (_layoutControllerImplementsSetViewportSize) {
+    [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
+  }
   
   // the layout controller needs to know what the current visible indices are to calculate range offsets
   if (_layoutControllerImplementsSetVisibleIndexPaths) {
@@ -194,7 +206,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   NSSet<NSIndexPath *> *visibleIndexPaths = [NSSet setWithArray:visibleNodePaths];
   NSSet<NSIndexPath *> *displayIndexPaths = nil;
-  NSSet<NSIndexPath *> *fetchDataIndexPaths = nil;
+  NSSet<NSIndexPath *> *preloadIndexPaths = nil;
   
   // Prioritize the order in which we visit each.  Visible nodes should be updated first so they are enqueued on
   // the network or display queues before preloading (offscreen) nodes are enqueued.
@@ -208,14 +220,14 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
   }
 
-  ASRangeTuningParameters parametersFetchData = [_layoutController tuningParametersForRangeMode:rangeMode
-                                                                                      rangeType:ASLayoutRangeTypeFetchData];
-  if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersFetchData, ASRangeTuningParametersZero)) {
-    fetchDataIndexPaths = visibleIndexPaths;
+  ASRangeTuningParameters parametersPreload = [_layoutController tuningParametersForRangeMode:rangeMode
+                                                                                      rangeType:ASLayoutRangeTypePreload];
+  if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersPreload, ASRangeTuningParametersZero)) {
+    preloadIndexPaths = visibleIndexPaths;
   } else {
-    fetchDataIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection
+    preloadIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection
                                                           rangeMode:rangeMode
-                                                          rangeType:ASLayoutRangeTypeFetchData];
+                                                          rangeType:ASLayoutRangeTypePreload];
   }
   
   ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeMode:rangeMode
@@ -224,19 +236,19 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     displayIndexPaths = [NSSet set];
   } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, ASRangeTuningParametersZero)) {
     displayIndexPaths = visibleIndexPaths;
-  } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, parametersFetchData)) {
-    displayIndexPaths = fetchDataIndexPaths;
+  } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, parametersPreload)) {
+    displayIndexPaths = preloadIndexPaths;
   } else {
     displayIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection
                                                         rangeMode:rangeMode
                                                         rangeType:ASLayoutRangeTypeDisplay];
   }
   
-  // Typically the fetchDataIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
+  // Typically the preloadIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
   // Because allIndexPaths is an NSMutableOrderedSet, this adds the non-duplicate items /after/ the existing items.
   // This means that during iteration, we will first visit visible, then display, then fetch data nodes.
   [allIndexPaths unionSet:displayIndexPaths];
-  [allIndexPaths unionSet:fetchDataIndexPaths];
+  [allIndexPaths unionSet:preloadIndexPaths];
   
   // Add anything we had applied interfaceState to in the last update, but is no longer in range, so we can clear any
   // range flags it still has enabled.  Most of the time, all but a few elements are equal; a large programmatic
@@ -265,10 +277,10 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     
     if (ASInterfaceStateIncludesVisible(selfInterfaceState)) {
       if ([visibleIndexPaths containsObject:indexPath]) {
-        interfaceState |= (ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData);
+        interfaceState |= (ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStatePreload);
       } else {
-        if ([fetchDataIndexPaths containsObject:indexPath]) {
-          interfaceState |= ASInterfaceStateFetchData;
+        if ([preloadIndexPaths containsObject:indexPath]) {
+          interfaceState |= ASInterfaceStatePreload;
         }
         if ([displayIndexPaths containsObject:indexPath]) {
           interfaceState |= ASInterfaceStateDisplay;
@@ -284,12 +296,12 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
         // our overall container object is itself not visible yet.  The moment it becomes visible, we will run the condition above
         
         // Set Layout, Fetch Data
-        interfaceState |= ASInterfaceStateFetchData;
+        interfaceState |= ASInterfaceStatePreload;
         
         if (rangeMode != ASLayoutRangeModeLowMemory) {
           // Add Display.
           // We might be looking at an indexPath that was previously in-range, but now we need to clear it.
-          // In that case we'll just set it back to MeasureLayout.  Only set Display | FetchData if in allCurrentIndexPaths.
+          // In that case we'll just set it back to MeasureLayout.  Only set Display | Preload if in allCurrentIndexPaths.
           interfaceState |= ASInterfaceStateDisplay;
         }
       }
@@ -323,12 +335,31 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
           if (nodeShouldScheduleDisplay) {
             [self registerForNodeDisplayNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
             if (_didRegisterForNodeDisplayNotifications) {
-              _pendingDisplayNodesTimestamp = CFAbsoluteTimeGetCurrent();
+              _pendingDisplayNodesTimestamp = CACurrentMediaTime();
             }
           }
         }
       }
     }
+  }
+  
+  // TODO: This code is for debugging only, but would be great to clean up with a delegate method implementation.
+  if ([ASRangeController shouldShowRangeDebugOverlay]) {
+    ASScrollDirection scrollableDirections = ASScrollDirectionUp | ASScrollDirectionDown;
+    if ([_dataSource isKindOfClass:NSClassFromString(@"ASCollectionView")]) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wundeclared-selector"
+      scrollableDirections = (ASScrollDirection)[_dataSource performSelector:@selector(scrollableDirections)];
+#pragma clang diagnostic pop
+    }
+    
+    [self updateRangeController:self
+       withScrollableDirections:scrollableDirections
+                scrollDirection:scrollDirection
+                      rangeMode:rangeMode
+        displayTuningParameters:parametersDisplay
+        preloadTuningParameters:parametersPreload
+                 interfaceState:selfInterfaceState];
   }
   
   _rangeIsValid = YES;
@@ -345,6 +376,8 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   NSLog(@"Range update complete; modifiedIndexPaths: %@", [self descriptionWithIndexPaths:modifiedIndexPaths]);
 #endif
   [_delegate didCompleteUpdatesInRangeController:self];
+  
+  ASProfilingSignpostEnd(1, self);
 }
 
 #pragma mark - Notification observers
@@ -411,50 +444,44 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 - (void)dataControllerBeginUpdates:(ASDataController *)dataController
 {
-  ASPerformBlockOnMainThread(^{
-    [_delegate didBeginUpdatesInRangeController:self];
-  });
+  ASDisplayNodeAssertMainThread();
+  [_delegate didBeginUpdatesInRangeController:self];
 }
 
 - (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
-  ASPerformBlockOnMainThread(^{
-    [_delegate rangeController:self didEndUpdatesAnimated:animated completion:completion];
-  });
+  ASDisplayNodeAssertMainThread();
+  [_delegate rangeController:self didEndUpdatesAnimated:animated completion:completion];
 }
 
 - (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssert(nodes.count == indexPaths.count, @"Invalid index path");
-  ASPerformBlockOnMainThread(^{
-    _rangeIsValid = NO;
-    [_delegate rangeController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
-  });
+  ASDisplayNodeAssertMainThread();
+  _rangeIsValid = NO;
+  [_delegate rangeController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
 }
 
 - (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  ASPerformBlockOnMainThread(^{
-    _rangeIsValid = NO;
-    [_delegate rangeController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
-  });
+  ASDisplayNodeAssertMainThread();
+  _rangeIsValid = NO;
+  [_delegate rangeController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
 }
 
 - (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssert(sections.count == indexSet.count, @"Invalid sections");
-  ASPerformBlockOnMainThread(^{
-    _rangeIsValid = NO;
-    [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-  });
+  ASDisplayNodeAssertMainThread();
+  _rangeIsValid = NO;
+  [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
 }
 
 - (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  ASPerformBlockOnMainThread(^{
-    _rangeIsValid = NO;
-    [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
-  });
+  ASDisplayNodeAssertMainThread();
+  _rangeIsValid = NO;
+  [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
 }
 
 #pragma mark - Memory Management
@@ -475,8 +502,8 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 {
   for (NSArray *section in [_dataSource completedNodes]) {
     for (ASDisplayNode *node in section) {
-      if (ASInterfaceStateIncludesFetchData(node.interfaceState)) {
-        [node exitInterfaceState:ASInterfaceStateFetchData];
+      if (ASInterfaceStateIncludesPreload(node.interfaceState)) {
+        [node exitInterfaceState:ASInterfaceStatePreload];
       }
     }
   }
@@ -586,8 +613,8 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisible
     ASInterfaceState interfaceState = node.interfaceState;
     BOOL inVisible = ASInterfaceStateIncludesVisible(interfaceState);
     BOOL inDisplay = ASInterfaceStateIncludesDisplay(interfaceState);
-    BOOL inFetchData = ASInterfaceStateIncludesFetchData(interfaceState);
-    [description appendFormat:@"indexPath %@, Visible: %d, Display: %d, FetchData: %d\n", indexPath, inVisible, inDisplay, inFetchData];
+    BOOL inPreload = ASInterfaceStateIncludesPreload(interfaceState);
+    [description appendFormat:@"indexPath %@, Visible: %d, Display: %d, Preload: %d\n", indexPath, inVisible, inDisplay, inPreload];
   }
   return description;
 }
@@ -596,6 +623,15 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisible
 {
   NSArray<NSIndexPath *> *indexPaths = [[_allPreviousIndexPaths allObjects] sortedArrayUsingSelector:@selector(compare:)];
   return [self descriptionWithIndexPaths:indexPaths];
+}
+
+@end
+
+@implementation ASDisplayNode (RangeModeConfiguring)
+
++ (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode
+{
+  [ASRangeController setRangeModeForMemoryWarnings:rangeMode];
 }
 
 @end

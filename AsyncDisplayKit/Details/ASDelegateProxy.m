@@ -9,8 +9,8 @@
 //
 
 #import "ASDelegateProxy.h"
-#import "ASTableView.h"
-#import "ASCollectionView.h"
+#import "ASTableNode.h"
+#import "ASCollectionNode.h"
 #import "ASAssert.h"
 
 @implementation ASTableViewProxy
@@ -22,9 +22,25 @@
           selector == @selector(tableView:cellForRowAtIndexPath:) ||
           selector == @selector(tableView:heightForRowAtIndexPath:) ||
           
+          // Selection, highlighting, menu
+          selector == @selector(tableView:willSelectRowAtIndexPath:) ||
+          selector == @selector(tableView:didSelectRowAtIndexPath:) ||
+          selector == @selector(tableView:willDeselectRowAtIndexPath:) ||
+          selector == @selector(tableView:didDeselectRowAtIndexPath:) ||
+          selector == @selector(tableView:shouldHighlightRowAtIndexPath:) ||
+          selector == @selector(tableView:didHighlightRowAtIndexPath:) ||
+          selector == @selector(tableView:didUnhighlightRowAtIndexPath:) ||
+          selector == @selector(tableView:shouldShowMenuForRowAtIndexPath:) ||
+          selector == @selector(tableView:canPerformAction:forRowAtIndexPath:withSender:) ||
+          selector == @selector(tableView:performAction:forRowAtIndexPath:withSender:) ||
+
           // handled by ASRangeController
           selector == @selector(numberOfSectionsInTableView:) ||
           selector == @selector(tableView:numberOfRowsInSection:) ||
+
+          // reordering support
+          selector == @selector(tableView:canMoveRowAtIndexPath:) ||
+          selector == @selector(tableView:moveRowAtIndexPath:toIndexPath:) ||
           
           // used for ASCellNode visibility
           selector == @selector(scrollViewDidScroll:) ||
@@ -54,13 +70,27 @@
           selector == @selector(collectionView:layout:sizeForItemAtIndexPath:) ||
           selector == @selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:) ||
           
-          // handled by ASRangeController
+          // Selection, highlighting, menu
+          selector == @selector(collectionView:shouldSelectItemAtIndexPath:) ||
+          selector == @selector(collectionView:didSelectItemAtIndexPath:) ||
+          selector == @selector(collectionView:shouldDeselectItemAtIndexPath:) ||
+          selector == @selector(collectionView:didDeselectItemAtIndexPath:) ||
+          selector == @selector(collectionView:shouldHighlightItemAtIndexPath:) ||
+          selector == @selector(collectionView:didHighlightItemAtIndexPath:) ||
+          selector == @selector(collectionView:didUnhighlightItemAtIndexPath:) ||
+          selector == @selector(collectionView:shouldShowMenuForItemAtIndexPath:) ||
+          selector == @selector(collectionView:canPerformAction:forItemAtIndexPath:withSender:) ||
+          selector == @selector(collectionView:performAction:forItemAtIndexPath:withSender:) ||
+
+          // Item counts
           selector == @selector(numberOfSectionsInCollectionView:) ||
           selector == @selector(collectionView:numberOfItemsInSection:) ||
           
-          // used for ASRangeController visibility updates
+          // Element appearance callbacks
           selector == @selector(collectionView:willDisplayCell:forItemAtIndexPath:) ||
           selector == @selector(collectionView:didEndDisplayingCell:forItemAtIndexPath:) ||
+          selector == @selector(collectionView:willDisplaySupplementaryView:forElementKind:atIndexPath:) ||
+          selector == @selector(collectionView:didEndDisplayingSupplementaryView:forElementOfKind:atIndexPath:) ||
           
           // used for batch fetching API
           selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:) ||
@@ -74,9 +104,7 @@
           
           // intercepted due to not being supported by ASCollectionView (prevent bugs caused by usage)
           selector == @selector(collectionView:canMoveItemAtIndexPath:) ||
-          selector == @selector(collectionView:moveItemAtIndexPath:toIndexPath:) ||
-          selector == @selector(collectionView:willDisplaySupplementaryView:forElementKind:atIndexPath:) ||
-          selector == @selector(collectionView:didEndDisplayingSupplementaryView:forElementOfKind:atIndexPath:)
+          selector == @selector(collectionView:moveItemAtIndexPath:toIndexPath:)
           );
 }
 
@@ -88,11 +116,10 @@
 {
   return (
           // handled by ASPagerDataSource node<->cell machinery
-          selector == @selector(collectionView:nodeForItemAtIndexPath:) ||
-          selector == @selector(collectionView:nodeBlockForItemAtIndexPath:) ||
-          selector == @selector(collectionView:numberOfItemsInSection:) ||
-          selector == @selector(collectionView:constrainedSizeForNodeAtIndexPath:) ||
-          selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)
+          selector == @selector(collectionNode:nodeForItemAtIndexPath:) ||
+          selector == @selector(collectionNode:nodeBlockForItemAtIndexPath:) ||
+          selector == @selector(collectionNode:numberOfItemsInSection:) ||
+          selector == @selector(collectionNode:constrainedSizeForItemAtIndexPath:)
           );
 }
 

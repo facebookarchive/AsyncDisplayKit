@@ -16,16 +16,20 @@
 //
 
 #import "DetailRootNode.h"
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
-
 #import "DetailCellNode.h"
+
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 static const NSInteger kImageHeight = 200;
 
-@interface DetailRootNode () <ASCollectionViewDataSource, ASCollectionViewDelegate>
+
+@interface DetailRootNode () <ASCollectionDataSource, ASCollectionDelegate>
+
 @property (nonatomic, copy) NSString *imageCategory;
 @property (nonatomic, strong) ASCollectionNode *collectionNode;
+
 @end
+
 
 @implementation DetailRootNode
 
@@ -34,20 +38,20 @@ static const NSInteger kImageHeight = 200;
 - (instancetype)initWithImageCategory:(NSString *)imageCategory
 {
     self = [super init];
-    if (self == nil) { return self; }
-    
-    _imageCategory = imageCategory;
+    if (self) {
+        // Enable automaticallyManagesSubnodes so the first time the layout pass of the node is happening all nodes that are referenced
+        // in the laaout specification within layoutSpecThatFits: will be added automatically
+        self.automaticallyManagesSubnodes = YES;
+        
+        _imageCategory = imageCategory;
 
-    // Create ASCollectionView. We don't have to add it explicitly as subnode as we will set usesImplicitHierarchyManagement to YES
-    UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-    _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
-    _collectionNode.delegate = self;
-    _collectionNode.dataSource = self;
-    _collectionNode.backgroundColor = [UIColor whiteColor];
-    
-    // Enable usesImplicitHierarchyManagement so the first time the layout pass of the node is happening all nodes that are referenced
-    // in layouts within layoutSpecThatFits: will be added automatically
-    self.usesImplicitHierarchyManagement = YES;
+        // Create ASCollectionView. We don't have to add it explicitly as subnode as we will set usesImplicitHierarchyManagement to YES
+        UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
+        _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
+        _collectionNode.delegate = self;
+        _collectionNode.dataSource = self;
+        _collectionNode.backgroundColor = [UIColor whiteColor];
+    }
     
     return self;
 }
@@ -62,19 +66,17 @@ static const NSInteger kImageHeight = 200;
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    self.collectionNode.position = CGPointZero;
-    self.collectionNode.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.collectionNode]];
+    return [ASWrapperLayoutSpec wrapperWithLayoutElement:self.collectionNode];
 }
 
 #pragma mark - ASCollectionDataSource
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+- (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
 {
     return 10;
 }
 
-- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString *imageCategory = self.imageCategory;
     return ^{
@@ -85,9 +87,9 @@ static const NSInteger kImageHeight = 200;
     };
 }
 
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    CGSize imageSize = CGSizeMake(CGRectGetWidth(collectionView.frame), kImageHeight);
+    CGSize imageSize = CGSizeMake(CGRectGetWidth(collectionNode.view.frame), kImageHeight);
     return ASSizeRangeMake(imageSize, imageSize);
 }
 

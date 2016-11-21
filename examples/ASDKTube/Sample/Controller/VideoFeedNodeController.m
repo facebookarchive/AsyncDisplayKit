@@ -34,7 +34,6 @@
 
 - (instancetype)init
 {
-  self.navigationItem.title = @"Home";
   _tableNode = [[ASTableNode alloc] init];
   _tableNode.delegate = self;
   _tableNode.dataSource = self;
@@ -42,17 +41,18 @@
   if (!(self = [super initWithNode:_tableNode])) {
     return nil;
   }
+  
+  [self generateFeedData];
+  self.navigationItem.title = @"Home";
 
   return self;
 }
 
-- (void)loadView
+- (void)viewDidLoad
 {
-  [super loadView];
-
-  [self generateFeedData];
-
-  [_tableNode.view reloadData];
+  [super viewDidLoad];
+  
+  [_tableNode reloadData];
 }
 
 - (void)generateFeedData
@@ -65,18 +65,23 @@
 }
 
 #pragma mark - ASCollectionDelegate - ASCollectionDataSource
-- (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
+
+- (NSInteger)numberOfSectionsInTableNode:(ASTableNode *)tableNode
+{
   return 1;
 }
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
+- (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
+{
   return _videoFeedData.count;
 }
 
-- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNode *)tableNode:(ASTableNode *)tableNode nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   VideoModel *videoObject = [_videoFeedData objectAtIndex:indexPath.row];
   VideoContentCell *cellNode = [[VideoContentCell alloc] initWithVideoObject:videoObject];
+  
   return cellNode;
 }
+
 @end

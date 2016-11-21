@@ -52,21 +52,21 @@
         
         // Name node
         _nameNode = [[ASTextNode alloc] init];
-        _nameNode.attributedString = [[NSAttributedString alloc] initWithString:_post.name attributes:[TextStyles nameStyle]];
+        _nameNode.attributedText = [[NSAttributedString alloc] initWithString:_post.name attributes:[TextStyles nameStyle]];
         _nameNode.maximumNumberOfLines = 1;
         [self addSubnode:_nameNode];
         
         // Username node
         _usernameNode = [[ASTextNode alloc] init];
-        _usernameNode.attributedString = [[NSAttributedString alloc] initWithString:_post.username attributes:[TextStyles usernameStyle]];
-        _usernameNode.flexShrink = YES; //if name and username don't fit to cell width, allow username shrink
+        _usernameNode.attributedText = [[NSAttributedString alloc] initWithString:_post.username attributes:[TextStyles usernameStyle]];
+        _usernameNode.style.flexShrink = 1.0; //if name and username don't fit to cell width, allow username shrink
         _usernameNode.truncationMode = NSLineBreakByTruncatingTail;
         _usernameNode.maximumNumberOfLines = 1;
         [self addSubnode:_usernameNode];
         
         // Time node
         _timeNode = [[ASTextNode alloc] init];
-        _timeNode.attributedString = [[NSAttributedString alloc] initWithString:_post.time attributes:[TextStyles timeStyle]];
+        _timeNode.attributedText = [[NSAttributedString alloc] initWithString:_post.time attributes:[TextStyles timeStyle]];
         [self addSubnode:_timeNode];
         
         // Post node
@@ -98,7 +98,7 @@
             _postNode.delegate = self;
             _postNode.userInteractionEnabled = YES;
             _postNode.linkAttributeNames = @[ kLinkAttributeName ];
-            _postNode.attributedString = attrString;
+            _postNode.attributedText = attrString;
             _postNode.passthroughNonlinkTouches = YES;   // passes touches through when they aren't on a link
             
         }
@@ -136,7 +136,8 @@
         // User pic
         _avatarNode = [[ASNetworkImageNode alloc] init];
         _avatarNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
-        _avatarNode.preferredFrameSize = CGSizeMake(44, 44);
+        _avatarNode.style.width = ASDimensionMakeWithPoints(44);
+        _avatarNode.style.height = ASDimensionMakeWithPoints(44);
         _avatarNode.cornerRadius = 22.0;
         _avatarNode.URL = [NSURL URLWithString:_post.photo];
         _avatarNode.imageModificationBlock = ^UIImage *(UIImage *image) {
@@ -209,12 +210,15 @@
 {
     // Flexible spacer between username and time
     ASLayoutSpec *spacer = [[ASLayoutSpec alloc] init];
-    spacer.flexGrow = YES;
+    spacer.style.flexGrow = 1.0;
   
     // NOTE: This inset is not actually required by the layout, but is an example of the upward propogation of layoutable
     // properties.  Specifically, .flexGrow from the child is transferred to the inset spec so they can expand together.
-    // Without this capability, it would be required to set insetSpacer.flexGrow = YES;
-    ASInsetLayoutSpec *insetSpacer = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0, 0, 0, 0) child:spacer];
+    // Without this capability, it would be required to set insetSpacer.flexGrow = 1.0;
+    ASInsetLayoutSpec *insetSpacer =
+    [ASInsetLayoutSpec
+     insetLayoutSpecWithInsets:UIEdgeInsetsMake(0, 0, 0, 0)
+     child:spacer];
   
     // Horizontal stack for name, username, via icon and time
     NSMutableArray *layoutSpecChildren = [@[_nameNode, _usernameNode, insetSpacer] mutableCopy];
@@ -223,40 +227,72 @@
     }
     [layoutSpecChildren addObject:_timeNode];
     
-    ASStackLayoutSpec *nameStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal spacing:5.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsCenter children:layoutSpecChildren];
-    nameStack.alignSelf = ASStackLayoutAlignSelfStretch;
+    ASStackLayoutSpec *nameStack =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+     spacing:5.0
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsCenter
+     children:layoutSpecChildren];
+    nameStack.style.alignSelf = ASStackLayoutAlignSelfStretch;
     
     // bottom controls horizontal stack
-    ASStackLayoutSpec *controlsStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal spacing:10 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsCenter children:@[_likesNode, _commentsNode, _optionsNode]];
+    ASStackLayoutSpec *controlsStack =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+     spacing:10
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsCenter
+     children:@[_likesNode, _commentsNode, _optionsNode]];
     
     // Add more gaps for control line
-    controlsStack.spacingAfter = 3.0;
-    controlsStack.spacingBefore = 3.0;
+    controlsStack.style.spacingAfter = 3.0;
+    controlsStack.style.spacingBefore = 3.0;
     
     NSMutableArray *mainStackContent = [[NSMutableArray alloc] init];
     [mainStackContent addObject:nameStack];
     [mainStackContent addObject:_postNode];
     
-    if (![_post.media isEqualToString:@""]) {
-        CGFloat imageRatio = (_mediaNode.image != nil ? _mediaNode.image.size.height / _mediaNode.image.size.width : 0.5);
-        ASRatioLayoutSpec *imagePlace = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:imageRatio child:_mediaNode];
-        imagePlace.spacingAfter = 3.0;
-        imagePlace.spacingBefore = 3.0;
+    
+    if (![_post.media isEqualToString:@""]){
         
-        [mainStackContent addObject:imagePlace];
-        
+        // Only add the media node if an image is present
+        if (_mediaNode.image != nil) {
+            CGFloat imageRatio = (_mediaNode.image != nil ? _mediaNode.image.size.height / _mediaNode.image.size.width : 0.5);
+            ASRatioLayoutSpec *imagePlace =
+            [ASRatioLayoutSpec
+             ratioLayoutSpecWithRatio:imageRatio
+             child:_mediaNode];
+            imagePlace.style.spacingAfter = 3.0;
+            imagePlace.style.spacingBefore = 3.0;
+            
+            [mainStackContent addObject:imagePlace];
+        }
     }
     [mainStackContent addObject:controlsStack];
     
     // Vertical spec of cell main content
-    ASStackLayoutSpec *contentSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical spacing:8.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:mainStackContent];
-    contentSpec.alignItems = ASStackLayoutAlignSelfStretch;
-    contentSpec.flexShrink = YES;
+    ASStackLayoutSpec *contentSpec =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+     spacing:8.0
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsStretch
+     children:mainStackContent];
+    contentSpec.style.flexShrink = 1.0;
     
     // Horizontal spec for avatar
-    ASStackLayoutSpec *avatarContentSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal spacing:8.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsStart children:@[_avatarNode, contentSpec]];
+    ASStackLayoutSpec *avatarContentSpec =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+     spacing:8.0
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsStart
+     children:@[_avatarNode, contentSpec]];
     
-    return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(10, 10, 10, 10) child:avatarContentSpec];
+    return [ASInsetLayoutSpec
+            insetLayoutSpecWithInsets:UIEdgeInsetsMake(10, 10, 10, 10)
+            child:avatarContentSpec];
     
 }
 

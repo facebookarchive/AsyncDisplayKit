@@ -9,14 +9,18 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <CoreGraphics/CGBase.h>
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector);
 BOOL ASSubclassOverridesClassSelector(Class superclass, Class subclass, SEL selector);
+
+/// Replace a method from the given class with a block and returns the original method IMP
+IMP ASReplaceMethodWithBlock(Class c, SEL origSEL, id block);
 
 /// Dispatches the given block to the main queue if not already running on the main thread
 void ASPerformBlockOnMainThread(void (^block)());
@@ -24,18 +28,37 @@ void ASPerformBlockOnMainThread(void (^block)());
 /// Dispatches the given block to a background queue with priority of DISPATCH_QUEUE_PRIORITY_DEFAULT if not already run on a background queue
 void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
 
-/// Dispatches a block on to a serial queue that's main purpose is for deallocation of objects on a background thread
-void ASPerformBlockOnDeallocationQueue(void (^block)());
+/// For deallocation of objects on a background thread without GCD overhead / thread explosion
+void ASPerformBackgroundDeallocation(id object);
 
 CGFloat ASScreenScale();
 
+CGSize ASFloorSizeValues(CGSize s);
+
 CGFloat ASFloorPixelValue(CGFloat f);
+
+CGSize ASCeilSizeValues(CGSize s);
 
 CGFloat ASCeilPixelValue(CGFloat f);
 
 CGFloat ASRoundPixelValue(CGFloat f);
 
+BOOL ASClassRequiresMainThreadDeallocation(Class _Nullable c);
+
+Class _Nullable ASGetClassFromType(const char *type);
+
 ASDISPLAYNODE_EXTERN_C_END
+
+ASDISPLAYNODE_INLINE BOOL ASImageAlphaInfoIsOpaque(CGImageAlphaInfo info) {
+  switch (info) {
+    case kCGImageAlphaNone:
+    case kCGImageAlphaNoneSkipLast:
+    case kCGImageAlphaNoneSkipFirst:
+      return YES;
+    default:
+      return NO;
+  }
+}
 
 /**
  @summary Conditionally performs UIView geometry changes in the given block without animation.
@@ -64,3 +87,5 @@ ASDISPLAYNODE_INLINE void ASBoundsAndPositionForFrame(CGRect rect, CGPoint origi
 @interface NSIndexPath (ASInverseComparison)
 - (NSComparisonResult)asdk_inverseCompare:(NSIndexPath *)otherIndexPath;
 @end
+
+NS_ASSUME_NONNULL_END

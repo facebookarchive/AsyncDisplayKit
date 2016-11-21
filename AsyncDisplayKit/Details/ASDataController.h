@@ -11,11 +11,17 @@
 #pragma once
 
 #import <UIKit/UIKit.h>
-#import <AsyncDisplayKit/ASDealloc2MainObject.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASFlowLayoutController.h>
+#import <AsyncDisplayKit/ASEventLog.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+#if ASEVENTLOG_ENABLE
+#define ASDataControllerLogEvent(dataController, ...) [dataController.eventLog logEventWithBacktrace:(AS_SAVE_EVENT_BACKTRACES ? [NSThread callStackSymbols] : nil) format:__VA_ARGS__]
+#else
+#define ASDataControllerLogEvent(dataController, ...)
+#endif
 
 @class ASCellNode;
 @class ASDataController;
@@ -107,12 +113,14 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  * For each data updating, the corresponding methods in delegate will be called.
  */
 @protocol ASFlowLayoutControllerDataSource;
-@interface ASDataController : ASDealloc2MainObject <ASFlowLayoutControllerDataSource>
+@interface ASDataController : NSObject <ASFlowLayoutControllerDataSource>
+
+- (instancetype)initWithDataSource:(id<ASDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
 
 /**
  Data source for fetching data info.
  */
-@property (nonatomic, weak) id<ASDataControllerSource> dataSource;
+@property (nonatomic, weak, readonly) id<ASDataControllerSource> dataSource;
 
 /**
  Delegate to notify when data is updated.
@@ -123,6 +131,22 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  *
  */
 @property (nonatomic, weak) id<ASDataControllerEnvironmentDelegate> environmentDelegate;
+
+/**
+ * Returns YES if reloadData has been called at least once. Before this point it is
+ * important to ignore/suppress some operations. For example, inserting a section
+ * before the initial data load should have no effect.
+ *
+ * This must be called on the main thread.
+ */
+@property (nonatomic, readonly) BOOL initialReloadDataHasBeenCalled;
+
+#if ASEVENTLOG_ENABLE
+/*
+ * @abstract The primitive event tracing object. You shouldn't directly use it to log event. Use the ASDataControllerLogEvent macro instead.
+ */
+@property (nonatomic, strong, readonly) ASEventLog *eventLog;
+#endif
 
 /** @name Data Updating */
 
@@ -170,14 +194,37 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
 
 - (nullable ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath;
 
+- (NSUInteger)completedNumberOfSections;
+
+- (NSUInteger)completedNumberOfRowsInSection:(NSUInteger)section;
+
+- (nullable ASCellNode *)nodeAtCompletedIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * @return The index path, in the data source's index space, for the given node.
+ */
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
 
-- (NSArray<ASCellNode *> *)nodesAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
+/**
+ * @return The index path, in UIKit's index space, for the given node.
+ *
+ * @discussion @c indexPathForNode: is returns an index path in the data source's index space.
+ *   This method is useful for e.g. looking up the cell for a given node.
+ */
+- (nullable NSIndexPath *)completedIndexPathForNode:(ASCellNode *)cellNode;
 
 /**
  * Direct access to the nodes that have completed calculation and layout
  */
 - (NSArray<NSArray <ASCellNode *> *> *)completedNodes;
+
+/**
+ * Immediately move this item. This is called by ASTableView when the user has finished an interactive
+ * item move and the table view is requesting a model update.
+ * 
+ * This must be called on the main thread.
+ */
+- (void)moveCompletedNodeAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
 
 @end
 

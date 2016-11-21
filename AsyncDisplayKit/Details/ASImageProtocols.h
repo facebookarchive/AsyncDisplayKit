@@ -17,8 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASImageContainerProtocol <NSObject>
 
-- (UIImage *)asdk_image;
-- (NSData *)asdk_animatedImageData;
+- (nullable UIImage *)asdk_image;
+- (nullable NSData *)asdk_animatedImageData;
 
 @end
 
@@ -210,31 +210,6 @@ withDownloadIdentifier:(id)downloadIdentifier;
  @abstract Clear any cached data. Called when playback is paused.
  */
 - (void)clearAnimatedImageCache;
-
-@end
-
-@protocol ASImageDownloaderProtocolDeprecated <ASImageDownloaderProtocol>
-
-@optional
-/**
- @deprecated This method is deprecated @see downloadImageWithURL:callbackQueue:downloadProgress:completion: instead
- */
-- (nullable id)downloadImageWithURL:(NSURL *)URL
-                      callbackQueue:(nullable dispatch_queue_t)callbackQueue
-              downloadProgressBlock:(void (^ _Nullable)(CGFloat progress))downloadProgressBlock
-                         completion:(void (^ _Nullable)(CGImageRef _Nullable image, NSError * _Nullable error))completion ASDISPLAYNODE_DEPRECATED;
-
-@end
-
-@protocol ASImageCacheProtocolDeprecated <ASImageCacheProtocol>
-
-@optional
-/**
- @deprecated This method is deprecated @see cachedImageWithURL:callbackQueue:completion: instead
- */
-- (void)fetchCachedImageWithURL:(nullable NSURL *)URL
-                  callbackQueue:(nullable dispatch_queue_t)callbackQueue
-                     completion:(void (^)(CGImageRef _Nullable imageFromCache))completion ASDISPLAYNODE_DEPRECATED;
 
 @end
 

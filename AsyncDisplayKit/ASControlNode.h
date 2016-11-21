@@ -10,6 +10,8 @@
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+#pragma once
+
 NS_ASSUME_NONNULL_BEGIN
 
 /**
@@ -102,13 +104,13 @@ typedef NS_OPTIONS(NSUInteger, ASControlState) {
   @param controlEvent A single constant of type ASControlNodeEvent that specifies a particular user action on the control; for a list of these constants, see "Control Events". May not be 0 or ASControlNodeEventAllEvents.
   @result An array of selector names as NSString objects, or nil if there are no action selectors associated with controlEvent.
  */
-- (nullable NSArray<NSString *> *)actionsForTarget:(id)target forControlEvent:(ASControlNodeEvent)controlEvent;
+- (nullable NSArray<NSString *> *)actionsForTarget:(id)target forControlEvent:(ASControlNodeEvent)controlEvent AS_WARN_UNUSED_RESULT;
 
 /**
   @abstract Returns all target objects associated with the receiver.
   @result A set of all targets for the receiver. The set may include NSNull to indicate at least one nil target (meaning, the responder chain is searched for a target.)
  */
-- (NSSet *)allTargets;
+- (NSSet *)allTargets AS_WARN_UNUSED_RESULT;
 
 /**
   @abstract Removes a target-action pair for a particular event.

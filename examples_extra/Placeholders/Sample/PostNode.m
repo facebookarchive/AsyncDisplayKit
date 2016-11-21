@@ -52,7 +52,7 @@
 
   NSString *text = @"Etiam porta sem malesuada magna mollis euismod. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh.";
   NSDictionary *attributes = @{ NSFontAttributeName: [UIFont systemFontOfSize:17.0] };
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:text attributes:attributes];
+  _textNode.attributedText = [[NSAttributedString alloc] initWithString:text attributes:attributes];
 
   _needyChildNode = [[SlowpokeShareNode alloc] init];
   _needyChildNode.opaque = NO;

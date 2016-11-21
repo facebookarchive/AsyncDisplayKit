@@ -23,10 +23,10 @@
 
 static NSUInteger kNumberOfImages = 14;
 
-@interface ViewController () <ASCollectionViewDataSource, MosaicCollectionViewLayoutDelegate>
+@interface ViewController () <ASCollectionDataSource, ASCollectionDelegate>
 {
   NSMutableArray *_sections;
-  ASCollectionView *_collectionView;
+  ASCollectionNode *_collectionNode;
   MosaicCollectionViewLayoutInspector *_layoutInspector;
 }
 
@@ -39,7 +39,18 @@ static NSUInteger kNumberOfImages = 14;
 
 - (instancetype)init
 {
-  if (!(self = [super init]))
+  MosaicCollectionViewLayout *layout = [[MosaicCollectionViewLayout alloc] init];
+  layout.numberOfColumns = 2;
+  layout.headerHeight = 44.0;
+  
+  _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
+  _collectionNode.dataSource = self;
+  _collectionNode.delegate = self;
+  _collectionNode.backgroundColor = [UIColor whiteColor];
+  
+  _layoutInspector = [[MosaicCollectionViewLayoutInspector alloc] init];
+
+  if (!(self = [super initWithNode:_collectionNode]))
     return nil;
   
   _sections = [NSMutableArray array];
@@ -53,50 +64,26 @@ static NSUInteger kNumberOfImages = 14;
     }
   }
   
-  MosaicCollectionViewLayout *layout = [[MosaicCollectionViewLayout alloc] init];
-  layout.numberOfColumns = 2;
-  layout.headerHeight = 44.0;
-  
-  _layoutInspector = [[MosaicCollectionViewLayoutInspector alloc] init];
-  
-  _collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
-  _collectionView.asyncDataSource = self;
-  _collectionView.asyncDelegate = self;
-  _collectionView.layoutInspector = _layoutInspector;
-  _collectionView.backgroundColor = [UIColor whiteColor];
-  
-  [_collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
+  [_collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
   
   return self;
-}
-
-- (void)dealloc
-{
-  _collectionView.asyncDataSource = nil;
-  _collectionView.asyncDelegate = nil;
 }
 
 - (void)viewDidLoad
 {
   [super viewDidLoad];
   
-  [self.view addSubview:_collectionView];
-}
-
-- (void)viewWillLayoutSubviews
-{
-  _collectionView.frame = self.view.bounds;
+  _collectionNode.view.layoutInspector = _layoutInspector;
 }
 
 - (void)reloadTapped
 {
-  [_collectionView reloadData];
+  [_collectionNode reloadData];
 }
 
-#pragma mark -
-#pragma mark ASCollectionView data source.
+#pragma mark - ASCollectionNode data source.
 
-- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   UIImage *image = _sections[indexPath.section][indexPath.item];
   return ^{
@@ -105,7 +92,7 @@ static NSUInteger kNumberOfImages = 14;
 }
 
 
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+- (ASCellNode *)collectionNode:(ASCollectionNode *)collectionNode nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   NSDictionary *textAttributes = @{
       NSFontAttributeName: [UIFont preferredFontForTextStyle:UIFontTextStyleHeadline],
@@ -117,17 +104,17 @@ static NSUInteger kNumberOfImages = 14;
   return textCellNode;
 }
 
-- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
+- (NSInteger)numberOfSectionsInCollectionNode:(ASCollectionNode *)collectionNode
 {
   return _sections.count;
 }
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+- (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
 {
   return [_sections[section] count];
 }
 
-- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout originalItemSizeAtIndexPath:(NSIndexPath *)indexPath
+- (CGSize)collectionView:(ASCollectionNode *)collectionNode layout:(UICollectionViewLayout *)collectionViewLayout originalItemSizeAtIndexPath:(NSIndexPath *)indexPath
 {
   return [(UIImage *)_sections[indexPath.section][indexPath.item] size];
 }

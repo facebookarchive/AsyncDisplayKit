@@ -15,9 +15,11 @@
 #import "ASAvailability.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASLayout.h"
 #import "ASTraitCollection.h"
 #import "ASEnvironmentInternal.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
+#import "ASInternalHelpers.h"
 
 #define AS_LOG_VISIBILITY_CHANGES 0
 
@@ -27,6 +29,8 @@
   BOOL _automaticallyAdjustRangeModeBasedOnViewEvents;
   BOOL _parentManagesVisibilityDepth;
   NSInteger _visibilityDepth;
+  BOOL _selfConformsToRangeModeProtocol;
+  BOOL _nodeConformsToRangeModeProtocol;
 }
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
@@ -51,9 +55,16 @@
   ASDisplayNodeAssertTrue(!node.layerBacked);
   _node = node;
 
-  _automaticallyAdjustRangeModeBasedOnViewEvents = NO;
+  _selfConformsToRangeModeProtocol = [self conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
+  _nodeConformsToRangeModeProtocol = [_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
+  _automaticallyAdjustRangeModeBasedOnViewEvents = _selfConformsToRangeModeProtocol || _nodeConformsToRangeModeProtocol;
 
   return self;
+}
+
+- (void)dealloc
+{
+  ASPerformBackgroundDeallocation(_node);
 }
 
 - (void)loadView
@@ -80,26 +91,37 @@
   if (AS_AT_LEAST_IOS8) {
     ASEnvironmentTraitCollection traitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
     [self progagateNewEnvironmentTraitCollection:traitCollection];
+  } else {
+    ASEnvironmentTraitCollection traitCollection = ASEnvironmentTraitCollectionMakeDefault();
+    traitCollection.containerSize = self.view.bounds.size;
+    [self progagateNewEnvironmentTraitCollection:traitCollection];
   }
 }
 
 - (void)viewWillLayoutSubviews
 {
   [super viewWillLayoutSubviews];
-  [_node measureWithSizeRange:[self nodeConstrainedSize]];
+  
+  // Before layout, make sure that our trait collection containerSize actually matches the size of our bounds.
+  // If not, we need to update the traits and propagate them.
+  if (CGSizeEqualToSize(self.node.environmentTraitCollection.containerSize, self.view.bounds.size) == NO) {
+    [UIView performWithoutAnimation:^{
+      ASEnvironmentTraitCollection environmentTraitCollection;
+      if (AS_AT_LEAST_IOS8) {
+        environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
+      } else {
+        environmentTraitCollection = ASEnvironmentTraitCollectionMakeDefault();
+      }
+      environmentTraitCollection.containerSize = self.view.bounds.size;
+      // this method will call measure
+      [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
+    }];
+  } else {
+    [_node layoutThatFits:[self nodeConstrainedSize]];
+  }
   
   if (!AS_AT_LEAST_IOS9) {
     [self _legacyHandleViewDidLayoutSubviews];
-  }
-}
-
-- (void)_legacyHandleViewDidLayoutSubviews
-{
-  // In modal presentation the view does not automatic resize in iOS7 and iOS8. As workaround we adjust the frame of the
-  // view manually
-  if (self.presentingViewController != nil) {
-    CGSize maxConstrainedSize = [self nodeConstrainedSize].max;
-    _node.frame = (CGRect){.origin = CGPointZero, .size = maxConstrainedSize};
   }
 }
 
@@ -118,7 +140,13 @@ ASVisibilityDidMoveToParentViewController;
 {
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
-  [_node measureWithSizeRange:[self nodeConstrainedSize]];
+
+  // A measure as well as layout pass is forced this early to get nodes like ASCollectionNode, ASTableNode etc.
+  // into the hierarchy before UIKit applies the scroll view inset adjustments, if automatic subnode management
+  // is enabled. Otherwise the insets would not be applied.
+  [_node layoutThatFits:[self nodeConstrainedSize]];
+  [_node.view layoutIfNeeded];
+
   [_node recursivelyFetchData];
   
   if (_parentManagesVisibilityDepth == NO) {
@@ -171,18 +199,27 @@ ASVisibilityDepthImplementation;
 
 - (void)setAutomaticallyAdjustRangeModeBasedOnViewEvents:(BOOL)automaticallyAdjustRangeModeBasedOnViewEvents
 {
-  _automaticallyAdjustRangeModeBasedOnViewEvents = automaticallyAdjustRangeModeBasedOnViewEvents;
+  if (automaticallyAdjustRangeModeBasedOnViewEvents != _automaticallyAdjustRangeModeBasedOnViewEvents) {
+    if (automaticallyAdjustRangeModeBasedOnViewEvents && _selfConformsToRangeModeProtocol == NO && _nodeConformsToRangeModeProtocol == NO) {
+      NSLog(@"Warning: automaticallyAdjustRangeModeBasedOnViewEvents set to YES in %@, but range mode updating is not possible because neither view controller nor node %@ conform to ASRangeControllerUpdateRangeProtocol.", self, _node);
+    }
+    _automaticallyAdjustRangeModeBasedOnViewEvents = automaticallyAdjustRangeModeBasedOnViewEvents;
+  }
 }
 
 - (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
 {
   if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
-  if (![_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]) {
-    return;
+  
+  if (_selfConformsToRangeModeProtocol) {
+    id<ASRangeControllerUpdateRangeProtocol> rangeUpdater = (id<ASRangeControllerUpdateRangeProtocol>)self;
+    [rangeUpdater updateCurrentRangeWithMode:rangeMode];
   }
-
-  id<ASRangeControllerUpdateRangeProtocol> updateRangeNode = (id<ASRangeControllerUpdateRangeProtocol>)_node;
-  [updateRangeNode updateCurrentRangeWithMode:rangeMode];
+  
+  if (_nodeConformsToRangeModeProtocol) {
+    id<ASRangeControllerUpdateRangeProtocol> rangeUpdater = (id<ASRangeControllerUpdateRangeProtocol>)_node;
+    [rangeUpdater updateCurrentRangeWithMode:rangeMode];
+  }
 }
 
 #pragma mark - Layout Helpers
@@ -191,10 +228,35 @@ ASVisibilityDepthImplementation;
 {
   if (AS_AT_LEAST_IOS9) {
     CGSize viewSize = self.view.bounds.size;
-    return ASSizeRangeMake(viewSize, viewSize);
+    return ASSizeRangeMake(viewSize);
   } else {
     return [self _legacyConstrainedSize];
   }
+}
+
+- (ASInterfaceState)interfaceState
+{
+  return _node.interfaceState;
+}
+
+#pragma mark - Legacy Layout Handling
+
+- (BOOL)_shouldLayoutTheLegacyWay
+{
+  BOOL isModalViewController = (self.presentingViewController != nil && self.presentedViewController == nil);
+  BOOL hasNavigationController = (self.navigationController != nil);
+  BOOL hasParentViewController = (self.parentViewController != nil);
+  if (isModalViewController && !hasNavigationController && !hasParentViewController) {
+    return YES;
+  }
+  
+  // Check if the view controller is a root view controller
+  BOOL isRootViewController = self.view.window.rootViewController == self;
+  if (isRootViewController) {
+    return YES;
+  }
+  
+  return NO;
 }
 
 - (ASSizeRange)_legacyConstrainedSize
@@ -203,7 +265,7 @@ ASVisibilityDepthImplementation;
   // view bounds
   UIView *view = self.view;
   CGSize viewSize = view.bounds.size;
-  if (self.presentingViewController != nil) {
+  if ([self _shouldLayoutTheLegacyWay]) {
     UIView *superview = view.superview;
     if (superview != nil) {
       viewSize = superview.bounds.size;
@@ -212,9 +274,14 @@ ASVisibilityDepthImplementation;
   return ASSizeRangeMake(viewSize, viewSize);
 }
 
-- (ASInterfaceState)interfaceState
+- (void)_legacyHandleViewDidLayoutSubviews
 {
-  return _node.interfaceState;
+  // In modal presentation or as root viw controller the view does not automatic resize in iOS7 and iOS8.
+  // As workaround we adjust the frame of the view manually
+  if ([self _shouldLayoutTheLegacyWay]) {
+    CGSize maxConstrainedSize = [self nodeConstrainedSize].max;
+    _node.frame = (CGRect){.origin = CGPointZero, .size = maxConstrainedSize};
+  }
 }
 
 #pragma mark - ASEnvironmentTraitCollection
@@ -232,17 +299,6 @@ ASVisibilityDepthImplementation;
   return asyncTraitCollection;
 }
 
-- (ASEnvironmentTraitCollection)environmentTraitCollectionForWindowSize:(CGSize)windowSize
-{
-  if (self.overrideDisplayTraitsWithWindowSize) {
-    ASTraitCollection *traitCollection = self.overrideDisplayTraitsWithWindowSize(windowSize);
-    return [traitCollection environmentTraitCollection];
-  }
-  ASEnvironmentTraitCollection traitCollection = self.node.environmentTraitCollection;
-  traitCollection.containerSize = windowSize;
-  return traitCollection;
-}
-
 - (void)progagateNewEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
   ASEnvironmentState environmentState = self.node.environmentState;
@@ -251,12 +307,15 @@ ASVisibilityDepthImplementation;
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, oldEnvironmentTraitCollection) == NO) {
     environmentState.environmentTraitCollection = environmentTraitCollection;
     self.node.environmentState = environmentState;
-    [self.node setNeedsLayout];
     
     NSArray<id<ASEnvironment>> *children = [self.node children];
     for (id<ASEnvironment> child in children) {
       ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
     }
+    
+    // once we've propagated all the traits, layout this node.
+    // Remeasure the node with the latest constrained size – old constrained size may be incorrect.
+    [self.node layoutThatFits:[self nodeConstrainedSize]];
   }
 }
 
@@ -269,24 +328,13 @@ ASVisibilityDepthImplementation;
   [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
 }
 
-- (void)willTransitionToTraitCollection:(UITraitCollection *)newCollection withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
+- (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
-  [super willTransitionToTraitCollection:newCollection withTransitionCoordinator:coordinator];
+  [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
   
-  // here we take the new UITraitCollection and use it to create a new ASEnvironmentTraitCollection on self.node
-  // We will propagate when the corresponding viewWillTransitionToSize:withTransitionCoordinator: is called and we have the
-  // new windowSize. There are cases when viewWillTransitionToSize: is called when willTransitionToTraitCollection: is not.
-  // Since we do the propagation on viewWillTransitionToSize: our subnodes should always get the proper trait collection.
-  ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(newCollection);
-  self.node.environmentTraitCollection = asyncTraitCollection;
-}
-
-- (void)viewWillTransitionToSize:(CGSize)size withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
-{
-  [super viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
-  
-  ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForWindowSize:size];
-  [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
+  ASEnvironmentTraitCollection traitCollection = self.node.environmentTraitCollection;
+  traitCollection.containerSize = self.view.bounds.size;
+  [self progagateNewEnvironmentTraitCollection:traitCollection];
 }
 
 @end

@@ -9,7 +9,7 @@
 //
 
 #import <XCTest/XCTest.h>
-
+#import "ASXCTExtensions.h"
 #import "ASDimension.h"
 
 
@@ -17,6 +17,26 @@
 @end
 
 @implementation ASDimensionTests
+
+- (void)testCreatingDimensionUnitAutos
+{
+  XCTAssertNoThrow(ASDimensionMake(ASDimensionUnitAuto, 0));
+  XCTAssertThrows(ASDimensionMake(ASDimensionUnitAuto, 100));
+  XCTAssertThrows(ASDimensionMake(@""));
+  ASXCTAssertEqualDimensions(ASDimensionAuto, ASDimensionMake(@"auto"));
+}
+
+- (void)testCreatingDimensionUnitFraction
+{
+  XCTAssertNoThrow(ASDimensionMake(ASDimensionUnitFraction, 0.5));
+  ASXCTAssertEqualDimensions(ASDimensionMake(ASDimensionUnitFraction, 0.5), ASDimensionMake(@"50%"));
+}
+
+- (void)testCreatingDimensionUnitPoints
+{
+  XCTAssertNoThrow(ASDimensionMake(ASDimensionUnitPoints, 100));
+  ASXCTAssertEqualDimensions(ASDimensionMake(ASDimensionUnitPoints, 100), ASDimensionMake(@"100pt"));
+}
 
 - (void)testIntersectingOverlappingSizeRangesReturnsTheirIntersection
 {

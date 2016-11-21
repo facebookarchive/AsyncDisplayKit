@@ -23,8 +23,7 @@ static const ASSizeRange kSize = {{320, 320}, {320, 320}};
 - (void)testOverlay
 {
   ASDisplayNode *backgroundNode = ASDisplayNodeWithBackgroundColor([UIColor blueColor]);
-  ASStaticSizeDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor blackColor]);
-  foregroundNode.staticSize = {20, 20};
+  ASDisplayNode *foregroundNode = ASDisplayNodeWithBackgroundColor([UIColor blackColor], {20, 20});
   
   ASLayoutSpec *layoutSpec =
   [ASOverlayLayoutSpec

@@ -23,13 +23,13 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
  * Deep mutable copy of an array that contains arrays, which contain objects.  It will go one level deep into the array to copy.
  * This method is substantially faster than the generalized version, e.g. about 10x faster, so use it whenever it fits the need.
  */
-extern NSMutableArray<NSMutableArray *> *ASTwoDimensionalArrayDeepMutableCopy(NSArray<NSArray *> *array);
+extern NSMutableArray<NSMutableArray *> *ASTwoDimensionalArrayDeepMutableCopy(NSArray<NSArray *> *array) AS_WARN_UNUSED_RESULT;
 
 /**
  * Deep mutable copy of multidimensional array.  This is completely generalized and supports copying mixed-depth arrays,
  * where some subarrays might contain both elements and other subarrays. It will recursively do the multiple copy for each subarray.
  */
-extern NSObject<NSCopying> *ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> *obj);
+extern NSObject<NSCopying> *ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> *obj) AS_WARN_UNUSED_RESULT;
 
 /**
  * Insert the elements into the mutable multidimensional array at given index paths.
@@ -44,27 +44,37 @@ extern void ASDeleteElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *
 /**
  * Find the elements of the mutable multidimensional array at given index paths.
  */
-extern NSArray *ASFindElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray, NSArray *indexPaths);
+extern NSArray *ASFindElementsInMultidimensionalArrayAtIndexPaths(NSMutableArray *mutableArray, NSArray *indexPaths) AS_WARN_UNUSED_RESULT;
 
 /**
  * Return all the index paths of mutable multidimensional array at given index set, in ascending order.
  */
-extern NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *multidimensionalArray, NSIndexSet *indexSet);
+extern NSArray *ASIndexPathsForMultidimensionalArrayAtIndexSet(NSArray *multidimensionalArray, NSIndexSet *indexSet) AS_WARN_UNUSED_RESULT;
+
+/**
+ * Moves the object at `sourceIndexPath` to `destinationIndexPath`.
+ */
+extern void ASMoveElementInTwoDimensionalArray(NSMutableArray *mutableArray, NSIndexPath *sourceIndexPath, NSIndexPath *destinationIndexPath);
 
 /**
  * Return the index paths of the given multidimensional array that are present in the given index paths array.
  */
-extern NSArray<NSIndexPath *> *ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths(NSArray *multidimensionalArray, NSArray<NSIndexPath *> *indexPaths);
+extern NSArray<NSIndexPath *> *ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths(NSArray *multidimensionalArray, NSArray<NSIndexPath *> *indexPaths) AS_WARN_UNUSED_RESULT;
 
 /**
  * Return all the index paths of a two-dimensional array, in ascending order.
  */
-extern NSArray *ASIndexPathsForTwoDimensionalArray(NSArray <NSArray *>* twoDimensionalArray);
+extern NSArray *ASIndexPathsForTwoDimensionalArray(NSArray <NSArray *>* twoDimensionalArray) AS_WARN_UNUSED_RESULT;
 
 /**
  * Return all the index paths of a multidimensional array, in ascending order.
  */
-extern NSArray *ASIndexPathsForMultidimensionalArray(NSArray *MultidimensionalArray);
+extern NSArray *ASIndexPathsForMultidimensionalArray(NSArray *MultidimensionalArray) AS_WARN_UNUSED_RESULT;
+
+/**
+ * Attempt to get the object at the given index path. Returns @c nil if the index path is out of bounds.
+ */
+extern id ASGetElementInTwoDimensionalArray(NSArray *array, NSIndexPath *indexPath) AS_WARN_UNUSED_RESULT;
 
 
 ASDISPLAYNODE_EXTERN_C_END

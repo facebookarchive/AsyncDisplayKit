@@ -97,7 +97,7 @@ static const CGFloat kInnerPadding = 10.0f;
 
   // lorem ipsum text, plus some nice styling
   _textNode = [[ASTextNode alloc] init];
-  _textNode.attributedString = [[NSAttributedString alloc] initWithString:[self kittyIpsum]
+  _textNode.attributedText = [[NSAttributedString alloc] initWithString:[self kittyIpsum]
                                                                attributes:[self textStyle]];
   [self addSubnode:_textNode];
 
@@ -140,8 +140,10 @@ static const CGFloat kInnerPadding = 10.0f;
 #if UseAutomaticLayout
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  _imageNode.preferredFrameSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize) : CGSizeMake(kImageSize, kImageSize);
-  _textNode.flexShrink = YES;
+  CGSize imageSize = _isImageEnlarged ? CGSizeMake(2.0 * kImageSize, 2.0 * kImageSize)
+                                      : CGSizeMake(kImageSize, kImageSize);
+  _imageNode.size = ASRelativeSizeRangeMakeWithExactCGSize(imageSize);
+  _textNode.flexShrink = 1.0;
   
   ASStackLayoutSpec *stackSpec = [[ASStackLayoutSpec alloc] init];
   stackSpec.direction = ASStackLayoutDirectionHorizontal;

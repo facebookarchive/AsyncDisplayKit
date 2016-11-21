@@ -16,6 +16,8 @@
 @class ASPagerNode;
 @class ASPagerFlowLayout;
 
+NS_ASSUME_NONNULL_BEGIN
+
 #define ASPagerNodeDataSource ASPagerDataSource
 @protocol ASPagerDataSource <NSObject>
 
@@ -23,7 +25,7 @@
  * This method replaces -collectionView:numberOfItemsInSection:
  *
  * @param pagerNode The sender.
- * @returns The total number of pages that can display in the pagerNode.
+ * @return The total number of pages that can display in the pagerNode.
  */
 - (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode;
 
@@ -34,7 +36,7 @@
  *
  * @param pagerNode The sender.
  * @param index     The index of the requested node.
- * @returns a node for display at this index. This will be called on the main thread and should
+ * @return a node for display at this index. This will be called on the main thread and should
  *   not implement reuse (it will be called once per row).  Unlike UICollectionView's version,
  *   this method is not called when the row is about to display.
  */
@@ -46,24 +48,26 @@
  *
  * @param pagerNode The sender.
  * @param index     The index of the requested node.
- * @returns a block that creates the node for display at this index.
+ * @return a block that creates the node for display at this index.
  *   Must be thread-safe (can be called on the main thread or a background
  *   queue) and should not implement reuse (it will be called once per row).
  */
 - (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index;
 
-/**
- * Provides the constrained size range for measuring the node at the index path.
- *
- * @param pagerNode The sender.
- * @param indexPath The index path of the node.
- * @returns A constrained size range for layout the node at this index path.
- */
-- (ASSizeRange)pagerNode:(ASPagerNode *)pagerNode constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
-
 @end
 
 @protocol ASPagerDelegate <ASCollectionDelegate>
+
+@optional
+
+/**
+ * Provides the constrained size range for measuring the node at the index.
+ *
+ * @param pagerNode The sender.
+ * @param index The index of the node.
+ * @return A constrained size range for layout the node at this index.
+ */
+- (ASSizeRange)pagerNode:(ASPagerNode *)pagerNode constrainedSizeForNodeAtIndex:(NSInteger)index;
 
 @end
 
@@ -82,14 +86,15 @@
 /**
  * Data Source is required, and uses a different protocol from ASCollectionNode.
  */
-- (void)setDataSource:(id <ASPagerDataSource>)dataSource;
-- (id <ASPagerDataSource>)dataSource;
+- (void)setDataSource:(nullable id <ASPagerDataSource>)dataSource;
+- (nullable id <ASPagerDataSource>)dataSource AS_WARN_UNUSED_RESULT;
 
 /**
- * Delegate is optional, and uses the same protocol as ASCollectionNode.
+ * Delegate is optional.
  * This includes UIScrollViewDelegate as well as most methods from UICollectionViewDelegate, like willDisplay...
  */
-@property (nonatomic, weak) id <ASPagerDelegate> delegate;
+- (void)setDelegate:(nullable id <ASPagerDelegate>)delegate;
+- (nullable id <ASPagerDelegate>)delegate AS_WARN_UNUSED_RESULT;
 
 /**
  * The underlying ASCollectionView object.
@@ -109,6 +114,13 @@
 /**
  * Returns the node for the passed page index
  */
-- (ASCellNode *)nodeForPageAtIndex:(NSInteger)index;
+- (ASCellNode *)nodeForPageAtIndex:(NSInteger)index AS_WARN_UNUSED_RESULT;
+
+/**
+ * Returns the index of the page for the cell passed or NSNotFound
+ */
+- (NSInteger)indexOfPageWithNode:(ASCellNode *)node;
 
 @end
+
+NS_ASSUME_NONNULL_END

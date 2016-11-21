@@ -13,6 +13,9 @@
 #import "ASImageNode.h"
 #import "AsyncDisplayKit+Debug.h"
 #import "ASInternalHelpers.h"
+#import "ASControlTargetAction.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASLayoutElementInspectorNode.h"
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
@@ -36,20 +39,9 @@
   BOOL _tracking;
   BOOL _touchInside;
 
-  // Target Messages.
-  /*
-     The table structure is as follows:
-
-   {
-    AnEvent -> {
-                  target1 -> (action1, ...)
-                  target2 -> (action1, ...)
-                  ...
-               }
-    ...
-   }
-   */
-  NSMutableDictionary *_controlEventDispatchTable;
+  // Target action pairs stored in an array for each event type
+  // ASControlEvent -> [ASTargetAction0, ASTargetAction1]
+  NSMutableDictionary<id<NSCopying>, NSMutableArray<ASControlTargetAction *> *> *_controlEventDispatchTable;
 }
 
 // Read-write overrides.
@@ -251,12 +243,11 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 {
   NSParameterAssert(action);
   NSParameterAssert(controlEventMask != 0);
+  // This assertion would likely be helpful to users who aren't familiar with the implications of layer-backing.
+  // However, it would represent an API change (in debug) as it did not used to assert.
+  // ASDisplayNodeAssert(!self.isLayerBacked, @"ASControlNode is layer backed, will never be able to call target in target:action: pair.");
   
   ASDN::MutexLocker l(_controlLock);
-  
-  // Convert nil to [NSNull null] so that it can be used as a key for NSMapTable.
-  if (!target)
-    target = [NSNull null];
 
   if (!_controlEventDispatchTable) {
     _controlEventDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeEventDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
@@ -273,6 +264,11 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
       });
     }
   }
+  
+  // Create new target action pair
+  ASControlTargetAction *targetAction = [[ASControlTargetAction alloc] init];
+  targetAction.action = action;
+  targetAction.target = target;
 
   // Enumerate the events in the mask, adding the target-action pair for each control event included in controlEventMask
   _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEventMask, ^
@@ -280,28 +276,21 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     {
       // Do we already have an event table for this control event?
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMapTable *eventDispatchTable = _controlEventDispatchTable[eventKey];
-      // Create it if necessary.
-      if (!eventDispatchTable)
-      {
-        // Create the dispatch table for this event.
-        eventDispatchTable = [NSMapTable weakToStrongObjectsMapTable];
-        _controlEventDispatchTable[eventKey] = eventDispatchTable;
+      NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[eventKey];
+      
+      if (!eventTargetActionArray) {
+        eventTargetActionArray = [[NSMutableArray alloc] init];
       }
-
-      // Have we seen this target before for this event?
-      NSMutableSet *targetActions = [eventDispatchTable objectForKey:target];
-      if (!targetActions)
-      {
-        // Nope. Create an action set for it.
-        targetActions = [[NSMutableSet alloc] initWithCapacity:kASControlNodeActionDispatchTableInitialCapacity]; // enough to handle common types without re-hashing the dictionary when adding entries.
-        [eventDispatchTable setObject:targetActions forKey:target];
+      
+      // Remove any prior target-action pair for this event, as UIKit does.
+      [eventTargetActionArray removeObject:targetAction];
+      
+      // Register the new target-action as the last one to be sent.
+      [eventTargetActionArray addObject:targetAction];
+      
+      if (eventKey) {
+        [_controlEventDispatchTable setObject:eventTargetActionArray forKey:eventKey];
       }
-
-      // Add the action message.
-      // UIControl does not support duplicate target-action-events entries, so we replicate that behavior.
-      // See: https://github.com/facebook/AsyncDisplayKit/files/205466/DuplicateActionsTest.playground.zip
-      [targetActions addObject:NSStringFromSelector(action)];
     });
 
   self.userInteractionEnabled = YES;
@@ -314,13 +303,22 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 
   ASDN::MutexLocker l(_controlLock);
   
-  // Grab the event dispatch table for this event.
-  NSMapTable *eventDispatchTable = _controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)];
-  if (!eventDispatchTable)
+  // Grab the event target action array for this event.
+  NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)];
+  if (!eventTargetActionArray) {
     return nil;
+  }
 
-  // Return the actions for this target.
-  return [eventDispatchTable objectForKey:target];
+  NSMutableArray *actions = [[NSMutableArray alloc] init];
+  
+  // Collect all actions for this target.
+  for (ASControlTargetAction *targetAction in eventTargetActionArray) {
+    if ((target == nil && targetAction.createdWithNoTarget) || (target != nil && target == targetAction.target)) {
+      [actions addObject:NSStringFromSelector(targetAction.action)];
+    }
+  }
+  
+  return actions;
 }
 
 - (NSSet *)allTargets
@@ -330,11 +328,11 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   NSMutableSet *targets = [[NSMutableSet alloc] init];
 
   // Look at each event...
-  for (NSMapTable *eventDispatchTable in [_controlEventDispatchTable allValues])
-  {
+  for (NSMutableArray *eventTargetActionArray in [_controlEventDispatchTable objectEnumerator]) {
     // and each event's targets...
-    for (id target in eventDispatchTable)
-      [targets addObject:target];
+    for (ASControlTargetAction *targetAction in eventTargetActionArray) {
+      [targets addObject:targetAction.target];
+    }
   }
 
   return targets;
@@ -352,44 +350,28 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     {
       // Grab the dispatch table for this event (if we have it).
       id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(controlEvent);
-      NSMapTable *eventDispatchTable = _controlEventDispatchTable[eventKey];
-      if (!eventDispatchTable)
+      NSMutableArray *eventTargetActionArray = _controlEventDispatchTable[eventKey];
+      if (!eventTargetActionArray) {
         return;
-
-      void (^removeActionFromTarget)(id <NSCopying> targetKey, SEL action) = ^
-        (id aTarget, SEL theAction)
-        {
-          // Grab the targetActions for this target.
-          NSMutableArray *targetActions = [eventDispatchTable objectForKey:aTarget];
-
-          // Remove action if we have it.
-          if (theAction)
-            [targetActions removeObject:NSStringFromSelector(theAction)];
-          // Or all actions if not.
-          else
-            [targetActions removeAllObjects];
-
-          // If there are no actions left, remove this target entry.
-          if ([targetActions count] == 0)
-          {
-            [eventDispatchTable removeObjectForKey:aTarget];
-
-            // If there are no targets for this event anymore, remove it.
-            if ([eventDispatchTable count] == 0)
-              [_controlEventDispatchTable removeObjectForKey:eventKey];
-          }
-        };
-
-
-      // Unlike addTarget:, if target is nil here we remove all targets with action.
-      if (!target)
-      {
-        // Look at every target, removing target-pairs that have action (or all of its actions).
-        for (id aTarget in [eventDispatchTable copy])
-          removeActionFromTarget(aTarget, action);
       }
-      else
-        removeActionFromTarget(target, action);
+      
+      NSPredicate *filterPredicate = [NSPredicate predicateWithBlock:^BOOL(ASControlTargetAction *_Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+        if (!target || evaluatedObject.target == target) {
+          if (!action) {
+            return NO;
+          } else if (evaluatedObject.action == action) {
+            return NO;
+          }
+        }
+        
+        return YES;
+      }];
+      [eventTargetActionArray filterUsingPredicate:filterPredicate];
+      
+      if (eventTargetActionArray.count == 0) {
+        // If there are no targets for this event anymore, remove it.
+        [_controlEventDispatchTable removeObjectForKey:eventKey];
+      }
     });
 }
 
@@ -405,30 +387,23 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     (ASControlNodeEvent controlEvent)
     {
       // Use a copy to itereate, the action perform could call remove causing a mutation crash.
-      NSMapTable *eventDispatchTable = [_controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)] copy];
-
-      // For each target interested in this event...
-      for (id target in eventDispatchTable)
-      {
-        NSArray *targetActions = [eventDispatchTable objectForKey:target];
-
-        // Invoke each of the actions on target.
-        for (NSString *actionMessage in targetActions)
-        {
-          SEL action = NSSelectorFromString(actionMessage);
-          id responder = target;
-
-          // NSNull means that a nil target was set, so start at self and travel the responder chain
-          if (responder == [NSNull null]) {
-            // if the target cannot perform the action, travel the responder chain to try to find something that does
-            responder = [self.view targetForAction:action withSender:self];
-          }
-
+      NSMutableArray *eventTargetActionArray = [_controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)] copy];
+      
+      // Iterate on each target action pair
+      for (ASControlTargetAction *targetAction in eventTargetActionArray) {
+        SEL action = targetAction.action;
+        id responder = targetAction.target;
+        
+        // NSNull means that a nil target was set, so start at self and travel the responder chain
+        if (!responder && targetAction.createdWithNoTarget) {
+          // if the target cannot perform the action, travel the responder chain to try to find something that does
+          responder = [self.view targetForAction:action withSender:self];
+        }
+        
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Warc-performSelector-leaks"
-          [responder performSelector:action withObject:self withObject:event];
+        [responder performSelector:action withObject:self withObject:event];
 #pragma clang diagnostic pop
-        }
       }
     });
 }
@@ -442,9 +417,11 @@ id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEv
 
 void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, void (^block)(ASControlNodeEvent anEvent))
 {
+  if (block == nil) {
+    return;
+  }
   // Start with our first event (touch down) and work our way up to the last event (touch cancel)
-  for (ASControlNodeEvent thisEvent = ASControlNodeEventTouchDown; thisEvent <= ASControlNodeEventTouchCancel; thisEvent <<= 1)
-  {
+  for (ASControlNodeEvent thisEvent = ASControlNodeEventTouchDown; thisEvent <= ASControlNodeEventTouchCancel; thisEvent <<= 1){
     // If it's included in the mask, invoke the block.
     if ((mask & thisEvent) == thisEvent)
       block(thisEvent);
@@ -474,6 +451,23 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
 - (ASImageNode *)debugHighlightOverlay
 {
   return _debugHighlightOverlay;
+}
+
+// methods for visualizing ASLayoutSpecs
+- (void)setHierarchyState:(ASHierarchyState)hierarchyState
+{
+  [super setHierarchyState:hierarchyState];
+  
+  if (self.shouldVisualizeLayoutSpecs) {
+    [self addTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];
+  } else {
+    [self removeTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];
+  }
+}
+
+- (void)inspectElement
+{
+  [ASLayoutElementInspectorNode sharedInstance].layoutElementToEdit = self;
 }
 
 @end

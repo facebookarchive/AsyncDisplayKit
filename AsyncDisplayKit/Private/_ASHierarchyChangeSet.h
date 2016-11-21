@@ -11,29 +11,70 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <vector>
+#import "ASObjectDescriptionHelpers.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 typedef NSUInteger ASDataControllerAnimationOptions;
 
 typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
+  /**
+   * A reload change, as submitted by the user. When a change set is
+   * completed, these changes are decomposed into delete-insert pairs
+   * and combined with the original deletes and inserts of the change.
+   */
   _ASHierarchyChangeTypeReload,
+  
+  /**
+   * A change that was either an original delete, or the first 
+   * part of a decomposed reload.
+   */
   _ASHierarchyChangeTypeDelete,
-  _ASHierarchyChangeTypeInsert
+  
+  /**
+   * A change that was submitted by the user as a delete.
+   */
+  _ASHierarchyChangeTypeOriginalDelete,
+  
+  /**
+   * A change that was either an original insert, or the second
+   * part of a decomposed reload.
+   */
+  _ASHierarchyChangeTypeInsert,
+  
+  /**
+   * A change that was submitted by the user as an insert.
+   */
+  _ASHierarchyChangeTypeOriginalInsert
 };
+
+/**
+ * Returns YES if the given change type is either .Insert or .Delete, NO otherwise.
+ * Other change types – .Reload, .OriginalInsert, .OriginalDelete – are
+ * intermediary types used while building the change set. All changes will
+ * be reduced to either .Insert or .Delete when the change is marked completed.
+ */
+BOOL ASHierarchyChangeTypeIsFinal(_ASHierarchyChangeType changeType);
 
 NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 
-@interface _ASHierarchySectionChange : NSObject
+@interface _ASHierarchySectionChange : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider>
 
 // FIXME: Generalize this to `changeMetadata` dict?
 @property (nonatomic, readonly) ASDataControllerAnimationOptions animationOptions;
 
 @property (nonatomic, strong, readonly) NSIndexSet *indexSet;
 @property (nonatomic, readonly) _ASHierarchyChangeType changeType;
+
+/**
+ * If this is a .OriginalInsert or .OriginalDelete change, this returns a copied change
+ * with type .Insert or .Delete. Calling this on changes of other types is an error.
+ */
+- (_ASHierarchySectionChange *)changeByFinalizingType;
 @end
 
-@interface _ASHierarchyItemChange : NSObject
+@interface _ASHierarchyItemChange : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider>
 @property (nonatomic, readonly) ASDataControllerAnimationOptions animationOptions;
 
 /// Index paths are sorted descending for changeType .Delete, ascending otherwise
@@ -41,10 +82,37 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 
 @property (nonatomic, readonly) _ASHierarchyChangeType changeType;
 
-+ (NSDictionary *)sectionToIndexSetMapFromChanges:(NSArray<_ASHierarchyItemChange *> *)changes ofType:(_ASHierarchyChangeType)changeType;
++ (NSDictionary *)sectionToIndexSetMapFromChanges:(NSArray<_ASHierarchyItemChange *> *)changes;
+
+/**
+ * If this is a .OriginalInsert or .OriginalDelete change, this returns a copied change
+ * with type .Insert or .Delete. Calling this on changes of other types is an error.
+ */
+- (_ASHierarchyItemChange *)changeByFinalizingType;
 @end
 
-@interface _ASHierarchyChangeSet : NSObject
+@interface _ASHierarchyChangeSet : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider>
+
+- (instancetype)initWithOldData:(std::vector<NSInteger>)oldItemCounts NS_DESIGNATED_INITIALIZER;
+
+
+/**
+ * The combined completion handler.
+ *
+ * @warning The completion block is discarded after reading because it may have captured
+ *   significant resources that we would like to reclaim as soon as possible.
+ */
+@property (nonatomic, copy, readonly, nullable) void(^completionHandler)(BOOL finished);
+
+/**
+ * Append the given completion handler to the combined @c completionHandler.
+ *
+ * @discussion Since batch updates can be nested, we have to support multiple
+ * completion handlers per update.
+ *
+ * @precondition The change set must not be completed.
+ */
+- (void)addCompletionHandler:(nullable void(^)(BOOL finished))completion;
 
 /// @precondition The change set must be completed.
 @property (nonatomic, strong, readonly) NSIndexSet *deletedSections;
@@ -55,7 +123,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
  Get the section index after the update for the given section before the update.
  
  @precondition The change set must be completed.
- @returns The new section index, or NSNotFound if the given section was deleted.
+ @return The new section index, or NSNotFound if the given section was deleted.
  */
 - (NSUInteger)newSectionForOldSection:(NSUInteger)oldSection;
 
@@ -63,22 +131,8 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 
 /// Call this once the change set has been constructed to prevent future modifications to the changeset. Calling this more than once is a programmer error.
 /// NOTE: Calling this method will cause the changeset to convert all reloads into delete/insert pairs.
-- (void)markCompleted;
+- (void)markCompletedWithNewItemCounts:(std::vector<NSInteger>)newItemCounts;
 
-/**
- @abstract Return sorted changes of the given type, grouped by animation options.
- 
- Items deleted from deleted sections are not reported.
- Items inserted into inserted sections are not reported.
- Items reloaded in reloaded sections are not reported.
- 
- The safe order for processing change groups is:
- - Reloaded sections & reloaded items
- - Deleted items, descending order
- - Deleted sections, descending order
- - Inserted sections, ascending order
- - Inserted items, ascending order
- */
 - (nullable NSArray <_ASHierarchySectionChange *> *)sectionChangesOfType:(_ASHierarchyChangeType)changeType;
 - (nullable NSArray <_ASHierarchyItemChange *> *)itemChangesOfType:(_ASHierarchyChangeType)changeType;
 

@@ -20,13 +20,16 @@
 
 #import "DetailViewController.h"
 
+
 @interface ViewController () <ASTableDataSource, ASTableDelegate>
+
 @property (nonatomic, copy) NSArray *imageCategories;
 @property (nonatomic, strong, readonly) ASTableNode *tableNode;
+
 @end
 
-@implementation ViewController
 
+@implementation ViewController
 
 #pragma mark - Lifecycle
 
@@ -42,8 +45,8 @@
 
 - (void)dealloc
 {
-    self.tableNode.delegate = nil;
-    self.tableNode.dataSource = nil;
+    self.node.delegate = nil;
+    self.node.dataSource = nil;
 }
 
 
@@ -55,35 +58,28 @@
     
     self.title = @"Image Categories";
     
-    self.tableNode.delegate = self;
-    self.tableNode.dataSource = self;
+    self.node.delegate = self;
+    self.node.dataSource = self;
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     
-    [self.tableNode.view deselectRowAtIndexPath:self.tableNode.view.indexPathForSelectedRow animated:YES];
-}
-
-
-#pragma mark - Setter / Getter
-
-- (ASTableNode *)tableNode
-{
-    return (ASTableNode *)self.node;
+    [self.node deselectRowAtIndexPath:self.node.indexPathForSelectedRow animated:YES];
 }
 
 
 #pragma mark - ASTableDataSource / ASTableDelegate
 
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
+- (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
 {
     return self.imageCategories.count;
 }
 
-- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)tableNode:(ASTableNode *)tableNode nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    // As the block is executed on a background thread we need to cache the image category string outside
     NSString *imageCategory = self.imageCategories[indexPath.row];
     return ^{
         ASTextCellNode *textCellNode = [ASTextCellNode new];
@@ -92,15 +88,13 @@
     };
 }
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
+- (void)tableNode:(ASTableNode *)tableNode didSelectRowAtIndexPath:(NSIndexPath *)indexPath
 {
     NSString *imageCategory = self.imageCategories[indexPath.row];
     DetailRootNode *detailRootNode = [[DetailRootNode alloc] initWithImageCategory:imageCategory];
     DetailViewController *detailViewController = [[DetailViewController alloc] initWithNode:detailRootNode];
     detailViewController.title = [imageCategory capitalizedString];
     [self.navigationController pushViewController:detailViewController animated:YES];
-    
-    
 }
 
 @end

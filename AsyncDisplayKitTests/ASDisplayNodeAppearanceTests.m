@@ -28,26 +28,21 @@ IMP class_replaceMethodWithBlock(Class class, SEL originalSelector, id block)
   return class_replaceMethod(class, originalSelector, newImplementation, method_getTypeEncoding(method));
 }
 
-static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(Class class, SEL originalSelector, id block);
-static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(Class class, SEL originalSelector, id block)
+static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(Class class, SEL originalSelector, void (^block)(id))
 {
   __block IMP originalImp = NULL;
-  void (^blockCopied)(id) = [block copy];
-  void (^blockActualSwizzle)(id) = [^(id swizzedSelf){
-    blockCopied(swizzedSelf);
+  void (^blockActualSwizzle)(id) = ^(id swizzedSelf){
+    block(swizzedSelf);
     ((void(*)(id, SEL))originalImp)(swizzedSelf, originalSelector);
-  } copy];
+  };
   originalImp = class_replaceMethodWithBlock(class, originalSelector, blockActualSwizzle);
   void (^cleanupBlock)(void) = ^{
     // restore original method
     Method method = class_getInstanceMethod(class, originalSelector);
     class_replaceMethod(class, originalSelector, originalImp, method_getTypeEncoding(method));
-    // release copied blocks
-    [blockCopied release];
-    [blockActualSwizzle release];
   };
-  return [[cleanupBlock copy] autorelease];
-}
+  return cleanupBlock;
+};
 
 @interface ASDisplayNode (PrivateStuffSoWeDontPullInCPPInternalH)
 - (BOOL)__visibilityNotificationsDisabled;
@@ -60,14 +55,11 @@ static dispatch_block_t modifyMethodByAddingPrologueBlockAndReturnCleanupBlock(C
 @end
 
 // Conveniences for making nodes named a certain way
-#define DeclareNodeNamed(n) ASDisplayNode *n = [[[ASDisplayNode alloc] init] autorelease]; n.name = @#n
-#define DeclareViewNamed(v) UIView *v = viewWithName(@#v)
-
-static UIView *viewWithName(NSString *name) {
-  ASDisplayNode *n = [[[ASDisplayNode alloc] init] autorelease];
-  n.name = name;
-  return n.view;
-}
+#define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.debugName = @#n
+#define DeclareViewNamed(v) \
+  ASDisplayNode *node_##v = [[ASDisplayNode alloc] init]; \
+  node_##v.debugName = @#v; \
+  UIView *v = node_##v.view;
 
 @implementation ASDisplayNodeAppearanceTests
 {
@@ -104,16 +96,11 @@ static UIView *viewWithName(NSString *name) {
 {
   [super tearDown];
 
-  for(id cleanupBlock in _swizzleCleanupBlocks) {
-    void (^cleanupBlockCasted)(void) = cleanupBlock;
-    cleanupBlockCasted();
+  for(dispatch_block_t cleanupBlock in _swizzleCleanupBlocks) {
+    cleanupBlock();
   }
-  [_swizzleCleanupBlocks release];
   _swizzleCleanupBlocks = nil;
-
-  [_willEnterHierarchyCounts release];
   _willEnterHierarchyCounts = nil;
-  [_didExitHierarchyCounts release];
   _didExitHierarchyCounts = nil;
 }
 
@@ -130,7 +117,7 @@ static UIView *viewWithName(NSString *name) {
 - (void)checkAppearanceMethodsCalledWithRootNodeInWindowLayerBacked:(BOOL)isLayerBacked
 {
   // ASDisplayNode visibility does not change if modifying a hierarchy that is not in a window.  So create one and add the superview to it.
-  UIWindow *window = [[[UIWindow alloc] initWithFrame:CGRectZero] autorelease];
+  UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectZero];
 
   DeclareNodeNamed(n);
   DeclareViewNamed(superview);
@@ -167,7 +154,7 @@ static UIView *viewWithName(NSString *name) {
 - (void)checkManualAppearanceViewLoaded:(BOOL)isViewLoaded layerBacked:(BOOL)isLayerBacked
 {
   // ASDisplayNode visibility does not change if modifying a hierarchy that is not in a window.  So create one and add the superview to it.
-  UIWindow *window = [[[UIWindow alloc] initWithFrame:CGRectZero] autorelease];
+  UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectZero];
 
   DeclareNodeNamed(parent);
   DeclareNodeNamed(a);
@@ -260,13 +247,13 @@ static UIView *viewWithName(NSString *name) {
 - (void)testSynchronousIntermediaryView
 {
   // Parent is a wrapper node for a scrollview
-  ASDisplayNode *parentSynchronousNode = [[[ASDisplayNode alloc] initWithViewClass:[UIScrollView class]] autorelease];
+  ASDisplayNode *parentSynchronousNode = [[ASDisplayNode alloc] initWithViewClass:[UIScrollView class]];
   DeclareNodeNamed(layerBackedNode);
   DeclareNodeNamed(viewBackedNode);
 
   layerBackedNode.layerBacked = YES;
 
-  UIWindow *window = [[[UIWindow alloc] initWithFrame:CGRectZero] autorelease];
+  UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectZero];
   [parentSynchronousNode addSubnode:layerBackedNode];
   [parentSynchronousNode addSubnode:viewBackedNode];
 
@@ -388,8 +375,6 @@ static UIView *viewWithName(NSString *name) {
   // Make sure that we don't leave these unbalanced
   XCTAssertFalse([child __visibilityNotificationsDisabled], @"Unbalanced visibility notifications calls");
   XCTAssertFalse([child __selfOrParentHasVisibilityNotificationsDisabled], @"Should not have re-enabled yet");
-
-  [window release];
 }
 
 - (void)testMoveAcrossHierarchyLayer

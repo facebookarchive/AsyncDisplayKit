@@ -30,7 +30,7 @@
 
 @end
 
-@protocol MosaicCollectionViewLayoutDelegate <ASCollectionViewDelegate>
+@protocol MosaicCollectionViewLayoutDelegate <ASCollectionDelegate>
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(MosaicCollectionViewLayout *)layout originalItemSizeAtIndexPath:(NSIndexPath *)indexPath;
 

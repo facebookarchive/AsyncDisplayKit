@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Retrieve the state of the current batch process.
  *
- * @returns A boolean reflecting if the owner of the context object is fetching another batch.
+ * @return A boolean reflecting if the owner of the context object is fetching another batch.
  */
 - (BOOL)isFetching;
 
@@ -41,7 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion If an error occurs in the context owner, the batch fetching may become out of sync and need to be
  * cancelled. For best practices, pass the return value of -batchWasCancelled to -completeBatchFetch:.
  *
- * @returns A boolean reflecting if the context object owner had to cancel the batch process.
+ * @return A boolean reflecting if the context object owner had to cancel the batch process.
  */
 - (BOOL)batchFetchingWasCancelled;
 

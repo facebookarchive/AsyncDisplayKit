@@ -28,24 +28,21 @@
   ASBasicImageDownloader *downloader = [ASBasicImageDownloader sharedImageDownloader];
   NSURL *URL = [NSURL URLWithString:@"http://wrongPath/wrongResource.png"];
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   [downloader downloadImageWithURL:URL
                      callbackQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-             downloadProgressBlock:nil
-                        completion:^(CGImageRef image, NSError *error) {
+                  downloadProgress:nil
+                        completion:^(id<ASImageContainerProtocol>  _Nullable image, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
                           [firstExpectation fulfill];
                         }];
-
+  
   [downloader downloadImageWithURL:URL
                      callbackQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
-             downloadProgressBlock:nil
-                        completion:^(CGImageRef image, NSError *error) {
+                  downloadProgress:nil
+                        completion:^(id<ASImageContainerProtocol>  _Nullable image, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
                           [secondExpectation fulfill];
                         }];
-#pragma clang diagnostic pop
 
-  [self waitForExpectationsWithTimeout:3 handler:nil];
+  [self waitForExpectationsWithTimeout:30 handler:nil];
 }
 
 @end

@@ -33,8 +33,8 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
     return nil;
   
   _textNode = [[ASTextNode alloc] init];
-  _textNode.flexGrow = YES;
-  _textNode.flexShrink = YES;
+  _textNode.style.flexGrow = 1.0;
+  _textNode.style.flexShrink = 1.0;
   _textNode.maximumNumberOfLines = 3;
   [self addSubnode:_textNode];
   
@@ -66,7 +66,7 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
                           }
                   range:[blurb rangeOfString:@"placekitten.com"]];
   
-  _textNode.attributedString = string;
+  _textNode.attributedText = string;
   
   ASStackLayoutSpec *stackSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
   stackSpec.children = @[_textNode, _buttonNode];

@@ -63,7 +63,7 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
                           NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle | NSUnderlinePatternDot),
                           }
                   range:[blurb rangeOfString:@"placekitten.com"]];
-  _textNode.attributedString = string;
+  _textNode.attributedText = string;
 
   // add it as a subnode, and we're done
   [self addSubnode:_textNode];

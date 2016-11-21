@@ -13,13 +13,15 @@
 #import "ASStackPositionedLayout.h"
 
 struct ASStackBaselinePositionedLayout {
-    const std::vector<ASLayout *> sublayouts;
-    const CGFloat crossSize;
-    const CGFloat ascender;
-    const CGFloat descender;
-    
+  const std::vector<ASStackLayoutSpecItem> items;
+  const CGFloat crossSize;
+  const CGFloat ascender;
+  const CGFloat descender;
+  
     /** Given a positioned layout, computes each child position using baseline alignment. */
   static ASStackBaselinePositionedLayout compute(const ASStackPositionedLayout &positionedLayout,
                                                  const ASStackLayoutSpecStyle &style,
                                                  const ASSizeRange &constrainedSize);
+    
+  static BOOL needsBaselineAlignment(const ASStackLayoutSpecStyle &style);
 };

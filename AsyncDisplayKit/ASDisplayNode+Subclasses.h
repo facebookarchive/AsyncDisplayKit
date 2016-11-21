@@ -41,6 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASDisplayNode (Subclassing)
 
+#pragma mark - Properties
 /** @name Properties */
 
 /**
@@ -64,8 +65,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nullable, nonatomic, readonly, assign) ASLayout *calculatedLayout;
 
+#pragma mark - View Lifecycle
 /** @name View Lifecycle */
-
 
 /**
  * @abstract Called on the main thread immediately after self.view is created.
@@ -75,8 +76,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)didLoad ASDISPLAYNODE_REQUIRES_SUPER;
 
 
+#pragma mark - Layout
 /** @name Layout */
-
 
 /**
  * @abstract Called on the main thread by the view's -layoutSubviews.
@@ -101,6 +102,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)calculatedLayoutDidChange ASDISPLAYNODE_REQUIRES_SUPER;
 
+
+#pragma mark - Layout calculation
 /** @name Layout calculation */
 
 /**
@@ -119,6 +122,19 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize;
 
 /**
+ * ASDisplayNode's implementation of -layoutThatFits:parentSize: calls this method to resolve the node's size
+ * against parentSize, intersect it with constrainedSize, and call -calculateLayoutThatFits: with the result.
+ *
+ * In certain advanced cases, you may want to customize this logic. Overriding this method allows you to receive all
+ * three parameters and do the computation yourself.
+ *
+ * @warning Overriding this method should be done VERY rarely.
+ */
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+                     restrictedToSize:(ASLayoutElementSize)size
+                 relativeToParentSize:(CGSize)parentSize;
+
+/**
  * @abstract Return the calculated size.
  *
  * @param constrainedSize The maximum size the receiver should fit in.
@@ -130,7 +146,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @note Subclasses that override are committed to manual layout. Therefore, -layout: must be overriden to layout all subnodes or subviews.
  *
- * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
+ * @note This method should not be called directly outside of ASDisplayNode; use -layoutThatFits: or layoutThatFits:parentSize: instead.
  */
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize;
 
@@ -144,11 +160,11 @@ NS_ASSUME_NONNULL_BEGIN
  * be done before display can be performed here, and using ivars to cache any valuable intermediate results is
  * encouraged.
  *
- * @note This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.
+ * @note This method should not be called directly outside of ASDisplayNode; use -layoutThatFits: instead.
  *
- * @warning Subclasses that implement -layoutSpecThatFits: must not also use .layoutSpecBlock. Doing so will trigger
- * an exception. A future version of the framework may support using both, calling them serially, with the
- * .layoutSpecBlock superseding any values set by the method override.
+ * @warning Subclasses that implement -layoutSpecThatFits: must not use .layoutSpecBlock. Doing so will trigger an
+ * exception. A future version of the framework may support using both, calling them serially, with the .layoutSpecBlock
+ * superseding any values set by the method override.
  */
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize;
 
@@ -161,8 +177,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)invalidateCalculatedLayout;
 
 
+#pragma mark - Drawing
 /** @name Drawing */
-
 
 /**
  * @summary Delegate method to draw layer contents into a CGBitmapContext. The current UIGraphics context will be set
@@ -216,6 +232,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @note Called on the main thread only
  */
 - (void)displayWillStart ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)displayWillStartAsynchronously:(BOOL)asynchronously ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * @abstract Indicates that the receiver has finished displaying.
@@ -238,36 +255,58 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
- * @abstract Called whenever the visiblity of the node changed.
+ * @abstract Called whenever the node becomes visible.
  *
  * @discussion Subclasses may use this to monitor when they become visible.
- */
-- (void)visibilityDidChange:(BOOL)isVisible ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the visiblity of the node changed.
  *
- * @discussion Subclasses may use this to monitor when they become visible.
+ * @note This method is guaranteed to be called on main.
  */
-- (void)visibleStateDidChange:(BOOL)isVisible ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didEnterVisibleState ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
- * @abstract Called whenever the the node has entered or exited the display state.
+ * @abstract Called whenever the node is no longer visible.
+ *
+ * @discussion Subclasses may use this to monitor when they are no longer visible.
+ *
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didExitVisibleState ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called whenever the the node has entered the display state.
  *
  * @discussion Subclasses may use this to monitor when a node should be rendering its content.
  *
- * @note This method can be called from any thread and should therefore be thread safe.
+ * @note This method is guaranteed to be called on main.
  */
-- (void)displayStateDidChange:(BOOL)inDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didEnterDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
- * @abstract Called whenever the the node has entered or left the load state.
+ * @abstract Called whenever the the node has exited the display state.
  *
- * @discussion Subclasses may use this to monitor data for a node should be loaded, either from a local or remote source.  
+ * @discussion Subclasses may use this to monitor when a node should no longer be rendering its content.
  *
- * @note This method can be called from any thread and should therefore be thread safe.
+ * @note This method is guaranteed to be called on main.
  */
-- (void)loadStateDidChange:(BOOL)inLoadState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called whenever the the node has entered the preload state.
+ *
+ * @discussion Subclasses may use this to monitor data for a node should be preloaded, either from a local or remote source.
+ *
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didEnterPreloadState ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called whenever the the node has exited the preload state.
+ *
+ * @discussion Subclasses may use this to monitor whether preloading data for a node should be canceled.
+ *
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didExitPreloadState ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * Called just before the view is added to a window.
@@ -371,8 +410,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) CGFloat contentsScaleForDisplay;
 
 
+#pragma mark - Touch handling
 /** @name Touch handling */
-
 
 /**
  * @abstract Tells the node when touches began in its view.
@@ -407,8 +446,8 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)touchesCancelled:(nullable NSSet<UITouch *> *)touches withEvent:(nullable UIEvent *)event ASDISPLAYNODE_REQUIRES_SUPER;
 
 
+#pragma mark - Managing Gesture Recognizers
 /** @name Managing Gesture Recognizers */
-
 
 /**
  * @abstract Asks the node if a gesture recognizer should continue tracking touches.
@@ -418,8 +457,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer;
 
 
-/** @name Hit Testing */
+#pragma mark - Hit Testing
 
+/** @name Hit Testing */
 
 /**
  * @abstract Returns the view that contains the point.
@@ -436,6 +476,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable UIView *)hitTest:(CGPoint)point withEvent:(nullable UIEvent *)event;
 
+
+#pragma mark - Placeholders
 /** @name Placeholders */
 
 /**
@@ -456,6 +498,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable UIImage *)placeholderImage;
 
 
+#pragma mark - Description
 /** @name Description */
 
 /**

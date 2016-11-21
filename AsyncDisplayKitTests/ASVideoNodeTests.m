@@ -37,11 +37,11 @@
 }
 
 
-@property (atomic, readwrite) ASInterfaceState interfaceState;
-@property (atomic, readonly) ASDisplayNode *spinner;
-@property (atomic, readwrite) ASDisplayNode *playerNode;
-@property (atomic, readwrite) AVPlayer *player;
-@property (atomic, readwrite) BOOL shouldBePlaying;
+@property (nonatomic, readwrite) ASInterfaceState interfaceState;
+@property (nonatomic, readonly) ASDisplayNode *spinner;
+@property (nonatomic, readwrite) ASDisplayNode *playerNode;
+@property (nonatomic, readwrite) AVPlayer *player;
+@property (nonatomic, readwrite) BOOL shouldBePlaying;
 
 - (void)setVideoPlaceholderImage:(UIImage *)image;
 - (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray *)requestedKeys;
@@ -73,7 +73,7 @@
 
 - (void)doOnPlayIfVideoIsNotReadyInitializeSpinnerAndAddAsSubnodeWithUrl
 {
-  _videoNode.interfaceState = ASInterfaceStateFetchData;
+  _videoNode.interfaceState = ASInterfaceStatePreload;
   [_videoNode play];
 }
 
@@ -92,7 +92,7 @@
 
 - (void)doOnPauseSpinnerIsPausedIfPresentWithURL
 {
-  _videoNode.interfaceState = ASInterfaceStateFetchData;
+  _videoNode.interfaceState = ASInterfaceStatePreload;
   
   [_videoNode play];
   [_videoNode pause];
@@ -114,7 +114,7 @@
 
 - (void)doOnVideoReadySpinnerIsStoppedAndRemovedWithURL
 {
-  _videoNode.interfaceState = ASInterfaceStateFetchData;
+  _videoNode.interfaceState = ASInterfaceStatePreload;
   
   [_videoNode play];
   [_videoNode observeValueForKeyPath:@"status" ofObject:[_videoNode currentItem] change:@{NSKeyValueChangeNewKey : @(AVPlayerItemStatusReadyToPlay)} context:NULL];
@@ -144,7 +144,7 @@
   [[[videoNodeMock expect] andForwardToRealObject] prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   
   _videoNode.asset = assetMock;
-  _videoNode.interfaceState = ASInterfaceStateFetchData;
+  _videoNode.interfaceState = ASInterfaceStatePreload;
   
   [videoNodeMock verifyWithDelay:1.0f];
   
@@ -162,7 +162,7 @@
   [[[videoNodeMock expect] andForwardToRealObject] prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   
   _videoNode.asset = assetMock;
-  _videoNode.interfaceState = ASInterfaceStateFetchData;
+  _videoNode.interfaceState = ASInterfaceStatePreload;
   
   [videoNodeMock verifyWithDelay:1.0f];
   
@@ -233,7 +233,7 @@
   }];
   _videoNode.playerNode.layer.frame = CGRectZero;
   
-  [_videoNode visibleStateDidChange:YES];
+  [_videoNode didEnterVisibleState];
 
   XCTAssertTrue(_videoNode.shouldBePlaying);
 }
@@ -311,7 +311,7 @@
   _videoNode.shouldAutorepeat = NO;
 
   [_videoNode didLoad];
-  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStatePreload];
   [_videoNode prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   [_videoNode play];
   
@@ -332,7 +332,7 @@
   _videoNode.shouldAutorepeat = YES;
 
   [_videoNode didLoad];
-  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStatePreload];
   [_videoNode prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   [_videoNode play];
 
@@ -348,7 +348,7 @@
   
   _videoNode.asset = assetMock;
 
-  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStateFetchData];
+  [_videoNode setInterfaceState:ASInterfaceStateVisible | ASInterfaceStateDisplay | ASInterfaceStatePreload];
   [_videoNode prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   [_videoNode pause];
   _videoNode.shouldBePlaying = YES;

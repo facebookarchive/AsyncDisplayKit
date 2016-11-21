@@ -45,18 +45,20 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    self.node.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.node]];
+    // 100% of container
+    _node.style.width = ASDimensionMakeWithFraction(1.0);
+    _node.style.height = ASDimensionMakeWithFraction(1.0);
+    return [ASWrapperLayoutSpec wrapperWithLayoutElement:_node];
 }
 
 #pragma mark - <ASCollectionDataSource, ASCollectionDelegate>
 
-- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
+- (NSInteger)collectionNode:(ASCollectionNode *)collectionNode numberOfItemsInSection:(NSInteger)section
 {
     return 100;
 }
 
-- (ASCellNodeBlock)collectionView:(ASCollectionView *)collectionView nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
     return ^{
         ASTextCellNode *cellNode = [ASTextCellNode new];
@@ -66,9 +68,9 @@
     };
 }
 
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-    return ASSizeRangeMakeExactSize(CGSizeMake(100, 100));
+    return ASSizeRangeMake(CGSizeMake(100, 100));
 }
 
 @end

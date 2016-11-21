@@ -10,6 +10,8 @@
 
 #pragma once
 
+#import "ASLog.h"
+
 // The C++ compiler mangles C function names. extern "C" { /* your C functions */ } prevents this.
 // You should wrap all C function prototypes declared in headers with ASDISPLAYNODE_EXTERN_C_BEGIN/END, even if
 // they are included only from .m (Objective-C) files. It's common for .m files to start using C++
@@ -80,10 +82,29 @@
 # endif
 #endif
 
+#ifndef ASDISPLAYNODE_DEPRECATED_MSG
+# if ASDISPLAYNODE_GNUC (3, 0) && ASDISPLAYNODE_WARN_DEPRECATED
+#   define  ASDISPLAYNODE_DEPRECATED_MSG(msg) __deprecated_msg(msg)
+# else
+#   define  ASDISPLAYNODE_DEPRECATED_MSG(msg)
+# endif
+#endif
+
 #if defined (__cplusplus) && defined (__GNUC__)
 # define ASDISPLAYNODE_NOTHROW __attribute__ ((nothrow))
 #else
 # define ASDISPLAYNODE_NOTHROW
+#endif
+
+/**
+ * The event backtraces take a static 2KB of memory
+ * and retain all objects present in all the registers
+ * of the stack frames. The memory consumption impact
+ * is too significant even to be enabled during general
+ * development.
+ */
+#ifndef AS_SAVE_EVENT_BACKTRACES
+# define AS_SAVE_EVENT_BACKTRACES 0
 #endif
 
 #define ARRAY_COUNT(x) sizeof(x) / sizeof(x[0])
@@ -143,3 +164,24 @@
 #define ASDISPLAYNODE_REQUIRES_SUPER
 #endif
 #endif
+
+#ifndef AS_UNAVAILABLE
+#if __has_attribute(unavailable)
+#define AS_UNAVAILABLE(message) __attribute__((unavailable(message)))
+#else
+#define AS_UNAVAILABLE(message)
+#endif
+#endif
+
+#ifndef AS_WARN_UNUSED_RESULT
+#if __has_attribute(warn_unused_result)
+#define AS_WARN_UNUSED_RESULT __attribute__((warn_unused_result))
+#else
+#define AS_WARN_UNUSED_RESULT
+#endif
+#endif
+
+#define ASOVERLOADABLE __attribute__((overloadable))
+
+/// Ensure that class is of certain kind
+#define ASDynamicCast(x, c) ((c *) ([x isKindOfClass:[c class]] ? x : nil))

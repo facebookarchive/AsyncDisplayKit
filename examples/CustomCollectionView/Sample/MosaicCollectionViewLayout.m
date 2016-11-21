@@ -214,16 +214,9 @@
   return ASSizeRangeMake(CGSizeZero, [layout _headerSizeForSection:indexPath.section]);
 }
 
-/**
- * Asks the inspector for the number of supplementary sections in the collection view for the given kind.
- */
-- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind
+- (ASScrollDirection)scrollableDirections
 {
-  if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
-    return [[collectionView asyncDataSource] numberOfSectionsInCollectionView:collectionView];
-  } else {
-    return 0;
-  }
+  return ASScrollDirectionVerticalDirections;
 }
 
 /**

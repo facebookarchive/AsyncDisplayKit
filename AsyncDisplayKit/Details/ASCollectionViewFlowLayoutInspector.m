@@ -8,52 +8,92 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <UIKit/UIKit.h>
-
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASCollectionView.h"
 #import "ASAssert.h"
 #import "ASEqualityHelpers.h"
+#import "ASCollectionView+Undeprecated.h"
 
+#define kDefaultItemSize CGSizeMake(50, 50)
+
+#pragma mark - ASCollectionViewFlowLayoutInspector
+
+@interface ASCollectionViewFlowLayoutInspector ()
+@property (nonatomic, weak) UICollectionViewFlowLayout *layout;
+@end
+ 
 @implementation ASCollectionViewFlowLayoutInspector {
-  BOOL _delegateImplementsReferenceSizeForHeader;
-  BOOL _delegateImplementsReferenceSizeForFooter;
+  struct {
+    unsigned int implementsReferenceSizeForHeader:1;
+    unsigned int implementsReferenceSizeForFooter:1;
+    unsigned int implementsConstrainedSizeForNodeAtIndexPathDeprecated:1;
+    unsigned int implementsConstrainedSizeForItemAtIndexPath:1;
+  } _delegateFlags;
+  
+  struct {
+    unsigned int implementsNumberOfSectionsInCollectionView:1;
+  } _dataSourceFlags;
 }
 
-#pragma mark - Accessors
+#pragma mark Lifecycle
 
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout;
 {
+  NSParameterAssert(collectionView);
+  NSParameterAssert(flowLayout);
+  
   self = [super init];
-
-  if (flowLayout == nil) {
-    ASDisplayNodeAssert(NO, @"Should never create a layout inspector without a layout");
-  }
-
   if (self != nil) {
+    [self didChangeCollectionViewDataSource:collectionView.asyncDataSource];
     [self didChangeCollectionViewDelegate:collectionView.asyncDelegate];
     _layout = flowLayout;
   }
   return self;
 }
 
+#pragma mark ASCollectionViewLayoutInspecting
+
 - (void)didChangeCollectionViewDelegate:(id<ASCollectionDelegate>)delegate;
 {
   if (delegate == nil) {
-    _delegateImplementsReferenceSizeForHeader = NO;
-    _delegateImplementsReferenceSizeForFooter = NO;
+    memset(&_delegateFlags, 0, sizeof(_delegateFlags));
   } else {
-    _delegateImplementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
-    _delegateImplementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
+    _delegateFlags.implementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
+    _delegateFlags.implementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
+    _delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
+    _delegateFlags.implementsConstrainedSizeForItemAtIndexPath = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForItemAtIndexPath:)];
   }
 }
 
-#pragma mark - ASCollectionViewLayoutInspecting
+- (void)didChangeCollectionViewDataSource:(id<ASCollectionDataSource>)dataSource
+{
+  if (dataSource == nil) {
+    memset(&_dataSourceFlags, 0, sizeof(_dataSourceFlags));
+  } else {
+    _dataSourceFlags.implementsNumberOfSectionsInCollectionView = [dataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
+  }
+}
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  // TODO: Provide constrained size for flow layout item nodes
-  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+  if (_delegateFlags.implementsConstrainedSizeForItemAtIndexPath) {
+    return [collectionView.asyncDelegate collectionNode:collectionView.collectionNode constrainedSizeForItemAtIndexPath:indexPath];
+  } else if (_delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    return [collectionView.asyncDelegate collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
+#pragma clang diagnostic pop
+  } else {
+    // With 2.0 `collectionView:constrainedSizeForNodeAtIndexPath:` was moved to the delegate. Assert if not implemented on the delegate but on the data source
+    ASDisplayNodeAssert([collectionView.asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] == NO, @"collectionView:constrainedSizeForNodeAtIndexPath: was moved from the ASCollectionDataSource to the ASCollectionDelegate.");
+  }
+  
+  CGSize itemSize = _layout.itemSize;
+  if (CGSizeEqualToSize(itemSize, kDefaultItemSize) == NO) {
+    return ASSizeRangeMake(itemSize, itemSize);
+  }
+  
+  return NodeConstrainedSizeForScrollDirection(collectionView);
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -61,20 +101,11 @@
   CGSize constrainedSize;
   CGSize supplementarySize = [self sizeForSupplementaryViewOfKind:kind inSection:indexPath.section collectionView:collectionView];
   if (_layout.scrollDirection == UICollectionViewScrollDirectionVertical) {
-    constrainedSize = CGSizeMake(collectionView.bounds.size.width, supplementarySize.height);
+    constrainedSize = CGSizeMake(CGRectGetWidth(collectionView.bounds), supplementarySize.height);
   } else {
-    constrainedSize = CGSizeMake(supplementarySize.height, collectionView.bounds.size.height);
+    constrainedSize = CGSizeMake(supplementarySize.width, CGRectGetHeight(collectionView.bounds));
   }
   return ASSizeRangeMake(CGSizeZero, constrainedSize);
-}
-
-- (NSUInteger)collectionView:(ASCollectionView *)collectionView numberOfSectionsForSupplementaryNodeOfKind:(NSString *)kind
-{
-  if ([collectionView.asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)]) {
-    return [collectionView.asyncDataSource numberOfSectionsInCollectionView:collectionView];
-  } else {
-    return 1;
-  }
 }
 
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
@@ -82,18 +113,23 @@
   return [self layoutHasSupplementaryViewOfKind:kind inSection:section collectionView:collectionView] ? 1 : 0;
 }
 
+- (ASScrollDirection)scrollableDirections
+{
+  return (self.layout.scrollDirection == UICollectionViewScrollDirectionHorizontal) ? ASScrollDirectionHorizontalDirections : ASScrollDirectionVerticalDirections;
+}
+
 #pragma mark - Private helpers
 
 - (CGSize)sizeForSupplementaryViewOfKind:(NSString *)kind inSection:(NSUInteger)section collectionView:(ASCollectionView *)collectionView
 {
   if (ASObjectIsEqual(kind, UICollectionElementKindSectionHeader)) {
-    if (_delegateImplementsReferenceSizeForHeader) {
+    if (_delegateFlags.implementsReferenceSizeForHeader) {
       return [[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForHeaderInSection:section];
     } else {
       return [self.layout headerReferenceSize];
     }
   } else if (ASObjectIsEqual(kind, UICollectionElementKindSectionFooter)) {
-    if (_delegateImplementsReferenceSizeForFooter) {
+    if (_delegateFlags.implementsReferenceSizeForFooter) {
       return [[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForFooterInSection:section];
     } else {
       return [self.layout footerReferenceSize];

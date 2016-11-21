@@ -13,9 +13,7 @@
 // These methods must never be called or overridden by other classes.
 //
 
-#import "_AS-objc-internal.h"
 #import "ASDisplayNode.h"
-#import "ASSentinel.h"
 #import "ASThread.h"
 
 NS_ASSUME_NONNULL_BEGIN
@@ -47,17 +45,54 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
   ASHierarchyStateTransitioningSupernodes = 1 << 2,
   /** One of the supernodes of this node is performing a transition.
       Any layout calculated during this state should not be applied immediately, but pending until later. */
-  ASHierarchyStateLayoutPending           = 1 << 3
+  ASHierarchyStateLayoutPending           = 1 << 3,
+  ASHierarchyStateVisualizeLayout         = 1 << 4
 };
 
-inline BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyState)
+ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyState)
 {
   return ((hierarchyState & ASHierarchyStateLayoutPending) == ASHierarchyStateLayoutPending);
 }
 
-inline BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState)
+ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState)
 {
     return ((hierarchyState & ASHierarchyStateRangeManaged) == ASHierarchyStateRangeManaged);
+}
+
+ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesVisualizeLayout(ASHierarchyState hierarchyState)
+{
+  return ((hierarchyState & ASHierarchyStateVisualizeLayout) == ASHierarchyStateVisualizeLayout);
+}
+
+ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesRasterized(ASHierarchyState hierarchyState)
+{
+	return ((hierarchyState & ASHierarchyStateRasterized) == ASHierarchyStateRasterized);
+}
+
+ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesTransitioningSupernodes(ASHierarchyState hierarchyState)
+{
+	return ((hierarchyState & ASHierarchyStateTransitioningSupernodes) == ASHierarchyStateTransitioningSupernodes);
+}
+
+__unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyState hierarchyState)
+{
+	NSMutableArray *states = [NSMutableArray array];
+	if (hierarchyState == ASHierarchyStateNormal) {
+		[states addObject:@"Normal"];
+	}
+	if (ASHierarchyStateIncludesRangeManaged(hierarchyState)) {
+		[states addObject:@"RangeManaged"];
+	}
+	if (ASHierarchyStateIncludesLayoutPending(hierarchyState)) {
+		[states addObject:@"LayoutPending"];
+	}
+	if (ASHierarchyStateIncludesRasterized(hierarchyState)) {
+		[states addObject:@"Rasterized"];
+	}
+	if (ASHierarchyStateIncludesTransitioningSupernodes(hierarchyState)) {
+		[states addObject:@"TransitioningSupernodes"];
+	}
+	return [NSString stringWithFormat:@"{ %@ }", [states componentsJoinedByString:@" | "]];
 }
 
 @interface ASDisplayNode ()
@@ -139,14 +174,28 @@ inline BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState
  */
 - (BOOL)shouldScheduleDisplayWithNewInterfaceState:(ASInterfaceState)newInterfaceState;
 
+/**
+ * @abstract Informs the root node that the intrinsic size of the receiver is no longer valid.
+ *
+ * @discussion The size of a root node is determined by each subnode. Calling invalidateSize will let the root node know
+ * that the intrinsic size of the receiver node is no longer valid and a resizing of the root node needs to happen.
+ */
+- (void)setNeedsLayoutFromAbove;
+
+/**
+ * @abstract Subclass hook for nodes that are acting as root nodes. This method is called if one of the subnodes
+ * size is invalidated and may need to result in a different size as the current calculated size.
+ */
+- (void)_locked_displayNodeDidInvalidateSizeNewSize:(CGSize)newSize;
+
 @end
 
 @interface UIView (ASDisplayNodeInternal)
-@property (nullable, nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
+@property (nullable, atomic, weak, readwrite) ASDisplayNode *asyncdisplaykit_node;
 @end
 
 @interface CALayer (ASDisplayNodeInternal)
-@property (nullable, nonatomic, assign, readwrite) ASDisplayNode *asyncdisplaykit_node;
+@property (nullable, atomic, weak, readwrite) ASDisplayNode *asyncdisplaykit_node;
 @end
 
 NS_ASSUME_NONNULL_END

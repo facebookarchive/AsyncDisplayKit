@@ -21,8 +21,8 @@
 - (void)viewDidLoad
 {
   self.textNode = [[ASTextNode alloc] init];
-  self.textNode.attributedString = [[NSAttributedString alloc] initWithString:@"Testing, testing." attributes:@{ NSForegroundColorAttributeName: [UIColor redColor] }];
-  [self.textNode measure:self.view.bounds.size];
+  self.textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Testing, testing." attributes:@{ NSForegroundColorAttributeName: [UIColor redColor] }];
+  [self.textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, self.view.bounds.size)];
   self.textNode.frame = (CGRect){ .origin = CGPointZero, .size = self.textNode.calculatedSize };
   [self.view addSubnode:self.textNode];
 }

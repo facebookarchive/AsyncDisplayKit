@@ -21,6 +21,85 @@
 
 #define StrokeRoundedImages 0
 
+#define IsDigit(v) (v >= '0' && v <= '9')
+
+static time_t parseRfc3339ToTimeT(const char *string)
+{
+  int dy, dm, dd;
+  int th, tm, ts;
+  int oh, om, osign;
+  char current;
+  
+  if (!string)
+    return (time_t)0;
+  
+  // date
+  if (sscanf(string, "%04d-%02d-%02d", &dy, &dm, &dd) == 3) {
+    string += 10;
+    
+    if (*string++ != 'T')
+      return (time_t)0;
+    
+    // time
+    if (sscanf(string, "%02d:%02d:%02d", &th, &tm, &ts) == 3) {
+      string += 8;
+      
+      current = *string;
+      
+      // optional: second fraction
+      if (current == '.') {
+        ++string;
+        while(IsDigit(*string))
+          ++string;
+        
+        current = *string;
+      }
+      
+      if (current == 'Z') {
+        oh = om = 0;
+        osign = 1;
+      } else if (current == '-') {
+        ++string;
+        if (sscanf(string, "%02d:%02d", &oh, &om) != 2)
+          return (time_t)0;
+        osign = -1;
+      } else if (current == '+') {
+        ++string;
+        if (sscanf(string, "%02d:%02d", &oh, &om) != 2)
+          return (time_t)0;
+        osign = 1;
+      } else {
+        return (time_t)0;
+      }
+      
+      struct tm timeinfo;
+      timeinfo.tm_wday = timeinfo.tm_yday = 0;
+      timeinfo.tm_zone = NULL;
+      timeinfo.tm_isdst = -1;
+      
+      timeinfo.tm_year = dy - 1900;
+      timeinfo.tm_mon = dm - 1;
+      timeinfo.tm_mday = dd;
+      
+      timeinfo.tm_hour = th;
+      timeinfo.tm_min = tm;
+      timeinfo.tm_sec = ts;
+      
+      // convert to utc
+      return timegm(&timeinfo) - (((oh * 60 * 60) + (om * 60)) * osign);
+    }
+  }
+  
+  return (time_t)0;
+}
+
+static NSDate *parseRfc3339ToNSDate(NSString *rfc3339DateTimeString)
+{
+  time_t t = parseRfc3339ToTimeT([rfc3339DateTimeString cStringUsingEncoding:NSUTF8StringEncoding]);
+  return [NSDate dateWithTimeIntervalSince1970:t];
+}
+
+
 @implementation UIColor (Additions)
 
 + (UIColor *)darkBlueColor
@@ -142,26 +221,15 @@
 
 @implementation NSString (Additions)
 
-// Returns a user-visible date time string that corresponds to the
-// specified RFC 3339 date time string. Note that this does not handle
-// all possible RFC 3339 date time strings, just one of the most common
-// styles.
+/*
+ * Returns a user-visible date time string that corresponds to the
+ * specified RFC 3339 date time string. Note that this does not handle
+ * all possible RFC 3339 date time strings, just one of the most common
+ * styles.
+ */
 + (NSDate *)userVisibleDateTimeStringForRFC3339DateTimeString:(NSString *)rfc3339DateTimeString
 {
-  NSDateFormatter *   rfc3339DateFormatter;
-  NSLocale *          enUSPOSIXLocale;
-  
-  // Convert the RFC 3339 date time string to an NSDate.
-  
-  rfc3339DateFormatter = [[NSDateFormatter alloc] init];
-  
-  enUSPOSIXLocale = [NSLocale localeWithLocaleIdentifier:@"en_US_POSIX"];
-  
-  [rfc3339DateFormatter setLocale:enUSPOSIXLocale];
-  [rfc3339DateFormatter setDateFormat:@"yyyy'-'MM'-'dd'T'HH':'mm':'ssZ'"];
-  [rfc3339DateFormatter setTimeZone:[NSTimeZone timeZoneForSecondsFromGMT:0]];
-  
-  return [rfc3339DateFormatter dateFromString:rfc3339DateTimeString];
+  return parseRfc3339ToNSDate(rfc3339DateTimeString);
 }
 
 + (NSString *)elapsedTimeStringSinceDate:(NSString *)uploadDateString

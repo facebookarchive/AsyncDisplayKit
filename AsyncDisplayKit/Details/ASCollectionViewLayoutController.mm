@@ -12,7 +12,7 @@
 
 #import "ASAssert.h"
 #import "ASCollectionView.h"
-#import "CGRect+ASConvenience.h"
+#import "CoreGraphics+ASConvenience.h"
 #import "UICollectionViewLayout+ASConvenience.h"
 
 struct ASRangeGeometry {
@@ -30,7 +30,6 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   @package
   ASCollectionView * __weak _collectionView;
   UICollectionViewLayout * __strong _collectionViewLayout;
-  ASScrollDirection _scrollableDirections;
 }
 @end
 
@@ -42,7 +41,6 @@ typedef struct ASRangeGeometry ASRangeGeometry;
     return nil;
   }
   
-  _scrollableDirections = [collectionView scrollableDirections];
   _collectionView = collectionView;
   _collectionViewLayout = [collectionView collectionViewLayout];
   return self;
@@ -62,7 +60,6 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   
   for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
     //ASDisplayNodeAssert(![indexPathSet containsObject:la.indexPath], @"Shouldn't already contain indexPath");
-    ASDisplayNodeAssert(la.representedElementCategory != UICollectionElementCategoryDecorationView, @"UICollectionView decoration views are not supported by ASCollectionView");
     [indexPathSet addObject:la.indexPath];
   }
 
@@ -74,12 +71,7 @@ typedef struct ASRangeGeometry ASRangeGeometry;
 {
   CGRect rect = _collectionView.bounds;
   
-  // Scrollable directions can change for non-flow layouts
-  if ([_collectionViewLayout asdk_isFlowLayout] == NO) {
-    _scrollableDirections = [_collectionView scrollableDirections];
-  }
-  
-  return CGRectExpandToRangeWithScrollableDirections(rect, tuningParameters, _scrollableDirections, scrollDirection);
+  return CGRectExpandToRangeWithScrollableDirections(rect, tuningParameters, [_collectionView scrollableDirections], scrollDirection);
 }
 
 @end

@@ -16,11 +16,32 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASRunLoopQueue<ObjectType> : NSObject
 
-- (instancetype)initWithRunLoop:(CFRunLoopRef)runloop andHandler:(void(^)(ObjectType dequeuedItem, BOOL isQueueDrained))handlerBlock;
+/**
+ * Create a new queue with the given run loop and handler.
+ *
+ * @param runloop The run loop that will drive this queue.
+ * @param handlerBlock An optional block to be run for each enqueued object.
+ *
+ * @discussion You may pass @c nil for the handler if you simply want the objects to
+ * be retained at enqueue time, and released during the run loop step. This is useful
+ * for creating a "main deallocation queue", as @c ASDeallocQueue creates its own 
+ * worker thread with its own run loop.
+ */
+- (instancetype)initWithRunLoop:(CFRunLoopRef)runloop
+                     andHandler:(nullable void(^)(ObjectType dequeuedItem, BOOL isQueueDrained))handlerBlock;
 
 - (void)enqueue:(ObjectType)object;
 
-@property (nonatomic, assign) NSUInteger batchSize;
+@property (nonatomic, assign) NSUInteger batchSize;           // Default == 1.
+@property (nonatomic, assign) BOOL ensureExclusiveMembership; // Default == YES.  Set-like behavior.
+
+@end
+
+@interface ASDeallocQueue : NSObject
+
++ (instancetype)sharedDeallocationQueue;
+
+- (void)releaseObjectInBackground:(id)object;
 
 @end
 

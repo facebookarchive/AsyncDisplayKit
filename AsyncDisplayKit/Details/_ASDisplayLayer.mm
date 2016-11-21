@@ -17,6 +17,7 @@
 #import "ASDisplayNode.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASObjectDescriptionHelpers.h"
 
 @implementation _ASDisplayLayer
 {
@@ -24,6 +25,11 @@
   // We can take this lock when we're setting displaySuspended and in setNeedsDisplay, so to not deadlock, this is recursive
   ASDN::RecursiveMutex _displaySuspendedLock;
   BOOL _displaySuspended;
+  BOOL _attemptedDisplayWhileZeroSized;
+
+  struct {
+    BOOL delegateDidChangeBounds:1;
+  } _delegateFlags;
 
   id<_ASDisplayLayerDelegate> __weak _asyncDelegate;
 }
@@ -36,7 +42,6 @@
 - (instancetype)init
 {
   if ((self = [super init])) {
-    _displaySentinel = [[ASSentinel alloc] init];
 
     self.opaque = YES;
   }
@@ -50,6 +55,12 @@
 {
   ASDN::MutexLocker l(_asyncDelegateLock);
   return _asyncDelegate;
+}
+
+- (void)setDelegate:(id)delegate
+{
+  [super setDelegate:delegate];
+  _delegateFlags.delegateDidChangeBounds = [delegate respondsToSelector:@selector(layer:didChangeBoundsWithOldValue:newValue:)];
 }
 
 - (void)setAsyncDelegate:(id<_ASDisplayLayerDelegate>)asyncDelegate
@@ -82,8 +93,21 @@
 
 - (void)setBounds:(CGRect)bounds
 {
-  [super setBounds:bounds];
-  self.asyncdisplaykit_node.threadSafeBounds = bounds;
+  if (_delegateFlags.delegateDidChangeBounds) {
+    CGRect oldBounds = self.bounds;
+    [super setBounds:bounds];
+    self.asyncdisplaykit_node.threadSafeBounds = bounds;
+    [(id<ASCALayerExtendedDelegate>)self.delegate layer:self didChangeBoundsWithOldValue:oldBounds newValue:bounds];
+    
+  } else {
+    [super setBounds:bounds];
+    self.asyncdisplaykit_node.threadSafeBounds = bounds;
+  }
+
+  if (_attemptedDisplayWhileZeroSized && CGRectIsEmpty(bounds) == NO && self.needsDisplayOnBoundsChange == NO) {
+    _attemptedDisplayWhileZeroSized = NO;
+    [self setNeedsDisplay];
+  }
 }
 
 #if DEBUG // These override is strictly to help detect application-level threading errors.  Avoid method overhead in release.
@@ -101,18 +125,11 @@
 #endif
 
 - (void)layoutSublayers
-{ 
+{
+  ASDisplayNodeAssertMainThread();
   [super layoutSublayers];
 
-  ASDisplayNode *node = self.asyncdisplaykit_node;
-  if (ASDisplayNodeThreadIsMain()) {
-    [node __layout];
-  } else {
-    ASDisplayNodeFailAssert(@"not reached assertion");
-    dispatch_async(dispatch_get_main_queue(), ^ {
-      [node __layout];
-    });
-  }
+  [self.asyncdisplaykit_node __layout];
 }
 
 - (void)setNeedsDisplay
@@ -178,9 +195,9 @@
 
 - (void)display
 {
+  ASDisplayNodeAssertMainThread();
   [self _hackResetNeedsDisplay];
 
-  ASDisplayNodeAssertMainThread();
   if (self.isDisplaySuspended) {
     return;
   }
@@ -190,7 +207,11 @@
 
 - (void)display:(BOOL)asynchronously
 {
-  id<_ASDisplayLayerDelegate> __attribute__((objc_precise_lifetime)) strongAsyncDelegate;
+  if (CGRectIsEmpty(self.bounds)) {
+    _attemptedDisplayWhileZeroSized = YES;
+  }
+
+  id<_ASDisplayLayerDelegate> NS_VALID_UNTIL_END_OF_SCOPE strongAsyncDelegate;
   {
     _asyncDelegateLock.lock();
     strongAsyncDelegate = _asyncDelegate;
@@ -203,9 +224,8 @@
 - (void)cancelAsyncDisplay
 {
   ASDisplayNodeAssertMainThread();
-  [_displaySentinel increment];
 
-  id<_ASDisplayLayerDelegate> __attribute__((objc_precise_lifetime)) strongAsyncDelegate;
+  id<_ASDisplayLayerDelegate> NS_VALID_UNTIL_END_OF_SCOPE strongAsyncDelegate;
   {
     _asyncDelegateLock.lock();
     strongAsyncDelegate = _asyncDelegate;
@@ -215,11 +235,21 @@
   [strongAsyncDelegate cancelDisplayAsyncLayer:self];
 }
 
+// e.g. <MYTextNodeLayer: 0xFFFFFF; node = <MYTextNode: 0xFFFFFFE; name = "Username node for user 179">>
 - (NSString *)description
 {
-  // The standard UIView description is useless for debugging because all ASDisplayNode subclasses have _ASDisplayView-type views.
-  // This allows us to at least see the name of the node subclass and get its pointer directly from [[UIWindow keyWindow] recursiveDescription].
-  return [NSString stringWithFormat:@"<%@, layer = %@>", self.asyncdisplaykit_node, [super description]];
+  NSMutableString *description = [[super description] mutableCopy];
+  ASDisplayNode *node = self.asyncdisplaykit_node;
+  if (node != nil) {
+    NSString *classString = [NSString stringWithFormat:@"%@-", [node class]];
+    [description replaceOccurrencesOfString:@"_ASDisplay" withString:classString options:kNilOptions range:NSMakeRange(0, description.length)];
+    NSUInteger insertionIndex = [description rangeOfString:@">"].location;
+    if (insertionIndex != NSNotFound) {
+      NSString *nodeString = [NSString stringWithFormat:@"; node = %@", node];
+      [description insertString:nodeString atIndex:insertionIndex];
+    }
+  }
+  return description;
 }
 
 @end

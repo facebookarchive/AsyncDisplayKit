@@ -10,9 +10,13 @@
 
 #import "ASTextKitShadower.h"
 
+#import <tgmath.h>
+
 static inline CGSize _insetSize(CGSize size, UIEdgeInsets insets)
 {
-  return UIEdgeInsetsInsetRect({.size = size}, insets).size;
+  size.width -= (insets.left + insets.right);
+  size.height -= (insets.top + insets.bottom);
+  return size;
 }
 
 static inline UIEdgeInsets _invertInsets(UIEdgeInsets insets)
@@ -27,6 +31,28 @@ static inline UIEdgeInsets _invertInsets(UIEdgeInsets insets)
 
 @implementation ASTextKitShadower {
   UIEdgeInsets _calculatedShadowPadding;
+}
+
++ (ASTextKitShadower *)shadowerWithShadowOffset:(CGSize)shadowOffset
+                                    shadowColor:(UIColor *)shadowColor
+                                  shadowOpacity:(CGFloat)shadowOpacity
+                                   shadowRadius:(CGFloat)shadowRadius
+{
+  /**
+   * For all cases where no shadow is drawn, we share this singleton shadower to save resources.
+   */
+  static dispatch_once_t onceToken;
+  static ASTextKitShadower *sharedNonShadower;
+  dispatch_once(&onceToken, ^{
+    sharedNonShadower = [[ASTextKitShadower alloc] initWithShadowOffset:CGSizeZero shadowColor:nil shadowOpacity:0 shadowRadius:0];
+  });
+
+  BOOL hasShadow = shadowOpacity > 0 && (shadowRadius > 0 || CGSizeEqualToSize(shadowOffset, CGSizeZero) == NO) && CGColorGetAlpha(shadowColor.CGColor) > 0;
+  if (hasShadow == NO) {
+    return sharedNonShadower;
+  } else {
+    return [[ASTextKitShadower alloc] initWithShadowOffset:shadowOffset shadowColor:shadowColor shadowOpacity:shadowOpacity shadowRadius:shadowRadius];
+  }
 }
 
 - (instancetype)initWithShadowOffset:(CGSize)shadowOffset
@@ -50,7 +76,7 @@ static inline UIEdgeInsets _invertInsets(UIEdgeInsets insets)
  */
 - (BOOL)_shouldDrawShadow
 {
-  return _shadowOpacity != 0.0 && _shadowColor != nil && (_shadowRadius != 0 || !CGSizeEqualToSize(_shadowOffset, CGSizeZero));
+  return _shadowOpacity != 0.0 && (_shadowRadius != 0 || !CGSizeEqualToSize(_shadowOffset, CGSizeZero)) && CGColorGetAlpha(_shadowColor.CGColor) > 0;
 }
 
 - (void)setShadowInContext:(CGContextRef)context
@@ -87,11 +113,11 @@ static inline UIEdgeInsets _invertInsets(UIEdgeInsets insets)
 
     // min values are expected to be negative for most typical shadowOffset and
     // blurRadius settings:
-    shadowPadding.top = fminf(0.0f, _shadowOffset.height - _shadowRadius);
-    shadowPadding.left = fminf(0.0f, _shadowOffset.width - _shadowRadius);
+    shadowPadding.top = std::fmin(0.0f, _shadowOffset.height - _shadowRadius);
+    shadowPadding.left = std::fmin(0.0f, _shadowOffset.width - _shadowRadius);
 
-    shadowPadding.bottom = fminf(0.0f, -_shadowOffset.height - _shadowRadius);
-    shadowPadding.right = fminf(0.0f, -_shadowOffset.width - _shadowRadius);
+    shadowPadding.bottom = std::fmin(0.0f, -_shadowOffset.height - _shadowRadius);
+    shadowPadding.right = std::fmin(0.0f, -_shadowOffset.width - _shadowRadius);
 
     _calculatedShadowPadding = shadowPadding;
   }

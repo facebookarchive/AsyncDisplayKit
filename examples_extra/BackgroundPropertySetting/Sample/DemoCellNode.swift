@@ -27,16 +27,16 @@ final class DemoCellNode: ASCellNode {
 
 	override init() {
 		super.init()
-		usesImplicitHierarchyManagement = true
+		automaticallyManagesSubnodes = true
 	}
 
 	override func layoutSpecThatFits(constrainedSize: ASSizeRange) -> ASLayoutSpec {
 		let specA = ASRatioLayoutSpec(ratio: 1, child: childA)
-		specA.flexBasis = ASRelativeDimensionMakeWithPoints(1)
-		specA.flexGrow = true
+		specA.style.flexBasis = ASDimensionMakeWithPoints(1)
+		specA.style.flexGrow = 1.0
 		let specB = ASRatioLayoutSpec(ratio: 1, child: childB)
-		specB.flexBasis = ASRelativeDimensionMakeWithPoints(1)
-		specB.flexGrow = true
+		specB.style.flexBasis = ASDimensionMakeWithPoints(1)
+		specB.style.flexGrow = 1.0
 		let children = state.isReverse ? [ specB, specA ] : [ specA, specB ]
 		let direction: ASStackLayoutDirection = state.isVertical ? .Vertical : .Horizontal
 		return ASStackLayoutSpec(direction: direction,
@@ -46,7 +46,7 @@ final class DemoCellNode: ASCellNode {
 			children: children)
 	}
 
-	override func animateLayoutTransition(context: ASContextTransitioning!) {
+	override func animateLayoutTransition(context: ASContextTransitioning) {
 		childA.frame = context.initialFrameForNode(childA)
 		childB.frame = context.initialFrameForNode(childB)
 		let tinyDelay = drand48() / 10

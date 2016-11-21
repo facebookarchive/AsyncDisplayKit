@@ -27,9 +27,10 @@
     self = [super init];
     if (self == nil) { return self; }
     
+    self.automaticallyManagesSubnodes = YES;
+    
     _imageNode = [[ASNetworkImageNode alloc] init];
     _imageNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
-    [self addSubnode:_imageNode];
     
     return self;
 }
@@ -38,9 +39,7 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    self.imageNode.position = CGPointZero;
-    self.imageNode.sizeRange = ASRelativeSizeRangeMakeWithExactCGSize(constrainedSize.max);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[self.imageNode]];
+    return [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.0 child:self.imageNode];
 }
 
 - (void)layoutDidFinish

@@ -10,8 +10,18 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import "ASDisplayNode.h"
 #import "ASControlNode.h"
 #import "ASImageNode.h"
+#import "ASRangeController.h"
+
+NS_ASSUME_NONNULL_BEGIN
+
+@interface ASDisplayNode (Visualization)
+@property (nonatomic, assign) BOOL shouldVisualizeLayoutSpecs;
+@property (nonatomic, assign) BOOL shouldCacheLayoutSpec;
+
+@end
 
 @interface ASImageNode (Debugging)
 
@@ -29,16 +39,41 @@
 @interface ASControlNode (Debugging)
 
 /**
- Class method to enable a visualization overlay of the tappable area on the ASControlNode. For app debugging purposes only.
- NOTE: GESTURE RECOGNIZERS, (including tap gesture recognizers on a control node) WILL NOT BE VISUALIZED!!!
- Overlay = translucent GREEN color, 
- edges that are clipped by the tappable area of any parent (their bounds + hitTestSlop) in the hierarchy = DARK GREEN BORDERED EDGE,
- edges that are clipped by clipToBounds = YES of any parent in the hierarchy = ORANGE BORDERED EDGE (may still receive touches beyond
- overlay rect, but can't be visualized).
- @param enable Specify YES to make this debug feature enabled when messaging the ASControlNode class.
+ * Class method to enable a visualization overlay of the tappable area on the ASControlNode. For app debugging purposes only.
+ * NOTE: GESTURE RECOGNIZERS, (including tap gesture recognizers on a control node) WILL NOT BE VISUALIZED!!!
+ * Overlay = translucent GREEN color,
+ * edges that are clipped by the tappable area of any parent (their bounds + hitTestSlop) in the hierarchy = DARK GREEN BORDERED EDGE,
+ * edges that are clipped by clipToBounds = YES of any parent in the hierarchy = ORANGE BORDERED EDGE (may still receive touches beyond
+ * overlay rect, but can't be visualized).
+ * @param enable Specify YES to make this debug feature enabled when messaging the ASControlNode class.
  */
 + (void)setEnableHitTestDebug:(BOOL)enable;
 + (BOOL)enableHitTestDebug;
 
 @end
 
+@interface ASRangeController (Debugging)
+
+/**
+ * Class method to enable a visualization overlay of the all ASRangeController's tuning parameters. For dev purposes only.
+ * To use, message ASRangeController in the AppDelegate --> [ASRangeController setShouldShowRangeDebugOverlay:YES];
+ * @param enable Specify YES to make this debug feature enabled when messaging the ASRangeController class.
+ */
++ (void)setShouldShowRangeDebugOverlay:(BOOL)show;
++ (BOOL)shouldShowRangeDebugOverlay;
+
++ (void)layoutDebugOverlayIfNeeded;
+
+- (void)addRangeControllerToRangeDebugOverlay;
+
+- (void)updateRangeController:(ASRangeController *)controller
+     withScrollableDirections:(ASScrollDirection)scrollableDirections
+              scrollDirection:(ASScrollDirection)direction
+                    rangeMode:(ASLayoutRangeMode)mode
+      displayTuningParameters:(ASRangeTuningParameters)displayTuningParameters
+      preloadTuningParameters:(ASRangeTuningParameters)preloadTuningParameters
+               interfaceState:(ASInterfaceState)interfaceState;
+
+@end
+
+NS_ASSUME_NONNULL_END

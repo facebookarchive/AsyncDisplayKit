@@ -69,7 +69,7 @@
   _node = [[ASTextNode alloc] init];
   _node.maximumNumberOfLines = 3;
   _node.backgroundColor = [UIColor lightGrayColor];
-  _node.attributedString = string;
+  _node.attributedText = string;
   _node.frame = CGRectMake(70, 400, 40, 100);
 //  [_node measure:CGSizeMake(40, 50)];  No longer needed now that https://github.com/facebook/AsyncDisplayKit/issues/1295 is fixed.
 

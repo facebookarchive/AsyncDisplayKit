@@ -30,7 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
  * "working ranges" to trigger network calls and rendering, and is responsible for driving asynchronous layout of cells.
  * This includes cancelling those asynchronous operations as cells fall outside of the working ranges.
  */
-@interface ASRangeController : ASDealloc2MainObject <ASDataControllerDelegate>
+@interface ASRangeController : NSObject <ASDataControllerDelegate>
 {
   id<ASLayoutController>                  _layoutController;
   __weak id<ASRangeControllerDataSource>  _dataSource;
@@ -103,38 +103,38 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @param rangeController Sender.
  *
- * @returns an array of index paths corresponding to the nodes currently visible onscreen (i.e., the visible range).
+ * @return an array of index paths corresponding to the nodes currently visible onscreen (i.e., the visible range).
  */
 - (NSArray<NSIndexPath *> *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController;
 
 /**
  * @param rangeController Sender.
  *
- * @returns the current scroll direction of the view using this range controller.
+ * @return the current scroll direction of the view using this range controller.
  */
 - (ASScrollDirection)scrollDirectionForRangeController:(ASRangeController *)rangeController;
 
 /**
  * @param rangeController Sender.
  *
- * @returns the receiver's viewport size (i.e., the screen space occupied by the visible range).
+ * @return the receiver's viewport size (i.e., the screen space occupied by the visible range).
  */
 - (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController;
 
 /**
  * @param rangeController Sender.
  *
- * @returns the ASInterfaceState of the node that this controller is powering.  This allows nested range controllers
+ * @return the ASInterfaceState of the node that this controller is powering.  This allows nested range controllers
  * to collaborate with one another, as an outer controller may set bits in .interfaceState such as Visible.
  * If this controller is an orthogonally scrolling element, it waits until it is visible to preload outside the viewport.
  */
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController;
 
-- (NSArray *)rangeController:(ASRangeController *)rangeController nodesAtIndexPaths:(NSArray *)indexPaths;
-
 - (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath;
 
 - (NSArray<NSArray <ASCellNode *> *> *)completedNodes;
+
+- (NSString *)nameForRangeControllerDataSource;
 
 @end
 

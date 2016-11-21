@@ -42,7 +42,7 @@
         if (_likesCount > 0) {
             
             NSDictionary *attributes = _liked ? [TextStyles cellControlColoredStyle] : [TextStyles cellControlStyle];
-            _countNode.attributedString = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%ld", (long)_likesCount] attributes:attributes];
+            _countNode.attributedText = [[NSAttributedString alloc] initWithString:[NSString stringWithFormat:@"%ld", (long)_likesCount] attributes:attributes];
             
         }
         [self addSubnode:_countNode];
@@ -66,13 +66,18 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-    ASStackLayoutSpec *mainStack = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal spacing:6.0 justifyContent:ASStackLayoutJustifyContentStart alignItems:ASStackLayoutAlignItemsCenter children:@[_iconNode, _countNode]];
-    
-    // set sizeRange to make width fixed to 60
-    ASRelativeSize min = ASRelativeSizeMake(ASRelativeDimensionMakeWithPoints(60.0), ASRelativeDimensionMakeWithPoints(0.0));
-    ASRelativeSize max = ASRelativeSizeMake(ASRelativeDimensionMakeWithPoints(60.0), ASRelativeDimensionMakeWithPoints(40.0));
-    mainStack.sizeRange = ASRelativeSizeRangeMake(min, max);
-    return [ASStaticLayoutSpec staticLayoutSpecWithChildren:@[mainStack]];
+    ASStackLayoutSpec *mainStack =
+    [ASStackLayoutSpec
+     stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+     spacing:6.0
+     justifyContent:ASStackLayoutJustifyContentStart
+     alignItems:ASStackLayoutAlignItemsCenter
+     children:@[_iconNode, _countNode]];
+
+    mainStack.style.minWidth = ASDimensionMakeWithPoints(60.0);
+    mainStack.style.maxHeight = ASDimensionMakeWithPoints(40.0);
+
+    return mainStack;
 }
 
 @end

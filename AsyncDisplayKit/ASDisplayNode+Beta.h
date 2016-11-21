@@ -8,7 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASContextTransitioning.h"
+#import "ASDisplayNode.h"
+#import "ASLayoutRangeType.h"
+#import "ASEventLog.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -17,13 +19,47 @@ void ASPerformBlockOnMainThread(void (^block)());
 void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
 ASDISPLAYNODE_EXTERN_C_END
 
+#if ASEVENTLOG_ENABLE
+#define ASDisplayNodeLogEvent(node, ...) [node.eventLog logEventWithBacktrace:(AS_SAVE_EVENT_BACKTRACES ? [NSThread callStackSymbols] : nil) format:__VA_ARGS__]
+#else
+#define ASDisplayNodeLogEvent(node, ...)
+#endif
+
+#if ASEVENTLOG_ENABLE
+#define ASDisplayNodeGetEventLog(node) node.eventLog
+#else
+#define ASDisplayNodeGetEventLog(node) nil
+#endif
+
+/**
+ * Bitmask to indicate what performance measurements the cell should record.
+ */
+typedef NS_OPTIONS(NSUInteger, ASDisplayNodePerformanceMeasurementOptions) {
+  ASDisplayNodePerformanceMeasurementOptionLayoutSpec = 1 << 0,
+  ASDisplayNodePerformanceMeasurementOptionLayoutComputation = 1 << 1
+};
+
+typedef struct {
+  CFTimeInterval layoutSpecTotalTime;
+  NSInteger layoutSpecNumberOfPasses;
+  CFTimeInterval layoutComputationTotalTime;
+  NSInteger layoutComputationNumberOfPasses;
+} ASDisplayNodePerformanceMeasurements;
+
 @interface ASDisplayNode (Beta)
 
-+ (BOOL)usesImplicitHierarchyManagement;
-+ (void)setUsesImplicitHierarchyManagement:(BOOL)enabled;
-
-/** @name Layout */
-
+/**
+ * ASTableView and ASCollectionView now throw exceptions on invalid updates
+ * like their UIKit counterparts. If YES, these classes will log messages
+ * on invalid updates rather than throwing exceptions.
+ *
+ * Note that even if AsyncDisplayKit's exception is suppressed, the app may still crash
+ * as it proceeds with an invalid update.
+ *
+ * This property defaults to NO. It will be removed in a future release.
+ */
++ (BOOL)suppressesInvalidCollectionUpdateExceptions AS_WARN_UNUSED_RESULT;
++ (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses;
 
 /**
  * @abstract Recursively ensures node and all subnodes are displayed.
@@ -46,66 +82,28 @@ ASDISPLAYNODE_EXTERN_C_END
  */
 @property (nonatomic, copy, nullable) ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext;
 
-/** @name Layout Transitioning */
-
-@property (nonatomic) BOOL usesImplicitHierarchyManagement;
+/**
+ * @abstract A bitmask representing which actions (layout spec, layout generation) should be measured.
+ */
+@property (nonatomic, assign) ASDisplayNodePerformanceMeasurementOptions measurementOptions;
 
 /**
- * @discussion A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.
+ * @abstract A simple struct representing performance measurements collected.
  */
-- (void)animateLayoutTransition:(id<ASContextTransitioning>)context;
+@property (nonatomic, assign, readonly) ASDisplayNodePerformanceMeasurements performanceMeasurements;
 
-/**
- * @discussion A place to clean up your nodes after the transition
+#if ASEVENTLOG_ENABLE
+/*
+ * @abstract The primitive event tracing object. You shouldn't directly use it to log event. Use the ASDisplayNodeLogEvent macro instead.
  */
-- (void)didCompleteLayoutTransition:(id<ASContextTransitioning>)context;
-
-/**
- * @abstract Transitions the current layout with a new constrained size. Must be called on main thread.
- *
- * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
- *
- * @param shouldMeasureAsync Measure the layout asynchronously.
- *
- * @param measurementCompletion Optional completion block called only if a new layout is calculated.
- * It is called on main, right after the measurement and before -animateLayoutTransition:.
- *
- * @discussion If the passed constrainedSize is the the same as the node's current constrained size, this method is noop.
- *
- * @see animateLayoutTransition:
- */
-- (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
-                             animated:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(nullable void(^)())completion;
-
-/**
- * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
- *
- * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
- *
- * @param shouldMeasureAsync Measure the layout asynchronously.
- *
- * @param measurementCompletion Optional completion block called only if a new layout is calculated.
- * It is called right after the measurement and before -animateLayoutTransition:.
- *
- * @see animateLayoutTransition:
- */
-- (void)transitionLayoutWithAnimation:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(nullable void(^)())completion;
-
+@property (nonatomic, strong, readonly) ASEventLog *eventLog;
+#endif
 
 /**
  * @abstract Currently used by ASNetworkImageNode and ASMultiplexImageNode to allow their placeholders to stay if they are loading an image from the network.
  * Otherwise, a display pass is scheduled and completes, but does not actually draw anything - and ASDisplayNode considers the element finished.
  */
-- (BOOL)placeholderShouldPersist;
-
-/**
- * @abstract Cancels all performing layout transitions. Can be called on any thread.
- */
-- (void)cancelLayoutTransitionsInProgress;
+- (BOOL)placeholderShouldPersist AS_WARN_UNUSED_RESULT;
 
 /**
  * @abstract Indicates that the receiver and all subnodes have finished displaying. May be called more than once, for example if the receiver has
@@ -115,6 +113,15 @@ ASDISPLAYNODE_EXTERN_C_END
  * progressImage block.
  */
 - (void)hierarchyDisplayDidFinish;
+
+/**
+ * Only ASLayoutRangeModeVisibleOnly or ASLayoutRangeModeLowMemory are recommended.  Default is ASLayoutRangeModeVisibleOnly,
+ * because this is the only way to ensure an application will not have blank / flashing views as the user navigates back after
+ * a memory warning.  Apps that wish to use the more effective / aggressive ASLayoutRangeModeLowMemory may need to take steps
+ * to mitigate this behavior, including: restoring a larger range mode to the next controller before the user navigates there,
+ * enabling .neverShowPlaceholders on ASCellNodes so that the navigation operation is blocked on redisplay completing, etc.
+ */
++ (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode;
 
 @end
 

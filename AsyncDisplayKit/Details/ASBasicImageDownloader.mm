@@ -13,6 +13,7 @@
 #import <objc/runtime.h>
 
 #import "ASBasicImageDownloaderInternal.h"
+#import "ASImageContainerProtocolCategories.h"
 #import "ASThread.h"
 
 
@@ -21,9 +22,6 @@
  * Collection of properties associated with a download request.
  */
 
-typedef void (^ASBasicImageDownloaderContextProgressBlock)(CGFloat);
-typedef void (^ASBasicImageDownloaderContextCompletionBlock)(CGImageRef, NSError *);
-
 NSString * const kASBasicImageDownloaderContextCallbackQueue = @"kASBasicImageDownloaderContextCallbackQueue";
 NSString * const kASBasicImageDownloaderContextProgressBlock = @"kASBasicImageDownloaderContextProgressBlock";
 NSString * const kASBasicImageDownloaderContextCompletionBlock = @"kASBasicImageDownloaderContextCompletionBlock";
@@ -31,7 +29,7 @@ NSString * const kASBasicImageDownloaderContextCompletionBlock = @"kASBasicImage
 @interface ASBasicImageDownloaderContext ()
 {
   BOOL _invalid;
-  ASDN::RecursiveMutex _propertyLock;
+  ASDN::RecursiveMutex __instanceLock__;
 }
 
 @property (nonatomic, strong) NSMutableArray *callbackDatas;
@@ -76,7 +74,7 @@ static ASDN::RecursiveMutex currentRequestsLock;
 
 - (void)cancel
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
 
   NSURLSessionTask *sessionTask = self.sessionTask;
   if (sessionTask) {
@@ -90,21 +88,21 @@ static ASDN::RecursiveMutex currentRequestsLock;
 
 - (BOOL)isCancelled
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   return _invalid;
 }
 
 - (void)addCallbackData:(NSDictionary *)callbackData
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   [self.callbackDatas addObject:callbackData];
 }
 
 - (void)performProgressBlocks:(CGFloat)progress
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   for (NSDictionary *callbackData in self.callbackDatas) {
-    ASBasicImageDownloaderContextProgressBlock progressBlock = callbackData[kASBasicImageDownloaderContextProgressBlock];
+    ASImageDownloaderProgress progressBlock = callbackData[kASBasicImageDownloaderContextProgressBlock];
     dispatch_queue_t callbackQueue = callbackData[kASBasicImageDownloaderContextCallbackQueue];
 
     if (progressBlock) {
@@ -117,14 +115,14 @@ static ASDN::RecursiveMutex currentRequestsLock;
 
 - (void)completeWithImage:(UIImage *)image error:(NSError *)error
 {
-  ASDN::MutexLocker l(_propertyLock);
+  ASDN::MutexLocker l(__instanceLock__);
   for (NSDictionary *callbackData in self.callbackDatas) {
-    ASBasicImageDownloaderContextCompletionBlock completionBlock = callbackData[kASBasicImageDownloaderContextCompletionBlock];
+    ASImageDownloaderCompletion completionBlock = callbackData[kASBasicImageDownloaderContextCompletionBlock];
     dispatch_queue_t callbackQueue = callbackData[kASBasicImageDownloaderContextCallbackQueue];
 
     if (completionBlock) {
       dispatch_async(callbackQueue, ^{
-        completionBlock(image.CGImage, error);
+        completionBlock(image, error, nil);
       });
     }
   }
@@ -135,7 +133,7 @@ static ASDN::RecursiveMutex currentRequestsLock;
 
 - (NSURLSessionTask *)createSessionTaskIfNecessaryWithBlock:(NSURLSessionTask *(^)())creationBlock {
   {
-    ASDN::MutexLocker l(_propertyLock);
+    ASDN::MutexLocker l(__instanceLock__);
 
     if (self.isCancelled) {
       return nil;
@@ -149,7 +147,7 @@ static ASDN::RecursiveMutex currentRequestsLock;
   NSURLSessionTask *newTask = creationBlock();
 
   {
-    ASDN::MutexLocker l(_propertyLock);
+    ASDN::MutexLocker l(__instanceLock__);
 
     if (self.isCancelled) {
       return nil;
@@ -229,9 +227,9 @@ static const char *kContextKey = NSStringFromClass(ASBasicImageDownloaderContext
 #pragma mark ASImageDownloaderProtocol.
 
 - (id)downloadImageWithURL:(NSURL *)URL
-             callbackQueue:(dispatch_queue_t)callbackQueue
-     downloadProgressBlock:(void (^)(CGFloat))downloadProgressBlock
-                completion:(void (^)(CGImageRef, NSError *))completion
+                      callbackQueue:(dispatch_queue_t)callbackQueue
+                   downloadProgress:(nullable ASImageDownloaderProgress)downloadProgress
+                         completion:(ASImageDownloaderCompletion)completion
 {
   ASBasicImageDownloaderContext *context = [ASBasicImageDownloaderContext contextForURL:URL];
 
@@ -242,8 +240,8 @@ static const char *kContextKey = NSStringFromClass(ASBasicImageDownloaderContext
     NSMutableDictionary *callbackData = [NSMutableDictionary dictionary];
     callbackData[kASBasicImageDownloaderContextCallbackQueue] = callbackQueue ? : dispatch_get_main_queue();
 
-    if (downloadProgressBlock) {
-      callbackData[kASBasicImageDownloaderContextProgressBlock] = [downloadProgressBlock copy];
+    if (downloadProgress) {
+      callbackData[kASBasicImageDownloaderContextProgressBlock] = [downloadProgress copy];
     }
 
     if (completion) {

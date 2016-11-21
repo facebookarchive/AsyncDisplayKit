@@ -8,11 +8,14 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitContext.h"
-#import "ASTextKitFontSizeAdjuster.h"
-#import "ASLayoutManager.h"
 
+#import "ASTextKitFontSizeAdjuster.h"
+
+#import <tgmath.h>
 #import <mutex>
+
+#import "ASTextKitContext.h"
+#import "ASLayoutManager.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -42,13 +45,15 @@
 
 + (void)adjustFontSizeForAttributeString:(NSMutableAttributedString *)attrString withScaleFactor:(CGFloat)scaleFactor
 {
+  if (scaleFactor == 1.0) return;
+  
   [attrString beginEditing];
 
   // scale all the attributes that will change the bounding box
   [attrString enumerateAttributesInRange:NSMakeRange(0, attrString.length) options:0 usingBlock:^(NSDictionary<NSString *,id> * _Nonnull attrs, NSRange range, BOOL * _Nonnull stop) {
     if (attrs[NSFontAttributeName] != nil) {
       UIFont *font = attrs[NSFontAttributeName];
-      font = [font fontWithSize:roundf(font.pointSize * scaleFactor)];
+      font = [font fontWithSize:std::round(font.pointSize * scaleFactor)];
       [attrString removeAttribute:NSFontAttributeName range:range];
       [attrString addAttribute:NSFontAttributeName value:font range:range];
     }
@@ -87,16 +92,16 @@
     static std::mutex __static_mutex;
     std::lock_guard<std::mutex> l(__static_mutex);
     
-    NSTextStorage *textStorage = _attributes.textStorageCreationBlock ? _attributes.textStorageCreationBlock(attributedString) : [[NSTextStorage alloc] initWithAttributedString:attributedString];
+    NSTextStorage *textStorage = [[NSTextStorage alloc] initWithAttributedString:attributedString];
     if (_sizingLayoutManager == nil) {
-        _sizingLayoutManager = _attributes.layoutManagerCreationBlock ? _attributes.layoutManagerCreationBlock() : [[ASLayoutManager alloc] init];
+        _sizingLayoutManager = [[ASLayoutManager alloc] init]; 
         _sizingLayoutManager.usesFontLeading = NO;
     }
     [textStorage addLayoutManager:_sizingLayoutManager];
     if (_sizingTextContainer == nil) {
         // make this text container unbounded in height so that the layout manager will compute the total
         // number of lines and not stop counting when height runs out.
-        _sizingTextContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(_constrainedSize.width, FLT_MAX)];
+        _sizingTextContainer = [[NSTextContainer alloc] initWithSize:CGSizeMake(_constrainedSize.width, CGFLOAT_MAX)];
         _sizingTextContainer.lineFragmentPadding = 0;
         
         // use 0 regardless of what is in the attributes so that we get an accurate line count
@@ -130,7 +135,10 @@
   
   __block CGFloat adjustedScale = 1.0;
   
-  NSArray *scaleFactors = _attributes.pointSizeScaleFactors;
+  // We add the scale factor of 1 to our scaleFactors array so that in the first iteration of the loop below, we are
+  // actually determining if we need to scale at all. If something doesn't fit, we will continue to iterate our scale factors.
+  NSArray *scaleFactors = [@[@(1)] arrayByAddingObjectsFromArray:_attributes.pointSizeScaleFactors];
+  
   [_context performBlockWithLockedTextKitComponents:^(NSLayoutManager *layoutManager, NSTextStorage *textStorage, NSTextContainer *textContainer) {
     
     // Check for two different situations (and correct for both)
@@ -146,56 +154,53 @@
       }
     }
     
-    NSUInteger scaleIndex = 0;
+    // check to see if we may need to shrink for any of these things
+    BOOL longestWordFits = [longestWordNeedingResize length] ? NO : YES;
+    BOOL maxLinesFits = _attributes.maximumNumberOfLines > 0 ? NO : YES;
+    BOOL heightFits = isinf(_constrainedSize.height) ? YES : NO;
 
-    // find the longest word and make sure it fits in the constrained width
-    if ([longestWordNeedingResize length] > 0) {
+    CGSize longestWordSize = CGSizeZero;
+    if (longestWordFits == NO) {
+        NSRange longestWordRange = [str rangeOfString:longestWordNeedingResize];
+        NSAttributedString *attrString = [textStorage attributedSubstringFromRange:longestWordRange];
+        longestWordSize = [attrString boundingRectWithSize:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
+    }
+    
+    // we may need to shrink for some reason, so let's iterate through our scale factors to see if we actually need to shrink
+    // Note: the first scale factor in the array is 1.0 so will make sure that things don't fit without shrinking
+    for (NSNumber *adjustedScaleObj in scaleFactors) {
+      if (longestWordFits && maxLinesFits && heightFits) {
+        break;
+      }
       
-      NSRange longestWordRange = [str rangeOfString:longestWordNeedingResize];
-      NSMutableAttributedString *attrString = [textStorage attributedSubstringFromRange:longestWordRange].mutableCopy;
-      CGSize longestWordSize = [attrString boundingRectWithSize:CGSizeMake(FLT_MAX, FLT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
+      adjustedScale = [adjustedScaleObj floatValue];
       
-      // check if the longest word is larger than our constrained width
-      if (longestWordSize.width > _constrainedSize.width) {
+      if (longestWordFits == NO) {
+        // we need to check the longest word to make sure it fits
+        longestWordFits = std::ceil((longestWordSize.width * adjustedScale)  <= _constrainedSize.width);
+      }
+      
+      // if the longest word fits, go ahead and check max line and height. If it didn't fit continue to the next scale factor
+      if (longestWordFits == YES) {
         
-        // we have a word that is too long. Loop through our scale factors until we fit
-        for (NSNumber *scaleFactor in scaleFactors) {
-          // even if we still don't fit, save this scaleFactor so more of the word will fit
-          adjustedScale = [scaleFactor floatValue];
-          
-          // adjust here so we start at the proper place in our scale array if we have too many lines
-          scaleIndex++;
-          
-          if (ceilf(longestWordSize.width * [scaleFactor floatValue])  <= _constrainedSize.width) {
-            // we fit! we are done
-            break;
-          }
+        // scale our string by the current scale factor
+        NSMutableAttributedString *scaledString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
+        [[self class] adjustFontSizeForAttributeString:scaledString withScaleFactor:adjustedScale];
+        
+        // check to see if this scaled string fit in the max lines
+        if (maxLinesFits == NO) {
+          maxLinesFits = ([self lineCountForString:scaledString] <= _attributes.maximumNumberOfLines);
+        }
+        
+        // if max lines still doesn't fit, continue without checking that we fit in the constrained height
+        if (maxLinesFits == YES && heightFits == NO) {
+          // max lines fit so make sure that we fit in the constrained height.
+          CGSize stringSize = [scaledString boundingRectWithSize:CGSizeMake(_constrainedSize.width, CGFLOAT_MAX) options:NSStringDrawingUsesLineFragmentOrigin context:nil].size;
+          heightFits = (stringSize.height <= _constrainedSize.height);
         }
       }
     }
-    
-    if (_attributes.maximumNumberOfLines > 0) {
-      // get the number of lines in our possibly scaled string
-      NSUInteger numberOfLines = [self lineCountForString:textStorage];
-      if (numberOfLines > _attributes.maximumNumberOfLines) {
-        
-        for (NSUInteger index = scaleIndex; index < scaleFactors.count; index++) {
-          NSMutableAttributedString *entireAttributedString = [[NSMutableAttributedString alloc] initWithAttributedString:textStorage];
-          [[self class] adjustFontSizeForAttributeString:entireAttributedString withScaleFactor:[scaleFactors[index] floatValue]];
-          
-          
-          // save away this scale factor. Even if we don't fit completely we should still scale down
-          adjustedScale = [scaleFactors[index] floatValue];
-          
-          if ([self lineCountForString:entireAttributedString] <= _attributes.maximumNumberOfLines) {
-            // we fit! we are done
-            break;
-          }
-        }
-        
-      }
-    }
-    
+   
   }];
   _measured = YES;
   _scaleFactor = adjustedScale;
