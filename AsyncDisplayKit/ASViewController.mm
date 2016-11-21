@@ -72,6 +72,7 @@
   [super viewDidLoad];
   
   // Add the root node to the view
+  _node.view.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   _node.view.frame = self.view.bounds;
   [self.view addSubnode:_node];
   
@@ -105,10 +106,14 @@
       // this method will call measure
       [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
     }];
-  } else {
-    CGSize size = [_node layoutThatFits:[self nodeConstrainedSize]].size;
-    _node.frame = (CGRect){.origin = CGPointZero, .size = size};
   }
+  
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  // Call layoutThatFits: to let the node prepare for a layout that will happen shortly in the layout pass of the view.
+  // If the node's constrained size didn't change between the last layout pass it's a no-op
+  [_node layoutThatFits:[self nodeConstrainedSize]];
+#pragma clang diagnostic pop
 }
 
 - (void)viewDidLayoutSubviews
@@ -247,10 +252,6 @@ ASVisibilityDepthImplementation;
     for (id<ASEnvironment> child in children) {
       ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
     }
-    
-    // once we've propagated all the traits, layout this node.
-    // Remeasure the node with the latest constrained size – old constrained size may be incorrect.
-    [self.node layoutThatFits:[self nodeConstrainedSize]];
   }
 }
 
