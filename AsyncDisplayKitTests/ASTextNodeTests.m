@@ -171,7 +171,9 @@
   ASTextNodeTestDelegate *delegate = [ASTextNodeTestDelegate new];
   _textNode.delegate = delegate;
 
-  [_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))];
+  ASLayout *layout = [_textNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))];
+  _textNode.frame = CGRectMake(0, 0, layout.size.width, layout.size.height);
+  
   NSRange returnedLinkRange;
   NSString *returnedAttributeName;
   NSString *returnedLinkAttributeValue = [_textNode linkAttributeValueAtPoint:CGPointMake(3, 3) attributeName:&returnedAttributeName range:&returnedLinkRange];
