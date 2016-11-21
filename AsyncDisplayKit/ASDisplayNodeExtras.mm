@@ -13,6 +13,24 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 
 #import <queue>
+#import "ASRunLoopQueue.h"
+
+extern void ASPerformMainThreadDeallocation(_Nullable id object)
+{
+  /**
+   * UIKit components must be deallocated on the main thread. We use this shared
+   * run loop queue to gradually deallocate them across many turns of the main run loop.
+   */
+  static ASRunLoopQueue *queue;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    queue = [[ASRunLoopQueue alloc] initWithRunLoop:CFRunLoopGetMain() andHandler:nil];
+    queue.batchSize = 10;
+  });
+  if (object != nil) {
+  	[queue enqueue:object];
+  }
+}
 
 extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window)
 {
