@@ -121,8 +121,10 @@
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
+  __weak __typeof__(self) weakSelf = self;
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(self)];
+    __typeof__(self) strongSelf = weakSelf;
+    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
   };
 
   if (self = [super initWithViewBlock:collectionViewBlock]) {
