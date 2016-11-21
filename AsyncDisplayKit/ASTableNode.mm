@@ -79,8 +79,9 @@
 
 - (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
 {
+  ASEventLog *eventLog = ASDisplayNodeGetEventLog(self);
   ASDisplayNodeViewBlock tableViewBlock = ^UIView *{
-    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass eventLog:ASDisplayNodeGetEventLog(self)];
+    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass eventLog:eventLog];
   };
 
   if (self = [super initWithViewBlock:tableViewBlock]) {
