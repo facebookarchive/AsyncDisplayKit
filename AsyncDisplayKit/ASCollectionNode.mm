@@ -111,20 +111,22 @@
 
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
 {
-  return [self initWithFrame:CGRectZero collectionViewLayout:layout];
+  return [self initWithCollectionViewLayout:layout layoutInspector:nil];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout layoutInspector:(id<ASCollectionViewLayoutInspecting>)layoutInspector
 {
-  return [self initWithFrame:frame collectionViewLayout:layout layoutFacilitator:nil];
+  return [self initWithCollectionViewLayout:layout layoutInspector:layoutInspector layoutFacilitator:nil];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
+- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout layoutInspector:(id<ASCollectionViewLayoutInspecting>)layoutInspector layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
   __weak __typeof__(self) weakSelf = self;
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
     __typeof__(self) strongSelf = weakSelf;
-    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
+    ASCollectionView *collectionView = [[ASCollectionView alloc] _initWithFrame:CGRectZero collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
+    collectionView.layoutInspector = layoutInspector;
+    return collectionView;
   };
 
   if (self = [super initWithViewBlock:collectionViewBlock]) {
