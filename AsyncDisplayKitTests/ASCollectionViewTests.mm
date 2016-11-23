@@ -149,10 +149,11 @@
     id realLayout = [UICollectionViewFlowLayout new];
     id mockLayout = [OCMockObject partialMockForObject:realLayout];
     self.collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:mockLayout];
-    self.collectionView = self.collectionNode.view;
-    self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.collectionNode.frame = self.view.bounds;
+    self.collectionNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.collectionNode.dataSource = self.asyncDelegate;
     self.collectionNode.delegate = self.asyncDelegate;
+    self.collectionView = self.collectionNode.view;
     
     [self.collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
     [self.view addSubview:self.collectionView];
