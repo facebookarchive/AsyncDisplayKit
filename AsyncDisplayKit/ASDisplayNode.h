@@ -17,12 +17,14 @@
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 #import <AsyncDisplayKit/ASLayoutElement.h>
 #import <AsyncDisplayKit/ASContextTransitioning.h>
+#import <AsyncDisplayKit/ASDisplayNodeContainerDelegate.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 #define ASDisplayNodeLoggingEnabled 0
 
 @class ASDisplayNode;
+@protocol ASDisplayNodeDelegate;
 
 /**
  * UIView creation block. Used to create the backing view of a new display node.
@@ -219,6 +221,9 @@ extern NSInteger const ASDefaultDrawingPriority;
  */
 @property (nonatomic, readonly, strong) CALayer * _Nonnull layer;
 
+@property (nonatomic, weak) id<ASDisplayNodeContainerDelegate> containerDelegate;
+@property (nonatomic, weak) id<ASDisplayNodeDelegate> nodeDelegate;
+
 /**
  * Returns YES if the node is – at least partially – visible in a window.
  *
@@ -371,6 +376,13 @@ extern NSInteger const ASDefaultDrawingPriority;
  */
 - (void)removeFromSupernode;
 
+/**
+ * @abstract Bring this node to the front.
+ *
+ * @discussion The node's view will be automatically removed and add to the supernode's view.
+ */
+- (void)bringSubnodeToFront:(ASDisplayNode *)node;
+
 /** 
  * @abstract The receiver's immediate subnodes.
  */
@@ -465,6 +477,8 @@ extern NSInteger const ASDefaultDrawingPriority;
  */
 - (void)recursivelySetDisplaySuspended:(BOOL)flag;
 
+- (void)recursivelySetDisplaysAsynchronously:(BOOL)flag;
+
 /**
  * @abstract Calls -clearContents on the receiver and its subnode hierarchy.
  *
@@ -496,6 +510,9 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @see [ASDisplayNode(Subclassing) fetchData] and [ASDisplayNode(Subclassing) clearFetchedData]
  */
 - (void)recursivelyFetchData;
+
+- (BOOL)recursivelyImplementsDisplay;
+- (BOOL)recursivelyPendingDisplayNodesHaveFinished;
 
 /**
  * @abstract Triggers a recursive call to fetchData when the node has an interfaceState of ASInterfaceStatePreload

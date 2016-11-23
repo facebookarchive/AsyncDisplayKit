@@ -12,6 +12,7 @@
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNode+Beta.h"
+#import "ASDisplayNodeDelegate.h"
 
 #import <objc/runtime.h>
 
@@ -81,6 +82,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 @synthesize isFinalLayoutElement = _isFinalLayoutElement;
 @synthesize threadSafeBounds = _threadSafeBounds;
 @synthesize layoutSpecBlock = _layoutSpecBlock;
+@synthesize nodeDelegate = _nodeDelegate;
 
 static BOOL suppressesInvalidCollectionUpdateExceptions = NO;
 
@@ -718,6 +720,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _flags.layerBacked;
+}
+
+- (void)setNodeDelegate:(id<ASDisplayNodeDelegate>)delegate
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _nodeDelegate = delegate;
 }
 
 #pragma mark - Style
@@ -1787,6 +1795,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   }
 }
 
+
+
 - (void)_addSubnodeSubviewOrSublayer:(ASDisplayNode *)subnode
 {
     // Due to a bug in Apple's framework we have to use the layer index to insert a subview
@@ -1996,6 +2006,14 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   }
 
   [self _insertSubnode:subnode atSubnodeIndex:idx sublayerIndex:sublayerIndex andRemoveSubnode:nil];
+}
+
+- (void)bringSubnodeToFront:(ASDisplayNode *)node {
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  [node removeFromSupernode];
+  [self addSubnode:node];
 }
 
 - (void)_removeSubnode:(ASDisplayNode *)subnode
@@ -2645,6 +2663,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)didLoad
 {
   ASDisplayNodeAssertMainThread();
+  if(_nodeDelegate && [_nodeDelegate respondsToSelector:@selector(nodeDidLoad)]) {
+    [_nodeDelegate nodeDidLoad];
+  }
 }
 
 #pragma mark Hierarchy State
@@ -3056,6 +3077,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   [self displayWillStart]; // Subclass override
   ASDisplayNodeAssertMainThread();
+  
+  [self _containerWillDisplayNode];
 
   ASDisplayNodeLogEvent(self, @"displayWillStart");
   // in case current node takes longer to display than it's subnodes, treat it as a dependent node
@@ -3071,17 +3094,37 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeLogEvent(self, @"displayDidFinish");
   [self _pendingNodeDidDisplay:self];
 
+  [self _containerDidDisplayNode];
+  
   [_supernode subnodeDisplayDidFinish:self];
 }
 
 - (void)subnodeDisplayWillStart:(ASDisplayNode *)subnode
 {
+  [self _containerWillDisplayNode];
+  
   [self _pendingNodeWillDisplay:subnode];
 }
 
 - (void)subnodeDisplayDidFinish:(ASDisplayNode *)subnode
 {
   [self _pendingNodeDidDisplay:subnode];
+  
+  [self _containerDidDisplayNode];
+}
+
+- (void)_containerWillDisplayNode
+{
+  if ([_pendingDisplayNodes count] == 0 && self.containerDelegate && !self.shouldRasterizeDescendants) {
+    [self.containerDelegate nodeContainerWillDisplayNode:self];
+  }
+}
+
+- (void)_containerDidDisplayNode
+{
+  if (_pendingDisplayNodes.count == 0 && self.containerDelegate) {
+    [self.containerDelegate nodeContainerDidDisplayNode:self];
+  }
 }
 
 - (void)setNeedsDisplayAtScale:(CGFloat)contentsScale
@@ -3093,11 +3136,44 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   }
 }
 
+- (BOOL)recursivelyImplementsDisplay
+{
+  if ([self __implementsDisplay]) {
+    return YES;
+  }
+  
+  BOOL implementsDisplay = NO;
+  for (ASDisplayNode *subnode in self.subnodes) {
+    implementsDisplay = [subnode recursivelyImplementsDisplay];
+    
+    if (implementsDisplay) {
+      return YES;
+    }
+  }
+  
+  return implementsDisplay;
+}
+
 - (void)recursivelySetNeedsDisplayAtScale:(CGFloat)contentsScale
 {
   ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode *node) {
     [node setNeedsDisplayAtScale:contentsScale];
   });
+}
+
+- (BOOL)recursivelyPendingDisplayNodesHaveFinished
+{
+  if (_pendingDisplayNodes.count != 0) {
+    return NO;
+  }
+  
+  for (ASDisplayNode *subnode in self.subnodes) {
+    if (![subnode recursivelyPendingDisplayNodesHaveFinished]) {
+      return NO;
+    }
+  }
+  
+  return YES;
 }
 
 - (void)hierarchyDisplayDidFinish
@@ -3250,6 +3326,15 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
     for (ASDisplayNode *subnode in node.subnodes) {
       _recursivelySetDisplaySuspended(subnode, nil, flag);
     }
+  }
+}
+
+- (void)recursivelySetDisplaysAsynchronously:(BOOL)flag
+{
+  self.displaysAsynchronously = flag;
+  
+  for (ASDisplayNode *subnode in self.subnodes) {
+    [subnode recursivelySetDisplaysAsynchronously:flag];
   }
 }
 
@@ -3547,7 +3632,7 @@ ASEnvironmentLayoutExtensibilityForwarding
   creationTypeString = [NSString stringWithFormat:@"cr8:%.2lfms dl:%.2lfms ap:%.2lfms ad:%.2lfms",  1000 * _debugTimeToCreateView, 1000 * _debugTimeForDidLoad, 1000 * _debugTimeToApplyPendingState, 1000 * _debugTimeToAddSubnodeViews];
 #endif
 
-  return [NSString stringWithFormat:@"<%@ alpha:%.2f isLayerBacked:%d frame:%@ %@>", self.description, self.alpha, self.isLayerBacked, NSStringFromCGRect(self.frame), creationTypeString];
+    return [NSString stringWithFormat:@"<%@ alpha:%.2f isLayerBacked:%d frame:%@ %@>", self.description, self.alpha, self.isLayerBacked, CATransform3DIsIdentity(self.transform) ? NSStringFromCGRect(self.frame) : @"Transform not identity", creationTypeString];
 }
 
 - (NSString *)displayNodeRecursiveDescription
