@@ -64,16 +64,6 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
 // Refer to examples/SynchronousConcurrency, AsyncViewController.m
 @property (nonatomic, assign) BOOL neverShowPlaceholders;
 
-
-/**
- * The constrained size used to measure the backing node.
- *
- * @discussion Defaults to providing a size range that uses the view controller view's bounds as
- * both the min and max definitions. Override this method to provide a custom size range to the
- * backing node.
- */
-- (ASSizeRange)nodeConstrainedSize AS_WARN_UNUSED_RESULT;
-
 @end
 
 @interface ASViewController (ASRangeControllerUpdateRangeProtocol)
@@ -85,6 +75,19 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
  * Default value is YES *if* node or view controller conform to ASRangeControllerUpdateRangeProtocol otherwise it is NO.
  */
 @property (nonatomic, assign) BOOL automaticallyAdjustRangeModeBasedOnViewEvents;
+
+@end
+
+@interface ASViewController (Deprecated)
+
+/**
+ * The constrained size used to measure the backing node.
+ *
+ * @discussion Defaults to providing a size range that uses the view controller view's bounds as
+ * both the min and max definitions. Override this method to provide a custom size range to the
+ * backing node.
+ */
+- (ASSizeRange)nodeConstrainedSize AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Set the size directly to the view's frame");
 
 @end
 
