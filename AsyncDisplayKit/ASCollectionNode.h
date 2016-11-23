@@ -33,19 +33,19 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion Initializes and returns a newly allocated collection node object with the specified layout.
  *
- * @param layout The layout object to use for organizing items. The collection node stores a strong reference to the specified object. Must not be nil.
+ * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
  */
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout;
 
 /**
  * Initializes an ASCollectionNode
  *
- * @discussion Initializes and returns a newly allocated collection node object with the specified layout.
+ * @discussion Initializes and returns a newly allocated collection node object with the specified frame and layout.
  *
- * @param layout The layout object to use for organizing items. The collection node stores a strong reference to the specified object. Must not be nil.
- * @param layoutInspector The layout inspector to use, or nil to use the ASDK default layout inspector.
+ * @param frame The frame rectangle for the collection view, measured in points. The origin of the frame is relative to the superview in which you plan to add it. This frame is passed to the superclass during initialization.
+ * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
  */
-- (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout layoutInspector:(nullable id<ASCollectionViewLayoutInspecting>)layoutInspector;
+- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
 
 /**
  * Returns the corresponding ASCollectionView
@@ -415,16 +415,6 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 @interface ASCollectionNode (Deprecated)
-
-/**
- * Initializes an ASCollectionNode
- *
- * @discussion Initializes and returns a newly allocated collection node object with the specified frame and layout.
- *
- * @param frame The frame rectangle for the collection view, measured in points. The origin of the frame is relative to the superview in which you plan to add it. This frame is passed to the superclass during initialization.
- * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
- */
-- (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout ASDISPLAYNODE_DEPRECATED_MSG("Use -initWithCollectionViewLayout: instead.");
 
 /**
  * Reload everything from scratch, destroying the working range and all cached nodes.

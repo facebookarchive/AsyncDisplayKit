@@ -148,12 +148,11 @@
     self.asyncDelegate = [[ASCollectionViewTestDelegate alloc] initWithNumberOfSections:10 numberOfItemsInSection:10];
     id realLayout = [UICollectionViewFlowLayout new];
     id mockLayout = [OCMockObject partialMockForObject:realLayout];
-    self.collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:mockLayout];
-    self.collectionNode.frame = self.view.bounds;
-    self.collectionNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+    self.collectionNode = [[ASCollectionNode alloc] initWithFrame:self.view.bounds collectionViewLayout:mockLayout];
+    self.collectionView = self.collectionNode.view;
+    self.collectionView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     self.collectionNode.dataSource = self.asyncDelegate;
     self.collectionNode.delegate = self.asyncDelegate;
-    self.collectionView = self.collectionNode.view;
     
     [self.collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
     [self.view addSubview:self.collectionView];
@@ -367,7 +366,7 @@
  */
 - (void)testThatCollectionNodeConformsToExpectedProtocols
 {
-  ASCollectionNode *node = [[ASCollectionNode alloc] initWithCollectionViewLayout:[[UICollectionViewFlowLayout alloc] init]];
+  ASCollectionNode *node = [[ASCollectionNode alloc] initWithFrame:CGRectZero collectionViewLayout:[[UICollectionViewFlowLayout alloc] init]];
   XCTAssert([node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)]);
 }
 
@@ -553,7 +552,7 @@
 {
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   UICollectionViewLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionNode *cn = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
+  ASCollectionNode *cn = [[ASCollectionNode alloc] initWithFrame:window.bounds collectionViewLayout:layout];
   ASCollectionView *cv = cn.view;
 
 
