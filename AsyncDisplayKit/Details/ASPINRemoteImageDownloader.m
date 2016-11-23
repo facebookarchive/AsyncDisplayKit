@@ -103,10 +103,15 @@ static ASPINRemoteImageDownloader *sharedDownloader = nil;
 + (void)setSharedImageManagerWithConfiguration:(nullable NSURLSessionConfiguration *)configuration
 {
   NSAssert(sharedDownloader == nil, @"Singleton has been created and session can no longer be configured.");
-  __unused PINRemoteImageManager *sharedManager = [self sharedPINRemoteImageManagerWithConfiguration:configuration];
+  __unused PINRemoteImageManager *sharedManager = [[self class] sharedPINRemoteImageManagerWithConfiguration:configuration];
 }
 
-+ (PINRemoteImageManager *)sharedPINRemoteImageManagerWithConfiguration:(NSURLSessionConfiguration *)configuration
+- (PINRemoteImageManager *)sharedPINRemoteImageManager
+{
+  return [self sharedPINRemoteImageManagerWithConfiguration:nil];
+}
+
+- (PINRemoteImageManager *)sharedPINRemoteImageManagerWithConfiguration:(NSURLSessionConfiguration *)configuration
 {
   static ASPINRemoteImageManager *sharedPINRemoteImageManager;
   static dispatch_once_t onceToken;
@@ -134,11 +139,6 @@ static ASPINRemoteImageDownloader *sharedDownloader = nil;
 #endif
   });
   return sharedPINRemoteImageManager;
-}
-
-- (PINRemoteImageManager *)sharedPINRemoteImageManager
-{
-  return [ASPINRemoteImageDownloader sharedPINRemoteImageManagerWithConfiguration:nil];
 }
 
 - (BOOL)sharedImageManagerSupportsMemoryRemoval
