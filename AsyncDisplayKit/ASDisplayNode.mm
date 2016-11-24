@@ -1306,21 +1306,27 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   // We generate placeholders at measureWithSizeRange: time so that a node is guaranteed to have a placeholder ready to go.
   // This is also because measurement is usually asynchronous, but placeholders need to be set up synchronously.
   // First measurement is guaranteed to be before the node is onscreen, so we can create the image async. but still have it appear sync.
-  if (_placeholderEnabled && [self _displaysAsynchronously]) {
+  if (_placeholderEnabled && !_placeholderImage && [self _displaysAsynchronously]) {
     
     // Zero-sized nodes do not require a placeholder.
     ASLayout *layout = _calculatedDisplayNodeLayout->layout;
     CGSize layoutSize = (layout ? layout.size : CGSizeZero);
-    if (CGSizeEqualToSize(layoutSize, CGSizeZero)) {
+    if (layoutSize.width * layoutSize.height <= 0.0) {
       return;
     }
-
-    if (!_placeholderImage) {
+    
+    // If we've displayed our contents, we don't need a placeholder.
+    // Contents is a thread-affined property and can't be read off main after loading.
+    if (self.isNodeLoaded) {
       ASPerformBlockOnMainThread(^{
         if (self.contents == nil) {
           _placeholderImage = [self placeholderImage];
         }
       });
+    } else {
+      if (self.contents == nil) {
+        _placeholderImage = [self placeholderImage];
+      }
     }
   }
   
