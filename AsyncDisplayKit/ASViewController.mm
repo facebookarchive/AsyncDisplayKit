@@ -64,7 +64,7 @@
     // Node already loaded the view
     [self view];
   } else {
-    // If the node didn't load yet add ourselves as on did load observer to laod the view in case the node get's loaded
+    // If the node didn't load yet add ourselves as on did load observer to laod the view in case the node gets loaded
     // before the view controller
     __weak __typeof__(self) weakSelf = self;
     [_node onDidLoad:^(__kindof ASDisplayNode * _Nonnull node) {
