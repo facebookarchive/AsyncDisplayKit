@@ -58,6 +58,21 @@
   _selfConformsToRangeModeProtocol = [self conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
   _nodeConformsToRangeModeProtocol = [_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
   _automaticallyAdjustRangeModeBasedOnViewEvents = _selfConformsToRangeModeProtocol || _nodeConformsToRangeModeProtocol;
+  
+  // In case the node will get loaded
+  if (_node.nodeLoaded) {
+    // Node already loaded the view
+    [self view];
+  } else {
+    // If the node didn't load yet add ourselves as on did load observer to laod the view in case the node get's loaded
+    // before the view controller
+    __weak __typeof__(self) weakSelf = self;
+    [_node onDidLoad:^(__kindof ASDisplayNode * _Nonnull node) {
+      if (weakSelf.viewLoaded == NO) {
+        [weakSelf view];
+      }
+    }];
+  }
 
   return self;
 }
