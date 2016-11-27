@@ -219,9 +219,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   // NOTE: We intentionally do not cancel image downloads until `clearPreloadedData`.
 }
 
-- (void)clearPreloadedData
+- (void)didExitPreloadState
 {
-  [super clearPreloadedData];
+  [super didExitPreloadState];
     
   [_phImageRequestOperation cancel];
 
@@ -236,9 +236,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   self.image = nil;
 }
 
-- (void)preload
+- (void)didEnterPreloadState
 {
-  [super preload];
+  [super didEnterPreloadState];
 
   [self _loadImageIdentifiers];
 }
@@ -281,7 +281,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 {
   [super displayWillStart];
   
-  [self preload];
+  [self didEnterPreloadState];
   
   if (_downloaderImplementsSetPriority) {
     {

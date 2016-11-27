@@ -157,27 +157,27 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
 - (void)recursivelyEnsureDisplaySynchronously:(BOOL)synchronously;
 
 /**
- * @abstract Calls -clearPreloadedData on the receiver and its subnode hierarchy.
+ * @abstract Calls -didExitPreloadState on the receiver and its subnode hierarchy.
  *
  * @discussion Clears any memory-intensive preloaded content.
  * This method is used to notify the node that it should purge any content that is both expensive to fetch and to
  * retain in memory.
  *
- * @see [ASDisplayNode(Subclassing) clearPreloadedData] and [ASDisplayNode(Subclassing) preload]
+ * @see [ASDisplayNode(Subclassing) didExitPreloadState] and [ASDisplayNode(Subclassing) didEnterPreloadState]
  */
 - (void)recursivelyClearPreloadedData;
 
 /**
- * @abstract Calls -preload on the receiver and its subnode hierarchy.
+ * @abstract Calls -didEnterPreloadState on the receiver and its subnode hierarchy.
  *
  * @discussion Fetches content from remote sources for the current node and all subnodes.
  *
- * @see [ASDisplayNode(Subclassing) preload] and [ASDisplayNode(Subclassing) clearPreloadedData]
+ * @see [ASDisplayNode(Subclassing) didEnterPreloadState] and [ASDisplayNode(Subclassing) didExitPreloadState]
  */
 - (void)recursivelyPreload;
 
 /**
- * @abstract Triggers a recursive call to preload when the node has an interfaceState of ASInterfaceStatePreload
+ * @abstract Triggers a recursive call to -didEnterPreloadState when the node has an interfaceState of ASInterfaceStatePreload
  */
 - (void)setNeedsPreload;
 

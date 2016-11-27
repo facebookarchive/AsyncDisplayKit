@@ -366,9 +366,9 @@ static NSString * const kRate = @"rate";
   }
 }
 
-- (void)preload
+- (void)didEnterPreloadState
 {
-  [super preload];
+  [super didEnterPreloadState];
   
   ASDN::MutexLocker l(__instanceLock__);
   AVAsset *asset = self.asset;
@@ -406,9 +406,9 @@ static NSString * const kRate = @"rate";
   }
 }
 
-- (void)clearPreloadedData
+- (void)didExitPreloadState
 {
-  [super clearPreloadedData];
+  [super didExitPreloadState];
   
   {
     ASDN::MutexLocker l(__instanceLock__);
@@ -506,7 +506,7 @@ static NSString * const kRate = @"rate";
 
 - (void)_setAndFetchAsset:(AVAsset *)asset url:(NSURL *)assetURL
 {
-  [self clearPreloadedData];
+  [self didExitPreloadState];
   _asset = asset;
   _assetURL = assetURL;
   [self setNeedsPreload];

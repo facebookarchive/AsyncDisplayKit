@@ -324,23 +324,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, assign, getter=isInHierarchy) BOOL inHierarchy;
 
 /**
- * @abstract Indicates that the node should preload any external data, such as images.
- *
- * @discussion Subclasses may override this method to be notified when they should begin to preload. Fetching
- * should be done asynchronously. The node is also responsible for managing the memory of any data.
- * The data may be remote and accessed via the network, but could also be a local database query.
- */
-- (void)preload ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * Provides an opportunity to clear any preloaded data (e.g. remote / network or database-queried) on the current node.
- *
- * @discussion This will not clear data recursively for all subnodes. Either call -recursivelyClearPreloadedData or
- * selectively clear preloaded data.
- */
-- (void)clearPreloadedData ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
  * Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers
  * on the current node.
  *
