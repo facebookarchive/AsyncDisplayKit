@@ -212,7 +212,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
  */
 + (nullable UIImage *)displayWithParameters:(nullable id<NSObject>)parameters
-                       isCancelled:(__attribute((noescape)) asdisplaynode_iscancelled_block_t)isCancelledBlock;
+                                isCancelled:(__attribute((noescape)) asdisplaynode_iscancelled_block_t)isCancelledBlock;
 
 /**
  * @abstract Delegate override for drawParameters
