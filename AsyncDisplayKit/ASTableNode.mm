@@ -136,9 +136,9 @@
   [self.rangeController clearContents];
 }
 
-- (void)clearPreloadedData
+- (void)didExitPreloadState
 {
-  [super clearPreloadedData];
+  [super didExitPreloadState];
   [self.rangeController clearPreloadedData];
 }
 

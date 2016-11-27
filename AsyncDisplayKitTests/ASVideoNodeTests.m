@@ -398,7 +398,7 @@
   [[[videoNodeMock expect] andForwardToRealObject] prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   
   _videoNode.asset = assetMock;
-  [_videoNode preload];
+  [_videoNode didEnterPreloadState];
   [_videoNode setVideoPlaceholderImage:[[UIImage alloc] init]];
   
   [videoNodeMock verifyWithDelay:1.0f];
@@ -407,7 +407,7 @@
   XCTAssertNotNil(_videoNode.currentItem);
   XCTAssertNotNil(_videoNode.image);
 
-  [_videoNode clearPreloadedData];
+  [_videoNode didExitPreloadState];
   XCTAssertNil(_videoNode.player);
   XCTAssertNil(_videoNode.currentItem);
   XCTAssertNil(_videoNode.image);

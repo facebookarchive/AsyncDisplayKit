@@ -72,9 +72,9 @@
   [super setLayerBacked:layerBacked];
 }
 
-- (void)preload
+- (void)didEnterPreloadState
 {
-  [super preload];
+  [super didEnterPreloadState];
   ASPerformBlockOnMainThread(^{
     if (self.isLiveMap) {
       [self addLiveMap];
@@ -84,9 +84,9 @@
   });
 }
 
-- (void)clearPreloadedData
+- (void)didExitPreloadState
 {
-  [super clearPreloadedData];
+  [super didExitPreloadState];
   ASPerformBlockOnMainThread(^{
     if (self.isLiveMap) {
       [self removeLiveMap];

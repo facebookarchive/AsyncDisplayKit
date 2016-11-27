@@ -266,7 +266,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 
   // TODO: Consider removing this; it predates ASInterfaceState, which now ensures that even non-range-managed nodes get a -preload call.
-  [self preload];
+  [self didEnterPreloadState];
   
   if (self.image == nil && _downloaderFlags.downloaderImplementsSetPriority) {
     ASDN::MutexLocker l(__instanceLock__);
@@ -306,9 +306,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   [self _updateProgressImageBlockOnDownloaderIfNeeded];
 }
 
-- (void)clearPreloadedData
+- (void)didExitPreloadState
 {
-  [super clearPreloadedData];
+  [super didExitPreloadState];
 
   {
     ASDN::MutexLocker l(__instanceLock__);
@@ -321,9 +321,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 }
 
-- (void)preload
+- (void)didEnterPreloadState
 {
-  [super preload];
+  [super didEnterPreloadState];
   
   {
     ASDN::MutexLocker l(__instanceLock__);

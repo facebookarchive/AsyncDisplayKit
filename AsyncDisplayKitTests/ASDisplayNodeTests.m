@@ -89,7 +89,6 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @interface ASTestDisplayNode : ASDisplayNode
 @property (nonatomic, copy) void (^willDeallocBlock)(__unsafe_unretained ASTestDisplayNode *node);
 @property (nonatomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
-@property (nonatomic) BOOL hasPreloaded;
 
 @property (nonatomic, nullable) UIGestureRecognizer *gestureRecognizer;
 @property (nonatomic, nullable) id idGestureRecognizer;
@@ -99,6 +98,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @property (nonatomic) BOOL displayRangeStateChangedToYES;
 @property (nonatomic) BOOL displayRangeStateChangedToNO;
 
+@property (nonatomic) BOOL hasPreloaded;
 @property (nonatomic) BOOL preloadStateChangedToYES;
 @property (nonatomic) BOOL preloadStateChangedToNO;
 @end
@@ -111,18 +111,6 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   return _calculateSizeBlock ? _calculateSizeBlock(self, constrainedSize) : CGSizeZero;
-}
-
-- (void)preload
-{
-  [super preload];
-  self.hasPreloaded = YES;
-}
-
-- (void)clearPreloadedData
-{
-  [super clearPreloadedData];
-  self.hasPreloaded = NO;
 }
 
 - (void)didEnterDisplayState
@@ -141,12 +129,14 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 {
   [super didEnterPreloadState];
   self.preloadStateChangedToYES = YES;
+  self.hasPreloaded = YES;
 }
 
 - (void)didExitPreloadState
 {
   [super didExitPreloadState];
   self.preloadStateChangedToNO = YES;
+  self.hasPreloaded = NO;
 }
 
 - (void)dealloc
@@ -1752,7 +1742,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
 
   [node.view removeFromSuperview];
-  // We don't want to call -clearPreloadedData on nodes that aren't being managed by a range controller.
+  // We don't want to call -didExitPreloadState on nodes that aren't being managed by a range controller.
   // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
   // Still, the interfaceState should be None to reflect the current state of the node.
   // We just don't proactively clear contents or fetched data for this state transition.
@@ -1783,14 +1773,14 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
 }
 
-- (void)testSetNeedsPreloadImmediateState
+- (void)testSetNeedsDataFetchImmediateState
 {
   ASCellNode *cellNode = [ASCellNode new];
   ASTestDisplayNode *node = [ASTestDisplayNode new];
   [cellNode addSubnode:node];
   [cellNode enterInterfaceState:ASInterfaceStatePreload];
   node.hasPreloaded = NO;
-  [cellNode setNeedsPreload];
+  [cellNode setNeedsDataFetch];
   XCTAssert(node.hasPreloaded);
 }
 
