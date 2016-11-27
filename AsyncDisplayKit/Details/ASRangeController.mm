@@ -24,6 +24,10 @@
 
 #define AS_RANGECONTROLLER_LOG_UPDATE_FREQ 0
 
+#ifndef ASRangeControllerAutomaticLowMemoryHandling
+#define ASRangeControllerAutomaticLowMemoryHandling 1
+#endif
+
 @interface ASRangeController ()
 {
   BOOL _rangeIsValid;
@@ -145,6 +149,10 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     _didUpdateCurrentRange = YES;
 
     [self setNeedsUpdate];
+  } else if (_needsRangeUpdate) {
+    // If _needsRangeUpdate is YES, but we don't set didUpdateCurrentRange, it
+    // will be overridden.
+    _didUpdateCurrentRange = YES;
   }
 }
 
@@ -532,7 +540,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [center addObserver:self selector:@selector(willEnterForeground:) name:UIApplicationWillEnterForegroundNotification object:nil];
 }
 
-static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisibleOnly;
+static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeLowMemory;
 + (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode
 {
   ASDisplayNodeAssert(rangeMode == ASLayoutRangeModeVisibleOnly || rangeMode == ASLayoutRangeModeLowMemory, @"It is highly inadvisable to engage a larger range mode when a memory warning occurs, as this will almost certainly cause app eviction");
@@ -544,8 +552,8 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisible
   NSArray *allRangeControllers = [[self allRangeControllersWeakSet] allObjects];
   for (ASRangeController *rangeController in allRangeControllers) {
     BOOL isDisplay = ASInterfaceStateIncludesDisplay([rangeController interfaceState]);
-    [rangeController updateCurrentRangeWithMode:isDisplay ? ASLayoutRangeModeMinimum : __rangeModeForMemoryWarnings];
-    [rangeController setNeedsUpdate];
+    [rangeController updateCurrentRangeWithMode:isDisplay ? ASLayoutRangeModeVisibleOnly : __rangeModeForMemoryWarnings];
+    // There's no need to call needs update as updateCurrentRangeWithMode sets this if necessary.
     [rangeController updateIfNeeded];
   }
   
@@ -568,7 +576,7 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeVisible
   __ApplicationState = UIApplicationStateBackground;
   for (ASRangeController *rangeController in allRangeControllers) {
     // Trigger a range update immediately, as we may not be allowed by the system to run the update block scheduled by changing range mode.
-    [rangeController setNeedsUpdate];
+    // There's no need to call needs update as updateCurrentRangeWithMode sets this if necessary.
     [rangeController updateIfNeeded];
   }
   
