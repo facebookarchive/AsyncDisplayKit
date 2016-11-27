@@ -22,44 +22,41 @@ import AsyncDisplayKit
 
 class ViewController: UIViewController, MosaicCollectionViewLayoutDelegate, ASCollectionDataSource, ASCollectionDelegate {
   
-  var _sections: [[UIImage]]?
-  var _collectionNode: ASCollectionNode?
-  var _layoutInspector: MosaicCollectionViewLayoutInspector?
+  var _sections = [[UIImage]]()
+  let _collectionNode: ASCollectionNode!
+  let _layoutInspector = MosaicCollectionViewLayoutInspector()
   let kNumberOfImages: UInt = 14
   
   required init?(coder aDecoder: NSCoder) {
+    let layout = MosaicCollectionViewLayout()
+    layout.numberOfColumns = 3;
+    layout.headerHeight = 44;
+    _collectionNode = ASCollectionNode(frame: CGRect.zero, collectionViewLayout: layout)
     super.init(coder: aDecoder)
-    _sections = []
-    _sections!.append([]);
-    
+    layout.delegate = self
+
+    _sections.append([]);
     var section = 0
     for idx in 0 ..< kNumberOfImages {
-      let name = String.init(format: "image_%d.jpg", idx)
-      _sections?[section].append(UIImage(named: name)!)
+      let name = String(format: "image_%d.jpg", idx)
+      _sections[section].append(UIImage(named: name)!)
       if ((idx + 1) % 5 == 0 && idx < kNumberOfImages - 1) {
         section += 1
-        _sections!.append([])
+        _sections.append([])
       }
     }
     
-    let layout = MosaicCollectionViewLayout.init()
-    layout.numberOfColumns = 3;
-    layout.headerHeight = 44;
-    layout.delegate = self
-    _layoutInspector = MosaicCollectionViewLayoutInspector.init()
-    
-    _collectionNode = ASCollectionNode.init(frame: CGRect.zero, collectionViewLayout: layout)
-    _collectionNode?.dataSource = self;
-    _collectionNode?.delegate = self;
-    _collectionNode?.view.layoutInspector = _layoutInspector
-    _collectionNode?.backgroundColor = UIColor.white
-    _collectionNode?.view.isScrollEnabled = true
-    _collectionNode?.registerSupplementaryNode(ofKind: UICollectionElementKindSectionHeader)
+    _collectionNode.dataSource = self;
+    _collectionNode.delegate = self;
+    _collectionNode.view.layoutInspector = _layoutInspector
+    _collectionNode.backgroundColor = UIColor.white
+    _collectionNode.view.isScrollEnabled = true
+    _collectionNode.registerSupplementaryNode(ofKind: UICollectionElementKindSectionHeader)
   }
   
   deinit {
-    _collectionNode?.dataSource = nil;
-    _collectionNode?.delegate = nil;
+    _collectionNode.dataSource = nil;
+    _collectionNode.delegate = nil;
   }
   
   override func viewDidLoad() {
@@ -68,12 +65,12 @@ class ViewController: UIViewController, MosaicCollectionViewLayoutDelegate, ASCo
   }
   
   override func viewWillLayoutSubviews() {
-    _collectionNode?.frame = self.view.bounds;
+    _collectionNode.frame = self.view.bounds;
   }
   
   func collectionNode(_ collectionNode: ASCollectionNode, nodeForItemAt indexPath: IndexPath) -> ASCellNode {
-    let image = _sections?[indexPath.section][indexPath.item]
-    return ImageCellNode.init(with: image!)
+    let image = _sections[indexPath.section][indexPath.item]
+    return ImageCellNode(with: image)
   }
   
   
@@ -82,23 +79,23 @@ class ViewController: UIViewController, MosaicCollectionViewLayoutDelegate, ASCo
       NSFontAttributeName: UIFont.preferredFont(forTextStyle: UIFontTextStyle.headline),
       NSForegroundColorAttributeName: UIColor.gray
     ]
-    let textInsets = UIEdgeInsets.init(top: 11, left: 0, bottom: 11, right: 0)
-    let textCellNode = ASTextCellNode.init(attributes: textAttributes as! [AnyHashable : Any], insets: textInsets)
-    textCellNode.text = String.init(format: "Section %zd", indexPath.section + 1)
+    let textInsets = UIEdgeInsets(top: 11, left: 0, bottom: 11, right: 0)
+    let textCellNode = ASTextCellNode(attributes: textAttributes as! [AnyHashable : Any], insets: textInsets)
+    textCellNode.text = String(format: "Section %zd", indexPath.section + 1)
     return textCellNode;
   }
   
 
   func numberOfSections(in collectionNode: ASCollectionNode) -> Int {
-    return _sections!.count
+    return _sections.count
   }
 
   func collectionNode(_ collectionNode: ASCollectionNode, numberOfItemsInSection section: Int) -> Int {
-    return _sections![section].count
+    return _sections[section].count
   }
 
   internal func collectionView(_ collectionView: UICollectionView, layout: MosaicCollectionViewLayout, originalItemSizeAtIndexPath: IndexPath) -> CGSize {
-    return _sections![originalItemSizeAtIndexPath.section][originalItemSizeAtIndexPath.item].size
+    return _sections[originalItemSizeAtIndexPath.section][originalItemSizeAtIndexPath.item].size
   }
 }
 

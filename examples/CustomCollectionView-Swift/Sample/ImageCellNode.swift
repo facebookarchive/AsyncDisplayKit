@@ -21,24 +21,23 @@ import UIKit
 import AsyncDisplayKit
 
 class ImageCellNode: ASCellNode {
-  var imageNode : ASImageNode?
+  let imageNode = ASImageNode()
   required init(with image : UIImage) {
     super.init()
-    self.imageNode = ASImageNode.init()
-    imageNode?.image = image;
-    self.addSubnode(self.imageNode!)
+    imageNode.image = image
+    self.addSubnode(self.imageNode)
   }
 
   override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
-    let imageSize = imageNode?.image?.size
-    print("imageNode= \(imageNode?.bounds), image=\(imageSize)")
+    let imageSize = imageNode.image?.size
+    print("imageNode= \(imageNode.bounds), image=\(imageSize)")
     
     var imageRatio: CGFloat = 0.5
-    if imageNode?.image != nil {
-      imageRatio = (imageNode?.image?.size.height)! / (imageNode?.image?.size.width)!
+    if imageNode.image != nil {
+      imageRatio = (imageNode.image?.size.height)! / (imageNode.image?.size.width)!
     }
     
-    let imagePlace = ASRatioLayoutSpec.init(ratio: imageRatio, child: imageNode!)
+    let imagePlace = ASRatioLayoutSpec(ratio: imageRatio, child: imageNode)
     
     let stackLayout = ASStackLayoutSpec.horizontal()
     stackLayout.justifyContent = .start
@@ -46,7 +45,7 @@ class ImageCellNode: ASCellNode {
     stackLayout.style.flexShrink = 1.0
     stackLayout.children = [imagePlace]
     
-    return  ASInsetLayoutSpec.init(insets: UIEdgeInsets.zero, child: stackLayout)
+    return  ASInsetLayoutSpec(insets: UIEdgeInsets.zero, child: stackLayout)
   }
   
 }
