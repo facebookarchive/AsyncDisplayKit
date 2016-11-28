@@ -21,6 +21,7 @@
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "_ASDisplayLayer.h"
+#import "_ASCoreAnimationExtras.h"
 #import "ASTableNode.h"
 #import "ASEqualityHelpers.h"
 #import "ASTableView+Undeprecated.h"
@@ -610,7 +611,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     } else {
       [self beginUpdates];
       [_dataController relayoutAllNodes];
-      [self endUpdates];
+      [self endUpdatesAnimated:(ASDisplayNodeLayerHasAnimations(self.layer) == NO) completion:nil];
     }
   }
   
@@ -1583,7 +1584,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     // If the node height changed, trigger a height requery.
     if (oldSize.height != calculatedSize.height) {
       [self beginUpdates];
-      [self endUpdates];
+      [self endUpdatesAnimated:(ASDisplayNodeLayerHasAnimations(self.layer) == NO) completion:nil];
     }
   }
 }
