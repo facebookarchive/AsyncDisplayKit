@@ -68,7 +68,7 @@
     // before the view controller
     __weak __typeof__(self) weakSelf = self;
     [_node onDidLoad:^(__kindof ASDisplayNode * _Nonnull node) {
-      if (weakSelf.viewLoaded == NO) {
+      if ([weakSelf isViewLoaded] == NO) {
         [weakSelf view];
       }
     }];
