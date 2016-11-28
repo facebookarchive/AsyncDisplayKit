@@ -36,7 +36,7 @@
   BOOL _layoutControllerImplementsSetViewportSize;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
   ASLayoutRangeMode _currentRangeMode;
-  BOOL _didUpdateCurrentRange;
+  BOOL _preserveCurrentRangeMode;
   BOOL _didRegisterForNodeDisplayNotifications;
   CFTimeInterval _pendingDisplayNodesTimestamp;
   
@@ -62,7 +62,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   _rangeIsValid = YES;
   _currentRangeMode = ASLayoutRangeModeInvalid;
-  _didUpdateCurrentRange = NO;
+  _preserveCurrentRangeMode = NO;
   
   [[[self class] allRangeControllersWeakSet] addObject:self];
   
@@ -144,15 +144,11 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode
 {
+  _preserveCurrentRangeMode = YES;
   if (_currentRangeMode != rangeMode) {
     _currentRangeMode = rangeMode;
-    _didUpdateCurrentRange = YES;
 
     [self setNeedsUpdate];
-  } else if (_needsRangeUpdate) {
-    // If _needsRangeUpdate is YES, but we don't set didUpdateCurrentRange, it
-    // will be overridden.
-    _didUpdateCurrentRange = YES;
   }
 }
 
@@ -224,7 +220,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   ASLayoutRangeMode rangeMode = _currentRangeMode;
   // If the range mode is explicitly set via updateCurrentRangeWithMode: it will last in that mode until the
   // range controller becomes visible again or explicitly changes the range mode again
-  if ((!_didUpdateCurrentRange && ASInterfaceStateIncludesVisible(selfInterfaceState)) || [[self class] isFirstRangeUpdateForRangeMode:rangeMode]) {
+  if ((!_preserveCurrentRangeMode && ASInterfaceStateIncludesVisible(selfInterfaceState)) || [[self class] isFirstRangeUpdateForRangeMode:rangeMode]) {
     rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
   }
 
@@ -267,7 +263,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _allPreviousIndexPaths = allCurrentIndexPaths;
   
   _currentRangeMode = rangeMode;
-  _didUpdateCurrentRange = NO;
+  _preserveCurrentRangeMode = NO;
   
   if (!_rangeIsValid) {
     [allIndexPaths addObjectsFromArray:ASIndexPathsForTwoDimensionalArray(allNodes)];
@@ -592,7 +588,7 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeLowMemo
   for (ASRangeController *rangeController in allRangeControllers) {
     BOOL isVisible = ASInterfaceStateIncludesVisible([rangeController interfaceState]);
     [rangeController updateCurrentRangeWithMode:isVisible ? ASLayoutRangeModeMinimum : ASLayoutRangeModeVisibleOnly];
-    [rangeController setNeedsUpdate];
+    // There's no need to call needs update as updateCurrentRangeWithMode sets this if necessary.
     [rangeController updateIfNeeded];
   }
   
