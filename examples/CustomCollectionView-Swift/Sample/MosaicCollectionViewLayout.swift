@@ -249,4 +249,8 @@ class MosaicCollectionViewLayoutInspector: NSObject, ASCollectionViewLayoutInspe
       return 0
     }
   }
+  
+  func scrollableDirections() -> ASScrollDirection {
+    return ASScrollDirectionVerticalDirections;
+  }
 }
