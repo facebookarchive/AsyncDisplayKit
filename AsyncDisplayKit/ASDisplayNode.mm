@@ -319,7 +319,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   _defaultLayoutTransitionDuration = 0.2;
   _defaultLayoutTransitionDelay = 0.0;
-  _defaultLayoutTransitionOptions = UIViewAnimationOptionBeginFromCurrentState;
+  _defaultLayoutTransitionOptions = UIViewAnimationOptionCurveEaseInOut | UIViewAnimationOptionTransitionNone;
   
   _flags.canClearContentsOfLayer = YES;
   _flags.canCallSetNeedsDisplayOfLayer = YES;
@@ -878,12 +878,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(__instanceLock__);
  
-  // If multiple layout transitions are in progress it can happen that an invalid one is still trying to do a measurement
-  // before it get's cancelled. In this case we should not touch any layout and return a no op layout
+  // If one or multiple layout transitions are in flight it still can happen that layout information is requested
+  // on other threads. As the pending and calculated layout to be updated in the layout transition in here just a
+  // layout calculation wil be performed without side effect
   if ([self _isLayoutTransitionInvalid]) {
-    return [ASLayout layoutWithLayoutElement:self size:{0, 0}];
+    return [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
   }
-  
+
   if (_calculatedDisplayNodeLayout->isValidForConstrainedSizeParentSize(constrainedSize, parentSize)) {
     ASDisplayNodeAssertNotNil(_calculatedDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _calculatedDisplayNodeLayout->layout should not be nil! %@", self);
     return _calculatedDisplayNodeLayout->layout ?: [ASLayout layoutWithLayoutElement:self size:{0, 0}];
@@ -933,7 +934,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDisplayNodeAssertMainThread();
 
   [self setNeedsLayout];
-    
+  
   [self transitionLayoutWithSizeRange:[self _locked_constrainedSizeForLayoutPass]
                              animated:animated
                    shouldMeasureAsync:shouldMeasureAsync
@@ -1028,8 +1029,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
         [node _completePendingLayoutTransition];
         node.hierarchyState &= (~ASHierarchyStateLayoutPending);
       });
-        
-      [self _finishOrCancelTransition];
       
       // Measurement pass completion
       if (completion) {
@@ -1050,6 +1049,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       
       // Kick off animating the layout transition
       [self animateLayoutTransition:_pendingLayoutTransitionContext];
+        
+      // Mark transaction as finished
+      [self _finishOrCancelTransition];
     });
   };
   
@@ -1573,7 +1575,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     return;
   }
-
+  
+  // If a current layout transition is in progress there is no need to do a measurement and layout pass in here as
+  // this is supposed to happen within the layout transition process
+  if ([self _isTransitionInProgress]) {
+    return;
+  }
+    
   // This method will confirm that the layout is up to date (and update if needed).
   // Importantly, it will also APPLY the layout to all of our subnodes if (unless parent is transitioning).
   [self _locked_measureNodeWithBoundsIfNecessary:bounds];
@@ -1684,14 +1692,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   CGSize boundsSizeForLayout = ASCeilSizeValues(self.threadSafeBounds.size);
   
   // Checkout if constrained size of pending or calculated display node layout can be used
-  if (_pendingDisplayNodeLayout != nullptr
-      && (_pendingDisplayNodeLayout->requestedLayoutFromAbove
-          || CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, boundsSizeForLayout))) {
+    if (_pendingDisplayNodeLayout != nullptr
+          && CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, boundsSizeForLayout)) {
     // We assume the size from the last returned layoutThatFits: layout was applied so use the pending display node
     // layout constrained size
     return _pendingDisplayNodeLayout->constrainedSize;
   } else if (_calculatedDisplayNodeLayout->layout != nil
-             && (_calculatedDisplayNodeLayout->requestedLayoutFromAbove
+             && (_calculatedDisplayNodeLayout->requestedLayoutFromAbove == NO
                  || CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, boundsSizeForLayout))) {
     // We assume the  _calculatedDisplayNodeLayout is still valid and the frame is not different
     return _calculatedDisplayNodeLayout->constrainedSize;
