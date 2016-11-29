@@ -1521,11 +1521,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _performingBatchUpdates = NO;
 }
 
-- (void)didCompleteUpdatesInRangeController:(ASRangeController *)rangeController
-{
-  [self _checkForBatchFetching];
-}
-
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
