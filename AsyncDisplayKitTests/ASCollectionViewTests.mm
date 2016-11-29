@@ -823,6 +823,8 @@
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
   window.rootViewController = testController;
+
+  // Start with 1 item so that our content does not fill bounds.
   __block NSInteger itemCount = 1;
   testController.asyncDelegate->_itemCounts = {itemCount};
   [window makeKeyAndVisible];
@@ -831,17 +833,22 @@
   ASCollectionNode *cn = testController.collectionNode;
   [cn waitUntilAllUpdatesAreCommitted];
   XCTAssertGreaterThan(cn.bounds.size.height, cn.view.contentSize.height, @"Expected initial data not to fill collection view area.");
-  __block NSUInteger batchFetchCount = 0;
 
+  __block NSUInteger batchFetchCount = 0;
   XCTestExpectation *expectation = [self expectationWithDescription:@"Batch fetching completed and then some"];
   __weak ASCollectionViewTestController *weakController = testController;
   testController.asyncDelegate.willBeginBatchFetch = ^(ASBatchContext *context) {
+
+    // Ensure only 1 batch fetch happens
     batchFetchCount += 1;
     if (batchFetchCount > 1) {
       XCTFail(@"Too many batch fetches!");
       return;
     }
+
     dispatch_async(dispatch_get_main_queue(), ^{
+      // Up the item count to 1000 so that we're well beyond the
+      // edge of the collection view and not ready for another batch fetch.
       NSMutableArray *indexPaths = [NSMutableArray array];
       for (; itemCount < 1000; itemCount++) {
         [indexPaths addObject:[NSIndexPath indexPathForItem:itemCount inSection:0]];
@@ -849,14 +856,14 @@
       weakController.asyncDelegate->_itemCounts = {itemCount};
       [cn insertItemsAtIndexPaths:indexPaths];
       [context completeBatchFetching:YES];
-      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+
+      // Let the run loop turn before we consider the test passed.
+      dispatch_async(dispatch_get_main_queue(), ^{
         [expectation fulfill];
       });
     });
   };
-  [self waitForExpectationsWithTimeout:30 handler:nil];
-  [window resignKeyWindow];
-  window.hidden = YES;
+  [self waitForExpectationsWithTimeout:3 handler:nil];
 }
 
 @end
