@@ -174,6 +174,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
    * The collection view never queried your data source before the update to see that it actually had 0 items.
    */
   BOOL _superIsPendingDataLoad;
+
+  /**
+   * It's important that we always check for batch fetching at least once, but also
+   * that we do not check for batch fetching for empty updates (as that may cause an infinite
+   * loop of batch fetching, where the batch completes and performBatchUpdates: is called without
+   * actually making any changes.) So to handle the case where a collection is completely empty
+   * (0 sections) we always check at least once after each update (initial reload is the first update.)
+   */
+  BOOL _hasEverCheckedForBatchFetchingDueToUpdate;
     
   struct {
     unsigned int scrollViewDidScroll:1;
@@ -1245,9 +1254,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)_scheduleCheckForBatchFetchingForNumberOfChanges:(NSUInteger)changes
 {
   // Prevent fetching will continually trigger in a loop after reaching end of content and no new content was provided
-  if (changes == 0) {
+  if (changes == 0 && _hasEverCheckedForBatchFetchingDueToUpdate) {
     return;
   }
+  _hasEverCheckedForBatchFetchingDueToUpdate = YES;
   
   // Push this to the next runloop to be sure the scroll view has the right content size
   dispatch_async(dispatch_get_main_queue(), ^{

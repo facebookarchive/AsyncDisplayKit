@@ -140,6 +140,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL _performingBatchUpdates;
   NSMutableSet *_cellsForVisibilityUpdates;
 
+  // See documentation on same property in ASCollectionView
+  BOOL _hasEverCheckedForBatchFetchingDueToUpdate;
+
   // The section index overlay view, if there is one present.
   // This is useful because we need to measure our row nodes against (width - indexView.width).
   __weak UIView *_sectionIndexView;
@@ -1169,9 +1172,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)_scheduleCheckForBatchFetchingForNumberOfChanges:(NSUInteger)changes
 {
   // Prevent fetching will continually trigger in a loop after reaching end of content and no new content was provided
-  if (changes == 0) {
+  if (changes == 0 && _hasEverCheckedForBatchFetchingDueToUpdate) {
     return;
   }
+  _hasEverCheckedForBatchFetchingDueToUpdate = YES;
 
   // Push this to the next runloop to be sure the scroll view has the right content size
   dispatch_async(dispatch_get_main_queue(), ^{

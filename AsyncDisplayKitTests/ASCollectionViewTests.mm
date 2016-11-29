@@ -866,4 +866,32 @@
   [self waitForExpectationsWithTimeout:3 handler:nil];
 }
 
+- (void)testThatBatchFetchHappensForEmptyCollection
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  window.rootViewController = testController;
+
+  // Start with 1 item so that our content does not fill bounds.
+  testController.asyncDelegate->_itemCounts = {};
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+
+  ASCollectionNode *cn = testController.collectionNode;
+  [cn waitUntilAllUpdatesAreCommitted];
+
+  __block NSUInteger batchFetchCount = 0;
+  XCTestExpectation *e = [self expectationWithDescription:@"Batch fetching completed"];
+  testController.asyncDelegate.willBeginBatchFetch = ^(ASBatchContext *context) {
+    // Ensure only 1 batch fetch happens
+    batchFetchCount += 1;
+    if (batchFetchCount > 1) {
+      XCTFail(@"Too many batch fetches!");
+      return;
+    }
+    [e fulfill];
+  };
+  [self waitForExpectationsWithTimeout:3 handler:nil];
+}
+
 @end
