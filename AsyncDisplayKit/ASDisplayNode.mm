@@ -1692,13 +1692,14 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   CGSize boundsSizeForLayout = ASCeilSizeValues(self.threadSafeBounds.size);
   
   // Checkout if constrained size of pending or calculated display node layout can be used
-    if (_pendingDisplayNodeLayout != nullptr
-          && CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, boundsSizeForLayout)) {
+  if (_pendingDisplayNodeLayout != nullptr
+      && (_pendingDisplayNodeLayout->requestedLayoutFromAbove
+           || CGSizeEqualToSize(_pendingDisplayNodeLayout->layout.size, boundsSizeForLayout))) {
     // We assume the size from the last returned layoutThatFits: layout was applied so use the pending display node
     // layout constrained size
     return _pendingDisplayNodeLayout->constrainedSize;
   } else if (_calculatedDisplayNodeLayout->layout != nil
-             && (_calculatedDisplayNodeLayout->requestedLayoutFromAbove == NO
+             && (_calculatedDisplayNodeLayout->requestedLayoutFromAbove
                  || CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, boundsSizeForLayout))) {
     // We assume the  _calculatedDisplayNodeLayout is still valid and the frame is not different
     return _calculatedDisplayNodeLayout->constrainedSize;
