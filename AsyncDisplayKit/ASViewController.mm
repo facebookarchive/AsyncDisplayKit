@@ -161,8 +161,6 @@ ASVisibilityDidMoveToParentViewController;
   // is enabled. Otherwise the insets would not be applied.
   [_node layoutThatFits:[self nodeConstrainedSize]];
   [_node.view layoutIfNeeded];
-
-  [_node recursivelyFetchData];
   
   if (_parentManagesVisibilityDepth == NO) {
     [self setVisibilityDepth:0];
