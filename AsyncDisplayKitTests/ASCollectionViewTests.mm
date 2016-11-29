@@ -841,7 +841,7 @@
       XCTFail(@"Too many batch fetches!");
       return;
     }
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
       NSMutableArray *indexPaths = [NSMutableArray array];
       for (; itemCount < 1000; itemCount++) {
         [indexPaths addObject:[NSIndexPath indexPathForItem:itemCount inSection:0]];
