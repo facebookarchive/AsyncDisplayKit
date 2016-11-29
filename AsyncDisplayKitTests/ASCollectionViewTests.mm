@@ -58,6 +58,7 @@
 @interface ASCollectionViewTestDelegate : NSObject <ASCollectionDataSource, ASCollectionDelegate, UICollectionViewDelegateFlowLayout>
 
 @property (nonatomic, assign) NSInteger sectionGeneration;
+@property (nonatomic, copy) void(^willBeginBatchFetch)(ASBatchContext *);
 
 @end
 
@@ -127,6 +128,15 @@
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   return [[ASCellNode alloc] init];
+}
+
+- (void)collectionNode:(ASCollectionNode *)collectionNode willBeginBatchFetchWithContext:(ASBatchContext *)context
+{
+  if (_willBeginBatchFetch != nil) {
+    _willBeginBatchFetch(context);
+  } else {
+    [context cancelBatchFetching];
+  }
 }
 
 @end
@@ -806,6 +816,47 @@
   // Passing nil blocks should not crash
   [cn performBatchUpdates:nil completion:nil];
   [cn performBatchAnimated:NO updates:nil completion:nil];
+}
+
+- (void)testThatMultipleBatchFetchesDontHappenUnnecessarily
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  window.rootViewController = testController;
+  __block NSInteger itemCount = 1;
+  testController.asyncDelegate->_itemCounts = {itemCount};
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+
+  ASCollectionNode *cn = testController.collectionNode;
+  [cn waitUntilAllUpdatesAreCommitted];
+  XCTAssertGreaterThan(cn.bounds.size.height, cn.view.contentSize.height, @"Expected initial data not to fill collection view area.");
+  __block NSUInteger batchFetchCount = 0;
+
+  XCTestExpectation *expectation = [self expectationWithDescription:@"Batch fetching completed and then some"];
+  __weak ASCollectionViewTestController *weakController = testController;
+  testController.asyncDelegate.willBeginBatchFetch = ^(ASBatchContext *context) {
+    batchFetchCount += 1;
+    if (batchFetchCount > 1) {
+      XCTFail(@"Too many batch fetches!");
+      return;
+    }
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.5 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+      NSMutableArray *indexPaths = [NSMutableArray array];
+      for (; itemCount < 1000; itemCount++) {
+        [indexPaths addObject:[NSIndexPath indexPathForItem:itemCount inSection:0]];
+      }
+      weakController.asyncDelegate->_itemCounts = {itemCount};
+      [cn insertItemsAtIndexPaths:indexPaths];
+      [context completeBatchFetching:YES];
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        [expectation fulfill];
+      });
+    });
+  };
+  [self waitForExpectationsWithTimeout:30 handler:nil];
+  [window resignKeyWindow];
+  window.hidden = YES;
 }
 
 @end

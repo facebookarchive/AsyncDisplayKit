@@ -29,16 +29,18 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
  * ASCollectionView batch fetching API.
  @param context The scroll view that in-flight fetches are happening.
  @param scrollDirection The current scrolling direction of the scroll view.
+ @param scrollableDirections The possible scrolling directions of the scroll view.
  @param targetOffset The offset that the scrollview will scroll to.
  @return Whether or not the current state should proceed with batch fetching.
  */
-BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollView> *scrollView, ASScrollDirection scrollDirection, CGPoint contentOffset);
+BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollView> *scrollView, ASScrollDirection scrollDirection, ASScrollDirection scrollableDirections, CGPoint contentOffset);
 
 
 /**
  @abstract Determine if batch fetching should begin based on the state of the parameters.
  @param context The batch fetching context that contains knowledge about in-flight fetches.
  @param scrollDirection The current scrolling direction of the scroll view.
+ @param scrollableDirections The possible scrolling directions of the scroll view.
  @param bounds The bounds of the scrollview.
  @param contentSize The content size of the scrollview.
  @param targetOffset The offset that the scrollview will scroll to.
@@ -49,6 +51,7 @@ BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollVi
  */
 extern BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
                                                 ASScrollDirection scrollDirection,
+                                                ASScrollDirection scrollableDirections,
                                                 CGRect bounds,
                                                 CGSize contentSize,
                                                 CGPoint targetOffset,

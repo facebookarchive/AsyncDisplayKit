@@ -1103,7 +1103,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
   if (targetContentOffset != NULL) {
     ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
-    [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollDirection] contentOffset:*targetContentOffset];
+    [self _beginBatchFetchingIfNeededWithContentOffset:*targetContentOffset];
   }
   
   if (_asyncDelegateFlags.scrollViewWillEndDragging) {
@@ -1261,12 +1261,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return;
   }
   
-  [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollableDirections] contentOffset:self.contentOffset];
+  [self _beginBatchFetchingIfNeededWithContentOffset:self.contentOffset];
 }
 
-- (void)_beginBatchFetchingIfNeededWithScrollView:(UIScrollView<ASBatchFetchingScrollView> *)scrollView forScrollDirection:(ASScrollDirection)scrollDirection contentOffset:(CGPoint)contentOffset
+- (void)_beginBatchFetchingIfNeededWithContentOffset:(CGPoint)contentOffset
 {
-  if (ASDisplayShouldFetchBatchForScrollView(self, scrollDirection, contentOffset)) {
+  if (ASDisplayShouldFetchBatchForScrollView(self, self.scrollDirection, self.scrollableDirections, contentOffset)) {
     [self _beginBatchFetching];
   }
 }
