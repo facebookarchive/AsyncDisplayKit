@@ -184,6 +184,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (ASDisplayNodeSubclassOverridesSelector(c, @selector(layoutSpecThatFits:))) {
     overrides |= ASDisplayNodeMethodOverrideLayoutSpecThatFits;
   }
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(fetchData))) {
+    overrides |= ASDisplayNodeMethodOverrideFetchData;
+  }
+  if (ASDisplayNodeSubclassOverridesSelector(c, @selector(clearFetchedData))) {
+    overrides |= ASDisplayNodeMethodOverrideClearFetchedData;
+  }
 
   return overrides;
 }
@@ -211,7 +217,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutThatFits:)), @"Subclass %@ must not override layoutThatFits: method. Instead overwrite calculateLayoutThatFits:.", classString);
     ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(layoutThatFits:parentSize:)), @"Subclass %@ must not override layoutThatFits:parentSize method. Instead overwrite calculateLayoutThatFits:.", classString);
     ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearContents)), @"Subclass %@ must not override recursivelyClearContents method.", classString);
-    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearFetchedData)), @"Subclass %@ must not override recursivelyClearFetchedData method.", classString);
+    ASDisplayNodeAssert(!ASDisplayNodeSubclassOverridesSelector(self, @selector(recursivelyClearPreloadedData)), @"Subclass %@ must not override recursivelyClearFetchedData method.", classString);
   }
 
   // Below we are pre-calculating values per-class and dynamically adding a method (_staticInitialize) to populate these values
@@ -2930,34 +2936,24 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   });
 }
 
-- (void)fetchData
-{
-  // subclass override
-}
-
-- (void)setNeedsDataFetch
+- (void)setNeedsPreload
 {
   if (self.isInPreloadState) {
-    [self recursivelyFetchData];
+    [self recursivelyPreload];
   }
 }
 
-- (void)recursivelyFetchData
+- (void)recursivelyPreload
 {
   ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
-    [node fetchData];
+    [node didEnterPreloadState];
   });
 }
 
-- (void)clearFetchedData
-{
-  // subclass override
-}
-
-- (void)recursivelyClearFetchedData
+- (void)recursivelyClearPreloadedData
 {
   ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
-    [node clearFetchedData];
+    [node didExitPreloadState];
   });
 }
 
@@ -2983,13 +2979,21 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)didEnterPreloadState
 {
-  [self fetchData];
+  if (_methodOverrides & ASDisplayNodeMethodOverrideFetchData) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [self fetchData];
+#pragma clang diagnostic pop
+  }
 }
 
 - (void)didExitPreloadState
 {
-  if ([self supportsRangeManagedInterfaceState]) {
+  if (_methodOverrides & ASDisplayNodeMethodOverrideClearFetchedData) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [self clearFetchedData];
+#pragma clang diagnostic pop
   }
 }
 
@@ -3047,7 +3051,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     // Trigger asynchronous measurement if it is not already cached or being calculated.
   }
   
-  // For the FetchData and Display ranges, we don't want to call -clear* if not being managed by a range controller.
+  // For the Preload and Display ranges, we don't want to call -clear* if not being managed by a range controller.
   // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
   // Still, the interfaceState should be updated to the current state of the node; just don't act on the transition.
   
@@ -3058,11 +3062,13 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (nowPreload != wasPreload) {
     if (nowPreload) {
       [self didEnterPreloadState];
-    } else {
+    } else if ([self supportsRangeManagedInterfaceState]) {
+      // We don't want to call -didExitPreloadState on nodes that aren't being managed by a range controller.
+      // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
       [self didExitPreloadState];
     }
   }
-
+  
   // Entered or exited contents rendering state.
   BOOL nowDisplay = ASInterfaceStateIncludesDisplay(newState);
   BOOL wasDisplay = ASInterfaceStateIncludesDisplay(oldState);
@@ -3944,6 +3950,16 @@ ASLayoutElementStyleForwarding
   } else {
     [self didExitPreloadState];
   }
+}
+
+- (void)fetchData
+{
+  // subclass override
+}
+
+- (void)clearFetchedData
+{
+  // subclass override
 }
 
 - (void)cancelLayoutTransitionsInProgress

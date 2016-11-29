@@ -216,12 +216,12 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   [super clearContents]; // This actually clears the contents, so we need to do this first for our displayedImageIdentifier to be meaningful.
   [self _setDisplayedImageIdentifier:nil withImage:nil];
 
-  // NOTE: We intentionally do not cancel image downloads until `clearFetchedData`.
+  // NOTE: We intentionally do not cancel image downloads until `clearPreloadedData`.
 }
 
-- (void)clearFetchedData
+- (void)didExitPreloadState
 {
-  [super clearFetchedData];
+  [super didExitPreloadState];
     
   [_phImageRequestOperation cancel];
 
@@ -236,9 +236,9 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   self.image = nil;
 }
 
-- (void)fetchData
+- (void)didEnterPreloadState
 {
-  [super fetchData];
+  [super didEnterPreloadState];
 
   [self _loadImageIdentifiers];
 }
@@ -281,7 +281,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 {
   [super displayWillStart];
   
-  [self fetchData];
+  [self didEnterPreloadState];
   
   if (_downloaderImplementsSetPriority) {
     {
@@ -396,7 +396,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     _imageIdentifiers = [[NSArray alloc] initWithArray:imageIdentifiers copyItems:YES];
   }
 
-  [self setNeedsDataFetch];
+  [self setNeedsPreload];
 }
 
 - (void)reloadImageIdentifierSources

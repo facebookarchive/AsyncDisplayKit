@@ -250,7 +250,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   // Typically the preloadIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
   // Because allIndexPaths is an NSMutableOrderedSet, this adds the non-duplicate items /after/ the existing items.
-  // This means that during iteration, we will first visit visible, then display, then fetch data nodes.
+  // This means that during iteration, we will first visit visible, then display, then preload nodes.
   [allIndexPaths unionSet:displayIndexPaths];
   [allIndexPaths unionSet:preloadIndexPaths];
   
@@ -292,14 +292,14 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
       }
     } else {
       // If selfInterfaceState isn't visible, then visibleIndexPaths represents what /will/ be immediately visible at the
-      // instant we come onscreen.  So, fetch data and display all of those things, but don't waste resources preloading yet.
+      // instant we come onscreen.  So, preload and display all of those things, but don't waste resources preloading yet.
       // We handle this as a separate case to minimize set operations for offscreen preloading, including containsObject:.
       
       if ([allCurrentIndexPaths containsObject:indexPath]) {
         // DO NOT set Visible: even though these elements are in the visible range / "viewport",
         // our overall container object is itself not visible yet.  The moment it becomes visible, we will run the condition above
         
-        // Set Layout, Fetch Data
+        // Set Layout, Preload
         interfaceState |= ASInterfaceStatePreload;
         
         if (rangeMode != ASLayoutRangeModeLowMemory) {
@@ -502,7 +502,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   }
 }
 
-- (void)clearFetchedData
+- (void)clearPreloadedData
 {
   for (NSArray *section in [_dataSource completedNodes]) {
     for (ASDisplayNode *node in section) {
