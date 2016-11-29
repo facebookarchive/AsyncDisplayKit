@@ -14,6 +14,7 @@
 #import "_ASHierarchyChangeSet.h"
 #import "ASAssert.h"
 #import "ASDataController+Subclasses.h"
+#import "NSArray+Diffing.h"
 
 @implementation ASChangeSetDataController {
   NSInteger _changeSetBatchUpdateCounter;
@@ -63,7 +64,14 @@
       return;
     }
 
-    [self invalidateDataSourceItemCounts];
+    // If they do functional data sourcing, we ignored the imperative updates
+    // so now let's do the diff and compute the changeset ourselves.
+    if (self.supportsDeclarativeData) {
+      [self _applyFunctionalDataSourceUpdate];
+    } else {
+      [self invalidateDataSourceData];
+    }
+
     [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
     
     ASDataControllerLogEvent(self, @"triggeredUpdate: %@", _changeSet);
@@ -102,6 +110,42 @@
   }
 }
 
+/**
+ * Updates _changeSet by reading the new data and diffing from the old data.
+ */
+- (void)_applyFunctionalDataSourceUpdate
+{
+  ASDisplayNodeAssertNotNil(_changeSet, nil);
+
+  ASCollectionData * oldData = self.currentData;
+  [self invalidateDataSourceData];
+  ASCollectionData * data = self.currentData;
+  NSIndexSet *insertedSections = nil, *deletedSections = nil;
+  NSArray<NSIndexPath *> *insertedItems = nil, *deletedItems = nil;
+  [oldData.mutableSections asdk_nestedDiffWithArray:data.mutableSections
+                                insertedSections:&insertedSections
+                                 deletedSections:&deletedSections
+                                   insertedItems:&insertedItems
+                                    deletedItems:&deletedItems
+                                    nestingBlock:^NSArray *(id<ASCollectionSection> object) {
+                                      return object.mutableItems;
+                                    }];
+
+  // Currently we assume automatic animation for all updates.
+  if (insertedSections.count > 0) {
+    [_changeSet insertSections:insertedSections animationOptions:UITableViewRowAnimationAutomatic];
+  }
+  if (deletedSections.count > 0) {
+    [_changeSet deleteSections:deletedSections animationOptions:UITableViewRowAnimationAutomatic];
+  }
+  if (insertedItems.count > 0) {
+    [_changeSet insertItems:insertedItems animationOptions:UITableViewRowAnimationAutomatic];
+  }
+  if (deletedItems.count > 0) {
+    [_changeSet deleteItems:deletedItems animationOptions:UITableViewRowAnimationAutomatic];
+  }
+}
+
 - (BOOL)batchUpdating
 {
   BOOL batchUpdating = (_changeSetBatchUpdateCounter != 0);
@@ -128,7 +172,9 @@
 {
   ASDisplayNodeAssertMainThread();
   [self beginUpdates];
-  [_changeSet insertSections:sections animationOptions:animationOptions];
+  if (self.supportsDeclarativeData == NO) {
+  	[_changeSet insertSections:sections animationOptions:animationOptions];
+  }
   [self endUpdates];
 }
 
@@ -136,7 +182,9 @@
 {
   ASDisplayNodeAssertMainThread();
   [self beginUpdates];
-  [_changeSet deleteSections:sections animationOptions:animationOptions];
+  if (self.supportsDeclarativeData == NO) {
+  	[_changeSet deleteSections:sections animationOptions:animationOptions];
+  }
   [self endUpdates];
 }
 
@@ -144,7 +192,9 @@
 {
   ASDisplayNodeAssertMainThread();
   [self beginUpdates];
-  [_changeSet reloadSections:sections animationOptions:animationOptions];
+  if (self.supportsDeclarativeData == NO) {
+  	[_changeSet reloadSections:sections animationOptions:animationOptions];
+  }
   [self endUpdates];
 }
 
@@ -152,8 +202,10 @@
 {
   ASDisplayNodeAssertMainThread();
   [self beginUpdates];
-  [_changeSet deleteSections:[NSIndexSet indexSetWithIndex:section] animationOptions:animationOptions];
-  [_changeSet insertSections:[NSIndexSet indexSetWithIndex:newSection] animationOptions:animationOptions];
+  if (self.supportsDeclarativeData == NO) {
+    [_changeSet deleteSections:[NSIndexSet indexSetWithIndex:section] animationOptions:animationOptions];
+    [_changeSet insertSections:[NSIndexSet indexSetWithIndex:newSection] animationOptions:animationOptions];
+  }
   [self endUpdates];
 }
 
@@ -163,7 +215,9 @@
 {
   ASDisplayNodeAssertMainThread();
   [self beginUpdates];
-  [_changeSet insertItems:indexPaths animationOptions:animationOptions];
+  if (self.supportsDeclarativeData == NO) {
+    [_changeSet insertItems:indexPaths animationOptions:animationOptions];
+  }
   [self endUpdates];
 }
 
@@ -171,7 +225,9 @@
 {
   ASDisplayNodeAssertMainThread();
   [self beginUpdates];
-  [_changeSet deleteItems:indexPaths animationOptions:animationOptions];
+  if (self.supportsDeclarativeData == NO) {
+    [_changeSet deleteItems:indexPaths animationOptions:animationOptions];
+  }
   [self endUpdates];
 }
 
@@ -179,7 +235,9 @@
 {
   ASDisplayNodeAssertMainThread();
   [self beginUpdates];
-  [_changeSet reloadItems:indexPaths animationOptions:animationOptions];
+  if (self.supportsDeclarativeData == NO) {
+    [_changeSet reloadItems:indexPaths animationOptions:animationOptions];
+  }
   [self endUpdates];
 }
 
@@ -187,8 +245,10 @@
 {
   ASDisplayNodeAssertMainThread();
   [self beginUpdates];
-  [_changeSet deleteItems:@[indexPath] animationOptions:animationOptions];
-  [_changeSet insertItems:@[newIndexPath] animationOptions:animationOptions];
+  if (self.supportsDeclarativeData == NO) {
+    [_changeSet deleteItems:@[indexPath] animationOptions:animationOptions];
+    [_changeSet insertItems:@[newIndexPath] animationOptions:animationOptions];
+  }
   [self endUpdates];
 }
 

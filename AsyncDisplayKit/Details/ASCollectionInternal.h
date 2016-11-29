@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASRangeController;
 
 @interface ASCollectionView ()
-- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(nullable id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator eventLog:(ASEventLog*)eventLog;
+- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(nullable id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator eventLog:(nullable ASEventLog *)eventLog;
 
 @property (nonatomic, weak, readwrite) ASCollectionNode *collectionNode;
 @property (nonatomic, strong, readonly) ASDataController *dataController;
@@ -47,6 +47,18 @@ NS_ASSUME_NONNULL_BEGIN
  * @param indexPaths An array of index paths in the view space
  */
 - (nullable NSArray<NSIndexPath *> *)convertIndexPathsToCollectionNode:(nullable NSArray<NSIndexPath *> *)indexPaths;
+
+// Called after running each node block, to update the
+// hierarchy state and set the interaction delegate.
+- (void)didCreateNode:(ASCellNode *)node;
+
+/**
+ * Prevent this collection view from making assertions about what methods its delegate/data source implement.
+ *
+ * This isn't pretty, but unfortunately OCMock always responds to all selectors, so
+ * removing it will require pretty significant resources that aren't currently worth it.
+ */
+@property (nonatomic, assign) BOOL test_suppressCallbackImplementationAssertions;
 
 @end
 

@@ -17,6 +17,7 @@
 #import "ASCollectionViewFlowLayoutInspector.h"
 #import "ASCellNode.h"
 #import "ASCollectionView+Undeprecated.h"
+#import "ASCollectionInternal.h"
 
 @interface ASCollectionView (Private)
 
@@ -380,6 +381,7 @@
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   ASCollectionNode *node = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
   ASCollectionView *collectionView = node.view;
+  collectionView.test_suppressCallbackImplementationAssertions = YES;
   
   id dataSourceAndDelegate = [OCMockObject mockForProtocol:@protocol(InspectorTestDataSourceDelegateProtocol)];
   ASSizeRange constrainedSize = ASSizeRangeMake(CGSizeZero, CGSizeZero);
@@ -406,6 +408,7 @@
   
   ASCollectionNode *node = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
   ASCollectionView *collectionView = node.view;
+  collectionView.test_suppressCallbackImplementationAssertions = YES;
   id dataSourceAndDelegate = [OCMockObject mockForProtocol:@protocol(InspectorTestDataSourceDelegateProtocol)];
   ASSizeRange constrainedSize = ASSizeRangeMake(CGSizeZero, CGSizeZero);
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];

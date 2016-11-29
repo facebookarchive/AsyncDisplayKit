@@ -24,6 +24,7 @@
 
 + (instancetype)randomItem;
 
+@property (nonatomic, copy) NSString *uuid;
 @property (nonatomic, copy) NSString *titleText;
 @property (nonatomic, copy) NSString *firstInfoText;
 @property (nonatomic, copy) NSString *secondInfoText;

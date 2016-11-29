@@ -34,6 +34,16 @@ NSString *ASGetDescriptionValueString(id object)
       [strings addObject:[NSString stringWithFormat:@"%lu", (unsigned long)[indexPath indexAtPosition:i]]];
     }
     return [NSString stringWithFormat:@"(%@)", [strings componentsJoinedByString:@", "]];
+  } else if ([object isKindOfClass:[NSArray class]]) {
+    NSArray *array = (NSArray *)object;
+    NSMutableString *str = [NSMutableString stringWithString:@"(\n"];
+    NSInteger i = 0;
+    for (id obj in array) {
+      [str appendFormat:@"\t[%ld]: \"%@\",\n", (long)i, obj];
+      i += 1;
+    }
+    [str appendString:@")"];
+    return str;
   }
   return [object description];
 }

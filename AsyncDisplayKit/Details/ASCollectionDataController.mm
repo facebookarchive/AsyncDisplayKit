@@ -17,6 +17,7 @@
 #import "ASIndexedNodeContext.h"
 #import "ASSection.h"
 #import "ASSectionContext.h"
+#import "ASCollectionDataInternal.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -237,7 +238,23 @@
 
   [sections enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
     for (NSUInteger sec = range.location; sec < NSMaxRange(range); sec++) {
-      NSUInteger itemCount = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:sec];
+      // TODO: Unfortunately the data controller architecture stores supplementary elements in an array,
+      // instead of a dictionary. So we have to fake it by finding the highest index of the given
+      // supplementary element kind in this section, and make an array of supplementaries up to that index.
+      // Unfortunately this means we cannot support indexless supplementary elements.
+      NSUInteger itemCount = 0;
+      if (self.supportsDeclarativeData) {
+        for (NSNumber *indexObj in self.currentData.sectionsInternal[sec].supplementaryElements[kind]) {
+          NSInteger index = indexObj.integerValue;
+          if (index == NSNotFound) {
+            ASDisplayNodeFailAssert(@"Supplementary elements with no index are not currently supported. Support is planned for the near future.");
+          }
+          itemCount = MAX(itemCount, index + 1);
+        }
+      } else {
+        itemCount = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:sec];
+      }
+
       for (NSUInteger i = 0; i < itemCount; i++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sec];
         [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environment:environment];
@@ -248,28 +265,29 @@
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
 {
-  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
-
   NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
   for (NSIndexPath *indexPath in indexPaths) {
     [sections addIndex:indexPath.section];
   }
 
-  [sections enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
-    for (NSUInteger sec = range.location; sec < NSMaxRange(range); sec++) {
-      NSUInteger itemCount = [self.collectionDataSource dataController:self supplementaryNodesOfKind:kind inSection:sec];
-      for (NSUInteger i = 0; i < itemCount; i++) {
-        NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:sec];
-        [self _populateSupplementaryNodeOfKind:kind atIndexPath:indexPath mutableContexts:contexts environment:environment];
-      }
-    }
-  }];
+  [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableContexts:contexts];
 }
 
 - (void)_populateSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts environment:(id<ASEnvironment>)environment
 {
   ASCellNodeBlock supplementaryCellBlock;
-  if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
+  if (self.supportsDeclarativeData) {
+    // As mentioned above, since data controller currently stores supplementaries in an array
+    // and not a dictionary, if the user specified, say, supp at 1 and at 7, we have to
+    // create 8 supplementaries inside the data controller, and fill in the gaps with just plain ASCellNodes.
+    // Good news is, this is extremely uncommon.
+    ASCollectionItemImpl *item = [self.currentData elementOfKind:kind atIndexPath:indexPath];
+    if (item != nil) {
+      supplementaryCellBlock = item.nodeBlock;
+    } else {
+      supplementaryCellBlock = ^{ return [[ASCellNode alloc] init]; };
+    }
+  } else if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
     supplementaryCellBlock = [self.collectionDataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
   } else {
     ASCellNode *supplementaryNode = [self.collectionDataSource dataController:self supplementaryNodeOfKind:kind atIndexPath:indexPath];
