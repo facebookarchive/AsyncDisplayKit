@@ -1224,22 +1224,38 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   ASDisplayNodeAssertMainThread();
   
+  CGRect bounds = self.bounds;
   // Calling indexPathsForVisibleRows will trigger UIKit to call reloadData if it never has, which can result
   // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
-  if (CGSizeEqualToSize(self.bounds.size, CGSizeZero)) {
+  if (CGRectIsEmpty(bounds)) {
     return @[];
   }
-  
-  // NOTE: A prior comment claimed that `indexPathsForVisibleRows` may return extra index paths for grouped-style
-  // tables. This is seen as an acceptable issue for the time being.
-  
+
+  // This is a very hot path of code. Since the return value is (in current versions of iOS) already mutable,
+  // skip making the extra copy when possible.
+  NSMutableArray *visibleIndexPaths = (NSMutableArray *)self.indexPathsForVisibleRows;
+  if ([visibleIndexPaths classForCoder] != [NSMutableArray class]) {
+    visibleIndexPaths = [visibleIndexPaths mutableCopy];
+  }
+
+  [visibleIndexPaths sortUsingSelector:@selector(compare:)];
+
+  // In some cases (grouped-style tables with particular geometry) indexPathsForVisibleRows will return extra index paths.
+  // This is a very serious issue because we rely on the fact that any node that is marked Visible is hosted inside of a cell,
+  // or else we may not mark it invisible before the node is released. See testIssue2252.
+  // Calling indexPathForCell: and cellForRowAtIndexPath: are both pretty expensive – this is the quickest approach we have.
+  // It would be possible to cache this NSPredicate as an ivar, but that would require unsafeifying self and calling @c bounds
+  // for each item. Since the performance cost is pretty small, prefer simplicity.
+  if (self.style == UITableViewStyleGrouped && visibleIndexPaths.count != self.visibleCells.count) {
+    [visibleIndexPaths filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(NSIndexPath *indexPath, NSDictionary<NSString *,id> * _Nullable bindings) {
+      return CGRectIntersectsRect(bounds, [self rectForRowAtIndexPath:indexPath]);
+    }]];
+  }
+
   NSIndexPath *pendingVisibleIndexPath = _pendingVisibleIndexPath;
   if (pendingVisibleIndexPath == nil) {
-    return self.indexPathsForVisibleRows;
+    return visibleIndexPaths;
   }
-  
-  NSMutableArray *visibleIndexPaths = [self.indexPathsForVisibleRows mutableCopy];
-  [visibleIndexPaths sortUsingSelector:@selector(compare:)];
 
   BOOL isPendingIndexPathVisible = (NSNotFound != [visibleIndexPaths indexOfObject:pendingVisibleIndexPath inSortedRange:NSMakeRange(0, visibleIndexPaths.count) options:kNilOptions usingComparator:^(id  _Nonnull obj1, id  _Nonnull obj2) {
     return [obj1 compare:obj2];
