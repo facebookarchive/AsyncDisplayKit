@@ -1080,6 +1080,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASInterfaceState interfaceState = [self interfaceStateForRangeController:_rangeController];
   if (ASInterfaceStateIncludesVisible(interfaceState)) {
     [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
+    [self _checkForBatchFetching];
   }
   
   for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {

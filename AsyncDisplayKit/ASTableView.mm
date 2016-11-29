@@ -1040,6 +1040,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASInterfaceState interfaceState = [self interfaceStateForRangeController:_rangeController];
   if (ASInterfaceStateIncludesVisible(interfaceState)) {
     [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
+    [self _checkForBatchFetching];
   }
   
   for (_ASTableViewCell *tableCell in _cellsForVisibilityUpdates) {
