@@ -885,6 +885,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   cellNode.scrollView = nil;
   cell.layoutAttributes = nil;
+
+  // It's important to remove our view now, so that the node will be released immediately.
+  // Rather than waiting for the cell to be assigned to a new node
+  [cellNode.view removeFromSuperview];
 }
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplaySupplementaryView:(UICollectionReusableView *)view forElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath

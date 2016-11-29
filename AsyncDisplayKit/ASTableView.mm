@@ -856,6 +856,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [_cellsForVisibilityUpdates removeObject:cell];
   
   cellNode.scrollView = nil;
+  
+  // It's important to remove our view now, so that the node will be released immediately.
+  // Rather than waiting for the cell to be assigned to a new node
+  [cellNode.view removeFromSuperview];
 }
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
