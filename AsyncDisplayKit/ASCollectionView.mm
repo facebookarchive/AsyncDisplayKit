@@ -174,6 +174,15 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
    * The collection view never queried your data source before the update to see that it actually had 0 items.
    */
   BOOL _superIsPendingDataLoad;
+
+  /**
+   * It's important that we always check for batch fetching at least once, but also
+   * that we do not check for batch fetching for empty updates (as that may cause an infinite
+   * loop of batch fetching, where the batch completes and performBatchUpdates: is called without
+   * actually making any changes.) So to handle the case where a collection is completely empty
+   * (0 sections) we always check at least once after each update (initial reload is the first update.)
+   */
+  BOOL _hasEverCheckedForBatchFetchingDueToUpdate;
     
   struct {
     unsigned int scrollViewDidScroll:1;
@@ -1080,6 +1089,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   ASInterfaceState interfaceState = [self interfaceStateForRangeController:_rangeController];
   if (ASInterfaceStateIncludesVisible(interfaceState)) {
     [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
+    [self _checkForBatchFetching];
   }
   
   for (_ASCollectionViewCell *collectionCell in _cellsForVisibilityUpdates) {
@@ -1103,7 +1113,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
   if (targetContentOffset != NULL) {
     ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
-    [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollDirection] contentOffset:*targetContentOffset];
+    [self _beginBatchFetchingIfNeededWithContentOffset:*targetContentOffset];
   }
   
   if (_asyncDelegateFlags.scrollViewWillEndDragging) {
@@ -1244,9 +1254,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)_scheduleCheckForBatchFetchingForNumberOfChanges:(NSUInteger)changes
 {
   // Prevent fetching will continually trigger in a loop after reaching end of content and no new content was provided
-  if (changes == 0) {
+  if (changes == 0 && _hasEverCheckedForBatchFetchingDueToUpdate) {
     return;
   }
+  _hasEverCheckedForBatchFetchingDueToUpdate = YES;
   
   // Push this to the next runloop to be sure the scroll view has the right content size
   dispatch_async(dispatch_get_main_queue(), ^{
@@ -1261,12 +1272,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return;
   }
   
-  [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollableDirections] contentOffset:self.contentOffset];
+  [self _beginBatchFetchingIfNeededWithContentOffset:self.contentOffset];
 }
 
-- (void)_beginBatchFetchingIfNeededWithScrollView:(UIScrollView<ASBatchFetchingScrollView> *)scrollView forScrollDirection:(ASScrollDirection)scrollDirection contentOffset:(CGPoint)contentOffset
+- (void)_beginBatchFetchingIfNeededWithContentOffset:(CGPoint)contentOffset
 {
-  if (ASDisplayShouldFetchBatchForScrollView(self, scrollDirection, contentOffset)) {
+  if (ASDisplayShouldFetchBatchForScrollView(self, self.scrollDirection, self.scrollableDirections, contentOffset)) {
     [self _beginBatchFetching];
   }
 }
@@ -1519,11 +1530,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   [_batchUpdateBlocks removeAllObjects];
   _performingBatchUpdates = NO;
-}
-
-- (void)didCompleteUpdatesInRangeController:(ASRangeController *)rangeController
-{
-  [self _checkForBatchFetching];
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions

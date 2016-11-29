@@ -140,6 +140,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL _performingBatchUpdates;
   NSMutableSet *_cellsForVisibilityUpdates;
 
+  // See documentation on same property in ASCollectionView
+  BOOL _hasEverCheckedForBatchFetchingDueToUpdate;
+
   // The section index overlay view, if there is one present.
   // This is useful because we need to measure our row nodes against (width - indexView.width).
   __weak UIView *_sectionIndexView;
@@ -1040,6 +1043,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASInterfaceState interfaceState = [self interfaceStateForRangeController:_rangeController];
   if (ASInterfaceStateIncludesVisible(interfaceState)) {
     [_rangeController updateCurrentRangeWithMode:ASLayoutRangeModeFull];
+    [self _checkForBatchFetching];
   }
   
   for (_ASTableViewCell *tableCell in _cellsForVisibilityUpdates) {
@@ -1062,7 +1066,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   if (targetContentOffset != NULL) {
     ASDisplayNodeAssert(_batchContext != nil, @"Batch context should exist");
-    [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollDirection] contentOffset:*targetContentOffset];
+    [self _beginBatchFetchingIfNeededWithContentOffset:*targetContentOffset];
   }
   
   if (_asyncDelegateFlags.scrollViewWillEndDragging) {
@@ -1168,9 +1172,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)_scheduleCheckForBatchFetchingForNumberOfChanges:(NSUInteger)changes
 {
   // Prevent fetching will continually trigger in a loop after reaching end of content and no new content was provided
-  if (changes == 0) {
+  if (changes == 0 && _hasEverCheckedForBatchFetchingDueToUpdate) {
     return;
   }
+  _hasEverCheckedForBatchFetchingDueToUpdate = YES;
 
   // Push this to the next runloop to be sure the scroll view has the right content size
   dispatch_async(dispatch_get_main_queue(), ^{
@@ -1185,12 +1190,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return;
   }
   
-  [self _beginBatchFetchingIfNeededWithScrollView:self forScrollDirection:[self scrollableDirections] contentOffset:self.contentOffset];
+  [self _beginBatchFetchingIfNeededWithContentOffset:self.contentOffset];
 }
 
-- (void)_beginBatchFetchingIfNeededWithScrollView:(UIScrollView<ASBatchFetchingScrollView> *)scrollView forScrollDirection:(ASScrollDirection)scrollDirection contentOffset:(CGPoint)contentOffset
+- (void)_beginBatchFetchingIfNeededWithContentOffset:(CGPoint)contentOffset
 {
-  if (ASDisplayShouldFetchBatchForScrollView(self, scrollDirection, contentOffset)) {
+  if (ASDisplayShouldFetchBatchForScrollView(self, self.scrollDirection, ASScrollDirectionVerticalDirections, contentOffset)) {
     [self _beginBatchFetching];
   }
 }
@@ -1327,11 +1332,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (completion) {
     completion(YES);
   }
-}
-
-- (void)didCompleteUpdatesInRangeController:(ASRangeController *)rangeController
-{
-  [self _checkForBatchFetching];
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
