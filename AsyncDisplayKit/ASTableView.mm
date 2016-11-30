@@ -1231,12 +1231,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return @[];
   }
 
-  // This is a very hot path of code. Since the return value is (in current versions of iOS) already mutable,
-  // skip making the extra copy when possible.
-  NSMutableArray *visibleIndexPaths = (NSMutableArray *)self.indexPathsForVisibleRows;
-  if ([visibleIndexPaths classForCoder] != [NSMutableArray class]) {
-    visibleIndexPaths = [visibleIndexPaths mutableCopy];
-  }
+  NSMutableArray *visibleIndexPaths = [self.indexPathsForVisibleRows mutableCopy];
 
   [visibleIndexPaths sortUsingSelector:@selector(compare:)];
 
