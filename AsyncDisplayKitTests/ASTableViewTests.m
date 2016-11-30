@@ -21,7 +21,6 @@
 #import "ASXCTExtensions.h"
 
 #define NumberOfSections 10
-#define NumberOfRowsPerSection 20
 #define NumberOfReloadIterations 50
 
 @interface ASTestDataController : ASChangeSetDataController
@@ -73,6 +72,8 @@
 
 @interface ASTableViewTestDelegate : NSObject <ASTableDataSource, ASTableDelegate>
 @property (nonatomic, copy) void (^willDeallocBlock)(ASTableViewTestDelegate *delegate);
+@property (nonatomic) CGFloat headerHeight;
+@property (nonatomic) CGFloat footerHeight;
 @end
 
 @implementation ASTableViewTestDelegate
@@ -90,6 +91,16 @@
 - (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   return nil;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
+{
+  return _footerHeight;
+}
+
+- (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
+{
+  return _headerHeight;
 }
 
 - (void)dealloc
@@ -120,9 +131,20 @@
 
 @interface ASTableViewFilledDataSource : NSObject <ASTableDataSource, ASTableDelegate>
 @property (nonatomic) BOOL usesSectionIndex;
+@property (nonatomic) NSInteger rowsPerSection;
+@property (nonatomic, nullable, copy) ASCellNodeBlock(^nodeBlockForItem)(NSIndexPath *);
 @end
 
 @implementation ASTableViewFilledDataSource
+
+- (instancetype)init
+{
+  self = [super init];
+  if (self != nil) {
+    _rowsPerSection = 20;
+  }
+  return self;
+}
 
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
@@ -140,7 +162,7 @@
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-  return NumberOfRowsPerSection;
+  return _rowsPerSection;
 }
 
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
@@ -153,9 +175,14 @@
 
 - (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+  if (_nodeBlockForItem) {
+    return _nodeBlockForItem(indexPath);
+  }
+
   return ^{
     ASTestTextCellNode *textCellNode = [ASTestTextCellNode new];
-    textCellNode.text = indexPath.description;
+    textCellNode.text = [NSString stringWithFormat:@"{%d, %d}", (int)indexPath.section, (int)indexPath.row];
+    textCellNode.backgroundColor = [UIColor whiteColor];
     return textCellNode;
   };
 }
@@ -223,7 +250,7 @@
   [tableView layoutIfNeeded];
   
   for (int section = 0; section < NumberOfSections; section++) {
-      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+      for (int row = 0; row < [tableView numberOfRowsInSection:section]; row++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
         CGRect rect = [tableView rectForRowAtIndexPath:indexPath];
         XCTAssertEqual(rect.size.width, 100);  // specified width should be ignored for table
@@ -267,13 +294,12 @@
   return [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(MIN(randA, randB), MAX(randA, randB) - MIN(randA, randB))];
 }
 
-- (NSArray *)randomIndexPathsExisting:(BOOL)existing
+- (NSArray *)randomIndexPathsExisting:(BOOL)existing rowCount:(NSInteger)rowCount
 {
   NSMutableArray *indexPaths = [NSMutableArray array];
   [[self randomIndexSet] enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-    NSUInteger rowNum = NumberOfRowsPerSection;
     NSIndexPath *sectionIndex = [[NSIndexPath alloc] initWithIndex:idx];
-    for (NSUInteger i = (existing ? 0 : rowNum); i < (existing ? rowNum : rowNum * 2); i++) {
+    for (NSUInteger i = (existing ? 0 : rowCount); i < (existing ? rowCount : rowCount * 2); i++) {
       // Maximize evility by sporadically skipping indicies 1/3rd of the time, but only if reloading existing rows
       if (existing && arc4random_uniform(2) == 0) {
         continue;
@@ -325,7 +351,7 @@
     }
     
     if (reloadRowsInsteadOfSections) {
-      NSArray *indexPaths = [self randomIndexPathsExisting:YES];
+      NSArray *indexPaths = [self randomIndexPathsExisting:YES rowCount:dataSource.rowsPerSection];
       //NSLog(@"reloading rows: %@", indexPaths);
       [tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:rowAnimation];
     } else {
@@ -396,7 +422,15 @@
   ASTestTableView *tableView = [[ASTestTableView alloc] __initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
                                                                 style:UITableViewStylePlain];
   ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
-  
+  // Currently this test requires that the text in the cell node fills the
+  // visible width, so we use the long description for the index path.
+  dataSource.nodeBlockForItem = ^(NSIndexPath *indexPath) {
+    return ^{
+      ASTestTextCellNode *textCellNode = [[ASTestTextCellNode alloc] init];
+      textCellNode.text = indexPath.description;
+      return textCellNode;
+    };
+  };
   tableView.asyncDelegate = dataSource;
   tableView.asyncDataSource = dataSource;
 
@@ -413,7 +447,7 @@
   [tableView setEditing:YES];
   [tableView endUpdatesAnimated:YES completion:^(BOOL completed) {
     for (int section = 0; section < NumberOfSections; section++) {
-      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+      for (int row = 0; row < dataSource.rowsPerSection; row++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
         ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
         if ([visibleNodes containsObject:node]) {
@@ -441,7 +475,7 @@
   [tableView setEditing:NO];
   [tableView endUpdatesAnimated:YES completion:^(BOOL completed) {
     for (int section = 0; section < NumberOfSections; section++) {
-      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+      for (int row = 0; row < dataSource.rowsPerSection; row++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
         ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
         BOOL visible = [visibleNodes containsObject:node];
@@ -472,7 +506,7 @@
   
   // Cause table view to enter editing mode and then scroll to the bottom.
   // The last node should be re-measured on main thread with the new (smaller) content view width.
-  NSIndexPath *lastRowIndexPath = [NSIndexPath indexPathForRow:(NumberOfRowsPerSection - 1) inSection:(NumberOfSections - 1)];
+  NSIndexPath *lastRowIndexPath = [NSIndexPath indexPathForRow:(dataSource.rowsPerSection - 1) inSection:(NumberOfSections - 1)];
   XCTestExpectation *relayoutExpectation = [self expectationWithDescription:@"relayout"];
   [tableView beginUpdates];
   [tableView setEditing:YES];
@@ -502,7 +536,7 @@
   
   [tableView reloadDataWithCompletion:^{
     for (NSUInteger i = 0; i < NumberOfSections; i++) {
-      for (NSUInteger j = 0; j < NumberOfRowsPerSection; j++) {
+      for (NSUInteger j = 0; j < dataSource.rowsPerSection; j++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:j inSection:i];
         ASCellNode *cellNode = [tableView nodeForRowAtIndexPath:indexPath];
         NSIndexPath *reportedIndexPath = [tableView indexPathForNode:cellNode];
@@ -517,7 +551,7 @@
   XCTestExpectation *reloadDataExpectation = [self expectationWithDescription:@"reloadData"];
   [tableView reloadDataWithCompletion:^{
     for (int section = 0; section < NumberOfSections; section++) {
-      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+      for (int row = 0; row < 20; row++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
         ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
         XCTAssertEqual(node.numberOfLayoutsOnMainThread, 0);
@@ -548,7 +582,7 @@
     XCTAssertEqual(tableView.testDataController.numberOfAllNodesRelayouts, 1);
 
     for (int section = 0; section < NumberOfSections; section++) {
-      for (int row = 0; row < NumberOfRowsPerSection; row++) {
+      for (int row = 0; row < [tableView numberOfRowsInSection:section]; row++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
         ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
         XCTAssertLessThanOrEqual(node.numberOfLayoutsOnMainThread, 1);
@@ -714,6 +748,54 @@
   // Passing nil blocks should not crash
   [node performBatchUpdates:nil completion:nil];
   [node performBatchAnimated:NO updates:nil completion:nil];
+}
+
+// https://github.com/facebook/AsyncDisplayKit/issues/2252#issuecomment-263689979
+- (void)testIssue2252
+{
+  // Hard-code an iPhone 7 screen. There's something particular about this geometry that causes the issue to repro.
+  UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 375, 667)];
+
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStyleGrouped];
+  node.frame = window.bounds;
+  ASTableViewTestDelegate *del = [[ASTableViewTestDelegate alloc] init];
+  del.headerHeight = 32;
+  del.footerHeight = 0.01;
+  node.delegate = del;
+  ASTableViewFilledDataSource *ds = [[ASTableViewFilledDataSource alloc] init];
+  ds.rowsPerSection = 1;
+  node.dataSource = ds;
+  ASViewController *vc = [[ASViewController alloc] initWithNode:node];
+  UITabBarController *tabCtrl = [[UITabBarController alloc] init];
+  tabCtrl.viewControllers = @[ vc ];
+  tabCtrl.tabBar.translucent = NO;
+  window.rootViewController = tabCtrl;
+  [window makeKeyAndVisible];
+
+  [window layoutIfNeeded];
+  [node waitUntilAllUpdatesAreCommitted];
+  XCTAssertEqual(node.view.numberOfSections, NumberOfSections);
+  ASXCTAssertEqualRects(CGRectMake(0, 32, 375, 43.5), [node rectForRowAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], @"This text requires very specific geometry. The rect for the first row should match up.");
+
+  __unused XCTestExpectation *e = [self expectationWithDescription:@"Did a bunch of rounds of updates."];
+  NSInteger totalCount = 20;
+  __block NSInteger count = 0;
+  dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
+  dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC, 0.01 * NSEC_PER_SEC);
+  dispatch_source_set_event_handler(timer, ^{
+    [node performBatchUpdates:^{
+      [node reloadSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, NumberOfSections)] withRowAnimation:UITableViewRowAnimationNone];
+    } completion:^(BOOL finished) {
+      if (++count == totalCount) {
+        dispatch_cancel(timer);
+        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+          [e fulfill];
+        });
+      }
+    }];
+  });
+  dispatch_resume(timer);
+  [self waitForExpectationsWithTimeout:60 handler:nil];
 }
 
 @end
