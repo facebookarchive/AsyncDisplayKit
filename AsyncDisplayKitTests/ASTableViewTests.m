@@ -551,7 +551,7 @@
   XCTestExpectation *reloadDataExpectation = [self expectationWithDescription:@"reloadData"];
   [tableView reloadDataWithCompletion:^{
     for (int section = 0; section < NumberOfSections; section++) {
-      for (int row = 0; row < 20; row++) {
+      for (int row = 0; row < [tableView numberOfRowsInSection:section]; row++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
         ASTestTextCellNode *node = (ASTestTextCellNode *)[tableView nodeForRowAtIndexPath:indexPath];
         XCTAssertEqual(node.numberOfLayoutsOnMainThread, 0);
