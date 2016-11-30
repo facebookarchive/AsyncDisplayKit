@@ -24,6 +24,7 @@ struct ASDisplayNodeLayout {
   ASLayout *layout;
   ASSizeRange constrainedSize;
   CGSize parentSize;
+  BOOL requestedLayoutFromAbove;
   BOOL _dirty;
   
   /*
@@ -33,13 +34,13 @@ struct ASDisplayNodeLayout {
    * @param parentSize Parent size used to create the layout
    */
   ASDisplayNodeLayout(ASLayout *layout, ASSizeRange constrainedSize, CGSize parentSize)
-  : layout(layout), constrainedSize(constrainedSize), parentSize(parentSize), _dirty(NO) {};
+  : layout(layout), constrainedSize(constrainedSize), parentSize(parentSize), requestedLayoutFromAbove(NO), _dirty(NO) {};
   
   /*
    * Creates a layout without any layout associated. By default this display node layout is dirty.
    */
   ASDisplayNodeLayout()
-  : layout(nil), constrainedSize({{0, 0}, {0, 0}}), parentSize({0, 0}), _dirty(YES) {};
+  : layout(nil), constrainedSize({{0, 0}, {0, 0}}), parentSize({0, 0}), requestedLayoutFromAbove(NO), _dirty(YES) {};
   
   /**
    * Returns if the display node layout is dirty as it was invalidated or it was created without a layout.

@@ -9,6 +9,8 @@
 //
 
 #import "ASDisplayNodeTestsHelper.h"
+#import "ASDisplayNode.h"
+#import "ASLayout.h"
 
 #import <QuartzCore/QuartzCore.h>
 
@@ -40,4 +42,16 @@ BOOL ASDisplayNodeRunRunLoopUntilBlockIsTrue(as_condition_block_t block)
     CFRunLoopRunInMode(kCFRunLoopDefaultMode, runLoopTimeout, true);
   }
   return passed;
+}
+
+void ASDisplayNodeSizeToFitSize(ASDisplayNode *node, CGSize size)
+{
+  CGSize sizeThatFits = [node layoutThatFits:ASSizeRangeMake(size)].size;
+  node.bounds = (CGRect){.origin = CGPointZero, .size = sizeThatFits};
+}
+
+void ASDisplayNodeSizeToFitSizeRange(ASDisplayNode *node, ASSizeRange sizeRange)
+{
+  CGSize sizeThatFits = [node layoutThatFits:sizeRange].size;
+  node.bounds = (CGRect){.origin = CGPointZero, .size = sizeThatFits};
 }

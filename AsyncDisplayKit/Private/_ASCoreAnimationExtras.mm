@@ -154,3 +154,8 @@ UIViewContentMode ASDisplayNodeUIContentModeFromCAContentsGravity(NSString *cons
   // If asserts disabled, fall back to this
   return UIViewContentModeScaleToFill;
 }
+
+BOOL ASDisplayNodeLayerHasAnimations(CALayer *layer)
+{
+  return (layer.animationKeys.count != 0);
+}

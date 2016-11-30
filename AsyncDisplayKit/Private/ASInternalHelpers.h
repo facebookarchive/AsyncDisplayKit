@@ -12,6 +12,8 @@
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector);
@@ -31,11 +33,19 @@ void ASPerformBackgroundDeallocation(id object);
 
 CGFloat ASScreenScale();
 
+CGSize ASFloorSizeValues(CGSize s);
+
 CGFloat ASFloorPixelValue(CGFloat f);
+
+CGSize ASCeilSizeValues(CGSize s);
 
 CGFloat ASCeilPixelValue(CGFloat f);
 
 CGFloat ASRoundPixelValue(CGFloat f);
+
+BOOL ASClassRequiresMainThreadDeallocation(Class _Nullable c);
+
+Class _Nullable ASGetClassFromType(const char *type);
 
 ASDISPLAYNODE_EXTERN_C_END
 
@@ -77,3 +87,5 @@ ASDISPLAYNODE_INLINE void ASBoundsAndPositionForFrame(CGRect rect, CGPoint origi
 @interface NSIndexPath (ASInverseComparison)
 - (NSComparisonResult)asdk_inverseCompare:(NSIndexPath *)otherIndexPath;
 @end
+
+NS_ASSUME_NONNULL_END

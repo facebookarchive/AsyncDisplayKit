@@ -57,8 +57,6 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 
   if (!(self = [super initWithNode:_tableNode]))
     return nil;
-  
-  _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone; // KittenNode has its own separator
 
   // populate our "data source" with some random kittens
   _kittenDataSource = [self createLitterWithSize:kLitterSize];
@@ -76,6 +74,7 @@ static const NSInteger kMaxLitterSize = 100;        // max number of kitten cell
 {
   [super viewDidLoad];
 
+  _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone; // KittenNode has its own separator
   [self.node addSubnode:_tableNode];
 }
 

@@ -16,6 +16,7 @@
 
 #import <cstdlib>
 #import <deque>
+#import <vector>
 
 #define ASRunLoopQueueLoggingEnabled 0
 
@@ -222,7 +223,12 @@ static void runLoopSourceCallback(void *info) {
 
 - (void)processQueue
 {
-  std::deque<id> itemsToProcess = std::deque<id>();  
+  BOOL hasExecutionBlock = (_queueConsumer != nil);
+
+  // If we have an execution block, this vector will be populated, otherwise remains empty.
+  // This is to avoid needlessly retaining/releasing the objects if we don't have a block.
+  std::vector<id> itemsToProcess;
+
   BOOL isQueueDrained = NO;
   {
     ASDN::MutexLocker l(_internalQueueLock);
@@ -235,25 +241,23 @@ static void runLoopSourceCallback(void *info) {
     ASProfilingSignpostStart(0, self);
 
     // Snatch the next batch of items.
-    NSUInteger totalNodeCount = _internalQueue.size();
-    for (int i = 0; i < MIN(self.batchSize, totalNodeCount); i++) {
-      id node = _internalQueue[0];
-      itemsToProcess.push_back(node);
-      _internalQueue.pop_front();
+    auto firstItemToProcess = _internalQueue.cbegin();
+    auto lastItemToProcess = MIN(_internalQueue.cend(), firstItemToProcess + self.batchSize);
+
+    if (hasExecutionBlock) {
+      itemsToProcess = std::vector<id>(firstItemToProcess, lastItemToProcess);
     }
+    _internalQueue.erase(firstItemToProcess, lastItemToProcess);
 
     if (_internalQueue.empty()) {
       isQueueDrained = YES;
     }
   }
 
-  unsigned long numberOfItems = itemsToProcess.size();
-  for (int i = 0; i < numberOfItems; i++) {
-    if (isQueueDrained && i == numberOfItems - 1) {
-      _queueConsumer(itemsToProcess[i], YES);
-    } else {
-      _queueConsumer(itemsToProcess[i], isQueueDrained);
-    }
+  // itemsToProcess will be empty if _queueConsumer == nil so no need to check again.
+  auto itemsEnd = itemsToProcess.cend();
+  for (auto iterator = itemsToProcess.begin(); iterator < itemsEnd; iterator++) {
+    _queueConsumer(*iterator, isQueueDrained && iterator == itemsEnd - 1);
   }
 
   // If the queue is not fully drained yet force another run loop to process next batch of items
