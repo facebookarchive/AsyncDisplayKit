@@ -931,6 +931,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   cellNode.scrollView = nil;
   cell.layoutAttributes = nil;
+
+  // If this item was deleted, we should go ahead and remove it from the cell's content view so that it will be marked
+  // invisible immediately. The range controller currently does not manage the interface state for nodes that have been deleted.
+  if (cellNode.indexPath == nil) {
+    [cellNode.view removeFromSuperview];
+  }
 }
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplaySupplementaryView:(UICollectionReusableView *)view forElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath

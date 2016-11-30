@@ -898,6 +898,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [_cellsForVisibilityUpdates removeObject:cell];
   
   cellNode.scrollView = nil;
+
+  // If this row was deleted, we should go ahead and remove it from the cell's content view so that it will be marked
+  // invisible immediately. The range controller currently does not manage the interface state for nodes that have been deleted.
+  if (cellNode.indexPath == nil) {
+    [cellNode.view removeFromSuperview];
+  }
 }
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(nonnull NSIndexPath *)indexPath
