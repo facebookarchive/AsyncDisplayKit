@@ -136,7 +136,6 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 {
   [super didExitPreloadState];
   self.preloadStateChangedToNO = YES;
-  self.hasPreloaded = NO;
 }
 
 - (void)dealloc

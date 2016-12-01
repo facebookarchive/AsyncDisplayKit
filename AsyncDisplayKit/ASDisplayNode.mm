@@ -2990,10 +2990,12 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)didExitPreloadState
 {
   if (_methodOverrides & ASDisplayNodeMethodOverrideClearFetchedData) {
+    if ([self supportsRangeManagedInterfaceState]) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [self clearFetchedData];
 #pragma clang diagnostic pop
+    }
   }
 }
 
