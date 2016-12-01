@@ -145,7 +145,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     });
   }
 
-  [self setNeedsDataFetch];
+  [self setNeedsPreload];
 }
 
 - (NSURL *)URL
@@ -265,8 +265,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     }
   }
 
-  // TODO: Consider removing this; it predates ASInterfaceState, which now ensures that even non-range-managed nodes get a -fetchData call.
-  [self fetchData];
+  // TODO: Consider removing this; it predates ASInterfaceState, which now ensures that even non-range-managed nodes get a -preload call.
+  [self didEnterPreloadState];
   
   if (self.image == nil && _downloaderFlags.downloaderImplementsSetPriority) {
     ASDN::MutexLocker l(__instanceLock__);
@@ -306,9 +306,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   [self _updateProgressImageBlockOnDownloaderIfNeeded];
 }
 
-- (void)clearFetchedData
+- (void)didExitPreloadState
 {
-  [super clearFetchedData];
+  [super didExitPreloadState];
 
   {
     ASDN::MutexLocker l(__instanceLock__);
@@ -321,9 +321,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 }
 
-- (void)fetchData
+- (void)didEnterPreloadState
 {
-  [super fetchData];
+  [super didEnterPreloadState];
   
   {
     ASDN::MutexLocker l(__instanceLock__);

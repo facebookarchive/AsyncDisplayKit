@@ -1646,18 +1646,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [super endUpdates];
 }
 
-#pragma mark - Memory Management
-
-- (void)clearContents
-{
-  [_rangeController clearContents];
-}
-
-- (void)clearFetchedData
-{
-  [_rangeController clearFetchedData];
-}
-
 #pragma mark - Helper Methods
 
 // Note: This is called every layout, and so it is very performance sensitive.

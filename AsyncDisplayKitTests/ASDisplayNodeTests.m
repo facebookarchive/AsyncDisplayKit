@@ -89,7 +89,6 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @interface ASTestDisplayNode : ASDisplayNode
 @property (nonatomic, copy) void (^willDeallocBlock)(__unsafe_unretained ASTestDisplayNode *node);
 @property (nonatomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
-@property (nonatomic) BOOL hasFetchedData;
 
 @property (nonatomic, nullable) UIGestureRecognizer *gestureRecognizer;
 @property (nonatomic, nullable) id idGestureRecognizer;
@@ -99,6 +98,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @property (nonatomic) BOOL displayRangeStateChangedToYES;
 @property (nonatomic) BOOL displayRangeStateChangedToNO;
 
+@property (nonatomic) BOOL hasPreloaded;
 @property (nonatomic) BOOL preloadStateChangedToYES;
 @property (nonatomic) BOOL preloadStateChangedToNO;
 @end
@@ -111,18 +111,6 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   return _calculateSizeBlock ? _calculateSizeBlock(self, constrainedSize) : CGSizeZero;
-}
-
-- (void)fetchData
-{
-  [super fetchData];
-  self.hasFetchedData = YES;
-}
-
-- (void)clearFetchedData
-{
-  [super clearFetchedData];
-  self.hasFetchedData = NO;
 }
 
 - (void)didEnterDisplayState
@@ -141,6 +129,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 {
   [super didEnterPreloadState];
   self.preloadStateChangedToYES = YES;
+  self.hasPreloaded = YES;
 }
 
 - (void)didExitPreloadState
@@ -1738,76 +1727,76 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 }
 
 // Check that nodes who have no cell node (no range controller)
-// do get their `fetchData` called, and they do report
-// the fetch data interface state.
+// do get their `preload` called, and they do report
+// the preload interface state.
 - (void)testInterfaceStateForNonCellNode
 {
   ASTestWindow *window = [ASTestWindow new];
   ASTestDisplayNode *node = [ASTestDisplayNode new];
   XCTAssert(node.interfaceState == ASInterfaceStateNone);
-  XCTAssert(!node.hasFetchedData);
+  XCTAssert(!node.hasPreloaded);
 
   [window addSubview:node.view];
-  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.hasPreloaded);
   XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
 
   [node.view removeFromSuperview];
-  // We don't want to call -clearFetchedData on nodes that aren't being managed by a range controller.
+  // We don't want to call -didExitPreloadState on nodes that aren't being managed by a range controller.
   // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
   // Still, the interfaceState should be None to reflect the current state of the node.
   // We just don't proactively clear contents or fetched data for this state transition.
-  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.hasPreloaded);
   XCTAssert(node.interfaceState == ASInterfaceStateNone);
 }
 
 // Check that nodes who have no cell node (no range controller)
-// do get their `fetchData` called, and they do report
-// the fetch data interface state.
+// do get their `preload` called, and they do report
+// the preload interface state.
 - (void)testInterfaceStateForCellNode
 {
   ASCellNode *cellNode = [ASCellNode new];
   ASTestDisplayNode *node = [ASTestDisplayNode new];
   XCTAssert(node.interfaceState == ASInterfaceStateNone);
-  XCTAssert(!node.hasFetchedData);
+  XCTAssert(!node.hasPreloaded);
 
   // Simulate range handler updating cell node.
   [cellNode addSubnode:node];
   [cellNode enterInterfaceState:ASInterfaceStatePreload];
-  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.hasPreloaded);
   XCTAssert(node.interfaceState == ASInterfaceStatePreload);
 
   // If the node goes into a view it should not adopt the `InHierarchy` state.
   ASTestWindow *window = [ASTestWindow new];
   [window addSubview:cellNode.view];
-  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.hasPreloaded);
   XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
 }
 
-- (void)testSetNeedsDataFetchImmediateState
+- (void)testSetNeedsPreloadImmediateState
 {
   ASCellNode *cellNode = [ASCellNode new];
   ASTestDisplayNode *node = [ASTestDisplayNode new];
   [cellNode addSubnode:node];
   [cellNode enterInterfaceState:ASInterfaceStatePreload];
-  node.hasFetchedData = NO;
-  [cellNode setNeedsDataFetch];
-  XCTAssert(node.hasFetchedData);
+  node.hasPreloaded = NO;
+  [cellNode setNeedsPreload];
+  XCTAssert(node.hasPreloaded);
 }
 
-- (void)testFetchDataExitingAndEnteringRange
+- (void)testPreloadExitingAndEnteringRange
 {
   ASCellNode *cellNode = [ASCellNode new];
   ASTestDisplayNode *node = [ASTestDisplayNode new];
   [cellNode addSubnode:node];
   [cellNode setHierarchyState:ASHierarchyStateRangeManaged];
   
-  // Simulate enter range, fetch data, exit range
+  // Simulate enter range, preload, exit range
   [cellNode enterInterfaceState:ASInterfaceStatePreload];
   [cellNode exitInterfaceState:ASInterfaceStatePreload];
-  node.hasFetchedData = NO;
+  node.hasPreloaded = NO;
   [cellNode enterInterfaceState:ASInterfaceStatePreload];
 
-  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.hasPreloaded);
 }
 
 - (void)testInitWithViewClass
@@ -2070,8 +2059,8 @@ static bool stringContainsPointer(NSString *description, id p) {
   
   XCTAssertTrue((node.interfaceState & ASInterfaceStatePreload) == ASInterfaceStatePreload);
   XCTAssertTrue((subnode.interfaceState & ASInterfaceStatePreload) == ASInterfaceStatePreload);
-  XCTAssertTrue(node.hasFetchedData);
-  XCTAssertTrue(subnode.hasFetchedData);
+  XCTAssertTrue(node.hasPreloaded);
+  XCTAssertTrue(subnode.hasPreloaded);
 }
 
 // FIXME
