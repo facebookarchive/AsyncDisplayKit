@@ -374,7 +374,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   if (_scrubberNode == nil) {
     __weak __typeof__(self) weakSelf = self;
     _scrubberNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView * _Nonnull {
-      __typeof__(self) strongSelf = weakSelf;
+      __strong __typeof__(weakSelf) strongSelf = weakSelf;
       
       UISlider *slider = [[UISlider alloc] initWithFrame:CGRectZero];
       slider.minimumValue = 0.0;
@@ -583,7 +583,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   
     __weak __typeof__(self) weakSelf = self;
     _spinnerNode = [[ASDisplayNode alloc] initWithViewBlock:^UIView *{
-      __typeof__(self) strongSelf = weakSelf;
+      __strong __typeof__(weakSelf) strongSelf = weakSelf;
       UIActivityIndicatorView *spinnnerView = [[UIActivityIndicatorView alloc] init];
       spinnnerView.backgroundColor = [UIColor clearColor];
 

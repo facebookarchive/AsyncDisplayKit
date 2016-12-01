@@ -123,7 +123,7 @@
 {
   __weak __typeof__(self) weakSelf = self;
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    __typeof__(self) strongSelf = weakSelf;
+    __strong __typeof__(weakSelf) strongSelf = weakSelf;
     return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
   };
 

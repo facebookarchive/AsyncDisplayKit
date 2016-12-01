@@ -81,7 +81,7 @@
 {
   __weak __typeof__(self) weakSelf = self;
   ASDisplayNodeViewBlock tableViewBlock = ^UIView *{
-    __typeof__(self) strongSelf = weakSelf;
+    __strong __typeof__(weakSelf) strongSelf = weakSelf;
     return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass eventLog:ASDisplayNodeGetEventLog(strongSelf)];
   };
 

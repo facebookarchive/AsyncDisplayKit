@@ -260,7 +260,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       else {
         __weak __typeof__(self) weakSelf = self;
         dispatch_async(dispatch_get_main_queue(), ^{
-          __typeof__(self) strongSelf = weakSelf;
+          __strong __typeof__(weakSelf) strongSelf = weakSelf;
           if (!strongSelf)
             return;
           [strongSelf.delegate multiplexImageNodeDidFinishDisplay:strongSelf];
@@ -425,7 +425,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     else {
       __weak __typeof__(self) weakSelf = self;
       dispatch_async(dispatch_get_main_queue(), ^{
-        __typeof__(self) strongSelf = weakSelf;
+        __strong __typeof__(weakSelf) strongSelf = weakSelf;
         if (!strongSelf)
           return;
         [strongSelf.delegate multiplexImageNode:strongSelf didDisplayUpdatedImage:image withIdentifier:displayedImageIdentifier];
@@ -510,7 +510,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   if (shouldRenderProgressImages && ASInterfaceStateIncludesVisible(interfaceState)) {
     __weak __typeof__(self) weakSelf = self;
     progress = ^(UIImage * _Nonnull progressImage, CGFloat progress, id _Nullable downloadIdentifier) {
-      __typeof__(self) strongSelf = weakSelf;
+      __strong __typeof__(weakSelf) strongSelf = weakSelf;
       if (strongSelf == nil) {
         return;
       }
@@ -588,7 +588,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   __weak __typeof__(self) weakSelf = self;
   ASMultiplexImageLoadCompletionBlock finishedLoadingBlock = ^(UIImage *image, id imageIdentifier, NSError *error) {
-    __typeof__(self) strongSelf = weakSelf;
+    __strong __typeof__(weakSelf) strongSelf = weakSelf;
     if (!strongSelf)
       return;
 
@@ -640,7 +640,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   {
     // First, check the cache.
     [self _fetchImageWithIdentifierFromCache:nextImageIdentifier URL:nextImageURL completion:^(UIImage *imageFromCache) {
-      __typeof__(self) strongSelf = weakSelf;
+      __strong __typeof__(weakSelf) strongSelf = weakSelf;
       if (!strongSelf)
         return;
 
@@ -712,7 +712,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   
   __weak __typeof(self) weakSelf = self;
   NSOperation *newImageRequestOp = [NSBlockOperation blockOperationWithBlock:^{
-    __strong __typeof(weakSelf) strongSelf = weakSelf;
+    __strong __typeof__(weakSelf) strongSelf = weakSelf;
     if (strongSelf == nil) { return; }
     
     PHAsset *imageAsset = nil;
@@ -809,7 +809,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   void (^downloadProgressBlock)(CGFloat) = nil;
   if (_delegateFlags.downloadProgress) {
     downloadProgressBlock = ^(CGFloat progress) {
-      __typeof__(self) strongSelf = weakSelf;
+      __strong __typeof__(weakSelf) strongSelf = weakSelf;
       if (!strongSelf)
         return;
       [strongSelf.delegate multiplexImageNode:strongSelf didUpdateDownloadProgress:progress forImageWithIdentifier:imageIdentifier];
@@ -824,7 +824,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
                                                     downloadProgress:downloadProgressBlock
                                                           completion:^(id <ASImageContainerProtocol> imageContainer, NSError *error, id downloadIdentifier) {
                                                             // We dereference iVars directly, so we can't have weakSelf going nil on us.
-                                                            __typeof__(self) strongSelf = weakSelf;
+                                                            __strong __typeof__(weakSelf) strongSelf = weakSelf;
                                                             if (!strongSelf)
                                                               return;
                                                             

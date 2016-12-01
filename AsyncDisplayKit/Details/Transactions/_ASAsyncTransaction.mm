@@ -439,7 +439,7 @@ ASAsyncTransactionQueue & ASAsyncTransactionQueue::instance()
 {
   __weak __typeof__(self) weakSelf = self;
   [self addOperationWithBlock:^(){return (id<NSObject>)nil;} queue:_callbackQueue completion:^(id<NSObject> value, BOOL canceled) {
-    __typeof__(self) strongSelf = weakSelf;
+    __strong __typeof__(weakSelf) strongSelf = weakSelf;
     completion(strongSelf, canceled);
   }];
 }
