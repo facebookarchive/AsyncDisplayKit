@@ -321,6 +321,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [_cachedControls removeAllObjects];
 
   _playbackButtonNode = nil;
+  _fullScreenButtonNode = nil;
   _elapsedTextNode = nil;
   _durationTextNode = nil;
   _scrubberNode = nil;
