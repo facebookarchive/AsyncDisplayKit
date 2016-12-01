@@ -136,10 +136,10 @@
   [self.rangeController clearContents];
 }
 
-- (void)clearFetchedData
+- (void)didExitPreloadState
 {
-  [super clearFetchedData];
-  [self.rangeController clearFetchedData];
+  [super didExitPreloadState];
+  [self.rangeController clearPreloadedData];
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState

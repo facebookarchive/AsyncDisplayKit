@@ -1681,18 +1681,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _nextLayoutInvalidationStyle = invalidationStyle;
 }
 
-#pragma mark - Memory Management
-
-- (void)clearContents
-{
-  [_rangeController clearContents];
-}
-
-- (void)clearFetchedData
-{
-  [_rangeController clearFetchedData];
-}
-
 #pragma mark - _ASDisplayView behavior substitutions
 // Need these to drive interfaceState so we know when we are visible, if not nested in another range-managing element.
 // Because our superclass is a true UIKit class, we cannot also subclass _ASDisplayView.

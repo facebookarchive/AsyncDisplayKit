@@ -69,7 +69,7 @@ NS_ASSUME_NONNULL_BEGIN
 // These methods call the corresponding method on each node, visiting each one that
 // the range controller has set a non-default interface state on.
 - (void)clearContents;
-- (void)clearFetchedData;
+- (void)clearPreloadedData;
 
 /**
  * An object that describes the layout behavior of the ranged component (table view, collection view, etc.)
