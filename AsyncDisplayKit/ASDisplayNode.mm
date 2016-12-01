@@ -3062,9 +3062,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   if (nowPreload != wasPreload) {
     if (nowPreload) {
       [self didEnterPreloadState];
-    } else if ([self supportsRangeManagedInterfaceState]) {
-      // We don't want to call -didExitPreloadState on nodes that aren't being managed by a range controller.
-      // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
+    } else {
       [self didExitPreloadState];
     }
   }
