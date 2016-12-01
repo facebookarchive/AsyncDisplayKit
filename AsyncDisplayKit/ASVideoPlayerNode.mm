@@ -829,7 +829,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateTimeLabelAttributedString = [_delegate respondsToSelector:@selector(videoPlayerNode:timeStringForTimeLabelType:forTime:)];
     _delegateFlags.delegatePlaybackButtonTint = [_delegate respondsToSelector:@selector(videoPlayerNodePlaybackButtonTint:)];
     _delegateFlags.delegateFullScreenButtonImage = [_delegate respondsToSelector:@selector(videoPlayerNodeFullScreenButtonImage:)];
-
     _delegateFlags.delegateDidTapVideoPlayerNode = [_delegate respondsToSelector:@selector(didTapVideoPlayerNode:)];
     _delegateFlags.delegateDidTapFullScreenButtonNode = [_delegate respondsToSelector:@selector(didTapFullScreenButtonNode:)];
     _delegateFlags.delegateVideoPlayerNodeDidSetCurrentItem = [_delegate respondsToSelector:@selector(videoPlayerNode:didSetCurrentItem:)];
