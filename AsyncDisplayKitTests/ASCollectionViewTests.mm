@@ -222,8 +222,6 @@
 
 - (void)testReloadIfNeeded
 {
-  [ASDisplayNode setSuppressesInvalidCollectionUpdateExceptions:NO];
-
   __block ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
   __block ASCollectionViewTestDelegate *del = testController.asyncDelegate;
   __block ASCollectionNode *cn = testController.collectionNode;
@@ -383,7 +381,6 @@
 #pragma mark - Update Validations
 
 #define updateValidationTestPrologue \
-  [ASDisplayNode setSuppressesInvalidCollectionUpdateExceptions:NO];\
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];\
   __unused ASCollectionViewTestDelegate *del = testController.asyncDelegate;\
   __unused ASCollectionView *cv = testController.collectionView;\

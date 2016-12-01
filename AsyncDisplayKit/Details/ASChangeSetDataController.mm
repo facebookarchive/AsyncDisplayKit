@@ -64,7 +64,20 @@
     }
 
     [self invalidateDataSourceItemCounts];
-    [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
+
+    // Attempt to mark the update completed. This is when update validation will occur inside the changeset.
+    // If an invalid update exception is thrown, we catch it and inject our "validationErrorSource" object,
+    // which is the table/collection node's data source, into the exception reason to help debugging.
+    @try {
+      [_changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
+    } @catch (NSException *e) {
+      id responsibleDataSource = self.validationErrorSource;
+      if (e.name == ASCollectionInvalidUpdateException && responsibleDataSource != nil) {
+        [NSException raise:ASCollectionInvalidUpdateException format:@"%@: %@", [responsibleDataSource class], e.reason];
+      } else {
+        @throw e;
+      }
+    }
     
     ASDataControllerLogEvent(self, @"triggeredUpdate: %@", _changeSet);
     

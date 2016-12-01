@@ -34,7 +34,8 @@ typedef NSUInteger ASDataControllerAnimationOptions;
  */
 typedef ASCellNode * _Nonnull(^ASCellNodeBlock)();
 
-FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
+extern NSString * const ASDataControllerRowNodeKind;
+extern NSString * const ASCollectionInvalidUpdateException;
 
 /**
  Data source for data controller
@@ -121,6 +122,11 @@ FOUNDATION_EXPORT NSString * const ASDataControllerRowNodeKind;
  Data source for fetching data info.
  */
 @property (nonatomic, weak, readonly) id<ASDataControllerSource> dataSource;
+
+/**
+ An object that will be included in the backtrace of any update validation exceptions that occur.
+ */
+@property (nonatomic, weak) id validationErrorSource;
 
 /**
  Delegate to notify when data is updated.
