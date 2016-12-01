@@ -24,6 +24,7 @@ typedef enum {
   ASVideoPlayerNodeControlTypeElapsedText,
   ASVideoPlayerNodeControlTypeDurationText,
   ASVideoPlayerNodeControlTypeScrubber,
+  ASVideoPlayerNodeControlTypeFullScreenButton,
   ASVideoPlayerNodeControlTypeFlexGrowSpacer,
 } ASVideoPlayerNodeControlType;
 
@@ -125,6 +126,10 @@ NS_ASSUME_NONNULL_BEGIN
 #pragma mark - Playback button delegate methods
 - (UIColor *)videoPlayerNodePlaybackButtonTint:(ASVideoPlayerNode *)videoPlayer;
 
+#pragma mark - Fullscreen button delegate methods
+
+- (UIImage *)videoPlayerNodeFullScreenButtonImage:(ASVideoPlayerNode *)videoPlayer;
+
 
 #pragma mark ASVideoNodeDelegate proxy methods
 /**
@@ -132,6 +137,13 @@ NS_ASSUME_NONNULL_BEGIN
  * @param videoPlayerNode The ASVideoPlayerNode that was tapped.
  */
 - (void)didTapVideoPlayerNode:(ASVideoPlayerNode *)videoPlayer;
+
+/**
+ * @abstract Delegate method invoked when fullcreen button is taped.
+ * @param buttonNode The fullscreen button node that was tapped.
+ */
+- (void)didTapFullScreenButtonNode:(ASButtonNode *)buttonNode;
+
 /**
  * @abstract Delegate method invoked when ASVideoNode playback time is updated.
  * @param videoPlayerNode The video player node

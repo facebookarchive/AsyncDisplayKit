@@ -26,6 +26,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateSpinnerTintColor:1;
     unsigned int delegateSpinnerStyle:1;
     unsigned int delegatePlaybackButtonTint:1;
+    unsigned int delegateFullScreenButtonImage:1;
     unsigned int delegateScrubberMaximumTrackTintColor:1;
     unsigned int delegateScrubberMinimumTrackTintColor:1;
     unsigned int delegateScrubberThumbTintColor:1;
@@ -38,6 +39,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateVideoNodeShouldChangeState:1;
     unsigned int delegateVideoNodePlaybackDidFinish:1;
     unsigned int delegateDidTapVideoPlayerNode:1;
+    unsigned int delegateDidTapFullScreenButtonNode:1;
     unsigned int delegateVideoPlayerNodeDidSetCurrentItem:1;
     unsigned int delegateVideoPlayerNodeDidStallAtTimeInterval:1;
     unsigned int delegateVideoPlayerNodeDidStartInitialLoading:1;
@@ -57,6 +59,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   NSMutableDictionary *_cachedControls;
 
   ASDefaultPlaybackButton *_playbackButtonNode;
+  ASButtonNode *_fullScreenButtonNode;
   ASTextNode  *_elapsedTextNode;
   ASTextNode  *_durationTextNode;
   ASDisplayNode *_scrubberNode;
@@ -274,6 +277,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       case ASVideoPlayerNodeControlTypeScrubber:
         [self createScrubber];
         break;
+      case ASVideoPlayerNodeControlTypeFullScreenButton:
+        [self createFullScreenButton];
+        break;
       case ASVideoPlayerNodeControlTypeFlexGrowSpacer:
         [self createControlFlexGrowSpacer];
         break;
@@ -341,6 +347,23 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 
   [self addSubnode:_playbackButtonNode];
+}
+
+- (void)createFullScreenButton
+{
+  if (_fullScreenButtonNode == nil) {
+    _fullScreenButtonNode = [[ASButtonNode alloc] init];
+    _fullScreenButtonNode.style.preferredSize = CGSizeMake(16.0, 22.0);
+    
+    if (_delegateFlags.delegateFullScreenButtonImage) {
+      [_fullScreenButtonNode setImage:[_delegate videoPlayerNodeFullScreenButtonImage:self] forState:ASControlStateNormal];
+    }
+
+    [_fullScreenButtonNode addTarget:self action:@selector(didTapFullScreenButton:) forControlEvents:ASControlNodeEventTouchUpInside];
+    [_cachedControls setObject:_fullScreenButtonNode forKey:@(ASVideoPlayerNodeControlTypeFullScreenButton)];
+  }
+  
+  [self addSubnode:_fullScreenButtonNode];
 }
 
 - (void)createElapsedTextField
@@ -624,6 +647,11 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self togglePlayPause];
 }
 
+- (void)didTapFullScreenButton:(ASButtonNode*)node
+{
+  [_delegate didTapFullScreenButtonNode:node];
+}
+
 - (void)beginSeek
 {
   _isSeeking = YES;
@@ -691,6 +719,10 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   if (_cachedControls[ @(ASVideoPlayerNodeControlTypeDurationText) ]) {
     [controls addObject:_cachedControls[ @(ASVideoPlayerNodeControlTypeDurationText) ]];
+  }
+  
+  if (_cachedControls[ @(ASVideoPlayerNodeControlTypeFullScreenButton) ]) {
+    [controls addObject:_cachedControls[ @(ASVideoPlayerNodeControlTypeFullScreenButton) ]];
   }
 
   return controls;
@@ -795,7 +827,10 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _delegateFlags.delegateVideoNodeShouldChangeState = [_delegate respondsToSelector:@selector(videoPlayerNode:shouldChangeVideoNodeStateTo:)];
     _delegateFlags.delegateTimeLabelAttributedString = [_delegate respondsToSelector:@selector(videoPlayerNode:timeStringForTimeLabelType:forTime:)];
     _delegateFlags.delegatePlaybackButtonTint = [_delegate respondsToSelector:@selector(videoPlayerNodePlaybackButtonTint:)];
+    _delegateFlags.delegateFullScreenButtonImage = [_delegate respondsToSelector:@selector(videoPlayerNodeFullScreenButtonImage:)];
+
     _delegateFlags.delegateDidTapVideoPlayerNode = [_delegate respondsToSelector:@selector(didTapVideoPlayerNode:)];
+    _delegateFlags.delegateDidTapFullScreenButtonNode = [_delegate respondsToSelector:@selector(didTapFullScreenButtonNode:)];
     _delegateFlags.delegateVideoPlayerNodeDidSetCurrentItem = [_delegate respondsToSelector:@selector(videoPlayerNode:didSetCurrentItem:)];
     _delegateFlags.delegateVideoPlayerNodeDidStallAtTimeInterval = [_delegate respondsToSelector:@selector(videoPlayerNode:didStallAtTimeInterval:)];
     _delegateFlags.delegateVideoPlayerNodeDidStartInitialLoading = [_delegate respondsToSelector:@selector(videoPlayerNodeDidStartInitialLoading:)];
