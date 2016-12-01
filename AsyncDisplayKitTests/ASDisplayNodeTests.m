@@ -1773,14 +1773,14 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
 }
 
-- (void)testSetNeedsDataFetchImmediateState
+- (void)testSetNeedsPreloadImmediateState
 {
   ASCellNode *cellNode = [ASCellNode new];
   ASTestDisplayNode *node = [ASTestDisplayNode new];
   [cellNode addSubnode:node];
   [cellNode enterInterfaceState:ASInterfaceStatePreload];
   node.hasPreloaded = NO;
-  [cellNode setNeedsDataFetch];
+  [cellNode setNeedsPreload];
   XCTAssert(node.hasPreloaded);
 }
 
