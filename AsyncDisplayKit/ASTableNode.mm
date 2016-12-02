@@ -81,7 +81,8 @@
 {
   __weak __typeof__(self) weakSelf = self;
   ASDisplayNodeViewBlock tableViewBlock = ^UIView *{
-    __typeof__(self) strongSelf = weakSelf;
+    // Variable will be unused if event logging is off.
+    __unused __typeof__(self) strongSelf = weakSelf;
     return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass eventLog:ASDisplayNodeGetEventLog(strongSelf)];
   };
 
