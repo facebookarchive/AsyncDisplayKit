@@ -30,12 +30,6 @@ Pod::Spec.new do |spec|
         'AsyncDisplayKit/TextKit/ASTextKitComponents.h'
     ]
     
-    # ASDealloc2MainObject must be compiled with MRR
-    core.exclude_files = [
-      'AsyncDisplayKit/Private/_AS-objc-internal.h',
-      'AsyncDisplayKit/Details/ASDealloc2MainObject.h',
-      'AsyncDisplayKit/Details/ASDealloc2MainObject.m',
-    ]
     core.source_files = [
         'AsyncDisplayKit/**/*.{h,m,mm}',
         'Base/*.{h,m}',
