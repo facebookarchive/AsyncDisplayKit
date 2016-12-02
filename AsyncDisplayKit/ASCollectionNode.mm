@@ -123,7 +123,7 @@
 {
   __weak __typeof__(self) weakSelf = self;
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    // Variable will be unused if event logging if off.
+    // Variable will be unused if event logging is off.
     __unused __typeof__(self) strongSelf = weakSelf;
     return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
   };
