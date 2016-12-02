@@ -121,7 +121,7 @@
   XCTAssertThrows([ASLayout layoutWithLayoutElement:displayNode size:CGSizeMake(INFINITY, INFINITY)]);
 }
 
-- (void)testThatLayoutElementCreatedInLayoutSpecThatFitsDoesNotGetDeallocated
+- (void)testThatLayoutElementCreatedInLayoutSpecThatFitsDoNotGetDeallocated
 {
   const CGSize kSize = CGSizeMake(300, 300);
   
