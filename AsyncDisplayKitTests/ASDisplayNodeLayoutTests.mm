@@ -13,19 +13,6 @@
 #import "ASLayoutSpecSnapshotTestsHelper.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 
-@interface DisplayNode : ASDisplayNode
-
-@end
-
-@implementation DisplayNode
-
-- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
-{
-  ASTextNode *someOtherNode = [ASTextNode new];
-  return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:someOtherNode];
-}
-@end
-
 @interface ASDisplayNodeLayoutTests : XCTestCase
 @end
 
@@ -136,76 +123,35 @@
 
 - (void)testThatLayoutElementCreatedInLayoutSpecThatFitsDoesNotGetDeallocated
 {
-  ASDisplayNode *displayNode = [DisplayNode new];
-  displayNode.automaticallyManagesSubnodes = YES;
+  const CGSize kSize = CGSizeMake(300, 300);
   
-  //[displayNode addSubnode:someOtherNode];
-  /*displayNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+  ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
+  displayNode.automaticallyManagesSubnodes = YES;
+  displayNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
     ASTextNode *someOtherNode = [ASTextNode new];
     return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:someOtherNode];
-  };*/
-  
-  XCTestExpectation *expectation = [self expectationWithDescription:@"Query timed out."];
-  //CGSize s = CGSizeZero;
-  displayNode.frame = CGRectMake(0, 0, 300, 300);
+  };
+
+  displayNode.frame = CGRectMake(0, 0, kSize.width, kSize.height);
   [displayNode view];
   
-  __unused CGSize s = CGSizeZero;
+  XCTestExpectation *expectation = [self expectationWithDescription:@"Execute measure and layout pass"];
   
-  dispatch_async(dispatch_get_global_queue( DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
-    //ASLayout *layout
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     
-    @autoreleasepool {
-      __unused CGSize s = [displayNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX))].size;
-      //s = [displayNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, CGFLOAT_MAX))].size;
-      //[displayNode setNeedsLayout];
-      //s = [displayNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(200, CGFLOAT_MAX))].size;
-      //[displayNode setNeedsLayout];
-      s = [displayNode layoutThatFits:ASSizeRangeMake(CGSizeMake(300, 300), CGSizeMake(300, 300))].size;
-      //[displayNode setNeedsLayout];
-    }
-
+    [displayNode layoutThatFits:ASSizeRangeMake(kSize)];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-      
-      //__unused CGSize s = [displayNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(CGFLOAT_MAX, 200))].size;
-      
-      //[displayNode setNeedsLayout];
-      [displayNode.view layoutIfNeeded];
-      
-      dispatch_async(dispatch_get_main_queue(), ^{
-        [expectation fulfill];
-      });
+      XCTAssertNoThrow([displayNode.view layoutIfNeeded]);
+      [expectation fulfill];
     });
   });
   
-  
-  //[displayNode view];
-  
-  /*dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-    
-    //displayNode.frame = CGRectMake(0, 0, 100, 100);
-    [displayNode setNeedsLayout];
-    [displayNode.view layoutIfNeeded];
-    
-    
-    // First layout pass
-    //displayNode.frame = CGRectMake(0, 0, layout.size.width, layout.size.height);
-    //[displayNode setNeedsLayout];
-    //[displayNode.view layoutIfNeeded];
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-      [displayNode transitionLayoutWithSizeRange:ASSizeRangeMake(CGSizeZero, CGSizeMake(80, 80)) animated:NO shouldMeasureAsync:NO measurementCompletion:nil];
-      [expectation fulfill];
-    });  
-  });*/
-  
-  
   [self waitForExpectationsWithTimeout:5.0 handler:^(NSError *error) {
     if (error) {
-      NSLog(@"Error: %@", error);
+      XCTFail(@"Expectation failed: %@", error);
     }
   }];
-  //XCTAssertNoThrow([displayNode layoutThatFits:ASSizeRangeMake(CGSizeMake(0, FLT_MAX))]);
 }
 
 @end
