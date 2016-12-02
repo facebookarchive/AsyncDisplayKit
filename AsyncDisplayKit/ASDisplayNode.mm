@@ -433,6 +433,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)dealloc
 {
+    NSLog(@"Dealloc: %@", self);
+    
   _flags.isDeallocating = YES;
 
   // Synchronous nodes may not be able to call the hierarchy notifications, so only enforce for regular nodes.
