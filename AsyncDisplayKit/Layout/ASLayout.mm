@@ -47,6 +47,11 @@ static inline NSString * descriptionIndents(NSUInteger indents)
  */
 @property (nonatomic, getter=isFlattened) BOOL flattened;
 
+/**
+ * Array for explicitly retain sublayout layout elements in case they are created and references in layoutSpecThatFits: and no one else will hold a strong reference on it
+ */
+@property (nonatomic, strong) NSMutableArray *sublayoutLayoutElements;
+
 @end
 
 @implementation ASLayout
@@ -69,6 +74,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 #endif
     
     _layoutElement = layoutElement;
+    
     // Read this now to avoid @c weak overhead later.
     _layoutElementType = layoutElement.layoutElementType;
     
@@ -88,6 +94,14 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
     _sublayouts = sublayouts != nil ? [sublayouts copy] : @[];
     _flattened = NO;
+    
+    // Add sublayouts layout elements to an internal array to retain it while the layout lives
+    if (sublayouts.count > 0) {
+      _sublayoutLayoutElements = [NSMutableArray array];
+      for (ASLayout *sublayout in sublayouts) {
+        [_sublayoutLayoutElements addObject:sublayout.layoutElement];
+      }
+    }
   }
   return self;
 }
