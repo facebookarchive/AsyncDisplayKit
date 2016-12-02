@@ -425,7 +425,7 @@
   // Currently this test requires that the text in the cell node fills the
   // visible width, so we use the long description for the index path.
   dataSource.nodeBlockForItem = ^(NSIndexPath *indexPath) {
-    return ^{
+    return (ASCellNodeBlock)^{
       ASTestTextCellNode *textCellNode = [[ASTestTextCellNode alloc] init];
       textCellNode.text = indexPath.description;
       return textCellNode;
@@ -796,6 +796,26 @@
   });
   dispatch_resume(timer);
   [self waitForExpectationsWithTimeout:60 handler:nil];
+}
+
+- (void)testThatInvalidUpdateExceptionReasonContainsDataSourceClassName
+{
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStyleGrouped];
+  node.bounds = CGRectMake(0, 0, 100, 100);
+  ASTableViewFilledDataSource *ds = [[ASTableViewFilledDataSource alloc] init];
+  node.dataSource = ds;
+
+  // Force node to load initial data.
+  [node.view layoutIfNeeded];
+
+  // Submit an invalid update, ensure exception name matches and that data source is included in the reason.
+  @try {
+    [node deleteSections:[NSIndexSet indexSetWithIndex:1000] withRowAnimation:UITableViewRowAnimationNone];
+    XCTFail(@"Expected validation to fail.");
+  } @catch (NSException *e) {
+    XCTAssertEqual(e.name, ASCollectionInvalidUpdateException);
+    XCTAssert([e.reason rangeOfString:NSStringFromClass([ds class])].location != NSNotFound, @"Expected validation reason to contain the data source class name. Got:\n%@", e.reason);
+  }
 }
 
 @end

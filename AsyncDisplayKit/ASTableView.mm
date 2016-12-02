@@ -365,6 +365,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     ASDisplayNodeAssert(_asyncDataSourceFlags.tableNodeNumberOfRowsInSection || _asyncDataSourceFlags.tableViewNumberOfRowsInSection, @"Data source must implement tableNode:numberOfRowsInSection:");
   }
   
+  _dataController.validationErrorSource = asyncDataSource;
   super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
 }
 

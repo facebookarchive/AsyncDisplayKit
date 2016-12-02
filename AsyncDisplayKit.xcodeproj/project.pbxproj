@@ -154,7 +154,7 @@
 		34EFC7771B701D2D00AD841F /* ASStackUnpositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED491B17847A00DA7C62 /* ASStackUnpositionedLayout.h */; };
 		34EFC7781B701D3100AD841F /* ASStackUnpositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED4A1B17847A00DA7C62 /* ASStackUnpositionedLayout.mm */; };
 		34EFC7791B701D3600AD841F /* ASLayoutSpecUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = ACF6ED451B17847A00DA7C62 /* ASLayoutSpecUtilities.h */; };
-		3C9C128519E616EF00E942A0 /* ASTableViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 3C9C128419E616EF00E942A0 /* ASTableViewTests.m */; };
+		3C9C128519E616EF00E942A0 /* ASTableViewTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = 3C9C128419E616EF00E942A0 /* ASTableViewTests.mm */; };
 		430E7C901B4C23F100697A4C /* ASIndexPath.h in Headers */ = {isa = PBXBuildFile; fileRef = 430E7C8D1B4C23F100697A4C /* ASIndexPath.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		430E7C911B4C23F100697A4C /* ASIndexPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 430E7C8E1B4C23F100697A4C /* ASIndexPath.m */; };
 		430E7C921B4C23F100697A4C /* ASIndexPath.m in Sources */ = {isa = PBXBuildFile; fileRef = 430E7C8E1B4C23F100697A4C /* ASIndexPath.m */; };
@@ -972,7 +972,7 @@
 		299DA1A71A828D2900162D41 /* ASBatchContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASBatchContext.h; sourceTree = "<group>"; };
 		299DA1A81A828D2900162D41 /* ASBatchContext.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASBatchContext.mm; sourceTree = "<group>"; };
 		29CDC2E11AAE70D000833CA4 /* ASBasicImageDownloaderContextTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBasicImageDownloaderContextTests.m; sourceTree = "<group>"; };
-		3C9C128419E616EF00E942A0 /* ASTableViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = ASTableViewTests.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
+		3C9C128419E616EF00E942A0 /* ASTableViewTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = ASTableViewTests.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		430E7C8D1B4C23F100697A4C /* ASIndexPath.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIndexPath.h; sourceTree = "<group>"; };
 		430E7C8E1B4C23F100697A4C /* ASIndexPath.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASIndexPath.m; sourceTree = "<group>"; };
 		464052191A3F83C40061C0BA /* ASDataController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ASDataController.h; sourceTree = "<group>"; };
@@ -1451,7 +1451,7 @@
 				697B31591CFE4B410049936F /* ASEditableTextNodeTests.m */,
 				052EE0651A159FEF002C6279 /* ASMultiplexImageNodeTests.m */,
 				058D0A32195D057000B7D73C /* ASMutableAttributedStringBuilderTests.m */,
-				3C9C128419E616EF00E942A0 /* ASTableViewTests.m */,
+				3C9C128419E616EF00E942A0 /* ASTableViewTests.mm */,
 				CC4981B21D1A02BE004E13CC /* ASTableViewThrashTests.m */,
 				058D0A33195D057000B7D73C /* ASTextKitCoreTextAdditionsTests.m */,
 				254C6B511BF8FE6D003EC431 /* ASTextKitTruncationTests.mm */,
@@ -2357,7 +2357,7 @@
 				05EA6FE71AC0966E00E35788 /* ASSnapshotTestCase.m in Sources */,
 				ACF6ED631B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm in Sources */,
 				81E95C141D62639600336598 /* ASTextNodeSnapshotTests.m in Sources */,
-				3C9C128519E616EF00E942A0 /* ASTableViewTests.m in Sources */,
+				3C9C128519E616EF00E942A0 /* ASTableViewTests.mm in Sources */,
 				AEEC47E41C21D3D200EC1693 /* ASVideoNodeTests.m in Sources */,
 				254C6B521BF8FE6D003EC431 /* ASTextKitTruncationTests.mm in Sources */,
 				058D0A3D195D057000B7D73C /* ASTextKitCoreTextAdditionsTests.m in Sources */,

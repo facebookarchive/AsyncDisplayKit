@@ -17,15 +17,25 @@
 #import "ASDisplayNode+Beta.h"
 #import "ASObjectDescriptionHelpers.h"
 #import <unordered_map>
+#import "ASDataController.h"
+#import "ASBaseDefines.h"
 
-// NOTE: We log before throwing so they don't have to let it bubble up to see the error.
-#define ASFailUpdateValidation(...)\
-  if ([ASDisplayNode suppressesInvalidCollectionUpdateExceptions]) {\
-    NSLog(__VA_ARGS__);\
-  } else {\
-    NSLog(__VA_ARGS__);\
-    ASDisplayNodeFailAssert(__VA_ARGS__);\
-  }
+// If assertions are enabled and they haven't forced us to suppress the exception,
+// then throw, otherwise log.
+#if ASDISPLAYNODE_ASSERTIONS_ENABLED
+  #define ASFailUpdateValidation(...)\
+    _Pragma("clang diagnostic push")\
+    _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")\
+    if ([ASDisplayNode suppressesInvalidCollectionUpdateExceptions]) {\
+      NSLog(__VA_ARGS__);\
+    } else {\
+      NSLog(__VA_ARGS__);\
+      [NSException raise:ASCollectionInvalidUpdateException format:__VA_ARGS__];\
+    }\
+  _Pragma("clang diagnostic pop")
+#else
+  #define ASFailUpdateValidation(...) NSLog(__VA_ARGS__);
+#endif
 
 BOOL ASHierarchyChangeTypeIsFinal(_ASHierarchyChangeType changeType) {
     switch (changeType) {

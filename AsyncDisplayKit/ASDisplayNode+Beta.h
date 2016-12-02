@@ -58,8 +58,8 @@ typedef struct {
  *
  * This property defaults to NO. It will be removed in a future release.
  */
-+ (BOOL)suppressesInvalidCollectionUpdateExceptions AS_WARN_UNUSED_RESULT;
-+ (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses;
++ (BOOL)suppressesInvalidCollectionUpdateExceptions AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Collection update exceptions are thrown if assertions are enabled.");
++ (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses ASDISPLAYNODE_DEPRECATED_MSG("Collection update exceptions are thrown if assertions are enabled.");;
 
 /**
  * @abstract Recursively ensures node and all subnodes are displayed.
