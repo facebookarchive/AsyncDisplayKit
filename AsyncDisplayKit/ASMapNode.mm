@@ -200,7 +200,7 @@
   __weak __typeof__(self) weakSelf = self;
   [_snapshotter startWithQueue:dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0)
              completionHandler:^(MKMapSnapshot *snapshot, NSError *error) {
-                 __typeof__(self) strongSelf = weakSelf;
+                 __strong __typeof__(weakSelf) strongSelf = weakSelf;
                 if (!strongSelf) {
                   return;
                 }

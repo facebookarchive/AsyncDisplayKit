@@ -505,7 +505,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     } else {
       __weak __typeof__(self) weakSelf = self;
       void (^finished)(id <ASImageContainerProtocol>, NSError *, id downloadIdentifier) = ^(id <ASImageContainerProtocol>imageContainer, NSError *error, id downloadIdentifier) {
-        __typeof__(self) strongSelf = weakSelf;
+        __strong __typeof__(weakSelf) strongSelf = weakSelf;
         if (strongSelf == nil) {
           return;
         }

@@ -1491,7 +1491,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   // Wrap the node block
   __weak __typeof__(self) weakSelf = self;
   return ^{
-    __typeof__(self) strongSelf = weakSelf;
+    __strong __typeof__(weakSelf) strongSelf = weakSelf;
     ASCellNode *node = (block != nil ? block() : [[ASCellNode alloc] init]);
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
     if (node.interactionDelegate == nil) {
