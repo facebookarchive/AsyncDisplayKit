@@ -174,6 +174,8 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
  */
 - (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
 {
+  [node setNeedsLayout];
+  
   CGRect frame = CGRectZero;
   frame.size = [node layoutThatFits:constrainedSize].size;
   node.frame = frame;
