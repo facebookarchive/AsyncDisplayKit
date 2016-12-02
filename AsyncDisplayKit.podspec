@@ -40,16 +40,6 @@ Pod::Spec.new do |spec|
         # See https://github.com/facebook/AsyncDisplayKit/issues/1153
         'AsyncDisplayKit/TextKit/*.h',
     ]
-    core.dependency  'AsyncDisplayKit/ASDealloc2MainObject'
-  end
-  
-  spec.subspec 'ASDealloc2MainObject' do |mrr|
-    mrr.requires_arc = false
-    mrr.source_files = [
-      'AsyncDisplayKit/Private/_AS-objc-internal.h',
-      'AsyncDisplayKit/Details/ASDealloc2MainObject.h',
-      'AsyncDisplayKit/Details/ASDealloc2MainObject.m',
-    ]
   end
   
   spec.subspec 'PINRemoteImage' do |pin|
