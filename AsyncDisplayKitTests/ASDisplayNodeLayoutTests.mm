@@ -125,24 +125,41 @@
 {
   const CGSize kSize = CGSizeMake(300, 300);
   
-  ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
-  displayNode.automaticallyManagesSubnodes = YES;
-  displayNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
-    ASTextNode *someOtherNode = [ASTextNode new];
-    return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:someOtherNode];
+  ASDisplayNode *subNode = [[ASDisplayNode alloc] init];
+  subNode.automaticallyManagesSubnodes = YES;
+  subNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    ASTextNode *textNode = [ASTextNode new];
+    textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Test Test Test Test Test Test Test Test"];
+    ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:textNode];
+    return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:insetSpec];
+  };
+  
+  ASDisplayNode *rootNode = [[ASDisplayNode alloc] init];
+  rootNode.automaticallyManagesSubnodes = YES;
+  rootNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    ASTextNode *textNode = [ASTextNode new];
+    textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Test Test Test Test Test"];
+    ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:textNode];
+    
+    return [ASStackLayoutSpec
+            stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+            spacing:0.0
+            justifyContent:ASStackLayoutJustifyContentStart
+            alignItems:ASStackLayoutAlignItemsStretch
+            children:@[insetSpec, subNode]];
   };
 
-  displayNode.frame = CGRectMake(0, 0, kSize.width, kSize.height);
-  [displayNode view];
+  rootNode.frame = CGRectMake(0, 0, kSize.width, kSize.height);
+  [rootNode view];
   
   XCTestExpectation *expectation = [self expectationWithDescription:@"Execute measure and layout pass"];
   
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
     
-    [displayNode layoutThatFits:ASSizeRangeMake(kSize)];
+    [rootNode layoutThatFits:ASSizeRangeMake(kSize)];
     
     dispatch_async(dispatch_get_main_queue(), ^{
-      XCTAssertNoThrow([displayNode.view layoutIfNeeded]);
+      XCTAssertNoThrow([rootNode.view layoutIfNeeded]);
       [expectation fulfill];
     });
   });
