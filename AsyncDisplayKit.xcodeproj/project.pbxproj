@@ -343,6 +343,7 @@
 		ACF6ED621B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED5A1B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm */; };
 		ACF6ED631B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = ACF6ED5B1B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm */; };
 		AE6987C11DD04E1000B9E458 /* ASPagerNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AE6987C01DD04E1000B9E458 /* ASPagerNodeTests.m */; };
+		AE8E3CE01DF4027A00B49B65 /* ASButtonNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AE8E3CDF1DF4027A00B49B65 /* ASButtonNodeTests.m */; };
 		AEB7B01B1C5962EA00662EF4 /* ASDefaultPlayButton.m in Sources */ = {isa = PBXBuildFile; fileRef = AEB7B0191C5962EA00662EF4 /* ASDefaultPlayButton.m */; };
 		AEEC47E21C20C2DD00EC1693 /* ASVideoNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = AEEC47E01C20C2DD00EC1693 /* ASVideoNode.mm */; };
 		AEEC47E41C21D3D200EC1693 /* ASVideoNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = AEEC47E31C21D3D200EC1693 /* ASVideoNodeTests.m */; };
@@ -1124,6 +1125,7 @@
 		ACF6ED5A1B178DC700DA7C62 /* ASRatioLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRatioLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
 		ACF6ED5B1B178DC700DA7C62 /* ASStackLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASStackLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
 		AE6987C01DD04E1000B9E458 /* ASPagerNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPagerNodeTests.m; sourceTree = "<group>"; };
+		AE8E3CDF1DF4027A00B49B65 /* ASButtonNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASButtonNodeTests.m; sourceTree = "<group>"; };
 		AEB7B0181C5962EA00662EF4 /* ASDefaultPlayButton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASDefaultPlayButton.h; sourceTree = "<group>"; };
 		AEB7B0191C5962EA00662EF4 /* ASDefaultPlayButton.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASDefaultPlayButton.m; sourceTree = "<group>"; };
 		AEEC47DF1C20C2DD00EC1693 /* ASVideoNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASVideoNode.h; sourceTree = "<group>"; };
@@ -1465,6 +1467,7 @@
 				2538B6F21BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m */,
 				69FEE53C1D95A9AF0086F066 /* ASLayoutElementStyleTests.m */,
 				695BE2541DC1245C008E6EA5 /* ASWrapperSpecSnapshotTests.mm */,
+				AE8E3CDF1DF4027A00B49B65 /* ASButtonNodeTests.m */,
 			);
 			path = AsyncDisplayKitTests;
 			sourceTree = "<group>";
@@ -2319,6 +2322,7 @@
 				242995D31B29743C00090100 /* ASBasicImageDownloaderTests.m in Sources */,
 				296A0A351A951ABF005ACEAA /* ASBatchFetchingTests.m in Sources */,
 				ACF6ED5C1B178DC700DA7C62 /* ASCenterLayoutSpecSnapshotTests.mm in Sources */,
+				AE8E3CE01DF4027A00B49B65 /* ASButtonNodeTests.m in Sources */,
 				9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.mm in Sources */,
 				2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */,
 				CC3B208E1C3F7D0A00798563 /* ASWeakSetTests.m in Sources */,

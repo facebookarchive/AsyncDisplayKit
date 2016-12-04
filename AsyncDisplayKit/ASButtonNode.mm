@@ -170,6 +170,12 @@
   }
   
   if ((_imageNode != nil || newImage != nil) && newImage != self.imageNode.image) {
+    if (newImage.renderingMode == UIImageRenderingModeAlwaysTemplate && !_imageNode.imageModificationBlock) {
+      _imageNode.imageModificationBlock = ASImageNodeTintColorModificationBlock(self.tintColor);
+    }
+    if (newImage.renderingMode != UIImageRenderingModeAlwaysTemplate && _imageNode.imageModificationBlock) {
+      _imageNode.imageModificationBlock = nil;
+    }
     _imageNode.image = newImage;
     [self setNeedsLayout];
   }
@@ -531,6 +537,15 @@
   _backgroundImageNode.hidden = (_backgroundImageNode.image == nil);
   _imageNode.hidden = (_imageNode.image == nil);
   _titleNode.hidden = (_titleNode.attributedText.length == 0);
+}
+
+- (void)setTintColor:(UIColor *)tintColor
+{
+  [super setTintColor:tintColor];
+  
+  if (_imageNode) {
+      _imageNode.imageModificationBlock = ASImageNodeTintColorModificationBlock(tintColor);
+  }
 }
 
 @end
