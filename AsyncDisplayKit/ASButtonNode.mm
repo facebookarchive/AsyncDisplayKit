@@ -541,6 +541,8 @@
 
 - (void)setTintColor:(UIColor *)tintColor
 {
+  ASDN::MutexLocker l(__instanceLock__);
+  
   [super setTintColor:tintColor];
   
   if (_imageNode) {
