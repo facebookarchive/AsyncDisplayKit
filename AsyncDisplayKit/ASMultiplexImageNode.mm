@@ -11,16 +11,17 @@
 #if TARGET_OS_IOS
 
 #import "ASMultiplexImageNode.h"
+#import "ASImageNode+Private.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 
 #import "ASAvailability.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNodeExtras.h"
 #import "ASLog.h"
 #import "ASPhotosFrameworkImageRequest.h"
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
-#import "ASDisplayNodeExtras.h"
 
 #if !AS_IOS8_SDK_OR_LATER
 #error ASMultiplexImageNode can be used on iOS 7, but must be linked against the iOS 8 SDK.
@@ -233,7 +234,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   // setting this to nil makes the node fetch images the next time its display starts
   _loadedImageIdentifier = nil;
-  self.image = nil;
+  [self __setImage:nil];
 }
 
 - (void)didEnterPreloadState
@@ -324,6 +325,12 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 }
 
 #pragma mark - Core
+
+- (void)setImage:(UIImage *)image
+{
+  ASDisplayNodeAssert(NO, @"Setting the image directly to an ASMultiplexImageNode is not allowed.");
+  [self __setImage:image];
+}
 
 - (void)setDelegate:(id <ASMultiplexImageNodeDelegate>)delegate
 {
@@ -520,7 +527,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
         return;
       }
-      strongSelf.image = progressImage;
+      [self __setImage:progressImage];
     };
   }
   [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
@@ -538,7 +545,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   if (shouldReleaseImageOnBackgroundThread) {
     ASPerformBackgroundDeallocation(image);
   }
-  self.image = nil;
+  [self __setImage:nil];
 }
 
 #pragma mark -
@@ -867,7 +874,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     UIImage *previousImage = self.image;
 
     self.loadedImageIdentifier = imageIdentifier;
-    self.image = image;
+    [self __setImage:image];
 
     if (_delegateFlags.updatedImage) {
       [_delegate multiplexImageNode:self didUpdateImage:image withIdentifier:imageIdentifier fromImage:previousImage withIdentifier:previousIdentifier];

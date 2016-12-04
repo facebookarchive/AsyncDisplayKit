@@ -200,6 +200,11 @@ struct ASImageNodeDrawParameters {
 
 - (void)setImage:(UIImage *)image
 {
+  [self __setImage:image];
+}
+
+- (void)__setImage:(UIImage *)image
+{
   ASDN::MutexLocker l(__instanceLock__);
   if (!ASObjectIsEqual(_image, image)) {
     _image = image;

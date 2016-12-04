@@ -9,15 +9,16 @@
 //
 
 #import "ASNetworkImageNode.h"
+#import "ASImageNode+Private.h"
 
 #import "ASBasicImageDownloader.h"
 #import "ASDisplayNodeInternal.h"
+#import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
 #import "ASImageContainerProtocolCategories.h"
-#import "ASDisplayNodeExtras.h"
 
 #if PIN_REMOTE_IMAGE
 #import "ASPINRemoteImageDownloader.h"
@@ -67,6 +68,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     unsigned int cacheSupportsSynchronousFetch:1;
   } _cacheFlags;
 }
+
 @end
 
 @implementation ASNetworkImageNode
@@ -116,6 +118,12 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 #pragma mark - Public methods -- must lock
 
+- (void)setImage:(UIImage *)image
+{
+  ASDisplayNodeAssert(NO, @"Setting the image directly to an ASNetworkImageNode is not allowed. Please either use the defaultImage property or move to an ASImageNode");
+  [self __setImage:image];
+}
+
 - (void)setURL:(NSURL *)URL
 {
   [self setURL:URL resetToDefault:YES];
@@ -136,7 +144,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
   BOOL hasURL = _URL == nil;
   if (reset || hasURL) {
-    self.image = _defaultImage;
+    [self __setImage:_defaultImage];
     /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
      so always use a dispatch_async to ensure that we queue the operations in the correct order.
      (see comment in displayDidFinish) */
@@ -171,7 +179,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     dispatch_async(dispatch_get_main_queue(), ^{
       self.currentImageQuality = hasURL ? 0.0 : 1.0;
     });
-    self.image = defaultImage;
+    [self __setImage:defaultImage];
   }
 }
 
@@ -256,7 +264,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     if (_imageLoaded == NO && _URL && _downloadIdentifier == nil) {
       UIImage *result = [[_cache synchronouslyFetchedCachedImageWithURL:_URL] asdk_image];
       if (result) {
-        self.image = result;
+        [self __setImage:result];
         _imageLoaded = YES;
         dispatch_async(dispatch_get_main_queue(), ^{
           _currentImageQuality = 1.0;
@@ -340,7 +348,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   if (ASObjectIsEqual(_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
     return;
   }
-  self.image = progressImage;
+  [self __setImage:progressImage];
   dispatch_async(dispatch_get_main_queue(), ^{
     // See comment in -displayDidFinish for why this must be dispatched to main
     self.currentImageQuality = progress;
@@ -396,7 +404,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     ASPerformBackgroundDeallocation(image);
   }
   self.animatedImage = nil;
-  self.image = _defaultImage;
+  [self __setImage:_defaultImage];
   _imageLoaded = NO;
   // See comment in -displayDidFinish for why this must be dispatched to main
   dispatch_async(dispatch_get_main_queue(), ^{
@@ -456,7 +464,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
         dispatch_async(dispatch_get_main_queue(), ^{
           if (self.shouldCacheImage) {
-            self.image = [UIImage imageNamed:_URL.path.lastPathComponent];
+            [self __setImage:[UIImage imageNamed:_URL.path.lastPathComponent]];
           } else {
             // First try to load the path directly, for efficiency assuming a developer who
             // doesn't want caching is trying to be as minimal as possible.
@@ -486,7 +494,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
             if (animatedImage != nil) {
               self.animatedImage = animatedImage;
             } else {
-              self.image = nonAnimatedImage;
+              [self __setImage:nonAnimatedImage];
             }
           }
 
@@ -522,7 +530,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           if ([imageContainer asdk_animatedImageData] && _downloaderFlags.downloaderImplementsAnimatedImage) {
             strongSelf.animatedImage = [_downloader animatedImageWithData:[imageContainer asdk_animatedImageData]];
           } else {
-            strongSelf.image = [imageContainer asdk_image];
+            [strongSelf __setImage:[imageContainer asdk_image]];
           }
           dispatch_async(dispatch_get_main_queue(), ^{
             strongSelf->_currentImageQuality = 1.0;

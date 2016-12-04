@@ -71,6 +71,12 @@
   [downloader verifyWithDelay:5];
 }
 
+- (void)testThatSettingAnImageExternallyWillThrow
+{
+  ASNetworkImageNode *networkImageNode = [[ASNetworkImageNode alloc] init];
+  XCTAssertThrows(networkImageNode.image = [UIImage imageNamed:@""]);
+}
+
 @end
 
 @implementation ASTestImageCache
