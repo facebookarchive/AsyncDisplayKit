@@ -16,6 +16,7 @@
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
 #import "ASDisplayNodeExtras.h"
+#import "ASImageNode+Private.h"
 
 static BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
   return ASObjectIsEqual(asset1, asset2)
@@ -300,7 +301,7 @@ static NSString * const kRate = @"rate";
   if (image != nil) {
     self.contentMode = ASContentModeFromVideoGravity(_gravity);
   }
-  self.image = image;
+  [self __setImage:image];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
