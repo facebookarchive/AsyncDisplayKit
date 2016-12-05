@@ -119,6 +119,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 #pragma mark - Public methods -- must lock
 
+/// Setter for public image property. It has the side effect to set an internal _imageWasSetExternally that prevents setting an image internally. Setting an image internally should happen with the _setImage: method
 - (void)setImage:(UIImage *)image
 {
   __instanceLock__.lock();
@@ -131,9 +132,17 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   [self __setImage:image];
 }
 
+/// Internal image setter that will first check if an image already was set externally and will return otherwise will set it
 - (void)_setImage:(UIImage *)image
 {
   __instanceLock__.lock();
+  
+#ifdef DEBUG
+  if (_URL != nil) {
+    NSLog(@"Setting the image directly on an %@ and setting an URL is not supported. If you decide to set an image direclty this node will work the same ways as an plain ASImageNode and not consider the image loaded via URL.", NSStringFromClass([self class]));
+  }
+#endif
+  
   if (_imageWasSetExternally) {
     __instanceLock__.unlock();
     return;
@@ -154,7 +163,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 #ifdef DEBUG
   if (_imageWasSetExternally) {
-    NSLog(@"Image was already set via the .image property. Setting an image explicitly and setting an URL is not supported.");
+    NSLog(@"Setting the image directly on an %@ and setting an URL is not supported. If you decide to set an image direclty this node will work the same ways as an plain ASImageNode and not consider the image loaded via URL.", NSStringFromClass([self class]));
   }
 #endif
 
