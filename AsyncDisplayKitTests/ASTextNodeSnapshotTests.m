@@ -18,6 +18,13 @@
 
 @implementation ASTextNodeSnapshotTests
 
+- (void)setUp
+{
+  [super setUp];
+  
+  self.recordMode = NO;
+}
+
 - (void)testTextContainerInset
 {
   // trivial test case to ensure ASSnapshotTestCase works
