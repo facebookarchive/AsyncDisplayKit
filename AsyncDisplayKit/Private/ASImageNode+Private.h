@@ -18,6 +18,9 @@
  * Set the image property of the ASImageNode. Subclasses like ASNetworkImageNode do not allow setting the
  * image property directly and throw an assertion. There still needs to be a way for subclasses of
  * ASNetworkImageNode to set the image.
+ *
+ * This is exposed to library subclasses, i.e. ASNetworkImageNode, ASMultiplexImageNode and ASVideoNode for setting
+ * the image directly without going throug the setter of the superclass
  */
 - (void)__setImage:(UIImage *)image;
 
