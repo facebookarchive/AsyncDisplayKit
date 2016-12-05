@@ -116,8 +116,6 @@ static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, 
   if (renderer == nil) {
     renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes constrainedSize:constrainedSize];
     [cache setObject:renderer forKey:key];
-  } else {
-    NSLog(@"haha");
   }
   
   return renderer;
