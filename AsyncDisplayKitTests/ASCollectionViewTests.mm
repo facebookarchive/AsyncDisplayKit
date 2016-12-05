@@ -894,4 +894,64 @@
   [self waitForExpectationsWithTimeout:3 handler:nil];
 }
 
+- (void)testThatWeBatchFetchUntilLeadingScreensRequirementIsMet_Animated
+{
+  [self _primitiveBatchFetchingFillTestAnimated:YES];
+}
+
+- (void)testThatWeBatchFetchUntilLeadingScreensRequirementIsMet_Nonanimated
+{
+  [self _primitiveBatchFetchingFillTestAnimated:NO];
+}
+
+- (void)_primitiveBatchFetchingFillTestAnimated:(BOOL)animated
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  window.rootViewController = testController;
+
+  // Start with 1 empty section
+  __block NSInteger itemCount = 0;
+  testController.asyncDelegate->_itemCounts = {itemCount};
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+
+  ASCollectionNode *cn = testController.collectionNode;
+  [cn waitUntilAllUpdatesAreCommitted];
+  XCTAssertGreaterThan(cn.bounds.size.height, cn.view.contentSize.height, @"Expected initial data not to fill collection view area.");
+
+  XCTestExpectation *expectation = [self expectationWithDescription:@"Completed all batch fetches"];
+  __weak ASCollectionViewTestController *weakController = testController;
+  __block NSInteger batchFetchCount = 0;
+  testController.asyncDelegate.willBeginBatchFetch = ^(ASBatchContext *context) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      NSInteger fetchIndex = batchFetchCount++;
+      
+      NSInteger itemCount = weakController.asyncDelegate->_itemCounts[0];
+      weakController.asyncDelegate->_itemCounts[0] = (itemCount + 1);
+      if (animated) {
+        [cn insertItemsAtIndexPaths:@[ [NSIndexPath indexPathForItem:itemCount inSection:0] ]];
+      } else {
+        [cn performBatchAnimated:NO updates:^{
+          [cn insertItemsAtIndexPaths:@[ [NSIndexPath indexPathForItem:itemCount inSection:0] ]];
+        } completion:nil];
+      }
+
+      [context completeBatchFetching:YES];
+
+      // If no more batch fetches have happened in 1 second, assume we're done.
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if (fetchIndex == batchFetchCount - 1) {
+          [expectation fulfill];
+        }
+      });
+    });
+  };
+  [self waitForExpectationsWithTimeout:60 handler:nil];
+  CGFloat contentHeight = cn.view.contentSize.height;
+  CGFloat requiredContentHeight = CGRectGetMaxY(cn.bounds) + CGRectGetHeight(cn.bounds) * cn.view.leadingScreensForBatching;
+  XCTAssertGreaterThan(batchFetchCount, 2);
+  XCTAssertGreaterThanOrEqual(contentHeight, requiredContentHeight);
+}
+
 @end

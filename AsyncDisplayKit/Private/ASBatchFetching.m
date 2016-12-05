@@ -61,10 +61,14 @@ BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
     return YES;
   }
 
-  BOOL isScrollingTowardEnd = (ASScrollDirectionContainsDown(scrollDirection) || ASScrollDirectionContainsRight(scrollDirection));
+  // If they are scrolling toward the head of content, don't batch fetch.
+  BOOL isScrollingTowardHead = (ASScrollDirectionContainsUp(scrollDirection) || ASScrollDirectionContainsLeft(scrollDirection));
+  if (isScrollingTowardHead) {
+    return NO;
+  }
 
   CGFloat triggerDistance = viewLength * leadingScreens;
   CGFloat remainingDistance = contentLength - viewLength - offset;
 
-  return isScrollingTowardEnd && remainingDistance <= triggerDistance;
+  return remainingDistance <= triggerDistance;
 }
