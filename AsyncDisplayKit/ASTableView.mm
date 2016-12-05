@@ -365,6 +365,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     ASDisplayNodeAssert(_asyncDataSourceFlags.tableNodeNumberOfRowsInSection || _asyncDataSourceFlags.tableViewNumberOfRowsInSection, @"Data source must implement tableNode:numberOfRowsInSection:");
   }
   
+  _dataController.validationErrorSource = asyncDataSource;
   super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
 }
 
@@ -1644,18 +1645,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   [super beginUpdates];
   [super endUpdates];
-}
-
-#pragma mark - Memory Management
-
-- (void)clearContents
-{
-  [_rangeController clearContents];
-}
-
-- (void)clearFetchedData
-{
-  [_rangeController clearFetchedData];
 }
 
 #pragma mark - Helper Methods

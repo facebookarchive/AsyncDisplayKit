@@ -1,4 +1,4 @@
-![AsyncDisplayKit](https://github.com/facebook/AsyncDisplayKit/blob/gh-pages/static/images/logo.png)
+![AsyncDisplayKit](https://github.com/AsyncDisplayKit/Documentation/raw/master/docs/static/images/logo.png)
 
 [![Apps Using](https://img.shields.io/badge/Apps%20Using%20ASDK-%3E4,974-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
 [![Downloads](https://img.shields.io/badge/Total%20Downloads-%3E512,000-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)

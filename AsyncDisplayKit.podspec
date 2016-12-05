@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = 'AsyncDisplayKit'
-  spec.version      = '2.0-beta.3'
+  spec.version      = '2.0-rc.1'
   spec.license      =  { :type => 'BSD' }
   spec.homepage     = 'http://asyncdisplaykit.org'
   spec.authors      = { 'Scott Goodson' => 'scottgoodson@gmail.com' }
@@ -30,12 +30,6 @@ Pod::Spec.new do |spec|
         'AsyncDisplayKit/TextKit/ASTextKitComponents.h'
     ]
     
-    # ASDealloc2MainObject must be compiled with MRR
-    core.exclude_files = [
-      'AsyncDisplayKit/Private/_AS-objc-internal.h',
-      'AsyncDisplayKit/Details/ASDealloc2MainObject.h',
-      'AsyncDisplayKit/Details/ASDealloc2MainObject.m',
-    ]
     core.source_files = [
         'AsyncDisplayKit/**/*.{h,m,mm}',
         'Base/*.{h,m}',
@@ -45,16 +39,6 @@ Pod::Spec.new do |spec|
         # `use_frameworks!` on 0.39.0 & Swift 2.1.
         # See https://github.com/facebook/AsyncDisplayKit/issues/1153
         'AsyncDisplayKit/TextKit/*.h',
-    ]
-    core.dependency  'AsyncDisplayKit/ASDealloc2MainObject'
-  end
-  
-  spec.subspec 'ASDealloc2MainObject' do |mrr|
-    mrr.requires_arc = false
-    mrr.source_files = [
-      'AsyncDisplayKit/Private/_AS-objc-internal.h',
-      'AsyncDisplayKit/Details/ASDealloc2MainObject.h',
-      'AsyncDisplayKit/Details/ASDealloc2MainObject.m',
     ]
   end
   

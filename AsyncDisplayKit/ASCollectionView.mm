@@ -444,6 +444,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
                         || _asyncDataSourceFlags.collectionViewNodeForItem, @"Data source must implement collectionNode:nodeBlockForItemAtIndexPath: or collectionNode:nodeForItemAtIndexPath:");
   }
   
+  _dataController.validationErrorSource = asyncDataSource;
   super.dataSource = (id<UICollectionViewDataSource>)_proxyDataSource;
   
   //Cache results of layoutInspector to ensure flags are up to date if getter lazily loads a new one.
@@ -1679,18 +1680,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
   
   _nextLayoutInvalidationStyle = invalidationStyle;
-}
-
-#pragma mark - Memory Management
-
-- (void)clearContents
-{
-  [_rangeController clearContents];
-}
-
-- (void)clearFetchedData
-{
-  [_rangeController clearFetchedData];
 }
 
 #pragma mark - _ASDisplayView behavior substitutions
