@@ -927,6 +927,11 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   return _videoNode.URL;
 }
 
+- (ASVideoNode*)videoNode
+{
+  return _videoNode;
+}
+
 - (void)setShouldAggressivelyRecoverFromStall:(BOOL)shouldAggressivelyRecoverFromStall
 {
   if (_shouldAggressivelyRecoverFromStall == shouldAggressivelyRecoverFromStall) {
