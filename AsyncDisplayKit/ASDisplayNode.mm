@@ -2956,7 +2956,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)recursivelyClearPreloadedData
 {
   ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
-    [node _didExitPreloadState];
+    [node didExitPreloadState];
   });
 }
 
@@ -2987,15 +2987,6 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     [self fetchData];
 #pragma clang diagnostic pop
-  }
-}
-
-- (void)_didExitPreloadState
-{
-  // We don't want to call -didExitPreloadState on nodes that aren't being managed by a range controller.
-  // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
-  if ([self supportsRangeManagedInterfaceState]) {
-    [self didExitPreloadState];
   }
 }
 
@@ -3075,7 +3066,11 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     if (nowPreload) {
       [self didEnterPreloadState];
     } else {
-      [self _didExitPreloadState];
+      // We don't want to call -didExitPreloadState on nodes that aren't being managed by a range controller.
+      // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
+      if ([self supportsRangeManagedInterfaceState]) {
+        [self didExitPreloadState];
+      }
     }
   }
   
@@ -3958,7 +3953,7 @@ ASLayoutElementStyleForwarding
   if (inLoadState) {
     [self didEnterPreloadState];
   } else {
-    [self _didExitPreloadState];
+    [self didExitPreloadState];
   }
 }
 
