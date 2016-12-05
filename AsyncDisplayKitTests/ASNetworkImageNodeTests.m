@@ -71,10 +71,15 @@
   [downloader verifyWithDelay:5];
 }
 
-- (void)testThatSettingAnImageExternallyWillThrow
+- (void)testThatSettingAnImageWillStayForEnteringAndExitingPreloadState
 {
+  UIImage *image = [[UIImage alloc] init];
   ASNetworkImageNode *networkImageNode = [[ASNetworkImageNode alloc] init];
-  XCTAssertThrows(networkImageNode.image = [UIImage imageNamed:@""]);
+  networkImageNode.image = image;
+  [networkImageNode enterInterfaceState:ASInterfaceStatePreload];
+  XCTAssertEqualObjects(image, networkImageNode.image);
+  [networkImageNode exitInterfaceState:ASInterfaceStatePreload];
+  XCTAssertEqualObjects(image, networkImageNode.image);
 }
 
 @end

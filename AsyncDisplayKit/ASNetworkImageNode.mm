@@ -43,6 +43,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   id _downloadIdentifierForProgressBlock;
 
   BOOL _imageLoaded;
+  BOOL _imageWasSetExternally;
   CGFloat _currentImageQuality;
   CGFloat _renderedImageQuality;
   BOOL _shouldRenderProgressImages;
@@ -120,7 +121,25 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)setImage:(UIImage *)image
 {
-  ASDisplayNodeAssert(NO, @"Setting the image directly to an ASNetworkImageNode is not allowed. Please either use the defaultImage property or move to an ASImageNode");
+  __instanceLock__.lock();
+  _imageWasSetExternally = (image != nil);
+  if (_imageWasSetExternally) {
+    [self __cancelDownloadAndClearImage];
+  }
+  __instanceLock__.unlock();
+  
+  [self __setImage:image];
+}
+
+- (void)_setImage:(UIImage *)image
+{
+  __instanceLock__.lock();
+  if (_imageWasSetExternally) {
+    __instanceLock__.unlock();
+    return;
+  }
+  __instanceLock__.unlock();
+  
   [self __setImage:image];
 }
 
@@ -133,7 +152,13 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 {
   ASDN::MutexLocker l(__instanceLock__);
 
-  if (ASObjectIsEqual(URL, _URL)) {
+#ifdef DEBUG
+  if (_imageWasSetExternally) {
+    NSLog(@"Image was already set via the .image property. Setting an image explicitly and setting an URL is not supported.");
+  }
+#endif
+
+  if (ASObjectIsEqual(URL, _URL) || _imageWasSetExternally) {
     return;
   }
 
@@ -144,7 +169,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
   BOOL hasURL = _URL == nil;
   if (reset || hasURL) {
-    [self __setImage:_defaultImage];
+    [self _setImage:_defaultImage];
     /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
      so always use a dispatch_async to ensure that we queue the operations in the correct order.
      (see comment in displayDidFinish) */
@@ -179,7 +204,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     dispatch_async(dispatch_get_main_queue(), ^{
       self.currentImageQuality = hasURL ? 0.0 : 1.0;
     });
-    [self __setImage:defaultImage];
+    [self _setImage:defaultImage];
   }
 }
 
@@ -264,7 +289,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     if (_imageLoaded == NO && _URL && _downloadIdentifier == nil) {
       UIImage *result = [[_cache synchronouslyFetchedCachedImageWithURL:_URL] asdk_image];
       if (result) {
-        [self __setImage:result];
+        [self _setImage:result];
         _imageLoaded = YES;
         dispatch_async(dispatch_get_main_queue(), ^{
           _currentImageQuality = 1.0;
@@ -320,12 +345,12 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
   {
     ASDN::MutexLocker l(__instanceLock__);
-
-    [self _cancelImageDownload];
-    [self _clearImage];
-    if (_cacheFlags.cacheSupportsClearing) {
-      [_cache clearFetchedImageFromCacheWithURL:_URL];
+    // If the image was set explicitly we don't want to remove it while exiting the preload state
+    if (_imageWasSetExternally) {
+      return;
     }
+
+    [self __cancelDownloadAndClearImage];
   }
 }
 
@@ -335,7 +360,10 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   
   {
     ASDN::MutexLocker l(__instanceLock__);
-    [self _lazilyLoadImageIfNecessary];
+    // Image was set externally no need to load an image
+    if (_imageWasSetExternally == NO) {
+      [self _lazilyLoadImageIfNecessary];
+    }
   }
 }
 
@@ -348,7 +376,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   if (ASObjectIsEqual(_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
     return;
   }
-  [self __setImage:progressImage];
+  [self _setImage:progressImage];
   dispatch_async(dispatch_get_main_queue(), ^{
     // See comment in -displayDidFinish for why this must be dispatched to main
     self.currentImageQuality = progress;
@@ -391,6 +419,15 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   _downloadIdentifierForProgressBlock = newDownloadIDForProgressBlock;
 }
 
+- (void)__cancelDownloadAndClearImage
+{
+  [self _cancelImageDownload];
+  [self _clearImage];
+  if (_cacheFlags.cacheSupportsClearing) {
+    [_cache clearFetchedImageFromCacheWithURL:_URL];
+  }
+}
+
 - (void)_clearImage
 {
   // Destruction of bigger images on the main thread can be expensive
@@ -404,7 +441,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     ASPerformBackgroundDeallocation(image);
   }
   self.animatedImage = nil;
-  [self __setImage:_defaultImage];
+  [self _setImage:_defaultImage];
   _imageLoaded = NO;
   // See comment in -displayDidFinish for why this must be dispatched to main
   dispatch_async(dispatch_get_main_queue(), ^{
@@ -464,7 +501,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
         dispatch_async(dispatch_get_main_queue(), ^{
           if (self.shouldCacheImage) {
-            [self __setImage:[UIImage imageNamed:_URL.path.lastPathComponent]];
+            [self _setImage:[UIImage imageNamed:_URL.path.lastPathComponent]];
           } else {
             // First try to load the path directly, for efficiency assuming a developer who
             // doesn't want caching is trying to be as minimal as possible.
@@ -494,7 +531,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
             if (animatedImage != nil) {
               self.animatedImage = animatedImage;
             } else {
-              [self __setImage:nonAnimatedImage];
+              [self _setImage:nonAnimatedImage];
             }
           }
 
@@ -530,7 +567,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
           if ([imageContainer asdk_animatedImageData] && _downloaderFlags.downloaderImplementsAnimatedImage) {
             strongSelf.animatedImage = [_downloader animatedImageWithData:[imageContainer asdk_animatedImageData]];
           } else {
-            [strongSelf __setImage:[imageContainer asdk_image]];
+            [strongSelf _setImage:[imageContainer asdk_image]];
           }
           dispatch_async(dispatch_get_main_queue(), ^{
             strongSelf->_currentImageQuality = 1.0;
