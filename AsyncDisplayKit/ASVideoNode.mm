@@ -90,7 +90,8 @@ static NSString * const kRate = @"rate";
 
 // TODO: Support preview images with HTTP Live Streaming videos.
 
-#pragma mark - Construction and Layout
+#pragma mark - Lifecycle
+
 
 - (instancetype)init
 {
@@ -228,6 +229,22 @@ static NSString * const kRate = @"rate";
   }
 }
 
+- (void)_fetchDataForVideoNode
+{
+  [self setNeedsPreload];
+}
+
+- (void)_clearVideoNode
+{
+  self.videoPlaceholderImage = nil;
+  self.player = nil;
+  self.currentItem = nil;
+  self.playerState = ASVideoNodePlayerStateUnknown;
+}
+
+#pragma mark - Layout
+
+
 - (void)layout
 {
   [super layout];
@@ -301,7 +318,7 @@ static NSString * const kRate = @"rate";
   if (image != nil) {
     self.contentMode = ASContentModeFromVideoGravity(_gravity);
   }
-  [self __setImage:image];
+  self.image = image;
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -413,10 +430,7 @@ static NSString * const kRate = @"rate";
   
   {
     ASDN::MutexLocker l(__instanceLock__);
-
-    self.player = nil;
-    self.currentItem = nil;
-    self.playerState = ASVideoNodePlayerStateUnknown;
+    [self _clearVideoNode];
   }
 }
 
@@ -507,10 +521,15 @@ static NSString * const kRate = @"rate";
 
 - (void)_setAndFetchAsset:(AVAsset *)asset url:(NSURL *)assetURL
 {
-  [self didExitPreloadState];
-  _asset = asset;
-  _assetURL = assetURL;
-  [self setNeedsPreload];
+  [self _clearVideoNode];
+  
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    _asset = asset;
+    _assetURL = assetURL;
+  }
+  
+  [self _fetchDataForVideoNode];
 }
 
 - (void)setVideoComposition:(AVVideoComposition *)videoComposition
@@ -619,7 +638,7 @@ static NSString * const kRate = @"rate";
   }
 
   if (_player == nil) {
-    [self setNeedsPreload];
+    [self _fetchDataForVideoNode];
   }
 
   if (_playerNode == nil) {
