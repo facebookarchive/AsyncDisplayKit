@@ -1725,6 +1725,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_rangeController setNeedsUpdate];
     [_rangeController updateIfNeeded];
   }
+
+  // When we aren't visible, we will only fetch up to the visible area. Now that we are visible,
+  // we will fetch visible area + leading screens, so we need to check.
+  if (visible) {
+    [self _checkForBatchFetching];
+  }
 }
 
 @end

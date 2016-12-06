@@ -45,6 +45,7 @@ BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollVi
  @param contentSize The content size of the scrollview.
  @param targetOffset The offset that the scrollview will scroll to.
  @param leadingScreens How many screens in the remaining distance will trigger batch fetching.
+ @param visible Whether the view is visible or not.
  @return Whether or not the current state should proceed with batch fetching.
  @discussion This method is broken into a category for unit testing purposes and should be used with the ASTableView and
  * ASCollectionView batch fetching API.
@@ -55,6 +56,7 @@ extern BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
                                                 CGRect bounds,
                                                 CGSize contentSize,
                                                 CGPoint targetOffset,
-                                                CGFloat leadingScreens);
+                                                CGFloat leadingScreens,
+                                                BOOL visible);
 
 ASDISPLAYNODE_EXTERN_C_END
