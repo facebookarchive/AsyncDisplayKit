@@ -358,6 +358,13 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   [self reloadDataWithCompletion:nil];
 }
 
+- (void)scrollToItemAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UICollectionViewScrollPosition)scrollPosition animated:(BOOL)animated
+{
+  if ([self validateIndexPath:indexPath]) {
+    [super scrollToItemAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+  }
+}
+
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
@@ -620,8 +627,35 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
+/**
+ * Asserts that the index path is a valid view-index-path, and returns it if so, nil otherwise.
+ */
+- (nullable NSIndexPath *)validateIndexPath:(nullable NSIndexPath *)indexPath
+{
+  if (indexPath == nil) {
+    return nil;
+  }
+
+  NSInteger section = indexPath.section;
+  if (section >= self.numberOfSections) {
+    ASDisplayNodeFailAssert(@"Collection view index path has invalid section %lu, section count = %lu", (unsigned long)section, (unsigned long)self.numberOfSections);
+    return nil;
+  }
+
+  if (indexPath.item >= [self numberOfItemsInSection:section]) {
+    ASDisplayNodeFailAssert(@"Collection view index path has invalid item %lu in section %lu, item count = %lu", (unsigned long)indexPath.item, (unsigned long)section, (unsigned long)[self numberOfItemsInSection:section]);
+    return nil;
+  }
+
+  return indexPath;
+}
+
 - (NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath
 {
+  if ([self validateIndexPath:indexPath] == nil) {
+    return nil;
+  }
+
   // If this is a section index path, we don't currently have a method
   // to do a mapping.
   if (indexPath.item == NSNotFound) {
@@ -656,7 +690,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
-  return [_dataController completedIndexPathForNode:cellNode];
+  return [self validateIndexPath:[_dataController completedIndexPathForNode:cellNode]];
 }
 
 - (NSArray *)visibleNodes
@@ -1707,6 +1741,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (![node supportsRangeManagedInterfaceState]) {
     [_rangeController setNeedsUpdate];
     [_rangeController updateIfNeeded];
+  }
+
+  // When we aren't visible, we will only fetch up to the visible area. Now that we are visible,
+  // we will fetch visible area + leading screens, so we need to check.
+  if (visible) {
+    [self _checkForBatchFetching];
   }
 }
 

@@ -891,4 +891,94 @@
   [self waitForExpectationsWithTimeout:3 handler:nil];
 }
 
+- (void)testThatWeBatchFetchUntilContentRequirementIsMet_Animated
+{
+  [self _primitiveBatchFetchingFillTestAnimated:YES visible:YES controller:nil];
+}
+
+- (void)testThatWeBatchFetchUntilContentRequirementIsMet_Nonanimated
+{
+  [self _primitiveBatchFetchingFillTestAnimated:NO visible:YES controller:nil];
+}
+
+- (void)testThatWeBatchFetchUntilContentRequirementIsMet_Invisible
+{
+  [self _primitiveBatchFetchingFillTestAnimated:NO visible:NO controller:nil];
+}
+
+- (void)testThatWhenWeBecomeVisibleWeWillFetchAdditionalContent
+{
+  ASCollectionViewTestController *ctrl = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  // Start with 1 empty section
+  ctrl.asyncDelegate->_itemCounts = {0};
+  [self _primitiveBatchFetchingFillTestAnimated:NO visible:NO controller:ctrl];
+  XCTAssertGreaterThan([ctrl.collectionNode numberOfItemsInSection:0], 0);
+  [self _primitiveBatchFetchingFillTestAnimated:NO visible:YES controller:ctrl];
+}
+
+- (void)_primitiveBatchFetchingFillTestAnimated:(BOOL)animated visible:(BOOL)visible controller:(nullable ASCollectionViewTestController *)testController
+{
+  if (testController == nil) {
+    testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+    // Start with 1 empty section
+    testController.asyncDelegate->_itemCounts = {0};
+  }
+  ASCollectionNode *cn = testController.collectionNode;
+
+  UIWindow *window = nil;
+  UIView *view = nil;
+  if (visible) {
+    window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    view = window;
+  } else {
+    view = cn.view;
+    view.frame = [UIScreen mainScreen].bounds;
+  }
+
+  XCTestExpectation *expectation = [self expectationWithDescription:@"Completed all batch fetches"];
+  __weak ASCollectionViewTestController *weakController = testController;
+  __block NSInteger batchFetchCount = 0;
+  testController.asyncDelegate.willBeginBatchFetch = ^(ASBatchContext *context) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      NSInteger fetchIndex = batchFetchCount++;
+
+      NSInteger itemCount = weakController.asyncDelegate->_itemCounts[0];
+      weakController.asyncDelegate->_itemCounts[0] = (itemCount + 1);
+      if (animated) {
+        [cn insertItemsAtIndexPaths:@[ [NSIndexPath indexPathForItem:itemCount inSection:0] ]];
+      } else {
+        [cn performBatchAnimated:NO updates:^{
+          [cn insertItemsAtIndexPaths:@[ [NSIndexPath indexPathForItem:itemCount inSection:0] ]];
+        } completion:nil];
+      }
+
+      [context completeBatchFetching:YES];
+
+      // If no more batch fetches have happened in 1 second, assume we're done.
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if (fetchIndex == batchFetchCount - 1) {
+          [expectation fulfill];
+        }
+      });
+    });
+  };
+  window.rootViewController = testController;
+
+  [window makeKeyAndVisible];
+  [view layoutIfNeeded];
+
+  [self waitForExpectationsWithTimeout:60 handler:nil];
+  CGFloat contentHeight = cn.view.contentSize.height;
+  CGFloat requiredContentHeight;
+  CGFloat itemHeight = [cn.view layoutAttributesForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]].size.height;
+  if (visible) {
+    requiredContentHeight = CGRectGetMaxY(cn.bounds) + CGRectGetHeight(cn.bounds) * cn.view.leadingScreensForBatching;
+  } else {
+    requiredContentHeight = CGRectGetMaxY(cn.bounds);
+  }
+  XCTAssertGreaterThan(batchFetchCount, 2);
+  XCTAssertGreaterThanOrEqual(contentHeight, requiredContentHeight, @"Loaded too little content.");
+  XCTAssertLessThanOrEqual(contentHeight, requiredContentHeight + 2 * itemHeight, @"Loaded too much content.");
+}
+
 @end

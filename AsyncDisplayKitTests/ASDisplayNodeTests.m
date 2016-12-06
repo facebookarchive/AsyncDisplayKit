@@ -1936,6 +1936,7 @@ static bool stringContainsPointer(NSString *description, id p) {
 - (void)testDidExitPreloadIsCalledWhenNodesExitPreloadRange
 {
   ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  [node setHierarchyState:ASHierarchyStateRangeManaged];
   
   [node recursivelySetInterfaceState:ASInterfaceStatePreload];
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
