@@ -26,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASNetworkImageNode : ASImageNode
 
 /**
- * The designated initializer.  Cache and Downloader are WEAK references.
+ * The designated initializer. Cache and Downloader are WEAK references.
  *
  * @param cache The object that implements a cache of images for the image node.  Weak reference.
  * @param downloader The object that implements image downloading for the image node.  Must not be nil.  Weak reference.
@@ -38,7 +38,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithCache:(nullable id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader NS_DESIGNATED_INITIALIZER;
 
 /**
- * Convenience initialiser.
+ * Convenience initializer.
  *
  * @return An ASNetworkImageNode configured to use the NSURLSession-powered ASBasicImageDownloader, and no extra cache.
  */
@@ -50,6 +50,17 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, weak, readwrite) id<ASNetworkImageNodeDelegate> delegate;
 
 /**
+ * The image to display.
+ *
+ * @discussion By setting an image to the image property the ASNetworkImageNode will act like a plain ASImageNode.
+ * As soon as the URL is set the ASNetworkImageNode will act like an ASNetworkImageNode and the image property
+ * will be managed internally. This means the image property will be cleared out and replaced by the placeholder 
+ * (<defaultImage>) image while loading and the final image after the new image data was downloaded and processed.
+ * If you want to use a placholder image functionality use the defaultImage property instead.
+ */
+@property (nullable, nonatomic, strong) UIImage *image;
+
+/**
  * A placeholder image to display while the URL is loading.
  */
 @property (nullable, nonatomic, strong, readwrite) UIImage *defaultImage;
@@ -57,7 +68,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * The URL of a new image to download and display.
  *
- * @discussion Changing this property will reset the displayed image to a placeholder (<defaultImage>) while loading.
+ * @discussion By setting an URL, the image property of this node will be managed internally. This means previously
+ * directly set images to the image property will be cleared out and replaced by the placeholder (<defaultImage>) image
+ * while loading and the final image after the new image data was downloaded and processed.
  */
 @property (nullable, nonatomic, strong, readwrite) NSURL *URL;
 
@@ -65,8 +78,11 @@ NS_ASSUME_NONNULL_BEGIN
  * Download and display a new image.
  *
  * @param URL The URL of a new image to download and display.
- *
  * @param reset Whether to display a placeholder (<defaultImage>) while loading the new image.
+ *
+ * @discussion By setting an URL, the image property of this node will be managed internally. This means previously
+ * directly set images to the image property will be cleared out and replaced by the placeholder (<defaultImage>) image
+ * while loading and the final image after the new image data was downloaded and processed.
  */
 - (void)setURL:(nullable NSURL *)URL resetToDefault:(BOOL)reset;
 

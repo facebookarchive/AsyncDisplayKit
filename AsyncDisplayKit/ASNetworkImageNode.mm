@@ -73,6 +73,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 @implementation ASNetworkImageNode
 
+@dynamic image;
+
 - (instancetype)initWithCache:(id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader
 {
   if (!(self = [super init]))
@@ -121,20 +123,13 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 /// Setter for public image property. It has the side effect to set an internal _imageWasSetExternally that prevents setting an image internally. Setting an image internally should happen with the _setImage: method
 - (void)setImage:(UIImage *)image
 {
-  __instanceLock__.lock();
-  
-#ifdef DEBUG
-  if (_URL != nil) {
-    NSLog(@"Setting the image directly on an %@ and setting and setting an URL is not supported. If you want to use a placeholder image please use defaultImage .", NSStringFromClass([self class]));
-  }
-#endif
+  ASDN::MutexLocker l(__instanceLock__);
   
   _imageWasSetExternally = (image != nil);
   if (_imageWasSetExternally) {
-    [self __cancelDownloadAndClearImage];
+    [self _cancelDownloadAndClearImage];
     _URL = nil;
   }
-  __instanceLock__.unlock();
   
   [self _setImage:image];
 }
@@ -153,11 +148,6 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 {
   ASDN::MutexLocker l(__instanceLock__);
 
-#ifdef DEBUG
-  if (_imageWasSetExternally) {
-    NSLog(@"Setting the image directly on an %@ and setting and setting an URL is not supported. If you want to use a placeholder image please use defaultImage .", NSStringFromClass([self class]));
-  }
-#endif
   _imageWasSetExternally = NO;
 
   if (ASObjectIsEqual(URL, _URL)) {
@@ -352,7 +342,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       return;
     }
 
-    [self __cancelDownloadAndClearImage];
+    [self _cancelDownloadAndClearImage];
   }
 }
 
@@ -419,13 +409,27 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   _downloadIdentifierForProgressBlock = newDownloadIDForProgressBlock;
 }
 
-- (void)__cancelDownloadAndClearImage
+- (void)_cancelDownloadAndClearImage
 {
   [self _cancelImageDownload];
   [self _clearImage];
   if (_cacheFlags.cacheSupportsClearing) {
     [_cache clearFetchedImageFromCacheWithURL:_URL];
   }
+}
+
+- (void)_cancelImageDownload
+{
+  if (!_downloadIdentifier) {
+    return;
+  }
+
+  if (_downloadIdentifier) {
+    [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
+  }
+  _downloadIdentifier = nil;
+
+  _cacheUUID = nil;
 }
 
 - (void)_clearImage
@@ -447,20 +451,6 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   dispatch_async(dispatch_get_main_queue(), ^{
     self.currentImageQuality = 0.0;
   });
-}
-
-- (void)_cancelImageDownload
-{
-  if (!_downloadIdentifier) {
-    return;
-  }
-
-  if (_downloadIdentifier) {
-    [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
-  }
-  _downloadIdentifier = nil;
-
-  _cacheUUID = nil;
 }
 
 - (void)_downloadImageWithCompletion:(void (^)(id <ASImageContainerProtocol> imageContainer, NSError*, id downloadIdentifier))finished
