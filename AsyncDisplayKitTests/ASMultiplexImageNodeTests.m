@@ -302,4 +302,10 @@
   [mockDelegate verify];
 }
 
+- (void)testThatSettingAnImageExternallyWillThrow
+{
+  ASMultiplexImageNode *multiplexImageNode = [[ASMultiplexImageNode alloc] init];
+  XCTAssertThrows(multiplexImageNode.image = [UIImage imageNamed:@""]);
+}
+
 @end
