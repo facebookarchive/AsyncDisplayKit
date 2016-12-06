@@ -945,6 +945,9 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 #pragma mark - Helpers
 - (NSString *)timeStringForCMTime:(CMTime)time forTimeLabelType:(ASVideoPlayerNodeControlType)type
 {
+  if (!CMTIME_IS_VALID(time)) {
+    return @"00:00";
+  }
   if (_delegateFlags.delegateTimeLabelAttributedString) {
     return [_delegate videoPlayerNode:self timeStringForTimeLabelType:type forTime:time];
   }
