@@ -11,7 +11,6 @@
 #if TARGET_OS_IOS
 
 #import "ASMultiplexImageNode.h"
-#import "ASImageNode+Private.h"
 #import <AssetsLibrary/AssetsLibrary.h>
 
 #import "ASAvailability.h"
@@ -234,7 +233,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
   // setting this to nil makes the node fetch images the next time its display starts
   _loadedImageIdentifier = nil;
-  [self __setImage:nil];
+  [self _setImage:nil];
 }
 
 - (void)didEnterPreloadState
@@ -329,7 +328,12 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 - (void)setImage:(UIImage *)image
 {
   ASDisplayNodeAssert(NO, @"Setting the image directly on an ASMultiplexImageNode is unsafe. It will be cleared in didExitPreloadRange and will have no way to restore in didEnterPreloadRange");
-  [self __setImage:image];
+  super.image = image;
+}
+
+- (void)_setImage:(UIImage *)image
+{
+  super.image = image;
 }
 
 - (void)setDelegate:(id <ASMultiplexImageNodeDelegate>)delegate
@@ -527,7 +531,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       if (ASObjectIsEqual(strongSelf->_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
         return;
       }
-      [self __setImage:progressImage];
+      [strongSelf _setImage:progressImage];
     };
   }
   [_downloader setProgressImageBlock:progress callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:_downloadIdentifier];
@@ -545,7 +549,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   if (shouldReleaseImageOnBackgroundThread) {
     ASPerformBackgroundDeallocation(image);
   }
-  [self __setImage:nil];
+  [self _setImage:nil];
 }
 
 #pragma mark -
@@ -874,7 +878,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
     UIImage *previousImage = self.image;
 
     self.loadedImageIdentifier = imageIdentifier;
-    [self __setImage:image];
+    [self _setImage:image];
 
     if (_delegateFlags.updatedImage) {
       [_delegate multiplexImageNode:self didUpdateImage:image withIdentifier:imageIdentifier fromImage:previousImage withIdentifier:previousIdentifier];

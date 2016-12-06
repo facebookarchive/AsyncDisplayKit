@@ -410,7 +410,6 @@
   [_videoNode didExitPreloadState];
   XCTAssertNil(_videoNode.player);
   XCTAssertNil(_videoNode.currentItem);
-  XCTAssertNil(_videoNode.image);
 }
 
 - (void)testDelegateProperlySetForClassHierarchy

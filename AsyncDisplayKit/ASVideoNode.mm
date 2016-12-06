@@ -16,7 +16,6 @@
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
 #import "ASDisplayNodeExtras.h"
-#import "ASImageNode+Private.h"
 
 static BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
   return ASObjectIsEqual(asset1, asset2)
@@ -90,8 +89,7 @@ static NSString * const kRate = @"rate";
 
 // TODO: Support preview images with HTTP Live Streaming videos.
 
-#pragma mark - Lifecycle
-
+#pragma mark - Construction and Layout
 
 - (instancetype)init
 {
@@ -228,22 +226,6 @@ static NSString * const kRate = @"rate";
     NSLog(@"Unnecessary KVO removal");
   }
 }
-
-- (void)_fetchDataForVideoNode
-{
-  [self setNeedsPreload];
-}
-
-- (void)_clearVideoNode
-{
-  self.videoPlaceholderImage = nil;
-  self.player = nil;
-  self.currentItem = nil;
-  self.playerState = ASVideoNodePlayerStateUnknown;
-}
-
-#pragma mark - Layout
-
 
 - (void)layout
 {
@@ -430,7 +412,10 @@ static NSString * const kRate = @"rate";
   
   {
     ASDN::MutexLocker l(__instanceLock__);
-    [self _clearVideoNode];
+
+    self.player = nil;
+    self.currentItem = nil;
+    self.playerState = ASVideoNodePlayerStateUnknown;
   }
 }
 
@@ -521,15 +506,11 @@ static NSString * const kRate = @"rate";
 
 - (void)_setAndFetchAsset:(AVAsset *)asset url:(NSURL *)assetURL
 {
-  [self _clearVideoNode];
-  
-  {
-    ASDN::MutexLocker l(__instanceLock__);
-    _asset = asset;
-    _assetURL = assetURL;
-  }
-  
-  [self _fetchDataForVideoNode];
+  [self setVideoPlaceholderImage:nil];
+  [self didExitPreloadState];
+  _asset = asset;
+  _assetURL = assetURL;
+  [self setNeedsPreload];
 }
 
 - (void)setVideoComposition:(AVVideoComposition *)videoComposition
@@ -638,7 +619,7 @@ static NSString * const kRate = @"rate";
   }
 
   if (_player == nil) {
-    [self _fetchDataForVideoNode];
+    [self setNeedsPreload];
   }
 
   if (_playerNode == nil) {
