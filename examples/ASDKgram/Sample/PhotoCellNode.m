@@ -200,9 +200,9 @@
 
 #pragma mark - Instance Methods
 
-- (void)fetchData
+- (void)didEnterPreloadState
 {
-  [super fetchData];
+  [super didEnterPreloadState];
   
   [_photoModel.commentFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
     [self loadCommentsForPhoto:_photoModel];
