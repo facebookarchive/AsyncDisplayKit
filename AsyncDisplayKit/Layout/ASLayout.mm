@@ -47,10 +47,15 @@ static inline NSString * descriptionIndents(NSUInteger indents)
  */
 @property (nonatomic, getter=isFlattened) BOOL flattened;
 
+/*
+ * Caches all sublayouts if set to YES or destroys the sublayout cache if set to NO. Defaults to YES
+ */
+@property (nonatomic, assign) BOOL cacheSublayoutLayoutElements;
+
 /**
  * Array for explicitly retain sublayout layout elements in case they are created and references in layoutSpecThatFits: and no one else will hold a strong reference on it
  */
-@property (nonatomic, strong) NSMutableArray *sublayoutLayoutElements;
+@property (nonatomic, strong) NSMutableArray<id<ASLayoutElement>> *sublayoutLayoutElements;
 
 @end
 
@@ -94,6 +99,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
     _sublayouts = sublayouts != nil ? [sublayouts copy] : @[];
     _flattened = NO;
+    _cacheSublayoutLayoutElements = NO;
   }
   
   return self;
@@ -105,36 +111,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
   return [self init];
 }
 
-#pragma mark - 
-
-- (void)cacheSublayouts
-{
-  // Add sublayouts layout elements to an internal array to retain it while the layout lives
-  if (_sublayouts.count > 0) {
-    _sublayoutLayoutElements = [NSMutableArray array];
-    for (ASLayout *sublayout in _sublayouts) {
-      [_sublayoutLayoutElements addObject:sublayout.layoutElement];
-    }
-  }
-}
-
 #pragma mark - Class Constructors
-
-+ (instancetype)layoutWithLayoutElement:(id<ASLayoutElement>)layoutElement
-                                   size:(CGSize)size
-                               position:(CGPoint)position
-                             sublayouts:(nullable NSArray<ASLayout *> *)sublayouts
-                        cacheSublayouts:(BOOL)cacheSublayouts
-{
-  ASLayout *layout = [[self alloc] initWithLayoutElement:layoutElement
-                                                    size:size
-                                                position:position
-                                              sublayouts:sublayouts];
-  if (cacheSublayouts) {
-    [layout cacheSublayouts];
-  }
-  return layout;
-}
 
 + (instancetype)layoutWithLayoutElement:(id<ASLayoutElement>)layoutElement
                                    size:(CGSize)size
@@ -170,8 +147,26 @@ static inline NSString * descriptionIndents(NSUInteger indents)
   return [self layoutWithLayoutElement:layout.layoutElement
                                   size:layout.size
                               position:position
-                            sublayouts:layout.sublayouts
-                       cacheSublayouts:YES];
+                            sublayouts:layout.sublayouts];
+}
+
+#pragma mark - Sublayout Elements Caching
+
+- (void)setCacheSublayoutLayoutElements:(BOOL)cacheSublayoutLayoutElements
+{
+  _cacheSublayoutLayoutElements = cacheSublayoutLayoutElements;
+  
+  if (cacheSublayoutLayoutElements == NO) {
+    _sublayoutLayoutElements = nil;
+  } else {
+    // Add sublayouts layout elements to an internal array to retain it while the layout lives
+    if (_sublayouts.count > 0) {
+      _sublayoutLayoutElements = [NSMutableArray array];
+      for (ASLayout *sublayout in _sublayouts) {
+        [_sublayoutLayoutElements addObject:sublayout.layoutElement];
+      }
+    }
+  }
 }
 
 #pragma mark - Layout Flattening
@@ -194,8 +189,9 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     queue.pop_front();
 
     if (self != context.layout && context.layout.type == ASLayoutElementTypeDisplayNode) {
-      ASLayout *layout = [ASLayout layoutWithLayout:context.layout position:context.absolutePosition ];
+      ASLayout *layout = [ASLayout layoutWithLayout:context.layout position:context.absolutePosition];
       layout.flattened = YES;
+      layout.cacheSublayoutLayoutElements = YES;
       [flattenedSublayouts addObject:layout];
     }
     
@@ -208,11 +204,9 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     queue.insert(queue.cbegin(), sublayoutContexts.begin(), sublayoutContexts.end());
   }
   
-  return [ASLayout layoutWithLayoutElement:_layoutElement
-                                      size:_size
-                                  position:CGPointZero
-                                sublayouts:flattenedSublayouts
-                           cacheSublayouts:YES];
+  ASLayout *layout = [ASLayout layoutWithLayoutElement:_layoutElement size:_size position:CGPointZero sublayouts:flattenedSublayouts];
+  layout.cacheSublayoutLayoutElements = YES;
+  return layout;
 }
 
 #pragma mark - Accessors
