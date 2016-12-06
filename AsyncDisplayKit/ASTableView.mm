@@ -467,6 +467,13 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [super reloadData];
 }
 
+- (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
+{
+  if ([self validateIndexPath:indexPath]) {
+    [super scrollToRowAtIndexPath:indexPath atScrollPosition:scrollPosition animated:animated];
+  }
+}
+
 - (void)relayoutItems
 {
   [_dataController relayoutAllNodes];
@@ -521,6 +528,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (NSIndexPath *)convertIndexPathToTableNode:(NSIndexPath *)indexPath
 {
+  if ([self validateIndexPath:indexPath] == nil) {
+    return nil;
+  }
+
   // If this is a section index path, we don't currently have a method
   // to do a mapping.
   if (indexPath.row == NSNotFound) {
@@ -553,12 +564,37 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return [self indexPathForNode:cellNode waitingIfNeeded:NO];
 }
 
+/**
+ * Asserts that the index path is a valid view-index-path, and returns it if so, nil otherwise.
+ */
+- (nullable NSIndexPath *)validateIndexPath:(nullable NSIndexPath *)indexPath
+{
+  if (indexPath == nil) {
+    return nil;
+  }
+
+  NSInteger section = indexPath.section;
+  if (section >= self.numberOfSections) {
+    ASDisplayNodeFailAssert(@"Table view index path has invalid section %lu, section count = %lu", (unsigned long)section, (unsigned long)self.numberOfSections);
+    return nil;
+  }
+
+  if (indexPath.item >= [self numberOfRowsInSection:section]) {
+    ASDisplayNodeFailAssert(@"Table view index path has invalid item %lu in section %lu, item count = %lu", (unsigned long)indexPath.item, (unsigned long)section, (unsigned long)[self numberOfRowsInSection:section]);
+    return nil;
+  }
+
+  return indexPath;
+}
+
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode waitingIfNeeded:(BOOL)wait
 {
   NSIndexPath *indexPath = [_dataController completedIndexPathForNode:cellNode];
+  indexPath = [self validateIndexPath:indexPath];
   if (indexPath == nil && wait) {
     [_dataController waitUntilAllUpdatesAreCommitted];
     indexPath = [_dataController completedIndexPathForNode:cellNode];
+    indexPath = [self validateIndexPath:indexPath];
   }
   return indexPath;
 }
