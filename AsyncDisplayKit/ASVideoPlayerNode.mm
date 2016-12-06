@@ -390,6 +390,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
     [_cachedControls setObject:_durationTextNode forKey:@(ASVideoPlayerNodeControlTypeDurationText)];
   }
+  [self updateDurationTimeLabel];
   [self addSubnode:_durationTextNode];
 }
 
