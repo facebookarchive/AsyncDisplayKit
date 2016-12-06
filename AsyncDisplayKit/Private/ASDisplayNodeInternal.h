@@ -31,11 +31,11 @@
 @class ASSentinel;
 struct ASDisplayNodeFlags;
 
-BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
+BOOL ASDisplayNodeSubclassOverridesSelector(Class _Nonnull subclass, SEL _Nonnull selector);
 BOOL ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(ASDisplayNodeFlags flags);
 
 /// Get the pending view state for the node, creating one if needed.
-_ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node);
+_ASPendingState * _Nonnull ASDisplayNodeGetPendingState(ASDisplayNode * _Nonnull node);
 
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 {
@@ -49,8 +49,8 @@ typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
   ASDisplayNodeMethodOverrideClearFetchedData   = 1 << 6
 };
 
-FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification;
-FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp;
+FOUNDATION_EXPORT NSString * _Nonnull const ASRenderingEngineDidDisplayScheduledNodesNotification;
+FOUNDATION_EXPORT NSString * _Nonnull const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp;
 
 // Allow 2^n increments of begin disabling hierarchy notifications
 #define VISIBILITY_NOTIFICATIONS_DISABLED_BITS 4
@@ -189,10 +189,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 #endif
 }
 
-+ (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node;
++ (void)scheduleNodeForRecursiveDisplay:(nonnull ASDisplayNode *)node;
 
 /// The _ASDisplayLayer backing the node, if any.
-@property (nonatomic, readonly, strong) _ASDisplayLayer *asyncLayer;
+@property (nullable, nonatomic, readonly, strong) _ASDisplayLayer *asyncLayer;
 
 /// Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
@@ -222,17 +222,17 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 /*
  * Internal method to set the supernode
  */
-- (void)__setSupernode:(ASDisplayNode *)supernode;
+- (void)__setSupernode:(nullable ASDisplayNode *)supernode;
 
 /**
  * Internal method to add / replace / insert subnode and remove from supernode without checking if
  * node has automaticallyManagesSubnodes set to YES.
  */
-- (void)_addSubnode:(ASDisplayNode *)subnode;
-- (void)_replaceSubnode:(ASDisplayNode *)oldSubnode withSubnode:(ASDisplayNode *)replacementSubnode;
-- (void)_insertSubnode:(ASDisplayNode *)subnode belowSubnode:(ASDisplayNode *)below;
-- (void)_insertSubnode:(ASDisplayNode *)subnode aboveSubnode:(ASDisplayNode *)above;
-- (void)_insertSubnode:(ASDisplayNode *)subnode atIndex:(NSInteger)idx;
+- (void)_addSubnode:(nonnull ASDisplayNode *)subnode;
+- (void)_replaceSubnode:(nonnull ASDisplayNode *)oldSubnode withSubnode:(nonnull ASDisplayNode *)replacementSubnode;
+- (void)_insertSubnode:(nonnull ASDisplayNode *)subnode belowSubnode:(nonnull ASDisplayNode *)below;
+- (void)_insertSubnode:(nonnull ASDisplayNode *)subnode aboveSubnode:(nonnull ASDisplayNode *)above;
+- (void)_insertSubnode:(nonnull ASDisplayNode *)subnode atIndex:(NSInteger)idx;
 - (void)_removeFromSupernode;
 
 // Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
@@ -248,10 +248,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)displayImmediately;
 
 /// Alternative initialiser for backing with a custom view class.  Supports asynchronous display with _ASDisplayView subclasses.
-- (instancetype)initWithViewClass:(Class)viewClass;
+- (nullable instancetype)initWithViewClass:(nonnull Class)viewClass;
 
 /// Alternative initialiser for backing with a custom layer class.  Supports asynchronous display with _ASDisplayLayer subclasses.
-- (instancetype)initWithLayerClass:(Class)layerClass;
+- (nullable instancetype)initWithLayerClass:(nonnull Class)layerClass;
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
 
@@ -277,7 +277,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  * @param checkViewHierarchy If YES, and no supernode can be found, method will walk up from `self.view` to find a supernode.
  * If YES, this method must be called on the main thread and the node must not be layer-backed.
  */
-- (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass checkViewHierarchy:(BOOL)checkViewHierarchy;
+- (nullable ASDisplayNode *)_supernodeWithClass:(nonnull Class)supernodeClass checkViewHierarchy:(BOOL)checkViewHierarchy;
 
 /**
  *  Convenience method to access this node's trait collection struct. Externally, users should interact
