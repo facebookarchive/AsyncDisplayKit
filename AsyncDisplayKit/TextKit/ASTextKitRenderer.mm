@@ -50,13 +50,13 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
     _attributes = attributes;
     _currentScaleFactor = 1;
     
-    // Create all the components in init
+    // As the renderer should be thread safe, create all subcomponents in the initialization method
     _shadower = [ASTextKitShadower shadowerWithShadowOffset:attributes.shadowOffset
                                                 shadowColor:attributes.shadowColor
                                               shadowOpacity:attributes.shadowOpacity
                                                shadowRadius:attributes.shadowRadius];
     
-        // We must inset the constrained size by the size of the shadower.
+    // We must inset the constrained size by the size of the shadower.
     CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:_constrainedSize];
     
     _context = [[ASTextKitContext alloc] initWithAttributedString:attributes.attributedString
@@ -65,10 +65,16 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
                                                    exclusionPaths:attributes.exclusionPaths
                                                   constrainedSize:shadowConstrainedSize];
     
-    NSCharacterSet *avoidTailTruncationSet = attributes.avoidTailTruncationSet ? : _defaultAvoidTruncationCharacterSet();
+    NSCharacterSet *avoidTailTruncationSet = attributes.avoidTailTruncationSet ?: _defaultAvoidTruncationCharacterSet();
     _truncater = [[ASTextKitTailTruncater alloc] initWithContext:[self context]
                                       truncationAttributedString:attributes.truncationAttributedString
                                           avoidTailTruncationSet:avoidTailTruncationSet];
+      
+    ASTextKitAttributes attributes = _attributes;
+    // We must inset the constrained size by the size of the shadower.
+    _fontSizeAdjuster = [[ASTextKitFontSizeAdjuster alloc] initWithContext:[self context]
+                                                           constrainedSize:shadowConstrainedSize
+                                                         textKitAttributes:attributes];
     
     // Calcualate size immediately
     [self _calculateSize];
@@ -187,12 +193,6 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
   // We add an assertion so we can track the rare conditions where a graphics context is not present
   ASDisplayNodeAssertNotNil(context, @"This is no good without a context.");
-  
-  // This renderer may not be the one that did the sizing. If that is the case its truncation and currentScaleFactor may not have been evaluated.
-  // If there's any possibility we need to truncate or scale (i.e. width is not infinite), perform the size calculation.
-//  if (_sizeIsCalculated == NO && isinf(_constrainedSize.width) == NO) {
-//    [self _calculateSize];
-//  }
 
   bounds = CGRectIntersection(bounds, { .size = _constrainedSize });
   CGRect shadowInsetBounds = [[self shadower] insetRectWithConstrainedRect:bounds];

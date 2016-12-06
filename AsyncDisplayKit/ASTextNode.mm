@@ -101,7 +101,7 @@ static NSCache *sharedRendererCache()
 /**
  The concept here is that neither the node nor layout should ever have a strong reference to the renderer object.
  This is to reduce memory load when loading thousands and thousands of text nodes into memory at once. Instead
- we maintain a LRU renderer cache that is queried via stack-allocated keys.
+ we maintain a LRU renderer cache that is queried via a unique key based on text kit attributes and constrained size. 
  */
 
 static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, CGSize constrainedSize)
