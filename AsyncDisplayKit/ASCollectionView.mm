@@ -642,7 +642,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     return nil;
   }
 
-  if (indexPath.item >= [self numberOfItemsInSection:section]) {
+  NSInteger item = indexPath.item;
+  // item == NSNotFound means e.g. "scroll to this section" and is acceptable
+  if (item != NSNotFound && item >= [self numberOfItemsInSection:section]) {
     ASDisplayNodeFailAssert(@"Collection view index path has invalid item %lu in section %lu, item count = %lu", (unsigned long)indexPath.item, (unsigned long)section, (unsigned long)[self numberOfItemsInSection:section]);
     return nil;
   }
