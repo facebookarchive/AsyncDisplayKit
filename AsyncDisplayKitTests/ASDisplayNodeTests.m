@@ -1971,33 +1971,43 @@ static bool stringContainsPointer(NSString *description, id p) {
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
-- (void)DISABLED_testThatNodesAreMarkedInvisibleWhenRemovedFromAVisibleRasterizedHierarchy
+- (void)testThatRasterizedNodesGetInterfaceStateUpdatesWhenContainerEntersHierarchy
 {
-  ASCellNode *supernode = [[ASCellNode alloc] init];
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
   supernode.shouldRasterizeDescendants = YES;
-  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  [NSDictionaryOfVariableBindings(supernode, subnode) enumerateKeysAndObjectsUsingBlock:^(NSString *_Nonnull name, ASDisplayNode *node, BOOL * _Nonnull stop) {
+    node.debugName = name;
+  }];
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-  [supernode addSubnode:node];
+  [supernode addSubnode:subnode];
   [window addSubnode:supernode];
   [window makeKeyAndVisible];
-  XCTAssertTrue(node.isVisible);
-  [node removeFromSupernode];
-  XCTAssertFalse(node.isVisible);
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertTrue(subnode.isVisible);
+  [supernode.view removeFromSuperview];
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertFalse(subnode.isVisible);
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
-- (void)DISABLED_testThatNodesAreMarkedVisibleWhenAddedToARasterizedHierarchyAlreadyOnscreen
+- (void)testThatRasterizedNodesGetInterfaceStateUpdatesWhenAddedToContainerThatIsInHierarchy
 {
-  ASCellNode *supernode = [[ASCellNode alloc] init];
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
   supernode.shouldRasterizeDescendants = YES;
-  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  [NSDictionaryOfVariableBindings(supernode, subnode) enumerateKeysAndObjectsUsingBlock:^(NSString *_Nonnull name, ASDisplayNode *node, BOOL * _Nonnull stop) {
+    node.debugName = name;
+  }];
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   [window addSubnode:supernode];
   [window makeKeyAndVisible];
-  [supernode addSubnode:node];
-  XCTAssertTrue(node.isVisible);
-  [node removeFromSupernode];
-  XCTAssertFalse(node.isVisible);
+  [supernode addSubnode:subnode];
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertTrue(subnode.isVisible);
+  [subnode removeFromSupernode];
+  XCTAssertFalse(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertFalse(subnode.isVisible);
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2011

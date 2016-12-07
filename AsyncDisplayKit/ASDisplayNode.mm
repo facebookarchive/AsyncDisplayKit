@@ -1938,6 +1938,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     ASPerformBlockOnMainThread(^{
       [self _insertSubnodeSubviewOrSublayer:subnode atIndex:sublayerIndex];
     });
+  } else if (self.inHierarchy) {
+    
   }
 
   ASDisplayNodeAssert(disableNotifications == shouldDisableNotificationsForMovingBetweenParents(oldParent, self), @"Invariant violated");
@@ -2032,7 +2034,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
   
-  if ([oldSubnode _deallocSafeSupernode] != self) {
+  if (oldSubnode.supernode != self) {
     ASDisplayNodeFailAssert(@"Old Subnode to replace must be a subnode");
     return;
   }
@@ -2076,7 +2078,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
 
-  if ([below _deallocSafeSupernode] != self) {
+  if (below.supernode != self) {
     ASDisplayNodeFailAssert(@"Node to insert below must be a subnode");
     return;
   }
@@ -2101,7 +2103,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     
     // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to
     // insert it will mess up our calculation
-    if ([subnode _deallocSafeSupernode] == self) {
+    if (subnode.supernode == self) {
       NSInteger currentIndexInSubnodes = [_subnodes indexOfObjectIdenticalTo:subnode];
       if (currentIndexInSubnodes < belowSubnodeIndex) {
         belowSubnodeIndex--;
@@ -2138,7 +2140,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
 
-  if ([above _deallocSafeSupernode] != self) {
+  if (above.supernode != self) {
     ASDisplayNodeFailAssert(@"Node to insert above must be a subnode");
     return;
   }
@@ -2162,7 +2164,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
     // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to
     // insert it will mess up our calculation
-    if ([subnode _deallocSafeSupernode] == self) {
+    if (subnode.supernode == self) {
       NSInteger currentIndexInSubnodes = [_subnodes indexOfObjectIdenticalTo:subnode];
       if (currentIndexInSubnodes <= aboveSubnodeIndex) {
         aboveSubnodeIndex--;
@@ -2228,7 +2230,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
   // Don't call self.supernode here because that will retain/autorelease the supernode.  This method -_removeSupernode: is often called while tearing down a node hierarchy, and the supernode in question might be in the middle of its -dealloc.  The supernode is never messaged, only compared by value, so this is safe.
   // The particular issue that triggers this edge case is when a node calls -removeFromSupernode on a subnode from within its own -dealloc method.
-  if (!subnode || [subnode _deallocSafeSupernode] != self) {
+  if (!subnode || subnode.supernode != self) {
     return;
   }
 
@@ -2416,14 +2418,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   return ([_subnodes copy] ?: @[]);
 }
 
+// NOTE: This method must be dealloc-safe (should not retain self).
 - (ASDisplayNode *)supernode
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _supernode;
-}
-
-// This is a thread-method to return the supernode without causing it to be retained autoreleased.  See -_removeSubnode: for details.
-- (ASDisplayNode *)_deallocSafeSupernode
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _supernode;
@@ -3610,7 +3606,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   }
   
   // Check supernode so that if we are cell node we don't find self.
-  ASCellNode *cellNode = ASDisplayNodeFindFirstSupernodeOfClass([self _deallocSafeSupernode], [ASCellNode class]);
+  ASCellNode *cellNode = ASDisplayNodeFindFirstSupernodeOfClass(self.supernode, [ASCellNode class]);
   if (cellNode != nil) {
     [result addObject:@{ @"cellNode" : ASObjectDescriptionMakeTiny(cellNode) }];
   }
