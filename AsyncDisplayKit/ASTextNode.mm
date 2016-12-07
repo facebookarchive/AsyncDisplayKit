@@ -81,8 +81,7 @@ ASDISPLAYNODE_INLINE NSUInteger ASHashFromCGSize(CGSize size)
     return YES;
   }
   
-  return _attributes.hash() == object.attributes.hash()
-  && CGSizeEqualToSize(_constrainedSize, object.constrainedSize);
+  return _attributes == object.attributes && CGSizeEqualToSize(_constrainedSize, object.constrainedSize);
 }
 
 @end
