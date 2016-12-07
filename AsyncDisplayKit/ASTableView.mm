@@ -579,7 +579,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return nil;
   }
 
-  if (indexPath.item >= [self numberOfRowsInSection:section]) {
+  NSInteger item = indexPath.item;
+  // item == NSNotFound means e.g. "scroll to this section" and is acceptable
+  if (item != NSNotFound && item >= [self numberOfRowsInSection:section]) {
     ASDisplayNodeFailAssert(@"Table view index path has invalid item %lu in section %lu, item count = %lu", (unsigned long)indexPath.item, (unsigned long)section, (unsigned long)[self numberOfRowsInSection:section]);
     return nil;
   }
