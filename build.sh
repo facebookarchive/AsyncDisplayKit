@@ -292,4 +292,12 @@ if [ "$MODE" = "framework" ]; then
     exit 0
 fi
 
+if [ "$MODE" = "cocoapods-lint" ]; then
+    echo "Verifying that podspec lints."
+
+    set -o pipefail && pod lib lint
+    trap - EXIT
+    exit 0
+fi
+
 echo "Unrecognised mode '$MODE'."
