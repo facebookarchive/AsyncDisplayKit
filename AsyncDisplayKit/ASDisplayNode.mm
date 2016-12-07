@@ -1238,6 +1238,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       movedSubnode.frame = [context finalFrameForNode:movedSubnode];
     }
   } completion:^(BOOL finished) {
+    for (ASDisplayNode *removedSubnode in removedSubnodes) {
+      removedSubnode.alpha = 1;
+    }
     for (UIView *removedView in removedViews) {
       [removedView removeFromSuperview];
     }
