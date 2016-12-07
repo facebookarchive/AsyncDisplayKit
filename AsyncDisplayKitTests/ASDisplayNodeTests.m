@@ -27,6 +27,7 @@
 #import "ASCenterLayoutSpec.h"
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInternalHelpers.h"
+#import "ASDisplayNodeExtras.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.debugName = @#n
@@ -1976,9 +1977,7 @@ static bool stringContainsPointer(NSString *description, id p) {
   ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
   supernode.shouldRasterizeDescendants = YES;
   ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
-  [NSDictionaryOfVariableBindings(supernode, subnode) enumerateKeysAndObjectsUsingBlock:^(NSString *_Nonnull name, ASDisplayNode *node, BOOL * _Nonnull stop) {
-    node.debugName = name;
-  }];
+  ASSetDebugNames(supernode, subnode);
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   [supernode addSubnode:subnode];
   [window addSubnode:supernode];
@@ -1996,9 +1995,8 @@ static bool stringContainsPointer(NSString *description, id p) {
   ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
   supernode.shouldRasterizeDescendants = YES;
   ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
-  [NSDictionaryOfVariableBindings(supernode, subnode) enumerateKeysAndObjectsUsingBlock:^(NSString *_Nonnull name, ASDisplayNode *node, BOOL * _Nonnull stop) {
-    node.debugName = name;
-  }];
+  ASSetDebugNames(supernode, subnode);
+
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   [window addSubnode:supernode];
   [window makeKeyAndVisible];
@@ -2008,6 +2006,42 @@ static bool stringContainsPointer(NSString *description, id p) {
   [subnode removeFromSupernode];
   XCTAssertFalse(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
   XCTAssertFalse(subnode.isVisible);
+}
+
+- (void)testThatLoadedNodeGetsUnloadedIfSubtreeBecomesRasterized
+{
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
+  [supernode view];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(supernode, subnode);
+  [supernode addSubnode:subnode];
+  XCTAssertTrue(subnode.nodeLoaded);
+  supernode.shouldRasterizeDescendants = YES;
+  XCTAssertFalse(subnode.nodeLoaded);
+}
+
+// TODO: Create an issue to enable this test
+- (void)testThatLoadedNodeGetsUnloadedIfAddedToRasterizedSubtree
+{
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
+  supernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(supernode, subnode);
+  [subnode view];
+  [supernode addSubnode:subnode];
+  XCTAssertFalse(subnode.nodeLoaded);
+  XCTAssertFalse(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+}
+
+- (void)testThatRasterizingWrapperNodesIsNotAllowed
+{
+  ASDisplayNode *rasterizedSupernode = [[ASDisplayNode alloc] init];
+  rasterizedSupernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] initWithViewBlock:^UIView * _Nonnull{
+    return [[UIView alloc] init];
+  }];
+  ASSetDebugNames(rasterizedSupernode, subnode);
+  XCTAssertThrows([rasterizedSupernode addSubnode:subnode]);
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2011

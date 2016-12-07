@@ -1887,6 +1887,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 /*
  * Central private helper method that should eventually be called if submethods add, insert or replace subnodes
  * You must hold __instanceLock__ to call this.
+ * This method is called with thread affinity.
  *
  * @param subnode       The subnode to insert
  * @param subnodeIndex  The index in _subnodes to insert it
@@ -1933,13 +1934,11 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   
   // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and
   // none of this could possibly work.
-  if (nodeIsInRasterizedTree(self) == NO && self.nodeLoaded) {
-    // If node is loaded insert the subnode otherwise wait until the node get's loaded
-    ASPerformBlockOnMainThread(^{
-      [self _insertSubnodeSubviewOrSublayer:subnode atIndex:sublayerIndex];
-    });
-  } else if (self.inHierarchy) {
-    
+  if (self.nodeLoaded && !_flags.shouldRasterizeDescendants) {
+    // If node is loaded insert the subnode otherwise wait until the node gets loaded
+    [self _insertSubnodeSubviewOrSublayer:subnode atIndex:sublayerIndex];
+  } else if (_flags.isInHierarchy) {
+    [subnode __enterHierarchy];
   }
 
   ASDisplayNodeAssert(disableNotifications == shouldDisableNotificationsForMovingBetweenParents(oldParent, self), @"Invariant violated");
@@ -1970,10 +1969,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   if (canUseViewAPI(self, subnode)) {
     [_view insertSubview:subnode.view atIndex:idx];
   } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wconversion"
-    [_layer insertSublayer:subnode.layer atIndex:idx];
-#pragma clang diagnostic pop
+    [_layer insertSublayer:subnode.layer atIndex:(unsigned int)idx];
   }
 }
 
@@ -2255,8 +2251,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     __weak ASDisplayNode *supernode = _supernode;
     __weak UIView *view = _view;
     __weak CALayer *layer = _layer;
-    BOOL layerBacked = _flags.layerBacked;
-    BOOL isNodeLoaded = (layer != nil || view != nil);
+    BOOL inHierarchy = (_flags.isInHierarchy);
   __instanceLock__.unlock();
 
   // Clear supernode's reference to us before removing the view from the hierarchy, as _ASDisplayView
@@ -2264,14 +2259,13 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   // This may result in removing the last strong reference, triggering deallocation after this method.
   [supernode _removeSubnode:self];
 
-  if (isNodeLoaded && (supernode == nil || supernode.isNodeLoaded)) {
-    ASPerformBlockOnMainThread(^{
-      if (layerBacked || supernode.layerBacked) {
-        [layer removeFromSuperlayer];
-      } else {
-        [view removeFromSuperview];
-      }
-    });
+  if (view != nil) {
+    [view removeFromSuperview];
+  } else if (layer != nil) {
+    [layer removeFromSuperlayer];
+  } else if (inHierarchy) {
+    // For rasterized nodes
+    [self __exitHierarchy];
   }
 }
 
@@ -2330,12 +2324,10 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   if (!_flags.isInHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
     _flags.isEnteringHierarchy = YES;
     _flags.isInHierarchy = YES;
-    
-    if (_flags.shouldRasterizeDescendants) {
-      // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
-      [self _recursiveWillEnterHierarchy];
-    } else {
-      [self willEnterHierarchy];
+
+    [self willEnterHierarchy];
+    for (ASDisplayNode *subnode in self.subnodes) {
+      [subnode __enterHierarchy];
     }
     _flags.isEnteringHierarchy = NO;
 
@@ -2371,13 +2363,10 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
     [self.asyncLayer cancelAsyncDisplay];
 
-    if (_flags.shouldRasterizeDescendants) {
-      // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
-      [self _recursiveDidExitHierarchy];
-    } else {
-      [self didExitHierarchy];
+    [self didExitHierarchy];
+    for (ASDisplayNode *subnode in self.subnodes) {
+      [subnode __exitHierarchy];
     }
-    
     _flags.isExitingHierarchy = NO;
   }
 }
@@ -2467,7 +2456,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
             
             // Propagate down the new pending transition id
             ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode * _Nonnull node) {
-              node.pendingTransitionID = _pendingTransitionID;
+              node.pendingTransitionID = pendingTransitionId;
             });
           }
         }
@@ -2481,6 +2470,9 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       stateToEnterOrExit |= ASHierarchyStateLayoutPending;
       
       [self exitHierarchyState:stateToEnterOrExit];
+      if (parentWasOrIsRasterized && _flags.isInHierarchy) {
+        [self _recursiveDidExitHierarchy];
+      }
     }
   }
 }
@@ -3553,12 +3545,6 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _flags.isInHierarchy;
-}
-
-- (void)setInHierarchy:(BOOL)inHierarchy
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _flags.isInHierarchy = inHierarchy;
 }
 
 - (id<ASLayoutElement>)finalLayoutElement

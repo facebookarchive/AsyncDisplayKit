@@ -39,6 +39,30 @@ ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesMeasureLayout(ASInterfaceState
   return ((interfaceState & ASInterfaceStateMeasureLayout) == ASInterfaceStateMeasureLayout);
 }
 
+#define ASSetDebugNames(node, ...) _ASSetDebugNames(@"" # __VA_ARGS__, __VA_ARGS__, nil)
+__unused static void _ASSetDebugNames(NSString * _Nonnull names, ASDisplayNode * _Nullable object, ...) {
+  if (object == nil) {
+    return;
+  }
+  static NSCharacterSet *separators;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    NSMutableCharacterSet *s = [NSMutableCharacterSet characterSetWithCharactersInString:@","];
+    [s formUnionWithCharacterSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    separators = s;
+  });
+  NSArray *nameArray = [names componentsSeparatedByCharactersInSet:separators];
+  va_list args;
+  va_start(args, object);
+  NSInteger i = 0;
+  for (NSString *name in nameArray) {
+    ASDisplayNode *node = va_arg(args, id);
+    node.debugName = name;
+    i += 1;
+  }
+  va_end(args);
+};
+
 __unused static NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfaceState)
 {
   NSMutableArray *states = [NSMutableArray array];
