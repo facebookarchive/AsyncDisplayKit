@@ -1181,6 +1181,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   NSMutableArray<ASDisplayNode *> *insertedSubnodes = [[context insertedSubnodes] mutableCopy];
   NSMutableArray<ASDisplayNode *> *movedSubnodes = [NSMutableArray array];
   
+  NSMutableArray<_ASAnimatedTransitionContext *> *insertedSubnodeContexts = [NSMutableArray array];
+  NSMutableArray<_ASAnimatedTransitionContext *> *removedSubnodeContexts = [NSMutableArray array];
+  
   for (ASDisplayNode *subnode in [context subnodesForKey:ASTransitionContextToLayoutKey]) {
     if ([insertedSubnodes containsObject:subnode] == NO) {
       // This is an existing subnode, check if it is resized, moved or both
@@ -1204,6 +1207,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
   }
   
+  // Create contexts for inserted and removed subnodes
+  for (ASDisplayNode *insertedSubnode in insertedSubnodes) {
+    [insertedSubnodeContexts addObject:[_ASAnimatedTransitionContext contextForNode:insertedSubnode alpha:insertedSubnode.alpha]];
+  }
+  for (ASDisplayNode *removedSubnode in removedSubnodes) {
+    [removedSubnodeContexts addObject:[_ASAnimatedTransitionContext contextForNode:removedSubnode alpha:removedSubnode.alpha]];
+  }
+  
+  // Fade out inserted subnodes
   for (ASDisplayNode *insertedSubnode in insertedSubnodes) {
     insertedSubnode.frame = [context finalFrameForNode:insertedSubnode];
     insertedSubnode.alpha = 0;
@@ -1219,8 +1231,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
     
     // Fade inserted subnodes in
-    for (ASDisplayNode *insertedSubnode in insertedSubnodes) {
-      insertedSubnode.alpha = 1;
+    for (_ASAnimatedTransitionContext *insertedSubnodeContext in insertedSubnodeContexts) {
+      insertedSubnodeContext.node.alpha = insertedSubnodeContext.alpha;
     }
     
     // Update frame of self and moved subnodes
@@ -1235,8 +1247,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       movedSubnode.frame = [context finalFrameForNode:movedSubnode];
     }
   } completion:^(BOOL finished) {
-    for (ASDisplayNode *removedSubnode in removedSubnodes) {
-      removedSubnode.alpha = 1;
+    // Restore all removed subnode alpha values
+    for (_ASAnimatedTransitionContext *removedSubnodeContext in removedSubnodeContexts) {
+      removedSubnodeContext.node.alpha = removedSubnodeContext.alpha;
     }
     for (UIView *removedView in removedViews) {
       [removedView removeFromSuperview];
