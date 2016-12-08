@@ -113,89 +113,52 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
-  return
-   // Main stack
-   [ASStackLayoutSpec
-    stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
-    spacing:0
-    justifyContent:ASStackLayoutJustifyContentStart
-    alignItems:ASStackLayoutAlignItemsStretch
-    children:@[
-
-      // Header stack with inset
-      [ASInsetLayoutSpec
-       insetLayoutSpecWithInsets:UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER)
-       child:
-         // Header stack
-         [ASStackLayoutSpec
-          stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
-          spacing:0.0
-          justifyContent:ASStackLayoutJustifyContentStart
-          alignItems:ASStackLayoutAlignItemsCenter
-          children:@[
-            // Avatar image with inset
-            [ASInsetLayoutSpec
-             insetLayoutSpecWithInsets:UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER)
-             child:
-               [_userAvatarImageView styledWithBlock:^(ASLayoutElementStyle *style) {
-                 style.preferredSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
-               }]
-            ],
-            // User and photo location stack
-            [[ASStackLayoutSpec
-             stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
-             spacing:0.0
-             justifyContent:ASStackLayoutJustifyContentStart
-             alignItems:ASStackLayoutAlignItemsStretch
-             children:_photoLocationLabel.attributedText ? @[
-               [_userNameLabel styledWithBlock:^(ASLayoutElementStyle *style) {
-                 style.flexShrink = 1.0;
-               }],
-               [_photoLocationLabel styledWithBlock:^(ASLayoutElementStyle *style) {
-                 style.flexShrink = 1.0;
-               }]
-             ] :
-             @[
-               [_userNameLabel styledWithBlock:^(ASLayoutElementStyle *style) {
-                 style.flexShrink = 1.0;
-               }]
-             ]]
-            styledWithBlock:^(ASLayoutElementStyle *style) {
-              style.flexShrink = 1.0;
-            }],
-            // Spacer between user / photo location and photo time inverval
-            [[ASLayoutSpec new] styledWithBlock:^(ASLayoutElementStyle *style) {
-              style.flexGrow = 1.0;
-            }],
-            // Photo and time interval node
-            [_photoTimeIntervalSincePostLabel styledWithBlock:^(ASLayoutElementStyle *style) {
-              // to remove double spaces around spacer
-              style.spacingBefore = HORIZONTAL_BUFFER;
-            }]
-          ]]
-        ],
-      
-      // Center photo with ratio
-      [ASRatioLayoutSpec
-       ratioLayoutSpecWithRatio:1.0
-       child:_photoImageView],
-      
-      // Footer stack with inset
-      [ASInsetLayoutSpec
-       insetLayoutSpecWithInsets:UIEdgeInsetsMake(VERTICAL_BUFFER, HORIZONTAL_BUFFER, VERTICAL_BUFFER, HORIZONTAL_BUFFER)
-       child:
-         [ASStackLayoutSpec
-          stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
-          spacing:VERTICAL_BUFFER
-          justifyContent:ASStackLayoutJustifyContentStart
-          alignItems:ASStackLayoutAlignItemsStretch
-          children:@[
-            _photoLikesLabel,
-            _photoDescriptionLabel,
-            _photoCommentsView
-          ]]
-       ]
-    ]];
+  // Avatar image with inset
+  _userAvatarImageView.style.preferredSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+  ASInsetLayoutSpec *avatarInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER)
+                                                                          child:_userAvatarImageView];
+  
+  // User and photo location stack
+  ASStackLayoutSpec *userPhotoLocationStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  userPhotoLocationStack.style.flexShrink = 1.0;
+  _userNameLabel.style.flexShrink = 1.0;
+  if (_photoLocationLabel.attributedText) {
+    _photoLocationLabel.style.flexShrink = 1.0;
+    [userPhotoLocationStack setChildren:@[_userNameLabel, _photoLocationLabel]];
+  } else {
+    [userPhotoLocationStack setChild:_userNameLabel];
+  }
+  
+  // Spacer between user / photo location and photo time inverval
+  ASLayoutSpec *spacer = [ASLayoutSpec new];
+  spacer.style.flexGrow = 1.0;
+  
+  // Photo and time interval node
+  _photoTimeIntervalSincePostLabel.style.spacingBefore = HORIZONTAL_BUFFER;
+  
+  // Header stack
+  ASStackLayoutSpec *headerStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
+  headerStack.alignItems = ASStackLayoutAlignItemsCenter;
+  headerStack.children = @[avatarInset, userPhotoLocationStack, spacer, _photoTimeIntervalSincePostLabel];
+  
+  ASInsetLayoutSpec *headerStackInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER)
+                                                                               child:headerStack];
+  
+  // Center photo with ratio
+  ASRatioLayoutSpec *centerPhoto = [ASRatioLayoutSpec ratioLayoutSpecWithRatio:1.0 child:_photoImageView];
+  
+  // Footer stack
+  ASStackLayoutSpec *footerStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  footerStack.spacing = VERTICAL_BUFFER;
+  footerStack.children = @[_photoLikesLabel, _photoDescriptionLabel, _photoCommentsView];
+  
+  ASInsetLayoutSpec *footerInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(VERTICAL_BUFFER, HORIZONTAL_BUFFER, VERTICAL_BUFFER, HORIZONTAL_BUFFER)
+                                                                          child:footerStack];
+  
+  // Main stack
+  ASStackLayoutSpec *mainStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  mainStack.children = @[headerStackInset, centerPhoto, footerInset];
+  return mainStack;
 }
 
 #pragma mark - Instance Methods
