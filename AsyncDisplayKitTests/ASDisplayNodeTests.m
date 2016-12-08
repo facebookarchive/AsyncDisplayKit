@@ -27,6 +27,8 @@
 #import "ASCenterLayoutSpec.h"
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInternalHelpers.h"
+#import "ASDisplayNodeExtras.h"
+#import "ASDisplayNode+Beta.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.debugName = @#n
@@ -1971,33 +1973,93 @@ static bool stringContainsPointer(NSString *description, id p) {
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
-- (void)DISABLED_testThatNodesAreMarkedInvisibleWhenRemovedFromAVisibleRasterizedHierarchy
+- (void)testThatRasterizedNodesGetInterfaceStateUpdatesWhenContainerEntersHierarchy
 {
-  ASCellNode *supernode = [[ASCellNode alloc] init];
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
   supernode.shouldRasterizeDescendants = YES;
-  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(supernode, subnode);
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-  [supernode addSubnode:node];
+  [supernode addSubnode:subnode];
   [window addSubnode:supernode];
   [window makeKeyAndVisible];
-  XCTAssertTrue(node.isVisible);
-  [node removeFromSupernode];
-  XCTAssertFalse(node.isVisible);
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertTrue(subnode.isVisible);
+  [supernode.view removeFromSuperview];
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertFalse(subnode.isVisible);
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
-- (void)DISABLED_testThatNodesAreMarkedVisibleWhenAddedToARasterizedHierarchyAlreadyOnscreen
+- (void)testThatRasterizedNodesGetInterfaceStateUpdatesWhenAddedToContainerThatIsInHierarchy
 {
-  ASCellNode *supernode = [[ASCellNode alloc] init];
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
   supernode.shouldRasterizeDescendants = YES;
-  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(supernode, subnode);
+
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   [window addSubnode:supernode];
   [window makeKeyAndVisible];
-  [supernode addSubnode:node];
-  XCTAssertTrue(node.isVisible);
-  [node removeFromSupernode];
-  XCTAssertFalse(node.isVisible);
+  [supernode addSubnode:subnode];
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertTrue(subnode.isVisible);
+  [subnode removeFromSupernode];
+  XCTAssertFalse(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertFalse(subnode.isVisible);
+}
+
+- (void)testThatLoadedNodeGetsUnloadedIfSubtreeBecomesRasterized
+{
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
+  [supernode view];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(supernode, subnode);
+  [supernode addSubnode:subnode];
+  XCTAssertTrue(subnode.nodeLoaded);
+  supernode.shouldRasterizeDescendants = YES;
+  XCTAssertFalse(subnode.nodeLoaded);
+}
+
+- (void)testThatLoadedNodeGetsUnloadedIfAddedToRasterizedSubtree
+{
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
+  supernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(supernode, subnode);
+  [subnode view];
+  XCTAssertTrue(subnode.nodeLoaded);
+  [supernode addSubnode:subnode];
+  XCTAssertFalse(subnode.nodeLoaded);
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+}
+
+- (void)testThatClearingRasterizationBitMidwayDownTheTreeWorksRight
+{
+  ASDisplayNode *topNode = [[ASDisplayNode alloc] init];
+  topNode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *middleNode = [[ASDisplayNode alloc] init];
+  middleNode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *bottomNode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(topNode, middleNode, bottomNode);
+  [middleNode addSubnode:bottomNode];
+  [topNode addSubnode:middleNode];
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(bottomNode.hierarchyState));
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(middleNode.hierarchyState));
+  middleNode.shouldRasterizeDescendants = NO;
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(bottomNode.hierarchyState));
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(middleNode.hierarchyState));
+}
+
+- (void)testThatRasterizingWrapperNodesIsNotAllowed
+{
+  ASDisplayNode *rasterizedSupernode = [[ASDisplayNode alloc] init];
+  rasterizedSupernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] initWithViewBlock:^UIView * _Nonnull{
+    return [[UIView alloc] init];
+  }];
+  ASSetDebugNames(rasterizedSupernode, subnode);
+  XCTAssertThrows([rasterizedSupernode addSubnode:subnode]);
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2011

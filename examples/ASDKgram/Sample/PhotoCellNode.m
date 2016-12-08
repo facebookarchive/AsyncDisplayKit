@@ -91,8 +91,8 @@
     _photoDescriptionLabel.maximumNumberOfLines = 3;
     
     _photoCommentsView = [[CommentsNode alloc] init];
-    // For now disable shouldRasterizeDescendants as it will throw an assertion: 'Node should always be marked invisible before deallocating. ...'
-    //_photoCommentsView.shouldRasterizeDescendants = YES;
+    
+    _photoCommentsView.shouldRasterizeDescendants = YES;
     
     // instead of adding everything addSubnode:
     self.automaticallyManagesSubnodes = YES;

@@ -1422,6 +1422,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)setShouldRasterizeDescendants:(BOOL)shouldRasterize
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  BOOL rasterizedFromSelfOrAncestor = NO;
   {
     ASDN::MutexLocker l(__instanceLock__);
     
@@ -1429,6 +1430,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       return;
     
     _flags.shouldRasterizeDescendants = shouldRasterize;
+    rasterizedFromSelfOrAncestor = shouldRasterize || ASHierarchyStateIncludesRasterized(_hierarchyState);
   }
   
   if (self.isNodeLoaded) {
@@ -1438,18 +1440,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [self recursivelyClearContents];
     
     ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode *node) {
-      if (shouldRasterize) {
+      if (rasterizedFromSelfOrAncestor) {
         [node enterHierarchyState:ASHierarchyStateRasterized];
-        [node __unloadNode];
+        if (node.isNodeLoaded) {
+          [node __unloadNode];
+        }
       } else {
         [node exitHierarchyState:ASHierarchyStateRasterized];
-        [node __loadNode];
+        // We can avoid eagerly loading this node. We will load it on-demand as usual.
       }
     });
-    if (!shouldRasterize) {
-      // At this point all of our subnodes have their layers or views recreated, but we haven't added
-      // them to ours yet.  This is because our node is already loaded, and the above recursion
-      // is only performed on our subnodes -- not self.
+    if (!rasterizedFromSelfOrAncestor) {
+      // If we are not going to rasterize at all, go ahead and set up our view hierarchy.
       [self _addSubnodeViewsAndLayers];
     }
     
@@ -1460,7 +1462,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
   } else {
     ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode *node) {
-      if (shouldRasterize) {
+      if (rasterizedFromSelfOrAncestor) {
         [node enterHierarchyState:ASHierarchyStateRasterized];
       } else {
         [node exitHierarchyState:ASHierarchyStateRasterized];
@@ -1887,6 +1889,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 /*
  * Central private helper method that should eventually be called if submethods add, insert or replace subnodes
  * You must hold __instanceLock__ to call this.
+ * This method is called with thread affinity.
  *
  * @param subnode       The subnode to insert
  * @param subnodeIndex  The index in _subnodes to insert it
@@ -1930,15 +1933,22 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   // This call will apply our .hierarchyState to the new subnode.
   // If we are a managed hierarchy, as in ASCellNode trees, it will also apply our .interfaceState.
   [subnode __setSupernode:self];
-  
-  // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and
-  // none of this could possibly work.
-  if (nodeIsInRasterizedTree(self) == NO && self.nodeLoaded) {
-    // If node is loaded insert the subnode otherwise wait until the node get's loaded
-    ASPerformBlockOnMainThread(^{
-      [self _insertSubnodeSubviewOrSublayer:subnode atIndex:sublayerIndex];
+
+  // If this subnode will be rasterized, update its hierarchy state & enter hierarchy if needed
+  if (nodeIsInRasterizedTree(self)) {
+    ASDisplayNodePerformBlockOnEveryNodeBFS(subnode, ^(ASDisplayNode * _Nonnull node) {
+      [node enterHierarchyState:ASHierarchyStateRasterized];
+      if (node.isNodeLoaded) {
+        [node __unloadNode];
+      }
     });
-  }
+    if (_flags.isInHierarchy) {
+      [subnode __enterHierarchy];
+    }
+  } else if (self.nodeLoaded) {
+    // If not rasterizing, and node is loaded insert the subview/sublayer now.
+    [self _insertSubnodeSubviewOrSublayer:subnode atIndex:sublayerIndex];
+  } // Otherwise we will insert subview/sublayer when we get loaded
 
   ASDisplayNodeAssert(disableNotifications == shouldDisableNotificationsForMovingBetweenParents(oldParent, self), @"Invariant violated");
   if (disableNotifications) {
@@ -1968,10 +1978,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   if (canUseViewAPI(self, subnode)) {
     [_view insertSubview:subnode.view atIndex:idx];
   } else {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wconversion"
-    [_layer insertSublayer:subnode.layer atIndex:idx];
-#pragma clang diagnostic pop
+    [_layer insertSublayer:subnode.layer atIndex:(unsigned int)idx];
   }
 }
 
@@ -2032,7 +2039,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
   
-  if ([oldSubnode _deallocSafeSupernode] != self) {
+  if (oldSubnode.supernode != self) {
     ASDisplayNodeFailAssert(@"Old Subnode to replace must be a subnode");
     return;
   }
@@ -2076,7 +2083,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
 
-  if ([below _deallocSafeSupernode] != self) {
+  if (below.supernode != self) {
     ASDisplayNodeFailAssert(@"Node to insert below must be a subnode");
     return;
   }
@@ -2101,7 +2108,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     
     // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to
     // insert it will mess up our calculation
-    if ([subnode _deallocSafeSupernode] == self) {
+    if (subnode.supernode == self) {
       NSInteger currentIndexInSubnodes = [_subnodes indexOfObjectIdenticalTo:subnode];
       if (currentIndexInSubnodes < belowSubnodeIndex) {
         belowSubnodeIndex--;
@@ -2138,7 +2145,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
 
-  if ([above _deallocSafeSupernode] != self) {
+  if (above.supernode != self) {
     ASDisplayNodeFailAssert(@"Node to insert above must be a subnode");
     return;
   }
@@ -2162,7 +2169,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
     // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to
     // insert it will mess up our calculation
-    if ([subnode _deallocSafeSupernode] == self) {
+    if (subnode.supernode == self) {
       NSInteger currentIndexInSubnodes = [_subnodes indexOfObjectIdenticalTo:subnode];
       if (currentIndexInSubnodes <= aboveSubnodeIndex) {
         aboveSubnodeIndex--;
@@ -2228,7 +2235,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
   // Don't call self.supernode here because that will retain/autorelease the supernode.  This method -_removeSupernode: is often called while tearing down a node hierarchy, and the supernode in question might be in the middle of its -dealloc.  The supernode is never messaged, only compared by value, so this is safe.
   // The particular issue that triggers this edge case is when a node calls -removeFromSupernode on a subnode from within its own -dealloc method.
-  if (!subnode || [subnode _deallocSafeSupernode] != self) {
+  if (!subnode || subnode.supernode != self) {
     return;
   }
 
@@ -2253,8 +2260,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     __weak ASDisplayNode *supernode = _supernode;
     __weak UIView *view = _view;
     __weak CALayer *layer = _layer;
-    BOOL layerBacked = _flags.layerBacked;
-    BOOL isNodeLoaded = (layer != nil || view != nil);
   __instanceLock__.unlock();
 
   // Clear supernode's reference to us before removing the view from the hierarchy, as _ASDisplayView
@@ -2262,14 +2267,10 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   // This may result in removing the last strong reference, triggering deallocation after this method.
   [supernode _removeSubnode:self];
 
-  if (isNodeLoaded && (supernode == nil || supernode.isNodeLoaded)) {
-    ASPerformBlockOnMainThread(^{
-      if (layerBacked || supernode.layerBacked) {
-        [layer removeFromSuperlayer];
-      } else {
-        [view removeFromSuperview];
-      }
-    });
+  if (view != nil) {
+    [view removeFromSuperview];
+  } else if (layer != nil) {
+    [layer removeFromSuperlayer];
   }
 }
 
@@ -2328,12 +2329,10 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   if (!_flags.isInHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
     _flags.isEnteringHierarchy = YES;
     _flags.isInHierarchy = YES;
-    
-    if (_flags.shouldRasterizeDescendants) {
-      // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
-      [self _recursiveWillEnterHierarchy];
-    } else {
-      [self willEnterHierarchy];
+
+    [self willEnterHierarchy];
+    for (ASDisplayNode *subnode in self.subnodes) {
+      [subnode __enterHierarchy];
     }
     _flags.isEnteringHierarchy = NO;
 
@@ -2369,13 +2368,10 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
     [self.asyncLayer cancelAsyncDisplay];
 
-    if (_flags.shouldRasterizeDescendants) {
-      // Nodes that are descendants of a rasterized container do not have views or layers, and so cannot receive visibility notifications directly via orderIn/orderOut CALayer actions.  Manually send visibility notifications to rasterized descendants.
-      [self _recursiveDidExitHierarchy];
-    } else {
-      [self didExitHierarchy];
+    [self didExitHierarchy];
+    for (ASDisplayNode *subnode in self.subnodes) {
+      [subnode __exitHierarchy];
     }
-    
     _flags.isExitingHierarchy = NO;
   }
 }
@@ -2416,14 +2412,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   return ([_subnodes copy] ?: @[]);
 }
 
+// NOTE: This method must be dealloc-safe (should not retain self).
 - (ASDisplayNode *)supernode
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _supernode;
-}
-
-// This is a thread-method to return the supernode without causing it to be retained autoreleased.  See -_removeSubnode: for details.
-- (ASDisplayNode *)_deallocSafeSupernode
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _supernode;
@@ -2471,7 +2461,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
             
             // Propagate down the new pending transition id
             ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode * _Nonnull node) {
-              node.pendingTransitionID = _pendingTransitionID;
+              node.pendingTransitionID = pendingTransitionId;
             });
           }
         }
@@ -2485,6 +2475,14 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       stateToEnterOrExit |= ASHierarchyStateLayoutPending;
       
       [self exitHierarchyState:stateToEnterOrExit];
+
+      // We only need to explicitly exit hierarchy here if we were rasterized.
+      // Otherwise we will exit the hierarchy when our view/layer does so
+      // which has some nice carry-over machinery to handle cases where we are removed from a hierarchy
+      // and then added into it again shortly after.
+      if (parentWasOrIsRasterized && _flags.isInHierarchy) {
+        [self __exitHierarchy];
+      }
     }
   }
 }
@@ -3559,12 +3557,6 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   return _flags.isInHierarchy;
 }
 
-- (void)setInHierarchy:(BOOL)inHierarchy
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  _flags.isInHierarchy = inHierarchy;
-}
-
 - (id<ASLayoutElement>)finalLayoutElement
 {
   return self;
@@ -3610,7 +3602,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   }
   
   // Check supernode so that if we are cell node we don't find self.
-  ASCellNode *cellNode = ASDisplayNodeFindFirstSupernodeOfClass([self _deallocSafeSupernode], [ASCellNode class]);
+  ASCellNode *cellNode = ASDisplayNodeFindFirstSupernodeOfClass(self.supernode, [ASCellNode class]);
   if (cellNode != nil) {
     [result addObject:@{ @"cellNode" : ASObjectDescriptionMakeTiny(cellNode) }];
   }
