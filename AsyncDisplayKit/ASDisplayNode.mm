@@ -1422,6 +1422,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)setShouldRasterizeDescendants:(BOOL)shouldRasterize
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  BOOL rasterizedFromSelfOrAncestor = NO;
   {
     ASDN::MutexLocker l(__instanceLock__);
     
@@ -1429,6 +1430,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       return;
     
     _flags.shouldRasterizeDescendants = shouldRasterize;
+    rasterizedFromSelfOrAncestor = shouldRasterize || ASHierarchyStateIncludesRasterized(_hierarchyState);
   }
   
   if (self.isNodeLoaded) {
@@ -1438,18 +1440,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     [self recursivelyClearContents];
     
     ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode *node) {
-      if (shouldRasterize) {
+      if (rasterizedFromSelfOrAncestor) {
         [node enterHierarchyState:ASHierarchyStateRasterized];
-        [node __unloadNode];
+        if (node.isNodeLoaded) {
+          [node __unloadNode];
+        }
       } else {
         [node exitHierarchyState:ASHierarchyStateRasterized];
-        [node __loadNode];
+        // We can avoid eagerly loading this node. We will load it on-demand as usual.
       }
     });
-    if (!shouldRasterize) {
-      // At this point all of our subnodes have their layers or views recreated, but we haven't added
-      // them to ours yet.  This is because our node is already loaded, and the above recursion
-      // is only performed on our subnodes -- not self.
+    if (!rasterizedFromSelfOrAncestor) {
+      // If we are not going to rasterize at all, go ahead and set up our view hierarchy.
       [self _addSubnodeViewsAndLayers];
     }
     
@@ -1460,7 +1462,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
   } else {
     ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode *node) {
-      if (shouldRasterize) {
+      if (rasterizedFromSelfOrAncestor) {
         [node enterHierarchyState:ASHierarchyStateRasterized];
       } else {
         [node exitHierarchyState:ASHierarchyStateRasterized];
@@ -1931,15 +1933,22 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   // This call will apply our .hierarchyState to the new subnode.
   // If we are a managed hierarchy, as in ASCellNode trees, it will also apply our .interfaceState.
   [subnode __setSupernode:self];
-  
-  // Don't bother inserting the view/layer if in a rasterized subtree, because there are no layers in the hierarchy and
-  // none of this could possibly work.
-  if (self.nodeLoaded && !_flags.shouldRasterizeDescendants) {
-    // If node is loaded insert the subnode otherwise wait until the node gets loaded
+
+  // If this subnode will be rasterized, update its hierarchy state & enter hierarchy if needed
+  if (nodeIsInRasterizedTree(self)) {
+    ASDisplayNodePerformBlockOnEveryNodeBFS(subnode, ^(ASDisplayNode * _Nonnull node) {
+      [node enterHierarchyState:ASHierarchyStateRasterized];
+      if (node.isNodeLoaded) {
+        [node __unloadNode];
+      }
+    });
+    if (_flags.isInHierarchy) {
+      [subnode __enterHierarchy];
+    }
+  } else if (self.nodeLoaded) {
+    // If not rasterizing, and node is loaded insert the subview/sublayer now.
     [self _insertSubnodeSubviewOrSublayer:subnode atIndex:sublayerIndex];
-  } else if (_flags.isInHierarchy) {
-    [subnode __enterHierarchy];
-  }
+  } // Otherwise we will insert subview/sublayer when we get loaded
 
   ASDisplayNodeAssert(disableNotifications == shouldDisableNotificationsForMovingBetweenParents(oldParent, self), @"Invariant violated");
   if (disableNotifications) {
@@ -2251,7 +2260,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     __weak ASDisplayNode *supernode = _supernode;
     __weak UIView *view = _view;
     __weak CALayer *layer = _layer;
-    BOOL inHierarchy = (_flags.isInHierarchy);
   __instanceLock__.unlock();
 
   // Clear supernode's reference to us before removing the view from the hierarchy, as _ASDisplayView
@@ -2263,9 +2271,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     [view removeFromSuperview];
   } else if (layer != nil) {
     [layer removeFromSuperlayer];
-  } else if (inHierarchy) {
-    // For rasterized nodes
-    [self __exitHierarchy];
   }
 }
 
@@ -2470,8 +2475,13 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       stateToEnterOrExit |= ASHierarchyStateLayoutPending;
       
       [self exitHierarchyState:stateToEnterOrExit];
+
+      // We only need to explicitly exit hierarchy here if we were rasterized.
+      // Otherwise we will exit the hierarchy when our view/layer does so
+      // which has some nice carry-over machinery to handle cases where we are removed from a hierarchy
+      // and then added into it again shortly after.
       if (parentWasOrIsRasterized && _flags.isInHierarchy) {
-        [self _recursiveDidExitHierarchy];
+        [self __exitHierarchy];
       }
     }
   }

@@ -28,6 +28,7 @@
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInternalHelpers.h"
 #import "ASDisplayNodeExtras.h"
+#import "ASDisplayNode+Beta.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.debugName = @#n
@@ -2028,9 +2029,27 @@ static bool stringContainsPointer(NSString *description, id p) {
   ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
   ASSetDebugNames(supernode, subnode);
   [subnode view];
+  XCTAssertTrue(subnode.nodeLoaded);
   [supernode addSubnode:subnode];
   XCTAssertFalse(subnode.nodeLoaded);
-  XCTAssertFalse(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+}
+
+- (void)testThatClearingRasterizationBitMidwayDownTheTreeWorksRight
+{
+  ASDisplayNode *topNode = [[ASDisplayNode alloc] init];
+  topNode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *middleNode = [[ASDisplayNode alloc] init];
+  middleNode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *bottomNode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(topNode, middleNode, bottomNode);
+  [middleNode addSubnode:bottomNode];
+  [topNode addSubnode:middleNode];
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(bottomNode.hierarchyState));
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(middleNode.hierarchyState));
+  middleNode.shouldRasterizeDescendants = NO;
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(bottomNode.hierarchyState));
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(middleNode.hierarchyState));
 }
 
 - (void)testThatRasterizingWrapperNodesIsNotAllowed
