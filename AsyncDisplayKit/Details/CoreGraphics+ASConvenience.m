@@ -72,3 +72,8 @@ CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTuningPar
   return rect;
 }
 
+CGSize CGSizeWithASLayoutSize(ASLayoutSize layoutSize)
+{
+    BOOL sizeInPoints = (layoutSize.width.unit != ASDimensionUnitFraction && layoutSize.height.unit != ASDimensionUnitFraction);
+    return sizeInPoints ? CGSizeMake(layoutSize.width.value, layoutSize.height.value) : CGSizeZero;
+}
