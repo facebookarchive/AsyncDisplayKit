@@ -1058,9 +1058,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       
       // Kick off animating the layout transition
       [self animateLayoutTransition:_pendingLayoutTransitionContext];
-        
-      // Mark transaction as finished
-      [self _finishOrCancelTransition];
     });
   };
   
@@ -1249,7 +1246,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }];
 }
 
-/*
+/**
  * Hook for subclasses to clean up nodes after the transition happened. Furthermore this can be used from subclasses
  * to manually perform deletions.
  */
@@ -1260,9 +1257,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark _ASTransitionContextCompletionDelegate
 
-/*
+/**
  * After completeTransition: is called on the ASContextTransitioning object in animateLayoutTransition: this
- * delegate method will be called that start the completion process of the 
+ * delegate method will be called that start the completion process of the transition
  */
 - (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete
 {
@@ -1270,6 +1267,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _pendingLayoutTransitionContext = nil;
 
   [self _pendingLayoutTransitionDidComplete];
+    
+  // Mark transaction as finished
+  [self _finishOrCancelTransition];
 }
 
 #pragma mark - Layout
