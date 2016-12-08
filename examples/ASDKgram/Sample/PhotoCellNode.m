@@ -25,6 +25,9 @@
 #import "PINImageView+PINRemoteImage.h"
 #import "PINButton+PINRemoteImage.h"
 
+// Use this to change the formatting of code you want in layoutSpecs.
+#define FLAT_LAYOUT 0
+
 #define DEBUG_PHOTOCELL_LAYOUT  0
 
 #define HEADER_HEIGHT           50
@@ -113,6 +116,7 @@
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
 {
+#if FLAT_LAYOUT   // This returns the layout specs in a flat structure.
   // Avatar image with inset
   _userAvatarImageView.style.preferredSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
   ASInsetLayoutSpec *avatarInset = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER)
@@ -159,6 +163,92 @@
   ASStackLayoutSpec *mainStack = [ASStackLayoutSpec verticalStackLayoutSpec];
   mainStack.children = @[headerStackInset, centerPhoto, footerInset];
   return mainStack;
+  
+#else   // This demonstrates how the final layout tree would look like.
+  return
+  // Main stack
+  [ASStackLayoutSpec
+   stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+   spacing:0
+   justifyContent:ASStackLayoutJustifyContentStart
+   alignItems:ASStackLayoutAlignItemsStretch
+   children:@[
+              
+              // Header stack with inset
+              [ASInsetLayoutSpec
+               insetLayoutSpecWithInsets:UIEdgeInsetsMake(0, HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER)
+               child:
+               // Header stack
+               [ASStackLayoutSpec
+                stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
+                spacing:0.0
+                justifyContent:ASStackLayoutJustifyContentStart
+                alignItems:ASStackLayoutAlignItemsCenter
+                children:@[
+                           // Avatar image with inset
+                           [ASInsetLayoutSpec
+                            insetLayoutSpecWithInsets:UIEdgeInsetsMake(HORIZONTAL_BUFFER, 0, HORIZONTAL_BUFFER, HORIZONTAL_BUFFER)
+                            child:
+                            [_userAvatarImageView styledWithBlock:^(ASLayoutElementStyle *style) {
+                 style.preferredSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+               }]
+                            ],
+                           // User and photo location stack
+                           [[ASStackLayoutSpec
+                             stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+                             spacing:0.0
+                             justifyContent:ASStackLayoutJustifyContentStart
+                             alignItems:ASStackLayoutAlignItemsStretch
+                             children:_photoLocationLabel.attributedText ? @[
+                                                                             [_userNameLabel styledWithBlock:^(ASLayoutElementStyle *style) {
+                 style.flexShrink = 1.0;
+               }],
+                                                                             [_photoLocationLabel styledWithBlock:^(ASLayoutElementStyle *style) {
+                 style.flexShrink = 1.0;
+               }]
+                                                                             ] :
+                             @[
+                               [_userNameLabel styledWithBlock:^(ASLayoutElementStyle *style) {
+                 style.flexShrink = 1.0;
+               }]
+                               ]]
+                            styledWithBlock:^(ASLayoutElementStyle *style) {
+                              style.flexShrink = 1.0;
+                            }],
+                           // Spacer between user / photo location and photo time inverval
+                           [[ASLayoutSpec new] styledWithBlock:^(ASLayoutElementStyle *style) {
+                 style.flexGrow = 1.0;
+               }],
+                           // Photo and time interval node
+                           [_photoTimeIntervalSincePostLabel styledWithBlock:^(ASLayoutElementStyle *style) {
+                 // to remove double spaces around spacer
+                 style.spacingBefore = HORIZONTAL_BUFFER;
+               }]
+                           ]]
+               ],
+              
+              // Center photo with ratio
+              [ASRatioLayoutSpec
+               ratioLayoutSpecWithRatio:1.0
+               child:_photoImageView],
+              
+              // Footer stack with inset
+              [ASInsetLayoutSpec
+               insetLayoutSpecWithInsets:UIEdgeInsetsMake(VERTICAL_BUFFER, HORIZONTAL_BUFFER, VERTICAL_BUFFER, HORIZONTAL_BUFFER)
+               child:
+               [ASStackLayoutSpec
+                stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+                spacing:VERTICAL_BUFFER
+                justifyContent:ASStackLayoutJustifyContentStart
+                alignItems:ASStackLayoutAlignItemsStretch
+                children:@[
+                           _photoLikesLabel,
+                           _photoDescriptionLabel,
+                           _photoCommentsView
+                           ]]
+               ]
+          ]];
+#endif
 }
 
 #pragma mark - Instance Methods
