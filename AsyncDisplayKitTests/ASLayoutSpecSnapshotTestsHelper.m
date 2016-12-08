@@ -13,6 +13,7 @@
 #import "ASDisplayNode.h"
 #import "ASLayoutSpec.h"
 #import "ASLayout.h"
+#import "ASDisplayNode+Beta.h"
 
 @interface ASTestNode : ASDisplayNode
 @property (strong, nonatomic, nullable) ASLayoutSpec *layoutSpecUnderTest;

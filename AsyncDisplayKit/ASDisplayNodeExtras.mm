@@ -32,6 +32,24 @@ extern void ASPerformMainThreadDeallocation(_Nullable id object)
   }
 }
 
+extern void _ASSetDebugNames(Class _Nonnull owningClass, NSString * _Nonnull names, ASDisplayNode * _Nullable object, ...)
+{
+  NSString *owningClassName = NSStringFromClass(owningClass);
+  NSArray *nameArray = [names componentsSeparatedByString:@", "];
+  va_list args;
+  va_start(args, object);
+  NSInteger i = 0;
+  for (ASDisplayNode *node = object; node != nil; node = va_arg(args, id), i++) {
+    NSMutableString *symbolName = [nameArray[i] mutableCopy];
+    // Remove any `self.` or `_` prefix
+    [symbolName replaceOccurrencesOfString:@"self." withString:@"" options:NSAnchoredSearch range:NSMakeRange(0, symbolName.length)];
+    [symbolName replaceOccurrencesOfString:@"_" withString:@"" options:NSAnchoredSearch range:NSMakeRange(0, symbolName.length)];
+    node.debugName = [NSString stringWithFormat:@"%@.%@", owningClassName, symbolName];
+  }
+  ASDisplayNodeCAssert(nameArray.count == i, @"Malformed call to ASSetDebugNames: %@", names);
+  va_end(args);
+}
+
 extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window)
 {
     ASDisplayNodeCAssert(![displayNode isLayerBacked], @"displayNode must not be layer backed as it may have a nil window");
