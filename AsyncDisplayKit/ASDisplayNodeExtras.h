@@ -19,7 +19,11 @@
  * For instance, in `MYButtonNode` if you call `ASSetDebugNames(self.titleNode, _countNode)` the debug names
  * for the nodes will be set to `MYButtonNode.titleNode` and `MYButtonNode.countNode`.
  */
-#define ASSetDebugNames(...) _ASSetDebugNames(self.class, @"" # __VA_ARGS__, __VA_ARGS__, nil)
+#if DEBUG
+  #define ASSetDebugNames(...) _ASSetDebugNames(self.class, @"" # __VA_ARGS__, __VA_ARGS__, nil)
+#else
+  #define ASSetDebugNames(...)
+#endif
 
 /// For deallocation of objects on the main thread across multiple run loops.
 extern void ASPerformMainThreadDeallocation(_Nullable id object);
