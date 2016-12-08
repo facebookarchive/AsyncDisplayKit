@@ -14,6 +14,13 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+/**
+ * Sets the debugName field for these nodes to the given symbol names, within the domain of "self.class"
+ * For instance, in `MYButtonNode` if you call `ASSetDebugNames(self.titleNode, _countNode)` the debug names
+ * for the nodes will be set to `MYButtonNode.titleNode` and `MYButtonNode.countNode`.
+ */
+#define ASSetDebugNames(...) _ASSetDebugNames(self.class, @"" # __VA_ARGS__, __VA_ARGS__, nil)
+
 /// For deallocation of objects on the main thread across multiple run loops.
 extern void ASPerformMainThreadDeallocation(_Nullable id object);
 
@@ -38,18 +45,6 @@ ASDISPLAYNODE_INLINE BOOL ASInterfaceStateIncludesMeasureLayout(ASInterfaceState
 {
   return ((interfaceState & ASInterfaceStateMeasureLayout) == ASInterfaceStateMeasureLayout);
 }
-
-#define ASSetDebugNames(...) _ASSetDebugNames(@"" # __VA_ARGS__, __VA_ARGS__, nil)
-__unused static void _ASSetDebugNames(NSString * _Nonnull names, ASDisplayNode * _Nullable object, ...) {
-  NSArray *nameArray = [names componentsSeparatedByString:@", "];
-  va_list args;
-  va_start(args, object);
-  NSInteger i = 0;
-  for (ASDisplayNode *node = object; node != nil; node = va_arg(args, id), i++) {
-    node.debugName = nameArray[i];
-  }
-  va_end(args);
-};
 
 __unused static NSString * _Nonnull NSStringFromASInterfaceState(ASInterfaceState interfaceState)
 {
@@ -174,6 +169,9 @@ extern UIColor *ASDisplayNodeDefaultTintColor() AS_WARN_UNUSED_RESULT;
  */
 extern void ASDisplayNodeDisableHierarchyNotifications(ASDisplayNode *node);
 extern void ASDisplayNodeEnableHierarchyNotifications(ASDisplayNode *node);
+
+// Not to be called directly.
+extern void _ASSetDebugNames(Class _Nonnull owningClass, NSString * _Nonnull names, ASDisplayNode * _Nullable object, ...);
 
 ASDISPLAYNODE_EXTERN_C_END
 

@@ -2021,7 +2021,6 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertFalse(subnode.nodeLoaded);
 }
 
-// TODO: Create an issue to enable this test
 - (void)testThatLoadedNodeGetsUnloadedIfAddedToRasterizedSubtree
 {
   ASDisplayNode *supernode = [[ASDisplayNode alloc] init];

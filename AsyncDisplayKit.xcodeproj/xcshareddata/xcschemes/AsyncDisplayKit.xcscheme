@@ -54,9 +54,6 @@
             </BuildableReference>
             <SkippedTests>
                <Test
-                  Identifier = "ASDisplayNodeTests/testThatLoadedNodeGetsUnloadedIfAddedToRasterizedSubtree">
-               </Test>
-               <Test
                   Identifier = "ASTextNodePerformanceTests">
                </Test>
                <Test
