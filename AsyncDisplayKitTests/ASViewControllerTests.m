@@ -116,19 +116,19 @@
     return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:pagerNode];
   };
   ASViewController *vc = [[ASViewController alloc] initWithNode:node];
-  
-  // This needs to be enabled for a full screen pager to remove the error message while popping back
-  vc.automaticallyAdjustsScrollViewInsets = NO;
-  
   UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
   window.rootViewController = nav;
   [window makeKeyAndVisible];
   [window layoutIfNeeded];
   
   // Wait until view controller is visible
-  [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
+  XCTestExpectation *e = [self expectationWithDescription:@"Transition completed"];
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 0 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    [e fulfill];
+  });
+  [self waitForExpectationsWithTimeout:2 handler:nil];
   
-  // Test initial content inset
+  // Test initial values
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
   cell = [pagerNode.view cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
@@ -138,7 +138,7 @@
   XCTAssertEqual(pagerNode.view.contentOffset.y, 0);
   XCTAssertEqual(pagerNode.view.contentInset.top, 0);
   
-  XCTestExpectation *e = [self expectationWithDescription:@"Transition completed"];
+  e = [self expectationWithDescription:@"Transition completed"];
   // Push another view controller
   UIViewController *vc2 = [[UIViewController alloc] init];
   vc2.view.frame = nav.view.bounds;
@@ -158,7 +158,7 @@
   });
   [self waitForExpectationsWithTimeout:2 handler:nil];
   
-  // Test again
+  // Test values again after popping the view controller
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
   cell = [pagerNode.view cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
