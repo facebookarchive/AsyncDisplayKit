@@ -11,9 +11,29 @@
 #import <OCMock/OCMock.h>
 #import <OCMock/NSInvocation+OCMAdditions.h>
 
-@interface ASViewControllerTests : XCTestCase
+@interface ASPagerNodeTestDataSourceTwo : NSObject <ASPagerDataSource>
 
 @end
+
+@implementation ASPagerNodeTestDataSourceTwo
+
+- (NSInteger)numberOfPagesInPagerNode:(ASPagerNode *)pagerNode
+{
+  return 5;
+}
+
+- (ASCellNodeBlock)pagerNode:(ASPagerNode *)pagerNode nodeBlockAtIndex:(NSInteger)index
+{
+  return ^{
+    ASCellNode *cellNode = [ASCellNode new];
+    cellNode.backgroundColor = [UIColor redColor];
+    return cellNode;
+  };
+}
+
+@end
+
+@interface ASViewControllerTests : XCTestCase @end
 
 @implementation ASViewControllerTests
 
@@ -79,6 +99,67 @@
   XCTAssertEqualObjects(NSStringFromCGRect(expectedRect), NSStringFromCGRect(node.frame));
   [navDelegate verify];
   [animator verify];
+}
+
+- (void)testThatRootPagerNodeDoesGetTheRightInsetWhilePoppingBack
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.automaticallyManagesSubnodes = YES;
+  
+  ASPagerNodeTestDataSourceTwo *dataSource = [[ASPagerNodeTestDataSourceTwo alloc] init];
+  ASPagerNode *pagerNode = [[ASPagerNode alloc] init];
+  pagerNode.dataSource = dataSource;
+  node.layoutSpecBlock = ^(ASDisplayNode *node, ASSizeRange constrainedSize){
+    return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:pagerNode];
+  };
+  ASViewController *vc = [[ASViewController alloc] initWithNode:node];
+  UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+  window.rootViewController = nav;
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+  
+  // Wait until view controller is visible
+  [[NSRunLoop mainRunLoop] runMode:NSDefaultRunLoopMode beforeDate:[NSDate date]];
+  
+  // Test initial content inset
+  XCTAssertEqualObjects(NSStringFromCGRect(window.bounds), NSStringFromCGRect(node.frame));
+  XCTAssertEqual(pagerNode.view.contentOffset.y, 0);
+  XCTAssertEqual(pagerNode.view.contentInset.top, 0);
+  
+  XCTestExpectation *e = [self expectationWithDescription:@"Transition completed"];
+  // Push another view controller
+  UIViewController *viewControllerTwo = [[UIViewController alloc] init];
+  viewControllerTwo.view.frame = nav.view.bounds;
+  viewControllerTwo.view.backgroundColor = [UIColor blueColor];
+  [nav pushViewController:viewControllerTwo animated:YES];
+  
+  //double delayInSeconds = 3.0;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    //XCTAssertTrue([Te.topViewController isKindOfClass:[requiredClass class]],@"View Controller not pushed properly");
+    [e fulfill];
+  });
+  [self waitForExpectationsWithTimeout:2 handler:nil];
+  
+  // Pop view controller
+  e = [self expectationWithDescription:@"Transition completed"];
+  [viewControllerTwo.navigationController popViewControllerAnimated:YES];
+  //double delayInSeconds = 3.0;
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, 1 * NSEC_PER_SEC), dispatch_get_main_queue(), ^{
+    //XCTAssertTrue([Te.topViewController isKindOfClass:[requiredClass class]],@"View Controller not pushed properly");
+    [e fulfill];
+  });
+  [self waitForExpectationsWithTimeout:2 handler:nil];
+  
+  // Test again
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  UICollectionViewCell *cell = [pagerNode.view cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+#pragma clang diagnostic pop
+  XCTAssertEqualObjects(NSStringFromCGRect(window.bounds), NSStringFromCGRect(node.frame));
+  XCTAssertEqualObjects(NSStringFromCGRect(window.bounds), NSStringFromCGRect(cell.frame));
+  XCTAssertEqual(pagerNode.view.contentOffset.y, 0);
+  XCTAssertEqual(pagerNode.view.contentInset.top, 0);
 }
 
 @end
