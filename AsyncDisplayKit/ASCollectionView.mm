@@ -1232,10 +1232,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)layoutSubviews
 {
-  if (_zeroContentInsets) {
-    self.contentInset = UIEdgeInsetsZero;
-  }
-  
   // Flush any pending invalidation action if needed.
   ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
   _nextLayoutInvalidationStyle = ASCollectionViewInvalidationStyleNone;
@@ -1254,6 +1250,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   
   // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
   [super layoutSubviews];
+    
+  if (_zeroContentInsets) {
+    self.contentInset = UIEdgeInsetsZero;
+  }
   
   // Update range controller immediately if possible & needed.
   // Calling -updateIfNeeded in here with self.window == nil (early in the collection view's life)
@@ -1750,6 +1750,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (visible) {
     [self _checkForBatchFetching];
   }
+}
+
+- (void)setContentInset:(UIEdgeInsets)contentInset
+{
+ // contentInset = _zeroContentInsets ? UIEdgeInsetsZero : contentInset;
+  [super setContentInset:contentInset];
 }
 
 #pragma mark ASCALayerExtendedDelegate
