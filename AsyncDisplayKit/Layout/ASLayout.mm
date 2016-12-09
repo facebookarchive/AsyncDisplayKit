@@ -47,6 +47,16 @@ static inline NSString * descriptionIndents(NSUInteger indents)
  */
 @property (nonatomic, getter=isFlattened) BOOL flattened;
 
+/*
+ * Caches all sublayouts if set to YES or destroys the sublayout cache if set to NO. Defaults to YES
+ */
+@property (nonatomic, assign) BOOL retainSublayoutLayoutElements;
+
+/**
+ * Array for explicitly retain sublayout layout elements in case they are created and references in layoutSpecThatFits: and no one else will hold a strong reference on it
+ */
+@property (nonatomic, strong) NSMutableArray<id<ASLayoutElement>> *sublayoutLayoutElements;
+
 @end
 
 @implementation ASLayout
@@ -69,6 +79,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 #endif
     
     _layoutElement = layoutElement;
+    
     // Read this now to avoid @c weak overhead later.
     _layoutElementType = layoutElement.layoutElementType;
     
@@ -88,7 +99,9 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
     _sublayouts = sublayouts != nil ? [sublayouts copy] : @[];
     _flattened = NO;
+    _retainSublayoutLayoutElements = NO;
   }
+  
   return self;
 }
 
@@ -137,6 +150,28 @@ static inline NSString * descriptionIndents(NSUInteger indents)
                             sublayouts:layout.sublayouts];
 }
 
+#pragma mark - Sublayout Elements Caching
+
+- (void)setRetainSublayoutLayoutElements:(BOOL)retainSublayoutLayoutElements
+{
+  if (_retainSublayoutLayoutElements != retainSublayoutLayoutElements) {
+    _retainSublayoutLayoutElements = retainSublayoutLayoutElements;
+    
+    if (retainSublayoutLayoutElements == NO) {
+      _sublayoutLayoutElements = nil;
+    } else {
+      // Add sublayouts layout elements to an internal array to retain it while the layout lives
+      NSUInteger sublayoutCount = _sublayouts.count;
+      if (sublayoutCount > 0) {
+        _sublayoutLayoutElements = [NSMutableArray arrayWithCapacity:sublayoutCount];
+        for (ASLayout *sublayout in _sublayouts) {
+          [_sublayoutLayoutElements addObject:sublayout.layoutElement];
+        }
+      }
+    }
+  }
+}
+
 #pragma mark - Layout Flattening
 
 - (ASLayout *)filteredNodeLayoutTree
@@ -170,8 +205,10 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     }
     queue.insert(queue.cbegin(), sublayoutContexts.begin(), sublayoutContexts.end());
   }
-
-  return [ASLayout layoutWithLayoutElement:_layoutElement size:_size sublayouts:flattenedSublayouts];
+  
+  ASLayout *layout = [ASLayout layoutWithLayoutElement:_layoutElement size:_size position:CGPointZero sublayouts:flattenedSublayouts];
+  layout.retainSublayoutLayoutElements = YES;
+  return layout;
 }
 
 #pragma mark - Accessors

@@ -10,10 +10,10 @@
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-59C939.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Build Status](https://travis-ci.org/facebook/AsyncDisplayKit.svg)](https://travis-ci.org/facebook/AsyncDisplayKit)
 [![License](https://img.shields.io/cocoapods/l/AsyncDisplayKit.svg)](https://github.com/facebook/AsyncDisplayKit/blob/master/LICENSE)
- 
+
 ## Installation
 
-ASDK is available via CocoaPods or Carthage. See our [Installation](http://asyncdisplaykit.org/docs/installation.html) guide for instructions. 
+ASDK is available via CocoaPods or Carthage. See our [Installation](http://asyncdisplaykit.org/docs/installation.html) guide for instructions.
 
 ## Performance Gains
 
@@ -21,7 +21,7 @@ AsyncDisplayKit's basic unit is the `node`. An ASDisplayNode is an abstraction o
 
 To keep its user interface smooth and responsive, your app should render at 60 frames per second — the gold standard on iOS. This means the main thread has one-sixtieth of a second to push each frame. That's 16 milliseconds to execute all layout and drawing code! And because of system overhead, your code usually has less than ten milliseconds to run before it causes a frame drop.
 
-AsyncDisplayKit lets you move image decoding, text sizing and rendering, layout, and other expensive UI operations off the main thread, to keep the main thread available to respond to user interaction. 
+AsyncDisplayKit lets you move image decoding, text sizing and rendering, layout, and other expensive UI operations off the main thread, to keep the main thread available to respond to user interaction.
 
 ## Advanced Developer Features
 
@@ -35,7 +35,7 @@ As the framework has grown, many features have been added that can save develope
 
 ## Getting Help
 
-We use Slack for real-time debugging, community updates, and general talk about ASDK. [Signup](http://asdk-slack-auto-invite.herokuapp.com) youself or email AsyncDisplayKit(at)gmail.com to get an invite.
+We use Slack for real-time debugging, community updates, and general talk about ASDK. [Signup](http://asdk-slack-auto-invite.herokuapp.com) yourself or email AsyncDisplayKit(at)gmail.com to get an invite.
 
 ## Contributing
 

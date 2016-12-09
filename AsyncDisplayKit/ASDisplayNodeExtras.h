@@ -14,6 +14,17 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
+/**
+ * Sets the debugName field for these nodes to the given symbol names, within the domain of "self.class"
+ * For instance, in `MYButtonNode` if you call `ASSetDebugNames(self.titleNode, _countNode)` the debug names
+ * for the nodes will be set to `MYButtonNode.titleNode` and `MYButtonNode.countNode`.
+ */
+#if DEBUG
+  #define ASSetDebugNames(...) _ASSetDebugNames(self.class, @"" # __VA_ARGS__, __VA_ARGS__, nil)
+#else
+  #define ASSetDebugNames(...)
+#endif
+
 /// For deallocation of objects on the main thread across multiple run loops.
 extern void ASPerformMainThreadDeallocation(_Nullable id object);
 
@@ -162,6 +173,9 @@ extern UIColor *ASDisplayNodeDefaultTintColor() AS_WARN_UNUSED_RESULT;
  */
 extern void ASDisplayNodeDisableHierarchyNotifications(ASDisplayNode *node);
 extern void ASDisplayNodeEnableHierarchyNotifications(ASDisplayNode *node);
+
+// Not to be called directly.
+extern void _ASSetDebugNames(Class _Nonnull owningClass, NSString * _Nonnull names, ASDisplayNode * _Nullable object, ...);
 
 ASDISPLAYNODE_EXTERN_C_END
 

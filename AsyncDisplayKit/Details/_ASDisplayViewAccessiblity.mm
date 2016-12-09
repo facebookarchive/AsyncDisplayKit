@@ -13,6 +13,7 @@
 #import "_ASDisplayView.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+Beta.h"
 
 #pragma mark - UIAccessibilityElement
 
