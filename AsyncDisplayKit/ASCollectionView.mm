@@ -1752,12 +1752,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
-- (void)setContentInset:(UIEdgeInsets)contentInset
-{
- // contentInset = _zeroContentInsets ? UIEdgeInsetsZero : contentInset;
-  [super setContentInset:contentInset];
-}
-
 #pragma mark ASCALayerExtendedDelegate
 
 /**
