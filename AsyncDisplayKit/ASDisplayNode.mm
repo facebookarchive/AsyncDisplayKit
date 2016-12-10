@@ -3857,6 +3857,9 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
     if (selfNode) {
       [selfNode addSubnode:subnode];
     } else {
+      if (subnode.supernode) {
+        [subnode removeFromSupernode];
+      }
       [self addSubview:subnode.view];
     }
   }
