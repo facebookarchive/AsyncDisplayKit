@@ -20,7 +20,6 @@
 #import "ASLayoutElement.h"
 #import "ASLayoutTransition.h"
 #import "ASEnvironment.h"
-#import "ASObjectDescriptionHelpers.h"
 #import "ASWeakSet.h"
 
 #import "ASDisplayNode+Beta.h"
@@ -57,13 +56,11 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 #define TIME_DISPLAYNODE_OPS 0 // If you're using this information frequently, try: (DEBUG || PROFILE)
 
-@interface ASDisplayNode () <ASDescriptionProvider, ASDebugDescriptionProvider>
+@interface ASDisplayNode ()
 {
 @package
   _ASPendingState *_pendingViewState;
 
-  // Protects access to _view, _layer, _pendingViewState, _subnodes, _supernode, and other properties which are accessed from multiple threads.
-  ASDN::RecursiveMutex __instanceLock__;
   UIView *_view;
   CALayer *_layer;
 
@@ -196,10 +193,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 /// Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
-
-/// Thread safe way to access the bounds of the node
-@property (nonatomic, assign) CGRect threadSafeBounds;
-
 
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;

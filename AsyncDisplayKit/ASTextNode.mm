@@ -16,7 +16,7 @@
 
 #import "_ASDisplayLayer.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASHighlightOverlayLayer.h"
 #import "ASDisplayNodeExtras.h"
 

@@ -16,6 +16,7 @@
 #import "ASAssert.h"
 #import "ASDimension.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+Beta.h"
@@ -244,7 +245,7 @@ struct ASImageNodeDrawParameters {
   _drawParameter = {
     .bounds = self.bounds,
     .opaque = self.opaque,
-    .contentsScale = _contentsScaleForDisplay,
+    .contentsScale = self.contentsScaleForDisplay,
     .backgroundColor = self.backgroundColor,
     .contentMode = self.contentMode,
     .cropEnabled = _cropEnabled,

@@ -12,14 +12,13 @@
 #import "ASStackLayoutSpec.h"
 #import "ASThread.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASBackgroundLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
 #import "ASAbsoluteLayoutSpec.h"
 
 @interface ASButtonNode ()
 {
-  ASDN::RecursiveMutex __instanceLock__;
-  
   NSAttributedString *_normalAttributedTitle;
   NSAttributedString *_highlightedAttributedTitle;
   NSAttributedString *_selectedAttributedTitle;

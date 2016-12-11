@@ -15,6 +15,7 @@
 
 #import "ASDisplayNode.h"
 #import "ASThread.h"
+#import "ASObjectDescriptionHelpers.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -95,8 +96,12 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
 	return [NSString stringWithFormat:@"{ %@ }", [states componentsJoinedByString:@" | "]];
 }
 
-@interface ASDisplayNode ()
+@interface ASDisplayNode () <ASDescriptionProvider, ASDebugDescriptionProvider>
 {
+  // Protects access to _view, _layer, _pendingViewState, _subnodes, _supernode, and other properties which are accessed from multiple threads.
+@package
+  ASDN::RecursiveMutex __instanceLock__;
+
 @protected
   ASInterfaceState _interfaceState;
   ASHierarchyState _hierarchyState;
@@ -104,6 +109,9 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
 
 // The view class to use when creating a new display node instance. Defaults to _ASDisplayView.
 + (Class)viewClass;
+
+// Thread safe way to access the bounds of the node
+@property (nonatomic, assign) CGRect threadSafeBounds;
 
 // These methods are recursive, and either union or remove the provided interfaceState to all sub-elements.
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState;
