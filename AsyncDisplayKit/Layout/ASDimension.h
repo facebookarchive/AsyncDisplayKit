@@ -20,17 +20,17 @@ ASDISPLAYNODE_INLINE BOOL AS_WARN_UNUSED_RESULT ASPointsValidForLayout(CGFloat p
 
 ASDISPLAYNODE_INLINE BOOL AS_WARN_UNUSED_RESULT ASIsCGSizeValidForLayout(CGSize size)
 {
-    return (ASPointsValidForLayout(size.width) && ASPointsValidForLayout(size.height));
+  return (ASPointsValidForLayout(size.width) && ASPointsValidForLayout(size.height));
 }
 
 ASDISPLAYNODE_INLINE BOOL AS_WARN_UNUSED_RESULT ASPointsValidForSize(CGFloat points)
 {
-    return ((isnormal(points) || points == 0.0) && points >= 0.0 && points < (FLT_MAX / 2.0));
+  return ((isnormal(points) || points == 0.0) && points >= 0.0 && points < (FLT_MAX / 2.0));
 }
 
 ASDISPLAYNODE_INLINE BOOL AS_WARN_UNUSED_RESULT ASIsCGSizeValidForSize(CGSize size)
 {
-    return (ASPointsValidForSize(size.width) && ASPointsValidForSize(size.height));
+  return (ASPointsValidForSize(size.width) && ASPointsValidForSize(size.height));
 }
 
 /**
