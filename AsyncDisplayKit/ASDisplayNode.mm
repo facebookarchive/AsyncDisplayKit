@@ -1170,7 +1170,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
 {
   if ([context isAnimated] == NO) {
-    [self __layoutSublayouts];
+    ASDN::MutexLocker l(__instanceLock__);
+    [self _locked_layoutSublayouts];
     [context completeTransition:YES];
     return;
   }
@@ -3261,14 +3262,17 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDisplayNodeAssertMainThread();
 
+  __instanceLock__.lock();
   if (_calculatedDisplayNodeLayout->isDirty()) {
+    __instanceLock__.unlock();
     return;
   }
   
-  [self __layoutSublayouts];
+  [self _locked_layoutSublayouts];
+  __instanceLock__.unlock();
 }
 
-- (void)__layoutSublayouts
+- (void)_locked_layoutSublayouts
 {
   for (ASLayout *subnodeLayout in _calculatedDisplayNodeLayout->layout.sublayouts) {
     ((ASDisplayNode *)subnodeLayout.layoutElement).frame = subnodeLayout.frame;
