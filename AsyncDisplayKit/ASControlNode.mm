@@ -420,8 +420,8 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   if (block == nil) {
     return;
   }
-  // Start with our first event (touch down) and work our way up to the last event (touch cancel)
-  for (ASControlNodeEvent thisEvent = ASControlNodeEventTouchDown; thisEvent <= ASControlNodeEventTouchCancel; thisEvent <<= 1){
+  // Start with our first event (touch down) and work our way up to the last event (PrimaryActionTriggered)
+  for (ASControlNodeEvent thisEvent = ASControlNodeEventTouchDown; thisEvent <= ASControlNodeEventPrimaryActionTriggered; thisEvent <<= 1) {
     // If it's included in the mask, invoke the block.
     if ((mask & thisEvent) == thisEvent)
       block(thisEvent);
