@@ -30,6 +30,7 @@
 
 @implementation ASScrollNode
 {
+  BOOL _automaticallyManagesContentSize;
   CGSize _contentCalculatedSizeFromLayout;
 }
 @dynamic view;
@@ -39,31 +40,54 @@
   return [super initWithViewBlock:^UIView *{ return [[ASScrollView alloc] init]; }];
 }
 
-- (void)layout
-{
-  [super layout];
-  ASDN::MutexLocker l(__instanceLock__);
-  if (_automaticallyManagesContentSize) {
-    CGSize contentSize = _contentCalculatedSizeFromLayout;
-    if (ASIsCGSizeValidForLayout(contentSize) == NO) {
-      NSLog(@"%@ calculated a size in its layout spec that can't be applied to .contentSize: %@. Applying CGSizeZero instead.", self, NSStringFromCGSize(contentSize));
-      contentSize = CGSizeZero;
-    }
-    self.view.contentSize = _contentCalculatedSizeFromLayout;
-  }
-}
-
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+                     restrictedToSize:(ASLayoutElementSize)size
+                 relativeToParentSize:(CGSize)parentSize
 {
-  ASLayout *layout = [super calculateLayoutThatFits:constrainedSize];
-  ASDN::MutexLocker l(__instanceLock__);
+  ASLayout *layout = [super calculateLayoutThatFits:constrainedSize
+                                   restrictedToSize:size
+                               relativeToParentSize:parentSize];
+  
+  ASDN::MutexLocker l(__instanceLock__);  // Lock for using our two instance variables.
+  
   if (_automaticallyManagesContentSize) {
     _contentCalculatedSizeFromLayout = layout.size;
-    if (ASIsCGSizeValidForLayout(constrainedSize.max)) {
-      layout = [ASLayout layoutWithLayoutElement:self size:constrainedSize.max sublayouts:layout.sublayouts];
+    if (ASIsCGSizeValidForLayout(parentSize)) {
+      layout = [ASLayout layoutWithLayoutElement:self
+                                            size:parentSize
+                                        position:CGPointZero
+                                      sublayouts:layout.sublayouts];
     }
   }
   return layout;
+}
+
+- (void)layout
+{
+  [super layout];
+  
+  ASDN::MutexLocker l(__instanceLock__);  // Lock for using our two instance variables.
+  
+  if (_automaticallyManagesContentSize) {
+    CGSize contentSize = _contentCalculatedSizeFromLayout;
+    if (ASIsCGSizeValidForLayout(contentSize) == NO) {
+      NSLog(@"%@ calculated a size in its layout spec that can't be applied to .contentSize: %@. Applying parentSize (scrollNode's bounds) instead: %@.", self, NSStringFromCGSize(contentSize), NSStringFromCGSize(self.calculatedSize));
+      contentSize = self.calculatedSize;
+    }
+    self.view.contentSize = contentSize;
+  }
+}
+
+- (BOOL)automaticallyManagesContentSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _automaticallyManagesContentSize;
+}
+
+- (void)setAutomaticallyManagesContentSize:(BOOL)automaticallyManagesContentSize
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  _automaticallyManagesContentSize = automaticallyManagesContentSize;
 }
 
 @end

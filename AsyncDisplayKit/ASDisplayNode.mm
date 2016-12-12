@@ -198,7 +198,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 #define __ASDisplayNodeCheckForLayoutMethodOverrides \
     ASDisplayNodeAssert(_layoutSpecBlock != NULL || \
     ((ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateSizeThatFits:)) ? 1 : 0) \
-    + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(layoutSpecThatFits:)) ? 1 : 0)) <= 1, \
+    + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(layoutSpecThatFits:)) ? 1 : 0) \
+    + (ASDisplayNodeSubclassOverridesSelector(self.class, @selector(calculateLayoutThatFits:)) ? 1 : 0)) <= 1, \
     @"Subclass %@ must at least provide a layoutSpecBlock or override at most one of the three layout methods: calculateLayoutThatFits:, layoutSpecThatFits:, or calculateSizeThatFits:", NSStringFromClass(self.class))
 
 + (void)initialize
@@ -1169,7 +1170,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
 {
   if ([context isAnimated] == NO) {
-    [self __layoutSublayouts];
+    ASDN::MutexLocker l(__instanceLock__);
+    [self _locked_layoutSublayouts];
     [context completeTransition:YES];
     return;
   }
@@ -3260,14 +3262,17 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 {
   ASDisplayNodeAssertMainThread();
 
+  __instanceLock__.lock();
   if (_calculatedDisplayNodeLayout->isDirty()) {
+    __instanceLock__.unlock();
     return;
   }
   
-  [self __layoutSublayouts];
+  [self _locked_layoutSublayouts];
+  __instanceLock__.unlock();
 }
 
-- (void)__layoutSublayouts
+- (void)_locked_layoutSublayouts
 {
   for (ASLayout *subnodeLayout in _calculatedDisplayNodeLayout->layout.sublayouts) {
     ((ASDisplayNode *)subnodeLayout.layoutElement).frame = subnodeLayout.frame;
