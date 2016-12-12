@@ -51,13 +51,23 @@
   ASDN::MutexLocker l(__instanceLock__);  // Lock for using our two instance variables.
   
   if (_automaticallyManagesContentSize) {
+    // To understand this code, imagine we're containing a horizontal stack set within a vertical table node.
+    // Our parentSize is fixed ~375pt width, but 0 - INF height.  Our stack measures 1000pt width, 50pt height.
+    // In this case, we want our scrollNode.bounds to be 375pt wide, and 50pt high.  ContentSize 1000pt, 50pt.
+    // We can achieve this behavior by: 1. Always set contentSize to layout.size.  2. Set bounds to parentSize,
+    // unless one dimension is not defined, in which case adopt the contentSize for that dimension.
     _contentCalculatedSizeFromLayout = layout.size;
-    if (ASIsCGSizeValidForLayout(parentSize)) {
-      layout = [ASLayout layoutWithLayoutElement:self
-                                            size:parentSize
-                                        position:CGPointZero
-                                      sublayouts:layout.sublayouts];
+    CGSize selfSize = parentSize;
+    if (ASPointsValidForLayout(selfSize.width) == NO) {
+      selfSize.width = _contentCalculatedSizeFromLayout.width;
     }
+    if (ASPointsValidForLayout(selfSize.height) == NO) {
+      selfSize.height = _contentCalculatedSizeFromLayout.height;
+    }
+    // Don't provide a position, as that should be set by the parent.
+    layout = [ASLayout layoutWithLayoutElement:self
+                                          size:parentSize
+                                    sublayouts:layout.sublayouts];
   }
   return layout;
 }
