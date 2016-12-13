@@ -98,10 +98,6 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
 
 @interface ASDisplayNode () <ASDescriptionProvider, ASDebugDescriptionProvider>
 {
-  // Protects access to _view, _layer, _pendingViewState, _subnodes, _supernode, and other properties which are accessed from multiple threads.
-@package
-  ASDN::RecursiveMutex __instanceLock__;
-
 @protected
   ASInterfaceState _interfaceState;
   ASHierarchyState _hierarchyState;

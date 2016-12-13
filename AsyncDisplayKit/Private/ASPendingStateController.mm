@@ -13,7 +13,7 @@
 #import "ASPendingStateController.h"
 #import "ASThread.h"
 #import "ASWeakSet.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNodeInternal.h" // Required for -applyPendingViewState; consider moving this to +FrameworkPrivate
 
 @interface ASPendingStateController()
 {

@@ -13,7 +13,7 @@
 #import "_ASDisplayLayer.h"
 #import "ASAssert.h"
 #import "ASDisplayNodeInternal.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 #import "ASInternalHelpers.h"
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>

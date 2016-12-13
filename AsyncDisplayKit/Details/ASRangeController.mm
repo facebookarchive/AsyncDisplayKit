@@ -13,8 +13,7 @@
 #import "ASAssert.h"
 #import "ASCellNode.h"
 #import "ASDisplayNodeExtras.h"
-#import "ASDisplayNodeInternal.h"
-#import "ASMultidimensionalArrayUtils.h"
+#import "ASDisplayNodeInternal.h" // Required for interfaceState and hierarchyState setter methods.
 #import "ASInternalHelpers.h"
 #import "ASMultiDimensionalArrayUtils.h"
 #import "ASWeakSet.h"

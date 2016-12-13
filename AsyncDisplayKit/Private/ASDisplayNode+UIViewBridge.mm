@@ -14,6 +14,7 @@
 #import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 #import "ASPendingStateController.h"
 
 /**

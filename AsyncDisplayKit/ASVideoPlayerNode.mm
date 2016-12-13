@@ -12,7 +12,7 @@
 
 #import "ASVideoPlayerNode.h"
 #import "ASDefaultPlaybackButton.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 
 static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 

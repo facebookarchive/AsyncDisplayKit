@@ -14,9 +14,7 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 
 #import "ASAvailability.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASLog.h"
 #import "ASPhotosFrameworkImageRequest.h"

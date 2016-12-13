@@ -15,8 +15,7 @@
 #import <tgmath.h>
 
 #import "_ASDisplayLayer.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 #import "ASHighlightOverlayLayer.h"
 #import "ASDisplayNodeExtras.h"
 

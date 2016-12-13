@@ -11,9 +11,11 @@
 //
 
 #import "ASLayoutTransition.h"
-
-#import "ASDisplayNodeInternal.h"
 #import "ASLayout.h"
+#import "ASThread.h"
+#import "ASDisplayNode+Beta.h"
+
+#import "ASDisplayNodeInternal.h" // Required for _insertSubnode... / _removeFromSupernode.
 
 #import <queue>
 #import <memory>
