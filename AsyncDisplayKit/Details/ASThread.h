@@ -29,6 +29,7 @@ static inline BOOL ASDisplayNodeThreadIsMain()
 #ifdef __cplusplus
 
 #define TIME_LOCKER 0
+#define CHECK_LOCKING_SAFETY 0
 
 #if TIME_LOCKER
 #import <QuartzCore/QuartzCore.h>
@@ -174,6 +175,10 @@ namespace ASDN {
 
     ~Mutex () {
       ASDISPLAYNODE_THREAD_ASSERT_ON_ERROR(pthread_mutex_destroy (&_m));
+#if CHECK_LOCKING_SAFETY
+      _owner = 0;
+      _count = 0;
+#endif
     }
 
     Mutex (const Mutex&) = delete;
@@ -181,14 +186,40 @@ namespace ASDN {
 
     void lock () {
       ASDISPLAYNODE_THREAD_ASSERT_ON_ERROR(pthread_mutex_lock (this->mutex()));
+#if CHECK_LOCKING_SAFETY
+      mach_port_t thread_id = pthread_mach_thread_np(pthread_self());
+      if (thread_id != _owner) {
+        assert(0 == _owner);
+        assert(0 == _count);
+        _owner = thread_id;
+      } else {
+        assert(_count > 0);
+      }
+      ++_count;
+#endif
     }
 
     void unlock () {
+#if CHECK_LOCKING_SAFETY
+      mach_port_t thread_id = pthread_mach_thread_np(pthread_self());
+      assert(thread_id == _owner);
+      assert(_count > 0);
+      --_count;
+      if (0 == _count) {
+        _owner = 0;
+      }
+#endif
       ASDISPLAYNODE_THREAD_ASSERT_ON_ERROR(pthread_mutex_unlock (this->mutex()));
     }
 
     pthread_mutex_t *mutex () { return &_m; }
 
+#if CHECK_LOCKING_SAFETY
+    bool ownedByCurrentThread() {
+      return _count > 0 && pthread_mach_thread_np(pthread_self()) == _owner;
+    }
+#endif
+    
   protected:
     explicit Mutex (bool recursive) {
       if (!recursive) {
@@ -200,10 +231,18 @@ namespace ASDN {
         ASDISPLAYNODE_THREAD_ASSERT_ON_ERROR(pthread_mutex_init (&_m, &attr));
         ASDISPLAYNODE_THREAD_ASSERT_ON_ERROR(pthread_mutexattr_destroy (&attr));
       }
+#if CHECK_LOCKING_SAFETY
+      _owner = 0;
+      _count = 0;
+#endif
     }
 
   private:
     pthread_mutex_t _m;
+#if CHECK_LOCKING_SAFETY
+    mach_port_t _owner;
+    uint32_t _count;
+#endif
   };
 
   /**
