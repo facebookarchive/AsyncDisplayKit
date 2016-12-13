@@ -1057,9 +1057,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       
       // Kick off animating the layout transition
       [self animateLayoutTransition:_pendingLayoutTransitionContext];
-        
-      // Mark transaction as finished
-      [self _finishOrCancelTransition];
     });
   };
   
@@ -1184,6 +1181,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   NSMutableArray<ASDisplayNode *> *insertedSubnodes = [[context insertedSubnodes] mutableCopy];
   NSMutableArray<ASDisplayNode *> *movedSubnodes = [NSMutableArray array];
   
+  NSMutableArray<_ASAnimatedTransitionContext *> *insertedSubnodeContexts = [NSMutableArray array];
+  NSMutableArray<_ASAnimatedTransitionContext *> *removedSubnodeContexts = [NSMutableArray array];
+  
   for (ASDisplayNode *subnode in [context subnodesForKey:ASTransitionContextToLayoutKey]) {
     if ([insertedSubnodes containsObject:subnode] == NO) {
       // This is an existing subnode, check if it is resized, moved or both
@@ -1207,6 +1207,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
   }
   
+  // Create contexts for inserted and removed subnodes
+  for (ASDisplayNode *insertedSubnode in insertedSubnodes) {
+    [insertedSubnodeContexts addObject:[_ASAnimatedTransitionContext contextForNode:insertedSubnode alpha:insertedSubnode.alpha]];
+  }
+  for (ASDisplayNode *removedSubnode in removedSubnodes) {
+    [removedSubnodeContexts addObject:[_ASAnimatedTransitionContext contextForNode:removedSubnode alpha:removedSubnode.alpha]];
+  }
+  
+  // Fade out inserted subnodes
   for (ASDisplayNode *insertedSubnode in insertedSubnodes) {
     insertedSubnode.frame = [context finalFrameForNode:insertedSubnode];
     insertedSubnode.alpha = 0;
@@ -1222,8 +1231,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
     
     // Fade inserted subnodes in
-    for (ASDisplayNode *insertedSubnode in insertedSubnodes) {
-      insertedSubnode.alpha = 1;
+    for (_ASAnimatedTransitionContext *insertedSubnodeContext in insertedSubnodeContexts) {
+      insertedSubnodeContext.node.alpha = insertedSubnodeContext.alpha;
     }
     
     // Update frame of self and moved subnodes
@@ -1238,6 +1247,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       movedSubnode.frame = [context finalFrameForNode:movedSubnode];
     }
   } completion:^(BOOL finished) {
+    // Restore all removed subnode alpha values
+    for (_ASAnimatedTransitionContext *removedSubnodeContext in removedSubnodeContexts) {
+      removedSubnodeContext.node.alpha = removedSubnodeContext.alpha;
+    }
     for (UIView *removedView in removedViews) {
       [removedView removeFromSuperview];
     }
@@ -1246,7 +1259,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }];
 }
 
-/*
+/**
  * Hook for subclasses to clean up nodes after the transition happened. Furthermore this can be used from subclasses
  * to manually perform deletions.
  */
@@ -1257,9 +1270,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 #pragma mark _ASTransitionContextCompletionDelegate
 
-/*
+/**
  * After completeTransition: is called on the ASContextTransitioning object in animateLayoutTransition: this
- * delegate method will be called that start the completion process of the 
+ * delegate method will be called that start the completion process of the transition
  */
 - (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete
 {
@@ -1267,6 +1280,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _pendingLayoutTransitionContext = nil;
 
   [self _pendingLayoutTransitionDidComplete];
+    
+  // Mark transaction as finished
+  [self _finishOrCancelTransition];
 }
 
 #pragma mark - Layout
