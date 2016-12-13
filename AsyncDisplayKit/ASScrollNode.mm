@@ -9,9 +9,7 @@
 //
 
 #import "ASScrollNode.h"
-#import "ASDisplayNodeInternal.h" // TODO: This can be removed after __instanceLock__ cleanup lands
-#import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 #import "ASLayout.h"
 #import "_ASDisplayLayer.h"
 
