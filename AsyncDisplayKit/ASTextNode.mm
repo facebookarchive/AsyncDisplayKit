@@ -1163,7 +1163,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
   ASDN::MutexLocker l(__instanceLock__);
   
   ASTextKitRenderer *renderer = [self _renderer];
-  return renderer.firstVisibleRange.length < _attributedText.length;
+  return renderer.isTruncated;
 }
 
 - (void)setPointSizeScaleFactors:(NSArray *)pointSizeScaleFactors
