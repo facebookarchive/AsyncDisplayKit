@@ -3875,6 +3875,9 @@ static const char *ASDisplayNodeAssociatedNodeKey = "ASAssociatedNode";
   if (selfNode) {
     [selfNode addSubnode:subnode];
   } else {
+    if (subnode.supernode) {
+      [subnode removeFromSupernode];
+    }
     [self addSublayer:subnode.layer];
   }
 }
