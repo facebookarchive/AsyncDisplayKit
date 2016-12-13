@@ -11,10 +11,8 @@
 #import "ASNetworkImageNode.h"
 
 #import "ASBasicImageDownloader.h"
-#import "ASDisplayNodeInternal.h"
 #import "ASDisplayNodeExtras.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
 #import "ASImageContainerProtocolCategories.h"

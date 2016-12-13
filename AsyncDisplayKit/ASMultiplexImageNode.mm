@@ -14,8 +14,7 @@
 #import <AssetsLibrary/AssetsLibrary.h>
 
 #import "ASAvailability.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASLog.h"
 #import "ASPhotosFrameworkImageRequest.h"
@@ -84,7 +83,6 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   id _downloadIdentifier;
   
   // Properties
-  ASDN::RecursiveMutex __instanceLock__;
   BOOL _shouldRenderProgressImages;
   
   //set on init only

@@ -12,7 +12,6 @@
 
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
-#import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASCollectionView+Undeprecated.h"
 #import "ASTableView+Undeprecated.h"

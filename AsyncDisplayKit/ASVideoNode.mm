@@ -9,9 +9,7 @@
 //
 #if TARGET_OS_IOS
 #import <AVFoundation/AVFoundation.h>
-#import "ASDisplayNodeInternal.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 #import "ASVideoNode.h"
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"

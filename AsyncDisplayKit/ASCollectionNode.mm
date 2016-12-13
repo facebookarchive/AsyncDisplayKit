@@ -13,8 +13,8 @@
 #import "ASCollectionInternal.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASCollectionNode.h"
-#import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEnvironmentInternal.h"
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
@@ -228,7 +228,7 @@
     // and asserting here isn't an option – it is a common pattern for users to clear
     // the delegate/dataSource in dealloc, which may be running on a background thread.
     // It is important that we avoid retaining self in this block, so that this method is dealloc-safe.
-    ASCollectionView *view = (ASCollectionView *)_view;
+    ASCollectionView *view = self.view;
     ASPerformBlockOnMainThread(^{
       view.asyncDelegate = delegate;
     });
@@ -254,7 +254,7 @@
     // and asserting here isn't an option – it is a common pattern for users to clear
     // the delegate/dataSource in dealloc, which may be running on a background thread.
     // It is important that we avoid retaining self in this block, so that this method is dealloc-safe.
-    ASCollectionView *view = (ASCollectionView *)_view;
+    ASCollectionView *view = self.view;
     ASPerformBlockOnMainThread(^{
       view.asyncDataSource = dataSource;
     });

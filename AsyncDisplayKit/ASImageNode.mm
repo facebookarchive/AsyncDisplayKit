@@ -15,21 +15,21 @@
 #import "_ASDisplayLayer.h"
 #import "ASAssert.h"
 #import "ASDimension.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+Beta.h"
 #import "ASLayout.h"
 #import "ASTextNode.h"
 #import "ASImageNode+AnimatedImagePrivate.h"
-
 #import "ASImageNode+CGExtras.h"
 #import "AsyncDisplayKit+Debug.h"
-
 #import "ASInternalHelpers.h"
 #import "ASEqualityHelpers.h"
 #import "ASEqualityHashHelpers.h"
 #import "ASWeakMap.h"
+
+// TODO: It would be nice to remove this dependency; it's the only subclass using more than +FrameworkSubclasses.h
+#import "ASDisplayNodeInternal.h"
 
 #include <functional>
 
@@ -244,7 +244,7 @@ struct ASImageNodeDrawParameters {
   _drawParameter = {
     .bounds = self.bounds,
     .opaque = self.opaque,
-    .contentsScale = _contentsScaleForDisplay,
+    .contentsScale = self.contentsScaleForDisplay,
     .backgroundColor = self.backgroundColor,
     .contentMode = self.contentMode,
     .cropEnabled = _cropEnabled,

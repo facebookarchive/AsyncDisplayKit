@@ -9,8 +9,7 @@
 //
 
 #import "ASDisplayNodeInternal.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 #import "ASDisplayNode+Beta.h"
 #import "AsyncDisplayKit+Debug.h"
 
