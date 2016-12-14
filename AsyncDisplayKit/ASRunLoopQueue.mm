@@ -50,21 +50,16 @@ static void runLoopSourceCallback(void *info) {
 
 - (void)releaseObjectInBackground:(id)object
 {
-  __weak __typeof__(self) weakSelf = self;
+  // This is a hot code path and self is long-lived. Retain self instead of strongify/weakify to reduce contention.
   ASPerformBlockOnMainThread(^{
     // Some associated objects cannot be deallocated in background (#2767). Always remove them on main instead.
     objc_removeAssociatedObjects(object);
     
-    __typeof__(self) strongSelf = weakSelf;
-    if (strongSelf) {
-      // It's important to push this object to dealloc queue right after the above removal, in the same run loop.
-      // Otherwise the queue may be scheduled to consume it before the removal occurs.
-      strongSelf->_queueLock.lock();
-      strongSelf->_queue.push_back(object);
-      strongSelf->_queueLock.unlock();
-    } else {
-      // Dealloc queue is gone. The object is released now.
-    }
+    // It's important to push this object to the queue right after the above removal, in the same run loop.
+    // Otherwise the queue may be scheduled to consume it before the removal occurs.
+    self->_queueLock.lock();
+    self->_queue.push_back(object);
+    self->_queueLock.unlock();
   });
 }
 
