@@ -24,6 +24,8 @@
 
 #import "ASDisplayNode+Beta.h"
 
+NS_ASSUME_NONNULL_BEGIN
+
 @protocol _ASDisplayLayerDelegate;
 @class _ASDisplayLayer;
 @class _ASPendingState;
@@ -34,7 +36,7 @@ BOOL ASDisplayNodeSubclassOverridesSelector(Class subclass, SEL selector);
 BOOL ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(ASDisplayNodeFlags flags);
 
 /// Get the pending view state for the node, creating one if needed.
-_ASPendingState *ASDisplayNodeGetPendingState(ASDisplayNode *node);
+_ASPendingState * ASDisplayNodeGetPendingState(ASDisplayNode * node);
 
 typedef NS_OPTIONS(NSUInteger, ASDisplayNodeMethodOverrides)
 {
@@ -189,7 +191,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 + (void)scheduleNodeForRecursiveDisplay:(ASDisplayNode *)node;
 
 /// The _ASDisplayLayer backing the node, if any.
-@property (nonatomic, readonly, strong) _ASDisplayLayer *asyncLayer;
+@property (nullable, nonatomic, readonly, strong) _ASDisplayLayer *asyncLayer;
 
 /// Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
@@ -215,7 +217,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 /*
  * Internal method to set the supernode
  */
-- (void)__setSupernode:(ASDisplayNode *)supernode;
+- (void)__setSupernode:(nullable ASDisplayNode *)supernode;
 
 /**
  * Internal method to add / replace / insert subnode and remove from supernode without checking if
@@ -241,10 +243,10 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)displayImmediately;
 
 /// Alternative initialiser for backing with a custom view class.  Supports asynchronous display with _ASDisplayView subclasses.
-- (instancetype)initWithViewClass:(Class)viewClass;
+- (nullable instancetype)initWithViewClass:(Class)viewClass;
 
 /// Alternative initialiser for backing with a custom layer class.  Supports asynchronous display with _ASDisplayLayer subclasses.
-- (instancetype)initWithLayerClass:(Class)layerClass;
+- (nullable instancetype)initWithLayerClass:(Class)layerClass;
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
 
@@ -270,7 +272,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  * @param checkViewHierarchy If YES, and no supernode can be found, method will walk up from `self.view` to find a supernode.
  * If YES, this method must be called on the main thread and the node must not be layer-backed.
  */
-- (ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass checkViewHierarchy:(BOOL)checkViewHierarchy;
+- (nullable ASDisplayNode *)_supernodeWithClass:(Class)supernodeClass checkViewHierarchy:(BOOL)checkViewHierarchy;
 
 /**
  *  Convenience method to access this node's trait collection struct. Externally, users should interact
@@ -279,3 +281,5 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (ASEnvironmentTraitCollection)environmentTraitCollection;
 
 @end
+
+NS_ASSUME_NONNULL_END
