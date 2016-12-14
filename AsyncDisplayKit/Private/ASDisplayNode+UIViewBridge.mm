@@ -255,6 +255,15 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
       CGPoint newPosition = CGPointZero;
       ASBoundsAndPositionForFrame(rect, origin, anchorPoint, &newBounds, &newPosition);
 
+      if (ASIsCGRectValidForLayout(newBounds) == NO) {
+        ASDisplayNodeAssert(NO, @"-[ASDisplayNode setFrame:] - The new bounds are invalid and unsafe to be set.");
+        return;
+      }
+      if (ASIsCGPointValidForLayout(newPosition) == NO) {
+        ASDisplayNodeAssert(NO, @"-[ASDisplayNode setFrame:] - The new position is invalid and unsafe to set.");
+        return;
+      }
+      
       if (useLayer) {
         layer.bounds = newBounds;
         layer.position = newPosition;
