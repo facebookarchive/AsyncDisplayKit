@@ -52,11 +52,12 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * The image to display.
  *
- * @discussion By setting an image to the image property the ASNetworkImageNode will act like a plain ASImageNode.
- * As soon as the URL is set the ASNetworkImageNode will act like an ASNetworkImageNode and the image property
- * will be managed internally. This means the image property will be cleared out and replaced by the placeholder 
- * (<defaultImage>) image while loading and the final image after the new image data was downloaded and processed.
- * If you want to use a placholder image functionality use the defaultImage property instead.
+ * @discussion Setting an image to the image property of an ASNetworkImageNode will cause it to act like a plain
+ * ASImageNode if a URL is not set as well. As soon as the URL is set the ASNetworkImageNode will act like an 
+ * ASNetworkImageNode and the image property will be managed internally. This means the image property will be cleared
+ * out and replaced by the placeholder (<defaultImage>) image while loading and the final image after the new image 
+ * data was downloaded and processed. If you want to use a placholder image, use the defaultImage property 
+ * instead.
  */
 @property (nullable, nonatomic, strong) UIImage *image;
 
