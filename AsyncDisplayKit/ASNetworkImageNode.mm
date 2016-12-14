@@ -54,14 +54,12 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
   //set on init only
   struct {
-    unsigned int downloaderSupportsNewProtocol:1;
     unsigned int downloaderImplementsSetProgress:1;
     unsigned int downloaderImplementsSetPriority:1;
     unsigned int downloaderImplementsAnimatedImage:1;
   } _downloaderFlags;
 
   struct {
-    unsigned int cacheSupportsCachedImage:1;
     unsigned int cacheSupportsClearing:1;
     unsigned int cacheSupportsSynchronousFetch:1;
   } _cacheFlags;
@@ -81,17 +79,10 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   _cache = (id<ASImageCacheProtocol>)cache;
   _downloader = (id<ASImageDownloaderProtocol>)downloader;
   
-  ASDisplayNodeAssert([downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)], @"downloader must respond to either downloadImageWithURL:callbackQueue:downloadProgress:completion:.");
-  
-  _downloaderFlags.downloaderSupportsNewProtocol = [downloader respondsToSelector:@selector(downloadImageWithURL:callbackQueue:downloadProgress:completion:)];
-  
-  ASDisplayNodeAssert(cache == nil || [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)], @"cacher must respond to either cachedImageWithURL:callbackQueue:completion:");
-  
   _downloaderFlags.downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)];
   _downloaderFlags.downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)];
   _downloaderFlags.downloaderImplementsAnimatedImage = [downloader respondsToSelector:@selector(animatedImageWithData:)];
-  
-  _cacheFlags.cacheSupportsCachedImage = [cache respondsToSelector:@selector(cachedImageWithURL:callbackQueue:completion:)];
+
   _cacheFlags.cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
   _cacheFlags.cacheSupportsSynchronousFetch = [cache respondsToSelector:@selector(synchronouslyFetchedCachedImageWithURL:)];
   
@@ -456,16 +447,14 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   ASPerformBlockOnBackgroundThread(^{
     
     ASDN::MutexLocker l(__instanceLock__);
-    if (_downloaderFlags.downloaderSupportsNewProtocol) {
-      _downloadIdentifier = [_downloader downloadImageWithURL:_URL
-                                                callbackQueue:dispatch_get_main_queue()
-                                             downloadProgress:NULL
-                                                   completion:^(id <ASImageContainerProtocol> _Nullable imageContainer, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
-                                                     if (finished != NULL) {
-                                                       finished(imageContainer, error, downloadIdentifier);
-                                                     }
-                                                   }];
-    }
+    _downloadIdentifier = [_downloader downloadImageWithURL:_URL
+                                              callbackQueue:dispatch_get_main_queue()
+                                           downloadProgress:NULL
+                                                 completion:^(id <ASImageContainerProtocol> _Nullable imageContainer, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
+                                                   if (finished != NULL) {
+                                                     finished(imageContainer, error, downloadIdentifier);
+                                                   }
+                                                 }];
   
     [self _updateProgressImageBlockOnDownloaderIfNeeded];
       
@@ -580,24 +569,20 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
         NSUUID *cacheUUID = [NSUUID UUID];
         _cacheUUID = cacheUUID;
 
-        void (^cacheCompletion)(id <ASImageContainerProtocol>) = ^(id <ASImageContainerProtocol> imageContainer) {
-          // If the cache UUID changed, that means this request was cancelled.
-          if (!ASObjectIsEqual(_cacheUUID, cacheUUID)) {
-            return;
-          }
-          
-          if ([imageContainer asdk_image] == nil && _downloader != nil) {
-            [self _downloadImageWithCompletion:finished];
-          } else {
-            finished(imageContainer, nil, nil);
-          }
-        };
-        
-        if (_cacheFlags.cacheSupportsCachedImage) {
-          [_cache cachedImageWithURL:_URL
-                       callbackQueue:dispatch_get_main_queue()
-                          completion:cacheCompletion];
-        }
+        [_cache cachedImageWithURL:_URL
+                     callbackQueue:dispatch_get_main_queue()
+                        completion:^(id <ASImageContainerProtocol> imageContainer) {
+                          // If the cache UUID changed, that means this request was cancelled.
+                          if (!ASObjectIsEqual(_cacheUUID, cacheUUID)) {
+                            return;
+                          }
+
+                          if ([imageContainer asdk_image] == nil && _downloader != nil) {
+                            [self _downloadImageWithCompletion:finished];
+                          } else {
+                            finished(imageContainer, nil, nil);
+                          }
+                        }];
       } else {
         [self _downloadImageWithCompletion:finished];
       }
