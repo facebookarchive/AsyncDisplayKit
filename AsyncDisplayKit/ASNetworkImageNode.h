@@ -51,17 +51,32 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * The image to display.
  *
- * @discussion Setting an image to the image property of an ASNetworkImageNode will cause it to act like a plain
- * ASImageNode if a URL is not set as well. As soon as the URL is set the ASNetworkImageNode will act like an 
- * ASNetworkImageNode and the image property will be managed internally. This means the image property will be cleared
- * out and replaced by the placeholder (<defaultImage>) image while loading and the final image after the new image 
- * data was downloaded and processed. If you want to use a placholder image, use the defaultImage property 
- * instead.
+ * @discussion By setting an image to the image property the ASNetworkImageNode will act like a plain ASImageNode.
+ * As soon as the URL is set the ASNetworkImageNode will act like an ASNetworkImageNode and the image property
+ * will be managed internally. This means the image property will be cleared out and replaced by the placeholder 
+ * (<defaultImage>) image while loading and the final image after the new image data was downloaded and processed.
+ * If you want to use a placholder image functionality use the defaultImage property instead.
  */
 @property (nullable, nonatomic, strong) UIImage *image;
 
 /**
- * A placeholder image to display while the URL is loading.
+ * An image to be displayed until it is cleared out by loading a URL or exiting the preload state. This is different
+ * than the @c defaultImage because it will only be retained and used until we load the URL or exit the preload state.
+ * defaultImage will never be cleared out by ASNetworkImageNode.
+ * This method exists as a convenience to clearing out defaultImage manually.
+ *
+ * @warning this method simply calls setImage on the super class. This means it will throw out any image that has
+ * already been downloaded!
+ */
+@property (nullable, nonatomic, strong) UIImage *ephemeralImage;
+
+//Because this is ephemeral, you shouldn't rely on its contents
+- (UIImage *)ephemeralImage NS_UNAVAILABLE;
+
+/**
+ * A placeholder image to display while the URL is loading. This is slightly different than placeholderImage in the
+ * ASDisplayNode superclass as defaultImage will *not* be displayed synchronously. If you wish to have the image
+ * displayed synchronously, use @c placeholderImage.
  */
 @property (nullable, nonatomic, strong, readwrite) UIImage *defaultImage;
 
