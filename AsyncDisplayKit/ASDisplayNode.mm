@@ -766,11 +766,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (BOOL)isSynchronous
 {
+  ASDN::MutexLocker l(__instanceLock__);
   return _flags.synchronous;
 }
 
 - (void)setSynchronous:(BOOL)flag
 {
+  ASDN::MutexLocker l(__instanceLock__);
   _flags.synchronous = flag;
 }
 
