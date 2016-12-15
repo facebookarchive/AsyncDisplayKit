@@ -114,7 +114,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 {
   ASDN::MutexLocker l(__instanceLock__);
   
-  _imageWasSetExternally = (image != nil && _URL != nil);
+  _imageWasSetExternally = (image != nil && _URL == nil);
   
   [self _setImage:image];
 }
