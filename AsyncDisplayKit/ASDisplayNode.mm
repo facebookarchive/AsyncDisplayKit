@@ -1887,9 +1887,9 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 
 ASDISPLAYNODE_INLINE bool shouldDisableNotificationsForMovingBetweenParents(ASDisplayNode *from, ASDisplayNode *to) {
   if (!from || !to) return NO;
-  if (from->_flags.synchronous) return NO;
-  if (to->_flags.synchronous) return NO;
-  if (from->_flags.isInHierarchy != to->_flags.isInHierarchy) return NO;
+  if (from.isSynchronous) return NO;
+  if (to.isSynchronous) return NO;
+  if (from.isInHierarchy != to.isInHierarchy) return NO;
   return YES;
 }
 
@@ -1905,12 +1905,11 @@ ASDISPLAYNODE_INLINE BOOL canUseViewAPI(ASDisplayNode *node, ASDisplayNode *subn
 
 /// Returns if node is a member of a rasterized tree
 ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
-  return (node->_flags.shouldRasterizeDescendants || (node->_hierarchyState & ASHierarchyStateRasterized));
+  return (node.shouldRasterizeDescendants || (node.hierarchyState & ASHierarchyStateRasterized));
 }
 
 /*
  * Central private helper method that should eventually be called if submethods add, insert or replace subnodes
- * You must hold __instanceLock__ to call this.
  * This method is called with thread affinity.
  *
  * @param subnode       The subnode to insert
@@ -1931,8 +1930,11 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
   
-  if (subnodeIndex > _subnodes.count || subnodeIndex < 0) {
-    ASDisplayNodeFailAssert(@"Cannot insert a subnode at index %zd. Count is %zd", subnodeIndex, _subnodes.count);
+  __instanceLock__.lock();
+    NSUInteger subnodesCount = _subnodes.count;
+  __instanceLock__.unlock();
+  if (subnodeIndex > subnodesCount || subnodeIndex < 0) {
+    ASDisplayNodeFailAssert(@"Cannot insert a subnode at index %zd. Count is %zd", subnodeIndex, subnodesCount);
     return;
   }
   
@@ -1946,11 +1948,12 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   [subnode _removeFromSupernode];
   [oldSubnode _removeFromSupernode];
   
-  if (_subnodes == nil) {
-    _subnodes = [[NSMutableArray alloc] init];
-  }
-    
-  [_subnodes insertObject:subnode atIndex:subnodeIndex];
+  __instanceLock__.lock();
+    if (_subnodes == nil) {
+      _subnodes = [[NSMutableArray alloc] init];
+    }
+    [_subnodes insertObject:subnode atIndex:subnodeIndex];
+  __instanceLock__.unlock();
   
   // This call will apply our .hierarchyState to the new subnode.
   // If we are a managed hierarchy, as in ASCellNode trees, it will also apply our .interfaceState.
@@ -1964,7 +1967,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
         [node __unloadNode];
       }
     });
-    if (_flags.isInHierarchy) {
+    if (self.isInHierarchy) {
       [subnode __enterHierarchy];
     }
   } else if (self.nodeLoaded) {
@@ -1980,7 +1983,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 /*
  * Inserts the view or layer of the given node at the given index
- * You must hold __instanceLock__ to call this.
  *
  * @param subnode       The subnode to insert
  * @param idx           The index in _view.subviews or _layer.sublayers at which to insert the subnode.view or
@@ -1996,6 +1998,9 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
   
+  // Because the view and layer can only be created and destroyed on Main, that is also the only thread
+  // where the view and layer can change. We can avoid locking.
+
   // If we can use view API, do. Due to an apple bug, -insertSubview:atIndex: actually wants a LAYER index, which we pass in
   if (canUseViewAPI(self, subnode)) {
     [_view insertSubview:subnode.view atIndex:idx];
@@ -2015,7 +2020,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (void)_addSubnode:(ASDisplayNode *)subnode
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  ASDN::MutexLocker l(__instanceLock__);
   
   ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
     
@@ -2025,7 +2029,15 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
 
-  [self _insertSubnode:subnode atSubnodeIndex:_subnodes.count sublayerIndex:_layer.sublayers.count andRemoveSubnode:nil];
+  NSUInteger subnodesIndex;
+  NSUInteger sublayersIndex;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    subnodesIndex = _subnodes.count;
+    sublayersIndex = _layer.sublayers.count;
+  }
+  
+  [self _insertSubnode:subnode atSubnodeIndex:subnodesIndex sublayerIndex:sublayersIndex andRemoveSubnode:nil];
 }
 
 - (void)_addSubnodeViewsAndLayers
@@ -2054,7 +2066,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (void)_replaceSubnode:(ASDisplayNode *)oldSubnode withSubnode:(ASDisplayNode *)replacementSubnode
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  ASDN::MutexLocker l(__instanceLock__);
 
   if (replacementSubnode == nil) {
     ASDisplayNodeFailAssert(@"Invalid subnode to replace");
@@ -2067,19 +2078,24 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   }
 
   ASDisplayNodeAssert(!(self.nodeLoaded && !oldSubnode.nodeLoaded), @"We have view loaded, but child node does not.");
-  ASDisplayNodeAssert(_subnodes, @"You should have subnodes if you have a subnode");
 
-  NSInteger subnodeIndex = [_subnodes indexOfObjectIdenticalTo:oldSubnode];
+  NSInteger subnodeIndex;
   NSInteger sublayerIndex = NSNotFound;
-
-  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
-  // hierarchy and none of this could possibly work.
-  if (nodeIsInRasterizedTree(self) == NO) {
-    if (_layer) {
-      sublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:oldSubnode.layer];
-      ASDisplayNodeAssert(sublayerIndex != NSNotFound, @"Somehow oldSubnode's supernode is self, yet we could not find it in our layers to replace");
-      if (sublayerIndex == NSNotFound) {
-        return;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    ASDisplayNodeAssert(_subnodes, @"You should have subnodes if you have a subnode");
+    
+    subnodeIndex = [_subnodes indexOfObjectIdenticalTo:oldSubnode];
+    
+    // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
+    // hierarchy and none of this could possibly work.
+    if (nodeIsInRasterizedTree(self) == NO) {
+      if (_layer) {
+        sublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:oldSubnode.layer];
+        ASDisplayNodeAssert(sublayerIndex != NSNotFound, @"Somehow oldSubnode's supernode is self, yet we could not find it in our layers to replace");
+        if (sublayerIndex == NSNotFound) {
+          return;
+        }
       }
     }
   }
@@ -2098,7 +2114,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (void)_insertSubnode:(ASDisplayNode *)subnode belowSubnode:(ASDisplayNode *)below
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  ASDN::MutexLocker l(__instanceLock__);
 
   if (subnode == nil) {
     ASDisplayNodeFailAssert(@"Cannot insert a nil subnode");
@@ -2110,35 +2125,38 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
 
-  ASDisplayNodeAssert(_subnodes, @"You should have subnodes if you have a subnode");
-
-  NSInteger belowSubnodeIndex = [_subnodes indexOfObjectIdenticalTo:below];
+  NSInteger belowSubnodeIndex;
   NSInteger belowSublayerIndex = NSNotFound;
-
-  
-  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
-  // hierarchy and none of this could possibly work.
-  if (nodeIsInRasterizedTree(self) == NO) {
-    if (_layer) {
-      belowSublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:below.layer];
-      ASDisplayNodeAssert(belowSublayerIndex != NSNotFound, @"Somehow below's supernode is self, yet we could not find it in our layers to reference");
-      if (belowSublayerIndex == NSNotFound)
-        return;
-    }
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    ASDisplayNodeAssert(_subnodes, @"You should have subnodes if you have a subnode");
     
-    ASDisplayNodeAssert(belowSubnodeIndex != NSNotFound, @"Couldn't find above in subnodes");
+    belowSubnodeIndex = [_subnodes indexOfObjectIdenticalTo:below];
     
-    // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to
-    // insert it will mess up our calculation
-    if (subnode.supernode == self) {
-      NSInteger currentIndexInSubnodes = [_subnodes indexOfObjectIdenticalTo:subnode];
-      if (currentIndexInSubnodes < belowSubnodeIndex) {
-        belowSubnodeIndex--;
-      }
+    // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
+    // hierarchy and none of this could possibly work.
+    if (nodeIsInRasterizedTree(self) == NO) {
       if (_layer) {
-        NSInteger currentIndexInSublayers = [_layer.sublayers indexOfObjectIdenticalTo:subnode.layer];
-        if (currentIndexInSublayers < belowSublayerIndex) {
-          belowSublayerIndex--;
+        belowSublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:below.layer];
+        ASDisplayNodeAssert(belowSublayerIndex != NSNotFound, @"Somehow below's supernode is self, yet we could not find it in our layers to reference");
+        if (belowSublayerIndex == NSNotFound)
+          return;
+      }
+      
+      ASDisplayNodeAssert(belowSubnodeIndex != NSNotFound, @"Couldn't find above in subnodes");
+      
+      // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to
+      // insert it will mess up our calculation
+      if (subnode.supernode == self) {
+        NSInteger currentIndexInSubnodes = [_subnodes indexOfObjectIdenticalTo:subnode];
+        if (currentIndexInSubnodes < belowSubnodeIndex) {
+          belowSubnodeIndex--;
+        }
+        if (_layer) {
+          NSInteger currentIndexInSublayers = [_layer.sublayers indexOfObjectIdenticalTo:subnode.layer];
+          if (currentIndexInSublayers < belowSublayerIndex) {
+            belowSublayerIndex--;
+          }
         }
       }
     }
@@ -2160,7 +2178,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (void)_insertSubnode:(ASDisplayNode *)subnode aboveSubnode:(ASDisplayNode *)above
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  ASDN::MutexLocker l(__instanceLock__);
 
   if (subnode == nil) {
     ASDisplayNodeFailAssert(@"Cannot insert a nil subnode");
@@ -2172,34 +2189,38 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
 
-  ASDisplayNodeAssert(_subnodes, @"You should have subnodes if you have a subnode");
-
-  NSInteger aboveSubnodeIndex = [_subnodes indexOfObjectIdenticalTo:above];
+  NSInteger aboveSubnodeIndex;
   NSInteger aboveSublayerIndex = NSNotFound;
-
-  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
-  // hierarchy and none of this could possibly work.
-  if (nodeIsInRasterizedTree(self) == NO) {
-    if (_layer) {
-      aboveSublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:above.layer];
-      ASDisplayNodeAssert(aboveSublayerIndex != NSNotFound, @"Somehow above's supernode is self, yet we could not find it in our layers to replace");
-      if (aboveSublayerIndex == NSNotFound)
-        return;
-    }
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    ASDisplayNodeAssert(_subnodes, @"You should have subnodes if you have a subnode");
     
-    ASDisplayNodeAssert(aboveSubnodeIndex != NSNotFound, @"Couldn't find above in subnodes");
-
-    // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to
-    // insert it will mess up our calculation
-    if (subnode.supernode == self) {
-      NSInteger currentIndexInSubnodes = [_subnodes indexOfObjectIdenticalTo:subnode];
-      if (currentIndexInSubnodes <= aboveSubnodeIndex) {
-        aboveSubnodeIndex--;
-      }
+    aboveSubnodeIndex = [_subnodes indexOfObjectIdenticalTo:above];
+    
+    // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
+    // hierarchy and none of this could possibly work.
+    if (nodeIsInRasterizedTree(self) == NO) {
       if (_layer) {
-        NSInteger currentIndexInSublayers = [_layer.sublayers indexOfObjectIdenticalTo:subnode.layer];
-        if (currentIndexInSublayers <= aboveSublayerIndex) {
-          aboveSublayerIndex--;
+        aboveSublayerIndex = [_layer.sublayers indexOfObjectIdenticalTo:above.layer];
+        ASDisplayNodeAssert(aboveSublayerIndex != NSNotFound, @"Somehow above's supernode is self, yet we could not find it in our layers to replace");
+        if (aboveSublayerIndex == NSNotFound)
+          return;
+      }
+      
+      ASDisplayNodeAssert(aboveSubnodeIndex != NSNotFound, @"Couldn't find above in subnodes");
+      
+      // If the subnode is already in the subnodes array / sublayers and it's before the below node, removing it to
+      // insert it will mess up our calculation
+      if (subnode.supernode == self) {
+        NSInteger currentIndexInSubnodes = [_subnodes indexOfObjectIdenticalTo:subnode];
+        if (currentIndexInSubnodes <= aboveSubnodeIndex) {
+          aboveSubnodeIndex--;
+        }
+        if (_layer) {
+          NSInteger currentIndexInSublayers = [_layer.sublayers indexOfObjectIdenticalTo:subnode.layer];
+          if (currentIndexInSublayers <= aboveSublayerIndex) {
+            aboveSublayerIndex--;
+          }
         }
       }
     }
@@ -2219,30 +2240,32 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (void)_insertSubnode:(ASDisplayNode *)subnode atIndex:(NSInteger)idx
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  ASDN::MutexLocker l(__instanceLock__);
   
   if (subnode == nil) {
     ASDisplayNodeFailAssert(@"Cannot insert a nil subnode");
     return;
   }
 
-  if (idx > _subnodes.count || idx < 0) {
-    ASDisplayNodeFailAssert(@"Cannot insert a subnode at index %zd. Count is %zd", idx, _subnodes.count);
-    return;
-  }
-  
   NSInteger sublayerIndex = NSNotFound;
-
-  // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
-  // hierarchy and none of this could possibly work.
-  if (nodeIsInRasterizedTree(self) == NO) {
-    // Account for potentially having other subviews
-    if (_layer && idx == 0) {
-      sublayerIndex = 0;
-    } else if (_layer) {
-      ASDisplayNode *positionInRelationTo = (_subnodes.count > 0 && idx > 0) ? _subnodes[idx - 1] : nil;
-      if (positionInRelationTo) {
-        sublayerIndex = incrementIfFound([_layer.sublayers indexOfObjectIdenticalTo:positionInRelationTo.layer]);
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (idx > _subnodes.count || idx < 0) {
+      ASDisplayNodeFailAssert(@"Cannot insert a subnode at index %zd. Count is %zd", idx, _subnodes.count);
+      return;
+    }
+    
+    // Don't bother figuring out the sublayerIndex if in a rasterized subtree, because there are no layers in the
+    // hierarchy and none of this could possibly work.
+    if (nodeIsInRasterizedTree(self) == NO) {
+      // Account for potentially having other subviews
+      if (_layer && idx == 0) {
+        sublayerIndex = 0;
+      } else if (_layer) {
+        ASDisplayNode *positionInRelationTo = (_subnodes.count > 0 && idx > 0) ? _subnodes[idx - 1] : nil;
+        if (positionInRelationTo) {
+          sublayerIndex = incrementIfFound([_layer.sublayers indexOfObjectIdenticalTo:positionInRelationTo.layer]);
+        }
       }
     }
   }
@@ -2581,7 +2604,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 /// Helper method to summarize whether or not the node run through the display process
 - (BOOL)__implementsDisplay
 {
-  ASDN::MutexLocker l(__instanceLock__);
   return _flags.implementsDrawRect || _flags.implementsImageDisplay || _flags.shouldRasterizeDescendants ||
          _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
 }

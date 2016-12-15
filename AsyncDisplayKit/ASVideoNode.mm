@@ -627,8 +627,9 @@ static NSString * const kRate = @"rate";
   if (_playerNode == nil) {
     _playerNode = [self constructPlayerNode];
 
-    [self addSubnode:_playerNode];
-
+    __instanceLock__.unlock();
+      [self addSubnode:_playerNode];
+    __instanceLock__.lock();
       
     [self setNeedsLayout];
   }
