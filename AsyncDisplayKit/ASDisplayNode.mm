@@ -40,6 +40,12 @@
   #define AS_DEDUPE_LAYOUT_SPEC_TREE 1
 #endif
 
+#if CHECK_LOCKING_SAFETY
+  #define ASDisplayNodeAssertLockUnownedByCurrentThread(lock) ASDisplayNodeAssertFalse(lock.ownedByCurrentThread());
+#else
+  #define ASDisplayNodeAssertLockUnownedByCurrentThread(lock)
+#endif
+
 NSInteger const ASDefaultDrawingPriority = ASDefaultTransactionPriority;
 NSString * const ASRenderingEngineDidDisplayScheduledNodesNotification = @"ASRenderingEngineDidDisplayScheduledNodes";
 NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp";
@@ -2338,21 +2344,29 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"Should not cause recursive __enterHierarchy");
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   // Profiling has shown that locking this method is beneficial, so each of the property accesses don't have to lock and unlock.
-  ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
   
   if (!_flags.isInHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
     _flags.isEnteringHierarchy = YES;
     _flags.isInHierarchy = YES;
 
-    [self willEnterHierarchy];
-    for (ASDisplayNode *subnode in self.subnodes) {
-      [subnode __enterHierarchy];
-    }
+    // Don't call -willEnterHierarchy while holding __instanceLock__.
+    // This method and subsequent ones (i.e -interfaceState and didEnter(.*)State)
+    // don't expect that they are called while the lock is being held.
+    // More importantly, didEnter(.*)State methods are meant to be overriden by clients.
+    // And so they can potentially walk up the node tree and cause deadlocks, or do expensive tasks and cause the lock to be held for too long.
+    __instanceLock__.unlock();
+      [self willEnterHierarchy];
+      for (ASDisplayNode *subnode in self.subnodes) {
+        [subnode __enterHierarchy];
+      }
+    __instanceLock__.lock();
+    
     _flags.isEnteringHierarchy = NO;
 
-    
     // If we don't have contents finished drawing by the time we are on screen, immediately add the placeholder (if it is enabled and we do have something to draw).
     if (self.contents == nil) {
       CALayer *layer = self.layer;
@@ -2368,15 +2382,18 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       }
     }
   }
+  
+  __instanceLock__.unlock();
 }
 
 - (void)__exitHierarchy
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"Should not cause recursive __exitHierarchy");
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   // Profiling has shown that locking this method is beneficial, so each of the property accesses don't have to lock and unlock.
-  ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
   
   if (_flags.isInHierarchy && !_flags.visibilityNotificationsDisabled && ![self __selfOrParentHasVisibilityNotificationsDisabled]) {
     _flags.isExitingHierarchy = YES;
@@ -2384,12 +2401,22 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
     [self.asyncLayer cancelAsyncDisplay];
 
-    [self didExitHierarchy];
-    for (ASDisplayNode *subnode in self.subnodes) {
-      [subnode __exitHierarchy];
-    }
+    // Don't call -didExitHierarchy while holding __instanceLock__.
+    // This method and subsequent ones (i.e -interfaceState and didExit(.*)State)
+    // don't expect that they are called while the lock is being held.
+    // More importantly, didExit(.*)State methods are meant to be overriden by clients.
+    // And so they can potentially walk up the node tree and cause deadlocks, or do expensive tasks and cause the lock to be held for too long.
+    __instanceLock__.unlock();
+      [self didExitHierarchy];
+      for (ASDisplayNode *subnode in self.subnodes) {
+        [subnode __exitHierarchy];
+      }
+    __instanceLock__.lock();
+    
     _flags.isExitingHierarchy = NO;
   }
+  
+  __instanceLock__.unlock();
 }
 
 - (void)_recursiveWillEnterHierarchy
@@ -2554,6 +2581,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 /// Helper method to summarize whether or not the node run through the display process
 - (BOOL)__implementsDisplay
 {
+  ASDN::MutexLocker l(__instanceLock__);
   return _flags.implementsDrawRect || _flags.implementsImageDisplay || _flags.shouldRasterizeDescendants ||
          _flags.implementsInstanceDrawRect || _flags.implementsInstanceImageDisplay;
 }
@@ -2562,6 +2590,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 // For details look at the comment on the canCallSetNeedsDisplayOfLayer flag
 - (BOOL)__canCallSetNeedsDisplayOfLayer
 {
+  ASDN::MutexLocker l(__instanceLock__);
   return _flags.canCallSetNeedsDisplayOfLayer;
 }
 
@@ -2905,7 +2934,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(_flags.isEnteringHierarchy, @"You should never call -willEnterHierarchy directly. Appearance is automatically managed by ASDisplayNode");
   ASDisplayNodeAssert(!_flags.isExitingHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
-
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+  
   if (![self supportsRangeManagedInterfaceState]) {
     self.interfaceState = ASInterfaceStateInHierarchy;
   }
@@ -2916,6 +2946,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(_flags.isExitingHierarchy, @"You should never call -didExitHierarchy directly. Appearance is automatically managed by ASDisplayNode");
   ASDisplayNodeAssert(!_flags.isEnteringHierarchy, @"ASDisplayNode inconsistency. __enterHierarchy and __exitHierarchy are mutually exclusive");
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   if (![self supportsRangeManagedInterfaceState]) {
     self.interfaceState = ASInterfaceStateNone;
@@ -2927,12 +2958,17 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     // TODO: This approach could be optimized by only performing the dispatch for root elements + recursively apply the interface state change. This would require a closer
     // integration with _ASDisplayLayer to ensure that the superlayer pointer has been cleared by this stage (to check if we are root or not), or a different delegate call.
     
-    if (ASInterfaceStateIncludesVisible(_interfaceState)) {
+    if (ASInterfaceStateIncludesVisible(self.interfaceState)) {
       dispatch_async(dispatch_get_main_queue(), ^{
         // This block intentionally retains self.
-        ASDN::MutexLocker l(__instanceLock__);
-        if (!_flags.isInHierarchy && ASInterfaceStateIncludesVisible(_interfaceState)) {
-          self.interfaceState = (_interfaceState & ~ASInterfaceStateVisible);
+        __instanceLock__.lock();
+          unsigned isInHierarchy = _flags.isInHierarchy;
+          BOOL isVisible = ASInterfaceStateIncludesVisible(_interfaceState);
+          ASInterfaceState newState = (_interfaceState & ~ASInterfaceStateVisible);
+        __instanceLock__.unlock();
+        
+        if (!isInHierarchy && isVisible) {
+          self.interfaceState = newState;
         }
       });
     }
@@ -3026,6 +3062,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
  */
 - (BOOL)supportsRangeManagedInterfaceState
 {
+  ASDN::MutexLocker l(__instanceLock__);
   return ASHierarchyStateIncludesRangeManaged(_hierarchyState);
 }
 
@@ -3060,6 +3097,9 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   ASDisplayNodeAssertMainThread();
   // It should never be possible for a node to be visible but not be allowed / expected to display.
   ASDisplayNodeAssertFalse(ASInterfaceStateIncludesVisible(newState) && !ASInterfaceStateIncludesDisplay(newState));
+  // This method manages __instanceLock__ itself, to ensure the lock is not held while didEnter/Exit(.*)State methods are called, thus avoid potential deadlocks
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+  
   ASInterfaceState oldState = ASInterfaceStateNone;
   {
     ASDN::MutexLocker l(__instanceLock__);
