@@ -70,6 +70,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 @implementation ASNetworkImageNode
 
 @dynamic image;
+@dynamic ephemeralImage;
 
 - (instancetype)initWithCache:(id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader
 {
