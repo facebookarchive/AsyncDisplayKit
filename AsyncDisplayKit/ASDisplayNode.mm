@@ -3019,25 +3019,31 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)didEnterVisibleState
 {
   // subclass override
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
 }
 
 - (void)didExitVisibleState
 {
   // subclass override
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
 }
 
 - (void)didEnterDisplayState
 {
   // subclass override
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
 }
 
 - (void)didExitDisplayState
 {
   // subclass override
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
 }
 
 - (void)didEnterPreloadState
 {
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+  
   if (_methodOverrides & ASDisplayNodeMethodOverrideFetchData) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -3048,6 +3054,8 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)didExitPreloadState
 {
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+  
   if (_methodOverrides & ASDisplayNodeMethodOverrideClearFetchedData) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
@@ -3202,6 +3210,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
 {
   // subclass hook
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
 }
 
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState
