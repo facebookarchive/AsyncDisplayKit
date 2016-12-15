@@ -109,16 +109,12 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 #pragma mark - Public methods -- must lock
 
-/// Setter for public image property. It has the side effect to set an internal _imageWasSetExternally that prevents setting an image internally. Setting an image internally should happen with the _setImage: method
+/// Setter for public image property. It has the side effect of setting an internal _imageWasSetExternally that prevents setting an image internally. Setting an image internally should happen with the _setImage: method
 - (void)setImage:(UIImage *)image
 {
   ASDN::MutexLocker l(__instanceLock__);
   
-  _imageWasSetExternally = (image != nil);
-  if (_imageWasSetExternally) {
-    [self _cancelDownloadAndClearImage];
-    _URL = nil;
-  }
+  _imageWasSetExternally = (image != nil && _URL != nil);
   
   [self _setImage:image];
 }
