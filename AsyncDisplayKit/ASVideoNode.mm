@@ -117,6 +117,7 @@ static NSString * const kRate = @"rate";
 
 - (AVPlayerItem *)constructPlayerItem
 {
+  ASDisplayNodeAssertMainThread();
   ASDN::MutexLocker l(__instanceLock__);
 
   AVPlayerItem *playerItem = nil;
@@ -134,6 +135,8 @@ static NSString * const kRate = @"rate";
 
 - (void)prepareToPlayAsset:(AVAsset *)asset withKeys:(NSArray<NSString *> *)requestedKeys
 {
+  ASDisplayNodeAssertMainThread();
+  
   for (NSString *key in requestedKeys) {
     NSError *error = nil;
     AVKeyValueStatus keyStatus = [asset statusOfValueForKey:key error:&error];
@@ -467,6 +470,8 @@ static NSString * const kRate = @"rate";
 
 - (void)setAssetURL:(NSURL *)assetURL
 {
+  ASDisplayNodeAssertMainThread();
+  
   if (ASObjectIsEqual(assetURL, self.assetURL) == NO) {
     [self setAndFetchAsset:[AVURLAsset assetWithURL:assetURL] url:assetURL];
   }
@@ -487,6 +492,8 @@ static NSString * const kRate = @"rate";
 
 - (void)setAsset:(AVAsset *)asset
 {
+  ASDisplayNodeAssertMainThread();
+  
   if (ASAssetIsEqual(asset, self.asset) == NO) {
     [self setAndFetchAsset:asset url:nil];
   }
@@ -500,6 +507,8 @@ static NSString * const kRate = @"rate";
 
 - (void)setAndFetchAsset:(AVAsset *)asset url:(NSURL *)assetURL
 {
+  ASDisplayNodeAssertMainThread();
+  
   [self didExitPreloadState];
   
   {
