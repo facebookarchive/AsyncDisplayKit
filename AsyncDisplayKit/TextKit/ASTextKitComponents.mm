@@ -10,6 +10,8 @@
 
 #import "ASTextKitComponents.h"
 
+#import <tgmath.h>
+
 @interface ASTextKitComponents ()
 
 // read-write redeclarations
@@ -70,15 +72,41 @@
 - (CGSize)sizeForConstrainedWidth:(CGFloat)constrainedWidth
                   forMaxNumberOfLines:(NSInteger)numberOfLines {
   
+  ASTextKitComponents *components = self;
+  
   
   // Force glyph generation and layout, which may not have happened yet (and isn't triggered by - usedRectForTextContainer:).
-  [components.layoutManager ensurelayoutForTextContainer:components.textContainer];
+  [components.layoutManager ensureLayoutForTextContainer:components.textContainer];
   
-  while (index < numberOfGlyphs, numLines += 1) {
-    fragmentRect = layoutManager.lineFragmentRect(forGlyphAt: index, effectiveRange: &lineRange)
-    index = NSMaxRange(lineRange)
+  // Calculate height baed on layoutManager
+  CGSize textSize = [components.layoutManager usedRectForTextContainer:components.textContainer].size;
+  CGFloat height = textSize.height;
+  
+  // Calculate height based on line fragments calculations
+  NSRange lineRange = NSMakeRange(0, 0);
+  NSUInteger numberOfGlyphs = components.layoutManager.numberOfGlyphs;
+  CGRect fragmentRect = CGRectZero;
+  CGFloat maxHeight = CGFLOAT_MAX;
+  NSUInteger numLines = 0;
+  
+  NSUInteger index = 0;
+  while (index < numberOfGlyphs) {
+    fragmentRect = [components.layoutManager lineFragmentRectForGlyphAtIndex:index effectiveRange:&lineRange];
+    index = NSMaxRange(lineRange);
+    
+    if (numLines == numberOfLines && numberOfLines != 0) {
+      maxHeight = fragmentRect.origin.y + fragmentRect.size.height;
+      break;
+    }
+    numLines += 1;
   }
+    
+  CGFloat fragmentHeight = fragmentRect.origin.y + fragmentRect.size.height;
+  CGFloat finalHeight = std::ceil(std::fmax(std::fmin(maxHeight, height), fragmentHeight));
   
+  CGSize size = CGSizeMake(textSize.width, finalHeight);
+  
+  return size;
 }
 
 @end
