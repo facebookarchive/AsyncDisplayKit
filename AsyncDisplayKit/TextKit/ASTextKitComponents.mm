@@ -68,7 +68,6 @@
   return textSize;
 }
 
-// *** TODO
 - (CGSize)sizeForConstrainedWidth:(CGFloat)constrainedWidth
                   forMaxNumberOfLines:(NSInteger)numberOfLines {
   
