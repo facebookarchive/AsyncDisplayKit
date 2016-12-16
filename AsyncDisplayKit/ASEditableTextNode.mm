@@ -243,7 +243,6 @@
   CGSize textSize;
   
   if (_maximumLinesToDisplay > 0) {
-    // *** TODO: My version of calculation
     textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width
                                         forMaxNumberOfLines: _maximumLinesToDisplay];
   } else {
