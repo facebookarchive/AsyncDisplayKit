@@ -487,7 +487,7 @@ static NSString * const kRate = @"rate";
 
 - (void)setAsset:(AVAsset *)asset
 {
-  if (ASAssetIsEqual(asset, _asset) == NO) {
+  if (ASAssetIsEqual(asset, self.asset) == NO) {
     [self setAndFetchAsset:asset url:nil];
   }
 }
