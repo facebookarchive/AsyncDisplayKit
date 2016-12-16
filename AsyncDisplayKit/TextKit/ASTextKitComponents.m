@@ -66,4 +66,19 @@
   return textSize;
 }
 
+// *** TODO
+- (CGSize)sizeForConstrainedWidth:(CGFloat)constrainedWidth
+                  forMaxNumberOfLines:(NSInteger)numberOfLines {
+  
+  
+  // Force glyph generation and layout, which may not have happened yet (and isn't triggered by - usedRectForTextContainer:).
+  [components.layoutManager ensurelayoutForTextContainer:components.textContainer];
+  
+  while (index < numberOfGlyphs, numLines += 1) {
+    fragmentRect = layoutManager.lineFragmentRect(forGlyphAt: index, effectiveRange: &lineRange)
+    index = NSMaxRange(lineRange)
+  }
+  
+}
+
 @end
