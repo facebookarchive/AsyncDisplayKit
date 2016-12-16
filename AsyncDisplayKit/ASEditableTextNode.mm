@@ -240,14 +240,14 @@
   
   ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
   
-  CGSize textSize
+  CGSize textSize;
   
-  if maximumLinesToDisplay >= 0 {
+  if (_maximumLinesToDisplay > 0) {
     // *** TODO: My version of calculation
-    CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width
-                                               forMaxNumberOfLines: maximumLinesToDisplay]
+    textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width
+                                        forMaxNumberOfLines: _maximumLinesToDisplay];
   } else {
-    CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
+    textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
   }
   
   CGFloat width = std::ceil(textSize.width + _textContainerInset.left + _textContainerInset.right);
@@ -323,6 +323,11 @@
   [self view];
   ASDisplayNodeAssert(_textKitComponents.textView != nil, @"UITextView must be created in -[ASEditableTextNode didLoad]");
   return _textKitComponents.textView;
+}
+
+- (void)setMaximumLinesToDisplay:(NSUInteger)maximumLines
+{
+  _maximumLinesToDisplay = maximumLines;
 }
 
 #pragma mark -
