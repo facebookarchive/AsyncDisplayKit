@@ -84,6 +84,8 @@
   // Force glyph generation and layout, which may not have happened yet (and isn't triggered by - usedRectForTextContainer:).
   [components.layoutManager ensureLayoutForTextContainer:components.textContainer];
   
+  CGFloat width = [components.layoutManager usedRectForTextContainer:components.textContainer].size.width;
+  
   // Calculate height based on line fragments
   // Based on calculating number of lines from: http://asciiwwdc.com/2013/sessions/220
   NSRange glyphRange, lineRange = NSMakeRange(0, 0);
@@ -115,7 +117,7 @@
   CGFloat fragmentHeight = rect.origin.y + rect.size.height;
   CGFloat finalHeight = std::ceil(std::fmax(height, fragmentHeight));
   
-  CGSize size = CGSizeMake(constrainedWidth, finalHeight);
+  CGSize size = CGSizeMake(width, finalHeight);
   
   return size;
 }
