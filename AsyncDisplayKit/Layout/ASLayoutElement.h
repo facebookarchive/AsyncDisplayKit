@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASDimensionInternal.h>
 #import <AsyncDisplayKit/ASStackLayoutDefines.h>
 #import <AsyncDisplayKit/ASStackLayoutElement.h>
 #import <AsyncDisplayKit/ASAbsoluteLayoutElement.h>

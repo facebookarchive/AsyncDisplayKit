@@ -13,6 +13,11 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASAssert.h>
 
+ASDISPLAYNODE_EXTERN_C_BEGIN
+NS_ASSUME_NONNULL_BEGIN
+
+#pragma mark -
+
 ASDISPLAYNODE_INLINE BOOL AS_WARN_UNUSED_RESULT ASPointsValidForLayout(CGFloat points)
 {
   return ((isnormal(points) || points == 0.0) && points >= 0.0 && points < (CGFLOAT_MAX / 2.0));
@@ -32,6 +37,8 @@ ASDISPLAYNODE_INLINE BOOL AS_WARN_UNUSED_RESULT ASIsCGSizeValidForSize(CGSize si
 {
   return (ASPointsValidForSize(size.width) && ASPointsValidForSize(size.height));
 }
+
+#pragma mark - ASDimension
 
 /**
  * A dimension relative to constraints to be provided in the future.
@@ -58,41 +65,9 @@ typedef struct {
 } ASDimension;
 
 /**
- * Expresses an inclusive range of sizes. Used to provide a simple constraint to layout.
+ * Represents auto as ASDimension
  */
-typedef struct {
-  CGSize min;
-  CGSize max;
-} ASSizeRange;
-
-/**
- * A struct specifying a ASLayoutElement's size. Example:
- *
- *  ASLayoutElementSize size = (ASLayoutElementSize){
- *    .width = ASDimensionMakeWithFraction(0.25),
- *    .maxWidth = ASDimensionMakeWithPoints(200),
- *    .minHeight = ASDimensionMakeWithFraction(0.50)
- *  };
- *
- *  Description: <ASLayoutElementSize: exact={25%, Auto}, min={Auto, 50%}, max={200pt, Auto}>
- *
- */
-typedef struct {
-  ASDimension width;
-  ASDimension height;
-  ASDimension minWidth;
-  ASDimension maxWidth;
-  ASDimension minHeight;
-  ASDimension maxHeight;
-} ASLayoutElementSize;
-
 extern ASDimension const ASDimensionAuto;
-
-ASDISPLAYNODE_EXTERN_C_BEGIN
-NS_ASSUME_NONNULL_BEGIN
-
-
-#pragma mark - ASDimension
 
 /**
  * Returns a dimension with the specified type and value.
@@ -173,15 +148,6 @@ ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT CGFloat ASDimensionResolve(ASDimensio
   }
 }
 
-
-#pragma mark - NSNumber+ASDimension
-
-@interface NSNumber (ASDimension)
-@property (nonatomic, readonly) ASDimension as_pointDimension;
-@property (nonatomic, readonly) ASDimension as_fractionDimension;
-@end
-
-
 #pragma mark - ASLayoutSize
 
 /**
@@ -205,6 +171,15 @@ ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASLayoutSize ASLayoutSizeMake(ASDimen
   return size;
 }
 
+/**
+ * Resolve this relative size relative to a parent size.
+ */
+ASDISPLAYNODE_INLINE CGSize ASLayoutSizeResolveSize(ASLayoutSize layoutSize, CGSize parentSize, CGSize autoSize)
+{
+  return CGSizeMake(ASDimensionResolve(layoutSize.width, parentSize.width, autoSize.width),
+                    ASDimensionResolve(layoutSize.height, parentSize.height, autoSize.height));
+}
+
 /*
  * Returns a string representation of a relative size.
  */
@@ -216,6 +191,14 @@ ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT NSString *NSStringFromASLayoutSize(AS
 }
 
 #pragma mark - ASSizeRange
+
+/**
+ * Expresses an inclusive range of sizes. Used to provide a simple constraint to layout.
+ */
+typedef struct {
+  CGSize min;
+  CGSize max;
+} ASSizeRange;
 
 /**
  * Creates an ASSizeRange with provided min and max size.
@@ -271,150 +254,6 @@ ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT BOOL ASSizeRangeEqualToSizeRange(ASSi
  * Returns a string representation of a size range
  */
 extern AS_WARN_UNUSED_RESULT NSString *NSStringFromASSizeRange(ASSizeRange sizeRange);
-
-
-#pragma mark - ASLayoutElementSize
-
-/**
- * Returns an ASLayoutElementSize with default values.
- */
-ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASLayoutElementSize ASLayoutElementSizeMake()
-{
-  return (ASLayoutElementSize){
-    .width = ASDimensionAuto,
-    .height = ASDimensionAuto,
-    .minWidth = ASDimensionAuto,
-    .maxWidth = ASDimensionAuto,
-    .minHeight = ASDimensionAuto,
-    .maxHeight = ASDimensionAuto
-  };
-}
-
-/**
- * Returns an ASLayoutElementSize with the specified CGSize values as width and height.
- */
-ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASLayoutElementSize ASLayoutElementSizeMakeFromCGSize(CGSize size)
-{
-  ASLayoutElementSize s = ASLayoutElementSizeMake();
-  s.width = ASDimensionMakeWithPoints(size.width);
-  s.height = ASDimensionMakeWithPoints(size.height);
-  return s;
-}
-
-/**
- * Returns whether two sizes are equal.
- */
-ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT BOOL ASLayoutElementSizeEqualToLayoutElementSize(ASLayoutElementSize lhs, ASLayoutElementSize rhs)
-{
-  return (ASDimensionEqualToDimension(lhs.width, rhs.width)
-  && ASDimensionEqualToDimension(lhs.height, rhs.height)
-  && ASDimensionEqualToDimension(lhs.minWidth, rhs.minWidth)
-  && ASDimensionEqualToDimension(lhs.maxWidth, rhs.maxWidth)
-  && ASDimensionEqualToDimension(lhs.minHeight, rhs.minHeight)
-  && ASDimensionEqualToDimension(lhs.maxHeight, rhs.maxHeight));
-}
-
-/**
- * Returns a string formatted to contain the data from an ASLayoutElementSize.
- */
-extern AS_WARN_UNUSED_RESULT NSString *NSStringFromASLayoutElementSize(ASLayoutElementSize size);
-
-/**
- * Resolve the given size relative to a parent size and an auto size.
- * From the given size uses width, height to resolve the exact size constraint, uses the minHeight and minWidth to
- * resolve the min size constraint and the maxHeight and maxWidth to resolve the max size constraint. For every
- * dimension with unit ASDimensionUnitAuto the given autoASSizeRange value will be used.
- * Based on the calculated exact, min and max size constraints the final size range will be calculated.
- */
-extern AS_WARN_UNUSED_RESULT ASSizeRange ASLayoutElementSizeResolveAutoSize(ASLayoutElementSize size, const CGSize parentSize, ASSizeRange autoASSizeRange);
-
-/**
- * Resolve the given size to a parent size. Uses internally ASLayoutElementSizeResolveAutoSize with {INFINITY, INFINITY} as
- * as autoASSizeRange. For more information look at ASLayoutElementSizeResolveAutoSize.
- */
-ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASSizeRange ASLayoutElementSizeResolve(ASLayoutElementSize size, const CGSize parentSize)
-{
-  return ASLayoutElementSizeResolveAutoSize(size, parentSize, ASSizeRangeMake(CGSizeZero, CGSizeMake(INFINITY, INFINITY)));
-}
-
-
-#pragma mark - Deprecated
-
-/**
- * A dimension relative to constraints to be provided in the future.
- * A ASDimension can be one of three types:
- *
- * "Auto" - This indicated "I have no opinion" and may be resolved in whatever way makes most sense given the circumstances.
- *
- * "Points" - Just a number. It will always resolve to exactly this amount.
- *
- * "Percent" - Multiplied to a provided parent amount to resolve a final amount.
- */
-typedef NS_ENUM(NSInteger, ASRelativeDimensionType) {
-  /** This indicates "I have no opinion" and may be resolved in whatever way makes most sense given the circumstances. */
-  ASRelativeDimensionTypeAuto,
-  /** Just a number. It will always resolve to exactly this amount. This is the default type. */
-  ASRelativeDimensionTypePoints,
-  /** Multiplied to a provided parent amount to resolve a final amount. */
-  ASRelativeDimensionTypeFraction,
-};
-
-#define ASRelativeDimension ASDimension
-#define ASRelativeSize ASLayoutSize
-#define ASRelativeDimensionMakeWithPoints ASDimensionMakeWithPoints
-#define ASRelativeDimensionMakeWithFraction ASDimensionMakeWithFraction
-
-/**
- * Function is deprecated. Use ASSizeRangeMake instead.
- */
-extern AS_WARN_UNUSED_RESULT ASSizeRange ASSizeRangeMakeExactSize(CGSize size) ASDISPLAYNODE_DEPRECATED_MSG("Use ASSizeRangeMake instead.");
-
-/**
- Expresses an inclusive range of relative sizes. Used to provide additional constraint to layout.
- Used by ASStaticLayoutSpec.
- */
-typedef struct {
-  ASLayoutSize min;
-  ASLayoutSize max;
-} ASRelativeSizeRange;
-
-extern ASRelativeSizeRange const ASRelativeSizeRangeUnconstrained;
-
-#pragma mark - ASRelativeDimension
-
-extern ASDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value) ASDISPLAYNODE_DEPRECATED;
-
-#pragma mark - ASRelativeSize
-
-extern ASLayoutSize ASRelativeSizeMake(ASRelativeDimension width, ASRelativeDimension height) ASDISPLAYNODE_DEPRECATED;
-
-/** Convenience constructor to provide size in points. */
-extern ASLayoutSize ASRelativeSizeMakeWithCGSize(CGSize size) ASDISPLAYNODE_DEPRECATED;
-
-/** Convenience constructor to provide size as a fraction. */
-extern ASLayoutSize ASRelativeSizeMakeWithFraction(CGFloat fraction) ASDISPLAYNODE_DEPRECATED;
-
-extern BOOL ASRelativeSizeEqualToRelativeSize(ASLayoutSize lhs, ASLayoutSize rhs) ASDISPLAYNODE_DEPRECATED;
-
-extern NSString *NSStringFromASRelativeSize(ASLayoutSize size) ASDISPLAYNODE_DEPRECATED;
-
-#pragma mark - ASRelativeSizeRange
-
-extern ASRelativeSizeRange ASRelativeSizeRangeMake(ASLayoutSize min, ASLayoutSize max) ASDISPLAYNODE_DEPRECATED;
-
-#pragma mark Convenience constructors to provide an exact size (min == max).
-extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeSize(ASLayoutSize exact) ASDISPLAYNODE_DEPRECATED;
-
-extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactCGSize(CGSize exact) ASDISPLAYNODE_DEPRECATED;
-
-extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactFraction(CGFloat fraction) ASDISPLAYNODE_DEPRECATED;
-
-extern ASRelativeSizeRange ASRelativeSizeRangeMakeWithExactRelativeDimensions(ASRelativeDimension exactWidth, ASRelativeDimension exactHeight) ASDISPLAYNODE_DEPRECATED;
-
-extern BOOL ASRelativeSizeRangeEqualToRelativeSizeRange(ASRelativeSizeRange lhs, ASRelativeSizeRange rhs) ASDISPLAYNODE_DEPRECATED;
-
-/** Provided a parent size, compute final dimensions for this RelativeSizeRange to arrive at a SizeRange. */
-extern ASSizeRange ASRelativeSizeRangeResolve(ASRelativeSizeRange relativeSizeRange, CGSize parentSize) ASDISPLAYNODE_DEPRECATED;
 
 NS_ASSUME_NONNULL_END
 ASDISPLAYNODE_EXTERN_C_END
