@@ -77,9 +77,8 @@
   
   ASTextKitComponents *components = self;
   
-  if (CGRectGetWidth(components.textView.bounds) != constrainedWidth) {
-    components = [ASTextKitComponents componentsWithAttributedSeedString:components.textStorage textContainerSize:CGSizeMake(constrainedWidth, CGFLOAT_MAX)];
-  }
+  // Always use temporary stack in case of threading issues
+  components = [ASTextKitComponents componentsWithAttributedSeedString:components.textStorage textContainerSize:CGSizeMake(constrainedWidth, CGFLOAT_MAX)];
   
   // Force glyph generation and layout, which may not have happened yet (and isn't triggered by - usedRectForTextContainer:).
   [components.layoutManager ensureLayoutForTextContainer:components.textContainer];
