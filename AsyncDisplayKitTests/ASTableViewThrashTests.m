@@ -27,7 +27,7 @@
 #define kMinimumItemCount 5
 #define kMinimumSectionCount 3
 #define kFickleness 0.1
-#define kThrashingIterationCount 100
+#define kThrashingIterationCount 10
 
 static NSString *ASThrashArrayDescription(NSArray *array) {
   NSMutableString *str = [NSMutableString stringWithString:@"(\n"];

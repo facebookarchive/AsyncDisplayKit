@@ -22,7 +22,7 @@
 {
   self = [super init];
   if (self) {
-    _hashTable = [NSHashTable weakObjectsHashTable];
+    _hashTable = [NSHashTable hashTableWithOptions:NSPointerFunctionsWeakMemory | NSPointerFunctionsObjectPointerPersonality];
   }
   return self;
 }
@@ -59,7 +59,7 @@
 
 /**
  Note: The `count` property of NSHashTable is unreliable
- in the case of weak-object hash tables because entries
+ in the case of weak-memory hash tables because entries
  that have been deallocated are not removed immediately.
  
  In order to get the true count we have to fall back to using
