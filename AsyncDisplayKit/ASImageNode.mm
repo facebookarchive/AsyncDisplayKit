@@ -273,11 +273,9 @@ struct ASImageNodeDrawParameters {
     return nil;
   }
   
-  ASImageNodeDrawParameters drawParameter;
-  {
-    ASDN::MutexLocker l(__instanceLock__);
-    drawParameter = _drawParameter;
-  }
+  __instanceLock__.lock();
+  ASImageNodeDrawParameters drawParameter = _drawParameter;
+  __instanceLock__.unlock();
   
   CGRect drawParameterBounds       = drawParameter.bounds;
   BOOL forceUpscaling              = drawParameter.forceUpscaling;
