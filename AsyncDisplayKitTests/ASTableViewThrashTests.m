@@ -175,6 +175,12 @@ static volatile int32_t ASThrashTestSectionNextID = 1;
 
 @implementation ASThrashTestNode
 
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
+{
+  ASDisplayNodeAssertFalse(isinf(constrainedSize.width));
+  return CGSizeMake(constrainedSize.width, 44);
+}
+
 @end
 #endif
 
@@ -188,6 +194,8 @@ static volatile int32_t ASThrashTestSectionNextID = 1;
 @property (nonatomic, strong, readonly) UIWindow *window;
 @property (nonatomic, strong, readonly) TableView *tableView;
 @property (nonatomic, strong) NSArray <ASThrashTestSection *> *data;
+// Only access on main
+@property (nonatomic, strong) ASWeakSet *allNodes;
 @end
 
 
@@ -199,6 +207,7 @@ static volatile int32_t ASThrashTestSectionNextID = 1;
     _data = [[NSArray alloc] initWithArray:data copyItems:YES];
     _window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
     _tableView = [[TableView alloc] initWithFrame:_window.bounds style:UITableViewStylePlain];
+    _allNodes = [[ASWeakSet alloc] init];
     [_window addSubview:_tableView];
 #if USE_UIKIT_REFERENCE
     _tableView.dataSource = self;
@@ -227,6 +236,17 @@ static volatile int32_t ASThrashTestSectionNextID = 1;
   return self.data[section].headerHeight;
 }
 
+/// Object passed into predicate is ignored.
+- (NSPredicate *)predicateForDeallocatedHierarchy
+{
+  ASWeakSet *allNodes = self.allNodes;
+  __weak UIWindow *window = _window;
+  __weak ASTableView *view = _tableView;
+  return [NSPredicate predicateWithBlock:^BOOL(id  _Nullable evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+    return window == nil && view == nil && allNodes.isEmpty;
+  }];
+}
+
 #if USE_UIKIT_REFERENCE
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
@@ -240,13 +260,12 @@ static volatile int32_t ASThrashTestSectionNextID = 1;
 
 #else
 
-- (ASCellNodeBlock)tableView:(ASTableView *)tableView nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath {
-  ASThrashTestItem *item = self.data[indexPath.section].items[indexPath.item];
-  return ^{
-    ASThrashTestNode *node = [[ASThrashTestNode alloc] init];
-    node.item = item;
-    return node;
-  };
+- (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASThrashTestNode *node = [[ASThrashTestNode alloc] init];
+  node.item = self.data[indexPath.section].items[indexPath.item];;
+  [self.allNodes addObject:node];
+  return node;
 }
 
 #endif
@@ -495,11 +514,17 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 - (void)DISABLED_testThrashingWildly {
   for (NSInteger i = 0; i < kThrashingIterationCount; i++) {
     [self setUp];
-    ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:[ASThrashTestSection sectionsWithCount:kInitialSectionCount]];
-    _update = [[ASThrashUpdate alloc] initWithData:ds.data];
-    
-    [self applyUpdate:_update toDataSource:ds];
-    [self verifyDataSource:ds];
+    @autoreleasepool {
+      NSArray *sections = [ASThrashTestSection sectionsWithCount:kInitialSectionCount];
+      _update = [[ASThrashUpdate alloc] initWithData:sections];
+      ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:sections];
+
+      [self applyUpdate:_update toDataSource:ds];
+      [self verifyDataSource:ds];
+      [self expectationForPredicate:[ds predicateForDeallocatedHierarchy] evaluatedWithObject:(id)kCFNull handler:nil];
+    }
+    [self waitForExpectationsWithTimeout:3 handler:nil];
+
     [self tearDown];
   }
 }
@@ -533,7 +558,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
     [tableView reloadRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
   }];
   @try {
-    [tableView endUpdates];
+    [tableView endUpdatesAnimated:NO completion:nil];
 #if !USE_UIKIT_REFERENCE
     [tableView waitUntilAllUpdatesAreCommitted];
 #endif
