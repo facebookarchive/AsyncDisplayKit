@@ -542,7 +542,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     Ivar ivar = allMyIvars[i];
     const char *type = ivar_getTypeEncoding(ivar);
 
-    if (type != nil && strcmp(type, @encode(id)) == 0) {
+    if (type != NULL && strcmp(type, @encode(id)) == 0) {
       // If it's `id` we have to include it just in case.
       resultIvars[resultCount] = ivar;
       resultCount += 1;
