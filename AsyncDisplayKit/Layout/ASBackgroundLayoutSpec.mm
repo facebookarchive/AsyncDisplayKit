@@ -67,6 +67,7 @@ static NSUInteger const kBackgroundChildIndex = 1;
 
 - (void)setBackground:(id<ASLayoutElement>)background
 {
+  ASDisplayNodeAssertNotNil(background, @"Background cannot be nil");
   [super setChild:background atIndex:kBackgroundChildIndex];
 }
 
