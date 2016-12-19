@@ -131,28 +131,30 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)setURL:(NSURL *)URL resetToDefault:(BOOL)reset
 {
-  ASDN::MutexLocker l(__instanceLock__);
-
-  _imageWasSetExternally = NO;
-
-  if (ASObjectIsEqual(URL, _URL)) {
-    return;
-  }
-
-  [self _cancelImageDownload];
-  _imageLoaded = NO;
-
-  _URL = URL;
-
-  BOOL hasURL = _URL == nil;
-  if (reset || hasURL) {
-    [self _setImage:_defaultImage];
-    /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
-     so always use a dispatch_async to ensure that we queue the operations in the correct order.
-     (see comment in displayDidFinish) */
-    dispatch_async(dispatch_get_main_queue(), ^{
-      self.currentImageQuality = hasURL ? 0.0 : 1.0;
-    });
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    _imageWasSetExternally = NO;
+    
+    if (ASObjectIsEqual(URL, _URL)) {
+      return;
+    }
+    
+    [self _cancelImageDownload];
+    _imageLoaded = NO;
+    
+    _URL = URL;
+    
+    BOOL hasURL = _URL == nil;
+    if (reset || hasURL) {
+      [self _setImage:_defaultImage];
+      /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
+       so always use a dispatch_async to ensure that we queue the operations in the correct order.
+       (see comment in displayDidFinish) */
+      dispatch_async(dispatch_get_main_queue(), ^{
+        self.currentImageQuality = hasURL ? 0.0 : 1.0;
+      });
+    }
   }
 
   [self setNeedsPreload];

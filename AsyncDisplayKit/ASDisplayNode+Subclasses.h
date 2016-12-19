@@ -327,7 +327,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers
  * on the current node.
  *
- * @discussion Called by -recursivelyClearContents. Base class implements self.contents = nil, clearing any backing
+ * @discussion Called by -recursivelyClearContents. Always called on main thread. Base class implements self.contents = nil, clearing any backing
  * store, for asynchronous regeneration when needed.
  */
 - (void)clearContents ASDISPLAYNODE_REQUIRES_SUPER;
