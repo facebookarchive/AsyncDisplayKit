@@ -492,7 +492,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 }
 
 // Disabled temporarily due to issue where cell nodes are not marked invisible before deallocation.
-- (void)DISABLED_testThrashingWildly {
+- (void)testThrashingWildly {
   for (NSInteger i = 0; i < kThrashingIterationCount; i++) {
     [self setUp];
     ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:[ASThrashTestSection sectionsWithCount:kInitialSectionCount]];

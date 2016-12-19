@@ -34,6 +34,7 @@
   BOOL _layoutControllerImplementsSetVisibleIndexPaths;
   BOOL _layoutControllerImplementsSetViewportSize;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
+  ASWeakSet<ASCellNode *> *_visibleNodes;
   ASLayoutRangeMode _currentRangeMode;
   BOOL _preserveCurrentRangeMode;
   BOOL _didRegisterForNodeDisplayNotifications;
@@ -273,6 +274,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   NSMutableArray<NSIndexPath *> *modifiedIndexPaths = (ASRangeControllerLoggingEnabled ? [NSMutableArray array] : nil);
 #endif
   
+  ASWeakSet *newVisibleNodes = [[ASWeakSet alloc] init];
   for (NSIndexPath *indexPath in allIndexPaths) {
     // Before a node / indexPath is exposed to ASRangeController, ASDataController should have already measured it.
     // For consistency, make sure each node knows that it should measure itself if something changes.
@@ -326,6 +328,9 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
         ASDisplayNode *node = currentSectionNodes[row];
         
         ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
+        if (ASInterfaceStateIncludesVisible(interfaceState)) {
+          [newVisibleNodes addObject:node];
+        }
         // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
         if (node.interfaceState != interfaceState) {
 #if ASRangeControllerLoggingEnabled
@@ -345,6 +350,21 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
       }
     }
   }
+
+  // Clear the visible bit from any nodes that disappeared since last update.
+  // Currently we guarantee that nodes will not be marked visible when deallocated,
+  // but it's OK to be in e.g. the preload range. So for the visible bit specifically,
+  // we add this extra mechanism to account for e.g. deleted items.
+  //
+  // NOTE: There is a minor risk here, if a node is transferred from one range controller
+  // to another before the first rc updates and clears the node out of this set. It's a pretty
+  // wild scenario that I doubt happens in practice.
+  for (ASCellNode *node in _visibleNodes) {
+    if (![newVisibleNodes containsObject:node] && node.isVisible) {
+      [node exitInterfaceState:ASInterfaceStateVisible];
+    }
+  }
+  _visibleNodes = newVisibleNodes;
   
   // TODO: This code is for debugging only, but would be great to clean up with a delegate method implementation.
   if ([ASRangeController shouldShowRangeDebugOverlay]) {
