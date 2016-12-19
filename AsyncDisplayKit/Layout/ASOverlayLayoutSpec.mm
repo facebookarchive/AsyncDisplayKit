@@ -43,6 +43,7 @@ static NSUInteger const kOverlayChildIndex = 1;
 
 - (void)setOverlay:(id<ASLayoutElement>)overlay
 {
+  ASDisplayNodeAssertNotNil(overlay, @"Overlay cannot be nil");
   [super setChild:overlay atIndex:kOverlayChildIndex];
 }
 
