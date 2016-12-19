@@ -300,4 +300,10 @@ if [ "$MODE" = "cocoapods-lint" ]; then
     exit 0
 fi
 
+if [ "$MODE" = "carthage" ]; then
+    echo "Verifying carthage works."
+    
+    set -o pipefail && carthage update && carthage build --no-skip-current
+fi
+
 echo "Unrecognised mode '$MODE'."
