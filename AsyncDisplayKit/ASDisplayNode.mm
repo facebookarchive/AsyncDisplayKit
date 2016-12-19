@@ -1922,6 +1922,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
  */
 - (void)_insertSubnode:(ASDisplayNode *)subnode atSubnodeIndex:(NSInteger)subnodeIndex sublayerIndex:(NSInteger)sublayerIndex andRemoveSubnode:(ASDisplayNode *)oldSubnode
 {
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+  
   if (subnode == nil || subnode == self) {
     ASDisplayNodeFailAssert(@"Cannot insert a nil subnode or self as subnode");
     return;
@@ -2278,15 +2280,17 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (void)_removeSubnode:(ASDisplayNode *)subnode
 {
   ASDisplayNodeAssertThreadAffinity(self);
-  ASDN::MutexLocker l(__instanceLock__);
-
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+  
   // Don't call self.supernode here because that will retain/autorelease the supernode.  This method -_removeSupernode: is often called while tearing down a node hierarchy, and the supernode in question might be in the middle of its -dealloc.  The supernode is never messaged, only compared by value, so this is safe.
   // The particular issue that triggers this edge case is when a node calls -removeFromSupernode on a subnode from within its own -dealloc method.
   if (!subnode || subnode.supernode != self) {
     return;
   }
 
-  [_subnodes removeObjectIdenticalTo:subnode];
+  __instanceLock__.lock();
+    [_subnodes removeObjectIdenticalTo:subnode];
+  __instanceLock__.unlock();
 
   [subnode __setSupernode:nil];
 }
@@ -2298,10 +2302,11 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   [self _removeFromSupernode];
 }
 
-// NOTE: You must not called this method while holding the receiver's property lock. This may cause deadlocks.
+// NOTE: You must not called this method while holding the receiver's instance lock. This may cause deadlocks.
 - (void)_removeFromSupernode
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   __instanceLock__.lock();
     __weak ASDisplayNode *supernode = _supernode;
@@ -3044,29 +3049,34 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 - (void)didEnterVisibleState
 {
   // subclass override
+  ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
 }
 
 - (void)didExitVisibleState
 {
   // subclass override
+  ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
 }
 
 - (void)didEnterDisplayState
 {
   // subclass override
+  ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
 }
 
 - (void)didExitDisplayState
 {
   // subclass override
+  ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
 }
 
 - (void)didEnterPreloadState
 {
+  ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   if (_methodOverrides & ASDisplayNodeMethodOverrideFetchData) {
@@ -3079,6 +3089,7 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)didExitPreloadState
 {
+  ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   if (_methodOverrides & ASDisplayNodeMethodOverrideClearFetchedData) {
