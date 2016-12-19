@@ -273,34 +273,23 @@ struct ASImageNodeDrawParameters {
     return nil;
   }
   
-  CGRect drawParameterBounds    = CGRectZero;
-  BOOL forceUpscaling           = NO;
-  CGSize forcedSize             = CGSizeZero;
-  BOOL cropEnabled              = YES;
-  BOOL isOpaque                 = NO;
-  UIColor *backgroundColor      = nil;
-  UIViewContentMode contentMode = UIViewContentModeScaleAspectFill;
-  CGFloat contentsScale         = 0.0;
-  CGRect cropDisplayBounds      = CGRectZero;
-  CGRect cropRect               = CGRectZero;
-  asimagenode_modification_block_t imageModificationBlock;
-
+  ASImageNodeDrawParameters drawParameter;
   {
     ASDN::MutexLocker l(__instanceLock__);
-    ASImageNodeDrawParameters drawParameter = _drawParameter;
-    
-    drawParameterBounds       = drawParameter.bounds;
-    forceUpscaling            = drawParameter.forceUpscaling;
-    forcedSize                = drawParameter.forcedSize;
-    cropEnabled               = drawParameter.cropEnabled;
-    isOpaque                  = drawParameter.opaque;
-    backgroundColor           = drawParameter.backgroundColor;
-    contentMode               = drawParameter.contentMode;
-    contentsScale             = drawParameter.contentsScale;
-    cropDisplayBounds         = drawParameter.cropDisplayBounds;
-    cropRect                  = drawParameter.cropRect;
-    imageModificationBlock    = drawParameter.imageModificationBlock;
+    drawParameter = _drawParameter;
   }
+  
+  CGRect drawParameterBounds       = drawParameter.bounds;
+  BOOL forceUpscaling              = drawParameter.forceUpscaling;
+  CGSize forcedSize                = drawParameter.forcedSize;
+  BOOL cropEnabled                 = drawParameter.cropEnabled;
+  BOOL isOpaque                    = drawParameter.opaque;
+  UIColor *backgroundColor         = drawParameter.backgroundColor;
+  UIViewContentMode contentMode    = drawParameter.contentMode;
+  CGFloat contentsScale            = drawParameter.contentsScale;
+  CGRect cropDisplayBounds         = drawParameter.cropDisplayBounds;
+  CGRect cropRect                  = drawParameter.cropRect;
+  asimagenode_modification_block_t imageModificationBlock    = drawParameter.imageModificationBlock;
   
   BOOL hasValidCropBounds = cropEnabled && !CGRectIsEmpty(cropDisplayBounds);
   CGRect bounds = (hasValidCropBounds ? cropDisplayBounds : drawParameterBounds);
@@ -374,26 +363,26 @@ struct ASImageNodeDrawParameters {
     return nil;
   }
 
-    ASImageNodeContentsKey *contentsKey = [[ASImageNodeContentsKey alloc] init];
-    contentsKey.image = image;
-    contentsKey.backingSize = backingSize;
-    contentsKey.imageDrawRect = imageDrawRect;
-    contentsKey.isOpaque = isOpaque;
-    contentsKey.backgroundColor = backgroundColor;
-    contentsKey.preContextBlock = preContextBlock;
-    contentsKey.postContextBlock = postContextBlock;
-    contentsKey.imageModificationBlock = imageModificationBlock;
+  ASImageNodeContentsKey *contentsKey = [[ASImageNodeContentsKey alloc] init];
+  contentsKey.image = image;
+  contentsKey.backingSize = backingSize;
+  contentsKey.imageDrawRect = imageDrawRect;
+  contentsKey.isOpaque = isOpaque;
+  contentsKey.backgroundColor = backgroundColor;
+  contentsKey.preContextBlock = preContextBlock;
+  contentsKey.postContextBlock = postContextBlock;
+  contentsKey.imageModificationBlock = imageModificationBlock;
 
-    if (isCancelled()) {
-        return nil;
-    }
+  if (isCancelled()) {
+    return nil;
+  }
 
-    ASWeakMapEntry<UIImage *> *entry = [self.class contentsForkey:contentsKey isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled];
-    if (entry == nil) {  // If nil, we were cancelled.
-        return nil;
-    }
-    _weakCacheEntry = entry; // Retain so that the entry remains in the weak cache
-    return entry.value;
+  ASWeakMapEntry<UIImage *> *entry = [self.class contentsForkey:contentsKey isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled];
+  if (entry == nil) {  // If nil, we were cancelled.
+    return nil;
+  }
+  _weakCacheEntry = entry; // Retain so that the entry remains in the weak cache
+  return entry.value;
 }
 
 static ASWeakMap<ASImageNodeContentsKey *, UIImage *> *cache = nil;

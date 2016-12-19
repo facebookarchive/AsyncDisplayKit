@@ -2013,7 +2013,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   
   ASDisplayNodeAssert(subnode, @"Cannot insert a nil subnode");
     
-  // Don't add subnode if it's already if it's already a subnodes
+  // Don't add if it's already a subnode
   ASDisplayNode *oldParent = subnode.supernode;
   if (!subnode || subnode == self || oldParent == self) {
     return;
@@ -3063,10 +3063,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
     oldState = _interfaceState;
     _interfaceState = newState;
   }
-  
-  if ((newState & ASInterfaceStateMeasureLayout) != (oldState & ASInterfaceStateMeasureLayout)) {
-    // Trigger asynchronous measurement if it is not already cached or being calculated.
-  }
+
+  // TODO: Trigger asynchronous measurement if it is not already cached or being calculated.
+  // if ((newState & ASInterfaceStateMeasureLayout) != (oldState & ASInterfaceStateMeasureLayout)) {
+  // }
   
   // For the Preload and Display ranges, we don't want to call -clear* if not being managed by a range controller.
   // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
