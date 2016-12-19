@@ -27,7 +27,7 @@
 #define kMinimumItemCount 5
 #define kMinimumSectionCount 3
 #define kFickleness 0.1
-#define kThrashingIterationCount 10
+#define kThrashingIterationCount 100
 
 static NSString *ASThrashArrayDescription(NSArray *array) {
   NSMutableString *str = [NSMutableString stringWithString:@"(\n"];
@@ -492,7 +492,7 @@ static NSInteger ASThrashUpdateCurrentSerializationVersion = 1;
 }
 
 // Disabled temporarily due to issue where cell nodes are not marked invisible before deallocation.
-- (void)testThrashingWildly {
+- (void)DISABLED_testThrashingWildly {
   for (NSInteger i = 0; i < kThrashingIterationCount; i++) {
     [self setUp];
     ASThrashDataSource *ds = [[ASThrashDataSource alloc] initWithData:[ASThrashTestSection sectionsWithCount:kInitialSectionCount]];
