@@ -815,6 +815,27 @@
   [cn performBatchAnimated:NO updates:nil completion:nil];
 }
 
+- (void)testThatDeletedItemsAreMarkedInvisible
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  window.rootViewController = testController;
+
+  __block NSInteger itemCount = 1;
+  testController.asyncDelegate->_itemCounts = {itemCount};
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+
+  ASCollectionNode *cn = testController.collectionNode;
+  [cn waitUntilAllUpdatesAreCommitted];
+  ASCellNode *node = [cn nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  XCTAssertTrue(node.visible);
+  testController.asyncDelegate->_itemCounts = {0};
+  [cn deleteItemsAtIndexPaths: @[[NSIndexPath indexPathForItem:0 inSection:0]]];
+  [self expectationForPredicate:[NSPredicate predicateWithFormat:@"visible = NO"] evaluatedWithObject:node handler:nil];
+  [self waitForExpectationsWithTimeout:3 handler:nil];
+}
+
 - (void)testThatMultipleBatchFetchesDontHappenUnnecessarily
 {
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
