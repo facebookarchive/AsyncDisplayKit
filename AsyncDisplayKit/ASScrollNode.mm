@@ -9,7 +9,9 @@
 //
 
 #import "ASScrollNode.h"
+#import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+FrameworkSubclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASLayout.h"
 #import "_ASDisplayLayer.h"
 
@@ -22,6 +24,32 @@
 + (Class)layerClass
 {
   return [_ASDisplayLayer class];
+}
+
+- (ASScrollNode *)scrollNode
+{
+  return (ASScrollNode *)ASViewToDisplayNode(self);
+}
+
+#pragma mark - _ASDisplayView behavior substitutions
+// Need these to drive interfaceState so we know when we are visible, if not nested in another range-managing element.
+// Because our superclass is a true UIKit class, we cannot also subclass _ASDisplayView.
+- (void)willMoveToWindow:(UIWindow *)newWindow
+{
+  ASDisplayNode *node = self.scrollNode; // Create strong reference to weak ivar.
+  BOOL visible = (newWindow != nil);
+  if (visible && !node.inHierarchy) {
+    [node __enterHierarchy];
+  }
+}
+
+- (void)didMoveToWindow
+{
+  ASDisplayNode *node = self.scrollNode; // Create strong reference to weak ivar.
+  BOOL visible = (self.window != nil);
+  if (!visible && node.inHierarchy) {
+    [node __exitHierarchy];
+  }
 }
 
 @end
