@@ -32,10 +32,12 @@ static inline BOOL ASDisplayNodeThreadIsMain()
 /**
  * Enable this flag to collect information on the owning thread and ownership level of a mutex.
  * These properties are useful to determine if a mutext has been acquired and in case of a recursive mutex, how many times that happened.
- * ASDisplayNodeAssertLockUnownedByCurrentThread(node) is also useful when you want to enforce locking policy/expectation of a method.
- * By putting a breakpoint at a lock assertion, walking through stack trace frames and
- * checking ownership count of a mutex, you can determine when and which methods acquired it.
- * Very helpful when you debug deadlocks.
+ * 
+ * This flag also enable locking assertions (e.g ASDisplayNodeAssertLockUnownedByCurrentThread(node)).
+ * The assertions are useful when you want to indicate and enforce the locking policy/expectation of methods.
+ * To determine when and which methods acquired a (recursive) mutex (to debug deadlocks, for example),
+ * put breakpoints at some assertions. When the breakpoints hit, walk through stack trace frames 
+ * and check ownership count of the mutex.
  */
 #define CHECK_LOCKING_SAFETY 0
 
