@@ -199,10 +199,12 @@ namespace ASDN {
 #if CHECK_LOCKING_SAFETY
       mach_port_t thread_id = pthread_mach_thread_np(pthread_self());
       if (thread_id != _owner) {
+        // New owner. Since this mutex can't be acquired by another thread if there is an existing owner, _owner and _count must be 0.
         assert(0 == _owner);
         assert(0 == _count);
         _owner = thread_id;
       } else {
+        // Existing owner tries to reacquire this (recusrice) mutex. _count must already be positive.
         assert(_count > 0);
       }
       ++_count;
@@ -212,10 +214,13 @@ namespace ASDN {
     void unlock () {
 #if CHECK_LOCKING_SAFETY
       mach_port_t thread_id = pthread_mach_thread_np(pthread_self());
+      // Unlocking a mutex on an unowning thread causes undefined behaviour. Assert and fail early.
       assert(thread_id == _owner);
+      // Current thread owns this mutex. _count must be positive.
       assert(_count > 0);
       --_count;
       if (0 == _count) {
+        // Current thread is no longer the owner.
         _owner = 0;
       }
 #endif
