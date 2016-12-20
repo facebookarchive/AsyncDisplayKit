@@ -3029,8 +3029,10 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)recursivelyClearContents
 {
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
-    [node clearContents];
+  ASPerformBlockOnMainThread(^{
+    ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
+      [node clearContents];
+    });
   });
 }
 
@@ -3043,15 +3045,19 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)recursivelyPreload
 {
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
-    [node didEnterPreloadState];
+  ASPerformBlockOnMainThread(^{
+    ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
+      [node didEnterPreloadState];
+    });
   });
 }
 
 - (void)recursivelyClearPreloadedData
 {
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
-    [node didExitPreloadState];
+  ASPerformBlockOnMainThread(^{
+    ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
+      [node didExitPreloadState];
+    });
   });
 }
 
