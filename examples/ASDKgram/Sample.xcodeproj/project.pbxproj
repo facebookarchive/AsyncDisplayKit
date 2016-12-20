@@ -36,6 +36,7 @@
 		CC5532171E15CC1E0011C01F /* ASCollectionSectionController.m in Sources */ = {isa = PBXBuildFile; fileRef = CC5532161E15CC1E0011C01F /* ASCollectionSectionController.m */; };
 		CC6350BB1E1C482D002BC613 /* TailLoadingNode.m in Sources */ = {isa = PBXBuildFile; fileRef = CC6350BA1E1C482D002BC613 /* TailLoadingNode.m */; };
 		CC85250F1E36B392008EABE6 /* FeedHeaderNode.m in Sources */ = {isa = PBXBuildFile; fileRef = CC85250E1E36B392008EABE6 /* FeedHeaderNode.m */; };
+		E5F128F01E09625400B4335F /* PhotoFeedBaseController.m in Sources */ = {isa = PBXBuildFile; fileRef = E5F128EF1E09625400B4335F /* PhotoFeedBaseController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -97,6 +98,8 @@
 		CC85250D1E36B392008EABE6 /* FeedHeaderNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FeedHeaderNode.h; sourceTree = "<group>"; };
 		CC85250E1E36B392008EABE6 /* FeedHeaderNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = FeedHeaderNode.m; sourceTree = "<group>"; };
 		D09B5DF0BFB37583DE8F3142 /* Pods-Sample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Sample.release.xcconfig"; path = "Pods/Target Support Files/Pods-Sample/Pods-Sample.release.xcconfig"; sourceTree = "<group>"; };
+		E5F128EE1E09612700B4335F /* PhotoFeedBaseController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoFeedBaseController.h; sourceTree = "<group>"; };
+		E5F128EF1E09625400B4335F /* PhotoFeedBaseController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoFeedBaseController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -183,6 +186,8 @@
 		767A5F141CAA3D8A004CDA8D /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				E5F128EE1E09612700B4335F /* PhotoFeedBaseController.h */,
+				E5F128EF1E09625400B4335F /* PhotoFeedBaseController.m */,
 				767A5F161CAA3D96004CDA8D /* UIKit */,
 				767A5F151CAA3D90004CDA8D /* ASDK */,
 				CC00D1581E159132004E5502 /* ASDK-ListKit */,
@@ -412,6 +417,7 @@
 				768843821CAA37EF00D8629E /* CommentModel.m in Sources */,
 				768843831CAA37EF00D8629E /* CommentsNode.m in Sources */,
 				768843961CAA37EF00D8629E /* Utilities.m in Sources */,
+				E5F128F01E09625400B4335F /* PhotoFeedBaseController.m in Sources */,
 				768843931CAA37EF00D8629E /* UserModel.m in Sources */,
 				CC5532171E15CC1E0011C01F /* ASCollectionSectionController.m in Sources */,
 				768843801CAA37EF00D8629E /* AppDelegate.m in Sources */,
