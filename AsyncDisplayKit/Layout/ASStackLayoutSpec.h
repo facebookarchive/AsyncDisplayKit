@@ -59,6 +59,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) ASStackLayoutJustifyContent justifyContent;
 /** Orientation of children along cross axis. Defaults to ASStackLayoutAlignItemsStretch */
 @property (nonatomic, assign) ASStackLayoutAlignItems alignItems;
+//TODO documentation. Defaults to ASStackLayoutFlexWrapNoWrap
+@property (nonatomic, assign) ASStackLayoutFlexWrap flexWrap;
+//TODO documentation. Defaults to ASStackLayoutAlignContentStart
+@property (nonatomic, assign) ASStackLayoutAlignContent alignContent;
 
 - (instancetype)init;
 
@@ -69,7 +73,27 @@ NS_ASSUME_NONNULL_BEGIN
  @param alignItems Orientation of the children along the cross axis
  @param children ASLayoutElement children to be positioned.
  */
-+ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction spacing:(CGFloat)spacing justifyContent:(ASStackLayoutJustifyContent)justifyContent alignItems:(ASStackLayoutAlignItems)alignItems children:(NSArray<id<ASLayoutElement>> *)children AS_WARN_UNUSED_RESULT;
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction
+                                     spacing:(CGFloat)spacing
+                              justifyContent:(ASStackLayoutJustifyContent)justifyContent
+                                  alignItems:(ASStackLayoutAlignItems)alignItems
+                                    children:(NSArray<id<ASLayoutElement>> *)children AS_WARN_UNUSED_RESULT;
+
+/**
+ @param direction The direction of the stack view (horizontal or vertical)
+ @param spacing The spacing between the children
+ @param justifyContent If no children are flexible, this describes how to fill any extra space
+ @param alignItems Orientation of the children along the cross axis
+ @param children ASLayoutElement children to be positioned.
+ TODO documentation flex wrap and align content
+ */
++ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction
+                                     spacing:(CGFloat)spacing
+                              justifyContent:(ASStackLayoutJustifyContent)justifyContent
+                                  alignItems:(ASStackLayoutAlignItems)alignItems
+                                    flexWrap:(ASStackLayoutFlexWrap)flexWrap
+                                alignContent:(ASStackLayoutAlignContent)alignContent
+                                    children:(NSArray<id<ASLayoutElement>> *)children AS_WARN_UNUSED_RESULT;
 
 /**
  * @return A stack layout spec with direction of ASStackLayoutDirectionVertical

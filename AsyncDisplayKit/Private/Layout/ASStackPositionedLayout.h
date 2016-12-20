@@ -15,7 +15,9 @@
 /** Represents a set of laid out and positioned stack layout children. */
 struct ASStackPositionedLayout {
   const std::vector<ASStackLayoutSpecItem> items;
-
+  /** Final size of the stack */
+  const CGSize size;
+  
   /** Given an unpositioned layout, computes the positions each child should be placed at. */
   static ASStackPositionedLayout compute(const ASStackUnpositionedLayout &unpositionedLayout,
                                          const ASStackLayoutSpecStyle &style,

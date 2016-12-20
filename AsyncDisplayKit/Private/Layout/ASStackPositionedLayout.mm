@@ -11,24 +11,26 @@
 #import <AsyncDisplayKit/ASStackPositionedLayout.h>
 
 #import <tgmath.h>
+#import <numeric>
 
+#import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASLayoutSpecUtilities.h>
 #import <AsyncDisplayKit/ASLayoutSpec+Subclasses.h>
 
-static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
-                           const ASStackLayoutSpecItem &l,
-                           const CGFloat crossSize,
-                           const CGFloat baseline)
+static CGFloat crossOffsetForItem(const ASStackLayoutSpecItem &item,
+                                  const ASStackLayoutSpecStyle &style,
+                                  const CGFloat crossSize,
+                                  const CGFloat baseline)
 {
-  switch (alignment(l.child.style.alignSelf, style.alignItems)) {
+  switch (alignment(item.child.style.alignSelf, style.alignItems)) {
     case ASStackLayoutAlignItemsEnd:
-      return crossSize - crossDimension(style.direction, l.layout.size);
+      return crossSize - crossDimension(style.direction, item.layout.size);
     case ASStackLayoutAlignItemsCenter:
-      return ASFloorPixelValue((crossSize - crossDimension(style.direction, l.layout.size)) / 2);
+      return ASFloorPixelValue((crossSize - crossDimension(style.direction, item.layout.size)) / 2);
     case ASStackLayoutAlignItemsBaselineFirst:
     case ASStackLayoutAlignItemsBaselineLast:
-      return baseline - ASStackUnpositionedLayout::baselineForItem(style, l);
+      return baseline - ASStackUnpositionedLayout::baselineForItem(style, item);
     case ASStackLayoutAlignItemsStart:
     case ASStackLayoutAlignItemsStretch:
     case ASStackLayoutAlignItemsNotSet:
@@ -36,77 +38,155 @@ static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
   }
 }
 
-/**
- * Positions children according to the stack style and positioning properties.
- *
- * @param style The layout style of the overall stack layout
- * @param firstChildOffset Offset of the first child
- * @param extraSpacing Spacing between children, in addition to spacing set to the stack's layout style
- * @param unpositionedLayout Unpositioned children of the stack
- * @param constrainedSize Constrained size of the stack
- */
-static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style,
-                                             const CGFloat firstChildOffset,
-                                             const CGFloat extraSpacing,
-                                             const ASStackUnpositionedLayout &unpositionedLayout,
-                                             const ASSizeRange &constrainedSize)
+//TODO assert if violation is infinite (max size is infinite)
+static void crossOffsetAndSpacingForEachLine(const std::size_t numOfLines,
+                                             const CGFloat crossViolation,
+                                             ASStackLayoutAlignContent alignContent,
+                                             CGFloat &offset,
+                                             CGFloat &spacing)
 {
-  CGFloat crossSize = unpositionedLayout.crossSize;
-  CGFloat baseline = unpositionedLayout.baseline;
+  ASDisplayNodeCAssertTrue(numOfLines > 0);
   
-  // Adjust the position of the unpositioned layouts to be positioned
-  CGPoint p = directionPoint(style.direction, firstChildOffset, 0);
-  BOOL first = YES;
-  const auto stackedChildren = unpositionedLayout.items;
-  for (const auto &l : stackedChildren) {
-    p = p + directionPoint(style.direction, l.child.style.spacingBefore, 0);
-    if (!first) {
-      p = p + directionPoint(style.direction, style.spacing + extraSpacing, 0);
-    }
-    first = NO;
-    l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize, baseline));
-    
-    p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.style.spacingAfter, 0);
+  // Handle edge cases
+  if (alignContent == ASStackLayoutAlignContentSpaceBetween && (crossViolation < kViolationEpsilon || numOfLines == 1)) {
+    alignContent = ASStackLayoutAlignContentStart;
+  } else if (alignContent == ASStackLayoutAlignContentSpaceAround && (crossViolation < kViolationEpsilon || numOfLines == 1)) {
+    alignContent = ASStackLayoutAlignContentCenter;
   }
-
-  return {std::move(stackedChildren)};
+  
+  offset = 0;
+  spacing = 0;
+  
+  switch (alignContent) {
+    case ASStackLayoutAlignContentCenter:
+      offset = crossViolation / 2;
+      break;
+    case ASStackLayoutAlignContentEnd:
+      offset = crossViolation;
+      break;
+    case ASStackLayoutAlignContentSpaceBetween:
+      // Spacing between the items, no spaces at the edges, evenly distributed
+      spacing = crossViolation / (numOfLines - 1);
+      break;
+    case ASStackLayoutAlignContentSpaceAround: {
+      // Spacing between items are twice the spacing on the edges
+      CGFloat spacingUnit = crossViolation / (numOfLines * 2);
+      offset = spacingUnit;
+      spacing = spacingUnit * 2;
+      break;
+    }
+    case ASStackLayoutAlignContentStart:
+    case ASStackLayoutAlignContentStretch:
+      break;
+  }
 }
 
-ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnpositionedLayout &unpositionedLayout,
-                                                         const ASStackLayoutSpecStyle &style,
-                                                         const ASSizeRange &constrainedSize)
+static void stackOffsetAndSpacingForEachItem(const std::size_t numOfItems,
+                                             const CGFloat stackViolation,
+                                             ASStackLayoutJustifyContent justifyContent,
+                                             CGFloat &offset,
+                                             CGFloat &spacing)
 {
-  const auto numOfItems = unpositionedLayout.items.size();
   ASDisplayNodeCAssertTrue(numOfItems > 0);
-  const CGFloat violation = unpositionedLayout.violation;
-  ASStackLayoutJustifyContent justifyContent = style.justifyContent;
   
-  // Handle edge cases of "space between" and "space around"
-  if (justifyContent == ASStackLayoutJustifyContentSpaceBetween && (violation < 0 || numOfItems == 1)) {
+  // Handle edge cases
+  if (justifyContent == ASStackLayoutJustifyContentSpaceBetween && (stackViolation < kViolationEpsilon || numOfItems == 1)) {
     justifyContent = ASStackLayoutJustifyContentStart;
-  } else if (justifyContent == ASStackLayoutJustifyContentSpaceAround && (violation < 0 || numOfItems == 1)) {
+  } else if (justifyContent == ASStackLayoutJustifyContentSpaceAround && (stackViolation < kViolationEpsilon || numOfItems == 1)) {
     justifyContent = ASStackLayoutJustifyContentCenter;
   }
   
+  offset = 0;
+  spacing = 0;
+  
   switch (justifyContent) {
-    case ASStackLayoutJustifyContentStart: {
-      return stackedLayout(style, 0, 0, unpositionedLayout, constrainedSize);
-    }
-    case ASStackLayoutJustifyContentCenter: {
-      return stackedLayout(style, std::floor(violation / 2), 0, unpositionedLayout, constrainedSize);
-    }
-    case ASStackLayoutJustifyContentEnd: {
-      return stackedLayout(style, violation, 0, unpositionedLayout, constrainedSize);
-    }
-    case ASStackLayoutJustifyContentSpaceBetween: {
+    case ASStackLayoutJustifyContentCenter:
+      offset = stackViolation / 2;
+      break;
+    case ASStackLayoutJustifyContentEnd:
+      offset = stackViolation;
+      break;
+    case ASStackLayoutJustifyContentSpaceBetween:
       // Spacing between the items, no spaces at the edges, evenly distributed
-      const auto numOfSpacings = numOfItems - 1;
-      return stackedLayout(style, 0, violation / numOfSpacings, unpositionedLayout, constrainedSize);
-    }
+      spacing = stackViolation / (numOfItems - 1);
+      break;
     case ASStackLayoutJustifyContentSpaceAround: {
       // Spacing between items are twice the spacing on the edges
-      CGFloat spacingUnit = violation / (numOfItems * 2);
-      return stackedLayout(style, spacingUnit, spacingUnit * 2, unpositionedLayout, constrainedSize);
+      CGFloat spacingUnit = stackViolation / (numOfItems * 2);
+      offset = spacingUnit;
+      spacing = spacingUnit * 2;
+      break;
     }
+    case ASStackLayoutJustifyContentStart:
+      break;
   }
+}
+
+static void positionedLineItems(const std::vector<ASStackLayoutSpecItem> items,
+                                const ASStackLayoutSpecStyle &style,
+                                const CGFloat stackOffset,
+                                const CGFloat stackSpacing,
+                                const CGFloat crossOffset,
+                                const CGFloat crossSize,
+                                const CGFloat baseline)
+{
+  CGPoint p = directionPoint(style.direction, stackOffset, crossOffset);
+  BOOL first = YES;
+  
+  for (const auto &item : items) {
+    p = p + directionPoint(style.direction, item.child.style.spacingBefore, 0);
+    if (!first) {
+      p = p + directionPoint(style.direction, style.spacing + stackSpacing, 0);
+    }
+    first = NO;
+    item.layout.position = p + directionPoint(style.direction, 0, crossOffsetForItem(item, style, crossSize, baseline));
+    
+    p = p + directionPoint(style.direction, stackDimension(style.direction, item.layout.size) + item.child.style.spacingAfter, 0);
+  }
+}
+
+ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnpositionedLayout &layout,
+                                                         const ASStackLayoutSpecStyle &style,
+                                                         const ASSizeRange &sizeRange)
+{
+  const auto &lines = layout.lines;
+  if (lines.empty()) {
+    return {};
+  }
+  
+  const auto numOfLines = lines.size();
+  const auto alignContent = style.alignContent;
+  const auto justifyContent = style.justifyContent;
+  //TODO crossViolation to be stored in layout?
+  const auto crossViolation = ASStackUnpositionedLayout::computeCrossViolation(layout.crossDimensionSum, style, sizeRange);
+  //TODO Use CGPoint instead?
+  CGFloat crossOffset;
+  CGFloat crossSpacing;
+  crossOffsetAndSpacingForEachLine(numOfLines, crossViolation, alignContent, crossOffset, crossSpacing);
+  
+  std::vector<ASStackLayoutSpecItem> positionedItems;
+  CGFloat currentCrossOffset = crossOffset;
+  BOOL first = YES;
+  for (const auto &line : lines) {
+    const auto &items = line.items;
+    //TODO stackViolation to be stored in line?
+    const auto stackViolation = ASStackUnpositionedLayout::computeStackViolation(line.stackDimensionSum, style, sizeRange);
+    
+    CGFloat stackOffset;
+    CGFloat stackSpacing;
+    stackOffsetAndSpacingForEachItem(items.size(), stackViolation, justifyContent, stackOffset, stackSpacing);
+    
+    if (!first) {
+      currentCrossOffset += crossSpacing;
+    }
+    first = NO;
+    
+    positionedLineItems(items, style, stackOffset, stackSpacing, currentCrossOffset, line.crossSize, line.baseline);
+    std::move(items.begin(), items.end(), std::back_inserter(positionedItems));
+    
+    currentCrossOffset += line.crossSize;
+  }
+
+  const CGSize finalSize = directionSize(style.direction, layout.stackDimensionSum, layout.crossDimensionSum);
+  return {std::move(positionedItems), ASSizeRangeClamp(sizeRange, finalSize)};
 }
