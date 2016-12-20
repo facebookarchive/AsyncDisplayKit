@@ -31,6 +31,7 @@
 		768843931CAA37EF00D8629E /* UserModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688437B1CAA37EF00D8629E /* UserModel.m */; };
 		768843961CAA37EF00D8629E /* Utilities.m in Sources */ = {isa = PBXBuildFile; fileRef = 7688437E1CAA37EF00D8629E /* Utilities.m */; };
 		B13424EE6D36C2EC5D1030B6 /* libPods-Sample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = AD5DDA0A29B0F32AA5CC47BA /* libPods-Sample.a */; };
+		E5F128F01E09625400B4335F /* PhotoFeedBaseController.m in Sources */ = {isa = PBXBuildFile; fileRef = E5F128EF1E09625400B4335F /* PhotoFeedBaseController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -81,6 +82,8 @@
 		97A9B1BAF4265967672F9EA3 /* Pods-Sample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Sample.debug.xcconfig"; path = "Pods/Target Support Files/Pods-Sample/Pods-Sample.debug.xcconfig"; sourceTree = "<group>"; };
 		AD5DDA0A29B0F32AA5CC47BA /* libPods-Sample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Sample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		D09B5DF0BFB37583DE8F3142 /* Pods-Sample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Sample.release.xcconfig"; path = "Pods/Target Support Files/Pods-Sample/Pods-Sample.release.xcconfig"; sourceTree = "<group>"; };
+		E5F128EE1E09612700B4335F /* PhotoFeedBaseController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhotoFeedBaseController.h; sourceTree = "<group>"; };
+		E5F128EF1E09625400B4335F /* PhotoFeedBaseController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PhotoFeedBaseController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -167,6 +170,8 @@
 		767A5F141CAA3D8A004CDA8D /* Controller */ = {
 			isa = PBXGroup;
 			children = (
+				E5F128EE1E09612700B4335F /* PhotoFeedBaseController.h */,
+				E5F128EF1E09625400B4335F /* PhotoFeedBaseController.m */,
 				767A5F161CAA3D96004CDA8D /* UIKit */,
 				767A5F151CAA3D90004CDA8D /* ASDK */,
 			);
@@ -377,6 +382,7 @@
 				768843821CAA37EF00D8629E /* CommentModel.m in Sources */,
 				768843831CAA37EF00D8629E /* CommentsNode.m in Sources */,
 				768843961CAA37EF00D8629E /* Utilities.m in Sources */,
+				E5F128F01E09625400B4335F /* PhotoFeedBaseController.m in Sources */,
 				768843931CAA37EF00D8629E /* UserModel.m in Sources */,
 				768843801CAA37EF00D8629E /* AppDelegate.m in Sources */,
 				768843811CAA37EF00D8629E /* CommentFeedModel.m in Sources */,
