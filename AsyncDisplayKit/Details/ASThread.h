@@ -204,7 +204,7 @@ namespace ASDN {
         assert(0 == _count);
         _owner = thread_id;
       } else {
-        // Existing owner tries to reacquire this (recusrice) mutex. _count must already be positive.
+        // Existing owner tries to reacquire this (recursive) mutex. _count must already be positive.
         assert(_count > 0);
       }
       ++_count;
