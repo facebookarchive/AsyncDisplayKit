@@ -1072,6 +1072,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       
       // Kick off animating the layout transition
       [self animateLayoutTransition:_pendingLayoutTransitionContext];
+      
+      // Mark transaction as finished
+      [self _finishOrCancelTransition];
     });
   };
   
@@ -1295,9 +1298,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _pendingLayoutTransitionContext = nil;
 
   [self _pendingLayoutTransitionDidComplete];
-    
-  // Mark transaction as finished
-  [self _finishOrCancelTransition];
 }
 
 #pragma mark - Layout
