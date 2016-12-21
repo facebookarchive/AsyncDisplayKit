@@ -11,10 +11,12 @@
 //
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
-typedef enum {
+
+typedef NS_ENUM(NSInteger, ASDefaultPlaybackButtonType) {
   ASDefaultPlaybackButtonTypePlay,
   ASDefaultPlaybackButtonTypePause
-} ASDefaultPlaybackButtonType;
+};
+
 @interface ASDefaultPlaybackButton : ASControlNode
 @property (nonatomic, assign) ASDefaultPlaybackButtonType buttonType;
 @end

@@ -19,14 +19,14 @@
 @class AVAsset;
 @protocol ASVideoPlayerNodeDelegate;
 
-typedef enum {
+typedef NS_ENUM(NSInteger, ASVideoPlayerNodeControlType) {
   ASVideoPlayerNodeControlTypePlaybackButton,
   ASVideoPlayerNodeControlTypeElapsedText,
   ASVideoPlayerNodeControlTypeDurationText,
   ASVideoPlayerNodeControlTypeScrubber,
   ASVideoPlayerNodeControlTypeFullScreenButton,
   ASVideoPlayerNodeControlTypeFlexGrowSpacer,
-} ASVideoPlayerNodeControlType;
+};
 
 NS_ASSUME_NONNULL_BEGIN
 
