@@ -13,12 +13,12 @@
 #import "ASViewController.h"
 #import "ASAssert.h"
 #import "ASAvailability.h"
-#import "ASDisplayNodeInternal.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASLayout.h"
 #import "ASTraitCollection.h"
 #import "ASEnvironmentInternal.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
+#import "ASInternalHelpers.h"
 
 #define AS_LOG_VISIBILITY_CHANGES 0
 
@@ -57,8 +57,28 @@
   _selfConformsToRangeModeProtocol = [self conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
   _nodeConformsToRangeModeProtocol = [_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
   _automaticallyAdjustRangeModeBasedOnViewEvents = _selfConformsToRangeModeProtocol || _nodeConformsToRangeModeProtocol;
+  
+  // In case the node will get loaded
+  if (_node.nodeLoaded) {
+    // Node already loaded the view
+    [self view];
+  } else {
+    // If the node didn't load yet add ourselves as on did load observer to laod the view in case the node gets loaded
+    // before the view controller
+    __weak __typeof__(self) weakSelf = self;
+    [_node onDidLoad:^(__kindof ASDisplayNode * _Nonnull node) {
+      if ([weakSelf isViewLoaded] == NO) {
+        [weakSelf view];
+      }
+    }];
+  }
 
   return self;
+}
+
+- (void)dealloc
+{
+  ASPerformBackgroundDeallocation(_node);
 }
 
 - (void)loadView
@@ -111,11 +131,12 @@
       [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
     }];
   } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    // Call layoutThatFits: to let the node prepare for a layout that will happen shortly in the layout pass of the view.
+    // If the node's constrained size didn't change between the last layout pass it's a no-op
     [_node layoutThatFits:[self nodeConstrainedSize]];
-  }
-  
-  if (!AS_AT_LEAST_IOS9) {
-    [self _legacyHandleViewDidLayoutSubviews];
+#pragma clang diagnostic pop
   }
 }
 
@@ -135,12 +156,10 @@ ASVisibilityDidMoveToParentViewController;
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
 
-  // We do this early layout because we need to get any ASCollectionNodes etc. into the
-  // hierarchy before UIKit applies the scroll view inset adjustments, if you are using
-  // automatic subnode management.
-  [_node layoutThatFits:[self nodeConstrainedSize]];
-
-  [_node recursivelyFetchData];
+  // A layout pass is forced this early to get nodes like ASCollectionNode, ASTableNode etc.
+  // into the hierarchy before UIKit applies the scroll view inset adjustments, if automatic subnode management
+  // is enabled. Otherwise the insets would not be applied.
+  [_node.view layoutIfNeeded];
   
   if (_parentManagesVisibilityDepth == NO) {
     [self setVisibilityDepth:0];
@@ -219,62 +238,12 @@ ASVisibilityDepthImplementation;
 
 - (ASSizeRange)nodeConstrainedSize
 {
-  if (AS_AT_LEAST_IOS9) {
-    CGSize viewSize = self.view.bounds.size;
-    return ASSizeRangeMake(viewSize, viewSize);
-  } else {
-    return [self _legacyConstrainedSize];
-  }
+  return ASSizeRangeMake(self.view.bounds.size);
 }
 
 - (ASInterfaceState)interfaceState
 {
   return _node.interfaceState;
-}
-
-#pragma mark - Legacy Layout Handling
-
-- (BOOL)_shouldLayoutTheLegacyWay
-{
-  BOOL isModalViewController = (self.presentingViewController != nil && self.presentedViewController == nil);
-  BOOL hasNavigationController = (self.navigationController != nil);
-  BOOL hasParentViewController = (self.parentViewController != nil);
-  if (isModalViewController && !hasNavigationController && !hasParentViewController) {
-    return YES;
-  }
-  
-  // Check if the view controller is a root view controller
-  BOOL isRootViewController = self.view.window.rootViewController == self;
-  if (isRootViewController) {
-    return YES;
-  }
-  
-  return NO;
-}
-
-- (ASSizeRange)_legacyConstrainedSize
-{
-  // In modal presentation the view does not have the right bounds in iOS7 and iOS8. As workaround using the superviews
-  // view bounds
-  UIView *view = self.view;
-  CGSize viewSize = view.bounds.size;
-  if ([self _shouldLayoutTheLegacyWay]) {
-    UIView *superview = view.superview;
-    if (superview != nil) {
-      viewSize = superview.bounds.size;
-    }
-  }
-  return ASSizeRangeMake(viewSize, viewSize);
-}
-
-- (void)_legacyHandleViewDidLayoutSubviews
-{
-  // In modal presentation or as root viw controller the view does not automatic resize in iOS7 and iOS8.
-  // As workaround we adjust the frame of the view manually
-  if ([self _shouldLayoutTheLegacyWay]) {
-    CGSize maxConstrainedSize = [self nodeConstrainedSize].max;
-    _node.frame = (CGRect){.origin = CGPointZero, .size = maxConstrainedSize};
-  }
 }
 
 #pragma mark - ASEnvironmentTraitCollection
@@ -305,10 +274,12 @@ ASVisibilityDepthImplementation;
     for (id<ASEnvironment> child in children) {
       ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
     }
-    
-    // once we've propagated all the traits, layout this node.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    // Once we've propagated all the traits, layout this node.
     // Remeasure the node with the latest constrained size – old constrained size may be incorrect.
     [self.node layoutThatFits:[self nodeConstrainedSize]];
+#pragma clang diagnostic pop
   }
 }
 

@@ -8,18 +8,22 @@
 
 #import <Foundation/Foundation.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @interface ASTraceEvent : NSObject
 
 /**
  * This method is dealloc safe.
  */
-- (instancetype)initWithObject:(id)object
-                     backtrace:(NSArray<NSString *> *)backtrace
-                        format:(NSString *)format
-                     arguments:(va_list)arguments NS_FORMAT_FUNCTION(3,0);
+- (instancetype)initWithBacktrace:(nullable NSArray<NSString *> *)backtrace
+                           format:(NSString *)format
+                        arguments:(va_list)arguments NS_FORMAT_FUNCTION(2,0);
 
-@property (nonatomic, readonly) NSArray<NSString *> *backtrace;
+// Will be nil unless AS_SAVE_EVENT_BACKTRACES=1 (default=0)
+@property (nonatomic, nullable, readonly) NSArray<NSString *> *backtrace;
 @property (nonatomic, strong, readonly) NSString *message;
 @property (nonatomic, readonly) NSTimeInterval timestamp;
 
 @end
+
+NS_ASSUME_NONNULL_END

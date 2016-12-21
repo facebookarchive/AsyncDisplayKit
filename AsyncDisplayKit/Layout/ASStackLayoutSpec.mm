@@ -20,9 +20,6 @@
 #import "ASThread.h"
 
 @implementation ASStackLayoutSpec
-{
-  ASDN::RecursiveMutex __instanceLock__;
-}
 
 - (instancetype)init
 {

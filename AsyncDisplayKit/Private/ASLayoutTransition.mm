@@ -11,9 +11,11 @@
 //
 
 #import "ASLayoutTransition.h"
-
-#import "ASDisplayNodeInternal.h"
 #import "ASLayout.h"
+#import "ASThread.h"
+#import "ASDisplayNode+Beta.h"
+
+#import "ASDisplayNodeInternal.h" // Required for _insertSubnode... / _removeFromSupernode.
 
 #import <queue>
 #import <memory>
@@ -95,6 +97,11 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
   ASDN::MutexSharedLocker l(__instanceLock__);
   [self calculateSubnodeOperationsIfNeeded];
   
+  if (_insertedSubnodes.count == 0) {
+    return;
+  }
+
+  ASDisplayNodeLogEvent(_node, @"insertSubnodes: %@", _insertedSubnodes);
   NSUInteger i = 0;
   for (ASDisplayNode *node in _insertedSubnodes) {
     NSUInteger p = _insertedSubnodePositions[i];
@@ -107,6 +114,12 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 {
   ASDN::MutexSharedLocker l(__instanceLock__);
   [self calculateSubnodeOperationsIfNeeded];
+
+  if (_removedSubnodes.count == 0) {
+    return;
+  }
+
+  ASDisplayNodeLogEvent(_node, @"removeSubnodes: %@", _removedSubnodes);
   for (ASDisplayNode *subnode in _removedSubnodes) {
     [subnode _removeFromSupernode];
   }
@@ -222,7 +235,7 @@ static inline std::vector<NSUInteger> findNodesInLayoutAtIndexesWithFilteredNode
     if (idx > lastIndex) { break; }
     if (idx >= firstIndex && [indexes containsIndex:idx]) {
       ASDisplayNode *node = (ASDisplayNode *)sublayout.layoutElement;
-      ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
+      ASDisplayNodeCAssert(node, @"ASDisplayNode was deallocated before it was added to a subnode. It's likely the case that you use automatically manages subnodes and allocate a ASDisplayNode in layoutSpecThatFits: and don't have any strong reference to it.");
       // Ignore the odd case in which a non-node sublayout is accessed and the type cast fails
       if (node != nil) {
         BOOL notFiltered = (filteredNodes == nil || [filteredNodes indexOfObjectIdenticalTo:node] == NSNotFound);

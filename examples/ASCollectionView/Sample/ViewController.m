@@ -130,7 +130,7 @@
   return 10;
 }
 
-- (NSInteger)numberOfSectionsInCollectionView:(ASCollectionNode *)collectionNode
+- (NSInteger)numberOfSectionsInCollectionNode:(ASCollectionNode *)collectionNode
 {
 #if SIMULATE_WEB_RESPONSE
   return _data == nil ? 0 : 100;
@@ -139,26 +139,10 @@
 #endif
 }
 
-- (void)collectionViewLockDataSource:(ASCollectionView *)collectionView
-{
-  // lock the data source
-  // The data source should not be change until it is unlocked.
-}
-
-- (void)collectionViewUnlockDataSource:(ASCollectionView *)collectionView
-{
-  // unlock the data source to enable data source updating.
-}
-
 - (void)collectionNode:(ASCollectionNode *)collectionNode willBeginBatchFetchWithContext:(ASBatchContext *)context
 {
   NSLog(@"fetch additional content");
   [context completeBatchFetching:YES];
-}
-
-- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
-{
-  return UIEdgeInsetsMake(20.0, 20.0, 20.0, 20.0);
 }
 
 @end

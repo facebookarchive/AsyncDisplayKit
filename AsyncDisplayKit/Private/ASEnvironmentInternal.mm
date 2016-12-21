@@ -144,6 +144,9 @@ ASEnvironmentState ASEnvironmentMergeObjectAndState(ASEnvironmentState environme
     if (parentLayoutOptionsState.flexGrow == defaultState.flexGrow) {
       parentLayoutOptionsState.flexGrow = layoutOptionsState.flexGrow;
     }
+    if (parentLayoutOptionsState.flexShrink == defaultState.flexShrink) {
+      parentLayoutOptionsState.flexShrink = layoutOptionsState.flexShrink;
+    }
     if (ASDimensionEqualToDimension(parentLayoutOptionsState.flexBasis, defaultState.flexBasis)) {
       parentLayoutOptionsState.flexBasis = layoutOptionsState.flexBasis;
     }

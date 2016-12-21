@@ -111,12 +111,6 @@
   };
   
   XCTAssertThrows([node layoutThatFits:ASSizeRangeMake(CGSizeMake(0, FLT_MAX))]);
-  
-  // This dance is necessary as we would assert in case we create an ASDimension that is not real numbers
-  ASDimension width = displayNode.style.width;
-  width.value = INFINITY;
-  displayNode.style.width = width;
-  XCTAssertThrows([node layoutThatFits:ASSizeRangeMake(CGSizeMake(0, 0), CGSizeMake(INFINITY, INFINITY))]);
 }
 
 - (void)testThatLayoutCreatedWithInvalidSizeCausesException
@@ -125,6 +119,56 @@
   XCTAssertThrows([ASLayout layoutWithLayoutElement:displayNode size:CGSizeMake(FLT_MAX, FLT_MAX)]);
   XCTAssertThrows([ASLayout layoutWithLayoutElement:displayNode size:CGSizeMake(CGFLOAT_MAX, CGFLOAT_MAX)]);
   XCTAssertThrows([ASLayout layoutWithLayoutElement:displayNode size:CGSizeMake(INFINITY, INFINITY)]);
+}
+
+- (void)testThatLayoutElementCreatedInLayoutSpecThatFitsDoNotGetDeallocated
+{
+  const CGSize kSize = CGSizeMake(300, 300);
+  
+  ASDisplayNode *subNode = [[ASDisplayNode alloc] init];
+  subNode.automaticallyManagesSubnodes = YES;
+  subNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    ASTextNode *textNode = [ASTextNode new];
+    textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Test Test Test Test Test Test Test Test"];
+    ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:textNode];
+    return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:insetSpec];
+  };
+  
+  ASDisplayNode *rootNode = [[ASDisplayNode alloc] init];
+  rootNode.automaticallyManagesSubnodes = YES;
+  rootNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    ASTextNode *textNode = [ASTextNode new];
+    textNode.attributedText = [[NSAttributedString alloc] initWithString:@"Test Test Test Test Test"];
+    ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:textNode];
+    
+    return [ASStackLayoutSpec
+            stackLayoutSpecWithDirection:ASStackLayoutDirectionVertical
+            spacing:0.0
+            justifyContent:ASStackLayoutJustifyContentStart
+            alignItems:ASStackLayoutAlignItemsStretch
+            children:@[insetSpec, subNode]];
+  };
+
+  rootNode.frame = CGRectMake(0, 0, kSize.width, kSize.height);
+  [rootNode view];
+  
+  XCTestExpectation *expectation = [self expectationWithDescription:@"Execute measure and layout pass"];
+  
+  dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+    
+    [rootNode layoutThatFits:ASSizeRangeMake(kSize)];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+      XCTAssertNoThrow([rootNode.view layoutIfNeeded]);
+      [expectation fulfill];
+    });
+  });
+  
+  [self waitForExpectationsWithTimeout:5.0 handler:^(NSError *error) {
+    if (error) {
+      XCTFail(@"Expectation failed: %@", error);
+    }
+  }];
 }
 
 @end

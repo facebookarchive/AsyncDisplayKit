@@ -15,17 +15,27 @@
 #import "NSIndexSet+ASHelpers.h"
 #import "ASAssert.h"
 #import "ASDisplayNode+Beta.h"
-
+#import "ASObjectDescriptionHelpers.h"
 #import <unordered_map>
+#import "ASDataController.h"
+#import "ASBaseDefines.h"
 
-// NOTE: We log before throwing so they don't have to let it bubble up to see the error.
-#define ASFailUpdateValidation(...)\
-  if ([ASDisplayNode suppressesInvalidCollectionUpdateExceptions]) {\
-    NSLog(__VA_ARGS__);\
-  } else {\
-    NSLog(__VA_ARGS__);\
-    ASDisplayNodeFailAssert(__VA_ARGS__);\
-  }
+// If assertions are enabled and they haven't forced us to suppress the exception,
+// then throw, otherwise log.
+#if ASDISPLAYNODE_ASSERTIONS_ENABLED
+  #define ASFailUpdateValidation(...)\
+    _Pragma("clang diagnostic push")\
+    _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")\
+    if ([ASDisplayNode suppressesInvalidCollectionUpdateExceptions]) {\
+      NSLog(__VA_ARGS__);\
+    } else {\
+      NSLog(__VA_ARGS__);\
+      [NSException raise:ASCollectionInvalidUpdateException format:__VA_ARGS__];\
+    }\
+  _Pragma("clang diagnostic pop")
+#else
+  #define ASFailUpdateValidation(...) NSLog(__VA_ARGS__);
+#endif
 
 BOOL ASHierarchyChangeTypeIsFinal(_ASHierarchyChangeType changeType) {
     switch (changeType) {
@@ -66,6 +76,8 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 /// Returns all the indexes from all the `indexSet`s of the given `_ASHierarchySectionChange` objects.
 + (NSMutableIndexSet *)allIndexesInSectionChanges:(NSArray *)changes;
+
++ (NSString *)smallDescriptionForSectionChanges:(NSArray<_ASHierarchySectionChange *> *)changes;
 @end
 
 @interface _ASHierarchyItemChange ()
@@ -76,9 +88,13 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
  Assumes: `changes` all have the same changeType
  */
 + (void)sortAndCoalesceItemChanges:(NSMutableArray<_ASHierarchyItemChange *> *)changes ignoringChangesInSections:(NSIndexSet *)sections;
+
++ (NSString *)smallDescriptionForItemChanges:(NSArray<_ASHierarchyItemChange *> *)changes;
+
++ (void)ensureItemChanges:(NSArray<_ASHierarchyItemChange *> *)changes ofSameType:(_ASHierarchyChangeType)changeType;
 @end
 
-@interface _ASHierarchyChangeSet ()
+@interface _ASHierarchyChangeSet () 
 
 @property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *insertItemChanges;
 @property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *originalInsertItemChanges;
@@ -328,8 +344,11 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
       [_insertItemChanges addObject:[originalInsertItemChange changeByFinalizingType]];
     }
     
-    NSDictionary *insertedIndexPathsMap = [_ASHierarchyItemChange sectionToIndexSetMapFromChanges:_insertItemChanges ofType:_ASHierarchyChangeTypeInsert];
-    NSDictionary *deletedIndexPathsMap = [_ASHierarchyItemChange sectionToIndexSetMapFromChanges:_deleteItemChanges ofType:_ASHierarchyChangeTypeDelete];
+    [_ASHierarchyItemChange ensureItemChanges:_insertItemChanges ofSameType:_ASHierarchyChangeTypeInsert];
+    NSDictionary *insertedIndexPathsMap = [_ASHierarchyItemChange sectionToIndexSetMapFromChanges:_insertItemChanges];
+    
+    [_ASHierarchyItemChange ensureItemChanges:_deleteItemChanges ofSameType:_ASHierarchyChangeTypeDelete];
+    NSDictionary *deletedIndexPathsMap = [_ASHierarchyItemChange sectionToIndexSetMapFromChanges:_deleteItemChanges];
     
     for (_ASHierarchyItemChange *change in _reloadItemChanges) {
       NSAssert(change.changeType == _ASHierarchyChangeTypeReload, @"It must be a reload change to be in here");
@@ -484,11 +503,46 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   }
 }
 
+#pragma mark - Debugging (Private)
+
 - (NSString *)description
 {
-  return [NSString stringWithFormat:@"<%@ %p: deletedSections=%@, insertedSections=%@, deletedItems=%@, insertedItems=%@>", NSStringFromClass(self.class), self, _deletedSections, _insertedSections, _deleteItemChanges, _insertItemChanges];
+  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
 }
 
+- (NSString *)debugDescription
+{
+  return ASObjectDescriptionMake(self, [self propertiesForDebugDescription]);
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDescription
+{
+  NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+  if (_reloadSectionChanges.count > 0) {
+    [result addObject:@{ @"reloadSections" : [_ASHierarchySectionChange smallDescriptionForSectionChanges:_reloadSectionChanges] }];
+  }
+  if (_reloadItemChanges.count > 0) {
+    [result addObject:@{ @"reloadItems" : [_ASHierarchyItemChange smallDescriptionForItemChanges:_reloadItemChanges] }];
+  }
+  if (_originalDeleteSectionChanges.count > 0) {
+    [result addObject:@{ @"deleteSections" : [_ASHierarchySectionChange smallDescriptionForSectionChanges:_originalDeleteSectionChanges] }];
+  }
+  if (_originalDeleteItemChanges.count > 0) {
+    [result addObject:@{ @"deleteItems" : [_ASHierarchyItemChange smallDescriptionForItemChanges:_originalDeleteItemChanges] }];
+  }
+  if (_originalInsertSectionChanges.count > 0) {
+    [result addObject:@{ @"insertSections" : [_ASHierarchySectionChange smallDescriptionForSectionChanges:_originalInsertSectionChanges] }];
+  }
+  if (_originalInsertItemChanges.count > 0) {
+    [result addObject:@{ @"insertItems" : [_ASHierarchyItemChange smallDescriptionForItemChanges:_originalInsertItemChanges] }];
+  }
+  return result;
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
+{
+  return [self propertiesForDescription];
+}
 
 @end
 
@@ -600,9 +654,46 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   return indexes;
 }
 
+#pragma mark - Debugging (Private)
+
++ (NSString *)smallDescriptionForSectionChanges:(NSArray<_ASHierarchySectionChange *> *)changes
+{
+  NSMutableIndexSet *unionIndexSet = [NSMutableIndexSet indexSet];
+  for (_ASHierarchySectionChange *change in changes) {
+    [unionIndexSet addIndexes:change.indexSet];
+  }
+  return [unionIndexSet as_smallDescription];
+}
+
 - (NSString *)description
 {
-  return [NSString stringWithFormat:@"<%@: anim=%lu, type=%@, indexes=%@>", NSStringFromClass(self.class), (unsigned long)_animationOptions, NSStringFromASHierarchyChangeType(_changeType), [self.indexSet as_smallDescription]];
+  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
+}
+
+- (NSString *)debugDescription
+{
+  return ASObjectDescriptionMake(self, [self propertiesForDebugDescription]);
+}
+
+- (NSString *)smallDescription
+{
+  return [self.indexSet as_smallDescription];
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDescription
+{
+  NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+  [result addObject:@{ @"indexes" : [self.indexSet as_smallDescription] }];
+  return result;
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
+{
+  NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+  [result addObject:@{ @"anim" : @(_animationOptions) }];
+  [result addObject:@{ @"type" : NSStringFromASHierarchyChangeType(_changeType) }];
+  [result addObject:@{ @"indexes" : self.indexSet }];
+  return result;
 }
 
 @end
@@ -629,11 +720,10 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 // Create a mapping out of changes indexPaths to a {@section : [indexSet]} fashion
 // e.g. changes: (0 - 0), (0 - 1), (2 - 5)
 //  will become: {@0 : [0, 1], @2 : [5]}
-+ (NSDictionary *)sectionToIndexSetMapFromChanges:(NSArray *)changes ofType:(_ASHierarchyChangeType)changeType
++ (NSDictionary *)sectionToIndexSetMapFromChanges:(NSArray<_ASHierarchyItemChange *> *)changes
 {
   NSMutableDictionary *sectionToIndexSetMap = [NSMutableDictionary dictionary];
   for (_ASHierarchyItemChange *change in changes) {
-    NSAssert(change.changeType == changeType, @"The map we created must all be of the same changeType as of now");
     for (NSIndexPath *indexPath in change.indexPaths) {
       NSNumber *sectionKey = @(indexPath.section);
       NSMutableIndexSet *indexSet = sectionToIndexSetMap[sectionKey];
@@ -646,6 +736,15 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
     }
   }
   return sectionToIndexSetMap;
+}
+
++ (void)ensureItemChanges:(NSArray<_ASHierarchyItemChange *> *)changes ofSameType:(_ASHierarchyChangeType)changeType
+{
+#if ASDISPLAYNODE_ASSERTIONS_ENABLED
+  for (_ASHierarchyItemChange *change in changes) {
+    NSAssert(change.changeType == changeType, @"The map we created must all be of the same changeType as of now");
+  }
+#endif
 }
 
 - (_ASHierarchyItemChange *)changeByFinalizingType
@@ -725,9 +824,43 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   [changes setArray:result];
 }
 
+#pragma mark - Debugging (Private)
+
++ (NSString *)smallDescriptionForItemChanges:(NSArray<_ASHierarchyItemChange *> *)changes
+{
+  NSDictionary *map = [self sectionToIndexSetMapFromChanges:changes];
+  NSMutableString *str = [NSMutableString stringWithString:@"{ "];
+  [map enumerateKeysAndObjectsUsingBlock:^(NSNumber * _Nonnull section, NSIndexSet * _Nonnull indexSet, BOOL * _Nonnull stop) {
+    [str appendFormat:@"@%lu : %@ ", (long)section.integerValue, [indexSet as_smallDescription]];
+  }];
+  [str appendString:@"}"];
+  return str;
+}
+
 - (NSString *)description
 {
-  return [NSString stringWithFormat:@"<%@: anim=%lu, type=%@, indexPaths=%@>", NSStringFromClass(self.class), (unsigned long)_animationOptions, NSStringFromASHierarchyChangeType(_changeType), self.indexPaths];
+  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
+}
+
+- (NSString *)debugDescription
+{
+  return ASObjectDescriptionMake(self, [self propertiesForDebugDescription]);
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDescription
+{
+  NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+  [result addObject:@{ @"indexPaths" : self.indexPaths }];
+  return result;
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
+{
+  NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+  [result addObject:@{ @"anim" : @(_animationOptions) }];
+  [result addObject:@{ @"type" : NSStringFromASHierarchyChangeType(_changeType) }];
+  [result addObject:@{ @"indexPaths" : self.indexPaths }];
+  return result;
 }
 
 @end

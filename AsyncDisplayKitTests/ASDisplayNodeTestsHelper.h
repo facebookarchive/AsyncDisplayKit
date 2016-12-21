@@ -9,7 +9,13 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "ASDimension.h"
+
+@class ASDisplayNode;
 
 typedef BOOL (^as_condition_block_t)(void);
 
 BOOL ASDisplayNodeRunRunLoopUntilBlockIsTrue(as_condition_block_t block);
+
+void ASDisplayNodeSizeToFitSize(ASDisplayNode *node, CGSize size);
+void ASDisplayNodeSizeToFitSizeRange(ASDisplayNode *node, ASSizeRange sizeRange);

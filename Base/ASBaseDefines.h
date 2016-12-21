@@ -96,6 +96,17 @@
 # define ASDISPLAYNODE_NOTHROW
 #endif
 
+/**
+ * The event backtraces take a static 2KB of memory
+ * and retain all objects present in all the registers
+ * of the stack frames. The memory consumption impact
+ * is too significant even to be enabled during general
+ * development.
+ */
+#ifndef AS_SAVE_EVENT_BACKTRACES
+# define AS_SAVE_EVENT_BACKTRACES 0
+#endif
+
 #define ARRAY_COUNT(x) sizeof(x) / sizeof(x[0])
 
 #ifndef __has_feature      // Optional.
@@ -171,3 +182,6 @@
 #endif
 
 #define ASOVERLOADABLE __attribute__((overloadable))
+
+/// Ensure that class is of certain kind
+#define ASDynamicCast(x, c) ((c *) ([x isKindOfClass:[c class]] ? x : nil))

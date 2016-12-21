@@ -19,6 +19,9 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface ASTableView (Undeprecated)
 
+@property (nonatomic, weak) id<ASTableDelegate>   asyncDelegate;
+@property (nonatomic, weak) id<ASTableDataSource> asyncDataSource;
+
 /**
  * Initializer.
  *

@@ -8,7 +8,8 @@
 
 #import "ASTraceEvent.h"
 #import <QuartzCore/QuartzCore.h>
-#import "ASObjectDescriptionHelpers.h"
+
+static NSString *const ASTraceEventThreadDescriptionKey = @"ASThreadTraceEventDescription";
 
 @interface ASTraceEvent ()
 @property (nonatomic, strong, readonly) NSString *objectDescription;
@@ -17,7 +18,7 @@
 
 @implementation ASTraceEvent
 
-- (instancetype)initWithObject:(id)object backtrace:(NSArray<NSString *> *)backtrace format:(NSString *)format arguments:(va_list)args
+- (instancetype)initWithBacktrace:(NSArray<NSString *> *)backtrace format:(NSString *)format arguments:(va_list)args
 {
   self = [super init];
   if (self != nil) {
@@ -29,8 +30,6 @@
     
     // Create the format string passed to us.
     _message = [[NSString alloc] initWithFormat:format arguments:args];
-    
-    _objectDescription = ASObjectDescriptionMakeTiny(object);
 	  
     NSThread *thread = [NSThread currentThread];
     NSString *threadDescription = thread.name;
@@ -38,14 +37,21 @@
       if ([thread isMainThread]) {
         threadDescription = @"Main";
       } else {
-        // Want these to be 4-chars to line up with "Main". It's possible that a collision could happen
-        // here but it's so unbelievably likely to impact development, the risk is acceptable.
-        NSString *ptrString = [NSString stringWithFormat:@"%p", thread];
-        threadDescription = [ptrString substringFromIndex:MAX(0, ptrString.length - 4)];
+        // If the bg thread has no name, we cache a 4-character ptr string to identify it by
+        // inside the thread dictionary.
+        NSMutableDictionary *threadDict = thread.threadDictionary;
+        threadDescription = threadDict[ASTraceEventThreadDescriptionKey];
+        if (threadDescription == nil) {
+          // Want these to be 4-chars to line up with "Main". It's possible that a collision could happen
+          // here but it's so unbelievably likely to impact development, the risk is acceptable.
+          NSString *ptrString = [NSString stringWithFormat:@"%p", thread];
+          threadDescription = [ptrString substringFromIndex:MAX(0, ptrString.length - 4)];
+          threadDict[ASTraceEventThreadDescriptionKey] = threadDescription;
+        }
       }
     }
     _threadDescription = threadDescription;
-    
+
     _backtrace = backtrace;
     _timestamp = CACurrentMediaTime() - refTime;
   }
@@ -54,7 +60,7 @@
 
 - (NSString *)description
 {
-  return [NSString stringWithFormat:@"<%@ (%@) t=%7.3f: %@>", _objectDescription, _threadDescription, _timestamp, _message];
+  return [NSString stringWithFormat:@"<(%@) t=%7.3f: %@>", _threadDescription, _timestamp, _message];
 }
 
 @end

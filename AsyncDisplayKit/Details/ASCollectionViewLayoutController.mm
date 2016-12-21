@@ -60,7 +60,15 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   
   for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
     //ASDisplayNodeAssert(![indexPathSet containsObject:la.indexPath], @"Shouldn't already contain indexPath");
-    ASDisplayNodeAssert(la.representedElementCategory != UICollectionElementCategoryDecorationView, @"UICollectionView decoration views are not supported by ASCollectionView");
+
+    // Manually filter out elements that don't intersect the range bounds.
+    // If a layout returns elements outside the requested rect this can be a huge problem.
+    // For instance in a paging flow, you may only want to preload 3 pages (one center, one on each side)
+    // but if flow layout includes the 4th page (which it does! as of iOS 9&10), you will preload a 4th
+    // page as well.
+    if (CATransform3DIsIdentity(la.transform3D) && CGRectIntersectsRect(la.frame, rangeBounds) == NO) {
+      continue;
+    }
     [indexPathSet addObject:la.indexPath];
   }
 

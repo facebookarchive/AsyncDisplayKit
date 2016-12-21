@@ -118,12 +118,13 @@ ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnposition
       return stackedLayout(style, violation, unpositionedLayout, constrainedSize);
     }
     case ASStackLayoutJustifyContentSpaceBetween: {
+      // Spacing between the items, no spaces at the edges, evenly distributed
       const auto numOfSpacings = numOfItems - 1;
-      return stackedLayout(style, 0, std::floor(violation / numOfSpacings), std::fmod(violation, numOfSpacings), unpositionedLayout, constrainedSize);
+      return stackedLayout(style, 0, violation / numOfSpacings, 0, unpositionedLayout, constrainedSize);
     }
     case ASStackLayoutJustifyContentSpaceAround: {
       // Spacing between items are twice the spacing on the edges
-      CGFloat spacingUnit = std::floor(violation / (numOfItems * 2));
+      CGFloat spacingUnit = violation / (numOfItems * 2);
       return stackedLayout(style, spacingUnit, spacingUnit * 2, 0, unpositionedLayout, constrainedSize);
     }
   }

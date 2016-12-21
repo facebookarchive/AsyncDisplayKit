@@ -39,6 +39,11 @@
   return [_target respondsToSelector:aSelector];
 }
 
+- (BOOL)conformsToProtocol:(Protocol *)aProtocol
+{
+  return [_target conformsToProtocol:aProtocol];
+}
+
 /// Strangely, this method doesn't get forwarded by ObjC.
 - (BOOL)isKindOfClass:(Class)aClass
 {

@@ -10,7 +10,7 @@
 
 #import "ASBatchFetching.h"
 
-BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollView> *scrollView, ASScrollDirection scrollDirection, CGPoint contentOffset)
+BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollView> *scrollView, ASScrollDirection scrollDirection, ASScrollDirection scrollableDirections, CGPoint contentOffset)
 {
   // Don't fetch if the scroll view does not allow
   if (![scrollView canBatchFetch]) {
@@ -22,34 +22,32 @@ BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollVi
   CGRect bounds = scrollView.bounds;
   CGSize contentSize = scrollView.contentSize;
   CGFloat leadingScreens = scrollView.leadingScreensForBatching;
-  return ASDisplayShouldFetchBatchForContext(context, scrollDirection, bounds, contentSize, contentOffset, leadingScreens);
+  BOOL visible = (scrollView.window != nil);
+  return ASDisplayShouldFetchBatchForContext(context, scrollDirection, scrollableDirections, bounds, contentSize, contentOffset, leadingScreens, visible);
 }
 
 BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
                                          ASScrollDirection scrollDirection,
+                                         ASScrollDirection scrollableDirections,
                                          CGRect bounds,
                                          CGSize contentSize,
                                          CGPoint targetOffset,
-                                         CGFloat leadingScreens)
+                                         CGFloat leadingScreens,
+                                         BOOL visible)
 {
   // Do not allow fetching if a batch is already in-flight and hasn't been completed or cancelled
   if ([context isFetching]) {
     return NO;
   }
 
-  // Only Down and Right scrolls are currently supported (tail loading)
-  if (!ASScrollDirectionContainsDown(scrollDirection) && !ASScrollDirectionContainsRight(scrollDirection)) {
-    return NO;
-  }
-
   // No fetching for null states
-  if (leadingScreens <= 0.0 || CGRectEqualToRect(bounds, CGRectZero)) {
+  if (leadingScreens <= 0.0 || CGRectIsEmpty(bounds)) {
     return NO;
   }
 
   CGFloat viewLength, offset, contentLength;
 
-  if (ASScrollDirectionContainsDown(scrollDirection)) {
+  if (ASScrollDirectionContainsVerticalDirection(scrollableDirections)) {
     viewLength = bounds.size.height;
     offset = targetOffset.y;
     contentLength = contentSize.height;
@@ -59,11 +57,25 @@ BOOL ASDisplayShouldFetchBatchForContext(ASBatchContext *context,
     contentLength = contentSize.width;
   }
 
-  // target offset will always be 0 if the content size is smaller than the viewport
-  BOOL hasSmallContent = offset == 0.0 && contentLength < viewLength;
+  BOOL hasSmallContent = contentLength < viewLength;
+  if (hasSmallContent) {
+    return YES;
+  }
+
+  // If we are not visible, but we do have enough content to fill visible area,
+  // don't batch fetch.
+  if (visible == NO) {
+    return NO;
+  }
+
+  // If they are scrolling toward the head of content, don't batch fetch.
+  BOOL isScrollingTowardHead = (ASScrollDirectionContainsUp(scrollDirection) || ASScrollDirectionContainsLeft(scrollDirection));
+  if (isScrollingTowardHead) {
+    return NO;
+  }
 
   CGFloat triggerDistance = viewLength * leadingScreens;
   CGFloat remainingDistance = contentLength - viewLength - offset;
 
-  return hasSmallContent || remainingDistance <= triggerDistance;
+  return remainingDistance <= triggerDistance;
 }

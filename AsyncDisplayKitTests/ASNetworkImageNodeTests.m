@@ -71,6 +71,17 @@
   [downloader verifyWithDelay:5];
 }
 
+- (void)testThatSettingAnImageWillStayForEnteringAndExitingPreloadState
+{
+  UIImage *image = [[UIImage alloc] init];
+  ASNetworkImageNode *networkImageNode = [[ASNetworkImageNode alloc] init];
+  networkImageNode.image = image;
+  [networkImageNode enterInterfaceState:ASInterfaceStatePreload];
+  XCTAssertEqualObjects(image, networkImageNode.image);
+  [networkImageNode exitInterfaceState:ASInterfaceStatePreload];
+  XCTAssertEqualObjects(image, networkImageNode.image);
+}
+
 @end
 
 @implementation ASTestImageCache

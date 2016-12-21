@@ -53,4 +53,11 @@ extern UIViewContentMode ASDisplayNodeUIContentModeFromCAContentsGravity(NSStrin
  */
 extern UIImage *ASDisplayNodeStretchableBoxContentsWithColor(UIColor *color, CGSize innerSize);
 
+/**
+ Checks whether a layer has ongoing animations
+ @param layer A layer to check if animations are ongoing
+ @return YES if the layer has ongoing animations, otherwise NO
+ */
+extern BOOL ASDisplayNodeLayerHasAnimations(CALayer *layer);
+
 ASDISPLAYNODE_EXTERN_C_END

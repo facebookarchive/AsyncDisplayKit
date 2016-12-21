@@ -24,6 +24,11 @@
 #import "ASImageNode.h"
 #import "ASOverlayLayoutSpec.h"
 #import "ASInsetLayoutSpec.h"
+#import "ASCenterLayoutSpec.h"
+#import "ASBackgroundLayoutSpec.h"
+#import "ASInternalHelpers.h"
+#import "ASDisplayNodeExtras.h"
+#import "ASDisplayNode+Beta.h"
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.debugName = @#n
@@ -86,11 +91,16 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 @interface ASTestDisplayNode : ASDisplayNode
 @property (nonatomic, copy) void (^willDeallocBlock)(__unsafe_unretained ASTestDisplayNode *node);
 @property (nonatomic, copy) CGSize(^calculateSizeBlock)(ASTestDisplayNode *node, CGSize size);
-@property (nonatomic) BOOL hasFetchedData;
+
+@property (nonatomic, nullable) UIGestureRecognizer *gestureRecognizer;
+@property (nonatomic, nullable) id idGestureRecognizer;
+@property (nonatomic, nullable) UIImage *bigImage;
+@property (nonatomic, nullable) NSArray *randomProperty;
 
 @property (nonatomic) BOOL displayRangeStateChangedToYES;
 @property (nonatomic) BOOL displayRangeStateChangedToNO;
 
+@property (nonatomic) BOOL hasPreloaded;
 @property (nonatomic) BOOL preloadStateChangedToYES;
 @property (nonatomic) BOOL preloadStateChangedToNO;
 @end
@@ -103,18 +113,6 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
   return _calculateSizeBlock ? _calculateSizeBlock(self, constrainedSize) : CGSizeZero;
-}
-
-- (void)fetchData
-{
-  [super fetchData];
-  self.hasFetchedData = YES;
-}
-
-- (void)clearFetchedData
-{
-  [super clearFetchedData];
-  self.hasFetchedData = NO;
 }
 
 - (void)didEnterDisplayState
@@ -133,6 +131,7 @@ for (ASDisplayNode *n in @[ nodes ]) {\
 {
   [super didEnterPreloadState];
   self.preloadStateChangedToYES = YES;
+  self.hasPreloaded = YES;
 }
 
 - (void)didExitPreloadState
@@ -1044,23 +1043,47 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   XCTAssertNil(weakSubnode);
 }
 
-- (void)testMainThreadDealloc
+- (void)testThatUIKitDeallocationTrampoliningWorks
 {
-  __block BOOL didDealloc = NO;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak UIGestureRecognizer *weakRecognizer = nil;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak UIGestureRecognizer *weakIdRecognizer = nil;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak UIView *weakView = nil;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak CALayer *weakLayer = nil;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak UIImage *weakImage = nil;
+  NS_VALID_UNTIL_END_OF_SCOPE __weak NSArray *weakArray = nil;
+  __block NS_VALID_UNTIL_END_OF_SCOPE ASTestDisplayNode *node = nil;
+  @autoreleasepool {
+    node = [[ASTestDisplayNode alloc] init];
+    node.gestureRecognizer = [[UIGestureRecognizer alloc] init];
+    node.idGestureRecognizer = [[UIGestureRecognizer alloc] init];
+    UIGraphicsBeginImageContextWithOptions(CGSizeMake(1000, 1000), YES, 1);
+    node.bigImage = UIGraphicsGetImageFromCurrentImageContext();
+    node.randomProperty = @[ @"Hello, world!" ];
+    UIGraphicsEndImageContext();
+    weakImage = node.bigImage;
+    weakView = node.view;
+    weakLayer = node.layer;
+    weakArray = node.randomProperty;
+    weakIdRecognizer = node.idGestureRecognizer;
+    weakRecognizer = node.gestureRecognizer;
+  }
 
   [self executeOffThread:^{
-    @autoreleasepool {
-      ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
-      node.willDeallocBlock = ^(__unsafe_unretained ASDisplayNode *n){
-        XCTAssertTrue([NSThread isMainThread], @"unexpected node dealloc %@ %@", n, [NSThread currentThread]);
-        didDealloc = YES;
-      };
-    }
+    node = nil;
   }];
 
-  // deallocation should be queued on the main runloop; give it a chance
-  ASDisplayNodeRunRunLoopUntilBlockIsTrue(^BOOL{ return didDealloc; });
-  XCTAssertTrue(didDealloc, @"unexpected node lifetime");
+  XCTAssertNotNil(weakRecognizer, @"UIGestureRecognizer ivars should be deallocated on main.");
+  XCTAssertNotNil(weakIdRecognizer, @"UIGestureRecognizer-backed 'id' ivars should be deallocated on main.");
+  XCTAssertNotNil(weakView, @"UIView ivars should be deallocated on main.");
+  XCTAssertNotNil(weakLayer, @"CALayer ivars should be deallocated on main.");
+  XCTAssertNil(weakImage, @"UIImage ivars should be deallocated normally.");
+  XCTAssertNil(weakArray, @"NSArray ivars should be deallocated normally.");
+  XCTAssertNil(node);
+  
+  [self expectationForPredicate:[NSPredicate predicateWithBlock:^BOOL(id  _Nonnull evaluatedObject, NSDictionary<NSString *,id> * _Nullable bindings) {
+    return (weakRecognizer == nil && weakIdRecognizer == nil && weakView == nil);
+  }] evaluatedWithObject:(id)kCFNull handler:nil];
+  [self waitForExpectationsWithTimeout:10 handler:nil];
 }
 
 - (void)testSubnodes
@@ -1706,76 +1729,76 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 }
 
 // Check that nodes who have no cell node (no range controller)
-// do get their `fetchData` called, and they do report
-// the fetch data interface state.
+// do get their `preload` called, and they do report
+// the preload interface state.
 - (void)testInterfaceStateForNonCellNode
 {
   ASTestWindow *window = [ASTestWindow new];
   ASTestDisplayNode *node = [ASTestDisplayNode new];
   XCTAssert(node.interfaceState == ASInterfaceStateNone);
-  XCTAssert(!node.hasFetchedData);
+  XCTAssert(!node.hasPreloaded);
 
   [window addSubview:node.view];
-  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.hasPreloaded);
   XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
 
   [node.view removeFromSuperview];
-  // We don't want to call -clearFetchedData on nodes that aren't being managed by a range controller.
+  // We don't want to call -didExitPreloadState on nodes that aren't being managed by a range controller.
   // Otherwise we get flashing behavior from normal UIKit manipulations like navigation controller push / pop.
   // Still, the interfaceState should be None to reflect the current state of the node.
   // We just don't proactively clear contents or fetched data for this state transition.
-  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.hasPreloaded);
   XCTAssert(node.interfaceState == ASInterfaceStateNone);
 }
 
 // Check that nodes who have no cell node (no range controller)
-// do get their `fetchData` called, and they do report
-// the fetch data interface state.
+// do get their `preload` called, and they do report
+// the preload interface state.
 - (void)testInterfaceStateForCellNode
 {
   ASCellNode *cellNode = [ASCellNode new];
   ASTestDisplayNode *node = [ASTestDisplayNode new];
   XCTAssert(node.interfaceState == ASInterfaceStateNone);
-  XCTAssert(!node.hasFetchedData);
+  XCTAssert(!node.hasPreloaded);
 
   // Simulate range handler updating cell node.
   [cellNode addSubnode:node];
   [cellNode enterInterfaceState:ASInterfaceStatePreload];
-  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.hasPreloaded);
   XCTAssert(node.interfaceState == ASInterfaceStatePreload);
 
   // If the node goes into a view it should not adopt the `InHierarchy` state.
   ASTestWindow *window = [ASTestWindow new];
   [window addSubview:cellNode.view];
-  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.hasPreloaded);
   XCTAssert(node.interfaceState == ASInterfaceStateInHierarchy);
 }
 
-- (void)testSetNeedsDataFetchImmediateState
+- (void)testSetNeedsPreloadImmediateState
 {
   ASCellNode *cellNode = [ASCellNode new];
   ASTestDisplayNode *node = [ASTestDisplayNode new];
   [cellNode addSubnode:node];
   [cellNode enterInterfaceState:ASInterfaceStatePreload];
-  node.hasFetchedData = NO;
-  [cellNode setNeedsDataFetch];
-  XCTAssert(node.hasFetchedData);
+  node.hasPreloaded = NO;
+  [cellNode setNeedsPreload];
+  XCTAssert(node.hasPreloaded);
 }
 
-- (void)testFetchDataExitingAndEnteringRange
+- (void)testPreloadExitingAndEnteringRange
 {
   ASCellNode *cellNode = [ASCellNode new];
   ASTestDisplayNode *node = [ASTestDisplayNode new];
   [cellNode addSubnode:node];
   [cellNode setHierarchyState:ASHierarchyStateRangeManaged];
   
-  // Simulate enter range, fetch data, exit range
+  // Simulate enter range, preload, exit range
   [cellNode enterInterfaceState:ASInterfaceStatePreload];
   [cellNode exitInterfaceState:ASInterfaceStatePreload];
-  node.hasFetchedData = NO;
+  node.hasPreloaded = NO;
   [cellNode enterInterfaceState:ASInterfaceStatePreload];
 
-  XCTAssert(node.hasFetchedData);
+  XCTAssert(node.hasPreloaded);
 }
 
 - (void)testInitWithViewClass
@@ -1915,6 +1938,7 @@ static bool stringContainsPointer(NSString *description, id p) {
 - (void)testDidExitPreloadIsCalledWhenNodesExitPreloadRange
 {
   ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
+  [node setHierarchyState:ASHierarchyStateRangeManaged];
   
   [node recursivelySetInterfaceState:ASInterfaceStatePreload];
   [node recursivelySetInterfaceState:ASInterfaceStateDisplay];
@@ -1949,33 +1973,93 @@ static bool stringContainsPointer(NSString *description, id p) {
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
-- (void)DISABLED_testThatNodesAreMarkedInvisibleWhenRemovedFromAVisibleRasterizedHierarchy
+- (void)testThatRasterizedNodesGetInterfaceStateUpdatesWhenContainerEntersHierarchy
 {
-  ASCellNode *supernode = [[ASCellNode alloc] init];
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
   supernode.shouldRasterizeDescendants = YES;
-  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(supernode, subnode);
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-  [supernode addSubnode:node];
+  [supernode addSubnode:subnode];
   [window addSubnode:supernode];
   [window makeKeyAndVisible];
-  XCTAssertTrue(node.isVisible);
-  [node removeFromSupernode];
-  XCTAssertFalse(node.isVisible);
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertTrue(subnode.isVisible);
+  [supernode.view removeFromSuperview];
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertFalse(subnode.isVisible);
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2205
-- (void)DISABLED_testThatNodesAreMarkedVisibleWhenAddedToARasterizedHierarchyAlreadyOnscreen
+- (void)testThatRasterizedNodesGetInterfaceStateUpdatesWhenAddedToContainerThatIsInHierarchy
 {
-  ASCellNode *supernode = [[ASCellNode alloc] init];
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
   supernode.shouldRasterizeDescendants = YES;
-  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(supernode, subnode);
+
   UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
   [window addSubnode:supernode];
   [window makeKeyAndVisible];
-  [supernode addSubnode:node];
-  XCTAssertTrue(node.isVisible);
-  [node removeFromSupernode];
-  XCTAssertFalse(node.isVisible);
+  [supernode addSubnode:subnode];
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertTrue(subnode.isVisible);
+  [subnode removeFromSupernode];
+  XCTAssertFalse(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+  XCTAssertFalse(subnode.isVisible);
+}
+
+- (void)testThatLoadedNodeGetsUnloadedIfSubtreeBecomesRasterized
+{
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
+  [supernode view];
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(supernode, subnode);
+  [supernode addSubnode:subnode];
+  XCTAssertTrue(subnode.nodeLoaded);
+  supernode.shouldRasterizeDescendants = YES;
+  XCTAssertFalse(subnode.nodeLoaded);
+}
+
+- (void)testThatLoadedNodeGetsUnloadedIfAddedToRasterizedSubtree
+{
+  ASDisplayNode *supernode = [[ASDisplayNode alloc] init];
+  supernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(supernode, subnode);
+  [subnode view];
+  XCTAssertTrue(subnode.nodeLoaded);
+  [supernode addSubnode:subnode];
+  XCTAssertFalse(subnode.nodeLoaded);
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(subnode.hierarchyState));
+}
+
+- (void)testThatClearingRasterizationBitMidwayDownTheTreeWorksRight
+{
+  ASDisplayNode *topNode = [[ASDisplayNode alloc] init];
+  topNode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *middleNode = [[ASDisplayNode alloc] init];
+  middleNode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *bottomNode = [[ASDisplayNode alloc] init];
+  ASSetDebugNames(topNode, middleNode, bottomNode);
+  [middleNode addSubnode:bottomNode];
+  [topNode addSubnode:middleNode];
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(bottomNode.hierarchyState));
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(middleNode.hierarchyState));
+  middleNode.shouldRasterizeDescendants = NO;
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(bottomNode.hierarchyState));
+  XCTAssertTrue(ASHierarchyStateIncludesRasterized(middleNode.hierarchyState));
+}
+
+- (void)testThatRasterizingWrapperNodesIsNotAllowed
+{
+  ASDisplayNode *rasterizedSupernode = [[ASDisplayNode alloc] init];
+  rasterizedSupernode.shouldRasterizeDescendants = YES;
+  ASDisplayNode *subnode = [[ASDisplayNode alloc] initWithViewBlock:^UIView * _Nonnull{
+    return [[UIView alloc] init];
+  }];
+  ASSetDebugNames(rasterizedSupernode, subnode);
+  XCTAssertThrows([rasterizedSupernode addSubnode:subnode]);
 }
 
 // Underlying issue for: https://github.com/facebook/AsyncDisplayKit/issues/2011
@@ -2038,8 +2122,8 @@ static bool stringContainsPointer(NSString *description, id p) {
   
   XCTAssertTrue((node.interfaceState & ASInterfaceStatePreload) == ASInterfaceStatePreload);
   XCTAssertTrue((subnode.interfaceState & ASInterfaceStatePreload) == ASInterfaceStatePreload);
-  XCTAssertTrue(node.hasFetchedData);
-  XCTAssertTrue(subnode.hasFetchedData);
+  XCTAssertTrue(node.hasPreloaded);
+  XCTAssertTrue(subnode.hasPreloaded);
 }
 
 // FIXME
@@ -2150,6 +2234,48 @@ static bool stringContainsPointer(NSString *description, id p) {
     return [ASOverlayLayoutSpec overlayLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:subnode] overlay:subnode];
   };
   XCTAssertThrowsSpecificNamed([node calculateLayoutThatFits:ASSizeRangeMake(CGSizeMake(100, 100))], NSException, NSInternalInconsistencyException);
+}
+
+- (void)testThatOverlaySpecOrdersSubnodesCorrectly
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.automaticallyManagesSubnodes = YES;
+  ASDisplayNode *underlay = [[ASDisplayNode alloc] init];
+  underlay.debugName = @"underlay";
+  ASDisplayNode *overlay = [[ASDisplayNode alloc] init];
+  overlay.debugName = @"overlay";
+  node.layoutSpecBlock = ^(ASDisplayNode *node, ASSizeRange size) {
+    // The inset spec here is crucial. If the nodes themselves are children, it passed before the fix.
+    return [ASOverlayLayoutSpec overlayLayoutSpecWithChild:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:underlay] overlay:overlay];
+  };
+  
+  ASDisplayNodeSizeToFitSize(node, CGSizeMake(100, 100));
+  [node.view layoutIfNeeded];
+  
+  NSInteger underlayIndex = [node.subnodes indexOfObjectIdenticalTo:underlay];
+  NSInteger overlayIndex = [node.subnodes indexOfObjectIdenticalTo:overlay];
+  XCTAssertLessThan(underlayIndex, overlayIndex);
+}
+
+- (void)testThatBackgroundLayoutSpecOrdersSubnodesCorrectly
+{
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.automaticallyManagesSubnodes = YES;
+  ASDisplayNode *underlay = [[ASDisplayNode alloc] init];
+  underlay.debugName = @"underlay";
+  ASDisplayNode *overlay = [[ASDisplayNode alloc] init];
+  overlay.debugName = @"overlay";
+  node.layoutSpecBlock = ^(ASDisplayNode *node, ASSizeRange size) {
+    // The inset spec here is crucial. If the nodes themselves are children, it passed before the fix.
+    return [ASBackgroundLayoutSpec backgroundLayoutSpecWithChild:overlay background:[ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:underlay]];
+  };
+  
+  ASDisplayNodeSizeToFitSize(node, CGSizeMake(100, 100));
+  [node.view layoutIfNeeded];
+  
+  NSInteger underlayIndex = [node.subnodes indexOfObjectIdenticalTo:underlay];
+  NSInteger overlayIndex = [node.subnodes indexOfObjectIdenticalTo:overlay];
+  XCTAssertLessThan(underlayIndex, overlayIndex);
 }
 
 @end

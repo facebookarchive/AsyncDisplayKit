@@ -45,8 +45,8 @@
 
 - (void)dealloc
 {
-    self.tableNode.delegate = nil;
-    self.tableNode.dataSource = nil;
+    self.node.delegate = nil;
+    self.node.dataSource = nil;
 }
 
 
@@ -58,23 +58,15 @@
     
     self.title = @"Image Categories";
     
-    self.tableNode.delegate = self;
-    self.tableNode.dataSource = self;
+    self.node.delegate = self;
+    self.node.dataSource = self;
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
     
-    [self.tableNode deselectRowAtIndexPath:self.tableNode.indexPathForSelectedRow animated:YES];
-}
-
-
-#pragma mark - Setter / Getter
-
-- (ASTableNode *)tableNode
-{
-    return (ASTableNode *)self.node;
+    [self.node deselectRowAtIndexPath:self.node.indexPathForSelectedRow animated:YES];
 }
 
 
@@ -87,6 +79,7 @@
 
 - (ASCellNodeBlock)tableNode:(ASTableNode *)tableNode nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
+    // As the block is executed on a background thread we need to cache the image category string outside
     NSString *imageCategory = self.imageCategories[indexPath.row];
     return ^{
         ASTextCellNode *textCellNode = [ASTextCellNode new];

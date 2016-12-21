@@ -10,7 +10,7 @@
 
 #import "ASDisplayNode.h"
 #import "ASLayoutRangeType.h"
-#import "ASTraceEvent.h"
+#import "ASEventLog.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -19,18 +19,16 @@ void ASPerformBlockOnMainThread(void (^block)());
 void ASPerformBlockOnBackgroundThread(void (^block)()); // DISPATCH_QUEUE_PRIORITY_DEFAULT
 ASDISPLAYNODE_EXTERN_C_END
 
-#ifndef ASDISPLAYNODE_EVENTLOG_CAPACITY
-#define ASDISPLAYNODE_EVENTLOG_CAPACITY 20
-#endif
-
-#ifndef ASDISPLAYNODE_EVENTLOG_ENABLE
-#define ASDISPLAYNODE_EVENTLOG_ENABLE DEBUG
-#endif
-
-#if ASDISPLAYNODE_EVENTLOG_ENABLE
-#define ASDisplayNodeLogEvent(node, ...) [node _logEventWithBacktrace:[NSThread callStackSymbols] format:__VA_ARGS__]
+#if ASEVENTLOG_ENABLE
+#define ASDisplayNodeLogEvent(node, ...) [node.eventLog logEventWithBacktrace:(AS_SAVE_EVENT_BACKTRACES ? [NSThread callStackSymbols] : nil) format:__VA_ARGS__]
 #else
 #define ASDisplayNodeLogEvent(node, ...)
+#endif
+
+#if ASEVENTLOG_ENABLE
+#define ASDisplayNodeGetEventLog(node) node.eventLog
+#else
+#define ASDisplayNodeGetEventLog(node) nil
 #endif
 
 /**
@@ -60,8 +58,8 @@ typedef struct {
  *
  * This property defaults to NO. It will be removed in a future release.
  */
-+ (BOOL)suppressesInvalidCollectionUpdateExceptions AS_WARN_UNUSED_RESULT;
-+ (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses;
++ (BOOL)suppressesInvalidCollectionUpdateExceptions AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Collection update exceptions are thrown if assertions are enabled.");
++ (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses ASDISPLAYNODE_DEPRECATED_MSG("Collection update exceptions are thrown if assertions are enabled.");;
 
 /**
  * @abstract Recursively ensures node and all subnodes are displayed.
@@ -94,6 +92,13 @@ typedef struct {
  */
 @property (nonatomic, assign, readonly) ASDisplayNodePerformanceMeasurements performanceMeasurements;
 
+#if ASEVENTLOG_ENABLE
+/*
+ * @abstract The primitive event tracing object. You shouldn't directly use it to log event. Use the ASDisplayNodeLogEvent macro instead.
+ */
+@property (nonatomic, strong, readonly) ASEventLog *eventLog;
+#endif
+
 /**
  * @abstract Currently used by ASNetworkImageNode and ASMultiplexImageNode to allow their placeholders to stay if they are loading an image from the network.
  * Otherwise, a display pass is scheduled and completes, but does not actually draw anything - and ASDisplayNode considers the element finished.
@@ -118,19 +123,27 @@ typedef struct {
  */
 + (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode;
 
-#if ASDISPLAYNODE_EVENTLOG_ENABLE
-
 /**
- * The primitive event tracing method. You shouldn't call this. Use the ASDisplayNodeLogEvent macro instead.
+ * @abstract Whether to draw all descendant nodes' layers/views into this node's layer/view's backing store.
+ *
+ * @discussion
+ * When set to YES, causes all descendant nodes' layers/views to be drawn directly into this node's layer/view's backing
+ * store.  Defaults to NO.
+ *
+ * If a node's descendants are static (never animated or never change attributes after creation) then that node is a
+ * good candidate for rasterization.  Rasterizing descendants has two main benefits:
+ * 1) Backing stores for descendant layers are not created.  Instead the layers are drawn directly into the rasterized
+ * container.  This can save a great deal of memory.
+ * 2) Since the entire subtree is drawn into one backing store, compositing and blending are eliminated in that subtree
+ * which can help improve animation/scrolling/etc performance.
+ *
+ * Rasterization does not currently support descendants with transform, sublayerTransform, or alpha. Those properties
+ * will be ignored when rasterizing descendants.
+ *
+ * Note: this has nothing to do with -[CALayer shouldRasterize], which doesn't work with ASDisplayNode's asynchronous
+ * rendering model.
  */
-- (void)_logEventWithBacktrace:(NSArray<NSString *> *)backtrace format:(NSString *)format, ... NS_FORMAT_FUNCTION(2, 3);
-
-/**
- * @abstract The most recent trace events for this node. Max count is ASDISPLAYNODE_EVENTLOG_CAPACITY.
- */
-@property (readonly, copy) NSArray *eventLog;
-
-#endif
+@property (nonatomic, assign) BOOL shouldRasterizeDescendants;
 
 @end
 

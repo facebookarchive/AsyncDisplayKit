@@ -14,6 +14,7 @@
 #import "ASTableViewInternal.h"
 #import "ASEnvironmentInternal.h"
 #import "ASDisplayNode+Subclasses.h"
+#import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
 #import "AsyncDisplayKit+Debug.h"
@@ -78,8 +79,11 @@
 
 - (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
 {
+  __weak __typeof__(self) weakSelf = self;
   ASDisplayNodeViewBlock tableViewBlock = ^UIView *{
-    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass];
+    // Variable will be unused if event logging is off.
+    __unused __typeof__(self) strongSelf = weakSelf;
+    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass eventLog:ASDisplayNodeGetEventLog(strongSelf)];
   };
 
   if (self = [super initWithViewBlock:tableViewBlock]) {
@@ -122,12 +126,6 @@
   }
 }
 
-- (void)dealloc
-{
-  self.delegate = nil;
-  self.dataSource = nil;
-}
-
 - (ASTableView *)view
 {
   return (ASTableView *)[super view];
@@ -139,10 +137,10 @@
   [self.rangeController clearContents];
 }
 
-- (void)clearFetchedData
+- (void)didExitPreloadState
 {
-  [super clearFetchedData];
-  [self.rangeController clearFetchedData];
+  [super didExitPreloadState];
+  [self.rangeController clearPreloadedData];
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
@@ -194,7 +192,15 @@
     _pendingState.delegate = delegate;
   } else {
     ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
-    self.view.asyncDelegate = delegate;
+
+    // Manually trampoline to the main thread. The view requires this be called on main
+    // and asserting here isn't an option – it is a common pattern for users to clear
+    // the delegate/dataSource in dealloc, which may be running on a background thread.
+    // It is important that we avoid retaining self in this block, so that this method is dealloc-safe.
+    ASTableView *view = self.view;
+    ASPerformBlockOnMainThread(^{
+      view.asyncDelegate = delegate;
+    });
   }
 }
 
@@ -213,7 +219,15 @@
     _pendingState.dataSource = dataSource;
   } else {
     ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
-    self.view.asyncDataSource = dataSource;
+
+    // Manually trampoline to the main thread. The view requires this be called on main
+    // and asserting here isn't an option – it is a common pattern for users to clear
+    // the delegate/dataSource in dealloc, which may be running on a background thread.
+    // It is important that we avoid retaining self in this block, so that this method is dealloc-safe.
+    ASTableView *view = self.view;
+    ASPerformBlockOnMainThread(^{
+      view.asyncDataSource = dataSource;
+    });
   }
 }
 
@@ -520,7 +534,9 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
   [self.view beginUpdates];
-  updates();
+  if (updates) {
+    updates();
+  }
   [self.view endUpdatesAnimated:animated completion:completion];
 }
 
@@ -572,6 +588,16 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 - (void)waitUntilAllUpdatesAreCommitted
 {
   [self.view waitUntilAllUpdatesAreCommitted];
+}
+
+#pragma mark - Debugging (Private)
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
+{
+  NSMutableArray<NSDictionary *> *result = [super propertiesForDebugDescription];
+  [result addObject:@{ @"dataSource" : ASObjectDescriptionMakeTiny(self.dataSource) }];
+  [result addObject:@{ @"delegate" : ASObjectDescriptionMakeTiny(self.delegate) }];
+  return result;
 }
 
 @end

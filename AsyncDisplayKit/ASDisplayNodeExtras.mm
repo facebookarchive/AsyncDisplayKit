@@ -13,6 +13,42 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 
 #import <queue>
+#import "ASRunLoopQueue.h"
+
+extern void ASPerformMainThreadDeallocation(_Nullable id object)
+{
+  /**
+   * UIKit components must be deallocated on the main thread. We use this shared
+   * run loop queue to gradually deallocate them across many turns of the main run loop.
+   */
+  static ASRunLoopQueue *queue;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    queue = [[ASRunLoopQueue alloc] initWithRunLoop:CFRunLoopGetMain() andHandler:nil];
+    queue.batchSize = 10;
+  });
+  if (object != nil) {
+  	[queue enqueue:object];
+  }
+}
+
+extern void _ASSetDebugNames(Class _Nonnull owningClass, NSString * _Nonnull names, ASDisplayNode * _Nullable object, ...)
+{
+  NSString *owningClassName = NSStringFromClass(owningClass);
+  NSArray *nameArray = [names componentsSeparatedByString:@", "];
+  va_list args;
+  va_start(args, object);
+  NSInteger i = 0;
+  for (ASDisplayNode *node = object; node != nil; node = va_arg(args, id), i++) {
+    NSMutableString *symbolName = [nameArray[i] mutableCopy];
+    // Remove any `self.` or `_` prefix
+    [symbolName replaceOccurrencesOfString:@"self." withString:@"" options:NSAnchoredSearch range:NSMakeRange(0, symbolName.length)];
+    [symbolName replaceOccurrencesOfString:@"_" withString:@"" options:NSAnchoredSearch range:NSMakeRange(0, symbolName.length)];
+    node.debugName = [NSString stringWithFormat:@"%@.%@", owningClassName, symbolName];
+  }
+  ASDisplayNodeCAssert(nameArray.count == i, @"Malformed call to ASSetDebugNames: %@", names);
+  va_end(args);
+}
 
 extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window)
 {

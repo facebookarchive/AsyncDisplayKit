@@ -69,6 +69,12 @@
     return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[guitarVideoNode, nicCageVideoNode, simonVideoNode, hlsVideoNode]];
   };
   
+  // Delay setting video asset for testing that the transition between the placeholder and setting/playing the asset is seamless.
+  dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+    hlsVideoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"]];
+    [hlsVideoNode play];
+  });
+  
   [self.view addSubnode:_rootNode];
 }
 
@@ -124,9 +130,8 @@
   ASVideoNode *hlsVideoNode = [[ASVideoNode alloc] init];
   
   hlsVideoNode.delegate = self;
-  hlsVideoNode.asset = [AVAsset assetWithURL:[NSURL URLWithString:@"http://devimages.apple.com/iphone/samples/bipbop/gear1/prog_index.m3u8"]];
   hlsVideoNode.gravity = AVLayerVideoGravityResize;
-  hlsVideoNode.backgroundColor = [UIColor lightGrayColor];
+  hlsVideoNode.backgroundColor = [UIColor redColor]; // Should not be seen after placeholder image is loaded
   hlsVideoNode.shouldAutorepeat = YES;
   hlsVideoNode.shouldAutoplay = YES;
   hlsVideoNode.muted = YES;

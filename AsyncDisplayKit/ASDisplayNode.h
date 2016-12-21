@@ -8,11 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#pragma once
+
 #import <UIKit/UIKit.h>
 
 #import <AsyncDisplayKit/_ASAsyncTransactionContainer.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
-#import <AsyncDisplayKit/ASDealloc2MainObject.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 #import <AsyncDisplayKit/ASLayoutElement.h>
@@ -106,7 +107,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  */
 
-@interface ASDisplayNode : ASDealloc2MainObject <ASLayoutElement>
+@interface ASDisplayNode : NSObject <ASLayoutElement>
 
 /** @name Initializing a node object */
 
@@ -428,28 +429,6 @@ extern NSInteger const ASDefaultDrawingPriority;
 @property (nonatomic, assign) BOOL displaysAsynchronously;
 
 /** 
- * @abstract Whether to draw all descendant nodes' layers/views into this node's layer/view's backing store.
- *
- * @discussion
- * When set to YES, causes all descendant nodes' layers/views to be drawn directly into this node's layer/view's backing 
- * store.  Defaults to NO.
- *
- * If a node's descendants are static (never animated or never change attributes after creation) then that node is a 
- * good candidate for rasterization.  Rasterizing descendants has two main benefits:
- * 1) Backing stores for descendant layers are not created.  Instead the layers are drawn directly into the rasterized
- * container.  This can save a great deal of memory.
- * 2) Since the entire subtree is drawn into one backing store, compositing and blending are eliminated in that subtree
- * which can help improve animation/scrolling/etc performance.
- *
- * Rasterization does not currently support descendants with transform, sublayerTransform, or alpha. Those properties 
- * will be ignored when rasterizing descendants.
- *
- * Note: this has nothing to do with -[CALayer shouldRasterize], which doesn't work with ASDisplayNode's asynchronous 
- * rendering model.
- */
-@property (nonatomic, assign) BOOL shouldRasterizeDescendants;
-
-/** 
  * @abstract Prevent the node's layer from displaying.
  *
  * @discussion A subclass may check this flag during -display or -drawInContext: to cancel a display that is already in 
@@ -491,33 +470,8 @@ extern NSInteger const ASDefaultDrawingPriority;
  */
 - (void)recursivelyClearContents;
 
-/**
- * @abstract Calls -clearFetchedData on the receiver and its subnode hierarchy.
- *
- * @discussion Clears any memory-intensive fetched content.
- * This method is used to notify the node that it should purge any content that is both expensive to fetch and to
- * retain in memory.
- *
- * @see [ASDisplayNode(Subclassing) clearFetchedData] and [ASDisplayNode(Subclassing) fetchData]
- */
-- (void)recursivelyClearFetchedData;
-
-/**
- * @abstract Calls -fetchData on the receiver and its subnode hierarchy.
- *
- * @discussion Fetches content from remote sources for the current node and all subnodes.
- *
- * @see [ASDisplayNode(Subclassing) fetchData] and [ASDisplayNode(Subclassing) clearFetchedData]
- */
-- (void)recursivelyFetchData;
-
 - (BOOL)recursivelyImplementsDisplay;
 - (BOOL)recursivelyPendingDisplayNodesHaveFinished;
-
-/**
- * @abstract Triggers a recursive call to fetchData when the node has an interfaceState of ASInterfaceStatePreload
- */
-- (void)setNeedsDataFetch;
 
 /**
  * @abstract Toggle displaying a placeholder over the node that covers content until the node and all subnodes are
@@ -652,11 +606,11 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 /**
  * Marks the node as needing layout. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
- * 
- * If this node was measured, calling this method triggers an internal relayout: the calculated layout is invalidated,
- * and the supernode is notified or (if this node is the root one) a full measurement pass is executed using the old constrained size.
  *
- * Note: ASCellNode has special behavior in that calling this method will automatically notify 
+ * If the node determines its own desired layout size will change in the next layout pass, it will propagate this
+ * information up the tree so its parents can have a chance to consider and apply if necessary the new size onto the node.
+ *
+ * Note: ASCellNode has special behavior in that calling this method will automatically notify
  * the containing ASTableView / ASCollectionView that the cell should be resized, if necessary.
  */
 - (void)setNeedsLayout;
@@ -811,7 +765,7 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 
 /**
- * @abstract Invalidates the current layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
+ * @abstract Invalidates the layout and begins a relayout of the node with the current `constrainedSize`. Must be called on main thread.
  *
  * @discussion It is called right after the measurement and before -animateLayoutTransition:.
  *

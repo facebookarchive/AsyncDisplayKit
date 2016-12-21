@@ -12,7 +12,7 @@
 
 #import "ASVideoPlayerNode.h"
 #import "ASDefaultPlaybackButton.h"
-#import "ASDisplayNodeInternal.h"
+#import "ASDisplayNode+FrameworkSubclasses.h"
 
 static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
@@ -666,6 +666,11 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (BOOL)isPlaying
 {
   return [_videoNode isPlaying];
+}
+
+- (void)resetToPlaceholder
+{
+  [_videoNode resetToPlaceholder];
 }
 
 - (NSArray *)controlsForLayoutSpec
