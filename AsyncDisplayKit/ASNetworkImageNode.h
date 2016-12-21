@@ -60,20 +60,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, strong) UIImage *image;
 
 /**
- * An image to be displayed until it is cleared out by loading a URL or exiting the preload state. This is different
- * than the @c defaultImage because it will only be retained and used until we load the URL or exit the preload state.
- * defaultImage will never be cleared out by ASNetworkImageNode.
- * This method exists as a convenience to clearing out defaultImage manually.
- *
- * @warning this method simply calls setImage on the super class. This means it will throw out any image that has
- * already been downloaded!
- */
-@property (nullable, nonatomic, strong) UIImage *ephemeralImage;
-
-//Because this is ephemeral, you shouldn't rely on its contents
-- (UIImage *)ephemeralImage NS_UNAVAILABLE;
-
-/**
  * A placeholder image to display while the URL is loading. This is slightly different than placeholderImage in the
  * ASDisplayNode superclass as defaultImage will *not* be displayed synchronously. If you wish to have the image
  * displayed synchronously, use @c placeholderImage.
