@@ -57,17 +57,9 @@
   ASRangeTuningParameters      tuningParameters  = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
 
   if (_layoutDirection == ASFlowLayoutDirectionHorizontal) {
-    ASDisplayNodeAssert(scrollDirection == ASScrollDirectionNone ||
-                        scrollDirection == ASScrollDirectionLeft ||
-                        scrollDirection == ASScrollDirectionRight, @"Invalid scroll direction");
-
     viewportDirectionalSize = viewportSize.width;
     directionalBuffer = ASDirectionalScreenfulBufferHorizontal(scrollDirection, tuningParameters);
   } else {
-    ASDisplayNodeAssert(scrollDirection == ASScrollDirectionNone ||
-                        scrollDirection == ASScrollDirectionUp   ||
-                        scrollDirection == ASScrollDirectionDown, @"Invalid scroll direction");
-
     viewportDirectionalSize = viewportSize.height;
     directionalBuffer = ASDirectionalScreenfulBufferVertical(scrollDirection, tuningParameters);
   }
