@@ -39,14 +39,12 @@ static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
  * @param style The layout style of the overall stack layout
  * @param firstChildOffset Offset of the first child
  * @param extraSpacing Spacing between children, in addition to spacing set to the stack's layout style
- * @param lastChildOffset Offset of the last child
  * @param unpositionedLayout Unpositioned children of the stack
  * @param constrainedSize Constrained size of the stack
  */
 static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style,
                                              const CGFloat firstChildOffset,
                                              const CGFloat extraSpacing,
-                                             const CGFloat lastChildOffset,
                                              const ASStackUnpositionedLayout &unpositionedLayout,
                                              const ASSizeRange &constrainedSize)
 {
@@ -63,14 +61,11 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
   
   CGPoint p = directionPoint(style.direction, firstChildOffset, 0);
   BOOL first = YES;
-  const auto lastChild = unpositionedLayout.items.back().child;
-  CGFloat offset = 0;
-    
+  
   // Adjust the position of the unpositioned layouts to be positioned
   const auto stackedChildren = unpositionedLayout.items;
   for (const auto &l : stackedChildren) {
-    offset = (l.child.element == lastChild.element) ? lastChildOffset : 0;
-    p = p + directionPoint(style.direction, l.child.style.spacingBefore + offset, 0);
+    p = p + directionPoint(style.direction, l.child.style.spacingBefore, 0);
     if (!first) {
       p = p + directionPoint(style.direction, style.spacing + extraSpacing, 0);
     }
@@ -81,14 +76,6 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
   }
 
   return {std::move(stackedChildren), crossSize};
-}
-
-static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style,
-                                             const CGFloat firstChildOffset,
-                                             const ASStackUnpositionedLayout &unpositionedLayout,
-                                             const ASSizeRange &constrainedSize)
-{
-  return stackedLayout(style, firstChildOffset, 0, 0, unpositionedLayout, constrainedSize);
 }
 
 ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnpositionedLayout &unpositionedLayout,
@@ -109,23 +96,23 @@ ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnposition
   
   switch (justifyContent) {
     case ASStackLayoutJustifyContentStart: {
-      return stackedLayout(style, 0, unpositionedLayout, constrainedSize);
+      return stackedLayout(style, 0, 0, unpositionedLayout, constrainedSize);
     }
     case ASStackLayoutJustifyContentCenter: {
-      return stackedLayout(style, std::floor(violation / 2), unpositionedLayout, constrainedSize);
+      return stackedLayout(style, std::floor(violation / 2), 0, unpositionedLayout, constrainedSize);
     }
     case ASStackLayoutJustifyContentEnd: {
-      return stackedLayout(style, violation, unpositionedLayout, constrainedSize);
+      return stackedLayout(style, violation, 0, unpositionedLayout, constrainedSize);
     }
     case ASStackLayoutJustifyContentSpaceBetween: {
       // Spacing between the items, no spaces at the edges, evenly distributed
       const auto numOfSpacings = numOfItems - 1;
-      return stackedLayout(style, 0, violation / numOfSpacings, 0, unpositionedLayout, constrainedSize);
+      return stackedLayout(style, 0, violation / numOfSpacings, unpositionedLayout, constrainedSize);
     }
     case ASStackLayoutJustifyContentSpaceAround: {
       // Spacing between items are twice the spacing on the edges
       CGFloat spacingUnit = violation / (numOfItems * 2);
-      return stackedLayout(style, spacingUnit, spacingUnit * 2, 0, unpositionedLayout, constrainedSize);
+      return stackedLayout(style, spacingUnit, spacingUnit * 2, unpositionedLayout, constrainedSize);
     }
   }
 }
