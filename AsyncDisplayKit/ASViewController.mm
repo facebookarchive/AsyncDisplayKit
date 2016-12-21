@@ -23,6 +23,7 @@
 
 @implementation ASViewController
 {
+  BOOL _nodeProvided;
   BOOL _ensureDisplayed;
   BOOL _automaticallyAdjustRangeModeBasedOnViewEvents;
   BOOL _parentManagesVisibilityDepth;
@@ -37,9 +38,7 @@
     return nil;
   }
   
-  _node = [[ASDisplayNode alloc] initWithViewBlock:^UIView * _Nonnull{
-    return [[UIView alloc] init];
-  }];
+  _node = [[ASDisplayNode alloc] init];
   [self _initializeInstance];
   
   return self;
@@ -51,9 +50,7 @@
     return nil;
   }
   
-  _node = [[ASDisplayNode alloc] initWithViewBlock:^UIView * _Nonnull{
-    return [[UIView alloc] init];
-  }];
+  _node = [[ASDisplayNode alloc] init];
   [self _initializeInstance];
   
   return self;
@@ -65,6 +62,7 @@
     return nil;
   }
   
+  _nodeProvided = YES;
   _node = node;
   [self _initializeInstance];
 
@@ -103,13 +101,15 @@
 
 - (void)loadView
 {
-  ASDisplayNodeAssertTrue(!_node.layerBacked);
-  
   // Apple applies a frame and autoresizing masks we need.  Allocating a view is not
   // nearly as expensive as adding and removing it from a hierarchy, and fortunately
   // we can avoid that here.  Enabling layerBacking on a single node in the hierarchy
   // will have a greater performance benefit than the impact of this transient view.
   [super loadView];
+  
+  if (!_nodeProvided) { return; }
+  
+  ASDisplayNodeAssertTrue(!_node.layerBacked);
   
   UIView *view = self.view;
   CGRect frame = view.frame;
