@@ -476,6 +476,11 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [_delegate didBeginUpdatesInRangeController:self];
 }
 
+- (void)dataControllerWillDeleteAllData:(ASDataController *)dataController
+{
+  [self _setVisibleNodes:nil];
+}
+
 - (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();

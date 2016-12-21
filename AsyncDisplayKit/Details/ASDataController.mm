@@ -452,6 +452,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
         // -beginUpdates
         [_mainSerialQueue performBlockOnMainThread:^{
           [_delegate dataControllerBeginUpdates:self];
+          [_delegate dataControllerWillDeleteAllData:self];
         }];
         
         // deleteSections:
