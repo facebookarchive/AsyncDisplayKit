@@ -379,7 +379,11 @@ struct ASImageNodeDrawParameters {
   if (entry == nil) {  // If nil, we were cancelled.
     return nil;
   }
-  _weakCacheEntry = entry; // Retain so that the entry remains in the weak cache
+  
+  __instanceLock__.lock();
+    _weakCacheEntry = entry; // Retain so that the entry remains in the weak cache
+  __instanceLock__.unlock();
+
   return entry.value;
 }
 
@@ -523,9 +527,11 @@ static ASDN::Mutex cacheLock;
 
 - (void)clearContents
 {
-    [super clearContents];
+  [super clearContents];
     
+  __instanceLock__.lock();
     _weakCacheEntry = nil;  // release contents from the cache.
+  __instanceLock__.unlock();
 }
 
 #pragma mark - Cropping
