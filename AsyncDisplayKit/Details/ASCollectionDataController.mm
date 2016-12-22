@@ -17,6 +17,7 @@
 #import "ASIndexedNodeContext.h"
 #import "ASSection.h"
 #import "ASSectionContext.h"
+#import "NSIndexSet+ASHelpers.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -26,6 +27,13 @@
   NSInteger _nextSectionID;
   NSMutableArray<ASSection *> *_sections;
   NSArray<ASSection *> *_pendingSections;
+
+  /**
+   * supplementaryKinds can only be accessed on the main thread
+   * and so we set this in the -prepare stage, and then read it during the -will
+   * stage of each update operation.
+   */
+  NSArray *_supplementaryKindsForPendingOperation;
 }
 
 - (id<ASCollectionDataControllerSource>)collectionDataSource;
@@ -59,7 +67,7 @@
   [_sections removeAllObjects];
   [self _populatePendingSectionsFromDataSource:sections];
   
-  for (NSString *kind in [self supplementaryKinds]) {
+  for (NSString *kind in [self supplementaryKindsInSections:sections]) {
     LOG(@"Populating elements of kind: %@", kind);
     NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableContexts:contexts];
@@ -101,7 +109,7 @@
   ASDisplayNodeAssertMainThread();
   [self _populatePendingSectionsFromDataSource:sections];
   
-  for (NSString *kind in [self supplementaryKinds]) {
+  for (NSString *kind in [self supplementaryKindsInSections:sections]) {
     LOG(@"Populating elements of kind: %@, for sections: %@", kind, sections);
     NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind withSections:sections mutableContexts:contexts];
@@ -127,46 +135,29 @@
   [_pendingNodeContexts removeAllObjects];
 }
 
+- (void)prepareForDeleteSections:(NSIndexSet *)sections
+{
+  _supplementaryKindsForPendingOperation = [self supplementaryKindsInSections:sections];
+}
+
 - (void)willDeleteSections:(NSIndexSet *)sections
 {
   [_sections removeObjectsAtIndexes:sections];
-  
-  for (NSString *kind in [self supplementaryKinds]) {
+
+  for (NSString *kind in _supplementaryKindsForPendingOperation) {
     NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], sections);
     
     [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
     [self deleteSectionsOfKind:kind atIndexSet:sections completion:nil];
   }
-}
-
-- (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection
-{
-  ASSection *movedSection = [_sections objectAtIndex:section];
-  [_sections removeObjectAtIndex:section];
-  [_sections insertObject:movedSection atIndex:newSection];
-  
-  NSIndexSet *sectionAsIndexSet = [NSIndexSet indexSetWithIndex:section];
-  for (NSString *kind in [self supplementaryKinds]) {
-    NSMutableArray *editingNodes = [self editingNodesOfKind:kind];
-    NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet(editingNodes, sectionAsIndexSet);
-    NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(editingNodes, indexPaths);
-    [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
-    
-    // update the section of indexpaths
-    NSMutableArray *updatedIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-    for (NSIndexPath *indexPath in indexPaths) {
-      NSUInteger newItem = [indexPath indexAtPosition:indexPath.length - 1];
-      NSIndexPath *mappedIndexPath = [NSIndexPath indexPathForItem:newItem inSection:newSection];
-      [updatedIndexPaths addObject:mappedIndexPath];
-    }
-    [self insertNodes:nodes ofKind:kind atIndexPaths:indexPaths completion:nil];
-  }
+  _supplementaryKindsForPendingOperation = nil;
 }
 
 - (void)prepareForInsertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
-  for (NSString *kind in [self supplementaryKinds]) {
+  NSIndexSet *sections = [NSIndexSet as_sectionsFromIndexPaths:indexPaths];
+  for (NSString *kind in [self supplementaryKindsInSections:sections]) {
     LOG(@"Populating elements of kind: %@, for index paths: %@", kind, indexPaths);
     NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind atIndexPaths:indexPaths mutableContexts:contexts];
@@ -188,7 +179,9 @@
 - (void)prepareForDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
-  for (NSString *kind in [self supplementaryKinds]) {
+  NSIndexSet *sections = [NSIndexSet as_sectionsFromIndexPaths:indexPaths];
+  _supplementaryKindsForPendingOperation = [self supplementaryKindsInSections:sections];
+  for (NSString *kind in _supplementaryKindsForPendingOperation) {
     NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
     [self _populateSupplementaryNodesOfKind:kind atIndexPaths:indexPaths mutableContexts:contexts];
     _pendingNodeContexts[kind] = contexts;
@@ -197,7 +190,7 @@
 
 - (void)willDeleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
 {
-  for (NSString *kind in [self supplementaryKinds]) {
+  for (NSString *kind in _supplementaryKindsForPendingOperation) {
     NSArray<NSIndexPath *> *deletedIndexPaths = ASIndexPathsInMultidimensionalArrayIntersectingIndexPaths([self editingNodesOfKind:kind], indexPaths);
 
     [self deleteNodesOfKind:kind atIndexPaths:deletedIndexPaths completion:nil];
@@ -216,6 +209,7 @@
     }];
   }
   [_pendingNodeContexts removeAllObjects];
+  _supplementaryKindsForPendingOperation = nil;
 }
 
 - (void)_populatePendingSectionsFromDataSource:(NSIndexSet *)sectionIndexes
@@ -323,9 +317,9 @@
 
 #pragma mark - Private Helpers
 
-- (NSArray *)supplementaryKinds
+- (NSArray *)supplementaryKindsInSections:(NSIndexSet *)sections
 {
-  return [self.collectionDataSource supplementaryNodeKindsInDataController:self];
+  return [self.collectionDataSource supplementaryNodeKindsInDataController:self sections:sections];
 }
 
 - (id<ASCollectionDataControllerSource>)collectionDataSource

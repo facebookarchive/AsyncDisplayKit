@@ -15,6 +15,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASCollectionViewLayoutFacilitatorProtocol;
+@protocol ASListAdapter;
 @class ASCollectionNode;
 @class ASDataController;
 @class ASRangeController;

@@ -502,6 +502,16 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable id<ASSectionContext>)collectionNode:(ASCollectionNode *)collectionNode contextForSection:(NSInteger)section;
 
 /**
+ * Asks the data source to provide an array of supplementary element kinds that exist in a given section.
+ *
+ * @param collectionNode The sender.
+ * @param section The index of the section to provide supplementary kinds for.
+ *
+ * @return The supplementary element kinds that exist in the given section, if any.
+ */
+- (NSArray<NSString *> *)collectionNode:(ASCollectionNode *)collectionNode supplementaryElementKindsInSection:(NSInteger)section;
+
+/**
  * Similar to -collectionView:cellForItemAtIndexPath:.
  *
  * @param collectionView The sender.
