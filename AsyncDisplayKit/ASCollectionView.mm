@@ -749,7 +749,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
-  [self performBatchAnimated:YES updates:updates completion:completion];
+  // We capture the current state of whether animations are enabled if they don't provide us with one.
+  [self performBatchAnimated:[UIView areAnimationsEnabled] updates:updates completion:completion];
 }
 
 - (void)registerSupplementaryNodeOfKind:(NSString *)elementKind

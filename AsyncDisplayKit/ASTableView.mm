@@ -625,7 +625,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)endUpdates
 {
-  [self endUpdatesAnimated:YES completion:nil];
+  // We capture the current state of whether animations are enabled if they don't provide us with one.
+  [self endUpdatesAnimated:[UIView areAnimationsEnabled] completion:nil];
 }
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion;
