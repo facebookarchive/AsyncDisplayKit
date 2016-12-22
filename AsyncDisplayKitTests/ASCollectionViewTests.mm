@@ -94,16 +94,6 @@
   };
 }
 
-- (void)collectionView:(ASCollectionView *)collectionView willDisplayNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssertNotNil(node.layoutAttributes, @"Expected layout attributes for node in %@ to be non-nil.", NSStringFromSelector(_cmd));
-}
-
-- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssertNotNil(node.layoutAttributes, @"Expected layout attributes for node in %@ to be non-nil.", NSStringFromSelector(_cmd));
-}
-
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
   return _itemCounts.size();
 }
