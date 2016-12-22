@@ -22,4 +22,7 @@
 
 - (NSString *)as_smallDescription;
 
+/// Returns all the section indexes contained in the index paths array.
++ (NSIndexSet *)as_sectionsFromIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
+
 @end

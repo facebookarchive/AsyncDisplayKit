@@ -47,13 +47,6 @@
   NSUInteger    _userID;
 }
 
-#pragma mark - Properties
-
-- (NSMutableArray *)photos
-{
-  return _photos;
-}
-
 #pragma mark - Lifecycle
 
 - (instancetype)initWithPhotoFeedModelType:(PhotoFeedModelType)type imageSize:(CGSize)size
@@ -91,6 +84,11 @@
 }
 
 #pragma mark - Instance Methods
+
+- (NSArray *)photos
+{
+  return [_photos copy];
+}
 
 - (NSUInteger)totalNumberOfPhotos
 {
@@ -186,10 +184,13 @@
   // early return if reached end of pages
   if (_totalPages) {
     if (_currentPage == _totalPages) {
+      if (block){
+        block(@[]);
+      }
       return;
     }
   }
-  
+
   NSUInteger numPhotos = (numResults < 100) ? numResults : 100;
     
   dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
@@ -244,6 +245,18 @@
       [_task resume];
     }
   });
+}
+
+#pragma mark - IGListDiffable
+
+- (id<NSObject>)diffIdentifier
+{
+  return self;
+}
+
+- (BOOL)isEqualToDiffableObject:(id<IGListDiffable>)object
+{
+  return self == object;
 }
 
 @end

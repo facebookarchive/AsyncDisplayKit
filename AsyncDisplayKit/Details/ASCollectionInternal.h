@@ -11,6 +11,9 @@
 //
 
 #import <AsyncDisplayKit/ASCollectionView.h>
+#if IG_LIST_KIT
+#import <IGListKit/IGListKit.h>
+#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -25,6 +28,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak, readwrite) ASCollectionNode *collectionNode;
 @property (nonatomic, strong, readonly) ASDataController *dataController;
 @property (nonatomic, strong, readonly) ASRangeController *rangeController;
+
+#if IG_LIST_KIT
+/**
+ * The IGListAdapter to use with this collection view.
+ * This should be set publicly on the collection node, not on the view.
+ */
+@property (nonatomic, weak) IGListAdapter *listAdapter;
+#endif 
 
 /**
  * Attempt to get the view-layer index path for the item with the given index path.

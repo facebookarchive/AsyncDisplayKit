@@ -17,12 +17,12 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#import "CoreGraphics/CoreGraphics.h"
 #import "UserModel.h"
 #import "LocationModel.h"
 #import "CommentFeedModel.h"
+#import <IGListKit/IGListKit.h>
 
-@interface PhotoModel : NSObject
+@interface PhotoModel : NSObject <IGListDiffable>
 
 @property (nonatomic, strong, readonly) NSURL                  *URL;
 @property (nonatomic, strong, readonly) NSString               *photoID;

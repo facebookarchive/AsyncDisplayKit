@@ -48,6 +48,12 @@ Pod::Spec.new do |spec|
       pin.dependency 'PINRemoteImage/PINCache'
       pin.dependency 'AsyncDisplayKit/Core'
   end
+
+  spec.subspec 'IGListKit' do |igl|
+      igl.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) IG_LIST_KIT=1' }
+      igl.dependency 'IGListKit', '2.1.0'
+      igl.dependency 'AsyncDisplayKit/Core'
+  end
   
   # Include optional PINRemoteImage module
   spec.default_subspec = 'PINRemoteImage'

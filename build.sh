@@ -31,7 +31,20 @@ if [ "$MODE" = "tests" ]; then
         -scheme AsyncDisplayKit \
         -sdk "$SDK" \
         -destination "$PLATFORM" \
-        build test | xcpretty $FORMATTER
+        build-for-testing test | xcpretty $FORMATTER
+    trap - EXIT
+    exit 0
+fi
+
+if [ "$MODE" = "tests_listkit" ]; then
+    echo "Building & testing AsyncDisplayKit+IGListKit."
+    pod install --project-directory=ASDKListKit
+    set -o pipefail && xcodebuild \
+        -workspace ASDKListKit/ASDKListKit.xcworkspace \
+        -scheme ASDKListKitTests \
+        -sdk "$SDK" \
+        -destination "$PLATFORM" \
+        build-for-testing test | xcpretty $FORMATTER
     trap - EXIT
     exit 0
 fi

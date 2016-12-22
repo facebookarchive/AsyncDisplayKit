@@ -129,6 +129,17 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
 - (void)willInsertSections:(NSIndexSet *)sections;
 
 /**
+ * Notifies the subclass to perform setup before sections are deleted in the data controller
+ *
+ * @discussion This method will be performed before the data controller enters its editing queue.
+ * The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
+ * data stores before entering into editing the backing store on a background thread.
+ *
+ * @param sections Indices of sections to be inserted
+ */
+- (void)prepareForDeleteSections:(NSIndexSet *)sections;
+
+/**
  * Notifies the subclass that the data controller will delete sections at the given positions
  *
  * @discussion This method will be performed on the data controller's editing background queue before the parent's
@@ -138,18 +149,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
  * @param sections Indices of sections to be deleted
  */
 - (void)willDeleteSections:(NSIndexSet *)sections;
-
-/**
- * Notifies the subclass that the data controller will move a section to a new position
- *
- * @discussion This method will be performed on the data controller's editing background queue before the parent's
- * concrete implementation. This is a great place to perform any additional transformations like supplementary views
- * or header/footer nodes.
- *
- * @param section    Index of current section position
- * @param newSection Index of new section position
- */
-- (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 /**
  * Notifies the subclass to perform setup before rows are inserted in the data controller.
