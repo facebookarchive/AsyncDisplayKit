@@ -12,7 +12,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class ASCellNode;
+@class ASCellNode, ASTextNode;
 
 typedef NSUInteger ASCellNodeAnimation;
 
@@ -204,6 +204,11 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  * The text inset or outset for each edge. The default value is 15.0 horizontal and 11.0 vertical padding.
  */
 @property (nonatomic, assign) UIEdgeInsets textInsets;
+
+/**
+ * The text node used by this cell node.
+ */
+@property (nonatomic, strong, readonly) ASTextNode *textNode;
 
 @end
 

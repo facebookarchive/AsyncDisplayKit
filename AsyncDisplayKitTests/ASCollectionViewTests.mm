@@ -1024,4 +1024,32 @@
   XCTAssertEqual([[cn valueForKeyPath:@"rangeController.currentRangeMode"] integerValue], ASLayoutRangeModeMinimum, @"Expected range mode to be minimum before scrolling begins.");
 }
 
+/**
+ * This tests an issue where, since subnode insertions aren't applied until the UIKit layout pass,
+ * which we trigger during the display phase, subnodes like network image nodes are not preloading
+ * until this layout pass happens which is too late.
+ */
+- (void)DISABLED_testThatAutomaticallyManagedSubnodesGetPreloadCallBeforeDisplay
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  window.rootViewController = testController;
+  ASCollectionNode *cn = testController.collectionNode;
+
+  __block NSInteger itemCount = 100;
+  testController.asyncDelegate->_itemCounts = {itemCount};
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+
+  [cn waitUntilAllUpdatesAreCommitted];
+  for (NSInteger i = 0; i < itemCount; i++) {
+    ASTextCellNodeWithSetSelectedCounter *node = [cn nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection:0]];
+    XCTAssert(node.automaticallyManagesSubnodes, @"Expected test cell node to use automatic subnode management. Can modify the test with a different class if needed.");
+    ASDisplayNode *subnode = node.textNode;
+    XCTAssertEqualObjects(NSStringFromASInterfaceState(subnode.interfaceState), NSStringFromASInterfaceState(node.interfaceState), @"Subtree interface state should match cell node interface state for ASM nodes.");
+    XCTAssert(node.inDisplayState || !node.nodeLoaded, @"Only nodes in the display range should be loaded.");
+  }
+
+}
+
 @end
