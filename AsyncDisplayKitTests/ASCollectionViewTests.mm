@@ -890,7 +890,6 @@
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
   window.rootViewController = testController;
 
-  // Start with 1 item so that our content does not fill bounds.
   testController.asyncDelegate->_itemCounts = {};
   [window makeKeyAndVisible];
   [window layoutIfNeeded];
@@ -1000,6 +999,39 @@
   XCTAssertGreaterThan(batchFetchCount, 2);
   XCTAssertGreaterThanOrEqual(contentHeight, requiredContentHeight, @"Loaded too little content.");
   XCTAssertLessThanOrEqual(contentHeight, requiredContentHeight + 2 * itemHeight, @"Loaded too much content.");
+}
+
+- (void)testInitialRangeBounds
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  ASCollectionNode *cn = testController.collectionNode;
+  [cn setTuningParameters:{ .leadingBufferScreenfuls = 2, .trailingBufferScreenfuls = 0 } forRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypePreload];
+  window.rootViewController = testController;
+
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+
+  [cn waitUntilAllUpdatesAreCommitted];
+
+  CGRect preloadBounds = ({
+    CGRect r = CGRectNull;
+    for (NSInteger s = 0; s < cn.numberOfSections; s++) {
+      NSInteger c = [cn numberOfItemsInSection:s];
+      for (NSInteger i = 0; i < c; i++) {
+        NSIndexPath *ip = [NSIndexPath indexPathForItem:i inSection:s];
+        ASCellNode *node = [cn nodeForItemAtIndexPath:ip];
+        if (node.inPreloadState) {
+          CGRect frame = [cn.view layoutAttributesForItemAtIndexPath:ip].frame;
+          r = CGRectUnion(r, frame);
+        }
+      }
+    }
+    r;
+  });
+  CGFloat expectedHeight = cn.bounds.size.height * 3;
+  XCTAssertEqualWithAccuracy(CGRectGetHeight(preloadBounds), expectedHeight, 100);
+  XCTAssertEqual([[cn valueForKeyPath:@"rangeController.currentRangeMode"] integerValue], ASLayoutRangeModeMinimum, @"Expected range mode to be minimum before scrolling begins.");
 }
 
 @end
