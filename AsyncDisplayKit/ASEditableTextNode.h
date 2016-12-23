@@ -93,6 +93,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readwrite) UIEdgeInsets textContainerInset;
 
 /**
+ @abstract The maximum number of lines to display. Additional lines will require scrolling.
+ @default 0 (No limit)
+ */
+@property (nonatomic, assign) NSUInteger maximumLinesToDisplay;
+
+/**
  @abstract <UITextInputTraits> properties.
  */
 @property(nonatomic, readwrite, assign) UITextAutocapitalizationType autocapitalizationType; // default is UITextAutocapitalizationTypeSentences

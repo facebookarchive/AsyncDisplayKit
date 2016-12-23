@@ -237,11 +237,22 @@
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
+  
   ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
-  CGSize textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
+  
+  CGSize textSize;
+  
+  if (_maximumLinesToDisplay > 0) {
+    textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width
+                                        forMaxNumberOfLines: _maximumLinesToDisplay];
+  } else {
+    textSize = [displayedComponents sizeForConstrainedWidth:constrainedSize.width];
+  }
+  
   CGFloat width = std::ceil(textSize.width + _textContainerInset.left + _textContainerInset.right);
   CGFloat height = std::ceil(textSize.height + _textContainerInset.top + _textContainerInset.bottom);
   return CGSizeMake(std::fmin(width, constrainedSize.width), std::fmin(height, constrainedSize.height));
+  
 }
 
 - (void)layout
@@ -311,6 +322,11 @@
   [self view];
   ASDisplayNodeAssert(_textKitComponents.textView != nil, @"UITextView must be created in -[ASEditableTextNode didLoad]");
   return _textKitComponents.textView;
+}
+
+- (void)setMaximumLinesToDisplay:(NSUInteger)maximumLines
+{
+  _maximumLinesToDisplay = maximumLines;
 }
 
 #pragma mark -
@@ -460,7 +476,10 @@
   [_textKitComponents.layoutManager invalidateLayoutForCharacterRange:NSMakeRange(0, [_textKitComponents.textStorage length]) actualCharacterRange:NULL];
 
   // When you type beyond UITextView's bounds it scrolls you down a line. We need to remain at the top.
-  [_textKitComponents.textView setContentOffset:CGPointZero animated:NO];
+  // [Question - leotumwattana] Is there a good reason why we are forcing content offset to top? Why not
+  // keep at the current offset of the text view?
+  CGPoint offset = _textKitComponents.textView.contentOffset;
+  [_textKitComponents.textView setContentOffset:offset animated:NO];
 }
 
 #pragma mark - Keyboard

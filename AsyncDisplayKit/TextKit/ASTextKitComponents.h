@@ -44,6 +44,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (CGSize)sizeForConstrainedWidth:(CGFloat)constrainedWidth;
 
+
+- (CGSize)sizeForConstrainedWidth:(CGFloat)constrainedWidth
+              forMaxNumberOfLines:(NSInteger)numberOfLines;
+
 @property (nonatomic, strong, readonly) NSTextStorage *textStorage;
 @property (nonatomic, strong, readonly) NSTextContainer *textContainer;
 @property (nonatomic, strong, readonly) NSLayoutManager *layoutManager;
