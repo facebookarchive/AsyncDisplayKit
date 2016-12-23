@@ -476,7 +476,10 @@
   [_textKitComponents.layoutManager invalidateLayoutForCharacterRange:NSMakeRange(0, [_textKitComponents.textStorage length]) actualCharacterRange:NULL];
 
   // When you type beyond UITextView's bounds it scrolls you down a line. We need to remain at the top.
-  [_textKitComponents.textView setContentOffset:CGPointZero animated:NO];
+  // [Question] Is there a good reason why we are forcing content offset to top? Why not
+  // keep at the current offset of the text view?
+  CGPoint offset = _textKitComponents.textView.contentOffset;
+  [_textKitComponents.textView setContentOffset:offset animated:NO];
 }
 
 #pragma mark - Keyboard
