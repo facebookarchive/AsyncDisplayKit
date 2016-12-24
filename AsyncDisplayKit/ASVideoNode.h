@@ -71,7 +71,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) int32_t periodicTimeObserverTimescale;
 
 //! Defaults to AVLayerVideoGravityResizeAspect
-@property (nonatomic) NSString *gravity;
+@property (nonatomic, strong) NSString *gravity;
 
 @property (nullable, nonatomic, weak, readwrite) id<ASVideoNodeDelegate, ASNetworkImageNodeDelegate> delegate;
 
