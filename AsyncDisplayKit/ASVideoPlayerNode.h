@@ -56,7 +56,7 @@ NS_ASSUME_NONNULL_BEGIN
 //! Defaults to 100
 @property (nonatomic, assign) int32_t periodicTimeObserverTimescale;
 //! Defaults to AVLayerVideoGravityResizeAspect
-@property (nonatomic) NSString *gravity;
+@property (nonatomic, copy) NSString *gravity;
 
 - (instancetype)initWithUrl:(NSURL*)url;
 - (instancetype)initWithAsset:(AVAsset*)asset;
