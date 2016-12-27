@@ -92,7 +92,7 @@
     }
     // Don't provide a position, as that should be set by the parent.
     layout = [ASLayout layoutWithLayoutElement:self
-                                          size:parentSize
+                                          size:selfSize
                                     sublayouts:layout.sublayouts];
   }
   return layout;
