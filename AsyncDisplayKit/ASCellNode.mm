@@ -395,13 +395,6 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
 #pragma mark -
 #pragma mark ASTextCellNode
 
-@interface ASTextCellNode ()
-
-@property (nonatomic, strong) ASTextNode *textNode;
-
-@end
-
-
 @implementation ASTextCellNode
 
 static const CGFloat kASTextCellNodeDefaultFontSize = 18.0f;
@@ -420,7 +413,7 @@ static const CGFloat kASTextCellNodeDefaultVerticalPadding = 11.0f;
     _textInsets = textInsets;
     _textAttributes = [textAttributes copy];
     _textNode = [[ASTextNode alloc] init];
-    [self addSubnode:_textNode];
+    self.automaticallyManagesSubnodes = YES;
   }
   return self;
 }
