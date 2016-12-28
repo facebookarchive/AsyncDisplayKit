@@ -911,6 +911,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
       return indexPath;
     } else {
       result = [_asyncDelegate tableNode:tableNode willSelectRowAtIndexPath:result];
+      if (result == nil) {
+        return nil; // If consumer explicitly returned nil, just pass it as-is to the table view.
+      }
       result = [self convertIndexPathFromTableNode:result waitingIfNeeded:YES];
       return result;
     }
