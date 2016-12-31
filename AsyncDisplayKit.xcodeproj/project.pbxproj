@@ -2071,6 +2071,8 @@
 						DevelopmentTeam = ZJB2J5C7VN;
 					};
 					058D09BB195D04C000B7D73C = {
+						DevelopmentTeam = ZJB2J5C7VN;
+						ProvisioningStyle = Automatic;
 						TestTargetID = 057D02BE1AC0A66700C7AC3C;
 					};
 					B35061D91B010EDF0018CF92 = {
@@ -2705,6 +2707,8 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_CODE_COVERAGE = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = ZJB2J5C7VN;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
@@ -2735,6 +2739,8 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_CODE_COVERAGE = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = ZJB2J5C7VN;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
@@ -2889,6 +2895,8 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CLANG_ENABLE_CODE_COVERAGE = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				DEVELOPMENT_TEAM = ZJB2J5C7VN;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(DEVELOPER_FRAMEWORKS_DIR)",
