@@ -163,13 +163,15 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
 
 #pragma mark - UITableViewCell specific passthrough properties
 
-/*
+/* @abstract The selection style when a tap on a cell occurs
+ * @default UITableViewCellSelectionStyleDefault
  * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
  */
 @property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
 
 
-/*
+/* @abstract The accessory type view on the right side of the cell 
+ * @default UITableViewCellAccessoryNone
  * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
  */
 @property (nonatomic) UITableViewCellAccessoryType accessoryType;

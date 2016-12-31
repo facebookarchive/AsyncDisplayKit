@@ -113,7 +113,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (CGRect)frameForTextRange:(NSRange)textRange AS_WARN_UNUSED_RESULT;
 
-#pragma mark - UITableViewCell specific passthrough properties
 /**
  @abstract <UITextInputTraits> properties.
  */
