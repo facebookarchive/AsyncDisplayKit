@@ -37,7 +37,8 @@ ASYNCDISPLAYKIT_PRIVATE_HEADERS = glob([
 def asyncdisplaykit_library(
     name,
     additional_preprocessor_flags = [],
-    deps = []):
+    deps = [],
+    additional_frameworks = []):
 
   apple_library(
     name = name,
@@ -70,7 +71,7 @@ def asyncdisplaykit_library(
       '$SDKROOT/System/Library/Frameworks/CoreGraphics.framework',
       '$SDKROOT/System/Library/Frameworks/CoreLocation.framework',
       '$SDKROOT/System/Library/Frameworks/AVFoundation.framework',
-    ],
+    ] + additional_frameworks,
     visibility = ['PUBLIC'],
   )
 
@@ -89,6 +90,9 @@ for name in ['AsyncDisplayKit', 'AsyncDisplayKit-PINRemoteImage']:
     deps = [
       '//Pods/PINRemoteImage:PINRemoteImage-PINCache',
     ],
+    additional_frameworks = [
+      '$SDKROOT/System/Library/Frameworks/MobileCoreServices.framework',
+    ]
   )
 
 #####################################

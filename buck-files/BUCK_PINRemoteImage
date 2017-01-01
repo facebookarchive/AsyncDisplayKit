@@ -30,7 +30,10 @@ apple_library(
     ],
     excludes = FLANIMATEDIMAGE_SOURCE_FILES + PINCACHE_SOURCE_FILES
   ),
-  preprocessor_flags = COMMON_PREPROCESSOR_FLAGS,
+  preprocessor_flags = COMMON_PREPROCESSOR_FLAGS + [
+    '-DPIN_TARGET_IOS=(TARGET_OS_IPHONE || TARGET_IPHONE_SIMULATOR || TARGET_OS_TV)',
+    '-DPIN_TARGET_MAC=(TARGET_OS_MAC)',
+  ],
   lang_preprocessor_flags = COMMON_LANG_PREPROCESSOR_FLAGS,
   linker_flags = [
     '-weak_framework',
