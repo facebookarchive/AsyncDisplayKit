@@ -53,17 +53,17 @@ def asyncdisplaykit_library(
     ]),
     preprocessor_flags = COMMON_PREPROCESSOR_FLAGS + additional_preprocessor_flags,
     lang_preprocessor_flags = COMMON_LANG_PREPROCESSOR_FLAGS,
-    linker_flags = COMMON_LINKER_FLAGS,
+    linker_flags = COMMON_LINKER_FLAGS + [
+      '-weak_framework',
+      'Photos',
+      '-weak_framework',
+      'MapKit',
+    ],
     deps = deps,
     frameworks = [
       '$SDKROOT/System/Library/Frameworks/Foundation.framework',
       '$SDKROOT/System/Library/Frameworks/UIKit.framework',
       '$SDKROOT/System/Library/Frameworks/AssetsLibrary.framework',
-
-      #TODO use -weak_framework linker flag?
-      #https://github.com/facebook/buck/commit/d83d3cf33615093ba337544c2ec76e426da7f1f8
-      '$SDKROOT/System/Library/Frameworks/Photos.framework',
-      '$SDKROOT/System/Library/Frameworks/MapKit.framework',
 
       '$SDKROOT/System/Library/Frameworks/QuartzCore.framework',
       '$SDKROOT/System/Library/Frameworks/CoreMedia.framework',
@@ -129,6 +129,10 @@ apple_binary(
     ':TestHostResources',
     ':AsyncDisplayKit-Core',
   ],
+  frameworks = [
+    '$SDKROOT/System/Library/Frameworks/Photos.framework',
+    '$SDKROOT/System/Library/Frameworks/MapKit.framework',
+  ],
 )
 
 apple_package(
@@ -189,15 +193,10 @@ apple_test(
   frameworks = [
     '$SDKROOT/System/Library/Frameworks/Foundation.framework',
     '$SDKROOT/System/Library/Frameworks/UIKit.framework',
-    '$SDKROOT/System/Library/Frameworks/AssetsLibrary.framework',
-    '$SDKROOT/System/Library/Frameworks/Photos.framework',
-    '$SDKROOT/System/Library/Frameworks/MapKit.framework',
 
-    '$SDKROOT/System/Library/Frameworks/QuartzCore.framework',
     '$SDKROOT/System/Library/Frameworks/CoreMedia.framework',
     '$SDKROOT/System/Library/Frameworks/CoreText.framework',
     '$SDKROOT/System/Library/Frameworks/CoreGraphics.framework',
-    '$SDKROOT/System/Library/Frameworks/CoreLocation.framework',
     '$SDKROOT/System/Library/Frameworks/AVFoundation.framework',
 
     '$PLATFORM_DIR/Developer/Library/Frameworks/XCTest.framework',
