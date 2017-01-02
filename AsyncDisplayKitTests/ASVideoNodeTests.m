@@ -25,12 +25,6 @@
 }
 @end
 
-@interface ASNetworkImageNode () {
-  @public __weak id<ASNetworkImageNodeDelegate> _delegate;
-}
-@end
-
-
 @interface ASVideoNode () {
   ASDisplayNode *_playerNode;
   AVPlayer *_player;
@@ -419,11 +413,9 @@
   XCTAssertTrue([_videoNode.delegate conformsToProtocol:@protocol(ASVideoNodeDelegate)]);
   XCTAssertTrue([_videoNode.delegate conformsToProtocol:@protocol(ASNetworkImageNodeDelegate)]);
   XCTAssertTrue([((ASNetworkImageNode*)_videoNode).delegate conformsToProtocol:@protocol(ASNetworkImageNodeDelegate)]);
-  XCTAssertTrue([((ASNetworkImageNode*)_videoNode)->_delegate conformsToProtocol:@protocol(ASNetworkImageNodeDelegate)]);
   
   XCTAssertEqual(_videoNode.delegate, self);
   XCTAssertEqual(((ASNetworkImageNode*)_videoNode).delegate, self);
-  XCTAssertEqual(((ASNetworkImageNode*)_videoNode)->_delegate, self);
 }
 
 @end
