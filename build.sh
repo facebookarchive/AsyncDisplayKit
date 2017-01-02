@@ -295,7 +295,7 @@ fi
 if [ "$MODE" = "cocoapods-lint" ]; then
     echo "Verifying that podspec lints."
 
-    set -o pipefail && pod lib lint
+    set -o pipefail && pod lib lint --verbose
     trap - EXIT
     exit 0
 fi
