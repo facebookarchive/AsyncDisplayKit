@@ -612,6 +612,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait
 {
+  if (indexPath == nil) {
+    return nil;
+  }
+  
   // If this is a section index path, we don't currently have a method
   // to do a mapping.
   if (indexPath.item == NSNotFound) {

@@ -591,6 +591,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode waitingIfNeeded:(BOOL)wait
 {
+  if (cellNode == nil) {
+    return nil;
+  }
+
   NSIndexPath *indexPath = [_dataController completedIndexPathForNode:cellNode];
   indexPath = [self validateIndexPath:indexPath];
   if (indexPath == nil && wait) {
