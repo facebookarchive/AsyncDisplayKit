@@ -78,7 +78,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _node = node;
   self.backgroundColor = node.backgroundColor;
   self.clipsToBounds = node.clipsToBounds;
-  
   [node __setSelectedFromUIKit:self.selected];
   [node __setHighlightedFromUIKit:self.highlighted];
 }
