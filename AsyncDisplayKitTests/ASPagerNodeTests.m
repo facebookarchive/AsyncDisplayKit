@@ -93,7 +93,8 @@
   return testController;
 }
 
-- (void)testThatRootPagerNodeDoesGetTheRightInsetWhilePoppingBack
+// Disabled due to flakiness https://github.com/facebook/AsyncDisplayKit/issues/2818
+- (void)DISABLED_testThatRootPagerNodeDoesGetTheRightInsetWhilePoppingBack
 {
   UICollectionViewCell *cell = nil;
   
