@@ -952,6 +952,9 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 - (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPath == nil) {
+    return nil;
+  }
   
   NSArray *contexts = _nodeContexts[ASDataControllerRowNodeKind];
   NSInteger section = indexPath.section;
@@ -971,6 +974,9 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 - (ASCellNode *)nodeAtCompletedIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
+  if (indexPath == nil) {
+    return nil;
+  }
 
   NSArray *completedNodes = [self completedNodes];
   NSInteger section = indexPath.section;
