@@ -825,6 +825,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)setNeedsLayoutFromAbove
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  // FIXME: this method is sometimes called with instance lock acquired which can cause deadlocks
+  // because this method may escalate all the way up to the root node.
+  // Enable this assertion and fix from there.
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   __instanceLock__.lock();
 
@@ -905,7 +909,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
   }
 
-  if (_calculatedDisplayNodeLayout->isValidForConstrainedSizeParentSize(constrainedSize, parentSize)) {
+  BOOL validCalculatedLayout = _calculatedDisplayNodeLayout->isValidForConstrainedSizeParentSize(constrainedSize, parentSize);
+  // Check if we asked supernode to resize to match this particular ASLayout object. If it is the case, reuse the layout.
+  BOOL requestedLayoutFromAbove = _calculatedDisplayNodeLayout->requestedLayoutFromAbove;
+  if (validCalculatedLayout || requestedLayoutFromAbove) {
     ASDisplayNodeAssertNotNil(_calculatedDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _calculatedDisplayNodeLayout->layout should not be nil! %@", self);
     // Our calculated layout is suitable for this constrainedSize, so keep using it and
     // invalidate any pending layout that has been generated in the past.
@@ -913,7 +920,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     return _calculatedDisplayNodeLayout->layout ?: [ASLayout layoutWithLayoutElement:self size:{0, 0}];
   }
   
-  // Creat a pending display node layout for the layout pass
+  // Create a pending display node layout for the layout pass
   _pendingDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>(
     [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
     constrainedSize,
@@ -955,8 +962,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                 measurementCompletion:(void(^)())completion
 {
   ASDisplayNodeAssertMainThread();
-
-  [self setNeedsLayout];
+  
+  // Going to transition to a new layout without a new constrained size.
+  // Need to invalidate the existing layout to make sure it won't be reused.
+  // Call invalidateCalculatedLayout instead of setNeedsLayout, because the latter will cause upward propagation and a layout pass later on.
+  // If the layout pass proceeds before this layout transition finishes, it will erase all pending transition states.
+  [self invalidateCalculatedLayout];
   
   [self transitionLayoutWithSizeRange:[self _locked_constrainedSizeForLayoutPass]
                              animated:animated
@@ -1030,10 +1041,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
     
     ASPerformBlockOnMainThread(^{
-      // Grab __instanceLock__ here to make sure this transition isn't invalidated
-      // right after it passed the validation test and before it proceeds
-      ASDN::MutexLocker l(__instanceLock__);
-
+      // Hold onto __instanceLock__ until at least after the animation of this transtion kicked off,
+      // to make sure this transition isn't invalidated after it passed the abort test below
+      __instanceLock__.lock();
+      
       if ([self _shouldAbortTransitionWithID:transitionID]) {
         return;
       }
@@ -1054,6 +1065,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       });
       
       // Measurement pass completion
+      // TODO Consider remove/deprecate this completion block.
+      // Instead, call _locked_displayNodeDidInvalidateSizeNewSize directly if this node has a new size.
       if (completion) {
         completion();
       }
@@ -1067,11 +1080,29 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
                                                                          layoutDelegate:_pendingLayoutTransition
                                                                      completionDelegate:self];
       
-      // Apply the subnode insertion immediately to be able to animate the nodes
+      // Apply subnode insertions immediately to be able to animate the nodes
       [_pendingLayoutTransition applySubnodeInsertions];
       
-      // Kick off animating the layout transition
+      // Kick off layout transition animation
       [self animateLayoutTransition:_pendingLayoutTransitionContext];
+      
+      // If this transition results in a new size. Ask supernode to resize itself to match this new layout.
+      ASDisplayNode *supernode = _supernode;
+      BOOL needsLayoutFromAbove = (supernode != nil) && (CGSizeEqualToSize(previousLayout->layout.size, pendingLayout->layout.size) == NO);
+      if (needsLayoutFromAbove) {
+        // Enable this flag to ensure later measurement(s) of this node during supernode's relayout won't throw away this new layout but reuse it.
+        pendingLayout->requestedLayoutFromAbove = YES;
+        
+        // Release instance lock to avoid deadlocks.
+        __instanceLock__.unlock();
+          [supernode setNeedsLayoutFromAbove];
+        __instanceLock__.lock();
+        
+        // Assuming supernode's relayout finished within `[supernode setNeedsLayoutFromAbove]`, this flag has served its purpose. Turn it off.
+        pendingLayout->requestedLayoutFromAbove = NO;
+      }
+      
+      __instanceLock__.unlock();
     });
   };
   
@@ -1710,6 +1741,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // particular ASLayout object, and shouldn't loop asking again unless we have a different ASLayout.
     nextLayout->requestedLayoutFromAbove = YES;
     [self setNeedsLayoutFromAbove];
+    // Assuming the parent's update finished within `[self setNeedsLayoutFromAbove]`, this flag has served its purpose. Turn it off.
+    nextLayout->requestedLayoutFromAbove = NO;
   }
 
   // Prepare to transition to nextLayout
