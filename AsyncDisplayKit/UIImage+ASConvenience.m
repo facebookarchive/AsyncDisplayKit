@@ -122,4 +122,47 @@
   return result;
 }
 
+#pragma mark - as_imageNamed
+
+UIImage *cachedImageNamed(NSString *imageName, UITraitCollection *traitCollection)
+{
+  static NSCache *imageCache = nil;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    // Because NSCache responds to memory warnings, we do not need an explicit limit.
+    // all of these objects contain compressed image data and are relatively small
+    // compared to the backing stores of text and image views.
+    imageCache = [[NSCache alloc] init];
+  });
+  
+  UIImage *image = nil;
+  if ([imageName length] > 0) {
+    NSString *imageKey = imageName;
+    if (traitCollection) {
+      char imageKeyBuffer[256];
+      snprintf(imageKeyBuffer, sizeof(imageKeyBuffer), "%s|%ld|%ld", imageName.UTF8String, (long)traitCollection.horizontalSizeClass, (long)traitCollection.verticalSizeClass);
+      imageKey = [NSString stringWithUTF8String:imageKeyBuffer];
+    }
+    
+    image = [imageCache objectForKey:imageKey];
+    if (!image) {
+      image =  [UIImage imageNamed:imageName inBundle:nil compatibleWithTraitCollection:traitCollection];
+      if (image) {
+        [imageCache setObject:image forKey:imageKey];
+      }
+    }
+  }
+  return image;
+}
+
++ (UIImage *)as_imageNamed:(NSString *)imageName
+{
+  return cachedImageNamed(imageName, nil);
+}
+
++ (UIImage *)as_imageNamed:(NSString *)imageName compatibleWithTraitCollection:(UITraitCollection *)traitCollection
+{
+  return cachedImageNamed(imageName, traitCollection);
+}
+
 @end
