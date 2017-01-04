@@ -1,0 +1,12 @@
+apple_library(
+  name = 'FBSnapshotTestCase',
+  exported_headers = glob(['FBSnapshotTestCase' + '/**/*.h']),
+  srcs = glob(['FBSnapshotTestCase' + '/**/*.m']),
+  frameworks = [
+    '$SDKROOT/System/Library/Frameworks/Foundation.framework',
+    '$SDKROOT/System/Library/Frameworks/UIKit.framework',
+    '$SDKROOT/System/Library/Frameworks/QuartzCore.framework',
+    '$PLATFORM_DIR/Developer/Library/Frameworks/XCTest.framework',
+  ],
+  visibility = ['PUBLIC'],
+)

@@ -6,7 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-@import XCTest;
+#import <XCTest/XCTest.h>
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "ASTableViewInternal.h"
 #import "ASTableView+Undeprecated.h"

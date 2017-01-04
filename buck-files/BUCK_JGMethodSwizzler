@@ -1,0 +1,9 @@
+apple_library(
+  name = 'JGMethodSwizzler',
+  exported_headers = ['JGMethodSwizzler' + '/JGMethodSwizzler.h'],
+  srcs = ['JGMethodSwizzler' + '/JGMethodSwizzler.m'],
+  frameworks = [
+    '$SDKROOT/System/Library/Frameworks/Foundation.framework',
+  ],
+  visibility = ['PUBLIC'],
+)

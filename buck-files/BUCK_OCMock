@@ -1,0 +1,9 @@
+apple_library(
+  name = 'OCMock',
+  exported_headers = glob(['Source/OCMock' + '/*.h']),
+  srcs = glob(['Source/OCMock' + '/*.m']),
+  frameworks = [
+    '$SDKROOT/System/Library/Frameworks/Foundation.framework',
+  ],
+  visibility = ['PUBLIC'],
+)
