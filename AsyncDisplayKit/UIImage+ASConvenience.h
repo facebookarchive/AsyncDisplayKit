@@ -70,6 +70,27 @@ NS_ASSUME_NONNULL_BEGIN
                                        roundedCorners:(UIRectCorner)roundedCorners
                                                 scale:(CGFloat)scale AS_WARN_UNUSED_RESULT;
 
+/**
+ *  A version of imageNamed that caches results because loading an image is expensive.
+ *  Calling with the same name value will usually return the same object.  A UIImage,
+ *  after creation, is immutable and thread-safe so it's fine to share these objects across multiple threads.
+ *
+ *  @param imageName The name of the image to load
+ *  @return The loaded image or nil
+ */
++ (UIImage *)as_imageNamed:(NSString *)imageName;
+
+/**
+ *  A version of imageNamed that caches results because loading an image is expensive.
+ *  Calling with the same name value will usually return the same object.  A UIImage,
+ *  after creation, is immutable and thread-safe so it's fine to share these objects across multiple threads.
+ *
+ *  @param imageName The name of the image to load
+ *  @param traitCollection The traits associated with the intended environment for the image.
+ *  @return The loaded image or nil
+ */
++ (UIImage *)as_imageNamed:(NSString *)imageName compatibleWithTraitCollection:(nullable UITraitCollection *)traitCollection;
+
 @end
 
 NS_ASSUME_NONNULL_END
