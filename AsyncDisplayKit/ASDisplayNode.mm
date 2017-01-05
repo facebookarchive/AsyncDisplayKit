@@ -1046,6 +1046,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
       __instanceLock__.lock();
       
       if ([self _shouldAbortTransitionWithID:transitionID]) {
+        __instanceLock__.unlock();
         return;
       }
 
