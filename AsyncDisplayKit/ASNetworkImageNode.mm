@@ -326,8 +326,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     }
   }
   
-  if (_downloadIdentifier != nil) {
-    [_downloader setPriority:ASImageDownloaderPriorityPreload withDownloadIdentifier:_downloadIdentifier];
+  if (downloadIdentifier != nil) {
+    [_downloader setPriority:ASImageDownloaderPriorityPreload withDownloadIdentifier:downloadIdentifier];
   }
   
   [self _updateProgressImageBlockOnDownloaderIfNeeded];
