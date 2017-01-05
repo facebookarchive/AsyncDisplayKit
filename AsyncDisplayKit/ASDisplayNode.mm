@@ -1742,8 +1742,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     // particular ASLayout object, and shouldn't loop asking again unless we have a different ASLayout.
     nextLayout->requestedLayoutFromAbove = YES;
     [self setNeedsLayoutFromAbove];
-    // Assuming the parent's update finished within `[self setNeedsLayoutFromAbove]`, this flag has served its purpose. Turn it off.
-    nextLayout->requestedLayoutFromAbove = NO;
   }
 
   // Prepare to transition to nextLayout
