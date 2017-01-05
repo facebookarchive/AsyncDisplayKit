@@ -27,6 +27,7 @@
 #import "ASEqualityHelpers.h"
 #import "ASEqualityHashHelpers.h"
 #import "ASWeakMap.h"
+#import "CoreGraphics+ASConvenience.h"
 
 // TODO: It would be nice to remove this dependency; it's the only subclass using more than +FrameworkSubclasses.h
 #import "ASDisplayNodeInternal.h"
@@ -181,6 +182,26 @@ struct ASImageNodeDrawParameters {
 {
   // Invalidate all components around animated images
   [self invalidateAnimatedImage];
+}
+
+- (UIImage *)placeholderImage
+{
+  // FIXME: Replace this implementation with reusable CALayers that have .backgroundColor set.
+  // This would completely eliminate the memory and performance cost of the backing store.
+  CGSize size = self.calculatedSize;
+  if ((size.width * size.height) < CGFLOAT_EPSILON) {
+    return nil;
+  }
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  UIGraphicsBeginImageContext(size);
+  [self.placeholderColor setFill];
+  UIRectFill(CGRectMake(0, 0, size.width, size.height));
+  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  
+  return image;
 }
 
 #pragma mark - Layout and Sizing
