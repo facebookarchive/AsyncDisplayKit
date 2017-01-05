@@ -82,6 +82,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 @interface _ASHierarchyItemChange ()
 - (instancetype)initWithChangeType:(_ASHierarchyChangeType)changeType indexPaths:(NSArray *)indexPaths animationOptions:(ASDataControllerAnimationOptions)animationOptions presorted:(BOOL)presorted;
+- (instancetype)initWithChangeType:(_ASHierarchyChangeType)changeType fromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath animationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  On return `changes` is sorted according to the change type with changes coalesced by animationOptions
@@ -96,6 +97,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 @interface _ASHierarchyChangeSet () 
 
+@property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *moveItemChanges;
 @property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *insertItemChanges;
 @property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *originalInsertItemChanges;
 
@@ -132,6 +134,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   if (self) {
     _oldItemCounts = oldItemCounts;
     
+    _moveItemChanges = [[NSMutableArray alloc] init];
     _originalInsertItemChanges = [[NSMutableArray alloc] init];
     _insertItemChanges = [[NSMutableArray alloc] init];
     _originalDeleteItemChanges = [[NSMutableArray alloc] init];
@@ -205,6 +208,8 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 {
   [self _ensureCompleted];
   switch (changeType) {
+    case _ASHierarchyChangeTypeMove:
+      return _moveItemChanges;
     case _ASHierarchyChangeTypeInsert:
       return _insertItemChanges;
     case _ASHierarchyChangeTypeReload:
@@ -285,6 +290,13 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   [self _ensureNotCompleted];
   _ASHierarchySectionChange *change = [[_ASHierarchySectionChange alloc] initWithChangeType:_ASHierarchyChangeTypeReload indexSet:sections animationOptions:options];
   [_reloadSectionChanges addObject:change];
+}
+
+- (void)moveItemFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath animationOptions:(ASDataControllerAnimationOptions)options
+{
+  [self _ensureNotCompleted];
+  _ASHierarchyItemChange *change = [[_ASHierarchyItemChange alloc] initWithChangeType:_ASHierarchyChangeTypeMove fromIndexPath:fromIndexPath toIndexPath:toIndexPath animationOptions:options];
+  [_moveItemChanges addObject:change];
 }
 
 #pragma mark Private
@@ -712,6 +724,20 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
       SEL sorting = changeType == _ASHierarchyChangeTypeDelete ? @selector(asdk_inverseCompare:) : @selector(compare:);
       _indexPaths = [indexPaths sortedArrayUsingSelector:sorting];
     }
+    _animationOptions = animationOptions;
+  }
+  return self;
+}
+
+- (instancetype)initWithChangeType:(_ASHierarchyChangeType)changeType fromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath animationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  self = [super init];
+  if (self) {
+    ASDisplayNodeAssert(fromIndexPath != nil, @"Request to create _ASHierarchyItemChange with no fromIndexPath!");
+    ASDisplayNodeAssert(toIndexPath != nil, @"Request to create _ASHierarchyItemChange with no toIndexPath!");
+    _changeType = changeType;
+    _fromIndexPath = fromIndexPath;
+    _toIndexPath = toIndexPath;
     _animationOptions = animationOptions;
   }
   return self;

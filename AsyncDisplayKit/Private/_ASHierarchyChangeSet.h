@@ -27,6 +27,11 @@ typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
   _ASHierarchyChangeTypeReload,
   
   /**
+   * TODO
+   */
+  _ASHierarchyChangeTypeMove,
+  
+  /**
    * A change that was either an original delete, or the first 
    * part of a decomposed reload.
    */
@@ -79,6 +84,8 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 
 /// Index paths are sorted descending for changeType .Delete, ascending otherwise
 @property (nonatomic, strong, readonly) NSArray<NSIndexPath *> *indexPaths;
+@property (nonatomic, strong, readonly) NSIndexPath *fromIndexPath;
+@property (nonatomic, strong, readonly) NSIndexPath *toIndexPath;
 
 @property (nonatomic, readonly) _ASHierarchyChangeType changeType;
 
@@ -145,6 +152,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 - (void)insertItems:(NSArray<NSIndexPath *> *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)deleteItems:(NSArray<NSIndexPath *> *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)reloadItems:(NSArray<NSIndexPath *> *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
+- (void)moveItemFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath animationOptions:(ASDataControllerAnimationOptions)options;
 @end
 
 NS_ASSUME_NONNULL_END

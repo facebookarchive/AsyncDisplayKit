@@ -14,6 +14,7 @@
 @class ASIndexedNodeContext;
 
 typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NSArray<NSIndexPath *> *indexPaths);
+typedef void (^ASDataControllerMoveCompletionBlock)(NSIndexPath *fromIndexPath, NSIndexPath *toIndexPath);
 
 @interface ASDataController (Subclasses)
 

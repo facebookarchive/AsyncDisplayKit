@@ -98,6 +98,10 @@
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
       [super insertRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
+    
+    for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeMove]) {
+      [super moveRowAtIndexPath:change.fromIndexPath toIndexPath:change.toIndexPath withAnimationOptions:change.animationOptions];
+    }
 
 #if ASEVENTLOG_ENABLE
     NSString *changeSetDescription = ASObjectDescriptionMakeTiny(_changeSet);
@@ -200,8 +204,7 @@
 {
   ASDisplayNodeAssertMainThread();
   [self beginUpdates];
-  [_changeSet deleteItems:@[indexPath] animationOptions:animationOptions];
-  [_changeSet insertItems:@[newIndexPath] animationOptions:animationOptions];
+  [_changeSet moveItemFromIndexPath:indexPath toIndexPath:newIndexPath animationOptions:animationOptions];
   [self endUpdates];
 }
 

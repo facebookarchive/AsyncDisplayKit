@@ -62,6 +62,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 
   BOOL _delegateDidInsertNodes;
   BOOL _delegateDidDeleteNodes;
+  BOOL _delegateDidMoveNode;
   BOOL _delegateDidInsertSections;
   BOOL _delegateDidDeleteSections;
 }
@@ -122,6 +123,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   // Interrogate our delegate to understand its capabilities, optimizing away expensive respondsToSelector: calls later.
   _delegateDidInsertNodes     = [_delegate respondsToSelector:@selector(dataController:didInsertNodes:atIndexPaths:withAnimationOptions:)];
   _delegateDidDeleteNodes     = [_delegate respondsToSelector:@selector(dataController:didDeleteNodes:atIndexPaths:withAnimationOptions:)];
+  _delegateDidMoveNode        = [_delegate respondsToSelector:@selector(dataController:didMoveFromIndexPath:toIndexPath:withinAnimationOptions:)];
   _delegateDidInsertSections  = [_delegate respondsToSelector:@selector(dataController:didInsertSections:atIndexSet:withAnimationOptions:)];
   _delegateDidDeleteSections  = [_delegate respondsToSelector:@selector(dataController:didDeleteSectionsAtIndexSet:withAnimationOptions:)];
 }
@@ -284,6 +286,26 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   }];
 }
 
+/**
+ * TODO
+ */
+
+- (void)moveNodeOfKind:(NSString *)kind fromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath completion:(ASDataControllerMoveCompletionBlock)completionBlock
+{
+  ASSERT_ON_EDITING_QUEUE;
+  if (_dataSource == nil) {
+    return;
+  }
+  
+  [_mainSerialQueue performBlockOnMainThread:^{
+    NSMutableArray *allNodes = _completedNodes[kind];
+    ASMoveElementInTwoDimensionalArray(allNodes, fromIndexPath, toIndexPath);
+    if (completionBlock) {
+      completionBlock(fromIndexPath, toIndexPath);
+    }
+  }];
+}
+
 - (void)insertSections:(NSMutableArray *)sections ofKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSArray *sections, NSIndexSet *indexSet))completionBlock
 {
   ASSERT_ON_EDITING_QUEUE;
@@ -359,6 +381,22 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
     
     if (_delegateDidDeleteNodes)
       [_delegate dataController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+  }];
+}
+
+/**
+ * TODO
+ */
+
+-(void)_moveNodeFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  ASSERT_ON_EDITING_QUEUE;
+  
+  [self moveNodeOfKind:ASDataControllerRowNodeKind fromIndexPath:fromIndexPath toIndexPath:toIndexPath completion:^(NSIndexPath *fromIndexPath, NSIndexPath *toIndexPath) {
+    ASDisplayNodeAssertMainThread();
+    
+    if (_delegateDidMoveNode)
+      [_delegate dataController:self didMoveFromIndexPath:fromIndexPath toIndexPath:toIndexPath withinAnimationOptions:animationOptions];
   }];
 }
 
@@ -728,6 +766,11 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }
 
+- (void)willMoveFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath
+{
+  // Optional TODO
+}
+
 #pragma mark - Row Editing (External API)
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
@@ -845,7 +888,22 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  ASDisplayNodeAssert(NO, @"ASDataController does not support %@. Call this on ASChangeSetDataController and the move will be processed along with the current batch of updates.", NSStringFromSelector(_cmd));
+  ASDisplayNodeAssertMainThread();
+  
+  if (!_initialReloadDataHasBeenCalled) {
+    return;
+  }
+  
+  LOG(@"Edit Command - moveRow: %@ to %@", indexPath, newIndexPath);
+  
+  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
+  
+  dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
+    [self willMoveFromIndexPath:indexPath toIndexPath:newIndexPath];
+    
+    LOG(@"Edit Transaction - moveRow: %@ to %@", indexPath, newIndexPath);
+    [self _moveNodeFromIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:animationOptions];
+  });
 }
 
 #pragma mark - Data Querying (Subclass API)

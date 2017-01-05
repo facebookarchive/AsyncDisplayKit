@@ -1626,6 +1626,28 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   }
 }
 
+- (void)rangeController:(ASRangeController *)rangeController didMoveFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+    ASDisplayNodeAssertMainThread();
+    if (!self.asyncDataSource || _superIsPendingDataLoad) {
+        return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+    }
+    
+    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[fromIndexPath, toIndexPath] batched:_performingBatchUpdates];
+    if (_performingBatchUpdates) {
+      [_batchUpdateBlocks addObject:^{
+        [super moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
+      }];
+    } else {
+      [UIView performWithoutAnimation:^{
+        [super moveItemAtIndexPath:fromIndexPath toIndexPath:toIndexPath];
+        // Flush any range changes that happened as part of submitting the update.
+        [_rangeController updateIfNeeded];
+        [self _scheduleCheckForBatchFetchingForNumberOfChanges:2]; // TODO
+      }];
+    }
+}
+
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
