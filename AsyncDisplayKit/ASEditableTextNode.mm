@@ -325,6 +325,7 @@
 - (void)setMaximumLinesToDisplay:(NSUInteger)maximumLines
 {
   _maximumLinesToDisplay = maximumLines;
+  [self setNeedsLayout];
 }
 
 #pragma mark -
