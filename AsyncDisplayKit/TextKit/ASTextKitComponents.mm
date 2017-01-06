@@ -69,8 +69,8 @@
 }
 
 - (CGSize)sizeForConstrainedWidth:(CGFloat)constrainedWidth
-              forMaxNumberOfLines:(NSInteger)maxNumberOfLines {
-  
+              forMaxNumberOfLines:(NSInteger)maxNumberOfLines
+{
   if (maxNumberOfLines == 0) {
     return [self sizeForConstrainedWidth:constrainedWidth];
   }
