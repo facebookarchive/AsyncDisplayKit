@@ -237,7 +237,6 @@
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  
   ASTextKitComponents *displayedComponents = [self isDisplayingPlaceholder] ? _placeholderTextKitComponents : _textKitComponents;
   
   CGSize textSize;
@@ -252,7 +251,6 @@
   CGFloat width = std::ceil(textSize.width + _textContainerInset.left + _textContainerInset.right);
   CGFloat height = std::ceil(textSize.height + _textContainerInset.top + _textContainerInset.bottom);
   return CGSizeMake(std::fmin(width, constrainedSize.width), std::fmin(height, constrainedSize.height));
-  
 }
 
 - (void)layout
