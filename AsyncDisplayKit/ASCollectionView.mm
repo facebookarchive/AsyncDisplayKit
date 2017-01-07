@@ -285,8 +285,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   // Experiments done by Instagram show that this option being YES (default)
   // when unused causes a significant hit to scroll performance.
   // https://github.com/Instagram/IGListKit/issues/318
+
   if (AS_AT_LEAST_IOS10) {
-    self.prefetchingEnabled = NO;
+//    self.prefetchingEnabled = NO;
   }
 
   _layoutController = [[ASCollectionViewLayoutController alloc] initWithCollectionView:self];

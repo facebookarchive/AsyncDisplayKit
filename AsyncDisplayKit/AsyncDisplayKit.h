@@ -96,5 +96,6 @@
 
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
 #import <AsyncDisplayKit/ASDisplayNode+Deprecated.h>
+#import <AsyncDisplayKit/ASDisplayNodeDebugUI.h>
 
 #import <AsyncDisplayKit/ASCollectionNode+Beta.h>
