@@ -8,6 +8,7 @@
 
 #import "ASDisplayNodeDebugViewController.h"
 #import "ASLayoutSpecDebuggingContext.h"
+#import "ASDebugOverlayRootViewController.h"
 
 @interface ASDisplayNodeDebugViewController () <UIGestureRecognizerDelegate>
 @property (nonatomic, strong) ASButtonNode *button;
@@ -22,6 +23,7 @@
 @property (nonatomic, strong) NSArray<NSValue *> *sizes;
 @property (nonatomic, strong) UIPanGestureRecognizer *panRecognizer;
 @property (nonatomic) UIRectEdge panRectEdge;
+@property (nonatomic, strong) ASLayoutSpecTree *tree;
 @end
 
 @implementation ASDisplayNodeDebugViewController
@@ -55,6 +57,7 @@
     // Setup button
     ASButtonNode *btn = [[ASButtonNode alloc] init];
     [btn setTitle:@"Info" withFont:[UIFont boldSystemFontOfSize:20] withColor:[UIColor blueColor] forState:ASControlStateNormal];
+    [btn addTarget:self action:@selector(buttonAction) forControlEvents:ASControlNodeEventTouchUpInside];
     _button = btn;
     [node addSubnode:btn];
     
@@ -80,6 +83,14 @@
 - (CGSize)currentSize
 {
   return self.debuggingContainerNode.style.preferredSize;
+}
+
+- (void)buttonAction
+{
+  ASDebugOverlayRootViewController *vc = [[ASDebugOverlayRootViewController alloc] init];
+  vc.tree = self.tree;
+  UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
+  [self presentViewController:nav animated:YES completion:nil];
 }
 
 /**
@@ -133,7 +144,7 @@
   ASLayoutSpecTree *treeForVC = [ASLayoutSpecTree currentTree];
   [ASLayoutSpecTree end];
   
-  ASLayoutSpecTree *treeForDebuggingNode = [treeForVC subtreeForElement:self.debuggingNode];
+  self.tree = [treeForVC subtreeForElement:self.debuggingNode];
   [super viewDidLayoutSubviews];
 }
 

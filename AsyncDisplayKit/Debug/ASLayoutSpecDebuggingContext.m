@@ -16,7 +16,7 @@
 
 @implementation ASLayoutSpecDebuggingContext
 
-+ (ASLayoutSpecDebuggingContext *)contextWithElement:(id<ASLayoutElement>)element
++ (ASLayoutSpecDebuggingContext *)contextWithElementIdentifier:(id)identifier
 {
   /**
    * Note: Currently this just grows and grows. In practice it's not a big problem
@@ -29,15 +29,11 @@
     storage = [NSMapTable strongToStrongObjectsMapTable];
     contextsLock = [[NSLock alloc] init];
   });
-  id identifier = element.identifier;
   [contextsLock lock];
   ASLayoutSpecDebuggingContext *context = [storage objectForKey:identifier];
   if (context == nil) {
     context = [[ASLayoutSpecDebuggingContext alloc] initWithIdentifier:identifier];
-    context.element = element;
     [storage setObject:context forKey:identifier];
-  } else {
-    context.element = element;
   }
   [contextsLock unlock];
   
@@ -60,8 +56,20 @@
 
 - (void)setElement:(id<ASLayoutElement>)element
 {
-  _element = element;
-  [self _applyPropertyOverrides];
+  if (element != _element) {
+    _element = element;
+    [self _captureDefaultProperties];
+    [self _applyPropertyOverrides];
+  }
+}
+
+- (void)_captureDefaultProperties
+{
+  NSMutableDictionary *newDefaultProps = [NSMutableDictionary dictionary];
+  for (NSString *keyPath in self.overriddenProperties) {
+    newDefaultProps[keyPath] = [(id)_element valueForKeyPath:keyPath];
+  }
+  _defaultProperties = newDefaultProps;
 }
 
 - (void)_applyPropertyOverrides
@@ -122,7 +130,8 @@ static NSString *const ASLayoutDebugTreeCurrentKey = @"org.asyncdisplaykit.curre
 {
   if (self = [super init]) {
     _subtrees = [NSMutableArray array];
-    _context = [ASLayoutSpecDebuggingContext contextWithElement:element];
+    _context = [ASLayoutSpecDebuggingContext contextWithElementIdentifier:element.identifier];
+    _context.element = element;
   }
   return self;
 }
@@ -131,17 +140,6 @@ static NSString *const ASLayoutDebugTreeCurrentKey = @"org.asyncdisplaykit.curre
 {
   [_subtrees addObject:tree];
   tree.parent = self;
-}
-
-- (ASLayoutSpecTree *)subtreeAtIndexPath:(NSIndexPath *)indexPath
-{
-  NSInteger l = indexPath.length;
-  ASLayoutSpecTree *tree = self;
-  for (NSInteger p = 0; p < l; p++) {
-    NSInteger i = [indexPath indexAtPosition:p];
-    tree = tree.subtrees[i];
-  }
-  return tree;
 }
 
 - (ASLayoutSpecTree *)subtreeForElement:(id<ASLayoutElement>)element
@@ -157,6 +155,50 @@ static NSString *const ASLayoutDebugTreeCurrentKey = @"org.asyncdisplaykit.curre
     }
   }
   return nil;
+}
+
+- (NSInteger)totalCount
+{
+  NSInteger result = 1;
+  for (ASLayoutSpecTree *tree in self.subtrees) {
+    result += tree.totalCount;
+  }
+  return result;
+}
+
+- (NSIndexPath *)indexPathForIndex:(NSInteger)index
+{
+  NSInteger idx = 0;
+  return [self _indexPathForIndex:index runningIndex:&idx baseIndexPath:[NSIndexPath new]];
+}
+
+- (NSIndexPath *)_indexPathForIndex:(NSInteger)index runningIndex:(NSInteger *)runningIndex baseIndexPath:(NSIndexPath *)baseIndexPath
+{
+  if (index == *runningIndex) {
+    return baseIndexPath;
+  }
+  
+  NSInteger i = 0;
+  for (ASLayoutSpecTree *s in self.subtrees) {
+    *runningIndex += 1;
+    NSIndexPath *newBase = [baseIndexPath indexPathByAddingIndex:i++];
+    NSIndexPath *result = [s _indexPathForIndex:index runningIndex:runningIndex baseIndexPath:newBase];
+    if (result) {
+      return result;
+    }
+  }
+  return nil;
+}
+
+- (ASLayoutSpecTree *)subtreeAtIndexPath:(NSIndexPath *)indexPath
+{
+  NSInteger l = indexPath.length;
+  ASLayoutSpecTree *t = self;
+  for (NSInteger p = 0; p < l; p++) {
+    NSInteger i = [indexPath indexAtPosition:p];
+    t = t.subtrees[i];
+  }
+  return t;
 }
 
 #pragma mark - Description
