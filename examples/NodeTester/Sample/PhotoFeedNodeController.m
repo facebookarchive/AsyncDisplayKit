@@ -114,16 +114,6 @@
   } numResultsToReturn:20];
 }
 
-- (void)viewDidAppear:(BOOL)animated
-{
-  [super viewDidAppear:animated];
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    ASDisplayNode *node = [[PhotoCellNode alloc] initWithPhotoObject:[PhotoModel samplePhotoModel]];
-    [[ASDisplayNodeDebugUIManager sharedManager] showDebugUIWithNode:node initialSize:CGSizeZero];
-  });
-}
-
 //- (void)requestCommentsForPhotos:(NSArray *)newPhotos
 //{
 //  for (PhotoModel *photo in newPhotos) {

@@ -13,12 +13,15 @@
 #import "ASLayoutSpec+Subclasses.h"
 #import "ASLayoutElementStylePrivate.h"
 #import "ASLayoutSpec+Debug.h"
+#import "ASLayoutSpecDebuggingContext.h"
 
 #import <objc/runtime.h>
 #import <map>
 #import <vector>
 
-@implementation ASLayoutSpec
+@implementation ASLayoutSpec {
+  NSNumber *_creationReturnAddress;
+}
 
 // Dynamic properties for ASLayoutElements
 @dynamic layoutElementType;
@@ -27,13 +30,15 @@
 
 #pragma mark - Class
 
+#if DEBUG
 + (void)initialize
 {
   [super initialize];
   if (self != [ASLayoutSpec class]) {
-    ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASLayoutSpec class], self, @selector(measureWithSizeRange:)), @"Subclass %@ must not override measureWithSizeRange: method. Instead overwrite calculateLayoutThatFits:", NSStringFromClass(self));
+    ASDisplayNodeAssert(!ASSubclassOverridesSelector([ASLayoutSpec class], self, @selector(layoutThatFits:)), @"Subclass %@ must not override layoutThatFits: method. Instead overwrite calculateLayoutThatFits:", NSStringFromClass(self));
   }
 }
+#endif
 
 
 #pragma mark - Lifecycle
@@ -43,12 +48,26 @@
   if (!(self = [super init])) {
     return nil;
   }
+	
+  NSInteger nonLayoutSpecFrameIndex = [[NSThread callStackSymbols] indexOfObjectPassingTest:^BOOL(NSString * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    return [obj rangeOfString:@"LayoutSpec"].location == NSNotFound;
+  }];
+  if (nonLayoutSpecFrameIndex != NSNotFound) {
+    _creationReturnAddress = [NSThread callStackReturnAddresses][nonLayoutSpecFrameIndex];
+  } else {
+    ASDisplayNodeFailAssert(@"Failed to find non-LayoutSpec frame to get return address from.");
+  }
   
   _isMutable = YES;
   _environmentState = ASEnvironmentStateMakeDefault();
   _childrenArray = [[NSMutableArray alloc] init];
   
   return self;
+}
+
+- (id)identifier
+{
+  return _creationReturnAddress;
 }
 
 - (ASLayoutElementType)layoutElementType
@@ -121,7 +140,10 @@
 
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
 {
-  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
+  [ASLayoutSpecTree beginWithElement:self];
+  id layout = [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
+  [ASLayoutSpecTree end];
+  return layout;
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize

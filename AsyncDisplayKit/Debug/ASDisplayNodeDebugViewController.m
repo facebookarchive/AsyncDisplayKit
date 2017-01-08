@@ -7,10 +7,17 @@
 //
 
 #import "ASDisplayNodeDebugViewController.h"
+#import "ASLayoutSpecDebuggingContext.h"
 
 @interface ASDisplayNodeDebugViewController () <UIGestureRecognizerDelegate>
 @property (nonatomic, strong) ASButtonNode *button;
+
+// A node we put around the user's node.
 @property (nonatomic, strong) ASDisplayNode *debuggingContainerNode;
+
+// The node the user is testing.
+@property (nonatomic, strong) ASDisplayNode *debuggingNode;
+
 @property (nonatomic, strong, nullable) NSValue *selectedSize;
 @property (nonatomic, strong) NSArray<NSValue *> *sizes;
 @property (nonatomic, strong) UIPanGestureRecognizer *panRecognizer;
@@ -24,7 +31,7 @@
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
   node.backgroundColor = [UIColor blackColor];
   if (self = [super initWithNode:node]) {
-    
+    _debuggingNode = debuggingNode;
     _panRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(didPan:)];
     _panRecognizer.delegate = self;
     // If they specify no sizes, use the size of the main screen.
@@ -113,6 +120,21 @@
     [self.debuggingContainerNode invalidateCalculatedLayout];
     [self.node setNeedsLayout];
   }
+}
+
+- (void)viewWillLayoutSubviews
+{
+  [ASLayoutSpecTree beginWithElement:nil];
+  [super viewWillLayoutSubviews];
+}
+
+- (void)viewDidLayoutSubviews
+{
+  ASLayoutSpecTree *treeForVC = [ASLayoutSpecTree currentTree];
+  [ASLayoutSpecTree end];
+  
+  ASLayoutSpecTree *treeForDebuggingNode = [treeForVC subtreeForElement:self.debuggingNode];
+  [super viewDidLayoutSubviews];
 }
 
 @end

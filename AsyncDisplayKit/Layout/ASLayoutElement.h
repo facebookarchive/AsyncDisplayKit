@@ -50,7 +50,7 @@ NS_ASSUME_NONNULL_BEGIN
  * access to the options via convenience properties. If you are creating custom layout spec, then you can
  * extend the backing layout options class to accommodate any new layout options.
  */
-@protocol ASLayoutElement <ASEnvironment, ASLayoutElementPrivate, ASLayoutElementExtensibility, ASLayoutElementStylability, NSFastEnumeration>
+@protocol ASLayoutElement <ASEnvironment, ASLayoutElementPrivate, ASLayoutElementExtensibility, ASLayoutElementStylability, NSFastEnumeration, NSObject>
 
 #pragma mark - Getter
 
@@ -73,6 +73,14 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract Optional name that is printed by ascii art string and displayed in description. 
  */
 @property (nullable, nonatomic, copy) NSString *debugName;
+
+/**
+ * An identifier for this element, which should consist _across_ layout passes. -hash and -isEqual: will be used.
+ *
+ * Nodes return an +[NSValue valueWithNonretainedObject:self]
+ * LayoutSpecs return an NSNumber of the return address where they were created, since they are regenerated each pass.
+ */
+@property (nonatomic, readonly) id identifier;
 
 #pragma mark - Calculate layout
 

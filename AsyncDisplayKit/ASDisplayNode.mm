@@ -35,6 +35,7 @@
 #import "ASCellNode+Internal.h"
 #import "ASWeakProxy.h"
 #import "ASLayoutSpecPrivate.h"
+#import "ASLayoutSpecDebuggingContext.h"
 
 #if DEBUG
   #define AS_DEDUPE_LAYOUT_SPEC_TREE 1
@@ -914,14 +915,21 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   // Creat a pending display node layout for the layout pass
+  [ASLayoutSpecTree beginWithElement:self];
   _pendingDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>(
     [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
     constrainedSize,
     parentSize
   );
+  [ASLayoutSpecTree end];
   
   ASDisplayNodeAssertNotNil(_pendingDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _pendingDisplayNodeLayout->layout should not be nil! %@", self);
   return _pendingDisplayNodeLayout->layout ?: [ASLayout layoutWithLayoutElement:self size:{0, 0}];
+}
+
+- (id)identifier
+{
+  return [NSValue valueWithNonretainedObject:self];
 }
 
 - (ASLayoutElementType)layoutElementType
