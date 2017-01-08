@@ -22,6 +22,7 @@
 #import "ASDispatch.h"
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
+#import "_ASHierarchyChangeSet.h"
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -65,6 +66,9 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   BOOL _delegateDidMoveNode;
   BOOL _delegateDidInsertSections;
   BOOL _delegateDidDeleteSections;
+  
+  NSMutableArray *_moveFromIndexPaths;
+  NSMutableArray *_moveToIndexPaths;
 }
 
 @end
@@ -290,20 +294,15 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
  * TODO
  */
 
-- (void)moveNodeOfKind:(NSString *)kind fromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath completion:(ASDataControllerMoveCompletionBlock)completionBlock
+- (void)prepareMoveItemChanges:(NSArray *)items
 {
-  ASSERT_ON_EDITING_QUEUE;
-  if (_dataSource == nil) {
-    return;
-  }
+  _moveFromIndexPaths = [[NSMutableArray alloc] initWithCapacity:items.count];
+  _moveToIndexPaths = [[NSMutableArray alloc] initWithCapacity:items.count];
   
-  [_mainSerialQueue performBlockOnMainThread:^{
-    NSMutableArray *allNodes = _completedNodes[kind];
-    ASMoveElementInTwoDimensionalArray(allNodes, fromIndexPath, toIndexPath);
-    if (completionBlock) {
-      completionBlock(fromIndexPath, toIndexPath);
-    }
-  }];
+  for (_ASHierarchyMoveItemChange *change in items) {
+    [_moveFromIndexPaths addObject:change.fromIndexPath];
+    [_moveToIndexPaths addObject:change.toIndexPath];
+  }
 }
 
 - (void)insertSections:(NSMutableArray *)sections ofKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSArray *sections, NSIndexSet *indexSet))completionBlock
@@ -361,8 +360,19 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   [self insertNodes:nodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
     ASDisplayNodeAssertMainThread();
     
+    // TODO - Filter out Move indexPaths
+    NSMutableArray *newNodes = [[NSMutableArray alloc] initWithCapacity:nodes.count];
+    NSMutableArray *newIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+    
+    for (int i = 0; i < indexPaths.count; i++) {
+      if (![_moveToIndexPaths containsObject:indexPaths[i]]) {
+        [newNodes addObject:nodes[i]];
+        [newIndexPaths addObject:indexPaths[i]];
+      }
+    }
+    
     if (_delegateDidInsertNodes)
-      [_delegate dataController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+      [_delegate dataController:self didInsertNodes:newNodes atIndexPaths:newIndexPaths withAnimationOptions:animationOptions];
   }];
 }
 
@@ -379,8 +389,19 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   [self deleteNodesOfKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
     ASDisplayNodeAssertMainThread();
     
+    // TODO - Filter out Move indexPaths
+    NSMutableArray *newNodes = [[NSMutableArray alloc] initWithCapacity:nodes.count];
+    NSMutableArray *newIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+    
+    for (int i = 0; i < indexPaths.count; i++) {
+      if (![_moveFromIndexPaths containsObject:indexPaths[i]]) {
+        [newNodes addObject:nodes[i]];
+        [newIndexPaths addObject:indexPaths[i]];
+      }
+    }
+    
     if (_delegateDidDeleteNodes)
-      [_delegate dataController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+      [_delegate dataController:self didDeleteNodes:newNodes atIndexPaths:newIndexPaths withAnimationOptions:animationOptions];
   }];
 }
 
@@ -392,7 +413,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 {
   ASSERT_ON_EDITING_QUEUE;
   
-  [self moveNodeOfKind:ASDataControllerRowNodeKind fromIndexPath:fromIndexPath toIndexPath:toIndexPath completion:^(NSIndexPath *fromIndexPath, NSIndexPath *toIndexPath) {
+  [_mainSerialQueue performBlockOnMainThread:^{
     ASDisplayNodeAssertMainThread();
     
     if (_delegateDidMoveNode)

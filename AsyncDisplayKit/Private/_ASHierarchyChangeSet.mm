@@ -82,7 +82,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 @interface _ASHierarchyItemChange ()
 - (instancetype)initWithChangeType:(_ASHierarchyChangeType)changeType indexPaths:(NSArray *)indexPaths animationOptions:(ASDataControllerAnimationOptions)animationOptions presorted:(BOOL)presorted;
-- (instancetype)initWithChangeType:(_ASHierarchyChangeType)changeType fromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath animationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  On return `changes` is sorted according to the change type with changes coalesced by animationOptions
@@ -95,9 +94,14 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 + (void)ensureItemChanges:(NSArray<_ASHierarchyItemChange *> *)changes ofSameType:(_ASHierarchyChangeType)changeType;
 @end
 
+@interface  _ASHierarchyMoveItemChange ()
+- (instancetype)initWithChangeType:(_ASHierarchyChangeType)changeType fromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath animationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+@end
+
 @interface _ASHierarchyChangeSet () 
 
-@property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *moveItemChanges;
+@property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyMoveItemChange *> *moveItemChanges;
 @property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *insertItemChanges;
 @property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *originalInsertItemChanges;
 
@@ -295,7 +299,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 - (void)moveItemFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath animationOptions:(ASDataControllerAnimationOptions)options
 {
   [self _ensureNotCompleted];
-  _ASHierarchyItemChange *change = [[_ASHierarchyItemChange alloc] initWithChangeType:_ASHierarchyChangeTypeMove fromIndexPath:fromIndexPath toIndexPath:toIndexPath animationOptions:options];
+  _ASHierarchyMoveItemChange *change = [[_ASHierarchyMoveItemChange alloc] initWithChangeType:_ASHierarchyChangeTypeMove fromIndexPath:fromIndexPath toIndexPath:toIndexPath animationOptions:options];
   [_moveItemChanges addObject:change];
 }
 
@@ -729,20 +733,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   return self;
 }
 
-- (instancetype)initWithChangeType:(_ASHierarchyChangeType)changeType fromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath animationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  self = [super init];
-  if (self) {
-    ASDisplayNodeAssert(fromIndexPath != nil, @"Request to create _ASHierarchyItemChange with no fromIndexPath!");
-    ASDisplayNodeAssert(toIndexPath != nil, @"Request to create _ASHierarchyItemChange with no toIndexPath!");
-    _changeType = changeType;
-    _fromIndexPath = fromIndexPath;
-    _toIndexPath = toIndexPath;
-    _animationOptions = animationOptions;
-  }
-  return self;
-}
-
 // Create a mapping out of changes indexPaths to a {@section : [indexSet]} fashion
 // e.g. changes: (0 - 0), (0 - 1), (2 - 5)
 //  will become: {@0 : [0, 1], @2 : [5]}
@@ -887,6 +877,22 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   [result addObject:@{ @"type" : NSStringFromASHierarchyChangeType(_changeType) }];
   [result addObject:@{ @"indexPaths" : self.indexPaths }];
   return result;
+}
+
+@end
+
+@implementation _ASHierarchyMoveItemChange
+
+- (instancetype)initWithChangeType:(_ASHierarchyChangeType)changeType fromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath animationOptions:(ASDataControllerAnimationOptions)animationOptions
+{
+  self = [super init];
+  if (self) {
+    ASDisplayNodeAssert(fromIndexPath != nil, @"Request to create _ASHierarchyItemChange with no fromIndexPath!");
+    ASDisplayNodeAssert(toIndexPath != nil, @"Request to create _ASHierarchyItemChange with no toIndexPath!");
+    _fromIndexPath = fromIndexPath;
+    _toIndexPath = toIndexPath;
+  }
+  return self;
 }
 
 @end

@@ -84,8 +84,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 
 /// Index paths are sorted descending for changeType .Delete, ascending otherwise
 @property (nonatomic, strong, readonly) NSArray<NSIndexPath *> *indexPaths;
-@property (nonatomic, strong, readonly) NSIndexPath *fromIndexPath;
-@property (nonatomic, strong, readonly) NSIndexPath *toIndexPath;
 
 @property (nonatomic, readonly) _ASHierarchyChangeType changeType;
 
@@ -96,6 +94,14 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
  * with type .Insert or .Delete. Calling this on changes of other types is an error.
  */
 - (_ASHierarchyItemChange *)changeByFinalizingType;
+@end
+
+/**
+ * Subclass to handle move
+ */
+@interface _ASHierarchyMoveItemChange : _ASHierarchyItemChange
+@property (nonatomic, strong, readonly) NSIndexPath *fromIndexPath;
+@property (nonatomic, strong, readonly) NSIndexPath *toIndexPath;
 @end
 
 @interface _ASHierarchyChangeSet : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider>

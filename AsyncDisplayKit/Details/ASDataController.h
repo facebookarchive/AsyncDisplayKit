@@ -180,6 +180,8 @@ extern NSString * const ASCollectionInvalidUpdateException;
 
 - (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
+- (void)prepareMoveItemChanges:(NSArray *)items;
+
 /**
  * Re-measures all loaded nodes in the backing store.
  * 
