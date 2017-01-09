@@ -329,6 +329,38 @@ ASEnvironmentLayoutExtensibilityForwarding
   return [self layoutThatFits:constrainedSize];
 }
 
+#pragma mark - Description
+
+- (NSString *)description
+{
+  NSMutableString *result = [NSMutableString string];
+  [self _descriptionHelperWithIndentation:[NSMutableString string] result:result];
+  return result;
+}
+
+- (void)_descriptionHelperWithIndentation:(NSMutableString *)indentation result:(NSMutableString *)mutableString
+{
+  [mutableString appendFormat:@"%@%@%@\n", indentation, ASObjectDescriptionMakeTiny(self), self.debugName];
+  for (id<ASLayoutElement> element in self) {
+    [indentation appendString:@"\t"];
+    if (ASDisplayNode *node = ASDynamicCast(element, ASDisplayNode)) {
+      // This is a node. Put the node in there and then its layout spec.
+      [mutableString appendFormat:@"%@%@\n", indentation, ASObjectDescriptionMakeTiny(node)];
+      [indentation appendString:@"\t"];
+        // TODO: Use method
+        ASLayoutSpec *spec = [node valueForKey:@"layoutSpec"];
+        [spec _descriptionHelperWithIndentation:indentation result:mutableString];
+      [indentation deleteCharactersInRange:NSMakeRange(indentation.length - 1, 1)];
+    } else if (ASLayoutSpec *spec = ASDynamicCast(element, ASLayoutSpec)) {
+      [spec _descriptionHelperWithIndentation:indentation result:mutableString];
+    } else {
+      [mutableString appendFormat:@"%@%@\n", indentation, element];
+    }
+    [indentation deleteCharactersInRange:NSMakeRange(indentation.length - 1, 1)];
+  }
+}
+
+
 @end
 
 #pragma mark - ASWrapperLayoutSpec
