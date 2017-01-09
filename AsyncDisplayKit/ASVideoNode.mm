@@ -314,6 +314,9 @@ static NSString * const kRate = @"rate";
       if ([change[NSKeyValueChangeNewKey] integerValue] == AVPlayerItemStatusReadyToPlay) {
         if (self.playerState != ASVideoNodePlayerStatePlaying) {
           self.playerState = ASVideoNodePlayerStateReadyToPlay;
+          if (_shouldBePlaying && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+            [self play];
+          }
         }
         // If we don't yet have a placeholder image update it now that we should have data available for it
         if (self.image == nil && self.URL == nil) {
