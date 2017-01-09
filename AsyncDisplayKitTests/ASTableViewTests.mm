@@ -19,6 +19,7 @@
 #import "ASTableView+Undeprecated.h"
 #import <JGMethodSwizzler/JGMethodSwizzler.h>
 #import "ASXCTExtensions.h"
+#import "ASInternalHelpers.h"
 
 #define NumberOfSections 10
 #define NumberOfReloadIterations 50
@@ -234,7 +235,7 @@
 - (void)testConstrainedSizeForRowAtIndexPath
 {
   // Initial width of the table view is non-zero and all nodes are measured with this size.
-  // Any subsequence size change must trigger a relayout.
+  // Any subsequent size change must trigger a relayout.
   // Width and height are swapped so that a later size change will simulate a rotation
   ASTestTableView *tableView = [[ASTestTableView alloc] __initWithFrame:CGRectMake(0, 0, 100, 400)
                                                                   style:UITableViewStylePlain];
@@ -249,12 +250,13 @@
   [tableView setNeedsLayout];
   [tableView layoutIfNeeded];
   
+  CGFloat separatorHeight = 1.0 / ASScreenScale();
   for (int section = 0; section < NumberOfSections; section++) {
       for (int row = 0; row < [tableView numberOfRowsInSection:section]; row++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForRow:row inSection:section];
         CGRect rect = [tableView rectForRowAtIndexPath:indexPath];
         XCTAssertEqual(rect.size.width, 100);  // specified width should be ignored for table
-        XCTAssertEqual(rect.size.height, 42);
+        XCTAssertEqual(rect.size.height, 42 + separatorHeight);
       }
   }
 }
@@ -775,7 +777,7 @@
   [window layoutIfNeeded];
   [node waitUntilAllUpdatesAreCommitted];
   XCTAssertEqual(node.view.numberOfSections, NumberOfSections);
-  ASXCTAssertEqualRects(CGRectMake(0, 32, 375, 43.5), [node rectForRowAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], @"This text requires very specific geometry. The rect for the first row should match up.");
+  ASXCTAssertEqualRects(CGRectMake(0, 32, 375, 44), [node rectForRowAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], @"This text requires very specific geometry. The rect for the first row should match up.");
 
   __unused XCTestExpectation *e = [self expectationWithDescription:@"Did a bunch of rounds of updates."];
   NSInteger totalCount = 20;

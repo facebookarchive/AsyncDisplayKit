@@ -819,7 +819,18 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-  return node.calculatedSize.height;
+  CGFloat height = node.calculatedSize.height;
+  
+  /**
+   * Weirdly enough, Apple expects the return value here to _include_ the height
+   * of the separator, if there is one! So if our node wants to be 43.5, we need
+   * to return 44. UITableView will make a cell of height 44 with a content view
+   * of height 43.5.
+   */
+  if (tableView.separatorStyle != UITableViewCellSeparatorStyleNone) {
+    height += 1.0 / ASScreenScale();
+  }
+  return height;
 }
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
