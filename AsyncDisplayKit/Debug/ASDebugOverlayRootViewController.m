@@ -23,19 +23,25 @@
     table.delegate = self;
     table.dataSource = self;
     self.title = @"Debug Menu";
+    self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(done)];
   }
   return self;
-}
-
-- (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
-{
-  return self.tree.totalCount;
 }
 
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
   [self.tableNode deselectRowAtIndexPath:self.tableNode.indexPathForSelectedRow animated:animated];
+}
+
+- (void)done
+{
+  [self dismissViewControllerAnimated:YES completion:nil];
+}
+
+- (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
+{
+  return self.tree.totalCount;
 }
 
 - (ASCellNodeBlock)tableNode:(ASTableNode *)tableNode nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath

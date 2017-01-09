@@ -140,7 +140,13 @@
 
 - (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize parentSize:(CGSize)parentSize
 {
+  // HACK! We need to make this spec mutable again while we attach it to the current
+  // spec tree, because it may apply overridden properties to us!
+  BOOL wasMutable = self.isMutable;
+  self.isMutable = YES;
   [ASLayoutSpecTree beginWithElement:self];
+  self.isMutable = wasMutable;
+  
   id layout = [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
   [ASLayoutSpecTree end];
   return layout;

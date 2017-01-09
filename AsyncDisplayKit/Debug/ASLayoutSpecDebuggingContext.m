@@ -9,6 +9,7 @@
 #import "ASLayoutSpecDebuggingContext.h"
 #import "ASAssert.h"
 #import "ASObjectDescriptionHelpers.h"
+#import "ASLayoutSpec.h"
 
 @interface ASLayoutSpecDebuggingContext ()
 @property (nonatomic, strong) id<ASLayoutElement> element;
@@ -51,7 +52,11 @@
 - (void)setOverriddenProperties:(NSDictionary<NSString *,id> *)overriddenProperties
 {
   _overriddenProperties = overriddenProperties;
-  [self _applyPropertyOverrides];
+  
+  // Layout specs cannot be modified after use, so we have to wait for the next one.
+  if (![self.element isKindOfClass:[ASLayoutSpec class]]) {
+    [self _applyPropertyOverrides];
+  }
 }
 
 - (void)setElement:(id<ASLayoutElement>)element
