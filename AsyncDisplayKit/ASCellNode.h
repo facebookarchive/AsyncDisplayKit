@@ -90,12 +90,6 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  */
 @property (nonatomic, strong, readonly, nullable) UICollectionViewLayoutAttributes *layoutAttributes;
 
-/*
- * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
- */
-//@property (nonatomic, retain) UIColor *backgroundColor;
-@property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
-
 /**
  * A Boolean value that is synchronized with the underlying collection or tableView cell property.
  * Setting this value is equivalent to calling selectItem / deselectItem on the collection or table.
@@ -166,6 +160,25 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  *   `cellFrame` will be the zero rect.
  */
 - (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)event inScrollView:(nullable UIScrollView *)scrollView withCellFrame:(CGRect)cellFrame;
+
+#pragma mark - UITableViewCell specific passthrough properties
+
+/* @abstract The selection style when a tap on a cell occurs
+ * @default UITableViewCellSelectionStyleDefault
+ * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
+ */
+@property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
+
+/* @abstract The accessory type view on the right side of the cell. Please take care of your ASLayoutSpec so that doesn't overlay the accessoryView
+ * @default UITableViewCellAccessoryNone
+ * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
+ */
+@property (nonatomic) UITableViewCellAccessoryType accessoryType;
+
+/* @abstract The seperator inset of the cell seperator line
+ * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
+ */
+@property (nonatomic) UIEdgeInsets seperatorInset;
 
 @end
 
