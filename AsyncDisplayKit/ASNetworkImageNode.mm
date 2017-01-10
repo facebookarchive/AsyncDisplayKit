@@ -25,9 +25,6 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 @interface ASNetworkImageNode ()
 {
-  __weak id<ASImageCacheProtocol> _cache;
-  __weak id<ASImageDownloaderProtocol> _downloader;
-
   // Only access any of these with __instanceLock__.
   __weak id<ASNetworkImageNodeDelegate> _delegate;
 
@@ -53,6 +50,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   } _delegateFlags;
 
   //set on init only
+  __weak id<ASImageDownloaderProtocol> _downloader;
+  __weak id<ASImageCacheProtocol> _cache;
+  
   struct {
     unsigned int downloaderImplementsSetProgress:1;
     unsigned int downloaderImplementsSetPriority:1;
@@ -236,11 +236,13 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)setShouldRenderProgressImages:(BOOL)shouldRenderProgressImages
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  if (shouldRenderProgressImages == _shouldRenderProgressImages) {
-    return;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if (shouldRenderProgressImages == _shouldRenderProgressImages) {
+      return;
+    }
+    _shouldRenderProgressImages = shouldRenderProgressImages;
   }
-  _shouldRenderProgressImages = shouldRenderProgressImages;
 
   [self _updateProgressImageBlockOnDownloaderIfNeeded];
 }
@@ -293,12 +295,19 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)didEnterVisibleState
 {
   [super didEnterVisibleState];
-  ASDN::MutexLocker l(__instanceLock__);
+  
+  id downloadIdentifier = nil;
+  
+  {
+    ASDN::MutexLocker l(__instanceLock__);
 
-  if (_downloaderFlags.downloaderImplementsSetPriority) {
-    if (_downloadIdentifier != nil) {
-      [_downloader setPriority:ASImageDownloaderPriorityVisible withDownloadIdentifier:_downloadIdentifier];
+    if (_downloaderFlags.downloaderImplementsSetPriority) {
+      downloadIdentifier = _downloadIdentifier;
     }
+  }
+  
+  if (downloadIdentifier != nil) {
+    [_downloader setPriority:ASImageDownloaderPriorityVisible withDownloadIdentifier:downloadIdentifier];
   }
   
   [self _updateProgressImageBlockOnDownloaderIfNeeded];
@@ -307,12 +316,18 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)didExitVisibleState
 {
   [super didExitVisibleState];
-  ASDN::MutexLocker l(__instanceLock__);
+  
+  id downloadIdentifier = nil;
 
-  if (_downloaderFlags.downloaderImplementsSetPriority) {
-    if (_downloadIdentifier != nil) {
-      [_downloader setPriority:ASImageDownloaderPriorityPreload withDownloadIdentifier:_downloadIdentifier];
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if (_downloaderFlags.downloaderImplementsSetPriority) {
+      downloadIdentifier = _downloadIdentifier;
     }
+  }
+  
+  if (downloadIdentifier != nil) {
+    [_downloader setPriority:ASImageDownloaderPriorityPreload withDownloadIdentifier:downloadIdentifier];
   }
   
   [self _updateProgressImageBlockOnDownloaderIfNeeded];
@@ -370,9 +385,16 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 
   // Read state.
-  BOOL shouldRender = _shouldRenderProgressImages && ASInterfaceStateIncludesVisible(_interfaceState);
-  id oldDownloadIDForProgressBlock = _downloadIdentifierForProgressBlock;
-  id newDownloadIDForProgressBlock = shouldRender ? _downloadIdentifier : nil;
+  BOOL shouldRender;
+  id oldDownloadIDForProgressBlock;
+  id newDownloadIDForProgressBlock;
+  BOOL clearAndReattempt = NO;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    shouldRender = _shouldRenderProgressImages && ASInterfaceStateIncludesVisible(_interfaceState);
+    oldDownloadIDForProgressBlock = _downloadIdentifierForProgressBlock;
+    newDownloadIDForProgressBlock = shouldRender ? _downloadIdentifier : nil;
+  }
 
   // If we're already bound to the correct download, we're done.
   if (ASObjectIsEqual(oldDownloadIDForProgressBlock, newDownloadIDForProgressBlock)) {
@@ -393,7 +415,19 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 
   // Update state.
-  _downloadIdentifierForProgressBlock = newDownloadIDForProgressBlock;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if (_downloadIdentifierForProgressBlock == oldDownloadIDForProgressBlock) {
+      _downloadIdentifierForProgressBlock = newDownloadIDForProgressBlock;
+    } else {
+      clearAndReattempt = YES;
+    }
+  }
+  
+  if (clearAndReattempt) {
+    [_downloader setProgressImageBlock:nil callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:newDownloadIDForProgressBlock];
+    [self _updateProgressImageBlockOnDownloaderIfNeeded];
+  }
 }
 
 - (void)_cancelDownloadAndClearImage
@@ -443,19 +477,46 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 - (void)_downloadImageWithCompletion:(void (^)(id <ASImageContainerProtocol> imageContainer, NSError*, id downloadIdentifier))finished
 {
   ASPerformBlockOnBackgroundThread(^{
+    NSURL *url;
+    id downloadIdentifier;
+    BOOL cancelAndReattempt = NO;
     
-    ASDN::MutexLocker l(__instanceLock__);
-    _downloadIdentifier = [_downloader downloadImageWithURL:_URL
-                                              callbackQueue:dispatch_get_main_queue()
-                                           downloadProgress:NULL
-                                                 completion:^(id <ASImageContainerProtocol> _Nullable imageContainer, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
-                                                   if (finished != NULL) {
-                                                     finished(imageContainer, error, downloadIdentifier);
-                                                   }
-                                                 }];
+    // Below, to avoid performance issues, we're calling downloadImageWithURL without holding the lock. This is a bit ugly because
+    // We need to reobtain the lock after and ensure that the task we've kicked off still matches our URL. If not, we need to cancel
+    // it and try again.
+    {
+      ASDN::MutexLocker l(__instanceLock__);
+      url = _URL;
+    }
+    
+    downloadIdentifier = [_downloader downloadImageWithURL:url
+                                             callbackQueue:dispatch_get_main_queue()
+                                          downloadProgress:NULL
+                                                completion:^(id <ASImageContainerProtocol> _Nullable imageContainer, NSError * _Nullable error, id  _Nullable downloadIdentifier) {
+                                                  if (finished != NULL) {
+                                                    finished(imageContainer, error, downloadIdentifier);
+                                                  }
+                                                }];
   
+    {
+      ASDN::MutexLocker l(__instanceLock__);
+      if ([_URL isEqual:url]) {
+        // The download we kicked off is correct, no need to do any more work.
+        _downloadIdentifier = downloadIdentifier;
+      } else {
+        // The URL changed since we kicked off our download task. This shouldn't happen often so we'll pay the cost and
+        // cancel that request and kick off a new one.
+        cancelAndReattempt = YES;
+      }
+    }
+    
+    if (cancelAndReattempt) {
+      [_downloader cancelImageDownloadForIdentifier:downloadIdentifier];
+      [self _downloadImageWithCompletion:finished];
+      return;
+    }
+    
     [self _updateProgressImageBlockOnDownloaderIfNeeded];
-      
   });
 }
 

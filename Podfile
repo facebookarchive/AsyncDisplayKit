@@ -2,16 +2,15 @@ source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '7.0'
 
-#TODO CocoaPods plugin instead?
-abstract_target 'Buck' do
+target :'AsyncDisplayKitTests' do
+  pod 'OCMock', '~> 2.2'
+  pod 'FBSnapshotTestCase/Core', '~> 2.1'
+  pod 'JGMethodSwizzler', :git => 'https://github.com/JonasGessner/JGMethodSwizzler', :branch => 'master'
+
+  # Only for buck build
   pod 'PINRemoteImage', '3.0.0-beta.7'
 
-  target :'AsyncDisplayKitTests' do
-    pod 'OCMock', '~> 2.2'
-    pod 'FBSnapshotTestCase/Core', '~> 2.1'
-    pod 'JGMethodSwizzler', :git => 'https://github.com/JonasGessner/JGMethodSwizzler', :branch => 'master'
-  end
-
+  #TODO CocoaPods plugin instead?
   post_install do |installer|
     require 'fileutils'
 
