@@ -211,6 +211,8 @@
 		690C356B1E05680300069B91 /* ASDimensionDeprecated.h in Headers */ = {isa = PBXBuildFile; fileRef = 690C356A1E05680300069B91 /* ASDimensionDeprecated.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		69127CFE1DD2B387004BF6E2 /* ASEventLog.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 696F01EA1DD2AF450049FBD5 /* ASEventLog.h */; };
 		693117CE1DC7C72700DE4784 /* ASDisplayNode+Deprecated.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 683489271D70DE3400327501 /* ASDisplayNode+Deprecated.h */; };
+		693DA50F1E2536A600F66DF4 /* ASDimensionInternal.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 690C35631E055C7B00069B91 /* ASDimensionInternal.h */; };
+		693DA5141E25373100F66DF4 /* ASDimensionDeprecated.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 690C356A1E05680300069B91 /* ASDimensionDeprecated.h */; };
 		69527B121DC84292004785FB /* ASLayoutElementStylePrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 69527B111DC84292004785FB /* ASLayoutElementStylePrivate.h */; };
 		6959433E1D70815300B0EE1F /* ASDisplayNodeLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6959433C1D70815300B0EE1F /* ASDisplayNodeLayout.mm */; };
 		6959433F1D70815300B0EE1F /* ASDisplayNodeLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6959433C1D70815300B0EE1F /* ASDisplayNodeLayout.mm */; };
@@ -679,6 +681,8 @@
 			dstPath = "include/$(PRODUCT_NAME)";
 			dstSubfolderSpec = 16;
 			files = (
+				693DA5141E25373100F66DF4 /* ASDimensionDeprecated.h in CopyFiles */,
+				693DA50F1E2536A600F66DF4 /* ASDimensionInternal.h in CopyFiles */,
 				68C2155C1DE11AA80019C4BC /* ASObjectDescriptionHelpers.h in CopyFiles */,
 				68C2155B1DE11A790019C4BC /* ASCollectionViewLayoutInspector.h in CopyFiles */,
 				DEB8ED7E1DD007F400DBDE55 /* ASLayoutElementInspectorNode.h in CopyFiles */,
