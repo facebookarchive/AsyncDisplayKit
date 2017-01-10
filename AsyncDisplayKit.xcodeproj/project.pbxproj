@@ -460,6 +460,12 @@
 		CCB2F34D1D63CCC6004E6DE9 /* ASDisplayNodeSnapshotTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CCB2F34C1D63CCC6004E6DE9 /* ASDisplayNodeSnapshotTests.m */; };
 		CCF18FF41D2575E300DF5895 /* NSIndexSet+ASHelpers.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4981BA1D1C7F65004E13CC /* NSIndexSet+ASHelpers.h */; };
 		CD75771B1E0AD2C700D7CE96 /* ASDisplayNodeController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7577171E0AD2C700D7CE96 /* ASDisplayNodeController.m */; };
+		CDF267D51E2544D300ECD6B9 /* ASDisplayNodeController.h in Headers */ = {isa = PBXBuildFile; fileRef = CD7577161E0AD2C700D7CE96 /* ASDisplayNodeController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CDF267D61E2544D600ECD6B9 /* ASDisplayNodeController.m in Sources */ = {isa = PBXBuildFile; fileRef = CD7577171E0AD2C700D7CE96 /* ASDisplayNodeController.m */; };
+		CDF267D71E2544DA00ECD6B9 /* ASDisplayNodeController+Subclasses.h in Headers */ = {isa = PBXBuildFile; fileRef = CD7577181E0AD2C700D7CE96 /* ASDisplayNodeController+Subclasses.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CDF267D81E2544DE00ECD6B9 /* ASDisplayNodeDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = CD7577191E0AD2C700D7CE96 /* ASDisplayNodeDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CDF267D91E2544E400ECD6B9 /* ASDisplayNodePresentation.h in Headers */ = {isa = PBXBuildFile; fileRef = CD75771A1E0AD2C700D7CE96 /* ASDisplayNodePresentation.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CDF267DA1E25450C00ECD6B9 /* ASDisplayNodeContainerDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = CD7577151E0AD2C700D7CE96 /* ASDisplayNodeContainerDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		D785F6631A74327E00291744 /* ASScrollNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = D785F6611A74327E00291744 /* ASScrollNode.mm */; };
 		DB55C2631C6408D6004EDCF5 /* _ASTransitionContext.m in Sources */ = {isa = PBXBuildFile; fileRef = DB55C2601C6408D6004EDCF5 /* _ASTransitionContext.m */; };
 		DB55C2671C641AE4004EDCF5 /* ASContextTransitioning.h in Headers */ = {isa = PBXBuildFile; fileRef = DB55C2651C641AE4004EDCF5 /* ASContextTransitioning.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -1825,6 +1831,7 @@
 				6907C2581DC4ECFE00374C66 /* ASObjectDescriptionHelpers.h in Headers */,
 				69E0E8A71D356C9400627613 /* ASEqualityHelpers.h in Headers */,
 				698C8B621CAB49FC0052DC3F /* ASLayoutElementExtensibility.h in Headers */,
+				CDF267D71E2544DA00ECD6B9 /* ASDisplayNodeController+Subclasses.h in Headers */,
 				698548641CA9E025008A345F /* ASEnvironment.h in Headers */,
 				AC026B6A1BD57D6F00BBC17E /* ASChangeSetDataController.h in Headers */,
 				69F10C871C84C35D0026140C /* ASRangeControllerUpdateRangeProtocol+Beta.h in Headers */,
@@ -1872,6 +1879,7 @@
 				B35061F31B010EFD0018CF92 /* ASCellNode.h in Headers */,
 				CC87BB951DA8193C0090E380 /* ASCellNode+Internal.h in Headers */,
 				34EFC7631B701CBF00AD841F /* ASCenterLayoutSpec.h in Headers */,
+				CDF267D91E2544E400ECD6B9 /* ASDisplayNodePresentation.h in Headers */,
 				9C70F20C1CDBE9B6007D6C76 /* ASCollectionDataController.h in Headers */,
 				18C2ED7F1B9B7DE800F627B3 /* ASCollectionNode.h in Headers */,
 				9C8898BD1C738BB800D6B02E /* ASTextKitFontSizeAdjuster.h in Headers */,
@@ -1881,6 +1889,7 @@
 				509E68631B3AEDB4009B9150 /* ASCollectionViewLayoutController.h in Headers */,
 				CC3B20841C3F76D600798563 /* ASPendingStateController.h in Headers */,
 				92074A621CC8BA1900918F75 /* ASImageNode+tvOS.h in Headers */,
+				CDF267D81E2544DE00ECD6B9 /* ASDisplayNodeDelegate.h in Headers */,
 				B35061F71B010EFD0018CF92 /* ASCollectionViewProtocols.h in Headers */,
 				68FC85E31CE29B7E00EDD713 /* ASTabBarController.h in Headers */,
 				DE6EA3231C14000600183B10 /* ASDisplayNode+FrameworkPrivate.h in Headers */,
@@ -1892,9 +1901,11 @@
 				68FC85EA1CE29C7D00EDD713 /* ASVisibilityProtocols.h in Headers */,
 				69C4CAF61DA3147000B1EC9B /* ASLayoutElementStylePrivate.h in Headers */,
 				A37320101C571B740011FC94 /* ASTextNode+Beta.h in Headers */,
+				CDF267DA1E25450C00ECD6B9 /* ASDisplayNodeContainerDelegate.h in Headers */,
 				DBABFAFC1C6A8D2F0039EA4A /* _ASTransitionContext.h in Headers */,
 				9C70F2061CDA4F0C007D6C76 /* ASTraitCollection.h in Headers */,
 				8021EC1D1D2B00B100799119 /* UIImage+ASConvenience.h in Headers */,
+				CDF267D51E2544D300ECD6B9 /* ASDisplayNodeController.h in Headers */,
 				B350624F1B010EFD0018CF92 /* ASDisplayNode+DebugTiming.h in Headers */,
 				B35061FD1B010EFD0018CF92 /* ASDisplayNode+Subclasses.h in Headers */,
 				B35061FB1B010EFD0018CF92 /* ASDisplayNode.h in Headers */,
@@ -2503,6 +2514,7 @@
 				92074A6A1CC8BADA00918F75 /* ASControlNode+tvOS.m in Sources */,
 				68C2155A1DE10D330019C4BC /* ASCollectionViewLayoutInspector.m in Sources */,
 				DB78412E1C6BCE1600A9E2B4 /* _ASTransitionContext.m in Sources */,
+				CDF267D61E2544D600ECD6B9 /* ASDisplayNodeController.m in Sources */,
 				B350620B1B010EFD0018CF92 /* ASTableView.mm in Sources */,
 				B350620E1B010EFD0018CF92 /* ASTextNode.mm in Sources */,
 				6959433F1D70815300B0EE1F /* ASDisplayNodeLayout.mm in Sources */,
