@@ -1805,6 +1805,15 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 - (CGPoint)convertPoint:(CGPoint)point fromNode:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  
+  if (node == nil && self.nodeLoaded) {
+    if (self.layerBacked) {
+      return [self.layer convertPoint:point fromLayer:nil];
+    } else {
+      return [self.view convertPoint:point fromView:nil];
+    }
+  }
+  
   // Get root node of the accessible node hierarchy, if node not specified
   node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
@@ -1820,6 +1829,15 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 - (CGPoint)convertPoint:(CGPoint)point toNode:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  
+  if (node == nil && self.nodeLoaded) {
+    if (self.layerBacked) {
+      return [self.layer convertPoint:point toLayer:nil];
+    } else {
+      return [self.view convertPoint:point toView:nil];
+    }
+  }
+  
   // Get root node of the accessible node hierarchy, if node not specified
   node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
@@ -1835,6 +1853,15 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 - (CGRect)convertRect:(CGRect)rect fromNode:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  
+  if (node == nil && self.nodeLoaded) {
+    if (self.layerBacked) {
+      return [self.layer convertRect:rect fromLayer:nil];
+    } else {
+      return [self.view convertRect:rect fromView:nil];
+    }
+  }
+  
   // Get root node of the accessible node hierarchy, if node not specified
   node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
@@ -1850,6 +1877,15 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 - (CGRect)convertRect:(CGRect)rect toNode:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  
+  if (node == nil && self.nodeLoaded) {
+    if (self.layerBacked) {
+      return [self.layer convertRect:rect toLayer:nil];
+    } else {
+      return [self.view convertRect:rect toView:nil];
+    }
+  }
+  
   // Get root node of the accessible node hierarchy, if node not specified
   node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
