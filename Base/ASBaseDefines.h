@@ -184,4 +184,7 @@
 #define ASOVERLOADABLE __attribute__((overloadable))
 
 /// Ensure that class is of certain kind
-#define ASDynamicCast(x, c) ((c *) ([x isKindOfClass:[c class]] ? x : nil))
+#define ASDynamicCast(x, c) ({ \
+  id __val = x;\
+  ((c *) ([__val isKindOfClass:[c class]] ? __val : nil));\
+})

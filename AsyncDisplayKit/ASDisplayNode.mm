@@ -1805,6 +1805,21 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 - (CGPoint)convertPoint:(CGPoint)point fromNode:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  
+  /**
+   * When passed node=nil, all methods in this family use the UIView-style
+   * behavior – that is, convert from/to window coordinates if there's a window,
+   * otherwise return the point untransformed.
+   */
+  if (node == nil && self.nodeLoaded) {
+    CALayer *layer = self.layer;
+    if (UIWindow *window = ASFindWindowOfLayer(layer)) {
+      return [layer convertPoint:point fromLayer:window.layer];
+    } else {
+      return point;
+    }
+  }
+  
   // Get root node of the accessible node hierarchy, if node not specified
   node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
@@ -1820,6 +1835,16 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 - (CGPoint)convertPoint:(CGPoint)point toNode:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  
+  if (node == nil && self.nodeLoaded) {
+    CALayer *layer = self.layer;
+    if (UIWindow *window = ASFindWindowOfLayer(layer)) {
+      return [layer convertPoint:point toLayer:window.layer];
+    } else {
+      return point;
+    }
+  }
+  
   // Get root node of the accessible node hierarchy, if node not specified
   node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
@@ -1835,6 +1860,16 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 - (CGRect)convertRect:(CGRect)rect fromNode:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  
+  if (node == nil && self.nodeLoaded) {
+    CALayer *layer = self.layer;
+    if (UIWindow *window = ASFindWindowOfLayer(layer)) {
+      return [layer convertRect:rect fromLayer:window.layer];
+    } else {
+      return rect;
+    }
+  }
+  
   // Get root node of the accessible node hierarchy, if node not specified
   node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
@@ -1850,6 +1885,16 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
 - (CGRect)convertRect:(CGRect)rect toNode:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  
+  if (node == nil && self.nodeLoaded) {
+    CALayer *layer = self.layer;
+    if (UIWindow *window = ASFindWindowOfLayer(layer)) {
+      return [layer convertRect:rect toLayer:window.layer];
+    } else {
+      return rect;
+    }
+  }
+  
   // Get root node of the accessible node hierarchy, if node not specified
   node = node ? : ASDisplayNodeUltimateParentOfNode(self);
 
