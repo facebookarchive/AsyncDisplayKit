@@ -2288,4 +2288,15 @@ static bool stringContainsPointer(NSString *description, id p) {
   ASXCTAssertEqualPoints([node convertPoint:node.bounds.origin toNode:nil], expectedOrigin);
 }
 
+- (void)testThatConvertPointGoesToWindowWhenPassedNil_layerBacked
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:CGRectMake(0, 0, 20, 20)];
+  ASDisplayNode *node = [[ASDisplayNode alloc] init];
+  node.layerBacked = YES;
+  node.frame = CGRectMake(10, 10, 10, 10);
+  [window addSubnode:node];
+  CGPoint expectedOrigin = CGPointMake(10, 10);
+  ASXCTAssertEqualPoints([node convertPoint:node.bounds.origin toNode:nil], expectedOrigin);
+}
+
 @end

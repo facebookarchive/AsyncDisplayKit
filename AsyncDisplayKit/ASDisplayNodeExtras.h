@@ -126,6 +126,11 @@ extern ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernode(ASDisplayNode *
 extern __kindof ASDisplayNode * _Nullable ASDisplayNodeFindFirstSupernodeOfClass(ASDisplayNode *start, Class c) AS_WARN_UNUSED_RESULT;
 
 /**
+ * Given a layer, find the window it lives in, if any.
+ */
+extern UIWindow * _Nullable ASFindWindowOfLayer(CALayer *layer) AS_WARN_UNUSED_RESULT;
+
+/**
  * Given two nodes, finds their most immediate common parent.  Used for geometry conversion methods.
  * NOTE: It is an error to try to convert between nodes which do not share a common ancestor. This behavior is
  * disallowed in UIKit documentation and the behavior is left undefined. The output does not have a rigorously defined

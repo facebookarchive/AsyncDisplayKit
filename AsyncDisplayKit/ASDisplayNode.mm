@@ -1807,11 +1807,9 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
   ASDisplayNodeAssertThreadAffinity(self);
   
   if (node == nil && self.nodeLoaded) {
-    if (self.layerBacked) {
-      return [self.layer convertPoint:point fromLayer:nil];
-    } else {
-      return [self.view convertPoint:point fromView:nil];
-    }
+    CALayer *layer = self.layer;
+    UIWindow *window = ASFindWindowOfLayer(layer);
+    return [layer convertPoint:point fromLayer:window.layer];
   }
   
   // Get root node of the accessible node hierarchy, if node not specified
@@ -1831,11 +1829,9 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
   ASDisplayNodeAssertThreadAffinity(self);
   
   if (node == nil && self.nodeLoaded) {
-    if (self.layerBacked) {
-      return [self.layer convertPoint:point toLayer:nil];
-    } else {
-      return [self.view convertPoint:point toView:nil];
-    }
+    CALayer *layer = self.layer;
+    UIWindow *window = ASFindWindowOfLayer(layer);
+    return [layer convertPoint:point toLayer:window.layer];
   }
   
   // Get root node of the accessible node hierarchy, if node not specified
@@ -1855,11 +1851,9 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
   ASDisplayNodeAssertThreadAffinity(self);
   
   if (node == nil && self.nodeLoaded) {
-    if (self.layerBacked) {
-      return [self.layer convertRect:rect fromLayer:nil];
-    } else {
-      return [self.view convertRect:rect fromView:nil];
-    }
+    CALayer *layer = self.layer;
+    UIWindow *window = ASFindWindowOfLayer(layer);
+    return [layer convertRect:rect fromLayer:window.layer];
   }
   
   // Get root node of the accessible node hierarchy, if node not specified
@@ -1879,11 +1873,9 @@ static inline CATransform3D _calculateTransformFromReferenceToTarget(ASDisplayNo
   ASDisplayNodeAssertThreadAffinity(self);
   
   if (node == nil && self.nodeLoaded) {
-    if (self.layerBacked) {
-      return [self.layer convertRect:rect toLayer:nil];
-    } else {
-      return [self.view convertRect:rect toView:nil];
-    }
+    CALayer *layer = self.layer;
+    UIWindow *window = ASFindWindowOfLayer(layer);
+    return [layer convertRect:rect toLayer:window.layer];
   }
   
   // Get root node of the accessible node hierarchy, if node not specified

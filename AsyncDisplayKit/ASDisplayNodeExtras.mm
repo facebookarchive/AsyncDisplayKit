@@ -249,6 +249,21 @@ static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *possible
   return NO;
 }
 
+extern UIWindow * _Nullable ASFindWindowOfLayer(CALayer *layer)
+{
+  while (layer != nil) {
+    if (UIView *view = ASDynamicCast(layer.delegate, UIView)) {
+      if ([view isKindOfClass:[UIWindow class]]) {
+        return (UIWindow *)view;
+      } else {
+        return view.window;
+      }
+    }
+    layer = layer.superlayer;
+  }
+  return nil;
+}
+
 extern ASDisplayNode *ASDisplayNodeFindClosestCommonAncestor(ASDisplayNode *node1, ASDisplayNode *node2)
 {
   ASDisplayNode *possibleAncestor = node1;
