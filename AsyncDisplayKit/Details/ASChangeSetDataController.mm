@@ -88,7 +88,7 @@
     [super beginUpdates];
     
     for (_ASHierarchyMoveItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeMove]) {
-      [super moveRowAtIndexPath:change.fromIndexPath toIndexPath:change.toIndexPath withAnimationOptions:change.animationOptions];
+      [super moveNodeFromIndexPath:change.fromIndexPath toIndexPath:change.toIndexPath withAnimationOptions:change.animationOptions];
     }
     
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {

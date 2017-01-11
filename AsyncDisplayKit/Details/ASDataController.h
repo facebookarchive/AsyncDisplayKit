@@ -182,6 +182,8 @@ extern NSString * const ASCollectionInvalidUpdateException;
 
 - (void)prepareMoveItemChanges:(NSArray *)items;
 
+- (void)moveNodeFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
 /**
  * Re-measures all loaded nodes in the backing store.
  * 
