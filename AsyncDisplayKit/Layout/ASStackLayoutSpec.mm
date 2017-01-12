@@ -114,12 +114,6 @@
   _spacing = spacing;
 }
 
-- (void)setBaselineRelativeArrangement:(BOOL)baselineRelativeArrangement
-{
-  ASDisplayNodeAssert(self.isMutable, @"Cannot set properties when layout spec is not mutable");
-  _baselineRelativeArrangement = baselineRelativeArrangement;
-}
-
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
 {
   NSArray *children = self.children;
@@ -134,7 +128,7 @@
     return {child, style, style.size};
   });
   
-  const ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
+  const ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems};
   
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, style, constrainedSize);
