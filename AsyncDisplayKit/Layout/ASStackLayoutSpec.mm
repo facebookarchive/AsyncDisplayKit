@@ -11,12 +11,15 @@
 #import <numeric>
 #import <vector>
 
+#import "ASStackLayoutSpec.h"
+#import "ASDimension.h"
 #import "ASInternalHelpers.h"
-
+#import "ASLayout.h"
 #import "ASLayoutElement.h"
 #import "ASLayoutElementStylePrivate.h"
 #import "ASLayoutSpecUtilities.h"
-#import "ASStackBaselinePositionedLayout.h"
+#import "ASStackPositionedLayout.h"
+#import "ASStackUnpositionedLayout.h"
 #import "ASThread.h"
 
 @implementation ASStackLayoutSpec
@@ -133,51 +136,22 @@
   
   const ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .baselineRelativeArrangement = _baselineRelativeArrangement};
   
-  // First pass is to get the children into a positioned state
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, style, constrainedSize);
   
-  // Figure out if a baseline pass is really needed
-  const BOOL directionIsVertical = (style.direction == ASStackLayoutDirectionVertical);
-  const BOOL needsBaselineAlignment = ASStackBaselinePositionedLayout::needsBaselineAlignment(style);
-  const BOOL needsBaselinePositioning = (directionIsVertical == NO || needsBaselineAlignment == YES);
-  
-  NSMutableArray *sublayouts = [NSMutableArray array];
-  CGSize finalSize = CGSizeZero;
-  if (needsBaselinePositioning) {
-    // All horizontal stacks, regardless of whether or not they are baseline aligned, should go through a baseline
-    // computation. They could be used in another horizontal stack that is baseline aligned and will need to have
-    // computed the proper ascender/descender.
-    
-    // Vertical stacks do not need to go through this computation since we can easily compute ascender/descender by
-    // looking at their first/last child's ascender/descender.
-    const auto baselinePositionedLayout = ASStackBaselinePositionedLayout::compute(positionedLayout, style, constrainedSize);
+  //TODO ensure children are the same (no copied)
+  NSLog(@"here");
 
-    if (directionIsVertical == NO) {
-      self.style.ascender = baselinePositionedLayout.ascender;
-      self.style.descender = baselinePositionedLayout.descender;
-    }
-    
-    if (needsBaselineAlignment == YES) {
-      finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, baselinePositionedLayout.crossSize);
-
-      for (const auto &l : baselinePositionedLayout.items) {
-        [sublayouts addObject:l.layout];
-      }
-    }
-  }
-  
-  if (directionIsVertical == YES) {
+  if (style.direction == ASStackLayoutDirectionVertical) {
     self.style.ascender = stackChildren.front().style.ascender;
     self.style.descender = stackChildren.back().style.descender;
   }
   
-  if (needsBaselineAlignment == NO) {
-    finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, positionedLayout.crossSize);
-    
-    for (const auto &l : positionedLayout.items) {
-      [sublayouts addObject:l.layout];
-    }
+  const CGSize finalSize = directionSize(style.direction, unpositionedLayout.stackDimensionSum, unpositionedLayout.crossSize);
+  
+  NSMutableArray *sublayouts = [NSMutableArray array];
+  for (const auto &l : positionedLayout.items) {
+    [sublayouts addObject:l.layout];
   }
   
   return [ASLayout layoutWithLayoutElement:self size:ASSizeRangeClamp(constrainedSize, finalSize) sublayouts:sublayouts];

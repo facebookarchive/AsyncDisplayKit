@@ -18,7 +18,8 @@
 
 static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
                            const ASStackLayoutSpecItem &l,
-                           const CGFloat crossSize)
+                           const CGFloat crossSize,
+                           const CGFloat baseline)
 {
   switch (alignment(l.child.style.alignSelf, style.alignItems)) {
     case ASStackLayoutAlignItemsEnd:
@@ -27,6 +28,7 @@ static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
       return ASFloorPixelValue((crossSize - crossDimension(style.direction, l.layout.size)) / 2);
     case ASStackLayoutAlignItemsBaselineFirst:
     case ASStackLayoutAlignItemsBaselineLast:
+      return baseline - ASStackUnpositionedLayout::baselineForItem(style, l);
     case ASStackLayoutAlignItemsStart:
     case ASStackLayoutAlignItemsStretch:
       return 0;
@@ -48,21 +50,12 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
                                              const ASStackUnpositionedLayout &unpositionedLayout,
                                              const ASSizeRange &constrainedSize)
 {
-    
-  // The cross dimension is the max of the childrens' cross dimensions (clamped to our constraint below).
-  const auto it = std::max_element(unpositionedLayout.items.begin(), unpositionedLayout.items.end(),
-                                   [&](const ASStackLayoutSpecItem &a, const ASStackLayoutSpecItem &b){
-                                     return compareCrossDimension(style.direction, a.layout.size, b.layout.size);
-                                   });
-  const auto largestChildCrossSize = it == unpositionedLayout.items.end() ? 0 : crossDimension(style.direction, it->layout.size);
-  const auto minCrossSize = crossDimension(style.direction, constrainedSize.min);
-  const auto maxCrossSize = crossDimension(style.direction, constrainedSize.max);
-  const CGFloat crossSize = MIN(MAX(minCrossSize, largestChildCrossSize), maxCrossSize);
-  
-  CGPoint p = directionPoint(style.direction, firstChildOffset, 0);
-  BOOL first = YES;
+  CGFloat crossSize = unpositionedLayout.crossSize;
+  CGFloat baseline = unpositionedLayout.baseline;
   
   // Adjust the position of the unpositioned layouts to be positioned
+  CGPoint p = directionPoint(style.direction, firstChildOffset, 0);
+  BOOL first = YES;
   const auto stackedChildren = unpositionedLayout.items;
   for (const auto &l : stackedChildren) {
     p = p + directionPoint(style.direction, l.child.style.spacingBefore, 0);
@@ -70,12 +63,12 @@ static ASStackPositionedLayout stackedLayout(const ASStackLayoutSpecStyle &style
       p = p + directionPoint(style.direction, style.spacing + extraSpacing, 0);
     }
     first = NO;
-    l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize));
+    l.layout.position = p + directionPoint(style.direction, 0, crossOffset(style, l, crossSize, baseline));
     
     p = p + directionPoint(style.direction, stackDimension(style.direction, l.layout.size) + l.child.style.spacingAfter, 0);
   }
 
-  return {std::move(stackedChildren), crossSize};
+  return {std::move(stackedChildren)};
 }
 
 ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnpositionedLayout &unpositionedLayout,
