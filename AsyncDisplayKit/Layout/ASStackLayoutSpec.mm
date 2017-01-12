@@ -133,9 +133,6 @@
   const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, style, constrainedSize);
   
-  //TODO ensure children are the same (no copied)
-  NSLog(@"here");
-
   if (style.direction == ASStackLayoutDirectionVertical) {
     self.style.ascender = stackChildren.front().style.ascender;
     self.style.descender = stackChildren.back().style.descender;
