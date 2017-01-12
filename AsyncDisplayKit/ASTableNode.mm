@@ -445,12 +445,7 @@ ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   [self reloadDataInitiallyIfNeeded];
-  ASCellNode *node = [self.dataController nodeAtIndexPath:indexPath];
-  NSLog(@"Inverted node %i", _inverted);
-  if (_inverted) {
-    node.transform = CATransform3DMakeRotation(M_PI, 0, 0, 1.0);
-  }
-  return node;
+  return [self.dataController nodeAtIndexPath:indexPath];
 }
 
 - (CGRect)rectForRowAtIndexPath:(NSIndexPath *)indexPath

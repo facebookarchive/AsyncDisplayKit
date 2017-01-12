@@ -74,6 +74,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
 
+/*
+ * A Boolean value that determines whether the collection node will be flipped.
+ * If the value of this property is YES, the first cell node will be at the bottom of the collection node (as opposed to the top by default). This is useful for chat/messaging apps. The default value is NO.
+ */
+@property (nonatomic, assign) BOOL inverted;
+
 /**
  * A Boolean value that indicates whether users can select items in the collection node.
  * If the value of this property is YES (the default), users can select items. If you want more fine-grained control over the selection of items, you must provide a delegate object and implement the appropriate methods of the UICollectionNodeDelegate protocol.

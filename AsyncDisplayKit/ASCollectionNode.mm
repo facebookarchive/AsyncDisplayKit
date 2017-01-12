@@ -129,6 +129,7 @@
   };
 
   if (self = [super initWithViewBlock:collectionViewBlock]) {
+    _inverted = NO;
     return self;
   }
   return nil;
@@ -215,6 +216,12 @@
   }
   ASDisplayNodeAssert(![self isNodeLoaded] || !_pendingState, @"ASCollectionNode should not have a pendingState once it is loaded");
   return _pendingState;
+}
+
+- (void)setInverted:(BOOL)inverted
+{
+  self.view.dataController.inverted = inverted;
+  self.transform = inverted ? CATransform3DMakeRotation(M_PI, 0, 0, 1.0) : CATransform3DIdentity;
 }
 
 - (void)setDelegate:(id <ASCollectionDelegate>)delegate
