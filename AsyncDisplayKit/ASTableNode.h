@@ -36,6 +36,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic) id <ASTableDataSource> dataSource;
 
 /*
+ * A Boolean value that determines whether the table will be flipped.
+ * If the value of this property is YES, the first cell node will be at the bottom of the table (as opposed to the top by default). This is useful for chat/messaging apps. The default value is NO.
+ */
+@property (nonatomic, assign) BOOL inverted;
+/*
  * A Boolean value that determines whether users can select a row.
  * If the value of this property is YES (the default), users can select rows. If you set it to NO, they cannot select rows. Setting this property affects cell selection only when the table view is not in editing mode. If you want to restrict selection of cells in editing mode, use `allowsSelectionDuringEditing`.
  */

@@ -912,7 +912,9 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
       context = completedNodesSection[row];
     }
   }
-  
+  if (_inverted) {
+    context.node.transform = CATransform3DMakeRotation(M_PI, 0, 0, 1.0);
+  }
   return context.node;
 }
 
