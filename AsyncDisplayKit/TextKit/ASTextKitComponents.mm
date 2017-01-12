@@ -10,6 +10,8 @@
 
 #import "ASTextKitComponents.h"
 
+#import <tgmath.h>
+
 @interface ASTextKitComponents ()
 
 // read-write redeclarations
@@ -64,6 +66,57 @@
   CGSize textSize = [components.layoutManager usedRectForTextContainer:components.textContainer].size;
 
   return textSize;
+}
+
+- (CGSize)sizeForConstrainedWidth:(CGFloat)constrainedWidth
+              forMaxNumberOfLines:(NSInteger)maxNumberOfLines
+{
+  if (maxNumberOfLines == 0) {
+    return [self sizeForConstrainedWidth:constrainedWidth];
+  }
+  
+  ASTextKitComponents *components = self;
+  
+  // Always use temporary stack in case of threading issues
+  components = [ASTextKitComponents componentsWithAttributedSeedString:components.textStorage textContainerSize:CGSizeMake(constrainedWidth, CGFLOAT_MAX)];
+  
+  // Force glyph generation and layout, which may not have happened yet (and isn't triggered by - usedRectForTextContainer:).
+  [components.layoutManager ensureLayoutForTextContainer:components.textContainer];
+  
+  CGFloat width = [components.layoutManager usedRectForTextContainer:components.textContainer].size.width;
+  
+  // Calculate height based on line fragments
+  // Based on calculating number of lines from: http://asciiwwdc.com/2013/sessions/220
+  NSRange glyphRange, lineRange = NSMakeRange(0, 0);
+  CGRect rect = CGRectZero;
+  CGFloat height = 0;
+  CGFloat lastOriginY = -1.0;
+  NSUInteger numberOfLines = 0;
+  
+  glyphRange = [components.layoutManager glyphRangeForTextContainer:components.textContainer];
+  
+  while (lineRange.location < NSMaxRange(glyphRange)) {
+    rect = [components.layoutManager lineFragmentRectForGlyphAtIndex:lineRange.location
+                                                      effectiveRange:&lineRange];
+    
+    if (CGRectGetMinY(rect) > lastOriginY) {
+      ++numberOfLines;
+      if (numberOfLines == maxNumberOfLines) {
+        height = rect.origin.y + rect.size.height;
+        break;
+      }
+    }
+    
+    lastOriginY = CGRectGetMinY(rect);
+    lineRange.location = NSMaxRange(lineRange);
+  }
+  
+  CGFloat fragmentHeight = rect.origin.y + rect.size.height;
+  CGFloat finalHeight = std::ceil(std::fmax(height, fragmentHeight));
+  
+  CGSize size = CGSizeMake(width, finalHeight);
+  
+  return size;
 }
 
 @end
