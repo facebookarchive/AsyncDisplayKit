@@ -60,19 +60,21 @@ static void runLoopSourceCallback(void *info) {
     // 100ms timer.  No resources are wasted in between, as the thread sleeps, and each check is fast.
     // This time is fast enough for most use cases without excessive churn.
     CFRunLoopTimerRef timer = CFRunLoopTimerCreateWithHandler(NULL, -1, 0.1, 0, 0, ^(CFRunLoopTimerRef timer) {
+      @autoreleasepool {
 #if ASRunLoopQueueLoggingEnabled
-      NSLog(@"ASDeallocQueue Processing: %d objects destroyed", weakSelf->_queue.size());
+        NSLog(@"ASDeallocQueue Processing: %d objects destroyed", weakSelf->_queue.size());
 #endif
-      weakSelf->_queueLock.lock();
-      std::deque<id> currentQueue = weakSelf->_queue;
-      if (currentQueue.size() == 0) {
+        weakSelf->_queueLock.lock();
+        std::deque<id> currentQueue = weakSelf->_queue;
+        if (currentQueue.size() == 0) {
+          weakSelf->_queueLock.unlock();
+          return;
+        }
+        // Sometimes we release 10,000 objects at a time.  Don't hold the lock while releasing.
+        weakSelf->_queue = std::deque<id>();
         weakSelf->_queueLock.unlock();
-        return;
+        currentQueue.clear();
       }
-      // Sometimes we release 10,000 objects at a time.  Don't hold the lock while releasing.
-      weakSelf->_queue = std::deque<id>();
-      weakSelf->_queueLock.unlock();
-      currentQueue.clear();
     });
     
     CFRunLoopRef runloop = CFRunLoopGetCurrent();
