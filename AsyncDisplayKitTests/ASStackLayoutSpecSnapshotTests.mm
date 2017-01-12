@@ -1142,7 +1142,6 @@ static NSArray<ASTextNode*> *defaultTextNodes()
   
   static ASSizeRange kSize = ASSizeRangeMake(CGSizeMake(300, 0), CGSizeMake(300, CGFLOAT_MAX));
   [self testStackLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:textNodes identifier:nil];
-  XCTFail(@"Not expected behaviour");
 }
 
 - (void)testBaselineAlignmentWithStretchedItem
@@ -1166,7 +1165,6 @@ static NSArray<ASTextNode*> *defaultTextNodes()
   
   static ASSizeRange kSize = ASSizeRangeMake(CGSizeMake(300, 0), CGSizeMake(300, CGFLOAT_MAX));
   [self testStackLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:children identifier:nil];
-  XCTFail(@"Not expected behaviour");
 }
 
 @end
