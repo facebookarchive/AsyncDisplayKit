@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <XCTest/XCTestAssertionsImpl.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 #define ASXCTAssertRelativePerformanceInRange(test, caseName, min, max) \
   _XCTPrimitiveAssertLessThanOrEqual(self, test.results[caseName].relativePerformance, @#caseName, max, @#max);\
@@ -32,7 +33,7 @@ typedef void (^ASTestPerformanceCaseBlock)(NSUInteger i, dispatch_block_t startM
 /**
  * The first case you add here will be considered the reference case.
  */
-- (void)addCaseWithName:(NSString *)caseName block:(__attribute((noescape)) ASTestPerformanceCaseBlock)block;
+- (void)addCaseWithName:(NSString *)caseName block:(AS_NOESCAPE ASTestPerformanceCaseBlock)block;
 
 @property (nonatomic, copy, readonly) NSDictionary<NSString *, ASPerformanceTestResult *> *results;
 

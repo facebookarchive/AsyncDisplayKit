@@ -315,7 +315,7 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 
 @protocol ASLayoutElementStylability
 
-- (instancetype)styledWithBlock:(__attribute__((noescape)) void (^)(__kindof ASLayoutElementStyle *style))styleBlock;
+- (instancetype)styledWithBlock:(AS_NOESCAPE void (^)(__kindof ASLayoutElementStyle *style))styleBlock;
 
 @end
 
