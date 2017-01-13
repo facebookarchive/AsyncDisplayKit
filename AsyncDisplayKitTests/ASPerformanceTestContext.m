@@ -74,7 +74,7 @@
   return YES;
 }
 
-- (void)addCaseWithName:(NSString *)caseName block:(__attribute((noescape)) ASTestPerformanceCaseBlock)block
+- (void)addCaseWithName:(NSString *)caseName block:(AS_NOESCAPE ASTestPerformanceCaseBlock)block
 {
   ASDisplayNodeAssert(_results[caseName] == nil, @"Already have a case named %@", caseName);
   ASPerformanceTestResult *result = [[ASPerformanceTestResult alloc] init];
@@ -91,7 +91,7 @@
 }
 
 /// Returns total work time
-- (CFTimeInterval)_testPerformanceForCaseWithBlock:(__attribute((noescape)) ASTestPerformanceCaseBlock)block
+- (CFTimeInterval)_testPerformanceForCaseWithBlock:(AS_NOESCAPE ASTestPerformanceCaseBlock)block
 {
   __block CFTimeInterval time = 0;
   for (NSInteger i = 0; i < _iterationCount; i++) {
