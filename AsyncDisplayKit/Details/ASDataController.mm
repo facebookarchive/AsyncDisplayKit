@@ -605,6 +605,11 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 
 #pragma mark - Section Editing (External API)
 
+- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
+{
+  
+}
+
 - (void)insertSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();

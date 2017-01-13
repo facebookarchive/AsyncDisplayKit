@@ -26,6 +26,7 @@
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASSectionContext.h"
 #import "ASCollectionView+Undeprecated.h"
+#import "_ASHierarchyChangeSet.h"
 
 /**
  * A macro to get self.collectionNode and assign it to a local variable, or return
@@ -194,6 +195,11 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
    * (0 sections) we always check at least once after each update (initial reload is the first update.)
    */
   BOOL _hasEverCheckedForBatchFetchingDueToUpdate;
+
+  /**
+   * The change set that we're currently building, if any.
+   */
+  _ASHierarchyChangeSet *_changeSet;
     
   struct {
     unsigned int scrollViewDidScroll:1;
@@ -762,7 +768,10 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
-  
+
+  if (_changeSet == nil) {
+    _changeSet = [[_ASHierarchyChangeSet alloc] initWithOldData:[_dataController itemCountsFromDataSource]];
+  }
   [_dataController beginUpdates];
   if (updates) {
     updates();
@@ -788,27 +797,35 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   ASDisplayNodeAssertMainThread();
   if (sections.count == 0) { return; }
-  [_dataController insertSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
+  [self performBatchUpdates:^{
+    [_changeSet insertSections:sections animationOptions:kASCollectionViewAnimationNone];
+  } completion:nil];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
   if (sections.count == 0) { return; }
-  [_dataController deleteSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
+  [self performBatchUpdates:^{
+    [_changeSet deleteSections:sections animationOptions:kASCollectionViewAnimationNone];
+  } completion:nil];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections
 {
   ASDisplayNodeAssertMainThread();
   if (sections.count == 0) { return; }
-  [_dataController reloadSections:sections withAnimationOptions:kASCollectionViewAnimationNone];
+  [self performBatchUpdates:^{
+    [_changeSet reloadSections:sections animationOptions:kASCollectionViewAnimationNone];
+  } completion:nil];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController moveSection:section toSection:newSection withAnimationOptions:kASCollectionViewAnimationNone];
+  [self performBatchUpdates:^{
+    [_changeSet moveSection:section toSection:newSection animationOptions:kASCollectionViewAnimationNone];
+  } completion:nil];
 }
 
 - (id<ASSectionContext>)contextForSection:(NSInteger)section
@@ -821,27 +838,35 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   ASDisplayNodeAssertMainThread();
   if (indexPaths.count == 0) { return; }
-  [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
+  [self performBatchUpdates:^{
+    [_changeSet insertItems:indexPaths animationOptions:kASCollectionViewAnimationNone];
+  } completion:nil];
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
   if (indexPaths.count == 0) { return; }
-  [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
+  [self performBatchUpdates:^{
+    [_changeSet deleteItems:indexPaths animationOptions:kASCollectionViewAnimationNone];
+  } completion:nil];
 }
 
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
 {
   ASDisplayNodeAssertMainThread();
   if (indexPaths.count == 0) { return; }
-  [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:kASCollectionViewAnimationNone];
+  [self performBatchUpdates:^{
+    [_changeSet reloadItems:indexPaths animationOptions:kASCollectionViewAnimationNone];
+  } completion:nil];
 }
 
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone];
+  [self performBatchUpdates:^{
+    [_changeSet moveItemAtIndexPath:indexPath toIndexPath:newIndexPath animationOptions:kASCollectionViewAnimationNone];
+  } completion:nil];
 }
 
 - (NSString *)__reuseIdentifierForKind:(NSString *)kind
