@@ -63,6 +63,14 @@ id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEv
  */
 void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, void (^block)(ASControlNodeEvent anEvent));
 
+/**
+ @abstract Returns the expanded bounds used to determine if a touch is considered 'inside' during tracking.
+ @param controlNode A control node.
+ @result The expanded bounds of the node.
+ */
+CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
+
+
 @end
 
 @implementation ASControlNode
@@ -158,7 +166,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   BOOL dragIsInsideBounds = [self pointInside:touchLocation withEvent:nil];
 
   // Update our highlighted state.
-  CGRect expandedBounds = CGRectInset(self.view.bounds, kASControlNodeExpandedInset, kASControlNodeExpandedInset);
+  CGRect expandedBounds = _ASControlNodeGetExpandedBounds(self);
   BOOL dragIsInsideExpandedBounds = CGRectContainsPoint(expandedBounds, touchLocation);
   self.touchInside = dragIsInsideExpandedBounds;
   self.highlighted = dragIsInsideExpandedBounds;
@@ -216,7 +224,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   [self endTrackingWithTouch:theTouch withEvent:event];
 
   // Send the appropriate touch-up control event.
-  CGRect expandedBounds = CGRectInset(self.view.bounds, kASControlNodeExpandedInset, kASControlNodeExpandedInset);
+  CGRect expandedBounds = _ASControlNodeGetExpandedBounds(self);
   BOOL touchUpIsInsideExpandedBounds = CGRectContainsPoint(expandedBounds, touchLocation);
 
   [self sendActionsForControlEvents:(touchUpIsInsideExpandedBounds ? ASControlNodeEventTouchUpInside : ASControlNodeEventTouchUpOutside)
@@ -426,6 +434,10 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
     if ((mask & thisEvent) == thisEvent)
       block(thisEvent);
   }
+}
+
+CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode) {
+  return CGRectInset(UIEdgeInsetsInsetRect(controlNode.view.bounds, controlNode.hitTestSlop), kASControlNodeExpandedInset, kASControlNodeExpandedInset);
 }
 
 #pragma mark - For Subclasses
