@@ -127,12 +127,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
  */
 @property (nonatomic, weak) id validationErrorSource;
 
-/*
- * A Boolean value that determines whether the nodes that the data source renders will be flipped.
- * This is to be used in tandem with the inverted property on ASTableNode/ASCollectionNode
- */
-@property (nonatomic, assign) BOOL inverted;
-
 /**
  Delegate to notify when data is updated.
  */

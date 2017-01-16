@@ -220,8 +220,8 @@
 
 - (void)setInverted:(BOOL)inverted
 {
-  self.view.dataController.inverted = inverted;
-  self.transform = inverted ? CATransform3DMakeRotation(M_PI, 0, 0, 1.0) : CATransform3DIdentity;
+  self.view.inverted = inverted;
+  self.transform = inverted ? CATransform3DMakeScale(1, -1, 1)  : CATransform3DIdentity;
 }
 
 - (void)setDelegate:(id <ASCollectionDelegate>)delegate

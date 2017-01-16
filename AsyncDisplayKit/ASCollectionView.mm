@@ -1404,6 +1404,9 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
     if (node.interactionDelegate == nil) {
       node.interactionDelegate = strongSelf;
     }
+    if (_inverted) {
+        node.transform = CATransform3DMakeScale(1, -1, 1) ;
+    }
     return node;
   };
   return block;

@@ -106,6 +106,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, readonly) ASScrollDirection scrollableDirections;
 
+/*
+ * A Boolean value that determines whether the nodes that the data source renders will be flipped.
+ */
+@property (nonatomic, assign) BOOL inverted;
+
 /**
  * Forces the .contentInset to be UIEdgeInsetsZero.
  *
