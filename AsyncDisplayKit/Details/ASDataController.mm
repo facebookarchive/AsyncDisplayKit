@@ -273,7 +273,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
       [newIndexPaths addObject:indexPaths[i]];
     }
   }
-  NSLog(@"Confirmed inserting indexPaths: %@", newIndexPaths);
+  NSLog(@"Confirmed inserting indexPaths: %@", newIndexPaths); // FIXME
   
   [_mainSerialQueue performBlockOnMainThread:^{
     _completedNodes[kind] = completedNodes;
@@ -310,10 +310,10 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 {
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
-  NSLog(@">>>>> Prepare Item Change");
+  NSLog(@">>>>> Prepare Item Change"); // FIXME
   
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
-    NSLog(@">>>>> Prepare Item Change - Start.");
+    NSLog(@">>>>> Prepare Item Change - Start."); // FIXME
     
     _moveFromIndexPaths = [[NSMutableArray alloc] initWithCapacity:items.count];
     _moveToIndexPaths = [[NSMutableArray alloc] initWithCapacity:items.count];
@@ -411,17 +411,6 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   
   [self insertNodes:nodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
     ASDisplayNodeAssertMainThread();
-    
-    // TODO - Filter out Move indexPaths
-//    NSMutableArray *newNodes = [[NSMutableArray alloc] initWithCapacity:nodes.count];
-//    NSMutableArray *newIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-//    
-//    for (int i = 0; i < indexPaths.count; i++) {
-//      if (![_moveToIndexPaths containsObject:indexPaths[i]]) {
-//        [newNodes addObject:nodes[i]];
-//        [newIndexPaths addObject:indexPaths[i]];
-//      }
-//    }
     
     if (_delegateDidInsertNodes)
       [_delegate dataController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
@@ -889,7 +878,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
     LOG(@"Edit Transaction - insertRows: %@", indexPaths);
     [self _batchLayoutAndInsertNodesFromContexts:contexts withAnimationOptions:animationOptions];
     
-    NSLog(@">>>>> Insert Done.");
+    NSLog(@">>>>> Insert Done."); // FIXME
   });
 }
 
