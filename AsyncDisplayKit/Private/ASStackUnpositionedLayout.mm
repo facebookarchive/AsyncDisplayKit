@@ -159,14 +159,8 @@ static void computeCrossSizeAndBaseline(const std::vector<ASStackLayoutSpecItem>
                                         CGFloat &crossSize,
                                         CGFloat &baseline)
 {
-  // Early return if the stack has a definite cross size
   const auto minCrossSize = crossDimension(style.direction, sizeRange.min);
   const auto maxCrossSize = crossDimension(style.direction, sizeRange.max);
-  if (minCrossSize == maxCrossSize) {
-    crossSize = minCrossSize;
-    baseline = 0;
-    return;
-  }
   
   // Step 1. Collect all the flex items whose align-self is baseline. Find the largest of the distances
   // between each item’s baseline and its hypothetical outer cross-start edge (aka. its ascender value),
@@ -183,8 +177,9 @@ static void computeCrossSizeAndBaseline(const std::vector<ASStackLayoutSpecItem>
       CGFloat baseline = ASStackUnpositionedLayout::baselineForItem(style, item);
       maxStartToBaselineDistance = MAX(maxStartToBaselineDistance, baseline);
       maxBaselineToEndDistance = MAX(maxBaselineToEndDistance, crossDimension(style.direction, item.layout.size) - baseline);
+    } else {
+      maxItemCrossSize = MAX(maxItemCrossSize, crossDimension(style.direction, item.layout.size));
     }
-    maxItemCrossSize = MAX(maxItemCrossSize, crossDimension(style.direction, item.layout.size));
   }
   
   // Step 3. The used cross-size of the flex line is the largest of the numbers found in the previous two steps and zero.
