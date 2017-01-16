@@ -263,10 +263,22 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _editing and _complete on different threads.
   NSMutableArray *completedNodes = ASTwoDimensionalArrayDeepMutableCopy(editingNodes);
   
+  // Filter out insert indexPaths in Edit Queue
+  NSMutableArray *newNodes = [[NSMutableArray alloc] initWithCapacity:nodes.count];
+  NSMutableArray *newIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+  
+  for (int i = 0; i < indexPaths.count; i++) {
+    if (![_moveToIndexPaths containsObject:indexPaths[i]]) {
+      [newNodes addObject:nodes[i]];
+      [newIndexPaths addObject:indexPaths[i]];
+    }
+  }
+  NSLog(@"Confirmed inserting indexPaths: %@", newIndexPaths);
+  
   [_mainSerialQueue performBlockOnMainThread:^{
     _completedNodes[kind] = completedNodes;
     if (completionBlock) {
-      completionBlock(nodes, indexPaths);
+      completionBlock(newNodes, newIndexPaths);
     }
   }];
 }
@@ -296,25 +308,33 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
  */
 - (void)prepareMoveItemChanges:(NSArray *)items
 {
-  _moveFromIndexPaths = [[NSMutableArray alloc] initWithCapacity:items.count];
-  _moveToIndexPaths = [[NSMutableArray alloc] initWithCapacity:items.count];
-  NSMutableDictionary *_moveIndexPathPairs = [NSMutableDictionary dictionaryWithCapacity:items.count];
-  _moveToNodeContextsDict = [NSMutableDictionary dictionaryWithCapacity:items.count];
+  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
-  for (_ASHierarchyMoveItemChange *change in items) {
-    [_moveFromIndexPaths addObject:change.fromIndexPath];
-    [_moveToIndexPaths addObject:change.toIndexPath];
-    [_moveIndexPathPairs setObject:change.toIndexPath forKey:change.fromIndexPath];
-  }
+  NSLog(@">>>>> Prepare Item Change");
   
-  for (int i = 0; i < items.count; i++) {
-    NSIndexPath *toIndexPath = [_moveIndexPathPairs objectForKey:_moveFromIndexPaths[i]];
+  dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
+    NSLog(@">>>>> Prepare Item Change - Start.");
     
-    NSArray *nodeContexts = ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodeContexts[ASDataControllerRowNodeKind], @[_moveFromIndexPaths[i]]);
-    id nodeContext = [nodeContexts firstObject];
+    _moveFromIndexPaths = [[NSMutableArray alloc] initWithCapacity:items.count];
+    _moveToIndexPaths = [[NSMutableArray alloc] initWithCapacity:items.count];
+    NSMutableDictionary *_moveIndexPathPairs = [NSMutableDictionary dictionaryWithCapacity:items.count];
+    _moveToNodeContextsDict = [NSMutableDictionary dictionaryWithCapacity:items.count];
     
-    [_moveToNodeContextsDict setObject:nodeContext forKey:toIndexPath];
-  }
+    for (_ASHierarchyMoveItemChange *change in items) {
+      [_moveFromIndexPaths addObject:change.fromIndexPath];
+      [_moveToIndexPaths addObject:change.toIndexPath];
+      [_moveIndexPathPairs setObject:change.toIndexPath forKey:change.fromIndexPath];
+    }
+    
+    for (int i = 0; i < items.count; i++) {
+      NSIndexPath *toIndexPath = [_moveIndexPathPairs objectForKey:_moveFromIndexPaths[i]];
+      
+      NSArray *nodeContexts = ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodeContexts[ASDataControllerRowNodeKind], @[_moveFromIndexPaths[i]]);
+      id nodeContext = [nodeContexts firstObject];
+      
+      [_moveToNodeContextsDict setObject:nodeContext forKey:toIndexPath];
+    }
+  });
 }
 
 - (void)moveNodeFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
@@ -325,14 +345,14 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
     return;
   }
   
-  LOG(@"Edit Command - moveRow: %@ to %@", indexPath, newIndexPath);
+  LOG(@"Edit Command - moveRow: %@ to %@", fromIndexPath, toIndexPath);
   
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     [self willMoveFromIndexPath:fromIndexPath toIndexPath:toIndexPath];
     
-    LOG(@"Edit Transaction - moveRow: %@ to %@", indexPath, newIndexPath);
+    LOG(@"Edit Transaction - moveRow: %@ to %@", fromIndexPath, toIndexPath);
     [self _moveNodeFromIndexPath:fromIndexPath toIndexPath:toIndexPath withAnimationOptions:animationOptions];
   });
 }
@@ -393,18 +413,18 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
     ASDisplayNodeAssertMainThread();
     
     // TODO - Filter out Move indexPaths
-    NSMutableArray *newNodes = [[NSMutableArray alloc] initWithCapacity:nodes.count];
-    NSMutableArray *newIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-    
-    for (int i = 0; i < indexPaths.count; i++) {
-      if (![_moveToIndexPaths containsObject:indexPaths[i]]) {
-        [newNodes addObject:nodes[i]];
-        [newIndexPaths addObject:indexPaths[i]];
-      }
-    }
+//    NSMutableArray *newNodes = [[NSMutableArray alloc] initWithCapacity:nodes.count];
+//    NSMutableArray *newIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+//    
+//    for (int i = 0; i < indexPaths.count; i++) {
+//      if (![_moveToIndexPaths containsObject:indexPaths[i]]) {
+//        [newNodes addObject:nodes[i]];
+//        [newIndexPaths addObject:indexPaths[i]];
+//      }
+//    }
     
     if (_delegateDidInsertNodes)
-      [_delegate dataController:self didInsertNodes:newNodes atIndexPaths:newIndexPaths withAnimationOptions:animationOptions];
+      [_delegate dataController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   }];
 }
 
@@ -868,6 +888,8 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 
     LOG(@"Edit Transaction - insertRows: %@", indexPaths);
     [self _batchLayoutAndInsertNodesFromContexts:contexts withAnimationOptions:animationOptions];
+    
+    NSLog(@">>>>> Insert Done.");
   });
 }
 
