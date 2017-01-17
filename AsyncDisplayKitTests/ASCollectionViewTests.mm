@@ -988,7 +988,7 @@
   }
   XCTAssertGreaterThan(batchFetchCount, 2);
   XCTAssertGreaterThanOrEqual(contentHeight, requiredContentHeight, @"Loaded too little content.");
-  XCTAssertLessThanOrEqual(contentHeight, requiredContentHeight + 2 * itemHeight, @"Loaded too much content.");
+  XCTAssertLessThanOrEqual(contentHeight, requiredContentHeight + 3 * itemHeight, @"Loaded too much content.");
 }
 
 - (void)testInitialRangeBounds
