@@ -110,8 +110,10 @@ static NSArray<ASTextNode*> *defaultTextNodes()
    spacing:style.spacing
    justifyContent:style.justifyContent
    alignItems:style.alignItems
+   flexWrap:style.flexWrap
+   alignContent:style.alignContent
    children:children];
-
+  
   [self testStackLayoutSpec:stackLayoutSpec sizeRange:sizeRange subnodes:subnodes identifier:identifier];
 }
 
@@ -162,6 +164,20 @@ static NSArray<ASTextNode*> *defaultTextNodes()
   [self testLayoutSpec:layoutSpec sizeRange:sizeRange subnodes:newSubnodes identifier:identifier];
 }
 
+- (void)testStackLayoutSpecWithAlignContent:(ASStackLayoutAlignContent)alignContent
+                                  sizeRange:(ASSizeRange)sizeRange
+                                 identifier:(NSString *)identifier
+{
+  ASStackLayoutSpecStyle style = {
+    .direction = ASStackLayoutDirectionHorizontal,
+    .flexWrap = ASStackLayoutFlexWrapWrap,
+    .alignContent = alignContent,
+  };
+  
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, 0);
+  
+  [self testStackLayoutSpecWithStyle:style sizeRange:sizeRange subnodes:subnodes identifier:identifier];
+}
 
 #pragma mark -
 
@@ -1166,5 +1182,35 @@ static NSArray<ASTextNode*> *defaultTextNodes()
   static ASSizeRange kSize = ASSizeRangeMake(CGSizeMake(300, 0), CGSizeMake(300, CGFLOAT_MAX));
   [self testStackLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:children identifier:nil];
 }
+
+#pragma mark - Content alignment tests
+
+- (void)testAlignContentUnderflow
+{
+  // width 60px; height 300px.
+  // width is 10px bigger than the width of default subnodes (60px vs 50px) to test that items are still correctly collected into lines
+  static ASSizeRange kSize = {{60, 300}, {60, 300}};
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentStart sizeRange:kSize identifier:@"alignContentStart"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentCenter sizeRange:kSize identifier:@"alignContentCenter"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentEnd sizeRange:kSize identifier:@"alignContentEnd"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentSpaceBetween sizeRange:kSize identifier:@"alignContentSpaceBetween"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentSpaceAround sizeRange:kSize identifier:@"alignContentSpaceAround"];
+}
+
+- (void)testAlignContentOverflow
+{
+  // width 40px; height 120px.
+  // width is 10px smaller than the width of default subnodes (40px vs 50px) to test that items are still correctly collected into lines
+  static ASSizeRange kSize = {{40, 120}, {40, 120}};
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentStart sizeRange:kSize identifier:@"alignContentStart"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentCenter sizeRange:kSize identifier:@"alignContentCenter"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentEnd sizeRange:kSize identifier:@"alignContentEnd"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentSpaceBetween sizeRange:kSize identifier:@"alignContentSpaceBetween"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentSpaceAround sizeRange:kSize identifier:@"alignContentSpaceAround"];
+}
+
+//TODO test alignContentStretch
+//TODO test when cross size is unconstrained
+//TODO test combination of alignSelf, justifyContent and alignContent
 
 @end
