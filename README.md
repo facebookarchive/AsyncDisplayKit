@@ -20,7 +20,7 @@ AsyncDisplayKit's basic unit is the `node`. An ASDisplayNode is an abstraction o
 
 To keep its user interface smooth and responsive, your app should render at 60 frames per second — the gold standard on iOS. This means the main thread has one-sixtieth of a second to push each frame. That's 16 milliseconds to execute all layout and drawing code! And because of system overhead, your code usually has less than ten milliseconds to run before it causes a frame drop.
 
-AsyncDisplayKit lets you move image decoding, text sizing and rendering, layout, and other expensive UI operations off the main thread, to keep the main thread available to respond to user interaction. 
+AsyncDisplayKit lets you move image decoding, text sizing and rendering, layout, and other expensive UI operations off the main thread, to keep the main thread available to respond to user interaction.
 
 ## Advanced Developer Features
 
