@@ -76,9 +76,9 @@
   PathKey key = { roundedCorners, cornerRadius };
   NSValue *pathKeyObject = [[NSValue alloc] initWithBytes:&key objCType:@encode(PathKey)];
 
+  CGSize cornerRadii = CGSizeMake(cornerRadius, cornerRadius);
   UIBezierPath *path = [__pathCache objectForKey:pathKeyObject];
   if (path == nil) {
-    CGSize cornerRadii = CGSizeMake(cornerRadius, cornerRadius);
     path = [UIBezierPath bezierPathWithRoundedRect:bounds byRoundingCorners:roundedCorners cornerRadii:cornerRadii];
     [__pathCache setObject:path forKey:pathKeyObject];
   }
@@ -107,7 +107,9 @@
     
     // It is rarer to have a stroke path, and our cache key only handles rounded rects for the exact-stretchable
     // size calculated by cornerRadius, so we won't bother caching this path.  Profiling validates this decision.
-    UIBezierPath *strokePath = [UIBezierPath bezierPathWithRoundedRect:strokeRect cornerRadius:cornerRadius];
+    UIBezierPath *strokePath = [UIBezierPath bezierPathWithRoundedRect:strokeRect
+                                                     byRoundingCorners:roundedCorners
+                                                           cornerRadii:cornerRadii];
     [strokePath setLineWidth:borderWidth];
     BOOL canUseCopy = (CGColorGetAlpha(borderColor.CGColor) == 1);
     [strokePath strokeWithBlendMode:(canUseCopy ? kCGBlendModeCopy : kCGBlendModeNormal) alpha:1];
