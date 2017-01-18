@@ -59,8 +59,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) ASStackLayoutJustifyContent justifyContent;
 /** Orientation of children along cross axis. Defaults to ASStackLayoutAlignItemsStretch */
 @property (nonatomic, assign) ASStackLayoutAlignItems alignItems;
-/** If YES the vertical spacing between two views is measured from the last baseline of the top view to the top of the bottom view */
-@property (nonatomic, assign) BOOL baselineRelativeArrangement;
 
 - (instancetype)init;
 

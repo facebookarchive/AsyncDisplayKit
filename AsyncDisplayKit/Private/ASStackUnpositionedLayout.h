@@ -39,9 +39,16 @@ struct ASStackUnpositionedLayout {
   const CGFloat stackDimensionSum;
   /** The amount by which stackDimensionSum violates constraints. If positive, less than min; negative, greater than max. */
   const CGFloat violation;
-
+  /** The size in the cross dimension */
+  const CGFloat crossSize;
+  /** The baseline of the stack which baseline aligned children should align to */
+  const CGFloat baseline;
+  
   /** Given a set of children, computes the unpositioned layouts for those children. */
   static ASStackUnpositionedLayout compute(const std::vector<ASStackLayoutSpecChild> &children,
                                            const ASStackLayoutSpecStyle &style,
                                            const ASSizeRange &sizeRange);
+  
+  static CGFloat baselineForItem(const ASStackLayoutSpecStyle &style,
+                                 const ASStackLayoutSpecItem &l);
 };

@@ -15,7 +15,6 @@ typedef struct {
   CGFloat spacing;
   ASStackLayoutJustifyContent justifyContent;
   ASStackLayoutAlignItems alignItems;
-  BOOL baselineRelativeArrangement;
 } ASStackLayoutSpecStyle;
 
 inline CGFloat stackDimension(const ASStackLayoutDirection direction, const CGSize size)
