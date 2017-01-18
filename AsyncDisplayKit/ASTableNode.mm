@@ -30,6 +30,7 @@
 @property (nonatomic, assign) BOOL allowsSelectionDuringEditing;
 @property (nonatomic, assign) BOOL allowsMultipleSelection;
 @property (nonatomic, assign) BOOL allowsMultipleSelectionDuringEditing;
+@property (nonatomic, assign) BOOL inverted;
 @end
 
 @implementation _ASTablePendingState
@@ -42,6 +43,7 @@
     _allowsSelectionDuringEditing = NO;
     _allowsMultipleSelection = NO;
     _allowsMultipleSelectionDuringEditing = NO;
+    _inverted = NO;
   }
   return self;
 }
@@ -87,7 +89,6 @@
   };
 
   if (self = [super initWithViewBlock:tableViewBlock]) {
-    _inverted = NO;
     return self;
   }
   return nil;
@@ -117,6 +118,7 @@
     self.pendingState    = nil;
     view.asyncDelegate   = pendingState.delegate;
     view.asyncDataSource = pendingState.dataSource;
+    view.inverted        = pendingState.inverted;
     view.allowsSelection = pendingState.allowsSelection;
     view.allowsSelectionDuringEditing = pendingState.allowsSelectionDuringEditing;
     view.allowsMultipleSelection = pendingState.allowsMultipleSelection;
@@ -189,8 +191,13 @@
 
 - (void)setInverted:(BOOL)inverted
 {
-  self.view.inverted = inverted;
   self.transform = inverted ? CATransform3DMakeScale(1, -1, 1)  : CATransform3DIdentity;
+  if ([self pendingState]) {
+    _pendingState.inverted = inverted;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
+    self.view.inverted = inverted;
+  }
 }
 
 - (void)setDelegate:(id <ASTableDelegate>)delegate

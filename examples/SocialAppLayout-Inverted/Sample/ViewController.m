@@ -58,8 +58,8 @@
 {
   [super viewWillAppear:animated];
   CGFloat inset = [self topBarsHeight];
-  self.tableNode.view.contentInset = UIEdgeInsetsMake(0, 0, inset, 0);
-  self.tableNode.view.scrollIndicatorInsets = UIEdgeInsetsMake(0, 0, inset, 0);
+  self.tableNode.view.contentInset = UIEdgeInsetsMake(-inset, 0, inset, 0);
+  self.tableNode.view.scrollIndicatorInsets = UIEdgeInsetsMake(-inset, 0, inset, 0);
 }
 
 - (void)viewDidLoad
