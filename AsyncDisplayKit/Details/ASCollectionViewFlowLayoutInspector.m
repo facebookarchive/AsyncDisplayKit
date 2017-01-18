@@ -29,10 +29,6 @@
     unsigned int implementsConstrainedSizeForNodeAtIndexPathDeprecated:1;
     unsigned int implementsConstrainedSizeForItemAtIndexPath:1;
   } _delegateFlags;
-  
-  struct {
-    unsigned int implementsNumberOfSectionsInCollectionView:1;
-  } _dataSourceFlags;
 }
 
 #pragma mark Lifecycle
@@ -67,11 +63,7 @@
 
 - (void)didChangeCollectionViewDataSource:(id<ASCollectionDataSource>)dataSource
 {
-  if (dataSource == nil) {
-    memset(&_dataSourceFlags, 0, sizeof(_dataSourceFlags));
-  } else {
-    _dataSourceFlags.implementsNumberOfSectionsInCollectionView = [dataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
-  }
+  // nop
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath

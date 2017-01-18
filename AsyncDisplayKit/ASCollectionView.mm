@@ -57,7 +57,9 @@ typedef NS_ENUM(NSUInteger, ASCollectionViewInvalidationStyle) {
 };
 
 static const NSUInteger kASCollectionViewAnimationNone = UITableViewRowAnimationNone;
-static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
+
+/// Used for all cells and supplementaries. UICV keys by supp-kind+reuseID so this is plenty.
+static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 #pragma mark -
 #pragma mark ASCellNode<->UICollectionViewCell bridging.
@@ -338,7 +340,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   _cellsForVisibilityUpdates = [NSMutableSet set];
   self.backgroundColor = [UIColor whiteColor];
   
-  [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kCellReuseIdentifier];
+  [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kReuseIdentifier];
   
   if (!AS_AT_LEAST_IOS9) {
     _retainedLayer = self.layer;
@@ -780,8 +782,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 {
   ASDisplayNodeAssert(elementKind != nil, @"A kind is needed for supplementary node registration");
   [_registeredSupplementaryKinds addObject:elementKind];
-  [self registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:elementKind
-                                            withReuseIdentifier:[self __reuseIdentifierForKind:elementKind]];
+  [self registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:elementKind withReuseIdentifier:kReuseIdentifier];
 }
 
 - (void)insertSections:(NSIndexSet *)sections
@@ -844,11 +845,6 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:kASCollectionViewAnimationNone];
 }
 
-- (NSString *)__reuseIdentifierForKind:(NSString *)kind
-{
-  return [@"_ASCollectionSupplementaryView_" stringByAppendingString:kind];
-}
-
 #pragma mark -
 #pragma mark Intercepted selectors.
 
@@ -870,8 +866,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  NSString *identifier = [self __reuseIdentifierForKind:kind];
-  UICollectionReusableView *view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:identifier forIndexPath:indexPath];
+  UICollectionReusableView *view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kReuseIdentifier forIndexPath:indexPath];
   ASCellNode *node = [_dataController supplementaryNodeOfKind:kind atIndexPath:indexPath];
   ASDisplayNodeAssert(node != nil, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self);
   [_rangeController configureContentView:view forCellNode:node];
@@ -882,7 +877,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
+  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:kReuseIdentifier forIndexPath:indexPath];
   
   ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
   cell.node = node;
