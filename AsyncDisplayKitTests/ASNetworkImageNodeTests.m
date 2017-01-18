@@ -34,7 +34,8 @@
   node = [[ASNetworkImageNode alloc] initWithCache:cache downloader:downloader];
 }
 
-- (void)testThatProgressBlockIsSetAndClearedCorrectlyOnVisibility
+/// Test is flaky: https://github.com/facebook/AsyncDisplayKit/issues/2898
+- (void)DISABLED_testThatProgressBlockIsSetAndClearedCorrectlyOnVisibility
 {
   node.URL = [NSURL URLWithString:@"http://imageA"];
 
