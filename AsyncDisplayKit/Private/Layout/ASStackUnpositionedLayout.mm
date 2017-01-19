@@ -125,8 +125,8 @@ static CGFloat computeLinesCrossDimensionSum(const std::vector<ASStackUnposition
  @param sizeRange the range of allowable sizes for the stack layout spec
  */
 CGFloat ASStackUnpositionedLayout::computeCrossViolation(const CGFloat crossDimensionSum,
-                                                       const ASStackLayoutSpecStyle &style,
-                                                       const ASSizeRange &sizeRange)
+                                                         const ASStackLayoutSpecStyle &style,
+                                                         const ASSizeRange &sizeRange)
 {
   const CGFloat minCrossDimension = crossDimension(style.direction, sizeRange.min);
   const CGFloat maxCrossDimension = crossDimension(style.direction, sizeRange.max);
@@ -139,8 +139,7 @@ CGFloat ASStackUnpositionedLayout::computeCrossViolation(const CGFloat crossDime
 }
 
 /**
- //TODO Docu
- Stretches children of a line to lay out along the cross axis according to the alignment stretch settings of the children
+ Stretches children to lay out along the cross axis according to the alignment stretch settings of the children
  (child.alignSelf), and the stack layout's alignment settings (style.alignItems).  This does not do the actual alignment
  of the items once stretched though; ASStackPositionedLayout will do centering etc.
 
@@ -172,9 +171,9 @@ CGFloat ASStackUnpositionedLayout::computeCrossViolation(const CGFloat crossDime
  @param style the layout style of the overall stack layout
  */
 static void stretchItemsAlongCrossDimension(std::vector<ASStackLayoutSpecItem> &items,
-                                       const ASStackLayoutSpecStyle &style,
-                                       const CGSize parentSize,
-                                       const CGFloat crossSize)
+                                            const ASStackLayoutSpecStyle &style,
+                                            const CGSize parentSize,
+                                            const CGFloat crossSize)
 {
   for (auto &item : items) {
     const ASStackLayoutAlignItems alignItems = alignment(item.child.style.alignSelf, style.alignItems);
@@ -454,7 +453,7 @@ static CGFloat computeItemsStackDimensionSum(const std::vector<ASStackLayoutSpec
   return childStackDimensionSum;
 }
 
-//TODO move this up near computeCrossViolation and make both methods share the same code path
+//TODO move this up near computeCrossViolation and make both methods share the same code path, to make sure they share the same concept of "negative" and "positive" violations.
 /**
  Computes the violation by comparing a stack dimension sum with the overall allowable size range for the stack.
 
@@ -487,8 +486,8 @@ static CGFloat computeItemsStackDimensionSum(const std::vector<ASStackLayoutSpec
  @param sizeRange the range of allowable sizes for the stack layout spec
  */
 CGFloat ASStackUnpositionedLayout::computeStackViolation(const CGFloat stackDimensionSum,
-                                                       const ASStackLayoutSpecStyle &style,
-                                                       const ASSizeRange &sizeRange)
+                                                         const ASStackLayoutSpecStyle &style,
+                                                         const ASSizeRange &sizeRange)
 {
   const CGFloat minStackDimension = stackDimension(style.direction, sizeRange.min);
   const CGFloat maxStackDimension = stackDimension(style.direction, sizeRange.max);

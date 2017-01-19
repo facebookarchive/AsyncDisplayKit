@@ -157,7 +157,6 @@ ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnposition
   const auto numOfLines = lines.size();
   const auto alignContent = style.alignContent;
   const auto justifyContent = style.justifyContent;
-  //TODO crossViolation to be stored in layout?
   const auto crossViolation = ASStackUnpositionedLayout::computeCrossViolation(layout.crossDimensionSum, style, sizeRange);
   //TODO Use CGPoint instead?
   CGFloat crossOffset;
@@ -169,7 +168,6 @@ ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnposition
   BOOL first = YES;
   for (const auto &line : lines) {
     const auto &items = line.items;
-    //TODO stackViolation to be stored in line?
     const auto stackViolation = ASStackUnpositionedLayout::computeStackViolation(line.stackDimensionSum, style, sizeRange);
     
     CGFloat stackOffset;

@@ -113,7 +113,7 @@ static NSArray<ASTextNode*> *defaultTextNodes()
    flexWrap:style.flexWrap
    alignContent:style.alignContent
    children:children];
-  
+
   [self testStackLayoutSpec:stackLayoutSpec sizeRange:sizeRange subnodes:subnodes identifier:identifier];
 }
 
