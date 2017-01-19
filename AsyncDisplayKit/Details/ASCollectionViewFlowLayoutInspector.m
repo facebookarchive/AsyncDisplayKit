@@ -29,10 +29,6 @@
     unsigned int implementsConstrainedSizeForNodeAtIndexPathDeprecated:1;
     unsigned int implementsConstrainedSizeForItemAtIndexPath:1;
   } _delegateFlags;
-  
-  struct {
-    unsigned int implementsNumberOfSectionsInCollectionView:1;
-  } _dataSourceFlags;
 }
 
 #pragma mark Lifecycle
@@ -44,7 +40,6 @@
   
   self = [super init];
   if (self != nil) {
-    [self didChangeCollectionViewDataSource:collectionView.asyncDataSource];
     [self didChangeCollectionViewDelegate:collectionView.asyncDelegate];
     _layout = flowLayout;
   }
@@ -62,15 +57,6 @@
     _delegateFlags.implementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
     _delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
     _delegateFlags.implementsConstrainedSizeForItemAtIndexPath = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForItemAtIndexPath:)];
-  }
-}
-
-- (void)didChangeCollectionViewDataSource:(id<ASCollectionDataSource>)dataSource
-{
-  if (dataSource == nil) {
-    memset(&_dataSourceFlags, 0, sizeof(_dataSourceFlags));
-  } else {
-    _dataSourceFlags.implementsNumberOfSectionsInCollectionView = [dataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
   }
 }
 
