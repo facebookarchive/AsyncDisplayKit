@@ -40,7 +40,6 @@
   
   self = [super init];
   if (self != nil) {
-    [self didChangeCollectionViewDataSource:collectionView.asyncDataSource];
     [self didChangeCollectionViewDelegate:collectionView.asyncDelegate];
     _layout = flowLayout;
   }
@@ -59,11 +58,6 @@
     _delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
     _delegateFlags.implementsConstrainedSizeForItemAtIndexPath = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForItemAtIndexPath:)];
   }
-}
-
-- (void)didChangeCollectionViewDataSource:(id<ASCollectionDataSource>)dataSource
-{
-  // nop
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath

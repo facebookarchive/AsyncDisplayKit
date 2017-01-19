@@ -17,6 +17,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * A layout inspector implementation specific for the sizing behavior of UICollectionViewFlowLayouts
  */
+AS_SUBCLASSING_RESTRICTED
 @interface ASCollectionViewFlowLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
 
 @property (nonatomic, weak, readonly) UICollectionViewFlowLayout *layout;
