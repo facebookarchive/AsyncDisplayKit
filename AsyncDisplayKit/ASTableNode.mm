@@ -200,6 +200,15 @@
   }
 }
 
+- (BOOL)inverted
+{
+  if ([self pendingState]) {
+    return _pendingState.inverted;
+  } else {
+    return self.view.inverted;
+  }
+}
+
 - (void)setDelegate:(id <ASTableDelegate>)delegate
 {
   if ([self pendingState]) {
