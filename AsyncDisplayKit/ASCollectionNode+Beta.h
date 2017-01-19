@@ -23,6 +23,11 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(nullable void (^)(BOOL))completion ASDISPLAYNODE_DEPRECATED_MSG("Use -performBatchUpdates:completion: instead.");
 
+/**
+ * The list adapter to be used with this collection node.
+ */
+@property (nonatomic, weak) id<ASListAdapter> listAdapter;
+
 @end
 
 NS_ASSUME_NONNULL_END

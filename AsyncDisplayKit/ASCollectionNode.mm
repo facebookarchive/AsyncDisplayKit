@@ -27,15 +27,12 @@
 #pragma mark - _ASCollectionPendingState
 
 @interface _ASCollectionPendingState : NSObject
-@property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
-@property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
+@property (weak, nonatomic) id <ASCollectionDelegate>    delegate;
+@property (weak, nonatomic) id <ASCollectionDataSource>  dataSource;
+@property (weak, nonatomic) id <ASListAdapter> listAdapter;
 @property (nonatomic, assign) ASLayoutRangeMode rangeMode;
 @property (nonatomic, assign) BOOL allowsSelection; // default is YES
 @property (nonatomic, assign) BOOL allowsMultipleSelection; // default is NO
-
-#if IG_LIST_KIT
-@property (nonatomic, weak) IGListAdapter *listAdapter;
-#endif
 
 @end
 
@@ -156,9 +153,7 @@
     view.asyncDataSource         = pendingState.dataSource;
     view.allowsSelection         = pendingState.allowsSelection;
     view.allowsMultipleSelection = pendingState.allowsMultipleSelection;
-#if IG_LIST_KIT
     view.listAdapter             = pendingState.listAdapter;
-#endif
 
     if (pendingState.rangeMode != ASLayoutRangeModeCount) {
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
@@ -228,12 +223,10 @@
 
 - (void)setDelegate:(id <ASCollectionDelegate>)delegate
 {
-#if IG_LIST_KIT
   if (self.listAdapter && delegate != nil) {
-    ASDisplayNodeFailAssert(@"ASCollectionNode.delegate cannot be set when used with a list adapter.");
+    ASDisplayNodeFailAssert(@"ASCollectionNode.delegate cannot be set when used with a data adapter.");
     return;
   }
-#endif
 
   if ([self pendingState]) {
     _pendingState.delegate = delegate;
@@ -262,12 +255,10 @@
 
 - (void)setDataSource:(id <ASCollectionDataSource>)dataSource
 {
-#if IG_LIST_KIT
   if (self.listAdapter && dataSource != nil) {
-    ASDisplayNodeFailAssert(@"ASCollectionNode.dataSource cannot be set when used with a list adapter.");
+    ASDisplayNodeFailAssert(@"ASCollectionNode.dataSource cannot be set when used with a data adapter.");
     return;
   }
-#endif
 
   if ([self pendingState]) {
     _pendingState.dataSource = dataSource;
@@ -353,25 +344,9 @@
   return [self.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
 }
 
-#if IG_LIST_KIT
-- (void)setListAdapter:(IGListAdapter *)listAdapter
+- (void)setListAdapter:(id<ASListAdapter>)listAdapter
 {
-  /**
-   * Configure the IGListAdapter updater to perform diffing, even when the collection view is offscreen.
-   * By default, the updater will simply call -reloadData when anything changes if collection view
-   * is not in a window, which will be a major performance problem for AsyncDisplayKit.
-   */
-  id<NSObject, IGListUpdatingDelegate> updater = listAdapter.updater;
-  if ([updater isKindOfClass:[IGListAdapterUpdater class]]) {
-    [(IGListAdapterUpdater *)updater setAllowsBackgroundReloading:NO];
-  } else {
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-      NSLog(@"WARNING: Use of non-%@ updater with AsyncDisplayKit is discouraged. Updater: %@", NSStringFromClass([IGListAdapterUpdater class]), updater);
-    });
-  }
-
-  IGListAdapter *oldListAdapter = self.listAdapter;
+  id oldListAdapter = self.listAdapter;
   if (self.delegate != oldListAdapter && listAdapter != nil) {
     ASDisplayNodeFailAssert(@"ASCollectionNode.delegate cannot be set when used with a list adapter.");
     return;
@@ -389,7 +364,7 @@
   }
 }
 
-- (IGListAdapter *)listAdapter
+- (id<ASListAdapter>)listAdapter
 {
   if (self.nodeLoaded) {
     return self.view.listAdapter;
@@ -397,7 +372,6 @@
     return self.pendingState.listAdapter;
   }
 }
-#endif
 
 #pragma mark - Selection
 

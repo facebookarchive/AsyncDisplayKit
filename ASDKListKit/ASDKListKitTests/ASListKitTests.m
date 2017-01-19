@@ -52,7 +52,7 @@
                                          viewController:nil
                                        workingRangeSize:0];
   self.adapter.dataSource = self.dataSource;
-  self.collectionNode.listAdapter = self.adapter;
+  self.collectionNode.listAdapter = [self.adapter as_dataAdapter];
   XCTAssertNotNil(self.adapter.collectionView, @"Adapter was not bound to collection view. You may have a stale copy of AsyncDisplayKit that was built without IG_LIST_KIT. Clean Builder Folder IMO.");
 }
 
@@ -74,7 +74,7 @@
                                                    viewController:nil
                                                  workingRangeSize:0];
   adapter.dataSource = self.dataSource;
-  self.collectionNode.listAdapter = adapter;
+  self.collectionNode.listAdapter = [adapter as_dataAdapter];
   [self.collectionNode.view layoutIfNeeded];
   [self.collectionNode waitUntilAllUpdatesAreCommitted];
   XCTAssertNotNil([self.collectionNode cellForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]]);
