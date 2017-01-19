@@ -10,6 +10,7 @@
 
 #import "ASCollectionView.h"
 #import "ASCollectionView+Undeprecated.h"
+#import "ASCollectionInternal.h"
 
 #pragma mark - Helper Functions
 
@@ -59,6 +60,10 @@ ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView *collectionVi
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
+  id<ASListAdapter> adapter = collectionView.listAdapter;
+  if (adapter) {
+    return [[adapter sectionControllerForSection:indexPath.section] constrainedSizeForItemAtIndex:indexPath.item];
+  } else
   if (_delegateFlags.implementsConstrainedSizeForNodeAtIndexPath) {
     return [collectionView.asyncDelegate collectionNode:collectionView.collectionNode constrainedSizeForItemAtIndexPath:indexPath];
   } else if (_delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated) {

@@ -17,6 +17,7 @@ before_install:
 install: echo "<3"
 env:
   - MODE=tests
+  - MODE=tests_listkit
   - MODE=examples-pt1
   - MODE=examples-pt2
   - MODE=examples-pt3

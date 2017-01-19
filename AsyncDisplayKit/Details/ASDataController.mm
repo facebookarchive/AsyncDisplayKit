@@ -656,6 +656,8 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   [_nodeContexts[ASDataControllerRowNodeKind] removeObjectsAtIndexes:sections];
 
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
+
+  [self prepareForDeleteSections:sections];
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     [self willDeleteSections:sections];
 
@@ -689,6 +691,11 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 }
 
 - (void)prepareForInsertSections:(NSIndexSet *)sections
+{
+  // Optional template hook for subclasses (See ASDataController+Subclasses.h)
+}
+
+- (void)prepareForDeleteSections:(NSIndexSet *)sections
 {
   // Optional template hook for subclasses (See ASDataController+Subclasses.h)
 }

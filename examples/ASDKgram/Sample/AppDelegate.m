@@ -20,6 +20,7 @@
 #import "AppDelegate.h"
 #import "PhotoFeedViewController.h"
 #import "PhotoFeedNodeController.h"
+#import "PhotoFeedListKitViewController.h"
 #import "WindowWithStatusBarUnderlay.h"
 #import "Utilities.h"
 
@@ -37,13 +38,19 @@
   _window                  = [[WindowWithStatusBarUnderlay alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
   _window.backgroundColor  = [UIColor whiteColor];
   
-  // UIKit Home Feed viewController & navController
+  // ASDK Home Feed viewController & navController
   PhotoFeedNodeController *asdkHomeFeedVC      = [[PhotoFeedNodeController alloc] init];
   UINavigationController *asdkHomeFeedNavCtrl  = [[UINavigationController alloc] initWithRootViewController:asdkHomeFeedVC];
   asdkHomeFeedNavCtrl.tabBarItem               = [[UITabBarItem alloc] initWithTitle:@"ASDK" image:[UIImage imageNamed:@"home"] tag:0];
   asdkHomeFeedNavCtrl.hidesBarsOnSwipe         = YES;
-  
-  // ASDK Home Feed viewController & navController
+
+  // ListKit Home Feed viewController & navController
+  PhotoFeedListKitViewController *listKitHomeFeedVC      = [[PhotoFeedListKitViewController alloc] init];
+  UINavigationController *listKitHomeFeedNavCtrl  = [[UINavigationController alloc] initWithRootViewController:listKitHomeFeedVC];
+  listKitHomeFeedNavCtrl.tabBarItem               = [[UITabBarItem alloc] initWithTitle:@"ListKit" image:[UIImage imageNamed:@"home"] tag:0];
+  listKitHomeFeedNavCtrl.hidesBarsOnSwipe         = YES;
+
+  // UIKit Home Feed viewController & navController
   PhotoFeedViewController *uikitHomeFeedVC     = [[PhotoFeedViewController alloc] init];
   UINavigationController *uikitHomeFeedNavCtrl = [[UINavigationController alloc] initWithRootViewController:uikitHomeFeedVC];
   uikitHomeFeedNavCtrl.tabBarItem              = [[UITabBarItem alloc] initWithTitle:@"UIKit" image:[UIImage imageNamed:@"home"] tag:0];
@@ -51,7 +58,7 @@
 
   // UITabBarController
   UITabBarController *tabBarController         = [[UITabBarController alloc] init];
-  tabBarController.viewControllers             = @[uikitHomeFeedNavCtrl, asdkHomeFeedNavCtrl];
+  tabBarController.viewControllers             = @[uikitHomeFeedNavCtrl, asdkHomeFeedNavCtrl, listKitHomeFeedNavCtrl];
   tabBarController.selectedViewController      = asdkHomeFeedNavCtrl;
   tabBarController.delegate                    = self;
   [[UITabBar appearance] setTintColor:[UIColor darkBlueColor]];

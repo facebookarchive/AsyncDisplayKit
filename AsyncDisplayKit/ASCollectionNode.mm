@@ -13,6 +13,7 @@
 #import "ASCollectionInternal.h"
 #import "ASCollectionViewLayoutFacilitatorProtocol.h"
 #import "ASCollectionNode.h"
+#import "ASCollectionNode+Beta.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASEnvironmentInternal.h"
@@ -26,11 +27,13 @@
 #pragma mark - _ASCollectionPendingState
 
 @interface _ASCollectionPendingState : NSObject
-@property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
-@property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
+@property (weak, nonatomic) id <ASCollectionDelegate>    delegate;
+@property (weak, nonatomic) id <ASCollectionDataSource>  dataSource;
+@property (weak, nonatomic) id <ASListAdapter> listAdapter;
 @property (nonatomic, assign) ASLayoutRangeMode rangeMode;
 @property (nonatomic, assign) BOOL allowsSelection; // default is YES
 @property (nonatomic, assign) BOOL allowsMultipleSelection; // default is NO
+
 @end
 
 @implementation _ASCollectionPendingState
@@ -150,6 +153,7 @@
     view.asyncDataSource         = pendingState.dataSource;
     view.allowsSelection         = pendingState.allowsSelection;
     view.allowsMultipleSelection = pendingState.allowsMultipleSelection;
+    view.listAdapter             = pendingState.listAdapter;
 
     if (pendingState.rangeMode != ASLayoutRangeModeCount) {
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
@@ -219,6 +223,11 @@
 
 - (void)setDelegate:(id <ASCollectionDelegate>)delegate
 {
+  if (self.listAdapter && delegate != nil) {
+    ASDisplayNodeFailAssert(@"ASCollectionNode.delegate cannot be set when used with a data adapter.");
+    return;
+  }
+
   if ([self pendingState]) {
     _pendingState.delegate = delegate;
   } else {
@@ -246,6 +255,11 @@
 
 - (void)setDataSource:(id <ASCollectionDataSource>)dataSource
 {
+  if (self.listAdapter && dataSource != nil) {
+    ASDisplayNodeFailAssert(@"ASCollectionNode.dataSource cannot be set when used with a data adapter.");
+    return;
+  }
+
   if ([self pendingState]) {
     _pendingState.dataSource = dataSource;
   } else {
@@ -328,6 +342,35 @@
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   return [self.rangeController setTuningParameters:tuningParameters forRangeMode:rangeMode rangeType:rangeType];
+}
+
+- (void)setListAdapter:(id<ASListAdapter>)listAdapter
+{
+  id oldListAdapter = self.listAdapter;
+  if (self.delegate != oldListAdapter && listAdapter != nil) {
+    ASDisplayNodeFailAssert(@"ASCollectionNode.delegate cannot be set when used with a list adapter.");
+    return;
+  }
+
+  if (self.dataSource != oldListAdapter && listAdapter != nil) {
+    ASDisplayNodeFailAssert(@"ASCollectionNode.dataSource cannot be set when used with a list adapter.");
+    return;
+  }
+
+  if (self.nodeLoaded) {
+    self.view.listAdapter = listAdapter;
+  } else {
+    self.pendingState.listAdapter = listAdapter;
+  }
+}
+
+- (id<ASListAdapter>)listAdapter
+{
+  if (self.nodeLoaded) {
+    return self.view.listAdapter;
+  } else {
+    return self.pendingState.listAdapter;
+  }
 }
 
 #pragma mark - Selection

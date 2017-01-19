@@ -34,6 +34,13 @@
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASSectionContext.h>
 
+#import <AsyncDisplayKit/ASListAdapter.h>
+#import <AsyncDisplayKit/ASSectionController.h>
+#import <AsyncDisplayKit/ASSupplementaryNodeSource.h>
+#if IG_LIST_KIT
+#import <AsyncDisplayKit/IGListAdapter+AsyncDisplayKit.h>
+#endif
+
 #import <AsyncDisplayKit/ASScrollNode.h>
 
 #import <AsyncDisplayKit/ASPagerFlowLayout.h>

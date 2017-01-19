@@ -164,7 +164,7 @@
 
 @interface ASCollectionView (InternalTesting)
 
-- (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController;
+- (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController sections:(nonnull NSIndexSet *)sections;
 
 @end
 
@@ -207,7 +207,7 @@
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   [collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  XCTAssertEqualObjects([collectionView supplementaryNodeKindsInDataController:nil], @[UICollectionElementKindSectionHeader]);
+  XCTAssertEqualObjects([collectionView supplementaryNodeKindsInDataController:nil sections:[NSIndexSet indexSetWithIndex:0]], @[UICollectionElementKindSectionHeader]);
 }
 
 - (void)testReloadIfNeeded

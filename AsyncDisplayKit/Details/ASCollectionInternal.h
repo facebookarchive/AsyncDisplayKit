@@ -15,6 +15,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASCollectionViewLayoutFacilitatorProtocol;
+@protocol ASListAdapter;
 @class ASCollectionNode;
 @class ASDataController;
 @class ASRangeController;
@@ -25,6 +26,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, weak, readwrite) ASCollectionNode *collectionNode;
 @property (nonatomic, strong, readonly) ASDataController *dataController;
 @property (nonatomic, strong, readonly) ASRangeController *rangeController;
+
+/**
+ * The data adapter to use with this collection view.
+ * This should be set publicly on the collection node, not on the view.
+ */
+@property (nonatomic, weak) id<ASListAdapter> listAdapter;
 
 /**
  * Attempt to get the view-layer index path for the item with the given index path.
