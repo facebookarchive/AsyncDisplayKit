@@ -912,7 +912,6 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
       context = completedNodesSection[row];
     }
   }
-  
   return context.node;
 }
 

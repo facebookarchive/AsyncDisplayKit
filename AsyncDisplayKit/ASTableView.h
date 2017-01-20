@@ -59,6 +59,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) CGFloat leadingScreensForBatching;
 
+/*
+ * A Boolean value that determines whether the nodes that the data source renders will be flipped.
+ */
+@property (nonatomic, assign) BOOL inverted;
+
 @end
 
 @interface ASTableView (Deprecated)
