@@ -149,16 +149,6 @@ apple_resource(
   dirs = ['AsyncDisplayKitTests/TestResources'],
 )
 
-apple_resource(
-  name = 'SnapshotTestsResources',
-  files = [],
-  dirs = [
-    'AsyncDisplayKitTests/ReferenceImages_32',
-    'AsyncDisplayKitTests/ReferenceImages_64',
-    'AsyncDisplayKitTests/ReferenceImages_iOS_10',
-  ],
-)
-
 apple_test(
   name = 'Tests',
   test_host_app = ':TestHost',
@@ -178,6 +168,7 @@ apple_test(
     # ASTextNodePerformanceTests are excluded (#2173)
     excludes = ['AsyncDisplayKitTests/ASTextNodePerformanceTests.m*']
   ),
+  snapshot_reference_images_path='AsyncDisplayKitTests/ReferenceImages',
   preprocessor_flags = COMMON_PREPROCESSOR_FLAGS + [
     '-Wno-implicit-function-declaration',
   ],
@@ -185,7 +176,6 @@ apple_test(
   linker_flags = COMMON_LINKER_FLAGS,
   deps = [
     ':TestsResources',
-    ':SnapshotTestsResources',
     '//Pods/OCMock:OCMock',
     '//Pods/FBSnapshotTestCase:FBSnapshotTestCase',
     '//Pods/JGMethodSwizzler:JGMethodSwizzler',
