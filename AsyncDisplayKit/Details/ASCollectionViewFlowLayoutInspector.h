@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include "ASCollectionViewLayoutInspector.h"
+#import "ASCollectionViewLayoutInspector.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
