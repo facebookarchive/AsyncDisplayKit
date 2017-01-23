@@ -13,6 +13,20 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+ASDISPLAYNODE_EXTERN_C_BEGIN
+
+FOUNDATION_EXPORT ASRangeTuningParameters const ASRangeTuningParametersZero;
+
+FOUNDATION_EXPORT BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningParameters lhs, ASRangeTuningParameters rhs);
+
+FOUNDATION_EXPORT ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferHorizontal(ASScrollDirection scrollDirection, ASRangeTuningParameters rangeTuningParameters);
+
+FOUNDATION_EXPORT ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferVertical(ASScrollDirection scrollDirection, ASRangeTuningParameters rangeTuningParameters);
+
+FOUNDATION_EXPORT CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTuningParameters tuningParameters, ASScrollDirection scrollableDirections, ASScrollDirection scrollDirection);
+
+ASDISPLAYNODE_EXTERN_C_END
+
 @interface ASAbstractLayoutController : NSObject <ASLayoutController>
 
 @end
