@@ -8,18 +8,20 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import "ASStackLayoutSpec.h"
+
 #import <numeric>
 #import <vector>
 
-#import "ASStackLayoutSpec.h"
 #import "ASDimension.h"
-#import "ASInternalHelpers.h"
 #import "ASLayout.h"
 #import "ASLayoutElement.h"
 #import "ASLayoutElementStylePrivate.h"
 #import "ASLayoutSpecUtilities.h"
 #import "ASStackPositionedLayout.h"
 #import "ASStackUnpositionedLayout.h"
+
+#import "ASInternalHelpers.h"
 #import "ASThread.h"
 
 @implementation ASStackLayoutSpec
