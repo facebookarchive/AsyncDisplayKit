@@ -778,7 +778,7 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   return _dataController;
 }
 
-- (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
+- (void)beginUpdates
 {
   ASDisplayNodeAssertMainThread();
   // _changeSet must be available during batch update
@@ -787,19 +787,34 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
   if (_batchUpdateCount == 0) {
     _changeSet = [[_ASHierarchyChangeSet alloc] initWithOldData:[_dataController itemCountsFromDataSource]];
   }
+  _batchUpdateCount++;  
+}
 
-  _batchUpdateCount++;
-  if (updates) {
-    updates();
-  }
+- (void)endUpdatesAnimated:(BOOL)animated completion:(nullable void (^)(BOOL))completion
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertNotNil(_changeSet, @"_changeSet must be available when batch update ends");
+
   _batchUpdateCount--;
+  // Prevent calling endUpdatesAnimated:completion: in an unbalanced way
+  NSAssert(_batchUpdateCount >= 0, @"endUpdatesAnimated:completion: called without having a balanced beginUpdates call");
   
   [_changeSet addCompletionHandler:completion];
-
+  
   if (_batchUpdateCount == 0) {
     [_dataController updateWithChangeSet:_changeSet animated:animated];
     _changeSet = nil;
   }
+}
+
+- (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
+{
+  ASDisplayNodeAssertMainThread();
+  [self beginUpdates];
+  if (updates) {
+    updates();
+  }
+  [self endUpdatesAnimated:animated completion:completion];
 }
 
 - (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
