@@ -67,9 +67,9 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   BOOL _delegateDidInsertSections;
   BOOL _delegateDidDeleteSections;
   
-  NSMutableArray *_moveFromIndexPaths;
-  NSMutableArray *_moveToIndexPaths;
-  NSMutableDictionary *_moveToNodeContextsDict;
+  NSMutableArray * _Nullable _moveFromIndexPaths;          // Modified on _editingTransactionQueue only.
+  NSMutableArray * _Nullable _moveToIndexPaths;            // Modified on _editingTransactionQueue only.
+  NSMutableDictionary * _Nullable _moveToNodeContextsDict; // Modified on _editingTransactionQueue only.
 }
 
 @end
@@ -317,22 +317,16 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
     
     _moveFromIndexPaths = [[NSMutableArray alloc] initWithCapacity:items.count];
     _moveToIndexPaths = [[NSMutableArray alloc] initWithCapacity:items.count];
-    NSMutableDictionary *_moveIndexPathPairs = [NSMutableDictionary dictionaryWithCapacity:items.count];
     _moveToNodeContextsDict = [NSMutableDictionary dictionaryWithCapacity:items.count];
     
     for (_ASHierarchyMoveItemChange *change in items) {
       [_moveFromIndexPaths addObject:change.fromIndexPath];
       [_moveToIndexPaths addObject:change.toIndexPath];
-      [_moveIndexPathPairs setObject:change.toIndexPath forKey:change.fromIndexPath];
-    }
-    
-    for (int i = 0; i < items.count; i++) {
-      NSIndexPath *toIndexPath = [_moveIndexPathPairs objectForKey:_moveFromIndexPaths[i]];
       
-      NSArray *nodeContexts = ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodeContexts[ASDataControllerRowNodeKind], @[_moveFromIndexPaths[i]]);
+      NSArray *nodeContexts = ASFindElementsInMultidimensionalArrayAtIndexPaths(_nodeContexts[ASDataControllerRowNodeKind], @[change.fromIndexPath]);
       id nodeContext = [nodeContexts firstObject];
       
-      [_moveToNodeContextsDict setObject:nodeContext forKey:toIndexPath];
+      [_moveToNodeContextsDict setObject:nodeContext forKey:change.toIndexPath];
     }
   });
 }
@@ -852,8 +846,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   for (NSIndexPath *indexPath in sortedIndexPaths) {
-    if ([_moveToIndexPaths containsObject:indexPath]) {
-      ASIndexedNodeContext *context = [_moveToNodeContextsDict objectForKey:indexPath];
+    if (ASIndexedNodeContext *context = _moveToNodeContextsDict[indexPath]) {
       context.indexPath = indexPath;
       
       [contexts addObject:context];
