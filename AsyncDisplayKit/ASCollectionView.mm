@@ -200,7 +200,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
    * The change set that we're currently building, if any.
    */
   _ASHierarchyChangeSet *_changeSet;
-    
+  
+  /**
+   * Counter used to keep track of nested batch updates.
+   */
+  NSInteger _batchUpdateCount;
+  
   struct {
     unsigned int scrollViewDidScroll:1;
     unsigned int scrollViewWillBeginDragging:1;
@@ -356,6 +361,8 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)dealloc
 {
   ASDisplayNodeAssertMainThread();
+  ASDisplayNodeCAssert(_batchUpdateCount == 0, @"ASCollectionView deallocated in the middle of a batch update.");
+  
   // Sometimes the UIKit classes can call back to their delegate even during deallocation, due to animation completion blocks etc.
   _isDeallocating = YES;
   [self setAsyncDelegate:nil];
@@ -406,6 +413,12 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)waitUntilAllUpdatesAreCommitted
 {
   ASDisplayNodeAssertMainThread();
+  if (_batchUpdateCount > 0) {
+    // This assertion will be enabled soon.
+    //    ASDisplayNodeFailAssert(@"Should not call %@ during batch update", NSStringFromSelector(_cmd));
+    return;
+  }
+  
   [_dataController waitUntilAllUpdatesAreCommitted];
 }
 
@@ -768,15 +781,25 @@ static NSString * const kCellReuseIdentifier = @"_ASCollectionViewCell";
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
-
-  if (_changeSet == nil) {
+  // _changeSet must be available during batch update
+  ASDisplayNodeAssertTrue((_batchUpdateCount > 0) == (_changeSet != nil));
+  
+  if (_batchUpdateCount == 0) {
     _changeSet = [[_ASHierarchyChangeSet alloc] initWithOldData:[_dataController itemCountsFromDataSource]];
   }
-  [_dataController beginUpdates];
+
+  _batchUpdateCount++;
   if (updates) {
     updates();
   }
-  [_dataController endUpdatesAnimated:animated completion:completion];
+  _batchUpdateCount--;
+  
+  [_changeSet addCompletionHandler:completion];
+
+  if (_batchUpdateCount == 0) {
+    [_dataController updateWithChangeSet:_changeSet animated:animated];
+    _changeSet = nil;
+  }
 }
 
 - (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion

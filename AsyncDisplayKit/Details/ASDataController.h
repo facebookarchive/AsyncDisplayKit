@@ -176,7 +176,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
 
 /** @name Data Updating */
 
-- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
+- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet animated:(BOOL)animated;
 
 /**
  * Re-measures all loaded nodes in the backing store.
@@ -185,8 +185,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
  * (e.g. ASTableView or ASCollectionView after an orientation change).
  */
 - (void)relayoutAllNodes;
-
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 - (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^ _Nullable)())completion;
 

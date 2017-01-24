@@ -10,7 +10,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import <AsyncDisplayKit/ASChangeSetDataController.h>
+#import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASDimension.h>
 
 @class ASDisplayNode;
@@ -41,7 +41,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface ASCollectionDataController : ASChangeSetDataController
+@interface ASCollectionDataController : ASDataController
 
 - (instancetype)initWithDataSource:(id<ASCollectionDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
 

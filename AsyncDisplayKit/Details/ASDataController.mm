@@ -10,6 +10,7 @@
 
 #import "ASDataController.h"
 
+#import "_ASHierarchyChangeSet.h"
 #import "ASAssert.h"
 #import "ASCellNode.h"
 #import "ASEnvironmentInternal.h"
@@ -580,11 +581,6 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   });
 }
 
-- (void)endUpdates
-{
-  [self endUpdatesAnimated:YES completion:nil];
-}
-
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   LOG(@"endUpdatesWithCompletion - beginning");
@@ -603,12 +599,75 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   });
 }
 
-#pragma mark - Section Editing (External API)
-
-- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
+- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet animated:(BOOL)animated
 {
+  ASDisplayNodeAssertMainThread();
   
+  void (^batchCompletion)(BOOL) = changeSet.completionHandler;
+  
+  /**
+   * If the initial reloadData has not been called, just bail because we don't have
+   * our old data source counts.
+   * See ASUICollectionViewTests.testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
+   * For the issue that UICollectionView has that we're choosing to workaround.
+   */
+  if (!self.initialReloadDataHasBeenCalled) {
+    if (batchCompletion != nil) {
+      batchCompletion(YES);
+    }
+    return;
+  }
+  
+  [self invalidateDataSourceItemCounts];
+  
+  // Attempt to mark the update completed. This is when update validation will occur inside the changeset.
+  // If an invalid update exception is thrown, we catch it and inject our "validationErrorSource" object,
+  // which is the table/collection node's data source, into the exception reason to help debugging.
+  @try {
+    [changeSet markCompletedWithNewItemCounts:[self itemCountsFromDataSource]];
+  } @catch (NSException *e) {
+    id responsibleDataSource = self.validationErrorSource;
+    if (e.name == ASCollectionInvalidUpdateException && responsibleDataSource != nil) {
+      [NSException raise:ASCollectionInvalidUpdateException format:@"%@: %@", [responsibleDataSource class], e.reason];
+    } else {
+      @throw e;
+    }
+  }
+  
+  ASDataControllerLogEvent(self, @"triggeredUpdate: %@", changeSet);
+  
+  [self beginUpdates];
+  
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
+    [self deleteRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+  }
+  
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
+    [self deleteSections:change.indexSet withAnimationOptions:change.animationOptions];
+  }
+  
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
+    [self insertSections:change.indexSet withAnimationOptions:change.animationOptions];
+  }
+  
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
+    [self insertRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+  }
+  
+#if ASEVENTLOG_ENABLE
+  NSString *changeSetDescription = ASObjectDescriptionMakeTiny(changeSet);
+  batchCompletion = ^(BOOL finished) {
+    if (batchCompletion != nil) {
+      batchCompletion(finished);
+    }
+    ASDataControllerLogEvent(self, @"finishedUpdate: %@", changeSetDescription);
+  };
+#endif
+  
+  [self endUpdatesAnimated:animated completion:batchCompletion];
 }
+
+#pragma mark - Section Editing (External API)
 
 - (void)insertSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
@@ -669,17 +728,6 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
     [self _deleteSectionsAtIndexSet:sections withAnimationOptions:animationOptions];
   });
 }
-
-- (void)reloadSections:(NSIndexSet *)sections withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssert(NO, @"ASDataController does not support %@. Call this on ASChangeSetDataController the reload will be broken into delete & insert.", NSStringFromSelector(_cmd));
-}
-
-- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssert(NO, @"ASDataController does not support %@. Call this on ASChangeSetDataController and the move will be processed along with the current batch of updates.", NSStringFromSelector(_cmd));
-}
-
 
 #pragma mark - Backing store manipulation optional hooks (Subclass API)
 
@@ -799,11 +847,6 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   });
 }
 
-- (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssert(NO, @"ASDataController does not support %@. Call this on ASChangeSetDataController and the reload will be broken into delete & insert.", NSStringFromSelector(_cmd));
-}
-
 - (void)relayoutAllNodes
 {
   ASDisplayNodeAssertMainThread();
@@ -846,11 +889,6 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
     }
     sectionIndex += 1;
   }
-}
-
-- (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssert(NO, @"ASDataController does not support %@. Call this on ASChangeSetDataController and the move will be processed along with the current batch of updates.", NSStringFromSelector(_cmd));
 }
 
 #pragma mark - Data Querying (Subclass API)

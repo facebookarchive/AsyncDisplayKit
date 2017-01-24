@@ -696,7 +696,7 @@
   XCTAssertTrue(toSection < originalSection);
   ASTestSectionContext *movedSectionContext = (ASTestSectionContext *)[cn contextForSection:toSection];
   XCTAssertNotNil(movedSectionContext);
-  // ASCollectionView currently uses ASChangeSetDataController which splits a move operation to a pair of delete and insert ones.
+  // ASCollectionView currently splits a move operation to a pair of delete and insert ones.
   // So this movedSectionContext is newly loaded and thus is second generation.
   XCTAssertEqual(movedSectionContext.sectionGeneration, 2);
   XCTAssertEqual(movedSectionContext.sectionIndex, toSection);

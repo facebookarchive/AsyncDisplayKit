@@ -13,7 +13,6 @@
 #import "ASTableView.h"
 #import "ASTableViewInternal.h"
 #import "ASDisplayNode+Subclasses.h"
-#import "ASChangeSetDataController.h"
 #import "ASCellNode.h"
 #import "ASTableNode.h"
 #import "ASTableView+Undeprecated.h"
@@ -24,7 +23,7 @@
 #define NumberOfSections 10
 #define NumberOfReloadIterations 50
 
-@interface ASTestDataController : ASChangeSetDataController
+@interface ASTestDataController : ASDataController
 @property (nonatomic) int numberOfAllNodesRelayouts;
 @end
 

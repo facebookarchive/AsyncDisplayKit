@@ -504,21 +504,6 @@
   [self.view reloadDataImmediately];
 }
 
-- (void)beginUpdates
-{
-  [self.dataController beginUpdates];
-}
-
-- (void)endUpdatesAnimated:(BOOL)animated
-{
-  [self endUpdatesAnimated:animated completion:nil];
-}
-
-- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
-{
-  [self.dataController endUpdatesAnimated:animated completion:completion];
-}
-
 - (void)insertSections:(NSIndexSet *)sections
 {
   [self.view insertSections:sections];
