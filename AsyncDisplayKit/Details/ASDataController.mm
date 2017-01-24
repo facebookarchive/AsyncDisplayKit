@@ -78,7 +78,6 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   if (!(self = [super init])) {
     return nil;
   }
-  ASDisplayNodeAssert(![self isMemberOfClass:[ASDataController class]], @"ASDataController is an abstract class and should not be instantiated. Instantiate a subclass instead.");
   
   _dataSource = dataSource;
   
