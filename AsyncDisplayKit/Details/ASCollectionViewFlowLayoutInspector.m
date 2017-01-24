@@ -25,7 +25,9 @@
 @implementation ASCollectionViewFlowLayoutInspector {
   struct {
     unsigned int implementsConstrainedSizeForHeader:1;
+    unsigned int implementsReferenceSizeForHeader:1;
     unsigned int implementsConstrainedSizeForFooter:1;
+    unsigned int implementsReferenceSizeForFooter:1;
     unsigned int implementsConstrainedSizeForNodeAtIndexPathDeprecated:1;
     unsigned int implementsConstrainedSizeForItemAtIndexPath:1;
   } _delegateFlags;
@@ -54,7 +56,9 @@
     memset(&_delegateFlags, 0, sizeof(_delegateFlags));
   } else {
     _delegateFlags.implementsConstrainedSizeForHeader = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForHeaderInSection:)];
+    _delegateFlags.implementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
     _delegateFlags.implementsConstrainedSizeForFooter = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForFooterInSection:)];
+    _delegateFlags.implementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
     _delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
     _delegateFlags.implementsConstrainedSizeForItemAtIndexPath = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForItemAtIndexPath:)];
   }
@@ -88,12 +92,16 @@
   if (ASObjectIsEqual(kind, UICollectionElementKindSectionHeader)) {
     if (_delegateFlags.implementsConstrainedSizeForHeader) {
       result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode constrainedSizeForHeaderInSection:indexPath.section];
+    } else if (_delegateFlags.implementsReferenceSizeForHeader) {
+      result.max = [(id)[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForHeaderInSection:indexPath.section];
     } else {
       result = ASSizeRangeMake(_layout.headerReferenceSize);
     }
   } else if (ASObjectIsEqual(kind, UICollectionElementKindSectionFooter)) {
     if (_delegateFlags.implementsConstrainedSizeForFooter) {
       result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode constrainedSizeForFooterInSection:indexPath.section];
+    } else if (_delegateFlags.implementsReferenceSizeForFooter) {
+      result.max = [(id)[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForFooterInSection:indexPath.section];
     } else {
       result = ASSizeRangeMake(_layout.footerReferenceSize);
     }
