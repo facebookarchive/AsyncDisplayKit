@@ -2823,13 +2823,15 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
   // Certain properties are necessary to set on an element of type ASLayoutSpec
   if (layoutElement.layoutElementType == ASLayoutElementTypeLayoutSpec) {
     ASLayoutSpec *layoutSpec = (ASLayoutSpec *)layoutElement;
-    
+  
+#if AS_DEDUPE_LAYOUT_SPEC_TREE
     NSSet *duplicateElements = [layoutSpec findDuplicatedElementsInSubtree];
     if (duplicateElements.count > 0) {
       ASDisplayNodeFailAssert(@"Node %@ returned a layout spec that contains the same elements in multiple positions. Elements: %@", self, duplicateElements);
       // Use an empty layout spec to avoid crashes
       layoutSpec = [[ASLayoutSpec alloc] init];
     }
+#endif
 
     if (_shouldCacheLayoutSpec) {
       _layoutSpec = layoutSpec;
