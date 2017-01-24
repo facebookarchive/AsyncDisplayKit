@@ -12,8 +12,9 @@
 
 
 #import "ASInternalHelpers.h"
-#import "ASEnvironmentInternal.h"
+
 #import "ASThread.h"
+#import "ASEnvironmentInternal.h"
 
 NS_ASSUME_NONNULL_BEGIN
 

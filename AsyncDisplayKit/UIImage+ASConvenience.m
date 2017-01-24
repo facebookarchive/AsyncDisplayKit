@@ -11,7 +11,6 @@
 //
 
 #import "UIImage+ASConvenience.h"
-#import <UIKit/UIKit.h>
 #import "ASInternalHelpers.h"
 #import "ASAssert.h"
 

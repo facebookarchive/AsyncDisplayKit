@@ -23,7 +23,7 @@ Pod::Spec.new do |spec|
     core.public_header_files = [
         'AsyncDisplayKit/*.h',
         'AsyncDisplayKit/Details/**/*.h',
-        'AsyncDisplayKit/Layout/*.h',
+        'AsyncDisplayKit/Layout/**/*.h',
         'Base/*.h',
         'AsyncDisplayKit/Debug/ASLayoutElementInspectorNode.h',
         'AsyncDisplayKit/TextKit/ASTextNodeTypes.h',

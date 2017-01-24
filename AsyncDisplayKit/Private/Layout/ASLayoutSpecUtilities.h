@@ -8,12 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <UIKit/UIKit.h>
+
 #import <algorithm>
 #import <functional>
 #import <type_traits>
 #import <vector>
-
-#import <UIKit/UIKit.h>
 
 namespace AS {
   // adopted from http://stackoverflow.com/questions/14945223/map-function-with-c11-constructs

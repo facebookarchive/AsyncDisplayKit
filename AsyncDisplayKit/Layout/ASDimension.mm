@@ -9,8 +9,10 @@
 //
 
 #import "ASDimension.h"
-#import "ASAssert.h"
+
 #import "CoreGraphics+ASConvenience.h"
+
+#import "ASAssert.h"
 
 #pragma mark - ASDimension
 
