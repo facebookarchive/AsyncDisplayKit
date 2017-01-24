@@ -141,13 +141,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
  */
 @property (nonatomic, weak) id<ASDataControllerEnvironmentDelegate> environmentDelegate;
 
-/**
- * Ensure that next time `itemCountsFromDataSource` is called, new values are retrieved.
- *
- * This must be called on the main thread.
- */
-- (void)invalidateDataSourceItemCounts;
-
 #ifdef __cplusplus
 /**
  * Returns the most recently gathered item counts from the data source. If the counts
