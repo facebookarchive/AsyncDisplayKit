@@ -8,13 +8,13 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASInternalHelpers.h"
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 #import <objc/runtime.h>
 #import <tgmath.h>
 
-#import "ASRunLoopQueue.h"
-#import "ASThread.h"
+#import <AsyncDisplayKit/ASRunLoopQueue.h>
+#import <AsyncDisplayKit/ASThread.h>
 
 BOOL ASSubclassOverridesSelector(Class superclass, Class subclass, SEL selector)
 {

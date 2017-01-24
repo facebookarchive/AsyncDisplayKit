@@ -10,12 +10,10 @@
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
+#import <AsyncDisplayKit/ASBlockTypes.h>
 
 @class ASDisplayNode;
 @protocol _ASDisplayLayerDelegate;
-
-// Type for the cancellation checker block passed into the async display blocks. YES means the operation has been cancelled, NO means continue.
-typedef BOOL(^asdisplaynode_iscancelled_block_t)(void);
 
 @interface _ASDisplayLayer : CALayer
 

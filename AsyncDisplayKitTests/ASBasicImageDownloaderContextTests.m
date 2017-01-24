@@ -9,7 +9,7 @@
 //
 
 #import <AsyncDisplayKit/ASBasicImageDownloader.h>
-#import "ASBasicImageDownloaderInternal.h"
+#import <AsyncDisplayKit/ASBasicImageDownloaderInternal.h>
 
 #import <OCMock/OCMock.h>
 

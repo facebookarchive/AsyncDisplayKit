@@ -471,7 +471,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Similar to -collectionView:cellForItemAtIndexPath:.
  *
- * @param collectionView The sender.
+ * @param collectionNode The sender.
  * @param indexPath The index path of the item.
  *
  * @return A node to display for the given item. This will be called on the main thread and should

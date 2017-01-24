@@ -8,10 +8,15 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <Foundation/Foundation.h>
-#import "ASTextKitAttributes.h"
-#import "ASTextKitContext.h"
+#import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASTextKitAttributes.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+@class ASTextKitContext;
+
+AS_SUBCLASSING_RESTRICTED
 @interface ASTextKitFontSizeAdjuster : NSObject
 
 @property (nonatomic, assign) CGSize constrainedSize;
@@ -45,4 +50,4 @@
 
 @end
 
-
+NS_ASSUME_NONNULL_END

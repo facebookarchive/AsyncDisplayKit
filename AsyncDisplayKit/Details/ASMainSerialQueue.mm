@@ -10,10 +10,10 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASMainSerialQueue.h"
+#import <AsyncDisplayKit/ASMainSerialQueue.h>
 
-#import "ASThread.h"
-#import "ASInternalHelpers.h"
+#import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 @interface ASMainSerialQueue ()
 {

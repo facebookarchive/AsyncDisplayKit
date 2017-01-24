@@ -12,14 +12,8 @@
 
 #import <XCTest/XCTest.h>
 
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "ASDisplayNodeTestsHelper.h"
-#import "ASDisplayNode.h"
-#import "ASDisplayNode+Beta.h"
-#import "ASDisplayNode+Subclasses.h"
-
-#import "ASAbsoluteLayoutSpec.h"
-#import "ASStackLayoutSpec.h"
-#import "ASInsetLayoutSpec.h"
 
 @interface ASSpecTestDisplayNode : ASDisplayNode
 

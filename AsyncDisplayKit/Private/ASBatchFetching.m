@@ -8,7 +8,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASBatchFetching.h"
+#import <AsyncDisplayKit/ASBatchFetching.h>
+#import <AsyncDisplayKit/ASBatchContext.h>
 
 BOOL ASDisplayShouldFetchBatchForScrollView(UIScrollView<ASBatchFetchingScrollView> *scrollView, ASScrollDirection scrollDirection, ASScrollDirection scrollableDirections, CGPoint contentOffset)
 {

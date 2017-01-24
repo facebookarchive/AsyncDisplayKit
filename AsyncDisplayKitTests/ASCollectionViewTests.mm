@@ -9,16 +9,13 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ASCollectionView.h"
-#import "ASCollectionDataController.h"
-#import "ASCollectionViewFlowLayoutInspector.h"
-#import "ASCellNode.h"
-#import "ASCollectionNode.h"
-#import "ASDisplayNode+Beta.h"
-#import "ASSectionContext.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASCollectionDataController.h>
+#import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
+#import <AsyncDisplayKit/ASSectionContext.h>
 #import <vector>
 #import <OCMock/OCMock.h>
-#import "ASCollectionView+Undeprecated.h"
+#import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 

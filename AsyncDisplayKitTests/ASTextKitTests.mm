@@ -13,10 +13,10 @@
 
 #import <FBSnapshotTestCase/FBSnapshotTestController.h>
 
-#import "ASTextKitEntityAttribute.h"
-#import "ASTextKitAttributes.h"
-#import "ASTextKitRenderer.h"
-#import "ASTextKitRenderer+Positioning.h"
+#import <AsyncDisplayKit/ASTextKitEntityAttribute.h>
+#import <AsyncDisplayKit/ASTextKitAttributes.h>
+#import <AsyncDisplayKit/ASTextKitRenderer.h>
+#import <AsyncDisplayKit/ASTextKitRenderer+Positioning.h>
 
 @interface ASTextKitTests : XCTestCase
 

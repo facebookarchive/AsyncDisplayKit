@@ -7,7 +7,7 @@
 //
 
 #pragma once
-#import "ASControlNode.h"
+#import <AsyncDisplayKit/ASControlNode.h>
 
 @class ASLayoutSpec;
 

@@ -8,8 +8,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitContext.h"
-#import "ASTextKitTailTruncater.h"
+#import <AsyncDisplayKit/ASTextKitContext.h>
+#import <AsyncDisplayKit/ASTextKitTailTruncater.h>
 
 @implementation ASTextKitTailTruncater
 {

@@ -8,10 +8,11 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <UIKit/UIScrollView.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+@class UIScrollView;
 
 /**
  * Simple node that wraps UIScrollView.

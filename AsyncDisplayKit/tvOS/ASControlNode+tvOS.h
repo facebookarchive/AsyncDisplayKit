@@ -11,7 +11,7 @@
 //
 
 #if TARGET_OS_TV
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASControlNode.h>
 
 @interface ASControlNode (tvOS)
 

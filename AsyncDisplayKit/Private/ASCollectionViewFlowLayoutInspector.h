@@ -8,11 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#pragma once
-
-#import "ASCollectionViewLayoutInspector.h"
+#import <AsyncDisplayKit/ASCollectionViewLayoutInspector.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+@class ASCollectionView;
+@class UICollectionViewFlowLayout;
 
 /**
  * A layout inspector implementation specific for the sizing behavior of UICollectionViewFlowLayouts

@@ -8,27 +8,20 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#if TARGET_OS_IOS
-
-#import "ASMultiplexImageNode.h"
+#import <AsyncDisplayKit/ASMultiplexImageNode.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 
-#import "ASAvailability.h"
-#import "ASDisplayNode+FrameworkSubclasses.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASLog.h"
-#import "ASPhotosFrameworkImageRequest.h"
-#import "ASEqualityHelpers.h"
-#import "ASInternalHelpers.h"
-
-#if !AS_IOS8_SDK_OR_LATER
-#error ASMultiplexImageNode can be used on iOS 7, but must be linked against the iOS 8 SDK.
-#endif
+#import <AsyncDisplayKit/ASAvailability.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASPhotosFrameworkImageRequest.h>
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 #if PIN_REMOTE_IMAGE
-#import "ASPINRemoteImageDownloader.h"
+#import <AsyncDisplayKit/ASPINRemoteImageDownloader.h>
 #else
-#import "ASBasicImageDownloader.h"
+#import <AsyncDisplayKit/ASBasicImageDownloader.h>
 #endif
 
 NSString *const ASMultiplexImageNodeErrorDomain = @"ASMultiplexImageNodeErrorDomain";
@@ -687,7 +680,6 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (void)_loadPHAssetWithRequest:(ASPhotosFrameworkImageRequest *)request identifier:(id)imageIdentifier completion:(void (^)(UIImage *image, NSError *error))completionBlock
 {
-  ASDisplayNodeAssert(AS_AT_LEAST_IOS8, @"PhotosKit is unavailable on iOS 7.");
   ASDisplayNodeAssertNotNil(imageIdentifier, @"imageIdentifier is required");
   ASDisplayNodeAssertNotNil(request, @"request is required");
   ASDisplayNodeAssertNotNil(completionBlock, @"completionBlock is required");
@@ -768,10 +760,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
       }
     }];
   }];
-  if (AS_AT_LEAST_IOS8) {
-    // If you don't set this, iOS will sometimes infer NSQualityOfServiceUserInteractive and promote the entire queue to that level, damaging system responsiveness
-    newImageRequestOp.qualityOfService = NSQualityOfServiceUserInitiated;
-  }
+  // If you don't set this, iOS will sometimes infer NSQualityOfServiceUserInteractive and promote the entire queue to that level, damaging system responsiveness
+  newImageRequestOp.qualityOfService = NSQualityOfServiceUserInitiated;
   _phImageRequestOperation = newImageRequestOp;
   [phImageRequestQueue addOperation:newImageRequestOp];
 }
@@ -877,7 +867,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 }
 
 @end
-#if TARGET_OS_IOS
+
 @implementation NSURL (ASPhotosFrameworkURLs)
 
 + (NSURL *)URLWithAssetLocalIdentifier:(NSString *)assetLocalIdentifier targetSize:(CGSize)targetSize contentMode:(PHImageContentMode)contentMode options:(PHImageRequestOptions *)options
@@ -890,6 +880,3 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 }
 
 @end
-#endif
-
-#endif

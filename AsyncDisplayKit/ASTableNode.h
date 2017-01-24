@@ -10,15 +10,17 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <AsyncDisplayKit/ASTableView.h>
+#import <AsyncDisplayKit/ASBlockTypes.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
+#import <AsyncDisplayKit/ASTableView.h>
+
 
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASTableDataSource;
 @protocol ASTableDelegate;
-@class ASTableView;
+@class ASTableView, ASBatchContext;
 
 /**
  * ASTableNode is a node based class that wraps an ASTableView. It can be used

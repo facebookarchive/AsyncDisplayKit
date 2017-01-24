@@ -11,9 +11,9 @@
 #import <Foundation/Foundation.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASDataController.h>
-#import <AsyncDisplayKit/ASLayoutController.h>
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
 #import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 #define ASRangeControllerLoggingEnabled 0
 
@@ -21,6 +21,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASRangeControllerDataSource;
 @protocol ASRangeControllerDelegate;
+@protocol ASLayoutController;
 
 /**
  * Working range controller.
@@ -30,6 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
  * "working ranges" to trigger network calls and rendering, and is responsible for driving asynchronous layout of cells.
  * This includes cancelling those asynchronous operations as cells fall outside of the working ranges.
  */
+AS_SUBCLASSING_RESTRICTED
 @interface ASRangeController : NSObject <ASDataControllerDelegate>
 {
   id<ASLayoutController>                  _layoutController;

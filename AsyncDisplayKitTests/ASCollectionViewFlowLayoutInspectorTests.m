@@ -13,11 +13,11 @@
 #import <OCMock/OCMock.h>
 #import "ASXCTExtensions.h"
 
-#import "ASCollectionView.h"
-#import "ASCollectionNode.h"
-#import "ASCollectionViewFlowLayoutInspector.h"
-#import "ASCellNode.h"
-#import "ASCollectionView+Undeprecated.h"
+#import <AsyncDisplayKit/ASCollectionView.h>
+#import <AsyncDisplayKit/ASCollectionNode.h>
+#import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
+#import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 
 @interface ASCollectionView (Private)
 

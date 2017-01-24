@@ -8,16 +8,16 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitRenderer.h"
+#import <AsyncDisplayKit/ASTextKitRenderer.h>
 
-#import "ASAssert.h"
+#import <AsyncDisplayKit/ASAssert.h>
 
-#import "ASTextKitContext.h"
-#import "ASTextKitShadower.h"
-#import "ASTextKitTailTruncater.h"
-#import "ASTextKitFontSizeAdjuster.h"
-#import "ASInternalHelpers.h"
-#import "ASRunLoopQueue.h"
+#import <AsyncDisplayKit/ASTextKitContext.h>
+#import <AsyncDisplayKit/ASTextKitShadower.h>
+#import <AsyncDisplayKit/ASTextKitTailTruncater.h>
+#import <AsyncDisplayKit/ASTextKitFontSizeAdjuster.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASRunLoopQueue.h>
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -207,10 +207,6 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   // fast path.
   if (self.canUseFastPath) {
     CGRect drawingBounds = shadowInsetBounds;
-    // Add a fudge-factor to the height, to workaround a bug in iOS 7
-    if (AS_AT_LEAST_IOS8 == NO) {
-      drawingBounds.size.height += 3;
-    }
     [_attributes.attributedString drawWithRect:drawingBounds options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:self.stringDrawingContext];
   } else {
     BOOL isScaled = [self isScaled];
@@ -230,7 +226,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
       
       LOG(@"usedRect: %@", NSStringFromCGRect([layoutManager usedRectForTextContainer:textContainer]));
 
-      NSRange glyphRange = [layoutManager glyphRangeForBoundingRect:CGRectMake(0,0,textContainer.size.width, textContainer.size.height) inTextContainer:textContainer];
+      NSRange glyphRange = [layoutManager glyphRangeForBoundingRect:(CGRect){ .size = textContainer.size } inTextContainer:textContainer];
       LOG(@"boundingRect: %@", NSStringFromCGRect([layoutManager boundingRectForGlyphRange:glyphRange inTextContainer:textContainer]));
       
       [layoutManager drawBackgroundForGlyphRange:glyphRange atPoint:shadowInsetBounds.origin];

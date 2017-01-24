@@ -6,9 +6,9 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASObjectDescriptionHelpers.h"
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 #import <UIKit/UIKit.h>
-#import "NSIndexSet+ASHelpers.h"
+#import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
 
 NSString *ASGetDescriptionValueString(id object)
 {

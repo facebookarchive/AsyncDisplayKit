@@ -8,8 +8,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDisplayNode+DebugTiming.h"
-#import "ASDisplayNodeInternal.h"
+#import <AsyncDisplayKit/ASDisplayNode+DebugTiming.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 
 @implementation ASDisplayNode (DebugTiming)
 

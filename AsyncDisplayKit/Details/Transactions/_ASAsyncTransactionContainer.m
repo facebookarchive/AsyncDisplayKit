@@ -8,11 +8,11 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "_ASAsyncTransactionContainer+Private.h"
+#import <AsyncDisplayKit/_ASAsyncTransactionContainer.h>
+#import <AsyncDisplayKit/_ASAsyncTransactionContainer+Private.h>
 
-#import "_ASAsyncTransaction.h"
-#import "_ASAsyncTransactionContainer.h"
-#import "_ASAsyncTransactionGroup.h"
+#import <AsyncDisplayKit/_ASAsyncTransaction.h>
+#import <AsyncDisplayKit/_ASAsyncTransactionGroup.h>
 #import <objc/runtime.h>
 
 static const char *ASDisplayNodeAssociatedTransactionsKey = "ASAssociatedTransactions";

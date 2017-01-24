@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitRenderer.h"
+#import <AsyncDisplayKit/ASTextKitRenderer.h>
 
 /**
  Application extensions to NSTextCheckingType. We're allowed to do this (see NSTextCheckingAllCustomTypes).

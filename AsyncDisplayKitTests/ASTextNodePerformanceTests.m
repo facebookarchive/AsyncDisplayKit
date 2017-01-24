@@ -10,9 +10,9 @@
 #import "ASPerformanceTestContext.h"
 #import <AsyncDisplayKit/ASTextNode.h>
 #import <AsyncDisplayKit/ASLayout.h>
-#import "ASinternalHelpers.h"
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 #import "ASXCTExtensions.h"
-#import "CoreGraphics+ASConvenience.h"
+#import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
 
 /**
  * NOTE: This test case is not run during the "test" action. You have to run it manually (click the little diamond.)

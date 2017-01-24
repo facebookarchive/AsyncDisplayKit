@@ -10,9 +10,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASLayoutRangeType.h"
-
-#import "ASBaseDefines.h"
+#import <AsyncDisplayKit/ASBaseDefines.h>
+#import <AsyncDisplayKit/ASLayoutRangeType.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

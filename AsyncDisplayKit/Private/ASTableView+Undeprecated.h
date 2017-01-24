@@ -6,7 +6,10 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASTableNode.h>
+#import <AsyncDisplayKit/ASLayoutRangeType.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

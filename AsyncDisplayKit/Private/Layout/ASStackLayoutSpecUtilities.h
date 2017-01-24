@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASStackLayoutSpec.h"
+#import <AsyncDisplayKit/ASStackLayoutSpec.h>
 
 typedef struct {
   ASStackLayoutDirection direction;

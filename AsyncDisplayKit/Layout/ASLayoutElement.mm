@@ -10,10 +10,11 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 
 #import <map>
 #import <atomic>
+#import <AsyncDisplayKit/ASThread.h>
 
 CGFloat const ASLayoutElementParentDimensionUndefined = NAN;
 CGSize const ASLayoutElementParentSizeUndefined = {ASLayoutElementParentDimensionUndefined, ASLayoutElementParentDimensionUndefined};

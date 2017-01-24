@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASMutableAttributedStringBuilder.h"
+#import <AsyncDisplayKit/ASMutableAttributedStringBuilder.h>
 
 @implementation ASMutableAttributedStringBuilder {
   // Flag for the type of the current transaction (set or add)

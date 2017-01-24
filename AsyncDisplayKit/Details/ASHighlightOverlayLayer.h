@@ -9,9 +9,12 @@
 //
 
 #import <QuartzCore/QuartzCore.h>
+#import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+AS_SUBCLASSING_RESTRICTED
 @interface ASHighlightOverlayLayer : CALayer
 
 /**

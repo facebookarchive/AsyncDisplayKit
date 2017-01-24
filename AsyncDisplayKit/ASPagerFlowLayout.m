@@ -10,7 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASPagerFlowLayout.h"
+#import <AsyncDisplayKit/ASPagerFlowLayout.h>
 
 @interface ASPagerFlowLayout () {
   BOOL _didRotate;

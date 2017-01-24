@@ -11,15 +11,15 @@
 //
 
 #if PIN_REMOTE_IMAGE
-#import "ASPINRemoteImageDownloader.h"
+#import <AsyncDisplayKit/ASPINRemoteImageDownloader.h>
 
-#import "ASAssert.h"
-#import "ASThread.h"
-#import "ASImageContainerProtocolCategories.h"
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASImageContainerProtocolCategories.h>
 
-#if __has_include ("PINAnimatedImage.h")
+#if __has_include (<PINRemoteImage/PINAnimatedImage.h>)
 #define PIN_ANIMATED_AVAILABLE 1
-#import "PINAnimatedImage.h"
+#import <PINRemoteImage/PINAnimatedImage.h>
 #import <PINRemoteImage/PINAlternateRepresentationProvider.h>
 #else
 #define PIN_ANIMATED_AVAILABLE 0

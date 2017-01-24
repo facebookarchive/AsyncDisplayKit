@@ -15,6 +15,7 @@
 @class ASDataController;
 @class ASTableNode;
 @class ASRangeController;
+@class ASEventLog;
 
 @interface ASTableView (Internal)
 

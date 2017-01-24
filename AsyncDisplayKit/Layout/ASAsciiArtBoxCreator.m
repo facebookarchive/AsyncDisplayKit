@@ -8,8 +8,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASAsciiArtBoxCreator.h"
-
+#import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
+#import <UIKit/UIKit.h>
 #import <tgmath.h>
 
 static const NSUInteger kDebugBoxPadding = 2;

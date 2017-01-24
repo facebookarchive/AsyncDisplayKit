@@ -10,7 +10,8 @@
 
 #import <XCTest/XCTest.h>
 
-#import "ASBatchFetching.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASBatchFetching.h>
 
 @interface ASBatchFetchingTests : XCTestCase
 

@@ -14,10 +14,10 @@
 
 #import <XCTest/XCTest.h>
 
-#import "_ASDisplayView.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNodeExtras.h"
-#import "UIView+ASConvenience.h"
+#import <AsyncDisplayKit/_ASDisplayView.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/UIView+ASConvenience.h>
 
 // helper functions
 IMP class_replaceMethodWithBlock(Class class, SEL originalSelector, id block);

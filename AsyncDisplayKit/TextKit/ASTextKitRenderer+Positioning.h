@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitRenderer.h"
+#import <AsyncDisplayKit/ASTextKitRenderer.h>
 
 typedef void (^as_text_component_index_block_t)(NSUInteger characterIndex,
                                                 CGRect glyphBoundingRect,

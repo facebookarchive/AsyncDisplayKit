@@ -8,12 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASInsetLayoutSpec.h"
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 
-#import "ASLayoutSpec+Subclasses.h"
+#import <AsyncDisplayKit/ASLayoutSpec+Subclasses.h>
 
-#import "ASAssert.h"
-#import "ASInternalHelpers.h"
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 @interface ASInsetLayoutSpec ()
 {

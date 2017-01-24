@@ -12,12 +12,10 @@
 
 #import <QuartzCore/QuartzCore.h>
 #import <UIKit/UIKit.h>
-
 #import <XCTest/XCTest.h>
 
-#import "_ASDisplayLayer.h"
-#import "_ASAsyncTransactionContainer.h"
-#import "ASDisplayNode.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
+
 #import "ASDisplayNodeTestsHelper.h"
 
 static UIImage *bogusImage() {

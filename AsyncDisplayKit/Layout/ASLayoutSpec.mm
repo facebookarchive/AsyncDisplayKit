@@ -8,13 +8,15 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASLayoutSpec.h"
-#import "ASLayoutSpecPrivate.h"
+#import <AsyncDisplayKit/ASLayoutSpec.h>
+#import <AsyncDisplayKit/ASLayoutSpecPrivate.h>
 
-#import "ASLayoutSpec+Subclasses.h"
-#import "ASLayoutSpec+Debug.h"
+#import <AsyncDisplayKit/ASLayoutSpec+Subclasses.h>
+#import <AsyncDisplayKit/ASLayoutSpec+Debug.h>
 
-#import "ASLayoutElementStylePrivate.h"
+#import <AsyncDisplayKit/ASLayoutElementStylePrivate.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
 
 #import <objc/runtime.h>
 #import <map>

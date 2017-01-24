@@ -6,11 +6,13 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASLayoutElementInspectorNode.h"
-#import "ASLayoutElementInspectorCell.h"
-#import "ASDisplayNode+Beta.h"
-#import "ASLayoutSpec+Debug.h"
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASLayoutElementInspectorNode.h>
+#import <AsyncDisplayKit/ASLayoutElementInspectorCell.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASLayoutSpec+Debug.h>
+#import <AsyncDisplayKit/ASTableNode.h>
+#import <AsyncDisplayKit/ASDisplayNode.h>
 
 @interface ASLayoutElementInspectorNode () <ASTableDelegate, ASTableDataSource>
 @end

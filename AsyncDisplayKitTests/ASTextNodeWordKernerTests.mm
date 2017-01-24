@@ -10,9 +10,9 @@
 
 #import <XCTest/XCTest.h>
 
-#import "ASTextKitComponents.h"
-#import "ASTextNodeTypes.h"
-#import "ASTextNodeWordKerner.h"
+#import <AsyncDisplayKit/ASTextKitComponents.h>
+#import <AsyncDisplayKit/ASTextNodeTypes.h>
+#import <AsyncDisplayKit/ASTextNodeWordKerner.h>
 
 #pragma mark - Tests
 

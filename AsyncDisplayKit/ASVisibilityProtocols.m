@@ -10,7 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASVisibilityProtocols.h"
+#import <AsyncDisplayKit/ASVisibilityProtocols.h>
 
 ASLayoutRangeMode ASLayoutRangeModeForVisibilityDepth(NSUInteger visibilityDepth)
 {

@@ -9,11 +9,10 @@
 //
 
 #import <AsyncDisplayKit/ASImageNode.h>
-#import <AsyncDisplayKit/ASImageProtocols.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol ASNetworkImageNodeDelegate;
+@protocol ASNetworkImageNodeDelegate, ASImageCacheProtocol, ASImageDownloaderProtocol;
 
 
 /**

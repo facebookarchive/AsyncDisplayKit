@@ -8,11 +8,11 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDimension.h"
+#import <AsyncDisplayKit/ASDimension.h>
 
-#import "CoreGraphics+ASConvenience.h"
+#import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
 
-#import "ASAssert.h"
+#import <AsyncDisplayKit/ASAssert.h>
 
 #pragma mark - ASDimension
 

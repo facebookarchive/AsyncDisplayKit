@@ -7,9 +7,11 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
+AS_SUBCLASSING_RESTRICTED
 @interface ASTraceEvent : NSObject
 
 /**
