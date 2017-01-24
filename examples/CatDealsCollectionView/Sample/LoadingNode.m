@@ -39,10 +39,6 @@ static CGFloat kFixedHeight = 200.0f;
 #pragma mark -
 #pragma mark ASCellNode.
 
-+ (CGFloat)desiredHeightForWidth:(CGFloat)width {
-  return kFixedHeight;
-}
-
 - (instancetype)init
 {
   if (!(self = [super init]))
@@ -59,10 +55,6 @@ static CGFloat kFixedHeight = 200.0f;
   [self addSubnode:_loadingSpinner];
   
   return self;
-}
-
-- (void)layout {
-  [super layout];
 }
 
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize

@@ -68,6 +68,8 @@
           // handled by ASCollectionView node<->cell machinery
           selector == @selector(collectionView:cellForItemAtIndexPath:) ||
           selector == @selector(collectionView:layout:sizeForItemAtIndexPath:) ||
+          selector == @selector(collectionView:layout:referenceSizeForHeaderInSection:) ||
+          selector == @selector(collectionView:layout:referenceSizeForFooterInSection:) ||
           selector == @selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:) ||
           
           // Selection, highlighting, menu

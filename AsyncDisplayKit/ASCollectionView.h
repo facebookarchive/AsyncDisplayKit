@@ -418,6 +418,7 @@ ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASCollectionDelegate.")
 /**
  * Defines methods that let you coordinate with a `UICollectionViewFlowLayout` in combination with an `ASCollectionView`.
  */
+ASDISPLAYNODE_DEPRECATED_MSG("Conform to ASCollectionDelegateFlowLayout instead.")
 @protocol ASCollectionViewDelegateFlowLayout <ASCollectionDelegate>
 
 @optional
@@ -436,12 +437,12 @@ ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASCollectionDelegate.")
 /**
  * Asks the delegate for the size of the header in the specified section.
  */
-- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section;
+- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section ASDISPLAYNODE_DEPRECATED_MSG("Implement collectionNode:constrainedSizeForHeaderInSection: instead.");
 
 /**
  * Asks the delegate for the size of the footer in the specified section.
  */
-- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section;
+- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section ASDISPLAYNODE_DEPRECATED_MSG("Implement collectionNode:constrainedSizeForFooterInSection: instead.");
 
 @end
 

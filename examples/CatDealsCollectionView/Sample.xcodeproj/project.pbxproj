@@ -275,7 +275,7 @@
 			<key>isa</key>
 			<string>PBXShellScriptBuildPhase</string>
 			<key>name</key>
-			<string>Copy Pods Resources</string>
+			<string>[CP] Copy Pods Resources</string>
 			<key>outputPaths</key>
 			<array/>
 			<key>runOnlyForDeploymentPostprocessing</key>
@@ -846,7 +846,7 @@
 			<key>isa</key>
 			<string>PBXShellScriptBuildPhase</string>
 			<key>name</key>
-			<string>Embed Pods Frameworks</string>
+			<string>[CP] Embed Pods Frameworks</string>
 			<key>outputPaths</key>
 			<array/>
 			<key>runOnlyForDeploymentPostprocessing</key>
@@ -911,7 +911,7 @@
 			<key>isa</key>
 			<string>PBXShellScriptBuildPhase</string>
 			<key>name</key>
-			<string>Check Pods Manifest.lock</string>
+			<string>[CP] Check Pods Manifest.lock</string>
 			<key>outputPaths</key>
 			<array/>
 			<key>runOnlyForDeploymentPostprocessing</key>

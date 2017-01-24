@@ -61,6 +61,8 @@ ASLayoutSize const ASLayoutSizeAuto = {ASDimensionAuto, ASDimensionAuto};
 
 #pragma mark - ASSizeRange
 
+ASSizeRange const ASSizeRangeZero = {};
+
 struct _Range {
   CGFloat min;
   CGFloat max;

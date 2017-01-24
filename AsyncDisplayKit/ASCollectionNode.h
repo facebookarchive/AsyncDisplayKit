@@ -696,4 +696,18 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@protocol ASCollectionDelegateFlowLayout <ASCollectionDelegate>
+
+@optional
+
+/**
+ */
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForHeaderInSection:(NSInteger)section;
+
+/**
+ */
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForFooterInSection:(NSInteger)section;
+
+@end
+
 NS_ASSUME_NONNULL_END
