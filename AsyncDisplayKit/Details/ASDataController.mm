@@ -292,13 +292,26 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 
   LOG(@"_deleteNodesAtIndexPaths:%@ ofKind:%@, full index paths in _editingNodes = %@", indexPaths, kind, ASIndexPathsForTwoDimensionalArray(_editingNodes[kind]));
   ASDeleteElementsInMultidimensionalArrayAtIndexPaths(_editingNodes[kind], indexPaths);
+  
+  NSArray *moveFromIndexPaths = [NSArray arrayWithArray:_moveFromIndexPaths];
 
   [_mainSerialQueue performBlockOnMainThread:^{
     NSMutableArray *allNodes = _completedNodes[kind];
     NSArray *nodes = ASFindElementsInMultidimensionalArrayAtIndexPaths(allNodes, indexPaths);
     ASDeleteElementsInMultidimensionalArrayAtIndexPaths(allNodes, indexPaths);
     if (completionBlock) {
-      completionBlock(nodes, indexPaths);
+      // TODO - Filter out Move indexPaths
+      NSMutableArray *newNodes = [[NSMutableArray alloc] initWithCapacity:nodes.count];
+      NSMutableArray *newIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
+      
+      for (int i = 0; i < indexPaths.count; i++) {
+        if (![moveFromIndexPaths containsObject:indexPaths[i]]) {
+          [newNodes addObject:nodes[i]];
+          [newIndexPaths addObject:indexPaths[i]];
+        }
+      }
+      
+      completionBlock(newNodes, newIndexPaths);
     }
   }];
 }
@@ -424,19 +437,8 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   [self deleteNodesOfKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
     ASDisplayNodeAssertMainThread();
     
-    // TODO - Filter out Move indexPaths
-    NSMutableArray *newNodes = [[NSMutableArray alloc] initWithCapacity:nodes.count];
-    NSMutableArray *newIndexPaths = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
-    
-    for (int i = 0; i < indexPaths.count; i++) {
-      if (![_moveFromIndexPaths containsObject:indexPaths[i]]) {
-        [newNodes addObject:nodes[i]];
-        [newIndexPaths addObject:indexPaths[i]];
-      }
-    }
-    
     if (_delegateDidDeleteNodes)
-      [_delegate dataController:self didDeleteNodes:newNodes atIndexPaths:newIndexPaths withAnimationOptions:animationOptions];
+      [_delegate dataController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
   }];
 }
 
