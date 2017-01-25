@@ -810,7 +810,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _style;
 }
 
-- (instancetype)styledWithBlock:(void (^)(ASLayoutElementStyle *style))styleBlock
+- (instancetype)styledWithBlock:(AS_NOESCAPE void (^)(__kindof ASLayoutElementStyle *style))styleBlock
 {
   styleBlock(self.style);
   return self;
