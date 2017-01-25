@@ -27,6 +27,11 @@ typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
   _ASHierarchyChangeTypeReload,
   
   /**
+   * TODO
+   */
+  _ASHierarchyChangeTypeMove,
+  
+  /**
    * A change that was either an original delete, or the first 
    * part of a decomposed reload.
    */
@@ -91,6 +96,14 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 - (_ASHierarchyItemChange *)changeByFinalizingType;
 @end
 
+/**
+ * Subclass to handle move
+ */
+@interface _ASHierarchyMoveItemChange : _ASHierarchyItemChange
+@property (nonatomic, strong, readonly) NSIndexPath *fromIndexPath;
+@property (nonatomic, strong, readonly) NSIndexPath *toIndexPath;
+@end
+
 @interface _ASHierarchyChangeSet : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider>
 
 - (instancetype)initWithOldData:(std::vector<NSInteger>)oldItemCounts NS_DESIGNATED_INITIALIZER;
@@ -145,6 +158,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 - (void)insertItems:(NSArray<NSIndexPath *> *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)deleteItems:(NSArray<NSIndexPath *> *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)reloadItems:(NSArray<NSIndexPath *> *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options;
+- (void)moveItemFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath animationOptions:(ASDataControllerAnimationOptions)options;
 @end
 
 NS_ASSUME_NONNULL_END

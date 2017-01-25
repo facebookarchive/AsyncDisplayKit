@@ -81,7 +81,15 @@
     
     ASDataControllerLogEvent(self, @"triggeredUpdate: %@", _changeSet);
     
+    // TODO: move
+    [super prepareMoveItemChanges:[_changeSet itemChangesOfType:_ASHierarchyChangeTypeMove]];
+    
+    // Prepare UIKit batch updates
     [super beginUpdates];
+    
+    for (_ASHierarchyMoveItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeMove]) {
+      [super moveNodeFromIndexPath:change.fromIndexPath toIndexPath:change.toIndexPath withAnimationOptions:change.animationOptions];
+    }
     
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
       [super deleteRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
@@ -98,7 +106,7 @@
     for (_ASHierarchyItemChange *change in [_changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
       [super insertRowsAtIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
     }
-
+    
 #if ASEVENTLOG_ENABLE
     NSString *changeSetDescription = ASObjectDescriptionMakeTiny(_changeSet);
     batchCompletion = ^(BOOL finished) {
@@ -200,6 +208,7 @@
 {
   ASDisplayNodeAssertMainThread();
   [self beginUpdates];
+  [_changeSet moveItemFromIndexPath:indexPath toIndexPath:newIndexPath animationOptions:animationOptions];
   [_changeSet deleteItems:@[indexPath] animationOptions:animationOptions];
   [_changeSet insertItems:@[newIndexPath] animationOptions:animationOptions];
   [self endUpdates];

@@ -94,6 +94,11 @@ extern NSString * const ASCollectionInvalidUpdateException;
 - (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
+ * TODO
+ */
+- (void)dataController:(ASDataController *)dataController didMoveFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath withinAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+/**
  Called for insertion of sections.
  */
 - (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray<NSArray<ASCellNode *> *> *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
@@ -174,6 +179,10 @@ extern NSString * const ASCollectionInvalidUpdateException;
 - (void)deleteRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 - (void)reloadRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
+- (void)prepareMoveItemChanges:(NSArray *)items;
+
+- (void)moveNodeFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  * Re-measures all loaded nodes in the backing store.

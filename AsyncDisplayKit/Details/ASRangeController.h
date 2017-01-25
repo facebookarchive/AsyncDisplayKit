@@ -185,6 +185,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
+- (void)rangeController:(ASRangeController *)rangeController didMoveFromIndexPath:(NSIndexPath *)fromIndexPath toIndexPath:(NSIndexPath *)toIndexPath withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+
 /**
  * Called for section insertion.
  *
