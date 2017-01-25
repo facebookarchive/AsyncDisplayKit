@@ -15,6 +15,8 @@
 #import <map>
 #import <atomic>
 
+#pragma mark - ASLayoutElementContext
+
 CGFloat const ASLayoutElementParentDimensionUndefined = NAN;
 CGSize const ASLayoutElementParentSizeUndefined = {ASLayoutElementParentDimensionUndefined, ASLayoutElementParentDimensionUndefined};
 
@@ -111,6 +113,7 @@ do {\
 @implementation ASLayoutElementStyle {
   ASDN::RecursiveMutex __instanceLock__;
   ASLayoutElementSize _size;
+  ASLayoutElementStyleExtensions _extensions;
   
   std::atomic<CGFloat> _spacingBefore;
   std::atomic<CGFloat> _spacingAfter;
@@ -435,6 +438,46 @@ do {\
 - (CGPoint)layoutPosition
 {
   return _layoutPosition.load();
+}
+
+#pragma mark - Extensions
+
+// TODO: Locking!
+
+- (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementBoolExtensions, @"Setting index outside of max bool extensions space");
+  _extensions.boolExtensions[idx] = value;
+}
+
+- (BOOL)layoutOptionExtensionBoolAtIndex:(int)idx\
+{
+  NSCAssert(idx < kMaxLayoutElementBoolExtensions, @"Accessing index outside of max bool extensions space");
+  return _extensions.boolExtensions[idx];
+}
+
+- (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementStateIntegerExtensions, @"Setting index outside of max integer extensions space");
+  _extensions.integerExtensions[idx] = value;
+}
+
+- (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementStateIntegerExtensions, @"Accessing index outside of max integer extensions space");
+  return _extensions.integerExtensions[idx];
+}
+
+- (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementStateEdgeInsetExtensions, @"Setting index outside of max edge insets extensions space");
+  _extensions.edgeInsetsExtensions[idx] = value;
+}
+
+- (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementStateEdgeInsetExtensions, @"Accessing index outside of max edge insets extensions space");
+  return _extensions.edgeInsetsExtensions[idx];
 }
 
 #pragma mark - Debugging

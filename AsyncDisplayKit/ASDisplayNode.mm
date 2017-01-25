@@ -79,7 +79,6 @@
 @dynamic layoutElementType;
 
 @synthesize debugName = _debugName;
-@synthesize isFinalLayoutElement = _isFinalLayoutElement;
 @synthesize threadSafeBounds = _threadSafeBounds;
 @synthesize layoutSpecBlock = _layoutSpecBlock;
 
@@ -826,10 +825,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return !self.isNodeLoaded;
 }
 
-- (id<ASLayoutElement>)finalLayoutElement
-{
-  return self;
-}
+ASLayoutElementExtensibilityDefault
 
 - (NSString *)debugName
 {
