@@ -25,7 +25,6 @@
 // Dynamic properties for ASLayoutElements
 @dynamic layoutElementType;
 @synthesize debugName = _debugName;
-@synthesize isFinalLayoutElement = _isFinalLayoutElement;
 
 #pragma mark - Class
 
@@ -64,6 +63,8 @@
 }
 
 #pragma mark - Final LayoutElement
+
+@synthesize isFinalLayoutElement = _isFinalLayoutElement;
 
 - (id<ASLayoutElement>)finalLayoutElement
 {
