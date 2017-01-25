@@ -9,8 +9,7 @@ Pod::Spec.new do |spec|
 
   spec.documentation_url = 'http://asyncdisplaykit.org/appledoc/'
 
-  spec.frameworks = 'AssetsLibrary'
-  spec.weak_frameworks = 'Photos','MapKit'
+  spec.weak_frameworks = 'Photos','MapKit','AssetsLibrary'
   spec.requires_arc = true
 
   spec.ios.deployment_target = '7.0'
