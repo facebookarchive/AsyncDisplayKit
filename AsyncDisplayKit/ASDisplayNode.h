@@ -105,7 +105,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  */
 
-@interface ASDisplayNode : NSObject <ASLayoutElement>
+@interface ASDisplayNode : NSObject <ASLayoutElement, NSFastEnumeration>
 
 /** @name Initializing a node object */
 
