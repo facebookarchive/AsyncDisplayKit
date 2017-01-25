@@ -193,6 +193,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 + (void)initialize
 {
   [super initialize];
+  
   if (self != [ASDisplayNode class]) {
     
     // Subclasses should never override these. Use unused to prevent warnings
@@ -526,7 +527,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return result;
 }
 
-#pragma mark - Loading
+#pragma mark - Loading / Unloading
 
 - (void)__unloadNode
 {
@@ -783,7 +784,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDN::MutexLocker l(__instanceLock__);
   _threadSafeBounds = newBounds;
 }
-
 
 #pragma mark - Layout
 
@@ -1997,7 +1997,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 - (void)hierarchyDisplayDidFinish
 {
-  // subclass hook
+  // Subclass hook
 }
 
 // Helper method to determine if it's safe to call setNeedsDisplay on a layer without throwing away the content.
@@ -2424,12 +2424,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   return (node.shouldRasterizeDescendants || (node.hierarchyState & ASHierarchyStateRasterized));
 }
 
-- (NSArray *)subnodes
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return ([_subnodes copy] ?: @[]);
-}
-
 // NOTE: This method must be dealloc-safe (should not retain self).
 - (ASDisplayNode *)supernode
 {
@@ -2509,6 +2503,12 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       }
     }
   }
+}
+
+- (NSArray *)subnodes
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ([_subnodes copy] ?: @[]);
 }
 
 /*
@@ -2898,6 +2898,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (void)removeFromSupernode
 {
+  // TODO: 2.0 Conversion: Reenable and fix within product code
   //ASDisplayNodeAssert(self.supernode.automaticallyManagesSubnodes == NO, @"Attempt to manually remove subnode from node with automaticallyManagesSubnodes=YES. Node: %@", self);
     
   [self _removeFromSupernode];
@@ -2975,11 +2976,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 #pragma mark - Placeholder
 
-- (BOOL)placeholderShouldPersist
-{
-  return NO;
-}
-
 - (void)_locked_layoutPlaceholderIfNecessary
 {
   if ([self _shouldHavePlaceholderLayer]) {
@@ -3024,6 +3020,12 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 {
   // Subclass hook
   return nil;
+}
+
+- (BOOL)placeholderShouldPersist
+{
+  // Subclass hook
+  return NO;
 }
 
 #pragma mark - Hierarchy State
@@ -3266,106 +3268,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 #pragma mark - Interface State
 
-- (void)clearContents
-{
-  ASDisplayNodeAssertMainThread();
-  if (_flags.canClearContentsOfLayer) {
-    // No-op if these haven't been created yet, as that guarantees they don't have contents that needs to be released.
-    _layer.contents = nil;
-  }
-  
-  _placeholderLayer.contents = nil;
-  _placeholderImage = nil;
-}
-
-- (void)recursivelyClearContents
-{
-  ASPerformBlockOnMainThread(^{
-    ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
-      [node clearContents];
-    });
-  });
-}
-
-- (void)setNeedsPreload
-{
-  if (self.isInPreloadState) {
-    [self recursivelyPreload];
-  }
-}
-
-- (void)recursivelyPreload
-{
-  ASPerformBlockOnMainThread(^{
-    ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
-      [node didEnterPreloadState];
-    });
-  });
-}
-
-- (void)recursivelyClearPreloadedData
-{
-  ASPerformBlockOnMainThread(^{
-    ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
-      [node didExitPreloadState];
-    });
-  });
-}
-
-- (void)didEnterVisibleState
-{
-  // subclass override
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
-}
-
-- (void)didExitVisibleState
-{
-  // subclass override
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
-}
-
-- (void)didEnterDisplayState
-{
-  // subclass override
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
-}
-
-- (void)didExitDisplayState
-{
-  // subclass override
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
-}
-
-- (void)didEnterPreloadState
-{
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
-  
-  if (_methodOverrides & ASDisplayNodeMethodOverrideFetchData) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    [self fetchData];
-#pragma clang diagnostic pop
-  }
-}
-
-- (void)didExitPreloadState
-{
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
-  
-  if (_methodOverrides & ASDisplayNodeMethodOverrideClearFetchedData) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    [self clearFetchedData];
-#pragma clang diagnostic pop
-  }
-}
-
 /**
  * We currently only set interface state on nodes in table/collection views. For other nodes, if they are
  * in the hierarchy we enable all ASInterfaceState types with `ASInterfaceStateInHierarchy`, otherwise `None`.
@@ -3376,22 +3278,39 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   return ASHierarchyStateIncludesRangeManaged(_hierarchyState);
 }
 
-- (BOOL)isVisible
+- (void)enterInterfaceState:(ASInterfaceState)interfaceState
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return ASInterfaceStateIncludesVisible(_interfaceState);
+  if (interfaceState == ASInterfaceStateNone) {
+    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
+  }
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode *node) {
+    node.interfaceState |= interfaceState;
+  });
 }
 
-- (BOOL)isInDisplayState
+- (void)exitInterfaceState:(ASInterfaceState)interfaceState
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return ASInterfaceStateIncludesDisplay(_interfaceState);
+  if (interfaceState == ASInterfaceStateNone) {
+    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
+  }
+  ASDisplayNodeLogEvent(self, @"%@ %@", NSStringFromSelector(_cmd), NSStringFromASInterfaceState(interfaceState));
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode *node) {
+    node.interfaceState &= (~interfaceState);
+  });
 }
 
-- (BOOL)isInPreloadState
+- (void)recursivelySetInterfaceState:(ASInterfaceState)newInterfaceState
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  return ASInterfaceStateIncludesPreload(_interfaceState);
+  // Instead of each node in the recursion assuming it needs to schedule itself for display,
+  // setInterfaceState: skips this when handling range-managed nodes (our whole subtree has this set).
+  // If our range manager intends for us to be displayed right now, and didn't before, get started!
+  BOOL shouldScheduleDisplay = [self supportsRangeManagedInterfaceState] && [self shouldScheduleDisplayWithNewInterfaceState:newInterfaceState];
+  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode *node) {
+    node.interfaceState = newInterfaceState;
+  });
+  if (shouldScheduleDisplay) {
+    [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
+  }
 }
 
 - (ASInterfaceState)interfaceState
@@ -3511,43 +3430,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
 {
-  // subclass hook
+  // Subclass hook
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
-}
-
-- (void)enterInterfaceState:(ASInterfaceState)interfaceState
-{
-  if (interfaceState == ASInterfaceStateNone) {
-    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
-  }
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode *node) {
-    node.interfaceState |= interfaceState;
-  });
-}
-
-- (void)exitInterfaceState:(ASInterfaceState)interfaceState
-{
-  if (interfaceState == ASInterfaceStateNone) {
-    return; // This method is a no-op with a 0-bitfield argument, so don't bother recursing.
-  }
-  ASDisplayNodeLogEvent(self, @"%@ %@", NSStringFromSelector(_cmd), NSStringFromASInterfaceState(interfaceState));
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode *node) {
-    node.interfaceState &= (~interfaceState);
-  });
-}
-
-- (void)recursivelySetInterfaceState:(ASInterfaceState)newInterfaceState
-{
-  // Instead of each node in the recursion assuming it needs to schedule itself for display,
-  // setInterfaceState: skips this when handling range-managed nodes (our whole subtree has this set).
-  // If our range manager intends for us to be displayed right now, and didn't before, get started!
-  BOOL shouldScheduleDisplay = [self supportsRangeManagedInterfaceState] && [self shouldScheduleDisplayWithNewInterfaceState:newInterfaceState];
-  ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode *node) {
-    node.interfaceState = newInterfaceState;
-  });
-  if (shouldScheduleDisplay) {
-    [ASDisplayNode scheduleNodeForRecursiveDisplay:self];
-  }
 }
 
 - (BOOL)shouldScheduleDisplayWithNewInterfaceState:(ASInterfaceState)newInterfaceState
@@ -3557,26 +3441,146 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   return willDisplay && (willDisplay != nowDisplay);
 }
 
+- (BOOL)isVisible
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASInterfaceStateIncludesVisible(_interfaceState);
+}
+
+- (void)didEnterVisibleState
+{
+  // subclass override
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+}
+
+- (void)didExitVisibleState
+{
+  // subclass override
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+}
+
+- (BOOL)isInDisplayState
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASInterfaceStateIncludesDisplay(_interfaceState);
+}
+
+- (void)didEnterDisplayState
+{
+  // subclass override
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+}
+
+- (void)didExitDisplayState
+{
+  // subclass override
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+}
+
+- (BOOL)isInPreloadState
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return ASInterfaceStateIncludesPreload(_interfaceState);
+}
+
+- (void)setNeedsPreload
+{
+  if (self.isInPreloadState) {
+    [self recursivelyPreload];
+  }
+}
+
+- (void)recursivelyPreload
+{
+  ASPerformBlockOnMainThread(^{
+    ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
+      [node didEnterPreloadState];
+    });
+  });
+}
+
+- (void)recursivelyClearPreloadedData
+{
+  ASPerformBlockOnMainThread(^{
+    ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
+      [node didExitPreloadState];
+    });
+  });
+}
+
+- (void)didEnterPreloadState
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+  
+  if (_methodOverrides & ASDisplayNodeMethodOverrideFetchData) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [self fetchData];
+#pragma clang diagnostic pop
+  }
+}
+
+- (void)didExitPreloadState
+{
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+  
+  if (_methodOverrides & ASDisplayNodeMethodOverrideClearFetchedData) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    [self clearFetchedData];
+#pragma clang diagnostic pop
+  }
+}
+
+- (void)clearContents
+{
+  ASDisplayNodeAssertMainThread();
+  if (_flags.canClearContentsOfLayer) {
+    // No-op if these haven't been created yet, as that guarantees they don't have contents that needs to be released.
+    _layer.contents = nil;
+  }
+  
+  _placeholderLayer.contents = nil;
+  _placeholderImage = nil;
+}
+
+- (void)recursivelyClearContents
+{
+  ASPerformBlockOnMainThread(^{
+    ASDisplayNodePerformBlockOnEveryNode(nil, self, YES, ^(ASDisplayNode * _Nonnull node) {
+      [node clearContents];
+    });
+  });
+}
+
+
+
 #pragma mark - Gesture Recognizing
 
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  // subclass hook
+  // Subclass hook
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  // subclass hook
+  // Subclass hook
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  // subclass hook
+  // Subclass hook
 }
 
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
-  // subclass hook
+  // Subclass hook
 }
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
