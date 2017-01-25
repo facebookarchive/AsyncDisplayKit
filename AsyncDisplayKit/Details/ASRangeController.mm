@@ -15,7 +15,7 @@
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNodeInternal.h" // Required for interfaceState and hierarchyState setter methods.
 #import "ASInternalHelpers.h"
-#import "ASMultiDimensionalArrayUtils.h"
+#import "ASMultidimensionalArrayUtils.h"
 #import "ASWeakSet.h"
 
 #import "ASDisplayNode+FrameworkPrivate.h"

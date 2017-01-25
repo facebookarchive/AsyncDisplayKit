@@ -185,7 +185,7 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
   switch (_propertyType) {
       
     case ASLayoutElementPropertyAlignSelf:
-      _layoutElementToEdit.style.alignSelf = index;
+      _layoutElementToEdit.style.alignSelf = (ASStackLayoutAlignSelf)index;
       _textNode.attributedText = [ASLayoutElementInspectorCell attributedStringFromString:[ASLayoutElementInspectorCell alignSelfEnumValueString:index]];
       break;
 
