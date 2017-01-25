@@ -12,11 +12,13 @@
 
 #import "ASRunLoopQueue.h"
 #import "ASThread.h"
+#import "ASInternalHelpers.h"
 #import "ASLog.h"
 
 #import <cstdlib>
 #import <deque>
 #import <vector>
+#import <objc/runtime.h>
 
 #define ASRunLoopQueueLoggingEnabled 0
 
@@ -48,9 +50,17 @@ static void runLoopSourceCallback(void *info) {
 
 - (void)releaseObjectInBackground:(id)object
 {
-  _queueLock.lock();
-  _queue.push_back(object);
-  _queueLock.unlock();
+  // This is a hot code path and self is long-lived. Retain self instead of strongify/weakify to reduce contention.
+  ASPerformBlockOnMainThread(^{
+    // Some associated objects cannot be deallocated in background (#2767). Always remove them on main instead.
+    objc_removeAssociatedObjects(object);
+    
+    // It's important to push this object to the queue right after the above removal, in the same run loop.
+    // Otherwise the queue may be scheduled to consume it before the removal occurs.
+    self->_queueLock.lock();
+    self->_queue.push_back(object);
+    self->_queueLock.unlock();
+  });
 }
 
 - (void)threadMain
