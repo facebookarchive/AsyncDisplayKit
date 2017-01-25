@@ -287,6 +287,24 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   [_reloadSectionChanges addObject:change];
 }
 
+- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath animationOptions:(ASDataControllerAnimationOptions)options
+{
+  /**
+   * TODO: Proper move implementation.
+   */
+  [self deleteItems:@[ indexPath ] animationOptions:options];
+  [self insertItems:@[ newIndexPath ] animationOptions:options];
+}
+
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection animationOptions:(ASDataControllerAnimationOptions)options
+{
+  /**
+   * TODO: Proper move implementation.
+   */
+  [self deleteSections:[NSIndexSet indexSetWithIndex:section] animationOptions:options];
+  [self insertSections:[NSIndexSet indexSetWithIndex:newSection] animationOptions:options];
+}
+
 #pragma mark Private
 
 - (BOOL)_ensureNotCompleted

@@ -529,7 +529,7 @@
 
 - (void)beginUpdates
 {
-  [self.dataController beginUpdates];
+  [self.view beginUpdates];
 }
 
 - (void)endUpdatesAnimated:(BOOL)animated
@@ -539,7 +539,7 @@
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
-  [self.dataController endUpdatesAnimated:animated completion:completion];
+  [self.view endUpdatesAnimated:animated completion:completion];
 }
 
 - (void)insertSections:(NSIndexSet *)sections

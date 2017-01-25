@@ -48,6 +48,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (nullable NSArray<NSIndexPath *> *)convertIndexPathsToCollectionNode:(nullable NSArray<NSIndexPath *> *)indexPaths;
 
+- (void)beginUpdates;
+
+- (void)endUpdatesAnimated:(BOOL)animated completion:(nullable void (^)(BOOL))completion;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -10,18 +10,18 @@
 
 #import "ASTableViewInternal.h"
 
+#import "_ASCoreAnimationExtras.h"
+#import "_ASDisplayLayer.h"
+#import "_ASHierarchyChangeSet.h"
 #import "ASAssert.h"
 #import "ASAvailability.h"
 #import "ASBatchFetching.h"
 #import "ASCellNode+Internal.h"
-#import "ASChangeSetDataController.h"
 #import "ASDelegateProxy.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASInternalHelpers.h"
 #import "ASLayout.h"
-#import "_ASDisplayLayer.h"
-#import "_ASCoreAnimationExtras.h"
 #import "ASTableNode.h"
 #import "ASEqualityHelpers.h"
 #import "ASTableView+Undeprecated.h"
@@ -154,6 +154,16 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   // This is useful because we need to measure our row nodes against (width - indexView.width).
   __weak UIView *_sectionIndexView;
   
+  /**
+   * The change set that we're currently building, if any.
+   */
+  _ASHierarchyChangeSet *_changeSet;
+  
+  /**
+   * Counter used to keep track of nested batch updates.
+   */
+  NSInteger _batchUpdateCount;
+  
   struct {
     unsigned int scrollViewDidScroll:1;
     unsigned int scrollViewWillBeginDragging:1;
@@ -230,7 +240,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 + (Class)dataControllerClass
 {
-  return [ASChangeSetDataController class];
+  return [ASDataController class];
 }
 
 #pragma mark -
@@ -303,6 +313,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)dealloc
 {
   ASDisplayNodeAssertMainThread();
+  ASDisplayNodeCAssert(_batchUpdateCount == 0, @"ASTableView deallocated in the middle of a batch update.");
+  
   // Sometimes the UIKit classes can call back to their delegate even during deallocation.
   _isDeallocating = YES;
   [self setAsyncDelegate:nil];
@@ -605,7 +617,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   NSIndexPath *indexPath = [_dataController completedIndexPathForNode:cellNode];
   indexPath = [self validateIndexPath:indexPath];
   if (indexPath == nil && wait) {
-    [_dataController waitUntilAllUpdatesAreCommitted];
+    [self waitUntilAllUpdatesAreCommitted];
     indexPath = [_dataController completedIndexPathForNode:cellNode];
     indexPath = [self validateIndexPath:indexPath];
   }
@@ -631,7 +643,13 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)beginUpdates
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController beginUpdates];
+  // _changeSet must be available during batch update
+  ASDisplayNodeAssertTrue((_batchUpdateCount > 0) == (_changeSet != nil));
+  
+  if (_batchUpdateCount == 0) {
+    _changeSet = [[_ASHierarchyChangeSet alloc] initWithOldData:[_dataController itemCountsFromDataSource]];
+  }
+  _batchUpdateCount++;
 }
 
 - (void)endUpdates
@@ -643,12 +661,29 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion;
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController endUpdatesAnimated:animated completion:completion];
+  ASDisplayNodeAssertNotNil(_changeSet, @"_changeSet must be available when batch update ends");
+  
+  _batchUpdateCount--;
+  // Prevent calling endUpdatesAnimated:completion: in an unbalanced way
+  NSAssert(_batchUpdateCount >= 0, @"endUpdatesAnimated:completion: called without having a balanced beginUpdates call");
+  
+  [_changeSet addCompletionHandler:completion];
+
+  if (_batchUpdateCount == 0) {
+    [_dataController updateWithChangeSet:_changeSet animated:animated];
+    _changeSet = nil;
+  } 
 }
 
 - (void)waitUntilAllUpdatesAreCommitted
 {
   ASDisplayNodeAssertMainThread();
+  if (_batchUpdateCount > 0) {
+    // This assertion will be enabled soon.
+    //    ASDisplayNodeFailAssert(@"Should not call %@ during batch update", NSStringFromSelector(_cmd));
+    return;
+  }
+  
   [_dataController waitUntilAllUpdatesAreCommitted];
 }
 
@@ -681,54 +716,70 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   ASDisplayNodeAssertMainThread();
   if (sections.count == 0) { return; }
-  [_dataController insertSections:sections withAnimationOptions:animation];
+  [self beginUpdates];
+  [_changeSet insertSections:sections animationOptions:animation];
+  [self endUpdates];
 }
 
 - (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
   if (sections.count == 0) { return; }
-  [_dataController deleteSections:sections withAnimationOptions:animation];
+  [self beginUpdates];
+  [_changeSet deleteSections:sections animationOptions:animation];
+  [self endUpdates];
 }
 
 - (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
   if (sections.count == 0) { return; }
-  [_dataController reloadSections:sections withAnimationOptions:animation];
+  [self beginUpdates];
+  [_changeSet reloadSections:sections animationOptions:animation];
+  [self endUpdates];
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController moveSection:section toSection:newSection withAnimationOptions:UITableViewRowAnimationNone];
+  [self beginUpdates];
+  [_changeSet moveSection:section toSection:newSection animationOptions:UITableViewRowAnimationNone];
+  [self endUpdates];
 }
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
   if (indexPaths.count == 0) { return; }
-  [_dataController insertRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
+  [self beginUpdates];
+  [_changeSet insertItems:indexPaths animationOptions:animation];
+  [self endUpdates];
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
   if (indexPaths.count == 0) { return; }
-  [_dataController deleteRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
+  [self beginUpdates];
+  [_changeSet deleteItems:indexPaths animationOptions:animation];
+  [self endUpdates];
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
   ASDisplayNodeAssertMainThread();
   if (indexPaths.count == 0) { return; }
-  [_dataController reloadRowsAtIndexPaths:indexPaths withAnimationOptions:animation];
+  [self beginUpdates];
+  [_changeSet reloadItems:indexPaths animationOptions:animation];
+  [self endUpdates];
 }
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController moveRowAtIndexPath:indexPath toIndexPath:newIndexPath withAnimationOptions:UITableViewRowAnimationNone];
+  [self beginUpdates];
+  [_changeSet moveItemAtIndexPath:indexPath toIndexPath:newIndexPath animationOptions:UITableViewRowAnimationNone];
+  [self endUpdates];
 }
 
 #pragma mark -
