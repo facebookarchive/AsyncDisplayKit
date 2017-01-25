@@ -90,7 +90,7 @@
   if (cornerColor) {
     contextIsClean = NO;
     [cornerColor setFill];
-    // Copy "blend" mode is extra fast because it disregards any value currently in the buffer and overwrites directly.
+    // Copy "blend" mode is extra fast because it disregards any value currently in the buffer and overrides directly.
     UIRectFillUsingBlendMode(bounds, kCGBlendModeCopy);
   }
   

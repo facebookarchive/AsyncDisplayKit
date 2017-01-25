@@ -77,7 +77,7 @@
                                                    userInterfaceIdiom:traitCollection.userInterfaceIdiom
                                                   horizontalSizeClass:traitCollection.horizontalSizeClass
                                                     verticalSizeClass:traitCollection.verticalSizeClass
-                                                 forceTouchCapability:0
+                                                 forceTouchCapability:UIForceTouchCapabilityUnknown
                                                   containerSize:windowSize];
   } else {
     asyncTraitCollection = [[[self class] alloc] init];
