@@ -174,6 +174,18 @@
 
 @implementation ASCollectionViewTests
 
+- (void)tearDown
+{
+  // We can't prevent the system from retaining windows, but we can at least clear them out to avoid
+  // pollution between test cases.
+  for (UIWindow *window in [UIApplication sharedApplication].windows) {
+    for (UIView *subview in window.subviews) {
+      [subview removeFromSuperview];
+    }
+  }
+  [super tearDown];
+}
+
 - (void)testDataSourceImplementsNecessaryMethods
 {
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
@@ -901,7 +913,7 @@
   [self waitForExpectationsWithTimeout:3 handler:nil];
 }
 
-- (void)DISABLED_testThatWeBatchFetchUntilContentRequirementIsMet_Animated
+- (void)testThatWeBatchFetchUntilContentRequirementIsMet_Animated
 {
   [self _primitiveBatchFetchingFillTestAnimated:YES visible:YES controller:nil];
 }
