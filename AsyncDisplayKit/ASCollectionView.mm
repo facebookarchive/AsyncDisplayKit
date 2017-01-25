@@ -1460,7 +1460,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
 }
 
-- (id<ASEnvironment>)dataControllerEnvironment
+- (id<ASPrimitiveTraitEnvironment>)dataControllerEnvironment
 {
   return self.collectionNode;
 }

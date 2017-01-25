@@ -12,7 +12,6 @@
 
 #import <AsyncDisplayKit/ASTableNode.h>
 #import <AsyncDisplayKit/ASTableViewInternal.h>
-#import <AsyncDisplayKit/ASEnvironmentInternal.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
@@ -356,7 +355,7 @@
 
 #pragma mark ASEnvironment
 
-ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
+ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 
 #pragma mark - Range Tuning
 

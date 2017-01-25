@@ -16,7 +16,6 @@
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASTraitCollection.h>
-#import <AsyncDisplayKit/ASEnvironmentInternal.h>
 #import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 
@@ -102,8 +101,8 @@
   
   // ensure that self.node has a valid trait collection before a subclass's implementation of viewDidLoad.
   // Any subnodes added in viewDidLoad will then inherit the proper environment.
-  ASEnvironmentTraitCollection traitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
-  [self progagateNewEnvironmentTraitCollection:traitCollection];
+  ASPrimitiveTraitCollection traitCollection = [self primitiveTraitCollectionForUITraitCollection:self.traitCollection];
+  [self progagateNewPrimitiveTraitCollection:traitCollection];
 }
 
 - (void)viewWillLayoutSubviews
@@ -112,13 +111,15 @@
   
   // Before layout, make sure that our trait collection containerSize actually matches the size of our bounds.
   // If not, we need to update the traits and propagate them.
+
   CGSize boundsSize = self.view.bounds.size;
-  if (CGSizeEqualToSize(self.node.environmentTraitCollection.containerSize, boundsSize) == NO) {
+  if (CGSizeEqualToSize(self.node.primitiveTraitCollection.containerSize, boundsSize) == NO) {
     [UIView performWithoutAnimation:^{
-      ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
-      environmentTraitCollection.containerSize = boundsSize;
+      ASEnvironmentTraitCollection primitiveTraitCollection = [self primitiveTraitCollectionForUITraitCollection:self.traitCollection];
+      primitiveTraitCollection.containerSize = boundsSize;
+        
       // this method will call measure
-      [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
+      [self progagateNewPrimitiveTraitCollection:primitiveTraitCollection];
     }];
   } else {
 #pragma clang diagnostic push
@@ -236,34 +237,33 @@ ASVisibilityDepthImplementation;
   return _node.interfaceState;
 }
 
-#pragma mark - ASEnvironmentTraitCollection
+#pragma mark - ASPrimitiveTraitEnvironment
 
-- (ASEnvironmentTraitCollection)environmentTraitCollectionForUITraitCollection:(UITraitCollection *)traitCollection
+- (ASPrimitiveTraitCollection)primitiveTraitCollectionForUITraitCollection:(UITraitCollection *)traitCollection
 {
   if (self.overrideDisplayTraitsWithTraitCollection) {
     ASTraitCollection *asyncTraitCollection = self.overrideDisplayTraitsWithTraitCollection(traitCollection);
-    return [asyncTraitCollection environmentTraitCollection];
+    return [asyncTraitCollection primitiveTraitCollection];
   }
   
   ASDisplayNodeAssertMainThread();
-  ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(traitCollection);
+  ASPrimitiveTraitCollection asyncTraitCollection = ASPrimitiveTraitCollectionFromUITraitCollection(traitCollection);
   asyncTraitCollection.containerSize = self.view.frame.size;
   return asyncTraitCollection;
 }
 
-- (void)progagateNewEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
+- (void)progagateNewPrimitiveTraitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
-  ASEnvironmentState environmentState = self.node.environmentState;
-  ASEnvironmentTraitCollection oldEnvironmentTraitCollection = environmentState.environmentTraitCollection;
+  ASPrimitiveTraitCollection oldTraitCollection = self.node.primitiveTraitCollection;
   
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, oldEnvironmentTraitCollection) == NO) {
-    environmentState.environmentTraitCollection = environmentTraitCollection;
-    self.node.environmentState = environmentState;
+  if (ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(traitCollection, oldTraitCollection) == NO) {
+    self.node.primitiveTraitCollection = traitCollection;
     
-    NSArray<id<ASEnvironment>> *children = [self.node children];
-    for (id<ASEnvironment> child in children) {
-      ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
+    NSArray<id<ASLayoutElement>> *children = [self.node sublayoutElements];
+    for (id<ASLayoutElement> child in children) {
+      ASPrimitiveTraitCollectionPropagateDown(child, traitCollection);
     }
+    
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     // Once we've propagated all the traits, layout this node.
@@ -277,18 +277,18 @@ ASVisibilityDepthImplementation;
 {
   [super traitCollectionDidChange:previousTraitCollection];
   
-  ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
-  environmentTraitCollection.containerSize = self.view.bounds.size;
-  [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
+  ASPrimitiveTraitCollection traitCollection = [self primitiveTraitCollectionForUITraitCollection:self.traitCollection];
+  traitCollection.containerSize = self.view.bounds.size;
+  [self progagateNewPrimitiveTraitCollection:traitCollection];
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
   [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
   
-  ASEnvironmentTraitCollection traitCollection = self.node.environmentTraitCollection;
+  ASPrimitiveTraitCollection traitCollection = self.node.primitiveTraitCollection;
   traitCollection.containerSize = self.view.bounds.size;
-  [self progagateNewEnvironmentTraitCollection:traitCollection];
+  [self progagateNewPrimitiveTraitCollection:traitCollection];
 }
 
 @end

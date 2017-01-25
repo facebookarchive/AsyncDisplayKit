@@ -7,6 +7,9 @@
 //
 
 #import <AsyncDisplayKit/ASLayoutSpec+Debug.h>
+
+#if ASLAYOUTSPEC_DEBUG
+
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import <AsyncDisplayKit/ASLayoutElementInspectorNode.h>
@@ -71,3 +74,4 @@
 
 @end
 
+#endif

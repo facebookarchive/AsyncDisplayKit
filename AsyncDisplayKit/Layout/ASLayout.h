@@ -9,13 +9,9 @@
 //
 
 #pragma once
-
-#import <UIKit/UIKit.h>
-
+#import <Foundation/Foundation.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASLayoutElement.h>
-
-//#import <AsyncDisplayKit/ASAssert.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -34,11 +30,11 @@ extern ASLayout *ASCalculateRootLayout(id<ASLayoutElement> rootLayoutElement, co
 
 /**
  * Safely computes the layout of the given node by guarding against nil nodes.
- * @param layoutElement The component to calculate the layout for.
+ * @param layoutElement The layout element to calculate the layout for.
  * @param sizeRange The size range to calculate the node layout within.
  * @param parentSize The parent size of the node to calculate the layout for.
  */
-extern ASLayout *ASCalculateLayout(id<ASLayoutElement> layoutElement, const ASSizeRange sizeRange, const CGSize parentSize);
+extern ASLayout *ASCalculateLayout(id<ASLayoutElement>layoutElement, const ASSizeRange sizeRange, const CGSize parentSize);
 
 ASDISPLAYNODE_EXTERN_C_END
 

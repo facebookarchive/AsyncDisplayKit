@@ -10,6 +10,12 @@
 
 #import <AsyncDisplayKit/ASDimension.h>
 
+#if AS_TARGET_OS_IOS
+#import <UIKit/UIGeometry.h>
+#else
+#import <Foundation/NSGeometry.h>
+#endif
+
 #import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
 
 #import <AsyncDisplayKit/ASAssert.h>
@@ -99,7 +105,13 @@ ASSizeRange ASSizeRangeIntersect(ASSizeRange sizeRange, ASSizeRange otherSizeRan
 
 NSString *NSStringFromASSizeRange(ASSizeRange sizeRange)
 {
+#if AS_TARGET_OS_IOS
   return [NSString stringWithFormat:@"<ASSizeRange: min=%@, max=%@>",
           NSStringFromCGSize(sizeRange.min),
           NSStringFromCGSize(sizeRange.max)];
+#else
+  return [NSString stringWithFormat:@"<ASSizeRange: min=%@, max=%@>",
+          NSStringFromRect(NSRectFromCGRect(sizeRange.min)),
+          NSStringFromRect(NSRectFromCGRect(sizeRange.max))];
+#endif
 }

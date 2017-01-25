@@ -97,7 +97,7 @@ static const CGFloat kViolationEpsilon = 0.01;
                                                                        |
                  +--------------------------------------------------+  + crossMax
 
- @param layouts pre-computed child layouts; modified in-place as needed
+ @param items pre-computed child layouts; modified in-place as needed
  @param style the layout style of the overall stack layout
  */
 static void stretchChildrenAlongCrossDimension(std::vector<ASStackLayoutSpecItem> &items,
@@ -147,7 +147,7 @@ CGFloat ASStackUnpositionedLayout::baselineForItem(const ASStackLayoutSpecStyle 
  * Finds cross dimension size and baseline of the stack.
  * https://www.w3.org/TR/css-flexbox-1/#algo-cross-line
  *
- * @param layout the unpositioned layout
+ * @param items All items to lay out
  * @param style the layout style of the overall stack layout
  * @param sizeRange the range of allowable sizes for the stack layout component
  * @param crossSize result of the cross size
@@ -403,7 +403,7 @@ ASDISPLAYNODE_INLINE BOOL useOptimizedFlexing(const std::vector<ASStackLayoutSpe
  @param items Reference to unpositioned items from the original, unconstrained layout pass; modified in-place
  @param style layout style to be applied to all children
  @param sizeRange the range of allowable sizes for the stack layout component
- @param size Size of the stack layout component. May be undefined in either or both directions.
+ @param parentSize Size of the stack layout component. May be undefined in either or both directions.
  */
 static void flexChildrenAlongStackDimension(std::vector<ASStackLayoutSpecItem> &items,
                                             const ASStackLayoutSpecStyle &style,

@@ -11,7 +11,6 @@
 //
 
 #import <AsyncDisplayKit/ASIndexedNodeContext.h>
-#import <AsyncDisplayKit/ASEnvironmentInternal.h>
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
 #import <mutex>
 
@@ -31,7 +30,7 @@
                         indexPath:(NSIndexPath *)indexPath
          supplementaryElementKind:(nullable NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
-                      environment:(id<ASEnvironment>)environment
+                      environment:(id<ASPrimitiveTraitEnvironment>)environment
 {
   NSAssert(nodeBlock != nil && indexPath != nil, @"Node block and index path must not be nil");
   self = [super init];
@@ -40,7 +39,7 @@
     _indexPath = indexPath;
     _supplementaryElementKind = [supplementaryElementKind copy];
     _constrainedSize = constrainedSize;
-    _environment = environment;
+    _traitEnvironment = environment;
   }
   return self;
 }
@@ -57,8 +56,8 @@
     }
     node.cachedIndexPath = _indexPath;
     node.supplementaryElementKind = _supplementaryElementKind;
-    node.owningNode = (ASDisplayNode *)_environment;
-    ASEnvironmentStatePropagateDown(node, [_environment environmentTraitCollection]);
+    node.owningNode = (ASDisplayNode *)_traitEnvironment;
+    ASPrimitiveTraitCollectionPropagateDown(node, [_traitEnvironment primitiveTraitCollection]);
     _node = node;
   }
   return _node;

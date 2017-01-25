@@ -28,7 +28,6 @@
 #import <AsyncDisplayKit/_ASScopeTimer.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
-#import <AsyncDisplayKit/ASEnvironmentInternal.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASLayoutElementStylePrivate.h>
@@ -81,7 +80,6 @@
 @dynamic layoutElementType;
 
 @synthesize debugName = _debugName;
-@synthesize isFinalLayoutElement = _isFinalLayoutElement;
 @synthesize threadSafeBounds = _threadSafeBounds;
 @synthesize layoutSpecBlock = _layoutSpecBlock;
 
@@ -289,7 +287,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   _contentsScaleForDisplay = ASScreenScale();
   
-  _environmentState = ASEnvironmentStateMakeDefault();
+  _primitiveTraitCollection = ASPrimitiveTraitCollectionMakeDefault();
   
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
   _pendingDisplayNodeLayout = nullptr;
@@ -811,12 +809,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _style;
 }
 
-- (instancetype)styledWithBlock:(void (^)(ASLayoutElementStyle *style))styleBlock
-{
-  styleBlock(self.style);
-  return self;
-}
-
 - (ASLayoutElementType)layoutElementType
 {
   return ASLayoutElementTypeDisplayNode;
@@ -827,10 +819,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return !self.isNodeLoaded;
 }
 
-- (id<ASLayoutElement>)finalLayoutElement
+- (NSArray<id<ASLayoutElement>> *)sublayoutElements
 {
+  return self.subnodes;
+}
+
+- (instancetype)styledWithBlock:(AS_NOESCAPE void (^)(__kindof ASLayoutElementStyle *style))styleBlock
+{
+  styleBlock(self.style);
   return self;
 }
+
+ASLayoutElementFinalLayoutElementDefault
 
 - (NSString *)debugName
 {
@@ -1120,8 +1120,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   // Manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
   {
+    
     ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-    ASEnvironmentStatePropagateDown(layoutElement, [self environmentTraitCollection]);
+    ASPrimitiveTraitCollectionPropagateDown(layoutElement, self.primitiveTraitCollection);
   }
   
   BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
@@ -2487,7 +2488,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       }
       
       // Now that we have a supernode, propagate its traits to self.
-      ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
+      ASPrimitiveTraitCollectionPropagateDown(self, newSupernode.primitiveTraitCollection);
+      
     } else {
       // If a node will be removed from the supernode it should go out from the layout pending state to remove all
       // layout pending state related properties on the node
@@ -3851,48 +3853,18 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   return [self.subnodes countByEnumeratingWithState:state objects:buffer count:len];
 }
 
-#pragma mark - ASEnvironment
+#pragma mark - ASPrimitiveTraitCollection
 
-- (ASEnvironmentState)environmentState
+- (ASPrimitiveTraitCollection)primitiveTraitCollection
 {
-  return _environmentState;
+  return _primitiveTraitCollection;
 }
 
-- (void)setEnvironmentState:(ASEnvironmentState)environmentState
+- (void)setPrimitiveTraitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
-  ASEnvironmentTraitCollection oldTraitCollection = _environmentState.environmentTraitCollection;
-  _environmentState = environmentState;
-  
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(oldTraitCollection, _environmentState.environmentTraitCollection) == NO) {
-    [self asyncTraitCollectionDidChange];
-  }
-}
-
-- (ASDisplayNode *)parent
-{
-  return self.supernode;
-}
-
-- (NSArray<ASDisplayNode *> *)children
-{
-  return self.subnodes;
-}
-
-- (BOOL)supportsTraitsCollectionPropagation
-{
-  return ASEnvironmentStateTraitCollectionPropagationEnabled();
-}
-
-- (ASEnvironmentTraitCollection)environmentTraitCollection
-{
-  return _environmentState.environmentTraitCollection;
-}
-
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
-{
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, _environmentState.environmentTraitCollection) == NO) {
-    _environmentState.environmentTraitCollection = environmentTraitCollection;
-    ASDisplayNodeLogEvent(self, @"asyncTraitCollectionDidChange: %@", NSStringFromASEnvironmentTraitCollection(environmentTraitCollection));
+  if (ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(traitCollection, _primitiveTraitCollection) == NO) {
+    _primitiveTraitCollection = traitCollection;
+    ASDisplayNodeLogEvent(self, @"asyncTraitCollectionDidChange: %@", NSStringFromASPrimitiveTraitCollection(traitCollection));
     [self asyncTraitCollectionDidChange];
   }
 }
@@ -3900,7 +3872,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
+  return [ASTraitCollection traitCollectionWithASPrimitiveTraitCollection:self.primitiveTraitCollection];
 }
 
 - (void)asyncTraitCollectionDidChange
@@ -3908,7 +3880,11 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   // Subclass override
 }
 
-ASEnvironmentLayoutExtensibilityForwarding
+ASPrimitiveTraitCollectionDeprecatedImplementation
+
+#pragma mark - ASLayoutElementStyleExtensibility
+
+ASLayoutElementStyleExtensibilityForwarding
 
 #if TARGET_OS_TV
 #pragma mark - UIFocusEnvironment Protocol (tvOS)
