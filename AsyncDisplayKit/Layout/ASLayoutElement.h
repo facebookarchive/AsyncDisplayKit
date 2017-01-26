@@ -17,6 +17,8 @@
 
 #import <AsyncDisplayKit/ASEnvironment.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 @class ASLayout;
 @class ASLayoutSpec;
 @protocol ASLayoutElementStylability;
@@ -33,9 +35,23 @@ typedef NS_ENUM(NSUInteger, ASLayoutElementType) {
   ASLayoutElementTypeDisplayNode
 };
 
-NS_ASSUME_NONNULL_BEGIN
+/**
+ This function will walk the layout element hierarchy. It does run the block on the node provided
+ directly to the function call.
+ */
+extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> root, void(^block)(id<ASLayoutElement> element));
 
-/** 
+#pragma mark - ASLayoutElementTraitCollection
+
+/**
+ This function will walk the layout element hierarchy. It updates the trait collection for every layout item
+ within the hierarchy.
+ */
+extern void ASLayoutElementTraitCollectionPropagateDown(id<ASLayoutElement> root, ASEnvironmentTraitCollection traitCollection);
+
+#pragma mark - ASLayoutElement
+
+/**
  * The ASLayoutElement protocol declares a method for measuring the layout of an object. A layout
  * is defined by an ASLayout return value, and must specify 1) the size (but not position) of the
  * layoutElement object, and 2) the size and position of all of its immediate child objects. The tree 
@@ -73,8 +89,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @abstract Returns all children of an object which class conforms to the ASLayoutElement protocol
  */
-//- (nullable NSArray<id<ASLayoutElement>> *)sublayoutElements;
-- (nullable NSArray<id<ASLayoutElement>> *)children;
+- (nullable NSArray<id<ASLayoutElement>> *)sublayoutElements;
 
 /**
  * @abstract Optional name that is printed by ascii art string and displayed in description. 
@@ -163,6 +178,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+#pragma mark - ASLayoutElementStyle
+
 extern NSString * const ASLayoutElementStyleWidthProperty;
 extern NSString * const ASLayoutElementStyleMinWidthProperty;
 extern NSString * const ASLayoutElementStyleMaxWidthProperty;
@@ -181,8 +198,6 @@ extern NSString * const ASLayoutElementStyleAscenderProperty;
 extern NSString * const ASLayoutElementStyleDescenderProperty;
 
 extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
-
-#pragma mark - ASLayoutElementStyle
 
 @protocol ASLayoutElementStyleDelegate <NSObject>
 - (void)style:(__kindof ASLayoutElementStyle *)style propertyDidChange:(NSString *)propertyName;

@@ -60,13 +60,7 @@
     node.cachedIndexPath = _indexPath;
     node.supplementaryElementKind = _supplementaryElementKind;
     node.owningNode = (ASDisplayNode *)_environment;
-    
-    // TODO: ASDK-Layout: Cleaner implementation
-    ASEnvironmentTraitCollection traitCollection = self.environmentTraitCollection;
-    ASLayoutElementPerformBlockOnEveryElement(node, ^(id<ASLayoutElement>  _Nonnull element) {
-      element.environmentTraitCollection = traitCollection;
-    });
-    //ASEnvironmentStatePropagateDown(node, _environmentTraitCollection);
+    ASLayoutElementTraitCollectionPropagateDown(node, _environmentTraitCollection);
 
     _node = node;
   }

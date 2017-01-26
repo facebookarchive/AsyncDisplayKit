@@ -29,6 +29,7 @@
 #import "ASEnvironmentInternal.h"
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
+#import "ASLayoutElement.h"
 #import "ASLayoutElementStylePrivate.h"
 #import "ASLayoutSpec.h"
 #import "ASLayoutSpecPrivate.h"
@@ -1117,13 +1118,7 @@ ASLayoutElementExtensibilityDefault
   {
     
     ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-    
-    // TODO: ASDK-Layout: Cleaner implementation
-    ASEnvironmentTraitCollection traitCollection = self.environmentTraitCollection;
-    ASLayoutElementPerformBlockOnEveryElement(layoutElement, ^(id<ASLayoutElement>  _Nonnull element) {
-      element.environmentTraitCollection = traitCollection;
-    });
-    //ASEnvironmentStatePropagateDown(layoutElement, [self environmentTraitCollection]);
+    ASLayoutElementTraitCollectionPropagateDown(layoutElement, self.environmentTraitCollection);
   }
   
   BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
@@ -2489,12 +2484,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       }
       
       // Now that we have a supernode, propagate its traits to self.
-      // TODO: ASDK-Layout: Cleaner implementation
-      ASEnvironmentTraitCollection traitCollection = [newSupernode environmentTraitCollection];
-      ASLayoutElementPerformBlockOnEveryElement(self, ^(id<ASLayoutElement>  _Nonnull element) {
-        element.environmentTraitCollection = traitCollection;
-      });
-      //ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
+      ASLayoutElementTraitCollectionPropagateDown(self, newSupernode.environmentTraitCollection);
       
     } else {
       // If a node will be removed from the supernode it should go out from the layout pending state to remove all
@@ -3854,21 +3844,30 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 #pragma mark - ASEnvironment
 
+// TODO: ASDK-Layout: Remove
 - (ASDisplayNode *)parent
 {
     return self.supernode;
 }
 
-- (NSArray<ASDisplayNode *> *)children
+// TODO: ASDK-Layout: Remove
+- (NSArray<id<ASEnvironment>> *)children
+{
+  return self.subnodes;
+}
+
+- (NSArray<id<ASLayoutElement>> *)sublayoutElements
 {
     return self.subnodes;
 }
 
+// TODO: ASDK-Layout: Remove
 - (ASEnvironmentState)environmentState
 {
   return _environmentState;
 }
 
+// TODO: ASDK-Layout: Remove
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState
 {
   ASEnvironmentTraitCollection oldTraitCollection = _environmentState.environmentTraitCollection;
@@ -3879,6 +3878,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   }
 }
 
+// TODO: ASDK-Layout: Remove
 - (BOOL)supportsTraitsCollectionPropagation
 {
   return ASEnvironmentStateTraitCollectionPropagationEnabled();

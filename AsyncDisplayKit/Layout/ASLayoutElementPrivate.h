@@ -125,7 +125,7 @@ typedef struct ASLayoutElementStyleExtensions {
   return [self.style layoutOptionExtensionEdgeInsetsAtIndex:idx];\
 }\
 
-#pragma mark - ASLayoutElementTraitCollectionForwarding
+#pragma mark - ASLayoutElementTraitCollection
 
 #import "ASTraitCollection.h"
 
@@ -145,11 +145,6 @@ typedef struct ASLayoutElementTraitCollection {
 @protocol ASLayoutElementTraitEnvironment <NSObject>
 
 /**
- * Returns an NSObject-representation of the environment's ASEnvironmentDisplayTraits
- */
-- (ASTraitCollection *)asyncTraitCollection;
-
-/**
  * Returns a struct-representation of the environment's ASEnvironmentDisplayTraits. This only exists as a internal
  * convenience method. Users should access the trait collections through the NSObject based asyncTraitCollection API
  */
@@ -160,9 +155,39 @@ typedef struct ASLayoutElementTraitCollection {
  */
 - (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection;
 
+/**
+ * Returns an NSObject-representation of the environment's ASEnvironmentDisplayTraits
+ */
+- (ASTraitCollection *)asyncTraitCollection;
+
 @end
 
-
+#define ASLayoutElementCollectionTableSetTraitCollection(lock) \
+- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection\
+{\
+  ASDN::MutexLocker l(lock);\
+\
+  ASEnvironmentTraitCollection oldTraits = self.environmentTraitCollection;\
+  [super setEnvironmentTraitCollection:environmentTraitCollection];\
+\
+  /* Extra Trait Collection Handling */\
+\
+  /* If the node is not loaded  yet don't do anything as otherwise the access of the view will trigger a load*/\
+  if (!self.isNodeLoaded) { return; }\
+\
+  ASEnvironmentTraitCollection currentTraits = self.environmentTraitCollection;\
+  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(currentTraits, oldTraits) == NO) {\
+    /* Must dispatch to main for self.view && [self.view.dataController completedNodes]*/\
+    ASPerformBlockOnMainThread(^{\
+      NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
+      for (NSArray *sectionArray in completedNodes) {\
+        for (ASCellNode *cellNode in sectionArray) {\
+          ASLayoutElementTraitCollectionPropagateDown(cellNode, currentTraits);\
+        }\
+      }\
+    });\
+  }\
+}\
 
 #pragma mark ASLayoutElementStyleForwardingDeclaration (Deprecated)
 

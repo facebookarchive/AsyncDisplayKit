@@ -155,45 +155,7 @@ ASDISPLAYNODE_EXTERN_C_END
       NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
       for (NSArray *sectionArray in completedNodes) {\
         for (ASCellNode *cellNode in sectionArray) {\
-          /* // TODO: ASDK-Layout: Cleaner implementation */\
-          ASLayoutElementPerformBlockOnEveryElement(cellNode, ^(id<ASLayoutElement> _Nonnull element) {\
-            element.environmentTraitCollection = currentTraits;\
-          });\
-          /* ASEnvironmentStatePropagateDown(cellNode, currentTraits);*/\
-        }\
-      }\
-    });\
-  }\
-}\
-
-// TODO: ASDK-Layout: Needs to be done for setting the trait collection instead of setting the environment state
-// --> ASLayoutElementCollectionTableSetTraitCollection(lock)
-
-#define ASLayoutElementCollectionTableSetTraitCollection(lock) \
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection\
-{\
-  ASDN::MutexLocker l(lock);\
-\
-  ASEnvironmentTraitCollection oldTraits = self.environmentTraitCollection;\
-  [super setEnvironmentTraitCollection:environmentTraitCollection];\
-\
-  /* Extra Trait Collection Handling */\
-\
-  /* If the node is not loaded  yet don't do anything as otherwise the access of the view will trigger a load*/\
-  if (!self.isNodeLoaded) { return; }\
-\
-  ASEnvironmentTraitCollection currentTraits = self.environmentTraitCollection;\
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(currentTraits, oldTraits) == NO) {\
-    /* Must dispatch to main for self.view && [self.view.dataController completedNodes]*/\
-    ASPerformBlockOnMainThread(^{\
-      NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
-      for (NSArray *sectionArray in completedNodes) {\
-        for (ASCellNode *cellNode in sectionArray) {\
-          /* // TODO: ASDK-Layout: Cleaner implementation */\
-          ASLayoutElementPerformBlockOnEveryElement(cellNode, ^(id<ASLayoutElement> _Nonnull element) {\
-            element.environmentTraitCollection = currentTraits;\
-          });\
-          /* ASEnvironmentStatePropagateDown(cellNode, currentTraits);*/\
+          ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
         }\
       }\
     });\

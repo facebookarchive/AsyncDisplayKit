@@ -189,7 +189,12 @@
   }
 }
 
-- (NSArray *)children
+- (nullable NSArray<id<ASLayoutElement>> *)children
+{
+  return [_childrenArray copy];
+}
+
+- (NSArray<id<ASLayoutElement>> *)sublayoutElements
 {
   return [_childrenArray copy];
 }
@@ -203,16 +208,19 @@
 
 #pragma mark - ASEnvironment
 
+// TODO: ASDK-Layout: Remove
 - (ASEnvironmentState)environmentState
 {
   return _environmentState;
 }
 
+// TODO: ASDK-Layout: Remove
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState
 {
   _environmentState = environmentState;
 }
 
+// TODO: ASDK-Layout: Remove
 - (BOOL)supportsTraitsCollectionPropagation
 {
   return ASEnvironmentStateTraitCollectionPropagationEnabled();
