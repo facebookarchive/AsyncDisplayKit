@@ -416,7 +416,7 @@ ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASCollectionDelegate.")
 @end
 
 /**
- * Defines methods that let you coordinate with a `UICollectionViewFlowLayout` in combination with an `ASCollectionView`.
+ * Defines methods that let you coordinate a `UICollectionViewFlowLayout` in combination with an `ASCollectionNode`.
  */
 ASDISPLAYNODE_DEPRECATED_MSG("Conform to ASCollectionDelegateFlowLayout instead.")
 @protocol ASCollectionViewDelegateFlowLayout <ASCollectionDelegate>

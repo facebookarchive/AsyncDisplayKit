@@ -24,9 +24,9 @@
  
 @implementation ASCollectionViewFlowLayoutInspector {
   struct {
-    unsigned int implementsConstrainedSizeForHeader:1;
+    unsigned int implementsReferenceConstrainedSizeForHeader:1;
     unsigned int implementsReferenceSizeForHeader:1;
-    unsigned int implementsConstrainedSizeForFooter:1;
+    unsigned int implementsReferenceConstrainedSizeForFooter:1;
     unsigned int implementsReferenceSizeForFooter:1;
     unsigned int implementsConstrainedSizeForNodeAtIndexPathDeprecated:1;
     unsigned int implementsConstrainedSizeForItemAtIndexPath:1;
@@ -55,9 +55,9 @@
   if (delegate == nil) {
     memset(&_delegateFlags, 0, sizeof(_delegateFlags));
   } else {
-    _delegateFlags.implementsConstrainedSizeForHeader = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForHeaderInSection:)];
+    _delegateFlags.implementsReferenceConstrainedSizeForHeader = [delegate respondsToSelector:@selector(collectionNode:referenceConstrainedSizeForHeaderInSection:)];
     _delegateFlags.implementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
-    _delegateFlags.implementsConstrainedSizeForFooter = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForFooterInSection:)];
+    _delegateFlags.implementsReferenceConstrainedSizeForFooter = [delegate respondsToSelector:@selector(collectionNode:referenceConstrainedSizeForFooterInSection:)];
     _delegateFlags.implementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
     _delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
     _delegateFlags.implementsConstrainedSizeForItemAtIndexPath = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForItemAtIndexPath:)];
@@ -90,18 +90,20 @@
 {
   ASSizeRange result = ASSizeRangeZero;
   if (ASObjectIsEqual(kind, UICollectionElementKindSectionHeader)) {
-    if (_delegateFlags.implementsConstrainedSizeForHeader) {
-      result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode constrainedSizeForHeaderInSection:indexPath.section];
+    if (_delegateFlags.implementsReferenceConstrainedSizeForHeader) {
+      result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode referenceConstrainedSizeForHeaderInSection:indexPath.section];
     } else if (_delegateFlags.implementsReferenceSizeForHeader) {
-      result.max = [(id)[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForHeaderInSection:indexPath.section];
+      CGSize exactSize = [(id)[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForHeaderInSection:indexPath.section];
+      result = ASSizeRangeMake(exactSize);
     } else {
       result = ASSizeRangeMake(_layout.headerReferenceSize);
     }
   } else if (ASObjectIsEqual(kind, UICollectionElementKindSectionFooter)) {
-    if (_delegateFlags.implementsConstrainedSizeForFooter) {
-      result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode constrainedSizeForFooterInSection:indexPath.section];
+    if (_delegateFlags.implementsReferenceConstrainedSizeForFooter) {
+      result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode referenceConstrainedSizeForFooterInSection:indexPath.section];
     } else if (_delegateFlags.implementsReferenceSizeForFooter) {
-      result.max = [(id)[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForFooterInSection:indexPath.section];
+      CGSize exactSize = [(id)[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForFooterInSection:indexPath.section];
+      result = ASSizeRangeMake(exactSize);
     } else {
       result = ASSizeRangeMake(_layout.footerReferenceSize);
     }

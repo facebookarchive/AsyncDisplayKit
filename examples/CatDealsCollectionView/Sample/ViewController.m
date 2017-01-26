@@ -205,19 +205,19 @@ static const CGFloat kVerticalSectionPadding = 20.0f;
 
 #pragma mark - ASCollectionDelegateFlowLayout
 
-- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForHeaderInSection:(NSInteger)section
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode referenceConstrainedSizeForHeaderInSection:(NSInteger)section
 {
   if (section == 0) {
-    return ASSizeRangeMake(CGSizeZero, CGSizeMake(0, INFINITY));
+    return ASSizeRangeUnconstrained;
   } else {
     return ASSizeRangeZero;
   }
 }
 
-- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForFooterInSection:(NSInteger)section
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode referenceConstrainedSizeForFooterInSection:(NSInteger)section
 {
   if (section == 0) {
-    return ASSizeRangeMake(CGSizeZero, CGSizeMake(0, INFINITY));
+    return ASSizeRangeUnconstrained;
   } else {
     return ASSizeRangeZero;
   }

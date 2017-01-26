@@ -63,6 +63,8 @@ ASLayoutSize const ASLayoutSizeAuto = {ASDimensionAuto, ASDimensionAuto};
 
 ASSizeRange const ASSizeRangeZero = {};
 
+ASSizeRange const ASSizeRangeUnconstrained = { {0, 0}, { INFINITY, INFINITY }};
+
 struct _Range {
   CGFloat min;
   CGFloat max;
