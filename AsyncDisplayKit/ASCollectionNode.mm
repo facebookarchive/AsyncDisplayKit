@@ -15,7 +15,6 @@
 #import "ASCollectionNode.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASEnvironmentInternal.h"
 #import "ASInternalHelpers.h"
 #import "ASCellNode+Internal.h"
 #import "AsyncDisplayKit+Debug.h"
@@ -593,11 +592,9 @@
   }
 }
 
-#pragma mark ASEnvironment
+#pragma mark - ASLayoutElementTraitCollection
 
-// TODO: ASDK-Layout: Needs to be removed / enabled
-ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
-//ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
+ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 
 #pragma mark - Debugging (Private)
 

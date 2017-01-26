@@ -19,7 +19,6 @@
 #import "_ASTransitionContext.h"
 #import "ASLayoutElement.h"
 #import "ASLayoutTransition.h"
-#import "ASEnvironment.h"
 #import "ASWeakSet.h"
 
 #import "ASDisplayNode+Beta.h"
@@ -111,13 +110,12 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   NSMutableArray *_subnodes;
   
   ASLayoutElementStyle *_style;
+  ASEnvironmentTraitCollection _environmentTraitCollection;
 
   std::atomic_uint _displaySentinel;
 
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
-
-  ASEnvironmentState _environmentState;
 
   UIEdgeInsets _hitTestSlop;
   

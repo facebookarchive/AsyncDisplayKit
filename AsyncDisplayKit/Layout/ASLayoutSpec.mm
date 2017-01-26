@@ -46,7 +46,7 @@
   }
   
   _isMutable = YES;
-  _environmentState = ASEnvironmentStateMakeDefault();
+  _environmentTraitCollection = ASEnvironmentTraitCollectionMakeDefault();
   _childrenArray = [[NSMutableArray alloc] init];
   
   return self;
@@ -206,34 +206,16 @@
   return [_childrenArray countByEnumeratingWithState:state objects:buffer count:len];
 }
 
-#pragma mark - ASEnvironment
-
-// TODO: ASDK-Layout: Remove
-- (ASEnvironmentState)environmentState
-{
-  return _environmentState;
-}
-
-// TODO: ASDK-Layout: Remove
-- (void)setEnvironmentState:(ASEnvironmentState)environmentState
-{
-  _environmentState = environmentState;
-}
-
-// TODO: ASDK-Layout: Remove
-- (BOOL)supportsTraitsCollectionPropagation
-{
-  return ASEnvironmentStateTraitCollectionPropagationEnabled();
-}
+#pragma mark - ASLayoutElementTraitEnvironment
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  return _environmentState.environmentTraitCollection;
+  return _environmentTraitCollection;
 }
 
 - (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  _environmentState.environmentTraitCollection = environmentTraitCollection;
+  _environmentTraitCollection = environmentTraitCollection;
 }
 
 - (ASTraitCollection *)asyncTraitCollection

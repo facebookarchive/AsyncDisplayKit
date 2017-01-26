@@ -16,8 +16,6 @@
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASLayout.h"
-#import "ASTraitCollection.h"
-#import "ASEnvironmentInternal.h"
 #import "ASRangeControllerUpdateRangeProtocol+Beta.h"
 #import "ASInternalHelpers.h"
 
@@ -247,7 +245,7 @@ ASVisibilityDepthImplementation;
   return _node.interfaceState;
 }
 
-#pragma mark - ASEnvironmentTraitCollection
+#pragma mark - ASLayoutElementTraitEnvironment
 
 - (ASEnvironmentTraitCollection)environmentTraitCollectionForUITraitCollection:(UITraitCollection *)traitCollection
 {
@@ -264,16 +262,12 @@ ASVisibilityDepthImplementation;
 
 - (void)progagateNewEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  ASEnvironmentState environmentState = self.node.environmentState;
-  ASEnvironmentTraitCollection oldEnvironmentTraitCollection = environmentState.environmentTraitCollection;
+  ASEnvironmentTraitCollection oldEnvironmentTraitCollection = self.node.environmentTraitCollection;
   
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, oldEnvironmentTraitCollection) == NO) {
-    environmentState.environmentTraitCollection = environmentTraitCollection;
-    //self.node.environmentState = environmentState;
     self.node.environmentTraitCollection = environmentTraitCollection;
     
     NSArray<id<ASLayoutElement>> *children = [self.node sublayoutElements];
-    ASEnvironmentTraitCollection environmentTraitCollection = environmentState.environmentTraitCollection;
     for (id<ASLayoutElement> child in children) {
       ASLayoutElementTraitCollectionPropagateDown(child, environmentTraitCollection);
     }

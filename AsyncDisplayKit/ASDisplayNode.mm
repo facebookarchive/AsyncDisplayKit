@@ -26,7 +26,6 @@
 #import "_ASScopeTimer.h"
 #import "ASDimension.h"
 #import "ASDisplayNodeExtras.h"
-#import "ASEnvironmentInternal.h"
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
 #import "ASLayoutElement.h"
@@ -34,7 +33,6 @@
 #import "ASLayoutSpec.h"
 #import "ASLayoutSpecPrivate.h"
 #import "ASRunLoopQueue.h"
-#import "ASTraitCollection.h"
 #import "ASWeakProxy.h"
 
 /**
@@ -287,7 +285,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   _contentsScaleForDisplay = ASScreenScale();
   
-  _environmentState = ASEnvironmentStateMakeDefault();
+  _environmentTraitCollection = ASEnvironmentTraitCollectionMakeDefault();
   
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
   _pendingDisplayNodeLayout = nullptr;
@@ -810,12 +808,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _style;
 }
 
-- (instancetype)styledWithBlock:(AS_NOESCAPE void (^)(__kindof ASLayoutElementStyle *style))styleBlock
-{
-  styleBlock(self.style);
-  return self;
-}
-
 - (ASLayoutElementType)layoutElementType
 {
   return ASLayoutElementTypeDisplayNode;
@@ -824,6 +816,17 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (BOOL)canLayoutAsynchronous
 {
   return !self.isNodeLoaded;
+}
+
+- (NSArray<id<ASLayoutElement>> *)sublayoutElements
+{
+  return self.subnodes;
+}
+
+- (instancetype)styledWithBlock:(AS_NOESCAPE void (^)(__kindof ASLayoutElementStyle *style))styleBlock
+{
+  styleBlock(self.style);
+  return self;
 }
 
 ASLayoutElementExtensibilityDefault
@@ -3842,57 +3845,17 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   return [self.subnodes countByEnumeratingWithState:state objects:buffer count:len];
 }
 
-#pragma mark - ASEnvironment
-
-// TODO: ASDK-Layout: Remove
-- (ASDisplayNode *)parent
-{
-    return self.supernode;
-}
-
-// TODO: ASDK-Layout: Remove
-- (NSArray<id<ASEnvironment>> *)children
-{
-  return self.subnodes;
-}
-
-- (NSArray<id<ASLayoutElement>> *)sublayoutElements
-{
-    return self.subnodes;
-}
-
-// TODO: ASDK-Layout: Remove
-- (ASEnvironmentState)environmentState
-{
-  return _environmentState;
-}
-
-// TODO: ASDK-Layout: Remove
-- (void)setEnvironmentState:(ASEnvironmentState)environmentState
-{
-  ASEnvironmentTraitCollection oldTraitCollection = _environmentState.environmentTraitCollection;
-  _environmentState = environmentState;
-  
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(oldTraitCollection, _environmentState.environmentTraitCollection) == NO) {
-    [self asyncTraitCollectionDidChange];
-  }
-}
-
-// TODO: ASDK-Layout: Remove
-- (BOOL)supportsTraitsCollectionPropagation
-{
-  return ASEnvironmentStateTraitCollectionPropagationEnabled();
-}
+#pragma mark - ASLayoutElementTraitEnvironment
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  return _environmentState.environmentTraitCollection;
+  return _environmentTraitCollection;
 }
 
 - (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
 {
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, _environmentState.environmentTraitCollection) == NO) {
-    _environmentState.environmentTraitCollection = environmentTraitCollection;
+  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, _environmentTraitCollection) == NO) {
+    _environmentTraitCollection = environmentTraitCollection;
     ASDisplayNodeLogEvent(self, @"asyncTraitCollectionDidChange: %@", NSStringFromASEnvironmentTraitCollection(environmentTraitCollection));
     [self asyncTraitCollectionDidChange];
   }

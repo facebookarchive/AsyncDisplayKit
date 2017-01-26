@@ -233,7 +233,7 @@
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withSections:(NSIndexSet *)sections mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
 {
-  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  __weak id<ASLayoutElementTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
 
   [sections enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
     for (NSUInteger sec = range.location; sec < NSMaxRange(range); sec++) {
@@ -248,7 +248,7 @@
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
 {
-  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  __weak id<ASLayoutElementTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
 
   NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
   for (NSIndexPath *indexPath in indexPaths) {
@@ -266,7 +266,7 @@
   }];
 }
 
-- (void)_populateSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts environment:(id<ASEnvironment>)environment
+- (void)_populateSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts environment:(id<ASLayoutElementTraitEnvironment>)environment
 {
   ASCellNodeBlock supplementaryCellBlock;
   if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {
