@@ -103,9 +103,13 @@ extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDi
   }
 }
 
-extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> root, void(^block)(id<ASLayoutElement> element))
+extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> element, void(^block)(id<ASLayoutElement> element))
 {
-  for (id<ASLayoutElement> subelement in [root children]) {
+  if (element) {
+    block(element);
+  }
+
+  for (id<ASLayoutElement> subelement in element.children) {
     ASLayoutElementPerformBlockOnEveryElement(subelement, block);
   }
 }

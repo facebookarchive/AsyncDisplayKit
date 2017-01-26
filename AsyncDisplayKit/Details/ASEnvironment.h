@@ -155,7 +155,11 @@ ASDISPLAYNODE_EXTERN_C_END
       NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
       for (NSArray *sectionArray in completedNodes) {\
         for (ASCellNode *cellNode in sectionArray) {\
-          ASEnvironmentStatePropagateDown(cellNode, currentTraits);\
+          /* // TODO: ASDK-Layout: Cleaner implementation */\
+          ASLayoutElementPerformBlockOnEveryElement(cellNode, ^(id<ASLayoutElement> _Nonnull element) {\
+            element.environmentTraitCollection = currentTraits;\
+          });\
+          /* ASEnvironmentStatePropagateDown(cellNode, currentTraits);*/\
         }\
       }\
     });\

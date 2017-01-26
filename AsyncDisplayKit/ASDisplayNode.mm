@@ -1115,8 +1115,15 @@ ASLayoutElementExtensibilityDefault
   
   // Manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
   {
+    
     ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-    ASEnvironmentStatePropagateDown(layoutElement, [self environmentTraitCollection]);
+    
+    // TODO: ASDK-Layout: Cleaner implementation
+    ASEnvironmentTraitCollection traitCollection = self.environmentTraitCollection;
+    ASLayoutElementPerformBlockOnEveryElement(layoutElement, ^(id<ASLayoutElement>  _Nonnull element) {
+      element.environmentTraitCollection = traitCollection;
+    });
+    //ASEnvironmentStatePropagateDown(layoutElement, [self environmentTraitCollection]);
   }
   
   BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
@@ -2482,7 +2489,13 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       }
       
       // Now that we have a supernode, propagate its traits to self.
-      ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
+      // TODO: ASDK-Layout: Cleaner implementation
+      ASEnvironmentTraitCollection traitCollection = [newSupernode environmentTraitCollection];
+      ASLayoutElementPerformBlockOnEveryElement(self, ^(id<ASLayoutElement>  _Nonnull element) {
+        element.environmentTraitCollection = traitCollection;
+      });
+      //ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
+      
     } else {
       // If a node will be removed from the supernode it should go out from the layout pending state to remove all
       // layout pending state related properties on the node

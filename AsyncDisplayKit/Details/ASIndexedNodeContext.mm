@@ -12,6 +12,7 @@
 
 #import "ASIndexedNodeContext.h"
 #import "ASEnvironmentInternal.h"
+#import "ASDisplayNodeExtras.h"
 #import "ASCellNode+Internal.h"
 #import <mutex>
 
@@ -59,7 +60,14 @@
     node.cachedIndexPath = _indexPath;
     node.supplementaryElementKind = _supplementaryElementKind;
     node.owningNode = (ASDisplayNode *)_environment;
-    ASEnvironmentStatePropagateDown(node, _environmentTraitCollection);
+    
+    // TODO: ASDK-Layout: Cleaner implementation
+    ASEnvironmentTraitCollection traitCollection = self.environmentTraitCollection;
+    ASLayoutElementPerformBlockOnEveryElement(node, ^(id<ASLayoutElement>  _Nonnull element) {
+      element.environmentTraitCollection = traitCollection;
+    });
+    //ASEnvironmentStatePropagateDown(node, _environmentTraitCollection);
+
     _node = node;
   }
   return _node;
