@@ -115,6 +115,9 @@ extern void ASDisplayNodePerformBlockOnEveryNodeBFS(ASDisplayNode *node, void(^b
  */
 extern void ASDisplayNodePerformBlockOnEverySubnode(ASDisplayNode *node, BOOL traverseSublayers, void(^block)(ASDisplayNode *node));
 
+// TODO: ASDK-Layout: Move to layout code
+extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> root, void(^block)(id<ASLayoutElement> element));
+
 /**
  Given a display node, traverses up the layer tree hierarchy, returning the first display node that passes block.
  */

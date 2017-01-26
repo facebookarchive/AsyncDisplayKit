@@ -234,7 +234,7 @@
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
 }
 
-ASEnvironmentLayoutExtensibilityForwarding
+ASLayoutElementStyleExtensibilityForwarding
 
 #pragma mark - Framework Private
 

@@ -103,6 +103,13 @@ extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDi
   }
 }
 
+extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> root, void(^block)(id<ASLayoutElement> element))
+{
+  for (id<ASLayoutElement> subelement in [root children]) {
+    ASLayoutElementPerformBlockOnEveryElement(subelement, block);
+  }
+}
+
 extern void ASDisplayNodePerformBlockOnEveryNodeBFS(ASDisplayNode *node, void(^block)(ASDisplayNode *node))
 {
   // Queue used to keep track of subnodes while traversing this layout in a BFS fashion.
