@@ -58,9 +58,13 @@
         ASEnvironmentStatePropagateUp(finalLayoutElement, child.environmentState.layoutOptionsState);
       } else {
         // If state propagation is not enabled the layout options state needs to be copied manually
+        
+        // TODO: ASDK-Layout: Needs to be removed
         ASEnvironmentState finalLayoutElementEnvironmentState = finalLayoutElement.environmentState;
         finalLayoutElementEnvironmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
         finalLayoutElement.environmentState = finalLayoutElementEnvironmentState;
+        
+        finalLayoutElement.environmentTraitCollection = finalLayoutElementEnvironmentState.environmentTraitCollection;
       }
       return finalLayoutElement;
     }
