@@ -56,11 +56,13 @@ typedef void (^ASDisplayNodeContextModifier)(CGContextRef context);
 typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize);
 
 /**
- Interface state is available on ASDisplayNode and ASViewController, and
- allows checking whether a node is in an interface situation where it is prudent to trigger certain
- actions: measurement, data loading, display, and visibility (the latter for animations or other onscreen-only effects).
+ * Interface state is available on ASDisplayNode and ASViewController, and
+ * allows checking whether a node is in an interface situation where it is prudent to trigger certain
+ * actions: measurement, data loading, display, and visibility (the latter for animations or other onscreen-only effects).
+ * 
+ * The defualt state, ASInterfaceStateNone, means that the element is not predicted to be onscreen soon and
+ * preloading should not be performed. Swift: use [] for the default behavior.
  */
-
 typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
 {
   /** The element is not predicted to be onscreen soon and preloading should not be performed */

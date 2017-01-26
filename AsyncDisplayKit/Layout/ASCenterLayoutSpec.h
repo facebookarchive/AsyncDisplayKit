@@ -10,7 +10,12 @@
 
 #import <AsyncDisplayKit/ASRelativeLayoutSpec.h>
 
-/** How the child is centered within the spec. */
+/** 
+  * How the child is centered within the spec.
+  *
+  * The default option will position the child at {0,0} relatively to the layout bound.
+  * Swift: use [] for the default behavior.
+  */
 typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecCenteringOptions) {
   /** The child is positioned in {0,0} relatively to the layout bounds */
   ASCenterLayoutSpecCenteringNone = 0,
@@ -22,7 +27,12 @@ typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecCenteringOptions) {
   ASCenterLayoutSpecCenteringXY = ASCenterLayoutSpecCenteringX | ASCenterLayoutSpecCenteringY
 };
 
-/** How much space the spec will take up. */
+/** 
+  * How much space the spec will take up.
+  *
+  * The default option will allow the spec to take up the maximum size possible.
+  * Swift: use [] for the default behavior.
+  */
 typedef NS_OPTIONS(NSUInteger, ASCenterLayoutSpecSizingOptions) {
   /** The spec will take up the maximum size possible */
   ASCenterLayoutSpecSizingOptionDefault = ASRelativeLayoutSpecSizingOptionDefault,

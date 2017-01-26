@@ -14,6 +14,11 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+  * Map Annotation options. 
+  * The default behavior is to ignore the annotations' positions, use the region or options specified instead.
+  * Swift: to select the default behavior, use [].
+  */
 typedef NS_OPTIONS(NSUInteger, ASMapNodeShowAnnotationsOptions)
 {
   /** The annotations' positions are ignored, use the region or options specified instead. */
