@@ -3841,6 +3841,16 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 #pragma mark - ASEnvironment
 
+- (ASDisplayNode *)parent
+{
+    return self.supernode;
+}
+
+- (NSArray<ASDisplayNode *> *)children
+{
+    return self.subnodes;
+}
+
 - (ASEnvironmentState)environmentState
 {
   return _environmentState;
@@ -3854,16 +3864,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(oldTraitCollection, _environmentState.environmentTraitCollection) == NO) {
     [self asyncTraitCollectionDidChange];
   }
-}
-
-- (ASDisplayNode *)parent
-{
-  return self.supernode;
-}
-
-- (NSArray<ASDisplayNode *> *)children
-{
-  return self.subnodes;
 }
 
 - (BOOL)supportsTraitsCollectionPropagation
@@ -3896,7 +3896,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   // Subclass override
 }
 
-ASEnvironmentLayoutExtensibilityForwarding
+ASLayoutElementStyleExtensibilityForwarding
 
 #if TARGET_OS_TV
 #pragma mark - UIFocusEnvironment Protocol (tvOS)

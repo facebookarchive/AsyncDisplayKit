@@ -71,6 +71,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) ASLayoutElementStyle *style;
 
 /**
+ * @abstract Returns all children of an object which class conforms to the ASLayoutElement protocol
+ */
+- (nullable NSArray<id<ASLayoutElement>> *)children;
+
+/**
  * @abstract Optional name that is printed by ascii art string and displayed in description. 
  */
 @property (nullable, nonatomic, copy) NSString *debugName;
