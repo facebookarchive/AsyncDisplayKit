@@ -269,13 +269,14 @@ ASVisibilityDepthImplementation;
   
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, oldEnvironmentTraitCollection) == NO) {
     environmentState.environmentTraitCollection = environmentTraitCollection;
-    self.node.environmentState = environmentState;
+    //self.node.environmentState = environmentState;
+    self.node.environmentTraitCollection = environmentTraitCollection;
     
-    NSArray<id<ASEnvironment>> *children = [self.node children];
-    for (id<ASEnvironment> child in children) {
+    NSArray<id<ASLayoutElement>> *children = [self.node children];
+    ASEnvironmentTraitCollection traitCollection = environmentState.environmentTraitCollection;
+    for (id<ASLayoutElement> child in children) {
       // TODO: ASDK-Layout: Cleaner implementation
-      ASEnvironmentTraitCollection traitCollection = environmentState.environmentTraitCollection;
-      ASLayoutElementPerformBlockOnEveryElement(child, ^(id<ASLayoutElement>  _Nonnull element) {
+      ASLayoutElementPerformBlockOnEveryElement(child, ^(id<ASLayoutElement> _Nonnull element) {
         element.environmentTraitCollection = traitCollection;
       });
       //ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);

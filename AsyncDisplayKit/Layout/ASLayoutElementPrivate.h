@@ -139,6 +139,9 @@ typedef struct ASLayoutElementTraitCollection {
   CGSize containerSize;
 } ASLayoutElementTraitCollection;
 
+/**
+ * Abstraction on top of UITraitCollection for propagation within AsyncDisplayKit-Layout
+ */
 @protocol ASLayoutElementTraitEnvironment <NSObject>
 
 /**

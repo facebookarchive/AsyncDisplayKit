@@ -354,7 +354,9 @@
 
 #pragma mark ASEnvironment
 
+// TODO: ASDK-Layout: Needs to be removed / enabled
 ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
+//ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 
 #pragma mark - Range Tuning
 
