@@ -15,6 +15,25 @@
 #import <map>
 #import <atomic>
 
+extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> element, void(^block)(id<ASLayoutElement> element))
+{
+  if (element) {
+    block(element);
+  }
+
+  for (id<ASLayoutElement> subelement in element.children) {
+    ASLayoutElementPerformBlockOnEveryElement(subelement, block);
+  }
+}
+
+#pragma mark - ASLayoutElementTraitCollection
+
+extern void ASLayoutElementTraitCollectionPropagateDown(id<ASLayoutElement> root, ASEnvironmentTraitCollection traitCollection) {
+  ASLayoutElementPerformBlockOnEveryElement(root, ^(id<ASLayoutElement>  _Nonnull element) {
+    element.environmentTraitCollection = traitCollection;
+  });
+}
+
 #pragma mark - ASLayoutElementContext
 
 CGFloat const ASLayoutElementParentDimensionUndefined = NAN;

@@ -272,14 +272,10 @@ ASVisibilityDepthImplementation;
     //self.node.environmentState = environmentState;
     self.node.environmentTraitCollection = environmentTraitCollection;
     
-    NSArray<id<ASLayoutElement>> *children = [self.node children];
-    ASEnvironmentTraitCollection traitCollection = environmentState.environmentTraitCollection;
+    NSArray<id<ASLayoutElement>> *children = [self.node sublayoutElements];
+    ASEnvironmentTraitCollection environmentTraitCollection = environmentState.environmentTraitCollection;
     for (id<ASLayoutElement> child in children) {
-      // TODO: ASDK-Layout: Cleaner implementation
-      ASLayoutElementPerformBlockOnEveryElement(child, ^(id<ASLayoutElement> _Nonnull element) {
-        element.environmentTraitCollection = traitCollection;
-      });
-      //ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
+      ASLayoutElementTraitCollectionPropagateDown(child, environmentTraitCollection);
     }
     
 #pragma clang diagnostic push
