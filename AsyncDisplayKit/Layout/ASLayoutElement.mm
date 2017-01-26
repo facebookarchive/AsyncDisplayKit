@@ -21,7 +21,7 @@ extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> elemen
     block(element);
   }
 
-  for (id<ASLayoutElement> subelement in element.children) {
+  for (id<ASLayoutElement> subelement in element.sublayoutElements) {
     ASLayoutElementPerformBlockOnEveryElement(subelement, block);
   }
 }

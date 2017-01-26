@@ -25,7 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class ASCellNode;
 @class ASDataController;
-@protocol ASEnvironment;
+@protocol ASLayoutElementTraitEnvironment;
 
 typedef NSUInteger ASDataControllerAnimationOptions;
 
@@ -67,7 +67,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
 @end
 
 @protocol ASDataControllerEnvironmentDelegate
-- (id<ASEnvironment>)dataControllerEnvironment;
+- (id<ASLayoutElementTraitEnvironment>)dataControllerEnvironment;
 @end
 
 /**

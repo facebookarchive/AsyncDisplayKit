@@ -12,7 +12,6 @@
 
 #import "ASAssert.h"
 #import "ASCellNode.h"
-#import "ASEnvironmentInternal.h"
 #import "ASLayout.h"
 #import "ASMainSerialQueue.h"
 #import "ASMultidimensionalArrayUtils.h"
@@ -514,7 +513,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 {
   ASDisplayNodeAssertMainThread();
   
-  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  __weak id<ASLayoutElementTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   std::vector<NSInteger> counts = [self itemCountsFromDataSource];
   NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
@@ -744,7 +743,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
   NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
 
-  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  __weak id<ASLayoutElementTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   for (NSIndexPath *indexPath in sortedIndexPaths) {
     ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];

@@ -15,12 +15,11 @@
 #import <AsyncDisplayKit/ASStackLayoutElement.h>
 #import <AsyncDisplayKit/ASAbsoluteLayoutElement.h>
 
-#import <AsyncDisplayKit/ASEnvironment.h>
-
 NS_ASSUME_NONNULL_BEGIN
 
 @class ASLayout;
 @class ASLayoutSpec;
+@protocol ASLayoutElementTraitEnvironment;
 @protocol ASLayoutElementStylability;
 
 /** A constant that indicates that the parent's size is not yet determined in a given dimension. */
@@ -67,7 +66,7 @@ extern void ASLayoutElementTraitCollectionPropagateDown(id<ASLayoutElement> root
  * access to the options via convenience properties. If you are creating custom layout spec, then you can
  * extend the backing layout options class to accommodate any new layout options.
  */
-@protocol ASLayoutElement <ASEnvironment, ASLayoutElementExtensibility, ASLayoutElementFinalLayoutElement>
+@protocol ASLayoutElement <ASLayoutElementExtensibility, ASLayoutElementFinalLayoutElement, ASLayoutElementTraitEnvironment>
 
 #pragma mark - Getter
 

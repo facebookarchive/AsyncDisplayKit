@@ -11,7 +11,6 @@
 //
 
 #import "ASIndexedNodeContext.h"
-#import "ASEnvironmentInternal.h"
 #import "ASDisplayNodeExtras.h"
 #import "ASCellNode+Internal.h"
 #import <mutex>
@@ -32,7 +31,7 @@
                         indexPath:(NSIndexPath *)indexPath
          supplementaryElementKind:(nullable NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
-                      environment:(id<ASEnvironment>)environment
+                      environment:(id<ASLayoutElementTraitEnvironment>)environment
 {
   NSAssert(nodeBlock != nil && indexPath != nil, @"Node block and index path must not be nil");
   self = [super init];

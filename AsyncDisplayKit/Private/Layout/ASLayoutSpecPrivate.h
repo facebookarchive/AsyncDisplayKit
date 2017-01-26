@@ -14,13 +14,12 @@
 #import "ASInternalHelpers.h"
 
 #import "ASThread.h"
-#import "ASEnvironmentInternal.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ASLayoutSpec() {
   ASDN::RecursiveMutex __instanceLock__;
-  ASEnvironmentState _environmentState;
+  ASEnvironmentTraitCollection _environmentTraitCollection;
   ASLayoutElementStyle *_style;
   NSMutableArray *_childrenArray;
 }
