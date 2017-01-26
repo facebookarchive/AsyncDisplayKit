@@ -127,6 +127,7 @@ typedef struct ASLayoutElementStyleExtensions {
 
 #pragma mark - ASLayoutElementTraitCollectionForwarding
 
+#import "ASTraitCollection.h"
 
 typedef struct ASLayoutElementTraitCollection {
   CGFloat displayScale;
@@ -138,7 +139,25 @@ typedef struct ASLayoutElementTraitCollection {
   CGSize containerSize;
 } ASLayoutElementTraitCollection;
 
+@protocol ASLayoutElementTraitEnvironment <NSObject>
 
+/**
+ * Returns an NSObject-representation of the environment's ASEnvironmentDisplayTraits
+ */
+- (ASTraitCollection *)asyncTraitCollection;
+
+/**
+ * Returns a struct-representation of the environment's ASEnvironmentDisplayTraits. This only exists as a internal
+ * convenience method. Users should access the trait collections through the NSObject based asyncTraitCollection API
+ */
+- (ASEnvironmentTraitCollection)environmentTraitCollection;
+
+/**
+ * Sets a trait collection on this environment state.
+ */
+- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection;
+
+@end
 
 
 

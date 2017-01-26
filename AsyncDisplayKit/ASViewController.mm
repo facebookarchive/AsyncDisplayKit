@@ -14,6 +14,7 @@
 #import "ASAssert.h"
 #import "ASAvailability.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASDisplayNodeExtras.h"
 #import "ASLayout.h"
 #import "ASTraitCollection.h"
 #import "ASEnvironmentInternal.h"
@@ -272,8 +273,14 @@ ASVisibilityDepthImplementation;
     
     NSArray<id<ASEnvironment>> *children = [self.node children];
     for (id<ASEnvironment> child in children) {
-      ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
+      // TODO: ASDK-Layout: Cleaner implementation
+      ASEnvironmentTraitCollection traitCollection = environmentState.environmentTraitCollection;
+      ASLayoutElementPerformBlockOnEveryElement(child, ^(id<ASLayoutElement>  _Nonnull element) {
+        element.environmentTraitCollection = traitCollection;
+      });
+      //ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
     }
+    
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     // Once we've propagated all the traits, layout this node.
