@@ -418,21 +418,16 @@ ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASCollectionDelegate.")
 /**
  * Defines methods that let you coordinate a `UICollectionViewFlowLayout` in combination with an `ASCollectionNode`.
  */
-ASDISPLAYNODE_DEPRECATED_MSG("Conform to ASCollectionDelegateFlowLayout instead.")
 @protocol ASCollectionViewDelegateFlowLayout <ASCollectionDelegate>
 
 @optional
 
 /**
- * @discussion This method is deprecated and does nothing from 1.9.7 and up
- * Previously it applies the section inset to every cells within the corresponding section.
- * The expected behavior is to apply the section inset to the whole section rather than
- * shrinking each cell individually.
- * If you want this behavior, you can integrate your insets calculation into
- * `constrainedSizeForNodeAtIndexPath`
- * please file a github issue if you would like this to be restored.
+ * Asks the delegate for the inset that should be applied to the given section.
+ *
+ * @see the same method in UICollectionViewDelegate. 
  */
-- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section ASDISPLAYNODE_DEPRECATED_MSG("This method does nothing for 1.9.7+ due to incorrect implementation previously, see the header file for more information.");
+- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section;
 
 /**
  * Asks the delegate for the size of the header in the specified section.
