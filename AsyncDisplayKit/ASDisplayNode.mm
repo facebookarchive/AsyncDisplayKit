@@ -3872,6 +3872,10 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   // Subclass override
 }
 
+ASLayoutElementTraitCollectionDeprecatedImplementation
+
+#pragma mark - ASLayoutElementStyleExtensibility
+
 ASLayoutElementStyleExtensibilityForwarding
 
 #if TARGET_OS_TV

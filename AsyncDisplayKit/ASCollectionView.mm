@@ -1452,7 +1452,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (id<ASLayoutElementTraitEnvironment>)dataControllerEnvironment
 {
-  return self.collectionNode;;
+  return self.collectionNode;
 }
 
 #pragma mark - ASCollectionViewDataControllerSource

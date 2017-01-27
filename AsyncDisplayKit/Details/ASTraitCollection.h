@@ -28,6 +28,9 @@ typedef struct ASLayoutElementTraitCollection {
   CGSize containerSize;
 } ASLayoutElementTraitCollection;
 
+/// Deprecation
+#define ASEnvironmentTraitCollection ASLayoutElementTraitCollection
+
 /**
  * Creates ASLayoutElementTraitCollection with default values.
  */
@@ -78,7 +81,24 @@ ASDISPLAYNODE_EXTERN_C_END
  */
 - (ASTraitCollection *)asyncTraitCollection;
 
+/**
+ * Deprecated and should be replaced by the methods from above
+ */
+- (ASEnvironmentTraitCollection)environmentTraitCollection;
+- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traitCollection;;
+
+
 @end
+
+#define ASLayoutElementTraitCollectionDeprecatedImplementation \
+- (ASEnvironmentTraitCollection)environmentTraitCollection\
+{\
+  return self.layoutElementTraitCollection;\
+}\
+- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traitCollection\
+{\
+  [self setLayoutElementTraitCollection:traitCollection];\
+}\
 
 #define ASLayoutElementCollectionTableSetTraitCollection(lock) \
 - (void)setLayoutElementTraitCollection:(ASLayoutElementTraitCollection)traitCollection\
