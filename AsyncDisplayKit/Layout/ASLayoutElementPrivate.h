@@ -127,7 +127,7 @@ typedef struct ASLayoutElementStyleExtensions {
 
 #pragma mark - ASLayoutElementTraitCollection
 
-#import "ASTraitCollection.h"
+@class ASTraitCollection;
 
 typedef struct ASLayoutElementTraitCollection {
   CGFloat displayScale;
@@ -148,12 +148,12 @@ typedef struct ASLayoutElementTraitCollection {
  * Returns a struct-representation of the environment's ASEnvironmentDisplayTraits. This only exists as a internal
  * convenience method. Users should access the trait collections through the NSObject based asyncTraitCollection API
  */
-- (ASEnvironmentTraitCollection)environmentTraitCollection;
+- (ASLayoutElementTraitCollection)layoutElementTraitCollection;
 
 /**
  * Sets a trait collection on this environment state.
  */
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection;
+- (void)setLayoutElementTraitCollection:(ASLayoutElementTraitCollection)traitCollection;
 
 /**
  * Returns an NSObject-representation of the environment's ASEnvironmentDisplayTraits
@@ -163,20 +163,20 @@ typedef struct ASLayoutElementTraitCollection {
 @end
 
 #define ASLayoutElementCollectionTableSetTraitCollection(lock) \
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection\
+- (void)setLayoutElementTraitCollection:(ASLayoutElementTraitCollection)traitCollection\
 {\
   ASDN::MutexLocker l(lock);\
 \
-  ASEnvironmentTraitCollection oldTraits = self.environmentTraitCollection;\
-  [super setEnvironmentTraitCollection:environmentTraitCollection];\
+  ASLayoutElementTraitCollection oldTraits = self.layoutElementTraitCollection;\
+  [super setLayoutElementTraitCollection:traitCollection];\
 \
   /* Extra Trait Collection Handling */\
 \
   /* If the node is not loaded  yet don't do anything as otherwise the access of the view will trigger a load*/\
   if (!self.isNodeLoaded) { return; }\
 \
-  ASEnvironmentTraitCollection currentTraits = self.environmentTraitCollection;\
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(currentTraits, oldTraits) == NO) {\
+  ASLayoutElementTraitCollection currentTraits = self.layoutElementTraitCollection;\
+  if (ASLayoutElementTraitCollectionIsEqualToASLayoutElementTraitCollection(currentTraits, oldTraits) == NO) {\
     /* Must dispatch to main for self.view && [self.view.dataController completedNodes]*/\
     ASPerformBlockOnMainThread(^{\
       NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\

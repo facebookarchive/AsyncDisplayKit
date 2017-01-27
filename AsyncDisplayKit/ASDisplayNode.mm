@@ -285,7 +285,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   _contentsScaleForDisplay = ASScreenScale();
   
-  _environmentTraitCollection = ASEnvironmentTraitCollectionMakeDefault();
+  _layoutElementTraitCollection = ASLayoutElementTraitCollectionMakeDefault();
   
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
   _pendingDisplayNodeLayout = nullptr;
@@ -1121,7 +1121,7 @@ ASLayoutElementExtensibilityDefault
   {
     
     ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-    ASLayoutElementTraitCollectionPropagateDown(layoutElement, self.environmentTraitCollection);
+    ASLayoutElementTraitCollectionPropagateDown(layoutElement, self.layoutElementTraitCollection);
   }
   
   BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
@@ -2487,7 +2487,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       }
       
       // Now that we have a supernode, propagate its traits to self.
-      ASLayoutElementTraitCollectionPropagateDown(self, newSupernode.environmentTraitCollection);
+      ASLayoutElementTraitCollectionPropagateDown(self, newSupernode.layoutElementTraitCollection);
       
     } else {
       // If a node will be removed from the supernode it should go out from the layout pending state to remove all
@@ -3847,16 +3847,16 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 #pragma mark - ASLayoutElementTraitEnvironment
 
-- (ASEnvironmentTraitCollection)environmentTraitCollection
+- (ASLayoutElementTraitCollection)layoutElementTraitCollection
 {
-  return _environmentTraitCollection;
+  return _layoutElementTraitCollection;
 }
 
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
+- (void)setLayoutElementTraitCollection:(ASLayoutElementTraitCollection)traitCollection
 {
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, _environmentTraitCollection) == NO) {
-    _environmentTraitCollection = environmentTraitCollection;
-    ASDisplayNodeLogEvent(self, @"asyncTraitCollectionDidChange: %@", NSStringFromASEnvironmentTraitCollection(environmentTraitCollection));
+  if (ASLayoutElementTraitCollectionIsEqualToASLayoutElementTraitCollection(traitCollection, _layoutElementTraitCollection) == NO) {
+    _layoutElementTraitCollection = traitCollection;
+    ASDisplayNodeLogEvent(self, @"asyncTraitCollectionDidChange: %@", NSStringFromASLayoutElementTraitCollection(traitCollection));
     [self asyncTraitCollectionDidChange];
   }
 }
@@ -3864,7 +3864,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
+  return [ASTraitCollection traitCollectionWithASLayoutElementTraitCollection:self.layoutElementTraitCollection];
 }
 
 - (void)asyncTraitCollectionDidChange

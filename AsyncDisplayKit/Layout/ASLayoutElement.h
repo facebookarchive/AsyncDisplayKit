@@ -34,6 +34,8 @@ typedef NS_ENUM(NSUInteger, ASLayoutElementType) {
   ASLayoutElementTypeDisplayNode
 };
 
+ASDISPLAYNODE_EXTERN_C_BEGIN
+
 /**
  This function will walk the layout element hierarchy. It does run the block on the node provided
  directly to the function call.
@@ -43,10 +45,33 @@ extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> root, 
 #pragma mark - ASLayoutElementTraitCollection
 
 /**
- This function will walk the layout element hierarchy. It updates the trait collection for every layout item
- within the hierarchy.
+ * Creates ASLayoutElementTraitCollection with default values.
  */
-extern void ASLayoutElementTraitCollectionPropagateDown(id<ASLayoutElement> root, ASEnvironmentTraitCollection traitCollection);
+extern ASLayoutElementTraitCollection ASLayoutElementTraitCollectionMakeDefault();
+
+/**
+ * Creates a ASLayoutElementTraitCollection from a given UITraitCollection.
+ */
+extern ASLayoutElementTraitCollection ASLayoutElementTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection);
+
+
+/**
+ * Compares two ASLayoutElementTraitCollections to determine if they are the same.
+ */
+extern BOOL ASLayoutElementTraitCollectionIsEqualToASLayoutElementTraitCollection(ASLayoutElementTraitCollection lhs, ASLayoutElementTraitCollection rhs);
+
+/**
+ * Returns a string representation of a ASLayoutElementTraitCollection.
+ */
+extern NSString *NSStringFromASLayoutElementTraitCollection(ASLayoutElementTraitCollection traits);
+
+/**
+ * This function will walk the layout element hierarchy and updates the layout element trait collection for every
+ * layout element within the hierarchy.
+ */
+extern void ASLayoutElementTraitCollectionPropagateDown(id<ASLayoutElement> root, ASLayoutElementTraitCollection traitCollection);
+
+ASDISPLAYNODE_EXTERN_C_END
 
 #pragma mark - ASLayoutElement
 

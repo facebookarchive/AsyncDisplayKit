@@ -54,7 +54,7 @@
   if (self.isFinalLayoutElement == NO) {
     id<ASLayoutElement> finalLayoutElement = [child finalLayoutElement];
     if (finalLayoutElement != child) {
-      finalLayoutElement.environmentTraitCollection = child.environmentTraitCollection;
+      finalLayoutElement.layoutElementTraitCollection = child.layoutElementTraitCollection;
       return finalLayoutElement;
     }
   }

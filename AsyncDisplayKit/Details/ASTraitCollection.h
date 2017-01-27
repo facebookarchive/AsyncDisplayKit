@@ -9,7 +9,7 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <AsyncDisplayKit/ASEnvironment.h>
+#import <AsyncDisplayKit/ASLayoutElement.h>
 
 @interface ASTraitCollection : NSObject
 
@@ -21,10 +21,10 @@
 @property (nonatomic, assign, readonly) CGSize containerSize;
 
 
-+ (ASTraitCollection *)traitCollectionWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits;
++ (ASTraitCollection *)traitCollectionWithASLayoutElementTraitCollection:(ASLayoutElementTraitCollection)traits;
 
 + (ASTraitCollection *)traitCollectionWithUITraitCollection:(UITraitCollection *)traitCollection
-                                        containerSize:(CGSize)windowSize;
+                                              containerSize:(CGSize)windowSize;
 
 
 + (ASTraitCollection *)traitCollectionWithDisplayScale:(CGFloat)displayScale
@@ -32,10 +32,10 @@
                                    horizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
                                      verticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
                                   forceTouchCapability:(UIForceTouchCapability)forceTouchCapability
-                                   containerSize:(CGSize)windowSize;
+                                         containerSize:(CGSize)windowSize;
 
 
-- (ASEnvironmentTraitCollection)environmentTraitCollection;
+- (ASLayoutElementTraitCollection)layoutElementTraitCollection;
 - (BOOL)isEqualToTraitCollection:(ASTraitCollection *)traitCollection;
 
 @end
