@@ -12,7 +12,12 @@
 
 #import <AsyncDisplayKit/ASLayoutSpec.h>
 
-/** How the child is positioned within the spec. */
+/** 
+  * How the child is positioned within the spec.
+  *
+  * The default option will position the child at point 0.
+  * Swift: use [] for the default behavior.
+  */
 typedef NS_ENUM(NSUInteger, ASRelativeLayoutSpecPosition) {
   /** The child is positioned at point 0 */ 
   ASRelativeLayoutSpecPositionNone = 0,
@@ -24,7 +29,12 @@ typedef NS_ENUM(NSUInteger, ASRelativeLayoutSpecPosition) {
   ASRelativeLayoutSpecPositionEnd = 3,
 };
 
-/** How much space the spec will take up. */
+/** 
+  * How much space the spec will take up.
+  *
+  * The default option will allow the spec to take up the maximum size possible.
+  * Swift: use [] for the default behavior.
+  */
 typedef NS_OPTIONS(NSUInteger, ASRelativeLayoutSpecSizingOption) {
   /** The spec will take up the maximum size possible */
   ASRelativeLayoutSpecSizingOptionDefault,
