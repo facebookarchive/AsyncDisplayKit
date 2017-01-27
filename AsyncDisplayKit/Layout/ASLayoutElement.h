@@ -15,6 +15,8 @@
 #import <AsyncDisplayKit/ASStackLayoutElement.h>
 #import <AsyncDisplayKit/ASAbsoluteLayoutElement.h>
 
+#import <AsyncDisplayKit/ASTraitCollection.h>
+
 NS_ASSUME_NONNULL_BEGIN
 
 @class ASLayout;
@@ -41,35 +43,6 @@ ASDISPLAYNODE_EXTERN_C_BEGIN
  directly to the function call.
  */
 extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> root, void(^block)(id<ASLayoutElement> element));
-
-#pragma mark - ASLayoutElementTraitCollection
-
-/**
- * Creates ASLayoutElementTraitCollection with default values.
- */
-extern ASLayoutElementTraitCollection ASLayoutElementTraitCollectionMakeDefault();
-
-/**
- * Creates a ASLayoutElementTraitCollection from a given UITraitCollection.
- */
-extern ASLayoutElementTraitCollection ASLayoutElementTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection);
-
-
-/**
- * Compares two ASLayoutElementTraitCollections to determine if they are the same.
- */
-extern BOOL ASLayoutElementTraitCollectionIsEqualToASLayoutElementTraitCollection(ASLayoutElementTraitCollection lhs, ASLayoutElementTraitCollection rhs);
-
-/**
- * Returns a string representation of a ASLayoutElementTraitCollection.
- */
-extern NSString *NSStringFromASLayoutElementTraitCollection(ASLayoutElementTraitCollection traits);
-
-/**
- * This function will walk the layout element hierarchy and updates the layout element trait collection for every
- * layout element within the hierarchy.
- */
-extern void ASLayoutElementTraitCollectionPropagateDown(id<ASLayoutElement> root, ASLayoutElementTraitCollection traitCollection);
 
 ASDISPLAYNODE_EXTERN_C_END
 

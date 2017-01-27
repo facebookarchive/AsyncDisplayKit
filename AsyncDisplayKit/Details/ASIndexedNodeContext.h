@@ -11,7 +11,7 @@
 //
 
 #import <AsyncDisplayKit/ASDataController.h>
-#import <AsyncDisplayKit/ASLayoutElementPrivate.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
