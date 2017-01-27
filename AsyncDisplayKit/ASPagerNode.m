@@ -18,7 +18,7 @@
 #import "ASCellNode.h"
 #import "ASCollectionView+Undeprecated.h"
 
-@interface ASPagerNode () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionViewDelegateFlowLayout, ASDelegateProxyInterceptor>
+@interface ASPagerNode () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
   ASPagerFlowLayout *_flowLayout;
 

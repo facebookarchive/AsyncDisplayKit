@@ -202,6 +202,16 @@ typedef struct {
 } ASSizeRange;
 
 /**
+ * A size range with all dimensions zero.
+ */
+extern ASSizeRange const ASSizeRangeZero;
+
+/**
+ * A size range from zero to infinity in both directions.
+ */
+extern ASSizeRange const ASSizeRangeUnconstrained;
+
+/**
  * Creates an ASSizeRange with provided min and max size.
  */
 ASOVERLOADABLE ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASSizeRange ASSizeRangeMake(CGSize min, CGSize max)

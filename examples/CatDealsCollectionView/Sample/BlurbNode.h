@@ -22,6 +22,4 @@
  */
 @interface BlurbNode : ASCellNode
 
-+ (CGFloat)desiredHeightForWidth:(CGFloat)width;
-
 @end
