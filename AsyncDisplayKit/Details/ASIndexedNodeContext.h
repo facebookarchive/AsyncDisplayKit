@@ -24,8 +24,8 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, strong) NSIndexPath *indexPath;
 @property (nonatomic, readonly, copy, nullable) NSString *supplementaryElementKind;
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSize;
-@property (weak, nonatomic) id<ASLayoutElementTraitEnvironment> environment;
-@property (nonatomic, readonly, assign) ASEnvironmentTraitCollection environmentTraitCollection;
+@property (weak, nonatomic) id<ASLayoutElementTraitEnvironment> traitEnvironment;
+@property (nonatomic, readonly, assign) ASLayoutElementTraitCollection layoutElementTraitCollection;
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
                         indexPath:(NSIndexPath *)indexPath

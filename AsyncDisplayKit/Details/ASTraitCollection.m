@@ -49,7 +49,7 @@
                              containerSize:windowSize];
 }
 
-+ (ASTraitCollection *)traitCollectionWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits
++ (ASTraitCollection *)traitCollectionWithASLayoutElementTraitCollection:(ASLayoutElementTraitCollection)traits
 {
     return [[[self class] alloc] initWithDisplayScale:traits.displayScale
                                    userInterfaceIdiom:traits.userInterfaceIdiom
@@ -86,9 +86,9 @@
   return asyncTraitCollection;
 }
 
-- (ASEnvironmentTraitCollection)environmentTraitCollection
+- (ASLayoutElementTraitCollection)layoutElementTraitCollection
 {
-  return (ASEnvironmentTraitCollection) {
+  return (ASLayoutElementTraitCollection) {
     .displayScale = self.displayScale,
     .horizontalSizeClass = self.horizontalSizeClass,
     .userInterfaceIdiom = self.userInterfaceIdiom,

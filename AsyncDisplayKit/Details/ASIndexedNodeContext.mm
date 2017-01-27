@@ -40,8 +40,8 @@
     _indexPath = indexPath;
     _supplementaryElementKind = [supplementaryElementKind copy];
     _constrainedSize = constrainedSize;
-    _environment = environment;
-    _environmentTraitCollection = environment.environmentTraitCollection;
+    _traitEnvironment = environment;
+    _layoutElementTraitCollection = environment.layoutElementTraitCollection;
   }
   return self;
 }
@@ -58,8 +58,8 @@
     }
     node.cachedIndexPath = _indexPath;
     node.supplementaryElementKind = _supplementaryElementKind;
-    node.owningNode = (ASDisplayNode *)_environment;
-    ASLayoutElementTraitCollectionPropagateDown(node, _environmentTraitCollection);
+    node.owningNode = (ASDisplayNode *)_traitEnvironment;
+    ASLayoutElementTraitCollectionPropagateDown(node, _layoutElementTraitCollection);
 
     _node = node;
   }

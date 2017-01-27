@@ -19,7 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASLayoutSpec() {
   ASDN::RecursiveMutex __instanceLock__;
-  ASEnvironmentTraitCollection _environmentTraitCollection;
+  ASLayoutElementTraitCollection _layoutElementTraitCollection;
   ASLayoutElementStyle *_style;
   NSMutableArray *_childrenArray;
 }

@@ -28,10 +28,96 @@ extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> elemen
 
 #pragma mark - ASLayoutElementTraitCollection
 
-extern void ASLayoutElementTraitCollectionPropagateDown(id<ASLayoutElement> root, ASEnvironmentTraitCollection traitCollection) {
+extern void ASLayoutElementTraitCollectionPropagateDown(id<ASLayoutElement> root, ASLayoutElementTraitCollection traitCollection) {
   ASLayoutElementPerformBlockOnEveryElement(root, ^(id<ASLayoutElement>  _Nonnull element) {
-    element.environmentTraitCollection = traitCollection;
+    element.layoutElementTraitCollection = traitCollection;
   });
+}
+
+ASLayoutElementTraitCollection ASLayoutElementTraitCollectionMakeDefault()
+{
+  return (ASLayoutElementTraitCollection) {
+    // Default values can be defined in here
+    .userInterfaceIdiom = UIUserInterfaceIdiomUnspecified,
+    .containerSize = CGSizeZero,
+  };
+}
+
+ASLayoutElementTraitCollection ASLayoutElementTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection)
+{
+  ASLayoutElementTraitCollection layoutElementTraitCollection = ASLayoutElementTraitCollectionMakeDefault();
+  if (AS_AT_LEAST_IOS8) {
+    layoutElementTraitCollection.displayScale = traitCollection.displayScale;
+    layoutElementTraitCollection.horizontalSizeClass = traitCollection.horizontalSizeClass;
+    layoutElementTraitCollection.verticalSizeClass = traitCollection.verticalSizeClass;
+    layoutElementTraitCollection.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
+    if (AS_AT_LEAST_IOS9) {
+      layoutElementTraitCollection.forceTouchCapability = traitCollection.forceTouchCapability;
+    }
+  }
+  return layoutElementTraitCollection;
+}
+
+BOOL ASLayoutElementTraitCollectionIsEqualToASLayoutElementTraitCollection(ASLayoutElementTraitCollection lhs, ASLayoutElementTraitCollection rhs)
+{
+  return
+    lhs.verticalSizeClass == rhs.verticalSizeClass &&
+    lhs.horizontalSizeClass == rhs.horizontalSizeClass &&
+    lhs.displayScale == rhs.displayScale &&
+    lhs.userInterfaceIdiom == rhs.userInterfaceIdiom &&
+    lhs.forceTouchCapability == rhs.forceTouchCapability &&
+    CGSizeEqualToSize(lhs.containerSize, rhs.containerSize);
+}
+
+// Named so as not to conflict with a hidden Apple function, in case compiler decides not to inline
+ASDISPLAYNODE_INLINE NSString *AS_NSStringFromUIUserInterfaceIdiom(UIUserInterfaceIdiom idiom) {
+  switch (idiom) {
+    case UIUserInterfaceIdiomTV:
+      return @"TV";
+    case UIUserInterfaceIdiomPad:
+      return @"Pad";
+    case UIUserInterfaceIdiomPhone:
+      return @"Phone";
+    case UIUserInterfaceIdiomCarPlay:
+      return @"CarPlay";
+    default:
+      return @"Unspecified";
+  }
+}
+
+// Named so as not to conflict with a hidden Apple function, in case compiler decides not to inline
+ASDISPLAYNODE_INLINE NSString *AS_NSStringFromUIForceTouchCapability(UIForceTouchCapability capability) {
+  switch (capability) {
+    case UIForceTouchCapabilityAvailable:
+      return @"Available";
+    case UIForceTouchCapabilityUnavailable:
+      return @"Unavailable";
+    default:
+      return @"Unknown";
+  }
+}
+
+// Named so as not to conflict with a hidden Apple function, in case compiler decides not to inline
+ASDISPLAYNODE_INLINE NSString *AS_NSStringFromUIUserInterfaceSizeClass(UIUserInterfaceSizeClass sizeClass) {
+  switch (sizeClass) {
+    case UIUserInterfaceSizeClassCompact:
+      return @"Compact";
+    case UIUserInterfaceSizeClassRegular:
+      return @"Regular";
+    default:
+      return @"Unspecified";
+  }
+}
+
+NSString *NSStringFromASLayoutElementTraitCollection(ASLayoutElementTraitCollection traits)
+{
+  NSMutableArray<NSDictionary *> *props = [NSMutableArray array];
+  [props addObject:@{ @"userInterfaceIdiom": AS_NSStringFromUIUserInterfaceIdiom(traits.userInterfaceIdiom) }];
+  [props addObject:@{ @"containerSize": NSStringFromCGSize(traits.containerSize) }];
+  [props addObject:@{ @"horizontalSizeClass": AS_NSStringFromUIUserInterfaceSizeClass(traits.horizontalSizeClass) }];
+  [props addObject:@{ @"verticalSizeClass": AS_NSStringFromUIUserInterfaceSizeClass(traits.verticalSizeClass) }];
+  [props addObject:@{ @"forceTouchCapability": AS_NSStringFromUIForceTouchCapability(traits.forceTouchCapability) }];
+  return ASObjectDescriptionMakeWithoutObject(props);
 }
 
 #pragma mark - ASLayoutElementContext
@@ -525,47 +611,47 @@ do {\
     [result addObject:@{ @"maxLayoutSize" : NSStringFromASLayoutSize(self.maxLayoutSize) }];
   }
   
-  const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentLayoutOptionsStateMakeDefault();
-  
-  if (self.alignSelf != defaultState.alignSelf) {
-    [result addObject:@{ @"alignSelf" : [@[@"ASStackLayoutAlignSelfAuto",
-                                          @"ASStackLayoutAlignSelfStart",
-                                          @"ASStackLayoutAlignSelfEnd",
-                                          @"ASStackLayoutAlignSelfCenter",
-                                          @"ASStackLayoutAlignSelfStretch"] objectAtIndex:self.alignSelf] }];
-  }
-  
-  if (self.ascender != defaultState.ascender) {
-    [result addObject:@{ @"ascender" : @(self.ascender) }];
-  }
-  
-  if (self.descender != defaultState.descender) {
-    [result addObject:@{ @"descender" : @(self.descender) }];
-  }
-  
-  if (ASDimensionEqualToDimension(self.flexBasis, defaultState.flexBasis) == NO) {
-    [result addObject:@{ @"flexBasis" : NSStringFromASDimension(self.flexBasis) }];
-  }
-  
-  if (self.flexGrow != defaultState.flexGrow) {
-    [result addObject:@{ @"flexGrow" : @(self.flexGrow) }];
-  }
-  
-  if (self.flexShrink != defaultState.flexShrink) {
-    [result addObject:@{ @"flexShrink" : @(self.flexShrink) }];
-  }
-  
-  if (self.spacingAfter != defaultState.spacingAfter) {
-    [result addObject:@{ @"spacingAfter" : @(self.spacingAfter) }];
-  }
-  
-  if (self.spacingBefore != defaultState.spacingBefore) {
-    [result addObject:@{ @"spacingBefore" : @(self.spacingBefore) }];
-  }
-  
-  if (CGPointEqualToPoint(self.layoutPosition, defaultState.layoutPosition) == NO) {
-    [result addObject:@{ @"layoutPosition" : [NSValue valueWithCGPoint:self.layoutPosition] }];
-  }
+//  const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentLayoutOptionsStateMakeDefault();
+//  
+//  if (self.alignSelf != defaultState.alignSelf) {
+//    [result addObject:@{ @"alignSelf" : [@[@"ASStackLayoutAlignSelfAuto",
+//                                          @"ASStackLayoutAlignSelfStart",
+//                                          @"ASStackLayoutAlignSelfEnd",
+//                                          @"ASStackLayoutAlignSelfCenter",
+//                                          @"ASStackLayoutAlignSelfStretch"] objectAtIndex:self.alignSelf] }];
+//  }
+//  
+//  if (self.ascender != defaultState.ascender) {
+//    [result addObject:@{ @"ascender" : @(self.ascender) }];
+//  }
+//  
+//  if (self.descender != defaultState.descender) {
+//    [result addObject:@{ @"descender" : @(self.descender) }];
+//  }
+//  
+//  if (ASDimensionEqualToDimension(self.flexBasis, defaultState.flexBasis) == NO) {
+//    [result addObject:@{ @"flexBasis" : NSStringFromASDimension(self.flexBasis) }];
+//  }
+//  
+//  if (self.flexGrow != defaultState.flexGrow) {
+//    [result addObject:@{ @"flexGrow" : @(self.flexGrow) }];
+//  }
+//  
+//  if (self.flexShrink != defaultState.flexShrink) {
+//    [result addObject:@{ @"flexShrink" : @(self.flexShrink) }];
+//  }
+//  
+//  if (self.spacingAfter != defaultState.spacingAfter) {
+//    [result addObject:@{ @"spacingAfter" : @(self.spacingAfter) }];
+//  }
+//  
+//  if (self.spacingBefore != defaultState.spacingBefore) {
+//    [result addObject:@{ @"spacingBefore" : @(self.spacingBefore) }];
+//  }
+//  
+//  if (CGPointEqualToPoint(self.layoutPosition, defaultState.layoutPosition) == NO) {
+//    [result addObject:@{ @"layoutPosition" : [NSValue valueWithCGPoint:self.layoutPosition] }];
+//  }
 
   return result;
 }

@@ -110,7 +110,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   NSMutableArray *_subnodes;
   
   ASLayoutElementStyle *_style;
-  ASEnvironmentTraitCollection _environmentTraitCollection;
+  ASLayoutElementTraitCollection _layoutElementTraitCollection;
 
   std::atomic_uint _displaySentinel;
 
@@ -278,7 +278,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  *  Convenience method to access this node's trait collection struct. Externally, users should interact
  *  with the trait collection via ASTraitCollection
  */
-- (ASEnvironmentTraitCollection)environmentTraitCollection;
+- (ASLayoutElementTraitCollection)layoutElementTraitCollection;
 
 @end
 

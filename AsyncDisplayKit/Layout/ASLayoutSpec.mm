@@ -46,7 +46,7 @@
   }
   
   _isMutable = YES;
-  _environmentTraitCollection = ASEnvironmentTraitCollectionMakeDefault();
+  _layoutElementTraitCollection = ASLayoutElementTraitCollectionMakeDefault();
   _childrenArray = [[NSMutableArray alloc] init];
   
   return self;
@@ -208,20 +208,20 @@
 
 #pragma mark - ASLayoutElementTraitEnvironment
 
-- (ASEnvironmentTraitCollection)environmentTraitCollection
+- (ASLayoutElementTraitCollection)layoutElementTraitCollection
 {
-  return _environmentTraitCollection;
+  return _layoutElementTraitCollection;
 }
 
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
+- (void)setLayoutElementTraitCollection:(ASLayoutElementTraitCollection)traitCollection
 {
-  _environmentTraitCollection = environmentTraitCollection;
+  _layoutElementTraitCollection = traitCollection;
 }
 
 - (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
+  return [ASTraitCollection traitCollectionWithASLayoutElementTraitCollection:self.layoutElementTraitCollection];
 }
 
 ASLayoutElementStyleExtensibilityForwarding
