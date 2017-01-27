@@ -418,7 +418,7 @@ ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASCollectionDelegate.")
 /**
  * Defines methods that let you coordinate a `UICollectionViewFlowLayout` in combination with an `ASCollectionNode`.
  */
-@protocol ASCollectionViewDelegateFlowLayout <ASCollectionDelegate>
+@protocol ASCollectionDelegateFlowLayout <ASCollectionDelegate>
 
 @optional
 
@@ -427,18 +427,60 @@ ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASCollectionDelegate.")
  *
  * @see the same method in UICollectionViewDelegate. 
  */
-- (UIEdgeInsets)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section;
+- (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section;
+
+/**
+ * Asks the delegate for the size range that should be used to measure the header in the given flow layout section.
+ *
+ * @param collectionNode The sender.
+ * @param section The section.
+ *
+ * @return The size range for the header, or @c ASSizeRangeZero if there is no header in this section.
+ *
+ * If you want the header to completely determine its own size, return @c ASSizeRangeUnconstrained.
+ *
+ * @note Only the scrollable dimension of the returned size range will be used. In a vertical flow,
+ * only the height will be used. In a horizontal flow, only the width will be used. The other dimension
+ * will be constrained to fill the collection node.
+ *
+ * @discussion If you do not implement this method, ASDK will fall back to calling @c collectionView:layout:referenceSizeForHeaderInSection:
+ * and using that as the exact constrained size. If you don't implement that method, ASDK will read the @c headerReferenceSize from the layout.
+ */
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode sizeRangeForHeaderInSection:(NSInteger)section;
+
+/**
+ * Asks the delegate for the size range that should be used to measure the footer in the given flow layout section.
+ *
+ * @param collectionNode The sender.
+ * @param section The section.
+ *
+ * @return The size range for the footer, or @c ASSizeRangeZero if there is no footer in this section.
+ *
+ * If you want the footer to completely determine its own size, return @c ASSizeRangeUnconstrained.
+ *
+ * @note Only the scrollable dimension of the returned size range will be used. In a vertical flow,
+ * only the height will be used. In a horizontal flow, only the width will be used. The other dimension
+ * will be constrained to fill the collection node.
+ *
+ * @discussion If you do not implement this method, ASDK will fall back to calling @c collectionView:layout:referenceSizeForFooterInSection:
+ * and using that as the exact constrained size. If you don't implement that method, ASDK will read the @c footerReferenceSize from the layout.
+ */
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode sizeRangeForFooterInSection:(NSInteger)section;
 
 /**
  * Asks the delegate for the size of the header in the specified section.
  */
-- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section ASDISPLAYNODE_DEPRECATED_MSG("Implement collectionNode:referenceConstrainedSizeForHeaderInSection: instead.");
+- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section ASDISPLAYNODE_DEPRECATED_MSG("Implement collectionNode:sizeRangeForHeaderInSection: instead.");
 
 /**
  * Asks the delegate for the size of the footer in the specified section.
  */
-- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section ASDISPLAYNODE_DEPRECATED_MSG("Implement collectionNode:referenceConstrainedSizeForFooterInSection: instead.");
+- (CGSize)collectionView:(ASCollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section ASDISPLAYNODE_DEPRECATED_MSG("Implement collectionNode:sizeRangeForFooterInSection: instead.");
 
+@end
+
+ASDISPLAYNODE_DEPRECATED_MSG("Renamed to ASCollectionDelegateFlowLayout.")
+@protocol ASCollectionViewDelegateFlowLayout <ASCollectionDelegateFlowLayout>
 @end
 
 NS_ASSUME_NONNULL_END

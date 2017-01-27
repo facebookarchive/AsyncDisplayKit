@@ -24,9 +24,9 @@
  
 @implementation ASCollectionViewFlowLayoutInspector {
   struct {
-    unsigned int implementsReferenceConstrainedSizeForHeader:1;
+    unsigned int implementsSizeRangeForHeader:1;
     unsigned int implementsReferenceSizeForHeader:1;
-    unsigned int implementsReferenceConstrainedSizeForFooter:1;
+    unsigned int implementsSizeRangeForFooter:1;
     unsigned int implementsReferenceSizeForFooter:1;
     unsigned int implementsConstrainedSizeForNodeAtIndexPathDeprecated:1;
     unsigned int implementsConstrainedSizeForItemAtIndexPath:1;
@@ -55,9 +55,9 @@
   if (delegate == nil) {
     memset(&_delegateFlags, 0, sizeof(_delegateFlags));
   } else {
-    _delegateFlags.implementsReferenceConstrainedSizeForHeader = [delegate respondsToSelector:@selector(collectionNode:referenceConstrainedSizeForHeaderInSection:)];
+    _delegateFlags.implementsSizeRangeForHeader = [delegate respondsToSelector:@selector(collectionNode:sizeRangeForHeaderInSection:)];
     _delegateFlags.implementsReferenceSizeForHeader = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)];
-    _delegateFlags.implementsReferenceConstrainedSizeForFooter = [delegate respondsToSelector:@selector(collectionNode:referenceConstrainedSizeForFooterInSection:)];
+    _delegateFlags.implementsSizeRangeForFooter = [delegate respondsToSelector:@selector(collectionNode:sizeRangeForFooterInSection:)];
     _delegateFlags.implementsReferenceSizeForFooter = [delegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)];
     _delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated = [delegate respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)];
     _delegateFlags.implementsConstrainedSizeForItemAtIndexPath = [delegate respondsToSelector:@selector(collectionNode:constrainedSizeForItemAtIndexPath:)];
@@ -90,8 +90,8 @@
 {
   ASSizeRange result = ASSizeRangeZero;
   if (ASObjectIsEqual(kind, UICollectionElementKindSectionHeader)) {
-    if (_delegateFlags.implementsReferenceConstrainedSizeForHeader) {
-      result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode referenceConstrainedSizeForHeaderInSection:indexPath.section];
+    if (_delegateFlags.implementsSizeRangeForHeader) {
+      result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode sizeRangeForHeaderInSection:indexPath.section];
     } else if (_delegateFlags.implementsReferenceSizeForHeader) {
       CGSize exactSize = [(id)[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForHeaderInSection:indexPath.section];
       result = ASSizeRangeMake(exactSize);
@@ -99,8 +99,8 @@
       result = ASSizeRangeMake(_layout.headerReferenceSize);
     }
   } else if (ASObjectIsEqual(kind, UICollectionElementKindSectionFooter)) {
-    if (_delegateFlags.implementsReferenceConstrainedSizeForFooter) {
-      result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode referenceConstrainedSizeForFooterInSection:indexPath.section];
+    if (_delegateFlags.implementsSizeRangeForFooter) {
+      result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode sizeRangeForFooterInSection:indexPath.section];
     } else if (_delegateFlags.implementsReferenceSizeForFooter) {
       CGSize exactSize = [(id)[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForFooterInSection:indexPath.section];
       result = ASSizeRangeMake(exactSize);
