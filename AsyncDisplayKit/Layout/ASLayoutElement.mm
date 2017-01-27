@@ -10,10 +10,13 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import "ASLayoutElement.h"
 
 #import <map>
 #import <atomic>
+
+#import "ASThread.h"
+#import "ASObjectDescriptionHelpers.h"
 
 extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> element, void(^block)(id<ASLayoutElement> element))
 {
@@ -485,6 +488,7 @@ do {\
   return _extensions.integerExtensions[idx];
 }
 
+#if AS_TARGET_OS_IOS
 - (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx
 {
   NSCAssert(idx < kMaxLayoutElementStateEdgeInsetExtensions, @"Setting index outside of max edge insets extensions space");
@@ -500,6 +504,23 @@ do {\
   ASDN::MutexLocker l(__instanceLock__);
   return _extensions.edgeInsetsExtensions[idx];
 }
+#else
+- (void)setLayoutOptionExtensionEdgeInsets:(NSEdgeInsets)value atIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementStateEdgeInsetExtensions, @"Setting index outside of max edge insets extensions space");
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  _extensions.edgeInsetsExtensions[idx] = value;
+}
+
+- (NSEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementStateEdgeInsetExtensions, @"Accessing index outside of max edge insets extensions space");
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  return _extensions.edgeInsetsExtensions[idx];
+}
+#endif
 
 #pragma mark - Debugging
 

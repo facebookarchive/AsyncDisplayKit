@@ -21,9 +21,6 @@
 #import "ASStackPositionedLayout.h"
 #import "ASStackUnpositionedLayout.h"
 
-#import "ASInternalHelpers.h"
-#import "ASThread.h"
-
 @implementation ASStackLayoutSpec
 
 - (instancetype)init
