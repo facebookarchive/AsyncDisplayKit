@@ -11,7 +11,9 @@
 //
 
 #import "ASTraitCollection.h"
-#import "ASAvailability.h"
+
+#if AS_TARGET_OS_IOS
+
 #import "ASObjectDescriptionHelpers.h"
 #import "ASLayoutElement.h"
 
@@ -207,3 +209,9 @@ NSString *NSStringFromASLayoutElementTraitCollection(ASLayoutElementTraitCollect
 }
 
 @end
+
+#else
+
+// Non iOS
+
+#endif

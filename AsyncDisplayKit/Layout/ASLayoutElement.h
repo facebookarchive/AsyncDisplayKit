@@ -8,20 +8,24 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASLayoutElementPrivate.h>
 #import <AsyncDisplayKit/ASLayoutElementExtensibility.h>
 #import <AsyncDisplayKit/ASDimensionInternal.h>
 #import <AsyncDisplayKit/ASStackLayoutElement.h>
 #import <AsyncDisplayKit/ASAbsoluteLayoutElement.h>
 
-#import <AsyncDisplayKit/ASTraitCollection.h>
-
-NS_ASSUME_NONNULL_BEGIN
-
 @class ASLayout;
 @class ASLayoutSpec;
-@protocol ASLayoutElementTraitEnvironment;
 @protocol ASLayoutElementStylability;
+
+#if AS_TARGET_OS_IOS
+#import <AsyncDisplayKit/ASTraitCollection.h>
+@protocol ASLayoutElementTraitEnvironment;
+#else
+#endif
+
+NS_ASSUME_NONNULL_BEGIN
 
 /** A constant that indicates that the parent's size is not yet determined in a given dimension. */
 extern CGFloat const ASLayoutElementParentDimensionUndefined;
@@ -63,7 +67,11 @@ ASDISPLAYNODE_EXTERN_C_END
  * access to the options via convenience properties. If you are creating custom layout spec, then you can
  * extend the backing layout options class to accommodate any new layout options.
  */
+#if AS_TARGET_OS_IOS
 @protocol ASLayoutElement <ASLayoutElementExtensibility, ASLayoutElementFinalLayoutElement, ASLayoutElementTraitEnvironment>
+#else
+@protocol ASLayoutElement <ASLayoutElementExtensibility, ASLayoutElementFinalLayoutElement>
+#endif
 
 #pragma mark - Getter
 
