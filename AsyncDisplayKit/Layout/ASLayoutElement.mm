@@ -517,47 +517,45 @@ do {\
     [result addObject:@{ @"maxLayoutSize" : NSStringFromASLayoutSize(self.maxLayoutSize) }];
   }
   
-//  const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentLayoutOptionsStateMakeDefault();
-//  
-//  if (self.alignSelf != defaultState.alignSelf) {
-//    [result addObject:@{ @"alignSelf" : [@[@"ASStackLayoutAlignSelfAuto",
-//                                          @"ASStackLayoutAlignSelfStart",
-//                                          @"ASStackLayoutAlignSelfEnd",
-//                                          @"ASStackLayoutAlignSelfCenter",
-//                                          @"ASStackLayoutAlignSelfStretch"] objectAtIndex:self.alignSelf] }];
-//  }
-//  
-//  if (self.ascender != defaultState.ascender) {
-//    [result addObject:@{ @"ascender" : @(self.ascender) }];
-//  }
-//  
-//  if (self.descender != defaultState.descender) {
-//    [result addObject:@{ @"descender" : @(self.descender) }];
-//  }
-//  
-//  if (ASDimensionEqualToDimension(self.flexBasis, defaultState.flexBasis) == NO) {
-//    [result addObject:@{ @"flexBasis" : NSStringFromASDimension(self.flexBasis) }];
-//  }
-//  
-//  if (self.flexGrow != defaultState.flexGrow) {
-//    [result addObject:@{ @"flexGrow" : @(self.flexGrow) }];
-//  }
-//  
-//  if (self.flexShrink != defaultState.flexShrink) {
-//    [result addObject:@{ @"flexShrink" : @(self.flexShrink) }];
-//  }
-//  
-//  if (self.spacingAfter != defaultState.spacingAfter) {
-//    [result addObject:@{ @"spacingAfter" : @(self.spacingAfter) }];
-//  }
-//  
-//  if (self.spacingBefore != defaultState.spacingBefore) {
-//    [result addObject:@{ @"spacingBefore" : @(self.spacingBefore) }];
-//  }
-//  
-//  if (CGPointEqualToPoint(self.layoutPosition, defaultState.layoutPosition) == NO) {
-//    [result addObject:@{ @"layoutPosition" : [NSValue valueWithCGPoint:self.layoutPosition] }];
-//  }
+  if (self.alignSelf != ASStackLayoutAlignSelfAuto) {
+    [result addObject:@{ @"alignSelf" : [@[@"ASStackLayoutAlignSelfAuto",
+                                          @"ASStackLayoutAlignSelfStart",
+                                          @"ASStackLayoutAlignSelfEnd",
+                                          @"ASStackLayoutAlignSelfCenter",
+                                          @"ASStackLayoutAlignSelfStretch"] objectAtIndex:self.alignSelf] }];
+  }
+  
+  if (self.ascender != 0) {
+    [result addObject:@{ @"ascender" : @(self.ascender) }];
+  }
+  
+  if (self.descender != 0) {
+    [result addObject:@{ @"descender" : @(self.descender) }];
+  }
+  
+  if (ASDimensionEqualToDimension(self.flexBasis, ASDimensionAuto) == NO) {
+    [result addObject:@{ @"flexBasis" : NSStringFromASDimension(self.flexBasis) }];
+  }
+  
+  if (self.flexGrow != 0) {
+    [result addObject:@{ @"flexGrow" : @(self.flexGrow) }];
+  }
+  
+  if (self.flexShrink != 0) {
+    [result addObject:@{ @"flexShrink" : @(self.flexShrink) }];
+  }
+  
+  if (self.spacingAfter != 0) {
+    [result addObject:@{ @"spacingAfter" : @(self.spacingAfter) }];
+  }
+  
+  if (self.spacingBefore != 0) {
+    [result addObject:@{ @"spacingBefore" : @(self.spacingBefore) }];
+  }
+  
+  if (CGPointEqualToPoint(self.layoutPosition, CGPointZero) == NO) {
+    [result addObject:@{ @"layoutPosition" : [NSValue valueWithCGPoint:self.layoutPosition] }];
+  }
 
   return result;
 }
