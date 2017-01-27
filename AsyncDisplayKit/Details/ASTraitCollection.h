@@ -8,6 +8,10 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <AsyncDisplayKit/ASAvailability.h>
+
+#if AS_TARGET_OS_IOS
+
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
@@ -158,3 +162,9 @@ ASDISPLAYNODE_EXTERN_C_END
 - (BOOL)isEqualToTraitCollection:(ASTraitCollection *)traitCollection;
 
 @end
+
+#else
+
+// Non iOS
+
+#endif
