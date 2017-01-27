@@ -93,7 +93,10 @@
     if (_delegateFlags.implementsSizeRangeForHeader) {
       result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode sizeRangeForHeaderInSection:indexPath.section];
     } else if (_delegateFlags.implementsReferenceSizeForHeader) {
-      CGSize exactSize = [(id)[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForHeaderInSection:indexPath.section];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+      CGSize exactSize = [[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForHeaderInSection:indexPath.section];
+#pragma clang diagnostic pop
       result = ASSizeRangeMake(exactSize);
     } else {
       result = ASSizeRangeMake(_layout.headerReferenceSize);
@@ -102,7 +105,10 @@
     if (_delegateFlags.implementsSizeRangeForFooter) {
       result = [[self delegateForCollectionView:collectionView] collectionNode:collectionView.collectionNode sizeRangeForFooterInSection:indexPath.section];
     } else if (_delegateFlags.implementsReferenceSizeForFooter) {
-      CGSize exactSize = [(id)[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForFooterInSection:indexPath.section];
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+      CGSize exactSize = [[self delegateForCollectionView:collectionView] collectionView:collectionView layout:_layout referenceSizeForFooterInSection:indexPath.section];
+#pragma clang diagnostic pop
       result = ASSizeRangeMake(exactSize);
     } else {
       result = ASSizeRangeMake(_layout.footerReferenceSize);
