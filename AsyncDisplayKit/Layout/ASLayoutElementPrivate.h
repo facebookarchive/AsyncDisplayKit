@@ -10,6 +10,12 @@
 
 #import "ASDimension.h"
 
+#if AS_TARGET_OS_IOS
+#import <UIKit/UIGeometry.h>
+#else
+#import <Foundation/NSGeometry.h>
+#endif
+
 @protocol ASLayoutElement;
 @class ASLayoutElementStyle;
 
@@ -90,7 +96,11 @@ typedef struct ASLayoutElementStyleExtensions {
   // Values to store extensions
   BOOL boolExtensions[kMaxLayoutElementBoolExtensions];
   NSInteger integerExtensions[kMaxLayoutElementStateIntegerExtensions];
+#if AS_TARGET_OS_IOS
   UIEdgeInsets edgeInsetsExtensions[kMaxLayoutElementStateEdgeInsetExtensions];
+#else
+  NSEdgeInsets edgeInsetsExtensions[kMaxLayoutElementStateEdgeInsetExtensions];
+#endif
 } ASLayoutElementStyleExtensions;
 
 

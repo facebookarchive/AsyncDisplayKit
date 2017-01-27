@@ -6,7 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASScrollDirection.h>
 

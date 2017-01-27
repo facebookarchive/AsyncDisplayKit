@@ -10,7 +10,7 @@
 
 #import <AsyncDisplayKit/ASLayoutSpec.h>
 
-#import <AsyncDisplayKit/ASLayoutElement.h>
+@protocol ASLayoutElement;
 
 NS_ASSUME_NONNULL_BEGIN
 

@@ -12,6 +12,7 @@
 
 #import "ASDisplayNode+FrameworkSubclasses.h"
 #import "ASDisplayNode+Beta.h"
+#import "ASDisplayNode+Deprecated.h"
 #import "AsyncDisplayKit+Debug.h"
 #import "ASLayoutSpec+Subclasses.h"
 #import "ASCellNode+Internal.h"

@@ -10,11 +10,12 @@
 
 #import "ASLayoutSpec.h"
 #import "ASLayoutSpecPrivate.h"
-
 #import "ASLayoutSpec+Subclasses.h"
 #import "ASLayoutSpec+Debug.h"
 
 #import "ASLayoutElementStylePrivate.h"
+#import "ASEqualityHelpers.h"
+#import "ASInternalHelpers.h"
 
 #import <objc/runtime.h>
 #import <map>

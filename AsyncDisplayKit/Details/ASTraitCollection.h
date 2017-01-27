@@ -28,9 +28,6 @@ typedef struct ASLayoutElementTraitCollection {
   CGSize containerSize;
 } ASLayoutElementTraitCollection;
 
-/// Deprecation
-#define ASEnvironmentTraitCollection ASLayoutElementTraitCollection
-
 /**
  * Creates ASLayoutElementTraitCollection with default values.
  */
@@ -57,6 +54,10 @@ extern NSString *NSStringFromASLayoutElementTraitCollection(ASLayoutElementTrait
  * layout element within the hierarchy.
  */
 extern void ASLayoutElementTraitCollectionPropagateDown(id<ASLayoutElement> root, ASLayoutElementTraitCollection traitCollection);
+
+/// For backward compatibility reasons we redefine the old layout element trait collection struct name
+#define ASEnvironmentTraitCollection ASLayoutElementTraitCollection
+#define ASEnvironmentTraitCollectionMakeDefault ASLayoutElementTraitCollectionMakeDefault
 
 ASDISPLAYNODE_EXTERN_C_END
 
