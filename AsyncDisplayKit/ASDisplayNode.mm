@@ -1600,7 +1600,6 @@ ASLayoutElementFinalLayoutElementDefault
   NSAssert(node.isNodeLoaded == YES, @"Invalid node state");
   
   NSArray<ASDisplayNode *> *removedSubnodes = [context removedSubnodes];
-  NSMutableArray<UIView *> *removedViews = [NSMutableArray array];
   NSMutableArray<ASDisplayNode *> *insertedSubnodes = [[context insertedSubnodes] mutableCopy];
   NSMutableArray<ASDisplayNode *> *movedSubnodes = [NSMutableArray array];
   
@@ -1613,15 +1612,6 @@ ASLayoutElementFinalLayoutElementDefault
       CGRect fromFrame = [context initialFrameForNode:subnode];
       CGRect toFrame = [context finalFrameForNode:subnode];
       if (CGSizeEqualToSize(fromFrame.size, toFrame.size) == NO) {
-        // To crossfade resized subnodes, show a snapshot of it on top.
-        // The node itself can then be treated as a newly-inserted one.
-        UIView *snapshotView = [subnode.view snapshotViewAfterScreenUpdates:YES];
-        snapshotView.frame = [context initialFrameForNode:subnode];
-        snapshotView.alpha = 1;
-        
-        [node.view insertSubview:snapshotView aboveSubview:subnode.view];
-        [removedViews addObject:snapshotView];
-        
         [insertedSubnodes addObject:subnode];
       }
       if (CGPointEqualToPoint(fromFrame.origin, toFrame.origin) == NO) {
@@ -1649,9 +1639,6 @@ ASLayoutElementFinalLayoutElementDefault
     for (ASDisplayNode *removedSubnode in removedSubnodes) {
       removedSubnode.alpha = 0;
     }
-    for (UIView *removedView in removedViews) {
-      removedView.alpha = 0;
-    }
     
     // Fade inserted subnodes in
     for (_ASAnimatedTransitionContext *insertedSubnodeContext in insertedSubnodeContexts) {
@@ -1673,9 +1660,6 @@ ASLayoutElementFinalLayoutElementDefault
     // Restore all removed subnode alpha values
     for (_ASAnimatedTransitionContext *removedSubnodeContext in removedSubnodeContexts) {
       removedSubnodeContext.node.alpha = removedSubnodeContext.alpha;
-    }
-    for (UIView *removedView in removedViews) {
-      [removedView removeFromSuperview];
     }
     // Subnode removals are automatically performed
     [context completeTransition:finished];
