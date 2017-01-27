@@ -224,6 +224,10 @@
   return [ASTraitCollection traitCollectionWithASLayoutElementTraitCollection:self.layoutElementTraitCollection];
 }
 
+ASLayoutElementTraitCollectionDeprecatedImplementation
+
+#pragma mark - ASLayoutElementStyleExtensibility
+
 ASLayoutElementStyleExtensibilityForwarding
 
 #pragma mark - Framework Private
