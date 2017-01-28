@@ -2144,11 +2144,16 @@ static bool stringContainsPointer(NSString *description, id p) {
   XCTAssertNoThrow([node.view layoutIfNeeded]);
 }
 
-- (void)testThatOnDidLoadThrowsIfCalledOnLoaded
+- (void)testThatOnDidLoadThrowsIfCalledOnLoadedOffMain
 {
   ASTestDisplayNode *node = [[ASTestDisplayNode alloc] init];
   [node view];
-  XCTAssertThrows([node onDidLoad:^(ASDisplayNode * _Nonnull node) { }]);
+  dispatch_semaphore_t sem = dispatch_semaphore_create(0);
+  [NSThread detachNewThreadWithBlock:^{
+    XCTAssertThrows([node onDidLoad:^(ASDisplayNode * _Nonnull node) { }]);
+    dispatch_semaphore_signal(sem);
+  }];
+  dispatch_semaphore_wait(sem, DISPATCH_TIME_FOREVER);
 }
 
 - (void)testThatOnDidLoadWorks
