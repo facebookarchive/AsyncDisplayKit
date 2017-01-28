@@ -46,6 +46,7 @@
 #import <AsyncDisplayKit/ASPagerFlowLayout.h>
 #import <AsyncDisplayKit/ASPagerNode.h>
 
+#import <AsyncDisplayKit/ASNodeController.h>
 #import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASNavigationController.h>
 #import <AsyncDisplayKit/ASTabBarController.h>
