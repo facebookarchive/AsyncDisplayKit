@@ -96,16 +96,24 @@ ASIGSectionControllerCellForIndexImplementation;
 
 - (ASCellNode *)nodeForSupplementaryElementOfKind:(NSString *)elementKind atIndex:(NSInteger)index
 {
-  // pointer compare is fine here
-  ASDisplayNodeAssert(elementKind == UICollectionElementKindSectionHeader, nil);
+  ASDisplayNodeAssert([elementKind isEqualToString:UICollectionElementKindSectionHeader], nil);
   return [[FeedHeaderNode alloc] init];
+}
+
+- (ASSizeRange)sizeRangeForSupplementaryElementOfKind:(NSString *)elementKind atIndex:(NSInteger)index
+{
+  if ([elementKind isEqualToString:UICollectionElementKindSectionHeader]) {
+    return ASSizeRangeUnconstrained;
+  } else {
+    return ASSizeRangeZero;
+  }
 }
 
 #pragma mark - IGListSupplementaryViewSource
 
 - (NSArray<NSString *> *)supportedElementKinds
 {
-  return @[ ];// UICollectionElementKindSectionHeader ];
+  return @[ UICollectionElementKindSectionHeader ];
 }
 
 ASIGSupplementarySourceViewForSupplementaryElementImplementation(self);

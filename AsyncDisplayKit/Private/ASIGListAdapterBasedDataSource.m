@@ -17,7 +17,7 @@ typedef IGListSectionController<IGListSectionType, ASSectionController> ASIGSect
 /// The optional methods that a class implements from ASSectionController.
 /// Note: Bitfields are not supported by NSValue so we can't use them.
 typedef struct {
-  BOOL constrainedSizeForItem;
+  BOOL sizeRangeForItem;
   BOOL shouldBatchFetch;
   BOOL beginBatchFetchWithContext;
 } ASSectionControllerOverrides;
@@ -25,13 +25,13 @@ typedef struct {
 /// The optional methods that a class implements from ASSupplementaryNodeSource.
 /// Note: Bitfields are not supported by NSValue so we can't use them.
 typedef struct {
-  BOOL constrainedSizeForSupplementary;
+  BOOL sizeRangeForSupplementary;
 } ASSupplementarySourceOverrides;
 
 @protocol ASIGSupplementaryNodeSource <IGListSupplementaryViewSource, ASSupplementaryNodeSource>
 @end
 
-@interface ASIGListAdapterBasedDataSource () <UICollectionViewDelegateFlowLayout>
+@interface ASIGListAdapterBasedDataSource ()
 @property (nonatomic, weak, readonly) IGListAdapter *listAdapter;
 @property (nonatomic, readonly) id<UICollectionViewDelegateFlowLayout> delegate;
 @property (nonatomic, readonly) id<UICollectionViewDataSource> dataSource;
@@ -135,21 +135,26 @@ typedef struct {
   [self.delegate collectionView:collectionView didEndDisplayingCell:cell forItemAtIndexPath:indexPath];
 }
 
-#pragma mark - UICollectionViewDelegateFlowLayout
+#pragma mark - ASCollectionDelegateFlowLayout
 
-- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode sizeRangeForHeaderInSection:(NSInteger)section
 {
-  return [self.delegate collectionView:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
+  id<ASIGSupplementaryNodeSource> src = [self supplementaryElementSourceForSection:section];
+  if ([ASIGListAdapterBasedDataSource overridesForSupplementarySourceClass:[src class]].sizeRangeForSupplementary) {
+    return [src sizeRangeForSupplementaryElementOfKind:UICollectionElementKindSectionHeader atIndex:0];
+  } else {
+    return ASSizeRangeZero;
+  }
 }
 
-- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForHeaderInSection:(NSInteger)section
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode sizeRangeForFooterInSection:(NSInteger)section
 {
-  return [self.delegate collectionView:collectionView layout:collectionViewLayout referenceSizeForHeaderInSection:section];
-}
-
-- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout referenceSizeForFooterInSection:(NSInteger)section
-{
-  return [self.delegate collectionView:collectionView layout:collectionViewLayout referenceSizeForFooterInSection:section];
+  id<ASIGSupplementaryNodeSource> src = [self supplementaryElementSourceForSection:section];
+  if ([ASIGListAdapterBasedDataSource overridesForSupplementarySourceClass:[src class]].sizeRangeForSupplementary) {
+    return [src sizeRangeForSupplementaryElementOfKind:UICollectionElementKindSectionFooter atIndex:0];
+  } else {
+    return ASSizeRangeZero;
+  }
 }
 
 - (UIEdgeInsets)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout insetForSectionAtIndex:(NSInteger)section
@@ -187,8 +192,8 @@ typedef struct {
 - (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   ASIGSectionController *ctrl = [self sectionControllerForSection:indexPath.section];
-  if ([ASIGListAdapterBasedDataSource overridesForSectionControllerClass:ctrl.class].constrainedSizeForItem) {
-    return [ctrl constrainedSizeForItemAtIndex:indexPath.item];
+  if ([ASIGListAdapterBasedDataSource overridesForSectionControllerClass:ctrl.class].sizeRangeForItem) {
+    return [ctrl sizeRangeForItemAtIndex:indexPath.item];
   } else {
     return ASSizeRangeUnconstrained;
   }
@@ -270,7 +275,7 @@ typedef struct {
   NSValue *obj = [cache objectForKey:c];
   ASSupplementarySourceOverrides o;
   if (obj == nil) {
-    o.constrainedSizeForSupplementary = [c instancesRespondToSelector:@selector(constrainedSizeForSupplementaryElementOfKind:atIndex:)];
+    o.sizeRangeForSupplementary = [c instancesRespondToSelector:@selector(sizeRangeForSupplementaryElementOfKind:atIndex:)];
     obj = [NSValue valueWithBytes:&o objCType:@encode(ASSupplementarySourceOverrides)];
     [cache setObject:obj forKey:c];
   } else {
@@ -289,7 +294,7 @@ typedef struct {
   NSValue *obj = [cache objectForKey:c];
   ASSectionControllerOverrides o;
   if (obj == nil) {
-    o.constrainedSizeForItem = [c instancesRespondToSelector:@selector(constrainedSizeForItemAtIndex:)];
+    o.sizeRangeForItem = [c instancesRespondToSelector:@selector(sizeRangeForItemAtIndex:)];
     o.beginBatchFetchWithContext = [c instancesRespondToSelector:@selector(beginBatchFetchWithContext:)];
     o.shouldBatchFetch = [c instancesRespondToSelector:@selector(shouldBatchFetch)];
     obj = [NSValue valueWithBytes:&o objCType:@encode(ASSectionControllerOverrides)];

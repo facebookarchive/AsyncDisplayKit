@@ -25,15 +25,15 @@ NS_ASSUME_NONNULL_BEGIN
 @optional
 
 /**
- * A method to provide the constrained size used for measuring the supplementary
+ * A method to provide the size range used for measuring the supplementary
  * element of the given kind at the given index.
  *
  * @param elementKind The kind of supplementary element.
  * @param index The index of the item.
- * @return A constrained size used for asynchronously measuring the node.
+ * @return A size range used for asynchronously measuring the node.
  * @see collectionNode:constrainedSizeForSupplementaryElementOfKind:atIndexPath:
  */
-- (ASSizeRange)constrainedSizeForSupplementaryElementOfKind:(NSString *)elementKind atIndex:(NSInteger)index;
+- (ASSizeRange)sizeRangeForSupplementaryElementOfKind:(NSString *)elementKind atIndex:(NSInteger)index;
 
 @end
 

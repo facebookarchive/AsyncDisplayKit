@@ -13,7 +13,7 @@
 #import "ASCollectionInteropProtocols.h"
 
 AS_SUBCLASSING_RESTRICTED
-@interface ASIGListAdapterBasedDataSource : NSObject <ASCollectionDataSourceInterop, ASCollectionDelegateInterop>
+@interface ASIGListAdapterBasedDataSource : NSObject <ASCollectionDataSourceInterop, ASCollectionDelegateInterop, ASCollectionDelegateFlowLayout>
 
 - (instancetype)initWithListAdapter:(IGListAdapter *)listAdapter;
 

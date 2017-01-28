@@ -59,10 +59,10 @@ NS_ASSUME_NONNULL_BEGIN
  * at the given index.
  *
  * @param index The index of the item.
- * @return A constrained size used for asynchronously measuring the node at this index.
+ * @return A size range used for asynchronously measuring the node at this index.
  * @see collectionNode:constrainedSizeForItemAtIndexPath:
  */
-- (ASSizeRange)constrainedSizeForItemAtIndex:(NSInteger)index;
+- (ASSizeRange)sizeRangeForItemAtIndex:(NSInteger)index;
 
 @end
 
