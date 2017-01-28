@@ -7,11 +7,25 @@
 //
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h> // for ASInterfaceState protocol
 
-@interface ASNodeController<__covariant DisplayNodeType : ASDisplayNode *> : NSObject
+@interface ASNodeController<__covariant DisplayNodeType : ASDisplayNode *> : NSObject <ASInterfaceState>
 
 @property (nonatomic, strong) DisplayNodeType node;
 
 - (void)loadNode;
+
+// for descriptions see <ASInterfaceState> definition
+- (void)didEnterVisibleState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitVisibleState  ASDISPLAYNODE_REQUIRES_SUPER;
+
+- (void)didEnterDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitDisplayState  ASDISPLAYNODE_REQUIRES_SUPER;
+
+- (void)didEnterPreloadState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitPreloadState  ASDISPLAYNODE_REQUIRES_SUPER;
+
+- (void)interfaceStateDidChange:(ASInterfaceState)newState
+                      fromState:(ASInterfaceState)oldState ASDISPLAYNODE_REQUIRES_SUPER;
 
 @end

@@ -16,6 +16,7 @@
 #import "ASDisplayNode.h"
 #import "ASThread.h"
 #import "ASObjectDescriptionHelpers.h"
+#import "ASDisplayNode+Subclasses.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -108,6 +109,9 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
 
 // Thread safe way to access the bounds of the node
 @property (nonatomic, assign) CGRect threadSafeBounds;
+
+// delegate to inform of ASInterfaceState changes (used by ASNodeController)
+@property (nonatomic, weak) id<ASInterfaceState> interfaceStateDelegate;
 
 // These methods are recursive, and either union or remove the provided interfaceState to all sub-elements.
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState;

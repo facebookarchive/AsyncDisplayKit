@@ -8,20 +8,23 @@
 
 #import "ASNodeController.h"
 
+#import "ASDisplayNode+FrameworkPrivate.h"
+
 @implementation ASNodeController
+@synthesize node = _node;
 
 - (instancetype)init
 {
   self = [super init];
   if (self) {
-        
+    
   }
   return self;
 }
 
 - (void)loadNode
 {
-  _node = [[ASDisplayNode alloc] init];
+  self.node = [[ASDisplayNode alloc] init];
 }
 
 - (ASDisplayNode *)node
@@ -31,5 +34,24 @@
   }
   return _node;
 }
+
+-(void)setNode:(ASDisplayNode *)node
+{
+  _node = node;
+  node.interfaceStateDelegate = self;
+}
+
+// subclass overrides
+- (void)didEnterVisibleState {}
+- (void)didExitVisibleState  {}
+
+- (void)didEnterDisplayState {}
+- (void)didExitDisplayState  {}
+
+- (void)didEnterPreloadState {}
+- (void)didExitPreloadState  {}
+
+- (void)interfaceStateDidChange:(ASInterfaceState)newState
+                      fromState:(ASInterfaceState)oldState {}
 
 @end

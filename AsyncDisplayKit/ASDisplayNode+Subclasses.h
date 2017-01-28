@@ -39,7 +39,61 @@ NS_ASSUME_NONNULL_BEGIN
  * variables.
  */
 
-@interface ASDisplayNode (Subclassing)
+@protocol ASInterfaceState <NSObject>
+@required
+
+/**
+ * @abstract Called whenever any bit in the ASInterfaceState bitfield is changed.
+ * @discussion Subclasses may use this to monitor when they become visible, should free cached data, and much more.
+ * @see ASInterfaceState
+ */
+- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState;
+
+/**
+ * @abstract Called whenever the node becomes visible.
+ * @discussion Subclasses may use this to monitor when they become visible.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didEnterVisibleState;
+
+/**
+ * @abstract Called whenever the node is no longer visible.
+ * @discussion Subclasses may use this to monitor when they are no longer visible.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didExitVisibleState;
+
+/**
+ * @abstract Called whenever the the node has entered the display state.
+ * @discussion Subclasses may use this to monitor when a node should be rendering its content.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didEnterDisplayState;
+
+/**
+ * @abstract Called whenever the the node has exited the display state.
+ * @discussion Subclasses may use this to monitor when a node should no longer be rendering its content.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didExitDisplayState;
+
+/**
+ * @abstract Called whenever the the node has entered the preload state.
+ * @discussion Subclasses may use this to monitor data for a node should be preloaded, either from a local or remote source.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didEnterPreloadState;
+
+/**
+ * @abstract Called whenever the the node has exited the preload state.
+ * @discussion Subclasses may use this to monitor whether preloading data for a node should be canceled.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didExitPreloadState;
+
+@end
+
+@interface ASDisplayNode (Subclassing) <ASInterfaceState>
 
 #pragma mark - Properties
 /** @name Properties */
@@ -176,6 +230,32 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)invalidateCalculatedLayout;
 
+#pragma mark - Observing Node State Changes
+/** @name Observing node state changes */
+
+/**
+  * Declare <ASInterfaceState> methods as requiring super calls (this can't be required in the protocol).
+  * For descriptions, see <ASInterfaceState> definition.
+  */
+
+- (void)didEnterVisibleState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitVisibleState  ASDISPLAYNODE_REQUIRES_SUPER;
+
+- (void)didEnterDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitDisplayState  ASDISPLAYNODE_REQUIRES_SUPER;
+
+- (void)didEnterPreloadState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitPreloadState  ASDISPLAYNODE_REQUIRES_SUPER;
+
+- (void)interfaceStateDidChange:(ASInterfaceState)newState
+                      fromState:(ASInterfaceState)oldState ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called when the node's ASTraitCollection changes
+ *
+ * @discussion Subclasses can override this method to react to a trait collection change.
+ */
+- (void)asyncTraitCollectionDidChange;
 
 #pragma mark - Drawing
 /** @name Drawing */
@@ -243,70 +323,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @note Called on the main thread only
  */
 - (void)displayDidFinish ASDISPLAYNODE_REQUIRES_SUPER;
-
-/** @name Observing node-related changes */
-
-/**
- * @abstract Called whenever any bit in the ASInterfaceState bitfield is changed.
- *
- * @discussion Subclasses may use this to monitor when they become visible, should free cached data, and much more.
- * @see ASInterfaceState
- */
-- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the node becomes visible.
- *
- * @discussion Subclasses may use this to monitor when they become visible.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didEnterVisibleState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the node is no longer visible.
- *
- * @discussion Subclasses may use this to monitor when they are no longer visible.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didExitVisibleState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the the node has entered the display state.
- *
- * @discussion Subclasses may use this to monitor when a node should be rendering its content.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didEnterDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the the node has exited the display state.
- *
- * @discussion Subclasses may use this to monitor when a node should no longer be rendering its content.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didExitDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the the node has entered the preload state.
- *
- * @discussion Subclasses may use this to monitor data for a node should be preloaded, either from a local or remote source.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didEnterPreloadState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the the node has exited the preload state.
- *
- * @discussion Subclasses may use this to monitor whether preloading data for a node should be canceled.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didExitPreloadState ASDISPLAYNODE_REQUIRES_SUPER;
 
 /**
  * Called just before the view is added to a window.
@@ -490,13 +506,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion The function that gets called for each display node in -recursiveDescription
  */
 - (NSString *)descriptionForRecursiveDescription;
-
-/**
- * @abstract Called when the node's ASTraitCollection changes
- *
- * @discussion Subclasses can override this method to react to a trait collection change.
- */
-- (void)asyncTraitCollectionDidChange;
 
 @end
 
