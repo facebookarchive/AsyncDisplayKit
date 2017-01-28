@@ -44,9 +44,9 @@
 @implementation PhotoCellNode
 {
   PhotoModel          *_photoModel;
-  CommentsNode        *_photoCommentsView;
-  ASNetworkImageNode  *_userAvatarImageView;
-  ASNetworkImageNode  *_photoImageView;
+  CommentsNode        *_photoCommentsNode;
+  ASNetworkImageNode  *_userAvatarImageNode;
+  ASNetworkImageNode  *_photoImageNode;
   ASTextNode          *_userNameLabel;
   ASTextNode          *_photoLocationLabel;
   ASTextNode          *_photoTimeIntervalSincePostLabel;
@@ -64,18 +64,18 @@
     
     _photoModel              = photo;
     
-    _userAvatarImageView     = [[ASNetworkImageNode alloc] init];
-    _userAvatarImageView.URL = photo.ownerUserProfile.userPicURL;   // FIXME: make round
+    _userAvatarImageNode     = [[ASNetworkImageNode alloc] init];
+    _userAvatarImageNode.URL = photo.ownerUserProfile.userPicURL;   // FIXME: make round
     
     // FIXME: autocomplete for this line seems broken
-    [_userAvatarImageView setImageModificationBlock:^UIImage *(UIImage *image) {
+    [_userAvatarImageNode setImageModificationBlock:^UIImage *(UIImage *image) {
       CGSize profileImageSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
       return [image makeCircularImageWithSize:profileImageSize];
     }];
 
-    _photoImageView          = [[ASNetworkImageNode alloc] init];
-    _photoImageView.URL      = photo.URL;
-    _photoImageView.layerBacked = YES;
+    _photoImageNode          = [[ASNetworkImageNode alloc] init];
+    _photoImageNode.URL      = photo.URL;
+    _photoImageNode.layerBacked = YES;
     
     _userNameLabel                  = [[ASTextNode alloc] init];
     _userNameLabel.attributedText = [photo.ownerUserProfile usernameAttributedStringWithFontSize:FONT_SIZE];
@@ -98,19 +98,19 @@
     _photoDescriptionLabel           = [self createLayerBackedTextNodeWithString:[photo descriptionAttributedStringWithFontSize:FONT_SIZE]];
     _photoDescriptionLabel.maximumNumberOfLines = 3;
     
-    _photoCommentsView = [[CommentsNode alloc] init];
+    _photoCommentsNode = [[CommentsNode alloc] init];
     
-    _photoCommentsView.shouldRasterizeDescendants = YES;
+    _photoCommentsNode.shouldRasterizeDescendants = YES;
     
     // instead of adding everything addSubnode:
     self.automaticallyManagesSubnodes = YES;
     
 #if DEBUG_PHOTOCELL_LAYOUT
-    _userAvatarImageView.backgroundColor              = [UIColor greenColor];
+    _userAvatarImageNode.backgroundColor              = [UIColor greenColor];
     _userNameLabel.backgroundColor                    = [UIColor greenColor];
     _photoLocationLabel.backgroundColor               = [UIColor greenColor];
     _photoTimeIntervalSincePostLabel.backgroundColor  = [UIColor greenColor];
-    _photoCommentsView.backgroundColor                = [UIColor greenColor];
+    _photoCommentsNode.backgroundColor                = [UIColor greenColor];
     _photoDescriptionLabel.backgroundColor            = [UIColor greenColor];
     _photoLikesLabel.backgroundColor                  = [UIColor greenColor];
 #endif
@@ -133,8 +133,8 @@
     headerStack.alignItems = ASStackLayoutAlignItemsCenter;
 
       // Avatar Image, with inset - first thing in the header stack.
-      _userAvatarImageView.style.preferredSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
-      [headerChildren addObject:[ASInsetLayoutSpec insetLayoutSpecWithInsets:InsetForAvatar child:_userAvatarImageView]];
+      _userAvatarImageNode.style.preferredSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
+      [headerChildren addObject:[ASInsetLayoutSpec insetLayoutSpecWithInsets:InsetForAvatar child:_userAvatarImageNode]];
       
       // User Name and Photo Location stack is next
       ASStackLayoutSpec *userPhotoLocationStack = [ASStackLayoutSpec verticalStackLayoutSpec];
@@ -165,13 +165,13 @@
     // Create the last stack before assembling everything: the Footer Stack contains the description and comments.
     ASStackLayoutSpec *footerStack = [ASStackLayoutSpec verticalStackLayoutSpec];
     footerStack.spacing = VERTICAL_BUFFER;
-    footerStack.children = @[_photoLikesLabel, _photoDescriptionLabel, _photoCommentsView];
+    footerStack.children = @[_photoLikesLabel, _photoDescriptionLabel, _photoCommentsNode];
 
     // Main Vertical Stack: contains header, large main photo with fixed aspect ratio, and footer.
     ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
     
       [verticalChildren addObject:[ASInsetLayoutSpec insetLayoutSpecWithInsets:InsetForHeader child:headerStack]];
-      [verticalChildren addObject:[ASRatioLayoutSpec ratioLayoutSpecWithRatio :1.0            child:_photoImageView]];
+      [verticalChildren addObject:[ASRatioLayoutSpec ratioLayoutSpecWithRatio :1.0            child:_photoImageNode]];
       [verticalChildren addObject:[ASInsetLayoutSpec insetLayoutSpecWithInsets:InsetForFooter child:footerStack]];
     
     verticalStack.children = verticalChildren;
@@ -204,7 +204,7 @@
                              [ASInsetLayoutSpec
                               insetLayoutSpecWithInsets:InsetForAvatar
                               child:
-                              [_userAvatarImageView styledWithBlock:^(ASLayoutElementStyle *style) {
+                              [_userAvatarImageNode styledWithBlock:^(ASLayoutElementStyle *style) {
                    style.preferredSize = CGSizeMake(USER_IMAGE_HEIGHT, USER_IMAGE_HEIGHT);
                  }]
                               ],
@@ -245,7 +245,7 @@
                 // Center photo with ratio
                 [ASRatioLayoutSpec
                  ratioLayoutSpecWithRatio:1.0
-                 child:_photoImageView],
+                 child:_photoImageNode],
                 
                 // Footer stack with inset
                 [ASInsetLayoutSpec
@@ -259,7 +259,7 @@
                   children:@[
                              _photoLikesLabel,
                              _photoDescriptionLabel,
-                             _photoCommentsView
+                             _photoCommentsNode
                              ]]
                  ]
             ]];
@@ -290,7 +290,7 @@
 - (void)loadCommentsForPhoto:(PhotoModel *)photo
 {
   if (photo.commentFeed.numberOfItemsInFeed > 0) {
-    [_photoCommentsView updateWithCommentFeedModel:photo.commentFeed];
+    [_photoCommentsNode updateWithCommentFeedModel:photo.commentFeed];
     
     [self setNeedsLayout];
   }
