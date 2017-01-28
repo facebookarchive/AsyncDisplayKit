@@ -204,6 +204,11 @@ typedef struct {
   return [[self supplementaryElementSourceForSection:indexPath.section] nodeForSupplementaryElementOfKind:kind atIndex:indexPath.item];
 }
 
+- (NSArray<NSString *> *)collectionNode:(ASCollectionNode *)collectionNode supplementaryElementKindsInSection:(NSInteger)section
+{
+  return [[self supplementaryElementSourceForSection:section] supportedElementKinds];
+}
+
 #pragma mark - ASCollectionDataSourceInterop
 
 - (__kindof UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(nonnull NSIndexPath *)indexPath
@@ -222,7 +227,7 @@ typedef struct {
 {
   ASIGSectionController *ctrl = [self sectionControllerForSection:section];
   id<ASIGSupplementaryNodeSource> src = (id<ASIGSupplementaryNodeSource>)ctrl.supplementaryViewSource;
-  ASDisplayNodeAssert(src == nil || [src conformsToProtocol:@protocol(ASIGSupplementaryNodeSource)], @"Supplementary view source should conform to %@", NSStringFromProtocol(@protocol(ASIGSupplementaryNodeSource)));
+  ASDisplayNodeAssert(src == nil || [src conformsToProtocol:@protocol(ASSupplementaryNodeSource)], @"Supplementary view source should conform to %@", NSStringFromProtocol(@protocol(ASSupplementaryNodeSource)));
   return src;
 }
 
