@@ -55,7 +55,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)beginBatchFetchWithContext:(ASBatchContext *)context;
 
 /**
- * A method to provide the constrained size used for measuring the item
+ * A method to provide the size range used for measuring the item
  * at the given index.
  *
  * @param index The index of the item.
