@@ -104,18 +104,18 @@ typedef struct {
   // If they implement shouldBatchFetch, call it. Otherwise, just say YES if they implement beginBatchFetch.
   ASIGSectionController *ctrl = [self sectionControllerForSection:sectionCount - 1];
   ASSectionControllerOverrides o = [ASIGListAdapterBasedDataSource overridesForSectionControllerClass:ctrl.class];
-	BOOL result = (o.shouldBatchFetch ? [ctrl shouldBatchFetch] : o.beginBatchFetchWithContext);
-	if (result) {
-		self.sectionControllerForBatchFetching = ctrl;
-	}
-	return result;
+  BOOL result = (o.shouldBatchFetch ? [ctrl shouldBatchFetch] : o.beginBatchFetchWithContext);
+  if (result) {
+    self.sectionControllerForBatchFetching = ctrl;
+  }
+  return result;
 }
 
 - (void)collectionNode:(ASCollectionNode *)collectionNode willBeginBatchFetchWithContext:(ASBatchContext *)context
 {
-	ASIGSectionController *ctrl = self.sectionControllerForBatchFetching;
-	self.sectionControllerForBatchFetching = nil;
-	[ctrl beginBatchFetchWithContext:context];
+  ASIGSectionController *ctrl = self.sectionControllerForBatchFetching;
+  self.sectionControllerForBatchFetching = nil;
+  [ctrl beginBatchFetchWithContext:context];
 }
 
 /**
