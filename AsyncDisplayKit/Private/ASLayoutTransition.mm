@@ -37,7 +37,10 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
     layout = queue.front();
     queue.pop();
     
-    if (layout.layoutElement.canLayoutAsynchronous == NO) {
+#if DEBUG
+    ASDisplayNodeCAssert([layout.layoutElement conformsToProtocol:@protocol(ASLayoutElementTransition)], @"ASLayoutElement in a layout transition needs to conforms to the ASLayoutElementTransition protocol.");
+#endif
+    if (((id<ASLayoutElementTransition>)layout.layoutElement).canLayoutAsynchronous == NO) {
       return NO;
     }
     
