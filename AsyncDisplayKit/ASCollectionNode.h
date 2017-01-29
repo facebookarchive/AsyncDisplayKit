@@ -502,6 +502,27 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable id<ASSectionContext>)collectionNode:(ASCollectionNode *)collectionNode contextForSection:(NSInteger)section;
 
 /**
+ * This method offers compatibility with synchronous, standard UICollectionViewCell objects.
+ * These cells will **not** have the performance benefits of ASCellNodes (like preloading, async layout, and
+ * async drawing) - even when mixed within the same ASCollectionNode.
+ *
+ * In order to use this method, you must:
+ * 1. Implement it on your ASCollectionDataSource object.
+ * 2. Call registerCellClass: on the collectionNode.view (in viewDidLoad, or register an onDidLoad: block).
+ * 3. Return nil from the nodeBlockForItem...: or nodeForItem...: method. NOTE: it is an error to return
+ *    nil from within a nodeBlock, if you have returned a nodeBlock object.
+ * 4. Lastly, you must implement a method to provide the size for the cell. There are two ways this is done:
+ * 4a. UICollectionViewFlowLayout (incl. ASPagerNode). Implement
+       collectionNode:constrainedSizeForItemAtIndexPath:.
+ * 4b. Custom collection layouts. Set .view.layoutInspector and have it implement
+       collectionView:constrainedSizeForNodeAtIndexPath:.
+ *
+ * For an example of using this method with all steps above (including a custom layout, 4b.),
+ * see the app in examples/CustomCollectionView and enable kShowUICollectionViewCells = YES.
+ */
+- (__kindof UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
  * Similar to -collectionView:cellForItemAtIndexPath:.
  *
  * @param collectionView The sender.
@@ -579,7 +600,19 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (void)collectionNode:(ASCollectionNode *)collectionNode willDisplayItemWithNode:(ASCellNode *)node;
 
+/**
+ * This method will only be called if you are using cellForItemAtIndexPath: (not ASCellNode's). 
+ * See documentation at collectionView:cellForItemAtIndexPath: method in this class.
+ */
+- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath NS_AVAILABLE_IOS(8_0);
+
 - (void)collectionNode:(ASCollectionNode *)collectionNode didEndDisplayingItemWithNode:(ASCellNode *)node;
+
+/**
+ * This method will only be called if you are using cellForItemAtIndexPath: (not ASCellNode's). 
+ * See documentation at collectionView:cellForItemAtIndexPath: method in this class.
+ */
+- (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath;
 
 - (void)collectionNode:(ASCollectionNode *)collectionNode willDisplaySupplementaryElementWithNode:(ASCellNode *)node NS_AVAILABLE_IOS(8_0);
 - (void)collectionNode:(ASCollectionNode *)collectionNode didEndDisplayingSupplementaryElementWithNode:(ASCellNode *)node;
@@ -634,6 +667,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @return A constrained size range for layout the node at this index path.
  */
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's constrainedSizeForItemAtIndexPath: instead. PLEASE NOTE the very subtle method name change.");
+- (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's constrainedSizeForItemAtIndexPath: instead. PLEASE NOTE the very subtle method name change.");
 
 /**
  * Informs the delegate that the collection view will add the given node

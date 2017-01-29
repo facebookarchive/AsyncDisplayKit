@@ -526,6 +526,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
         ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];
         
         ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:ASDataControllerRowNodeKind atIndexPath:indexPath];
+        NSLog(@"constrainedSize = %@, index = %@", NSStringFromCGSize(constrainedSize.max), indexPath);
         [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
                                                                   indexPath:indexPath
                                                    supplementaryElementKind:nil

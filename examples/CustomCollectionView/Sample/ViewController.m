@@ -20,14 +20,16 @@
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "MosaicCollectionViewLayout.h"
 #import "ImageCellNode.h"
+#import "ImageCollectionViewCell.h"
 
+// This option demonstrates that raw UIKit cells can still be used alongside native ASCellNodes.
+static BOOL kShowUICollectionViewCells = NO;
 static NSUInteger kNumberOfImages = 14;
 
-@interface ViewController () <ASCollectionDataSource, ASCollectionDelegate>
+@interface ViewController () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionViewLayoutInspecting>
 {
   NSMutableArray *_sections;
   ASCollectionNode *_collectionNode;
-  MosaicCollectionViewLayoutInspector *_layoutInspector;
 }
 
 @end
@@ -35,7 +37,7 @@ static NSUInteger kNumberOfImages = 14;
 @implementation ViewController
 
 #pragma mark -
-#pragma mark UIViewController.
+#pragma mark UIViewController
 
 - (instancetype)init
 {
@@ -48,8 +50,6 @@ static NSUInteger kNumberOfImages = 14;
   _collectionNode.delegate = self;
   _collectionNode.backgroundColor = [UIColor whiteColor];
   
-  _layoutInspector = [[MosaicCollectionViewLayoutInspector alloc] init];
-
   if (!(self = [super initWithNode:_collectionNode]))
     return nil;
   
@@ -73,7 +73,8 @@ static NSUInteger kNumberOfImages = 14;
 {
   [super viewDidLoad];
   
-  _collectionNode.view.layoutInspector = _layoutInspector;
+  _collectionNode.view.layoutInspector = self;
+  [_collectionNode.view registerClass:[ImageCollectionViewCell class] forCellWithReuseIdentifier:@"ImageCollectionViewCell"];
 }
 
 - (void)reloadTapped
@@ -85,12 +86,50 @@ static NSUInteger kNumberOfImages = 14;
 
 - (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 {
+  if (kShowUICollectionViewCells && indexPath.item % 3 == 1) {
+    // When enabled, return nil for every third cell and then cellForItemAtIndexPath: will be called.
+    return nil;
+  }
+  
   UIImage *image = _sections[indexPath.section][indexPath.item];
   return ^{
     return [[ImageCellNode alloc] initWithImage:image];
   };
 }
 
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [_collectionNode.view dequeueReusableCellWithReuseIdentifier:@"ImageCollectionViewCell" forIndexPath:indexPath];
+}
+
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  MosaicCollectionViewLayout *layout = (MosaicCollectionViewLayout *)[collectionView collectionViewLayout];
+  return ASSizeRangeMake(CGSizeZero, [layout itemSizeAtIndexPath:indexPath]);
+}
+
+- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+{
+  MosaicCollectionViewLayout *layout = (MosaicCollectionViewLayout *)[collectionView collectionViewLayout];
+  return ASSizeRangeMake(CGSizeZero, [layout headerSizeForSection:indexPath.section]);
+}
+
+- (ASScrollDirection)scrollableDirections
+{
+  return ASScrollDirectionVerticalDirections;
+}
+
+/**
+ * Asks the inspector for the number of supplementary views for the given kind in the specified section.
+ */
+- (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
+{
+  if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
 
 - (ASCellNode *)collectionNode:(ASCollectionNode *)collectionNode nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
@@ -116,7 +155,12 @@ static NSUInteger kNumberOfImages = 14;
 
 - (CGSize)collectionView:(ASCollectionNode *)collectionNode layout:(UICollectionViewLayout *)collectionViewLayout originalItemSizeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [(UIImage *)_sections[indexPath.section][indexPath.item] size];
+  ASCellNode *cellNode = [collectionNode nodeForItemAtIndexPath:indexPath];
+  if ([cellNode isKindOfClass:[ImageCellNode class]]) {
+    return [[(ImageCellNode *)cellNode image] size];
+  } else {
+    return CGSizeMake(100, 100);
+  }
 }
 
 @end

@@ -22,5 +22,6 @@
 @interface ImageCellNode : ASCellNode
 
 - (instancetype)initWithImage:(UIImage *)image;
+@property (nonatomic, strong) UIImage *image;
 
 @end
