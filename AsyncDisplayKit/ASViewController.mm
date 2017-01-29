@@ -24,6 +24,7 @@
 
 @implementation ASViewController
 {
+  BOOL _nodeProvided;
   BOOL _ensureDisplayed;
   BOOL _automaticallyAdjustRangeModeBasedOnViewEvents;
   BOOL _parentManagesVisibilityDepth;
@@ -34,14 +35,26 @@
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-  ASDisplayNodeAssert(NO, @"ASViewController requires using -initWithNode:");
-  return [self initWithNode:[[ASDisplayNode alloc] init]];
+  if (!(self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])) {
+    return nil;
+  }
+  
+  _node = [[ASDisplayNode alloc] init];
+  [self _initializeInstance];
+  
+  return self;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
-  ASDisplayNodeAssert(NO, @"ASViewController requires using -initWithNode:");
-  return [self initWithNode:[[ASDisplayNode alloc] init]];
+  if (!(self = [super initWithCoder:aDecoder])) {
+    return nil;
+  }
+  
+  _node = [[ASDisplayNode alloc] init];
+  [self _initializeInstance];
+  
+  return self;
 }
 
 - (instancetype)initWithNode:(ASDisplayNode *)node
@@ -50,10 +63,18 @@
     return nil;
   }
   
-  ASDisplayNodeAssertNotNil(node, @"Node must not be nil");
-  ASDisplayNodeAssertTrue(!node.layerBacked);
+  _nodeProvided = YES;
   _node = node;
+  [self _initializeInstance];
 
+  return self;
+}
+
+- (void)_initializeInstance
+{
+  ASDisplayNodeAssertNotNil(_node, @"Node must not be nil");
+  ASDisplayNodeAssertTrue(!_node.layerBacked);
+  
   _selfConformsToRangeModeProtocol = [self conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
   _nodeConformsToRangeModeProtocol = [_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
   _automaticallyAdjustRangeModeBasedOnViewEvents = _selfConformsToRangeModeProtocol || _nodeConformsToRangeModeProtocol;
@@ -63,7 +84,7 @@
     // Node already loaded the view
     [self view];
   } else {
-    // If the node didn't load yet add ourselves as on did load observer to laod the view in case the node gets loaded
+    // If the node didn't load yet add ourselves as on did load observer to load the view in case the node gets loaded
     // before the view controller
     __weak __typeof__(self) weakSelf = self;
     [_node onDidLoad:^(__kindof ASDisplayNode * _Nonnull node) {
@@ -72,8 +93,6 @@
       }
     }];
   }
-
-  return self;
 }
 
 - (void)dealloc
@@ -83,13 +102,16 @@
 
 - (void)loadView
 {
-  ASDisplayNodeAssertTrue(!_node.layerBacked);
-  
   // Apple applies a frame and autoresizing masks we need.  Allocating a view is not
   // nearly as expensive as adding and removing it from a hierarchy, and fortunately
   // we can avoid that here.  Enabling layerBacking on a single node in the hierarchy
   // will have a greater performance benefit than the impact of this transient view.
   [super loadView];
+  
+  if (!_nodeProvided) { return; }
+  
+  ASDisplayNodeAssertTrue(!_node.layerBacked);
+  
   UIView *view = self.view;
   CGRect frame = view.frame;
   UIViewAutoresizing autoresizingMask = view.autoresizingMask;

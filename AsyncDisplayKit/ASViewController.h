@@ -21,20 +21,25 @@ NS_ASSUME_NONNULL_BEGIN
 typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitCollectionBlock)(UITraitCollection *traitCollection);
 typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(CGSize windowSize);
 
+/**
+ * ASViewController allows you to have a completely node backed hierarchy. It automatically
+ * handles @c ASVisibilityDepth, automatic range mode and propogating @c ASDisplayTraits to contained nodes.
+ *
+ * You can opt-out of node backed hierarchy and use it like a normal UIViewController.
+ * More importantly, you can use it as a base class for all of your view controllers among which some use a node hierarchy and some don't.
+ * See examples/ASDKgram project for actual implementation.
+ */
 @interface ASViewController<__covariant DisplayNodeType : ASDisplayNode *> : UIViewController <ASVisibilityDepth>
 
 /**
- * ASViewController Designated initializer.
- *
- * @discussion ASViewController allows you to have a completely node backed heirarchy. It automatically
- * handles @c ASVisibilityDepth, automatic range mode and propogating @c ASDisplayTraits to contained nodes.
+ * ASViewController initializer.
  *
  * @param node An ASDisplayNode which will provide the root view (self.view)
  * @return An ASViewController instance whose root view will be backed by the provided ASDisplayNode.
  *
  * @see ASVisibilityDepth
  */
-- (instancetype)initWithNode:(DisplayNodeType)node NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithNode:(DisplayNodeType)node;
 
 /**
  * @return node Returns the ASDisplayNode which provides the backing view to the view controller.
@@ -88,14 +93,6 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
  * backing node.
  */
 - (ASSizeRange)nodeConstrainedSize AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Set the size directly to the view's frame");
-
-@end
-
-@interface ASViewController (Unavailable)
-
-- (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil AS_UNAVAILABLE("ASViewController requires using -initWithNode:");
-
-- (nullable instancetype)initWithCoder:(NSCoder *)aDecoder AS_UNAVAILABLE("ASViewController requires using -initWithNode:");
 
 @end
 
