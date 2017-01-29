@@ -23,13 +23,13 @@ import UIKit
 final class WebService {
 	func load<A>(resource: Resource<A>, completion: @escaping (Result<A>) -> ()) {
 		URLSession.shared.dataTask(with: resource.url) { data, response, error in
-
 			// Check for errors in responses.
-			let errorCheck = self.checkForNetworkErrors(data, response, error)
-
-			if let data = errorCheck.1 {
+			let result = self.checkForNetworkErrors(data, response, error)
+			
+			switch result {
+			case .success(let data):
 				completion(resource.parse(data))
-			} else if let error = errorCheck.0 {
+			case .failure(let error):
 				completion(.failure(error))
 			}
 		}.resume()
@@ -37,26 +37,24 @@ final class WebService {
 }
 
 extension WebService {
-
-	// returns a tuple with .0 as error and .1 as data.
-
-	fileprivate func checkForNetworkErrors(_ data: Data?, _ response: URLResponse?, _ error: Error?) -> (NetworkingErrors?, Data?) {
+	
+	fileprivate func checkForNetworkErrors(_ data: Data?, _ response: URLResponse?, _ error: Error?) -> Result<Data> {
 		// Check for errors in responses.
 		guard error == nil else {
 			if (error as! NSError).domain == NSURLErrorDomain && ((error as! NSError).code == NSURLErrorNotConnectedToInternet || (error as! NSError).code == NSURLErrorTimedOut) {
-				return (.noInternetConnection, nil)
+				return .failure(.noInternetConnection)
 			} else {
-				return (.returnedError(error!), nil)
+				return .failure(.returnedError(error!))
 			}
 		}
-
+		
 		guard let statusCode = (response as? HTTPURLResponse)?.statusCode, statusCode >= 200 && statusCode <= 299 else {
-			return (.invalidStatusCode("Request returned status code other than 2xx \(response)"), nil)
+			return .failure((.invalidStatusCode("Request returned status code other than 2xx \(response)")))
 		}
-
-		guard let data = data else { return (.dataReturnedNil, nil) }
-
-		return (nil, data)
+		
+		guard let data = data else { return .failure(.dataReturnedNil) }
+		
+		return .success(data)
 	}
 }
 
@@ -66,7 +64,7 @@ struct Resource<A> {
 }
 
 extension Resource {
-
+	
 	init(url: URL, parseJSON: @escaping (Any) -> Result<A>) {
 		self.url = url
 		self.parse = { data	in

@@ -19,7 +19,7 @@
 
 import UIKit
 
-class PhotoFeedModel: NSObject {
+final class PhotoFeedModel {
 
 	public private(set) var photoFeedModelType: PhotoFeedModelType
 	public private(set) var photos: [PhotoModel] = []

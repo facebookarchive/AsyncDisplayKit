@@ -20,31 +20,30 @@
 import UIKit
 
 class PhotoFeedTableViewController: UITableViewController {
-
+	
 	var activityIndicator: UIActivityIndicatorView!
 	var photoFeed: PhotoFeedModel
-
+	
 	init() {
 		photoFeed = PhotoFeedModel(initWithPhotoFeedModelType: .photoFeedModelTypePopular, requiredImageSize: screenSizeForWidth)
 		super.init(nibName: nil, bundle: nil)
 		self.navigationItem.title = "UIKit"
-
+		
 	}
-
+	
 	required init?(coder aDecoder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}
-
+	
 	override func viewDidLoad() {
-
-		activityIndicatorConfig()
-		tableViewProperties()
+		super.viewDidLoad()
+		setupActivityIndicator()
+		configureTableView()
 		fetchNewBatch()
 		navigationController?.hidesBarsOnSwipe = true
 	}
-
+	
 	func fetchNewBatch() {
-
 		activityIndicator.startAnimating()
 		photoFeed.updateNewBatchOfPopularPhotos() { additions, connectionStatus in
 			switch connectionStatus {
@@ -57,16 +56,15 @@ class PhotoFeedTableViewController: UITableViewController {
 			}
 		}
 	}
-
+	
 	var screenSizeForWidth: CGSize = {
 		let screenRect = UIScreen.main.bounds
 		let screenScale = UIScreen.main.scale
 		return CGSize(width: screenRect.size.width * screenScale, height: screenRect.size.width * screenScale)
 	}()
-
+	
 	// helper functions
-
-	func activityIndicatorConfig() {
+	func setupActivityIndicator() {
 		let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
 		self.activityIndicator = activityIndicator
 		self.tableView.addSubview(activityIndicator)
@@ -76,8 +74,8 @@ class PhotoFeedTableViewController: UITableViewController {
 			activityIndicator.centerYAnchor.constraint(equalTo: self.tableView.centerYAnchor)
 			])
 	}
-
-	func tableViewProperties() {
+	
+	func configureTableView() {
 		tableView.register(PhotoTableViewCell.self, forCellReuseIdentifier: "photoCell")
 		tableView.allowsSelection = false
 		tableView.rowHeight = UITableViewAutomaticDimension
@@ -86,38 +84,38 @@ class PhotoFeedTableViewController: UITableViewController {
 }
 
 extension PhotoFeedTableViewController {
-
+	
 	func addRowsIntoTableView(newPhotoCount newPhotos: Int) {
-
+		
 		let indexRange = (photoFeed.photos.count - newPhotos..<photoFeed.photos.count)
 		let indexPaths = indexRange.map { IndexPath(row: $0, section: 0) }
 		tableView.insertRows(at: indexPaths, with: .none)
 	}
-
+	
 	// TableView Data Source
-
+	
 	override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
 		return photoFeed.photos.count
 	}
-
+	
 	override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 		guard let cell = tableView.dequeueReusableCell(withIdentifier: "photoCell", for: indexPath) as? PhotoTableViewCell else { fatalError("Wrong cell type") }
 		cell.photoModel = photoFeed.photos[indexPath.row]
 		return cell
 	}
-
+	
 	override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
 		return PhotoTableViewCell.height(for: photoFeed.photos[indexPath.row], withWidth: self.view.frame.size.width)
 	}
-
+	
 	override func scrollViewDidScroll(_ scrollView: UIScrollView) {
-
+		
 		let currentOffSetY = scrollView.contentOffset.y
 		let contentHeight = scrollView.contentSize.height
 		let screenHeight = UIScreen.main.bounds.size.height
 		let screenfullsBeforeBottom = (contentHeight - currentOffSetY) / screenHeight
 		if screenfullsBeforeBottom < 2.5 {
-				self.fetchNewBatch()
+			self.fetchNewBatch()
 		}
 	}
 }

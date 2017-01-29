@@ -20,36 +20,34 @@
 import AsyncDisplayKit
 
 class PhotoFeedTableNodeController: ASViewController<ASTableNode> {
-
+	
 	var activityIndicator: UIActivityIndicatorView!
 	var photoFeed: PhotoFeedModel
-
+	
 	init() {
 		photoFeed = PhotoFeedModel(initWithPhotoFeedModelType: .photoFeedModelTypePopular, requiredImageSize: screenSizeForWidth)
 		super.init(node: ASTableNode())
 		self.navigationItem.title = "ASDK"
-
+		
 	}
-
+	
 	required init?(coder aDecoder: NSCoder) {
 		fatalError("init(coder:) has not been implemented")
 	}
-
+	
 	override func viewDidLoad() {
-		configActivityIndicator()
+		super.viewDidLoad()
+		setupActivityIndicator()
 		node.allowsSelection = false
 		node.view.separatorStyle = .none
 		node.dataSource = self
 		node.delegate = self
 		node.view.leadingScreensForBatching = 2.5
 		navigationController?.hidesBarsOnSwipe = true
-
 	}
-
+	
 	// helper functions
-
-	func configActivityIndicator() {
-
+	func setupActivityIndicator() {
 		let activityIndicator = UIActivityIndicatorView(activityIndicatorStyle: .gray)
 		self.activityIndicator = activityIndicator
 		let bounds = self.node.frame
@@ -58,15 +56,14 @@ class PhotoFeedTableNodeController: ASViewController<ASTableNode> {
 		activityIndicator.frame = refreshRect
 		self.node.view.addSubview(activityIndicator)
 	}
-
+	
 	var screenSizeForWidth: CGSize = {
 		let screenRect = UIScreen.main.bounds
 		let screenScale = UIScreen.main.scale
 		return CGSize(width: screenRect.size.width * screenScale, height: screenRect.size.width * screenScale)
 	}()
-
+	
 	func fetchNewBatchWithContext(_ context: ASBatchContext?) {
-
 		activityIndicator.startAnimating()
 		photoFeed.updateNewBatchOfPopularPhotos() { additions, connectionStatus in
 			switch connectionStatus {
@@ -83,7 +80,7 @@ class PhotoFeedTableNodeController: ASViewController<ASTableNode> {
 			}
 		}
 	}
-
+	
 	func addRowsIntoTableNode(newPhotoCount newPhotos: Int) {
 		let indexRange = (photoFeed.photos.count - newPhotos..<photoFeed.photos.count)
 		let indexPaths = indexRange.map { IndexPath(row: $0, section: 0) }
@@ -92,11 +89,11 @@ class PhotoFeedTableNodeController: ASViewController<ASTableNode> {
 }
 
 extension PhotoFeedTableNodeController: ASTableDataSource, ASTableDelegate {
-
+	
 	func tableNode(_ tableNode: ASTableNode, numberOfRowsInSection section: Int) -> Int {
 		return photoFeed.numberOfItemsInFeed
 	}
-
+	
 	func tableNode(_ tableNode: ASTableNode, nodeBlockForRowAt indexPath: IndexPath) -> ASCellNodeBlock {
 		let photo = photoFeed.photos[indexPath.row]
 		let nodeBlock: ASCellNodeBlock = { _ in
@@ -104,11 +101,11 @@ extension PhotoFeedTableNodeController: ASTableDataSource, ASTableDelegate {
 		}
 		return nodeBlock
 	}
-
+	
 	func shouldBatchFetchForCollectionNode(collectionNode: ASCollectionNode) -> Bool {
 		return true
 	}
-
+	
 	func tableNode(_ tableNode: ASTableNode, willBeginBatchFetchWith context: ASBatchContext) {
 		fetchNewBatchWithContext(context)
 	}

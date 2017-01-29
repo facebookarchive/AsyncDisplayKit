@@ -20,7 +20,7 @@
 import UIKit
 
 class PhotoTableViewCell: UITableViewCell {
-
+	
 	var photoModel: PhotoModel? {
 		didSet {
 			if let model = photoModel {
@@ -38,23 +38,14 @@ class PhotoTableViewCell: UITableViewCell {
 			}
 		}
 	}
-
-	override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
-		super.init(style: style, reuseIdentifier: reuseIdentifier)
-		setupViews()
-	}
-
-	required init?(coder aDecoder: NSCoder) {
-		fatalError("init(coder:) has not been implemented")
-	}
-
+	
 	let photoImageView: NetworkImageView = {
 		let imageView = NetworkImageView()
 		imageView.contentMode = .scaleAspectFill
 		imageView.translatesAutoresizingMaskIntoConstraints = false
 		return imageView
 	}()
-
+	
 	let avatarImageView: NetworkImageView = {
 		let imageView = NetworkImageView()
 		imageView.contentMode = .scaleAspectFill
@@ -63,32 +54,41 @@ class PhotoTableViewCell: UITableViewCell {
 		imageView.clipsToBounds = true
 		return imageView
 	}()
-
+	
 	let usernameLabel: UILabel = {
 		let label = UILabel()
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
-
+	
 	let timeIntervalLabel: UILabel = {
 		let label = UILabel()
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
-
+	
 	let photoLikesLabel: UILabel = {
 		let label = UILabel()
 		label.translatesAutoresizingMaskIntoConstraints = false
 		return label
 	}()
-
+	
 	let photoDescriptionLabel: UILabel = {
 		let label = UILabel()
 		label.translatesAutoresizingMaskIntoConstraints = false
 		label.numberOfLines = 3
 		return label
 	}()
-
+	
+	override init(style: UITableViewCellStyle, reuseIdentifier: String?) {
+		super.init(style: style, reuseIdentifier: reuseIdentifier)
+		setupViews()
+	}
+	
+	required init?(coder aDecoder: NSCoder) {
+		fatalError("init(coder:) has not been implemented")
+	}
+	
 	func setupViews() {
 		addSubview(photoImageView)
 		addSubview(avatarImageView)
@@ -98,9 +98,9 @@ class PhotoTableViewCell: UITableViewCell {
 		addSubview(photoDescriptionLabel)
 		setupConstraints()
 	}
-
+	
 	func setupConstraints() {
-
+		
 		NSLayoutConstraint.activate ([
 			//photoImageView
 			photoImageView.topAnchor.constraint(equalTo: topAnchor, constant: Constants.CellLayout.HeaderHeight),
@@ -126,9 +126,9 @@ class PhotoTableViewCell: UITableViewCell {
 			photoDescriptionLabel.leftAnchor.constraint(equalTo: leftAnchor, constant: Constants.CellLayout.HorizontalBuffer),
 			photoDescriptionLabel.rightAnchor.constraint(equalTo: rightAnchor, constant: -Constants.CellLayout.HorizontalBuffer),
 			photoDescriptionLabel.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -Constants.CellLayout.VerticalBuffer)
-		])
+			])
 	}
-
+	
 	class func height(for photo: PhotoModel, withWidth width: CGFloat) -> CGFloat {
 		let photoHeight = width
 		let font = UIFont.systemFont(ofSize: Constants.CellLayout.FontSize)
@@ -136,7 +136,7 @@ class PhotoTableViewCell: UITableViewCell {
 		let descriptionAttrString = photo.attrStringForDescription(withSize: Constants.CellLayout.FontSize)
 		let availableWidth = width - Constants.CellLayout.HorizontalBuffer * 2
 		let descriptionHeight = descriptionAttrString.boundingRect(with: CGSize(width: availableWidth, height: CGFloat.greatestFiniteMagnitude), options: .usesLineFragmentOrigin, context: nil).size.height
-
+		
 		return likesHeight + descriptionHeight + photoHeight + Constants.CellLayout.HeaderHeight + Constants.CellLayout.VerticalBuffer * 3
 	}
 }
