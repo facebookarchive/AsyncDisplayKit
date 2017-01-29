@@ -8,7 +8,11 @@
 
 /**
  * If you are using AsyncDisplayKit with IGListKit, you should use
- * these method implementations
+ * these macros to provide implementations of methods like 
+ * -cellForItemAtIndex: that don't apply when used with AsyncDisplayKit.
+ *
+ * Your section controllers should also conform to @c ASSectionController and your
+ * supplementary view sources should conform to @c ASSupplementaryNodeSource.
  */
 
 #if IG_LIST_KIT
@@ -47,7 +51,7 @@ return CGSizeZero; \
 #define ASIGSectionControllerCellForIndexImplementation \
 - (__kindof UICollectionViewCell *)cellForItemAtIndex:(NSInteger)index\
 {\
-return [self.collectionContext dequeueReusableCellOfClass:NSClassFromString(@"_ASCollectionViewCell") forSectionController:self atIndex:index]; \
+return [self.collectionContext dequeueReusableCellOfClass:[_ASCollectionViewCell class] forSectionController:self atIndex:index]; \
 }\
 
 #define ASIGSectionControllerSizeForItemImplementation \
