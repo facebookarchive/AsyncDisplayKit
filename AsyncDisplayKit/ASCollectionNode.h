@@ -599,19 +599,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
 - (void)collectionNode:(ASCollectionNode *)collectionNode willDisplayItemWithNode:(ASCellNode *)node;
-
-/**
- * This method will only be called if you are using cellForItemAtIndexPath: (not ASCellNode's). 
- * See documentation at collectionView:cellForItemAtIndexPath: method in this class.
- */
-- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath NS_AVAILABLE_IOS(8_0);
-
 - (void)collectionNode:(ASCollectionNode *)collectionNode didEndDisplayingItemWithNode:(ASCellNode *)node;
 
 /**
- * This method will only be called if you are using cellForItemAtIndexPath: (not ASCellNode's). 
+ * These two methods will only be called if you are using cellForItemAtIndexPath: (not ASCellNode's).
  * See documentation at collectionView:cellForItemAtIndexPath: method in this class.
  */
+- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath NS_AVAILABLE_IOS(8_0);
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath;
 
 - (void)collectionNode:(ASCollectionNode *)collectionNode willDisplaySupplementaryElementWithNode:(ASCellNode *)node NS_AVAILABLE_IOS(8_0);
