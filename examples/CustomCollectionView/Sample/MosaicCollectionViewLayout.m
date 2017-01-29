@@ -54,7 +54,7 @@
     top += _sectionInset.top;
     
     if (_headerHeight > 0) {
-      CGSize headerSize = [self _headerSizeForSection:section];
+      CGSize headerSize = [self headerSizeForSection:section];
       UICollectionViewLayoutAttributes *attributes = [UICollectionViewLayoutAttributes
                                                       layoutAttributesForSupplementaryViewOfKind:UICollectionElementKindSectionHeader
                                                       withIndexPath:[NSIndexPath indexPathForItem:0 inSection:section]];
@@ -75,7 +75,7 @@
       NSUInteger columnIndex = [self _shortestColumnIndexInSection:section];
       NSIndexPath *indexPath = [NSIndexPath indexPathForItem:idx inSection:section];
       
-      CGSize itemSize = [self _itemSizeAtIndexPath:indexPath];
+      CGSize itemSize = [self itemSizeAtIndexPath:indexPath];
       CGFloat xOffset = _sectionInset.left + (columnWidth + _columnSpacing) * columnIndex;
       CGFloat yOffset = [_columnHeights[section][columnIndex] floatValue];
       
@@ -146,7 +146,7 @@
   return ([self _widthForSection:section] - ((_numberOfColumns - 1) * _columnSpacing)) / _numberOfColumns;
 }
 
-- (CGSize)_itemSizeAtIndexPath:(NSIndexPath *)indexPath
+- (CGSize)itemSizeAtIndexPath:(NSIndexPath *)indexPath
 {
   CGSize size = CGSizeMake([self _columnWidthForSection:indexPath.section], 0);
   CGSize originalSize = [[self _delegate] collectionView:self.collectionView layout:self originalItemSizeAtIndexPath:indexPath];
@@ -156,7 +156,7 @@
   return size;
 }
 
-- (CGSize)_headerSizeForSection:(NSUInteger)section
+- (CGSize)headerSizeForSection:(NSInteger)section
 {
   return CGSizeMake([self _widthForSection:section], _headerHeight);
 }
@@ -196,39 +196,6 @@
 - (id<MosaicCollectionViewLayoutDelegate>)_delegate
 {
   return (id<MosaicCollectionViewLayoutDelegate>)self.collectionView.delegate;
-}
-
-@end
-
-@implementation MosaicCollectionViewLayoutInspector
-
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
-{
-  MosaicCollectionViewLayout *layout = (MosaicCollectionViewLayout *)[collectionView collectionViewLayout];
-  return ASSizeRangeMake(CGSizeZero, [layout _itemSizeAtIndexPath:indexPath]);
-}
-
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
-{
-  MosaicCollectionViewLayout *layout = (MosaicCollectionViewLayout *)[collectionView collectionViewLayout];
-  return ASSizeRangeMake(CGSizeZero, [layout _headerSizeForSection:indexPath.section]);
-}
-
-- (ASScrollDirection)scrollableDirections
-{
-  return ASScrollDirectionVerticalDirections;
-}
-
-/**
- * Asks the inspector for the number of supplementary views for the given kind in the specified section.
- */
-- (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
-{
-  if ([kind isEqualToString:UICollectionElementKindSectionHeader]) {
-    return 1;
-  } else {
-    return 0;
-  }
 }
 
 @end

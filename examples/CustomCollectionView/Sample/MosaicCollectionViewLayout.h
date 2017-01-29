@@ -28,14 +28,13 @@
 @property (assign, nonatomic) UIEdgeInsets interItemSpacing;
 @property (assign, nonatomic) CGFloat headerHeight;
 
+- (CGSize)itemSizeAtIndexPath:(NSIndexPath *)indexPath;
+- (CGSize)headerSizeForSection:(NSInteger)section;
+
 @end
 
 @protocol MosaicCollectionViewLayoutDelegate <ASCollectionDelegate>
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(MosaicCollectionViewLayout *)layout originalItemSizeAtIndexPath:(NSIndexPath *)indexPath;
-
-@end
-
-@interface MosaicCollectionViewLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
 
 @end

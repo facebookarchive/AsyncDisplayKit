@@ -213,8 +213,10 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     unsigned int scrollViewWillBeginDragging:1;
     unsigned int scrollViewDidEndDragging:1;
     unsigned int scrollViewWillEndDragging:1;
+    unsigned int collectionViewWillDisplayCellForItem:1;
     unsigned int collectionViewWillDisplayNodeForItem:1;
     unsigned int collectionViewWillDisplayNodeForItemDeprecated:1;
+    unsigned int collectionViewDidEndDisplayingCellForItem:1;
     unsigned int collectionViewDidEndDisplayingNodeForItem:1;
     unsigned int collectionViewShouldSelectItem:1;
     unsigned int collectionViewDidSelectItem:1;
@@ -250,6 +252,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   struct {
     unsigned int collectionViewNodeForItem:1;
     unsigned int collectionViewNodeBlockForItem:1;
+    unsigned int collectionViewCellForItem:1;
     unsigned int collectionViewNodeForSupplementaryElement:1;
     unsigned int numberOfSectionsInCollectionView:1;
     unsigned int collectionViewNumberOfItemsInSection:1;
@@ -472,6 +475,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     
     _asyncDataSourceFlags.collectionViewNodeForItem = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForItemAtIndexPath:)];
     _asyncDataSourceFlags.collectionViewNodeBlockForItem = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeBlockForItemAtIndexPath:)];
+    _asyncDataSourceFlags.collectionViewCellForItem = [_asyncDataSource respondsToSelector:@selector(collectionView:cellForItemAtIndexPath:)];
     _asyncDataSourceFlags.numberOfSectionsInCollectionView = [_asyncDataSource respondsToSelector:@selector(numberOfSectionsInCollectionView:)];
     _asyncDataSourceFlags.collectionViewNumberOfItemsInSection = [_asyncDataSource respondsToSelector:@selector(collectionView:numberOfItemsInSection:)];
     _asyncDataSourceFlags.collectionViewNodeForSupplementaryElement = [_asyncDataSource respondsToSelector:@selector(collectionView:nodeForSupplementaryElementOfKind:atIndexPath:)];
@@ -530,10 +534,12 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     _asyncDelegateFlags.scrollViewWillEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
     _asyncDelegateFlags.scrollViewWillBeginDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillBeginDragging:)];
     _asyncDelegateFlags.scrollViewDidEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)];
+    _asyncDelegateFlags.collectionViewWillDisplayCellForItem = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayCell:forItemAtIndexPath:)];
     _asyncDelegateFlags.collectionViewWillDisplayNodeForItem = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNode:forItemAtIndexPath:)];
     if (_asyncDelegateFlags.collectionViewWillDisplayNodeForItem == NO) {
       _asyncDelegateFlags.collectionViewWillDisplayNodeForItemDeprecated = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNodeForItemAtIndexPath:)];
     }
+    _asyncDelegateFlags.collectionViewDidEndDisplayingCellForItem = [_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingCell:forItemAtIndexPath:)];
     _asyncDelegateFlags.collectionViewDidEndDisplayingNodeForItem = [_asyncDelegate respondsToSelector:@selector(collectionView:didEndDisplayingNode:forItemAtIndexPath:)];
     _asyncDelegateFlags.collectionViewWillBeginBatchFetch = [_asyncDelegate respondsToSelector:@selector(collectionView:willBeginBatchFetchWithContext:)];
     _asyncDelegateFlags.shouldBatchFetchForCollectionView = [_asyncDelegate respondsToSelector:@selector(shouldBatchFetchForCollectionView:)];
@@ -948,23 +954,30 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  _ASCollectionViewCell *cell = [self dequeueReusableCellWithReuseIdentifier:kReuseIdentifier forIndexPath:indexPath];
-  
   ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-  cell.node = node;
-  [_rangeController configureContentView:cell.contentView forCellNode:node];
+  UICollectionViewCell *cell = nil;
   
-  if (!AS_AT_LEAST_IOS8) {
-    // Even though UICV was introduced in iOS 6, and UITableView has always had the equivalent method,
-    // -willDisplayCell: was not introduced until iOS 8 for UICV.  didEndDisplayingCell, however, is available.
-    [self collectionView:collectionView willDisplayCell:cell forItemAtIndexPath:indexPath];
+  if (node.shouldUseUIKitCell) {
+    cell = [self.asyncDataSource collectionView:collectionView cellForItemAtIndexPath:indexPath];
+  } else {
+    cell = [self dequeueReusableCellWithReuseIdentifier:kReuseIdentifier forIndexPath:indexPath];
+    [(_ASCollectionViewCell *)cell setNode:node];
+    [_rangeController configureContentView:cell.contentView forCellNode:node];
   }
-  
   return cell;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(_ASCollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
+  // Since _ASCollectionViewCell is not available for subclassing, this is faster than isKindOfClass:
+  if ([cell class] != [_ASCollectionViewCell class]) {
+    if (_asyncDelegateFlags.collectionViewWillDisplayCellForItem) {
+    	[_asyncDelegate collectionView:collectionView willDisplayCell:cell forItemAtIndexPath:indexPath];
+    }
+    [_rangeController setNeedsUpdate];
+    return;
+  }
+  
   ASCellNode *cellNode = [cell node];
   cellNode.scrollView = collectionView;
   
@@ -1001,6 +1014,15 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(_ASCollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
+  // Since _ASCollectionViewCell is not available for subclassing, this is faster than isKindOfClass:
+  if ([cell class] != [_ASCollectionViewCell class]) {
+    if (_asyncDelegateFlags.collectionViewDidEndDisplayingCellForItem) {
+    	[_asyncDelegate collectionView:collectionView didEndDisplayingCell:cell forItemAtIndexPath:indexPath];
+    }
+    [_rangeController setNeedsUpdate];
+    return;
+  }
+  
   ASCellNode *cellNode = [cell node];
   ASDisplayNodeAssertNotNil(cellNode, @"Expected node associated with removed cell not to be nil.");
 
@@ -1430,44 +1452,46 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 #pragma mark - ASDataControllerSource
 
-- (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
+- (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath
+{
   ASCellNodeBlock block = nil;
+  ASCellNode *cell = nil;
 
   if (_asyncDataSourceFlags.collectionNodeNodeBlockForItem) {
     GET_COLLECTIONNODE_OR_RETURN(collectionNode, ^{ return [[ASCellNode alloc] init]; });
     block = [_asyncDataSource collectionNode:collectionNode nodeBlockForItemAtIndexPath:indexPath];
   } else if (_asyncDataSourceFlags.collectionNodeNodeForItem) {
     GET_COLLECTIONNODE_OR_RETURN(collectionNode, ^{ return [[ASCellNode alloc] init]; });
-    ASCellNode *node = [_asyncDataSource collectionNode:collectionNode nodeForItemAtIndexPath:indexPath];
-    if ([node isKindOfClass:[ASCellNode class]]) {
-      block = ^{
-        return node;
-      };
-    } else {
-      ASDisplayNodeFailAssert(@"Data source returned invalid node from tableNode:nodeForRowAtIndexPath:. Node: %@", node);
-    }
-  } else if (_asyncDataSourceFlags.collectionViewNodeBlockForItem) {
+    cell = [_asyncDataSource collectionNode:collectionNode nodeForItemAtIndexPath:indexPath];
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+  } else if (_asyncDataSourceFlags.collectionViewNodeBlockForItem) {
     block = [_asyncDataSource collectionView:self nodeBlockForItemAtIndexPath:indexPath];
   } else if (_asyncDataSourceFlags.collectionViewNodeForItem) {
-    ASCellNode *node = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
+    cell = [_asyncDataSource collectionView:self nodeForItemAtIndexPath:indexPath];
+  }
 #pragma clang diagnostic pop
-    if ([node isKindOfClass:[ASCellNode class]]) {
-      block = ^{
-        return node;
-      };
-    } else {
-      ASDisplayNodeFailAssert(@"Data source returned invalid node from tableView:nodeForRowAtIndexPath:. Node: %@", node);
-    }
+
+  // Handle nil node block or cell
+  if (cell && [cell isKindOfClass:[ASCellNode class]]) {
+    block = ^{
+      return cell;
+    };
   }
 
-  // Handle nil node block
   if (block == nil) {
-    ASDisplayNodeFailAssert(@"ASTableNode could not get a node block for row at index path %@", indexPath);
-    block = ^{
-      return [[ASCellNode alloc] init];
-    };
+    if (_asyncDataSourceFlags.collectionViewCellForItem) {
+      block = ^{
+        ASCellNode *cell = [[ASCellNode alloc] init];
+        cell.shouldUseUIKitCell = YES;
+        return cell;
+      };
+    } else {
+      ASDisplayNodeFailAssert(@"ASCollection could not get a node block for row at index path %@: %@", indexPath, cell);
+      block = ^{
+        return [[ASCellNode alloc] init];
+      };
+    }
   }
 
   // Wrap the node block

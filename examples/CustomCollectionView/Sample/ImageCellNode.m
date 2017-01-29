@@ -39,4 +39,14 @@
   return [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:_imageNode];
 }
 
+- (void)setImage:(UIImage *)image
+{
+  _imageNode.image = image;
+}
+
+- (UIImage *)image
+{
+  return _imageNode.image;
+}
+
 @end
