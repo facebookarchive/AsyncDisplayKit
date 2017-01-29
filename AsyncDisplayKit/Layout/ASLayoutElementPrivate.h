@@ -8,6 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import "ASAvailability.h"
 #import "ASDimension.h"
 
 #if AS_TARGET_OS_IOS
@@ -96,13 +97,8 @@ typedef struct ASLayoutElementStyleExtensions {
   // Values to store extensions
   BOOL boolExtensions[kMaxLayoutElementBoolExtensions];
   NSInteger integerExtensions[kMaxLayoutElementStateIntegerExtensions];
-#if AS_TARGET_OS_IOS
   UIEdgeInsets edgeInsetsExtensions[kMaxLayoutElementStateEdgeInsetExtensions];
-#else
-  NSEdgeInsets edgeInsetsExtensions[kMaxLayoutElementStateEdgeInsetExtensions];
-#endif
 } ASLayoutElementStyleExtensions;
-
 
 #define ASLayoutElementStyleExtensibilityForwarding \
 - (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx\

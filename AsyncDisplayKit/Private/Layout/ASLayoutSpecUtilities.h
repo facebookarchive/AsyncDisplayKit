@@ -83,44 +83,22 @@ inline CGSize operator-(const CGSize &s1, const CGSize &s2)
   return { s1.width - s2.width, s1.height - s2.height };
 }
 
-#if AS_TARGET_OS_IOS
-  inline UIEdgeInsets operator+(const UIEdgeInsets &e1, const UIEdgeInsets &e2)
-  {
-    return { e1.top + e2.top, e1.left + e2.left, e1.bottom + e2.bottom, e1.right + e2.right };
-  }
+inline UIEdgeInsets operator+(const UIEdgeInsets &e1, const UIEdgeInsets &e2)
+{
+return { e1.top + e2.top, e1.left + e2.left, e1.bottom + e2.bottom, e1.right + e2.right };
+}
 
-  inline UIEdgeInsets operator-(const UIEdgeInsets &e1, const UIEdgeInsets &e2)
-  {
-    return { e1.top - e2.top, e1.left - e2.left, e1.bottom - e2.bottom, e1.right - e2.right };
-  }
+inline UIEdgeInsets operator-(const UIEdgeInsets &e1, const UIEdgeInsets &e2)
+{
+return { e1.top - e2.top, e1.left - e2.left, e1.bottom - e2.bottom, e1.right - e2.right };
+}
 
-  inline UIEdgeInsets operator*(const UIEdgeInsets &e1, const UIEdgeInsets &e2)
-  {
-    return { e1.top * e2.top, e1.left * e2.left, e1.bottom * e2.bottom, e1.right * e2.right };
-  }
+inline UIEdgeInsets operator*(const UIEdgeInsets &e1, const UIEdgeInsets &e2)
+{
+return { e1.top * e2.top, e1.left * e2.left, e1.bottom * e2.bottom, e1.right * e2.right };
+}
 
-  inline UIEdgeInsets operator-(const UIEdgeInsets &e)
-  {
-    return { -e.top, -e.left, -e.bottom, -e.right };
-  }
-#else
-  inline NSEdgeInsets operator+(const NSEdgeInsets &e1, const NSEdgeInsets &e2)
-  {
-    return { e1.top + e2.top, e1.left + e2.left, e1.bottom + e2.bottom, e1.right + e2.right };
-  }
-
-  inline NSEdgeInsets operator-(const NSEdgeInsets &e1, const NSEdgeInsets &e2)
-  {
-    return { e1.top - e2.top, e1.left - e2.left, e1.bottom - e2.bottom, e1.right - e2.right };
-  }
-
-  inline NSEdgeInsets operator*(const NSEdgeInsets &e1, const NSEdgeInsets &e2)
-  {
-    return { e1.top * e2.top, e1.left * e2.left, e1.bottom * e2.bottom, e1.right * e2.right };
-  }
-
-  inline NSEdgeInsets operator-(const NSEdgeInsets &e)
-  {
-    return { -e.top, -e.left, -e.bottom, -e.right };
-  }
-#endif
+inline UIEdgeInsets operator-(const UIEdgeInsets &e)
+{
+return { -e.top, -e.left, -e.bottom, -e.right };
+}

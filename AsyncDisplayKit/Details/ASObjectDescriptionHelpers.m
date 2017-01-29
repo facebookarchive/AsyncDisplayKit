@@ -24,7 +24,6 @@ NSString *ASGetDescriptionValueString(id object)
     NSValue *value = object;
     const char *type = value.objCType;
     
-#if AS_TARGET_OS_IOS
     if (strcmp(type, @encode(CGRect)) == 0) {
       CGRect rect = [value CGRectValue];
       return [NSString stringWithFormat:@"(%g %g; %g %g)", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height];
@@ -33,16 +32,6 @@ NSString *ASGetDescriptionValueString(id object)
     } else if (strcmp(type, @encode(CGPoint)) == 0) {
       return NSStringFromCGPoint(value.CGPointValue);
     }
-#else
-    if (strcmp(type, @encode(CGRect)) == 0) {
-        NSRect rect = [value rectValue];
-      return [NSString stringWithFormat:@"(%g %g; %g %g)", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height];
-    } else if (strcmp(type, @encode(CGSize)) == 0) {
-      return NSStringFromSize(value.sizeValue);
-    } else if (strcmp(type, @encode(CGPoint)) == 0) {
-      return NSStringFromPoint(value.pointValue);
-    }
-#endif
     
   } else if ([object isKindOfClass:[NSIndexSet class]]) {
     return [object as_smallDescription];

@@ -65,3 +65,47 @@
 
 #define AS_TARGET_OS_OSX (!(TARGET_OS_IOS || TARGET_OS_TV || TARGET_OS_WATCH))
 #define AS_TARGET_OS_IOS TARGET_OS_IPHONE
+
+#if AS_TARGET_OS_OSX
+
+#define UIEdgeInsets NSEdgeInsets
+#define NSStringFromCGSize NSStringFromSize
+#define NSStringFromCGPoint NSStringFromPoint
+
+#import <Foundation/Foundation.h>
+
+@interface NSValue (ASAvailability)
++ (NSValue *)valueWithCGPoint:(CGPoint)point;
++ (NSValue *)valueWithCGSize:(CGSize)size;
+- (CGRect)CGRectValue;
+- (CGPoint)CGPointValue;
+- (CGSize)CGSizeValue;
+@end
+
+@implementation NSValue(ASAvailability)
++ (NSValue *)valueWithCGPoint:(CGPoint)point
+{
+  return [self valueWithPoint:point];
+}
++ (NSValue *)valueWithCGSize:(CGSize)size
+{
+  return [self valueWithSize:size];
+}
+- (CGRect)CGRectValue
+{
+  return self.rectValue;
+}
+
+- (CGPoint)CGPointValue
+{
+  return self.pointValue;
+}
+
+- (CGSize)CGSizeValue
+{
+  return self.sizeValue;
+}
+@end
+
+
+#endif

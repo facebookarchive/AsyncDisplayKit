@@ -27,13 +27,8 @@
 - (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx;
 - (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx;
 
-#if AS_TARGET_OS_IOS
 - (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx;
 - (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx;
-#else
-- (void)setLayoutOptionExtensionEdgeInsets:(NSEdgeInsets)value atIndex:(int)idx;
-- (NSEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx;
-#endif
 
 
 @end

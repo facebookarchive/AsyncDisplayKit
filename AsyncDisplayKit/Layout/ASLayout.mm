@@ -320,4 +320,3 @@ ASLayout *ASCalculateRootLayout(id<ASLayoutElement> rootLayoutElement, const ASS
   // Here could specific verfication happen
   return layout;
 }
-

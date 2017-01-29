@@ -8,11 +8,11 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import "ASAvailability.h"
 #import "ASLayoutSpec.h"
 #import "ASLayoutSpecPrivate.h"
 #import "ASLayoutSpec+Subclasses.h"
 #import "ASLayoutSpec+Debug.h"
-
 #import "ASLayoutElementStylePrivate.h"
 #import "ASEqualityHelpers.h"
 #import "ASInternalHelpers.h"
@@ -47,7 +47,9 @@
   }
   
   _isMutable = YES;
+#if AS_TARGET_OS_IOS
   _layoutElementTraitCollection = ASLayoutElementTraitCollectionMakeDefault();
+#endif
   _childrenArray = [[NSMutableArray alloc] init];
   
   return self;
@@ -69,21 +71,27 @@
 
 - (id<ASLayoutElement>)finalLayoutElement
 {
+#if ASLAYOUTSPEC_DEBUG
   if (ASLayoutElementGetCurrentContext().needsVisualizeNode && !self.neverShouldVisualize) {
-    return [[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:self];
+    return self;
   } else {
     return self;
   }
+#else
+  return self;
+#endif
 }
 
 - (void)recursivelySetShouldVisualize:(BOOL)visualize
 {
   NSMutableArray *mutableChildren = [self.children mutableCopy];
-  
+
+#if ASLAYOUTSPEC_DEBUG
   for (id<ASLayoutElement>layoutElement in self.children) {
     if (layoutElement.layoutElementType == ASLayoutElementTypeLayoutSpec) {
+
+      // No visualizer support on macOS yet
       ASLayoutSpec *layoutSpec = (ASLayoutSpec *)layoutElement;
-      
       [mutableChildren replaceObjectAtIndex:[mutableChildren indexOfObjectIdenticalTo:layoutSpec]
                                  withObject:[[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:layoutSpec]];
       
@@ -91,6 +99,7 @@
       layoutSpec.shouldVisualize = visualize;
     }
   }
+#endif
   
   if ([mutableChildren count] == 1) {         // HACK for wrapper layoutSpecs (e.g. insetLayoutSpec)
     self.child = mutableChildren[0];
@@ -209,6 +218,8 @@
 
 #pragma mark - ASLayoutElementTraitEnvironment
 
+#if AS_TARGET_OS_IOS
+
 - (ASLayoutElementTraitCollection)layoutElementTraitCollection
 {
   return _layoutElementTraitCollection;
@@ -225,7 +236,11 @@
   return [ASTraitCollection traitCollectionWithASLayoutElementTraitCollection:self.layoutElementTraitCollection];
 }
 
+#endif
+
+#if AS_TARGET_OS_IOS
 ASLayoutElementTraitCollectionDeprecatedImplementation
+#endif
 
 #pragma mark - ASLayoutElementStyleExtensibility
 

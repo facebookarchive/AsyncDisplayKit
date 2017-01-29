@@ -20,9 +20,8 @@
 @protocol ASLayoutElementStylability;
 
 #if AS_TARGET_OS_IOS
-#import <AsyncDisplayKit/ASTraitCollection.h>
+#import "ASTraitCollection.h"
 @protocol ASLayoutElementTraitEnvironment;
-#else
 #endif
 
 NS_ASSUME_NONNULL_BEGIN
@@ -36,6 +35,7 @@ extern CGSize const ASLayoutElementParentSizeUndefined;
 /** Type of ASLayoutElement  */
 typedef NS_ENUM(NSUInteger, ASLayoutElementType) {
   ASLayoutElementTypeLayoutSpec,
+  // TODO: We should think of renaming that to something else as other classes of ASDisplayNode can be an ASLayoutElement -> ASLayoutElementTypeView?
   ASLayoutElementTypeDisplayNode
 };
 
@@ -91,7 +91,7 @@ ASDISPLAYNODE_EXTERN_C_END
 - (nullable NSArray<id<ASLayoutElement>> *)sublayoutElements;
 
 /**
- * @abstract Optional name that is printed by ascii art string and displayed in description. 
+ * @abstract Optional name that is printed by ascii art string and displayed in description.
  */
 @property (nullable, nonatomic, copy) NSString *debugName;
 

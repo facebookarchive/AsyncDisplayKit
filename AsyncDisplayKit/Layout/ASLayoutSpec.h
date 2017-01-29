@@ -31,9 +31,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, weak) id<ASLayoutElement> parent;
 
 /**
- * Adds a child to this layout spec using a default identifier.
- *
- * @param child A child to be added.
+ * First child within the children's array.
  *
  * @discussion Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
  * responsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
@@ -48,9 +46,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, strong, nonatomic) id<ASLayoutElement> child;
 
 /**
- * Adds childen to this layout spec.
- *
- * @param children An array of ASLayoutElement children to be added.
+ * An array of ASLayoutElement children
  * 
  * @discussion Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
  * reponsibility of holding on to the spec children. Some layout specs, like ASStackLayoutSpec,
