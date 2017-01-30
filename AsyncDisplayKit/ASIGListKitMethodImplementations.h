@@ -17,6 +17,8 @@
 
 #if IG_LIST_KIT
 
+#import <AsyncDisplayKit/_ASCollectionViewCell.h>
+
 /**
  * The implementation of viewForSupplementaryElementOfKind that connects
  * IGSupplementaryViewSource to AsyncDisplayKit. Add this into the .m file
@@ -43,22 +45,22 @@
  */
 #define ASIGSupplementarySourceSizeForSupplementaryElementImplementation \
 - (CGSize)sizeForSupplementaryViewOfKind:(NSString *)elementKind atIndex:(NSInteger)index {\
-ASDisplayNodeFailAssert(@"Did not expect %@ to be called.", NSStringFromSelector(_cmd)); \
-return CGSizeZero; \
+  ASDisplayNodeFailAssert(@"Did not expect %@ to be called.", NSStringFromSelector(_cmd)); \
+  return CGSizeZero; \
 }
 
 
 #define ASIGSectionControllerCellForIndexImplementation \
 - (__kindof UICollectionViewCell *)cellForItemAtIndex:(NSInteger)index\
 {\
-return [self.collectionContext dequeueReusableCellOfClass:[_ASCollectionViewCell class] forSectionController:self atIndex:index]; \
+  return [self.collectionContext dequeueReusableCellOfClass:[_ASCollectionViewCell class] forSectionController:self atIndex:index]; \
 }\
 
 #define ASIGSectionControllerSizeForItemImplementation \
 - (CGSize)sizeForItemAtIndex:(NSInteger)index \
 {\
-ASDisplayNodeFailAssert(@"Did not expect %@ to be called.", NSStringFromSelector(_cmd)); \
-return CGSizeZero;\
+  ASDisplayNodeFailAssert(@"Did not expect %@ to be called.", NSStringFromSelector(_cmd)); \
+  return CGSizeZero;\
 }
 
 #endif // IG_LIST_KIT
