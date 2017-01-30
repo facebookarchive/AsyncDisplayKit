@@ -111,7 +111,7 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
 @property (nonatomic, assign) CGRect threadSafeBounds;
 
 // delegate to inform of ASInterfaceState changes (used by ASNodeController)
-@property (nonatomic, weak) id<ASInterfaceState> interfaceStateDelegate;
+@property (nonatomic, weak) id<ASInterfaceStateDelegate> interfaceStateDelegate;
 
 // These methods are recursive, and either union or remove the provided interfaceState to all sub-elements.
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState;

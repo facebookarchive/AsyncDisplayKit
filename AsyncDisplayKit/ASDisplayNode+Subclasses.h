@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
  * variables.
  */
 
-@protocol ASInterfaceState <NSObject>
+@protocol ASInterfaceStateDelegate <NSObject>
 @required
 
 /**
@@ -93,7 +93,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface ASDisplayNode (Subclassing) <ASInterfaceState>
+@interface ASDisplayNode (Subclassing) <ASInterfaceStateDelegate>
 
 #pragma mark - Properties
 /** @name Properties */

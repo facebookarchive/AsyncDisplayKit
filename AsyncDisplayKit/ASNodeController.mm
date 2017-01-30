@@ -38,7 +38,7 @@
 -(void)setNode:(ASDisplayNode *)node
 {
   _node = node;
-  node.interfaceStateDelegate = self;
+  _node.interfaceStateDelegate = self;
 }
 
 // subclass overrides
