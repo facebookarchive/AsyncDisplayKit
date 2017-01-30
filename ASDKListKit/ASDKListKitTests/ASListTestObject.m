@@ -24,7 +24,6 @@
   return [[ASListTestObject alloc] initWithKey:self.key value:self.value];
 }
 
-
 #pragma mark - IGListDiffable
 
 - (id<NSObject>)diffIdentifier

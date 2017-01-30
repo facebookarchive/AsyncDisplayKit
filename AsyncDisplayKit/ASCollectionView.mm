@@ -8,6 +8,10 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import "ASCollectionView.h"
+
+#import <objc/runtime.h>
+
 #import "_ASCollectionViewCell.h"
 #import "ASAssert.h"
 #import "ASAvailability.h"
@@ -29,7 +33,6 @@
 #import "ASSectionContext.h"
 #import "ASCollectionView+Undeprecated.h"
 #import "_ASHierarchyChangeSet.h"
-#import <objc/runtime.h>
 #import "ASCollectionInteropProtocols.h"
 
 /**
