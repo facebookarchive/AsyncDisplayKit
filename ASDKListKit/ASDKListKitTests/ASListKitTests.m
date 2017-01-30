@@ -26,7 +26,8 @@
 
 @implementation ASListKitTests
 
-- (void)setUp {
+- (void)setUp
+{
   [super setUp];
 
   [ASCollectionView swizzleInstanceMethod:@selector(reloadData) withReplacement:JGMethodReplacementProviderBlock {
@@ -52,11 +53,12 @@
                                          viewController:nil
                                        workingRangeSize:0];
   self.adapter.dataSource = self.dataSource;
-  [self.adapter becomeDataSourceAndDelegateForCollectionNode:self.collectionNode];
+  [self.adapter setASDKCollectionNode:self.collectionNode];
   XCTAssertNotNil(self.adapter.collectionView, @"Adapter was not bound to collection view. You may have a stale copy of AsyncDisplayKit that was built without IG_LIST_KIT. Clean Builder Folder IMO.");
 }
 
-- (void)tearDown {
+- (void)tearDown
+{
   [super tearDown];
   XCTAssert([ASCollectionView deswizzleAllMethods]);
   self.reloadDataCount = 0;
@@ -68,7 +70,8 @@
   self.layout = nil;
 }
 
-- (void)test_whenAdapterUpdated_withObjectsOverflow_thatVisibleObjectsIsSubsetOfAllObjects {
+- (void)test_whenAdapterUpdated_withObjectsOverflow_thatVisibleObjectsIsSubsetOfAllObjects
+{
   // each section controller returns n items sized 100x10
   self.dataSource.objects = @[@1, @2, @3, @4, @5, @6];
   XCTestExpectation *e = [self expectationWithDescription:@"Data update completed"];

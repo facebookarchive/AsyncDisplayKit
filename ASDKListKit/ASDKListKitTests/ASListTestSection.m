@@ -11,31 +11,38 @@
 
 @implementation ASListTestSection
 
-- (instancetype)init {
-  if (self = [super init]) {
+- (instancetype)init
+{
+  if (self = [super init])
+{
     _selectedItemIndex = NSNotFound;
   }
   return self;
 }
 
-- (NSInteger)numberOfItems {
+- (NSInteger)numberOfItems
+{
   return self.itemCount;
 }
 
-- (CGSize)sizeForItemAtIndex:(NSInteger)index {
+- (CGSize)sizeForItemAtIndex:(NSInteger)index
+{
   ASDisplayNodeFailAssert(@"Did not expect %@ to be called.", NSStringFromSelector(_cmd));
   return CGSizeMake(100, 10);
 }
 
 ASIGSectionControllerCellForIndexImplementation
 
-- (void)didUpdateToObject:(id)object {
-  if ([object isKindOfClass:[NSNumber class]]) {
+- (void)didUpdateToObject:(id)object
+{
+  if ([object isKindOfClass:[NSNumber class]])
+{
     self.itemCount = [object integerValue];
   }
 }
 
-- (void)didSelectItemAtIndex:(NSInteger)index {
+- (void)didSelectItemAtIndex:(NSInteger)index
+{
   self.selectedItemIndex = index;
 }
 

@@ -11,16 +11,19 @@
 
 @implementation ASListKitTestAdapterDataSource
 
-- (NSArray *)objectsForListAdapter:(IGListAdapter *)listAdapter {
+- (NSArray *)objectsForListAdapter:(IGListAdapter *)listAdapter
+{
   return self.objects;
 }
 
-- (IGListSectionController <IGListSectionType> *)listAdapter:(IGListAdapter *)listAdapter sectionControllerForObject:(id)object {
+- (IGListSectionController <IGListSectionType> *)listAdapter:(IGListAdapter *)listAdapter sectionControllerForObject:(id)object
+{
   ASListTestSection *section = [[ASListTestSection alloc] init];
   return section;
 }
 
-- (nullable UIView *)emptyViewForListAdapter:(IGListAdapter *)listAdapter {
+- (nullable UIView *)emptyViewForListAdapter:(IGListAdapter *)listAdapter
+{
   return nil;
 }
 

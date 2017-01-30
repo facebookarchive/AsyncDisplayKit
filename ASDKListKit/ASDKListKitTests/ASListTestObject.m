@@ -10,7 +10,8 @@
 
 @implementation ASListTestObject
 
-- (instancetype)initWithKey:(id)key value:(id)value {
+- (instancetype)initWithKey:(id)key value:(id)value
+{
   if (self = [super init]) {
     _key = [key copy];
     _value = value;
@@ -18,18 +19,21 @@
   return self;
 }
 
-- (instancetype)copyWithZone:(NSZone *)zone {
+- (instancetype)copyWithZone:(NSZone *)zone
+{
   return [[ASListTestObject alloc] initWithKey:self.key value:self.value];
 }
 
 
 #pragma mark - IGListDiffable
 
-- (id<NSObject>)diffIdentifier {
+- (id<NSObject>)diffIdentifier
+{
   return self.key;
 }
 
-- (BOOL)isEqualToDiffableObject:(id)object {
+- (BOOL)isEqualToDiffableObject:(id)object
+{
   if (object == self) {
     return YES;
   }
