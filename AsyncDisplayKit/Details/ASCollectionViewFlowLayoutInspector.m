@@ -66,24 +66,32 @@
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
+  ASSizeRange result = ASSizeRangeUnconstrained;
   if (_delegateFlags.implementsConstrainedSizeForItemAtIndexPath) {
-    return [collectionView.asyncDelegate collectionNode:collectionView.collectionNode constrainedSizeForItemAtIndexPath:indexPath];
+    result = [collectionView.asyncDelegate collectionNode:collectionView.collectionNode constrainedSizeForItemAtIndexPath:indexPath];
   } else if (_delegateFlags.implementsConstrainedSizeForNodeAtIndexPathDeprecated) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    return [collectionView.asyncDelegate collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
+    result = [collectionView.asyncDelegate collectionView:collectionView constrainedSizeForNodeAtIndexPath:indexPath];
 #pragma clang diagnostic pop
   } else {
     // With 2.0 `collectionView:constrainedSizeForNodeAtIndexPath:` was moved to the delegate. Assert if not implemented on the delegate but on the data source
     ASDisplayNodeAssert([collectionView.asyncDataSource respondsToSelector:@selector(collectionView:constrainedSizeForNodeAtIndexPath:)] == NO, @"collectionView:constrainedSizeForNodeAtIndexPath: was moved from the ASCollectionDataSource to the ASCollectionDelegate.");
   }
-  
-  CGSize itemSize = _layout.itemSize;
-  if (CGSizeEqualToSize(itemSize, kDefaultItemSize) == NO) {
-    return ASSizeRangeMake(itemSize, itemSize);
+
+  // If we got no size range:
+  if (ASSizeRangeEqualToSizeRange(result, ASSizeRangeUnconstrained)) {
+    // Use itemSize if they set it.
+    CGSize itemSize = _layout.itemSize;
+    if (CGSizeEqualToSize(itemSize, kDefaultItemSize) == NO) {
+      result = ASSizeRangeMake(itemSize, itemSize);
+    } else {
+      // Compute constraint from scroll direction otherwise.
+      result = NodeConstrainedSizeForScrollDirection(collectionView);
+    }
   }
   
-  return NodeConstrainedSizeForScrollDirection(collectionView);
+  return result;
 }
 
 - (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath

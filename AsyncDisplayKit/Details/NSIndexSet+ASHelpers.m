@@ -77,4 +77,13 @@
   return result;
 }
 
++ (NSIndexSet *)as_sectionsFromIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  NSMutableIndexSet *result = [NSMutableIndexSet indexSet];
+  for (NSIndexPath *indexPath in indexPaths) {
+    [result addIndex:indexPath.section];
+  }
+  return result;
+}
+
 @end

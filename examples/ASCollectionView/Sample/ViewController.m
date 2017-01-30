@@ -21,7 +21,7 @@
 #import "SupplementaryNode.h"
 #import "ItemNode.h"
 
-@interface ViewController () <ASCollectionDataSource, ASCollectionViewDelegateFlowLayout>
+@interface ViewController () <ASCollectionDataSource, ASCollectionDelegateFlowLayout>
 
 @property (nonatomic, strong) ASCollectionNode *collectionNode;
 @property (nonatomic, strong) NSArray *data;

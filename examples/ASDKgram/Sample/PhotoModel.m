@@ -83,11 +83,7 @@
 
 - (NSAttributedString *)likesAttributedStringWithFontSize:(CGFloat)size
 {
-  NSNumberFormatter *formatter = [[NSNumberFormatter alloc] init];
-  [formatter setNumberStyle:NSNumberFormatterDecimalStyle];
-  NSString *formattedLikesNumber = [formatter stringFromNumber:[[NSNumber alloc] initWithUnsignedInteger:self.likesCount]];
-  
-  NSString *likesString = [NSString stringWithFormat:@"♥︎ %@ likes", formattedLikesNumber];
+  NSString *likesString = [NSString stringWithFormat:@"♥︎ %lu likes", (unsigned long)_likesCount];
 
   return [NSAttributedString attributedStringWithString:likesString fontSize:size color:[UIColor darkBlueColor] firstWordColor:nil];
 }
@@ -100,6 +96,16 @@
 - (NSString *)description
 {
   return [NSString stringWithFormat:@"%@ - %@", _photoID, _descriptionText];
+}
+
+- (id<NSObject>)diffIdentifier
+{
+  return self.photoID;
+}
+
+- (BOOL)isEqualToDiffableObject:(id<IGListDiffable>)object
+{
+  return [self isEqual:object];
 }
 
 @end

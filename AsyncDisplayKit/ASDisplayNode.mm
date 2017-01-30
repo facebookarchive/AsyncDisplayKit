@@ -389,11 +389,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 {
   ASDN::MutexLocker l(__instanceLock__);
   if ([self _isNodeLoaded]) {
-    ASDisplayNodeFailAssert(@"Attempt to call %@ on node after it was loaded. Node: %@", NSStringFromSelector(_cmd), self);
-    return;
-  }
-  
-  if (_onDidLoadBlocks == nil) {
+    ASDisplayNodeAssertThreadAffinity(self);
+    ASDN::MutexUnlocker l(__instanceLock__);
+    body(self);
+  } else if (_onDidLoadBlocks == nil) {
     _onDidLoadBlocks = [NSMutableArray arrayWithObject:body];
   } else {
     [_onDidLoadBlocks addObject:body];
@@ -663,11 +662,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDN::MutexLocker l(__instanceLock__);
 
   ASDisplayNodeLogEvent(self, @"didLoad");
+  [self didLoad];
   for (ASDisplayNodeDidLoadBlock block in _onDidLoadBlocks) {
     block(self);
   }
   _onDidLoadBlocks = nil;
-  [self didLoad];
 }
 
 - (void)didLoad

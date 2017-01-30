@@ -10,6 +10,7 @@
 
 #import "ASCollectionView.h"
 #import "ASCollectionView+Undeprecated.h"
+#import "ASCollectionInternal.h"
 
 #pragma mark - Helper Functions
 
