@@ -48,6 +48,11 @@ static void runLoopSourceCallback(void *info) {
 
 - (void)releaseObjectInBackground:(id)object
 {
+  // Disable background deallocation on iOS 8 and below to avoid crashes related to UIAXDelegateClearer (#2767).
+  if (!AS_AT_LEAST_IOS9) {
+    return;
+  }
+
   _queueLock.lock();
   _queue.push_back(object);
   _queueLock.unlock();
