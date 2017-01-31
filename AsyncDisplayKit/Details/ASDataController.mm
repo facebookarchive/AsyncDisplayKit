@@ -308,18 +308,22 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   }];
 }
 
-- (void)deleteSectionsOfKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSIndexSet *indexSet))completionBlock
+- (void)deleteSections:(NSIndexSet *)indexSet completion:(void (^)())completionBlock
 {
   ASSERT_ON_EDITING_QUEUE;
   if (!indexSet.count || _dataSource == nil) {
     return;
   }
-  
-  [_editingNodes[kind] removeObjectsAtIndexes:indexSet];
+
+  [_editingNodes enumerateKeysAndObjectsUsingBlock:^(NSString *  _Nonnull kind, NSMutableArray *sections, BOOL * _Nonnull stop) {
+    [sections removeObjectsAtIndexes:indexSet];
+  }];
   [_mainSerialQueue performBlockOnMainThread:^{
-    [_completedNodes[kind] removeObjectsAtIndexes:indexSet];
+    [_completedNodes enumerateKeysAndObjectsUsingBlock:^(NSString *  _Nonnull kind, NSMutableArray *sections, BOOL * _Nonnull stop) {
+      [sections removeObjectsAtIndexes:indexSet];
+    }];
     if (completionBlock) {
-      completionBlock(indexSet);
+      completionBlock();
     }
   }];
 }
@@ -390,7 +394,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 {
   ASSERT_ON_EDITING_QUEUE;
   
-  [self deleteSectionsOfKind:ASDataControllerRowNodeKind atIndexSet:indexSet completion:^(NSIndexSet *indexSet) {
+  [self deleteSections:indexSet completion:^() {
     ASDisplayNodeAssertMainThread();
     
     if (_delegateDidDeleteSections)
@@ -898,12 +902,6 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 }
 
 #pragma mark - Data Querying (Subclass API)
-
-- (NSArray<NSIndexPath *> *)indexPathsForEditingNodesOfKind:(NSString *)kind
-{
-  NSArray *nodes = _editingNodes[kind];
-  return nodes != nil ? ASIndexPathsForTwoDimensionalArray(nodes) : nil;
-}
 
 - (NSMutableArray *)editingNodesOfKind:(NSString *)kind
 {

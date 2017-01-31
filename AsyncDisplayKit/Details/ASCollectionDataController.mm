@@ -81,15 +81,10 @@
   
   [self applyPendingSections:sectionIndexes];
   
+  // ASDataController has already deleted all the old sections for us.
+  ASDisplayNodeAssert([self editingNodesOfKind:ASDataControllerRowNodeKind].count == 0, nil);
+
   [_pendingNodeContexts enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, NSMutableArray<ASIndexedNodeContext *> * _Nonnull contexts, __unused BOOL * _Nonnull stop) {
-    // Remove everything that existed before the reload, now that we're ready to insert replacements
-    NSArray *indexPaths = [self indexPathsForEditingNodesOfKind:kind];
-    [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
-    
-    NSArray *editingNodes = [self editingNodesOfKind:kind];
-    NSIndexSet *indexSet = [[NSIndexSet alloc] initWithIndexesInRange:NSMakeRange(0, editingNodes.count)];
-    [self deleteSectionsOfKind:kind atIndexSet:indexSet completion:nil];
-    
     // Insert each section
     NSMutableArray *sections = [NSMutableArray arrayWithCapacity:newSectionCount];
     for (int i = 0; i < newSectionCount; i++) {
@@ -135,22 +130,9 @@
   [_pendingNodeContexts removeAllObjects];
 }
 
-- (void)prepareForDeleteSections:(NSIndexSet *)sections
-{
-  _supplementaryKindsForPendingOperation = [self supplementaryKindsInSections:sections];
-}
-
 - (void)willDeleteSections:(NSIndexSet *)sections
 {
   [_sections removeObjectsAtIndexes:sections];
-
-  for (NSString *kind in _supplementaryKindsForPendingOperation) {
-    NSArray *indexPaths = ASIndexPathsForMultidimensionalArrayAtIndexSet([self editingNodesOfKind:kind], sections);
-    
-    [self deleteNodesOfKind:kind atIndexPaths:indexPaths completion:nil];
-    [self deleteSectionsOfKind:kind atIndexSet:sections completion:nil];
-  }
-  _supplementaryKindsForPendingOperation = nil;
 }
 
 - (void)prepareForInsertRowsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
