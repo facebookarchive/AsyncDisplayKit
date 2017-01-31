@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <UIKit/UIKit.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 #import <algorithm>
 #import <functional>
@@ -85,21 +85,20 @@ inline CGSize operator-(const CGSize &s1, const CGSize &s2)
 
 inline UIEdgeInsets operator+(const UIEdgeInsets &e1, const UIEdgeInsets &e2)
 {
-  return { e1.top + e2.top, e1.left + e2.left, e1.bottom + e2.bottom, e1.right + e2.right };
+return { e1.top + e2.top, e1.left + e2.left, e1.bottom + e2.bottom, e1.right + e2.right };
 }
 
 inline UIEdgeInsets operator-(const UIEdgeInsets &e1, const UIEdgeInsets &e2)
 {
-  return { e1.top - e2.top, e1.left - e2.left, e1.bottom - e2.bottom, e1.right - e2.right };
+return { e1.top - e2.top, e1.left - e2.left, e1.bottom - e2.bottom, e1.right - e2.right };
 }
 
 inline UIEdgeInsets operator*(const UIEdgeInsets &e1, const UIEdgeInsets &e2)
 {
-  return { e1.top * e2.top, e1.left * e2.left, e1.bottom * e2.bottom, e1.right * e2.right };
+return { e1.top * e2.top, e1.left * e2.left, e1.bottom * e2.bottom, e1.right * e2.right };
 }
 
 inline UIEdgeInsets operator-(const UIEdgeInsets &e)
 {
-  return { -e.top, -e.left, -e.bottom, -e.right };
+return { -e.top, -e.left, -e.bottom, -e.right };
 }
-

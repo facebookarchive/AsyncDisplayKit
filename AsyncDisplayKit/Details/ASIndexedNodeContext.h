@@ -11,7 +11,7 @@
 //
 
 #import <AsyncDisplayKit/ASDataController.h>
-#import <AsyncDisplayKit/ASEnvironment.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,14 +24,14 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, strong) NSIndexPath *indexPath;
 @property (nonatomic, readonly, copy, nullable) NSString *supplementaryElementKind;
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSize;
-@property (weak, nonatomic) id<ASEnvironment> environment;
-@property (nonatomic, readonly, assign) ASEnvironmentTraitCollection environmentTraitCollection;
+@property (weak, nonatomic) id<ASLayoutElementTraitEnvironment> traitEnvironment;
+@property (nonatomic, readonly, assign) ASLayoutElementTraitCollection layoutElementTraitCollection;
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
                         indexPath:(NSIndexPath *)indexPath
          supplementaryElementKind:(nullable NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
-                      environment:(id<ASEnvironment>)environment;
+                      environment:(id<ASLayoutElementTraitEnvironment>)environment;
 
 /**
  * @return The node, running the node block if necessary. The node block will be discarded

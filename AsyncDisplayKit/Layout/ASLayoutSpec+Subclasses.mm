@@ -7,8 +7,6 @@
 //
 
 #import "ASLayoutSpec+Subclasses.h"
-
-#import "ASLayoutSpec.h"
 #import "ASLayoutSpecPrivate.h"
 
 #pragma mark - ASNullLayoutSpec
@@ -54,14 +52,9 @@
   if (self.isFinalLayoutElement == NO) {
     id<ASLayoutElement> finalLayoutElement = [child finalLayoutElement];
     if (finalLayoutElement != child) {
-      if (ASEnvironmentStatePropagationEnabled()) {
-        ASEnvironmentStatePropagateUp(finalLayoutElement, child.environmentState.layoutOptionsState);
-      } else {
-        // If state propagation is not enabled the layout options state needs to be copied manually
-        ASEnvironmentState finalLayoutElementEnvironmentState = finalLayoutElement.environmentState;
-        finalLayoutElementEnvironmentState.layoutOptionsState = child.environmentState.layoutOptionsState;
-        finalLayoutElement.environmentState = finalLayoutElementEnvironmentState;
-      }
+#if AS_TARGET_OS_IOS
+      finalLayoutElement.layoutElementTraitCollection = child.layoutElementTraitCollection;
+#endif
       return finalLayoutElement;
     }
   }

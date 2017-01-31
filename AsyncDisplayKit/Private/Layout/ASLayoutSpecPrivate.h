@@ -10,17 +10,16 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-
-#import "ASInternalHelpers.h"
-
+#import "ASAvailability.h"
 #import "ASThread.h"
-#import "ASEnvironmentInternal.h"
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ASLayoutSpec() {
   ASDN::RecursiveMutex __instanceLock__;
-  ASEnvironmentState _environmentState;
+#if AS_TARGET_OS_IOS
+  ASLayoutElementTraitCollection _layoutElementTraitCollection;
+#endif
   ASLayoutElementStyle *_style;
   NSMutableArray *_childrenArray;
 }

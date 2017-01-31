@@ -7,6 +7,9 @@
 //
 
 #import "ASLayoutSpec+Debug.h"
+
+#if ASLAYOUTSPEC_DEBUG
+
 #import "ASDisplayNode+Beta.h"
 #import "AsyncDisplayKit.h"
 #import "ASLayoutElementInspectorNode.h"
@@ -71,3 +74,4 @@
 
 @end
 
+#endif

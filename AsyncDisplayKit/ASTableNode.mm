@@ -12,7 +12,6 @@
 
 #import "ASTableNode.h"
 #import "ASTableViewInternal.h"
-#import "ASEnvironmentInternal.h"
 #import "ASDisplayNode+Subclasses.h"
 #import "ASDisplayNode+FrameworkPrivate.h"
 #import "ASInternalHelpers.h"
@@ -354,7 +353,7 @@
 
 #pragma mark ASEnvironment
 
-ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
+ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 
 #pragma mark - Range Tuning
 

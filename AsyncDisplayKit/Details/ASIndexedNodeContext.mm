@@ -11,7 +11,7 @@
 //
 
 #import "ASIndexedNodeContext.h"
-#import "ASEnvironmentInternal.h"
+#import "ASDisplayNodeExtras.h"
 #import "ASCellNode+Internal.h"
 #import <mutex>
 
@@ -31,7 +31,7 @@
                         indexPath:(NSIndexPath *)indexPath
          supplementaryElementKind:(nullable NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
-                      environment:(id<ASEnvironment>)environment
+                      environment:(id<ASLayoutElementTraitEnvironment>)environment
 {
   NSAssert(nodeBlock != nil && indexPath != nil, @"Node block and index path must not be nil");
   self = [super init];
@@ -40,8 +40,8 @@
     _indexPath = indexPath;
     _supplementaryElementKind = [supplementaryElementKind copy];
     _constrainedSize = constrainedSize;
-    _environment = environment;
-    _environmentTraitCollection = environment.environmentTraitCollection;
+    _traitEnvironment = environment;
+    _layoutElementTraitCollection = environment.layoutElementTraitCollection;
   }
   return self;
 }
@@ -58,8 +58,9 @@
     }
     node.cachedIndexPath = _indexPath;
     node.supplementaryElementKind = _supplementaryElementKind;
-    node.owningNode = (ASDisplayNode *)_environment;
-    ASEnvironmentStatePropagateDown(node, _environmentTraitCollection);
+    node.owningNode = (ASDisplayNode *)_traitEnvironment;
+    ASLayoutElementTraitCollectionPropagateDown(node, _layoutElementTraitCollection);
+
     _node = node;
   }
   return _node;

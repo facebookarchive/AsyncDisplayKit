@@ -19,7 +19,6 @@
 #import "_ASTransitionContext.h"
 #import "ASLayoutElement.h"
 #import "ASLayoutTransition.h"
-#import "ASEnvironment.h"
 #import "ASWeakSet.h"
 
 #import "ASDisplayNode+Beta.h"
@@ -111,13 +110,12 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   NSMutableArray *_subnodes;
   
   ASLayoutElementStyle *_style;
+  ASLayoutElementTraitCollection _layoutElementTraitCollection;
 
   std::atomic_uint _displaySentinel;
 
   // This is the desired contentsScale, not the scale at which the layer's contents should be displayed
   CGFloat _contentsScaleForDisplay;
-
-  ASEnvironmentState _environmentState;
 
   UIEdgeInsets _hitTestSlop;
   
@@ -280,7 +278,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  *  Convenience method to access this node's trait collection struct. Externally, users should interact
  *  with the trait collection via ASTraitCollection
  */
-- (ASEnvironmentTraitCollection)environmentTraitCollection;
+- (ASLayoutElementTraitCollection)layoutElementTraitCollection;
 
 @end
 

@@ -8,12 +8,13 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import "ASLayout.h"
+
 #import <queue>
 
 #import "ASDimension.h"
 #import "ASLayoutSpecUtilities.h"
 #import "ASLayoutSpec+Subclasses.h"
-
 #import "ASInternalHelpers.h"
 #import "ASObjectDescriptionHelpers.h"
 
@@ -319,4 +320,3 @@ ASLayout *ASCalculateRootLayout(id<ASLayoutElement> rootLayoutElement, const ASS
   // Here could specific verfication happen
   return layout;
 }
-
