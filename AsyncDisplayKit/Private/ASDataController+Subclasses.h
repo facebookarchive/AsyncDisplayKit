@@ -20,11 +20,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
 #pragma mark - Internal editing & completed store querying
 
 /**
- * Provides a collection of index paths for nodes of the given kind that are currently in the editing store
- */
-- (NSArray<NSIndexPath *> *)indexPathsForEditingNodesOfKind:(NSString *)kind;
-
-/**
  * Read-only access to the underlying editing nodes of the given kind
  */
 - (NSMutableArray *)editingNodesOfKind:(NSString *)kind;
@@ -67,9 +62,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
 - (void)insertSections:(NSMutableArray *)sections ofKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSArray *sections, NSIndexSet *indexSet))completionBlock;
 
 /**
- * Deletes the given sections of the specified kind in the backing store, calling completion on the main thread when finished.
+ * Deletes the given sections in the backing store, calling completion on the main thread when finished.
  */
-- (void)deleteSectionsOfKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSIndexSet *indexSet))completionBlock;
+- (void)deleteSections:(NSIndexSet *)indexSet completion:(void (^)())completionBlock;
 
 #pragma mark - Data Manipulation Hooks
 
