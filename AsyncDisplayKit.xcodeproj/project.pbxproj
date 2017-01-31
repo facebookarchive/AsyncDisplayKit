@@ -270,6 +270,10 @@
 		8021EC1D1D2B00B100799119 /* UIImage+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 8021EC1A1D2B00B100799119 /* UIImage+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8021EC1E1D2B00B100799119 /* UIImage+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */; };
 		8021EC1F1D2B00B100799119 /* UIImage+ASConvenience.m in Sources */ = {isa = PBXBuildFile; fileRef = 8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */; };
+		80364CC71E3D89410094400C /* ASNodeController.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 8079E6971E3C4A07009D5BB2 /* ASNodeController.h */; };
+		8079E6991E3C4A07009D5BB2 /* ASNodeController.h in Headers */ = {isa = PBXBuildFile; fileRef = 8079E6971E3C4A07009D5BB2 /* ASNodeController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		8079E69A1E3C4A07009D5BB2 /* ASNodeController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8079E6981E3C4A07009D5BB2 /* ASNodeController.mm */; };
+		8079E69B1E3C4A07009D5BB2 /* ASNodeController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8079E6981E3C4A07009D5BB2 /* ASNodeController.mm */; };
 		81E95C141D62639600336598 /* ASTextNodeSnapshotTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 81E95C131D62639600336598 /* ASTextNodeSnapshotTests.m */; };
 		81EE38501C8E94F000456208 /* ASRunLoopQueue.mm in Sources */ = {isa = PBXBuildFile; fileRef = 81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */; };
 		83A7D95A1D44542100BF333E /* ASWeakMap.m in Sources */ = {isa = PBXBuildFile; fileRef = 83A7D9591D44542100BF333E /* ASWeakMap.m */; };
@@ -690,6 +694,7 @@
 			dstSubfolderSpec = 16;
 			files = (
 				CC8525181E3FC316008EABE6 /* _ASCollectionViewCell.h in CopyFiles */,
+				80364CC71E3D89410094400C /* ASNodeController.h in CopyFiles */,
 				690ED59D1E36D140000627C0 /* ASImageNode+tvOS.h in CopyFiles */,
 				690ED59C1E36D13A000627C0 /* ASControlNode+tvOS.h in CopyFiles */,
 				690ED58F1E36BCBF000627C0 /* ASLayoutElementStylePrivate.h in CopyFiles */,
@@ -1071,6 +1076,8 @@
 		7AB338681C55B97B0055FDE8 /* ASRelativeLayoutSpecSnapshotTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASRelativeLayoutSpecSnapshotTests.mm; sourceTree = "<group>"; };
 		8021EC1A1D2B00B100799119 /* UIImage+ASConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+ASConvenience.h"; sourceTree = "<group>"; };
 		8021EC1B1D2B00B100799119 /* UIImage+ASConvenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+ASConvenience.m"; sourceTree = "<group>"; };
+		8079E6971E3C4A07009D5BB2 /* ASNodeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASNodeController.h; sourceTree = "<group>"; };
+		8079E6981E3C4A07009D5BB2 /* ASNodeController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASNodeController.mm; sourceTree = "<group>"; };
 		81E95C131D62639600336598 /* ASTextNodeSnapshotTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTextNodeSnapshotTests.m; sourceTree = "<group>"; };
 		81EE384D1C8E94F000456208 /* ASRunLoopQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASRunLoopQueue.h; path = ../ASRunLoopQueue.h; sourceTree = "<group>"; };
 		81EE384E1C8E94F000456208 /* ASRunLoopQueue.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = ASRunLoopQueue.mm; path = ../ASRunLoopQueue.mm; sourceTree = "<group>"; };
@@ -1389,6 +1396,8 @@
 				68FC85DD1CE29AB700EDD713 /* ASNavigationController.m */,
 				055B9FA61A1C154B00035D6D /* ASNetworkImageNode.h */,
 				055B9FA71A1C154B00035D6D /* ASNetworkImageNode.mm */,
+				8079E6971E3C4A07009D5BB2 /* ASNodeController.h */,
+				8079E6981E3C4A07009D5BB2 /* ASNodeController.mm */,
 				25E327541C16819500A2170C /* ASPagerNode.h */,
 				25E327551C16819500A2170C /* ASPagerNode.m */,
 				A2763D771CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h */,
@@ -2040,6 +2049,7 @@
 				254C6B781BF94DF4003EC431 /* ASTextKitContext.h in Headers */,
 				CC8525151E3FC253008EABE6 /* _ASCollectionViewCell.h in Headers */,
 				B350620A1B010EFD0018CF92 /* ASTableView.h in Headers */,
+				8079E6991E3C4A07009D5BB2 /* ASNodeController.h in Headers */,
 				B350620C1B010EFD0018CF92 /* ASTableViewProtocols.h in Headers */,
 				B350620D1B010EFD0018CF92 /* ASTextNode.h in Headers */,
 				B35062391B010EFD0018CF92 /* ASThread.h in Headers */,
@@ -2212,7 +2222,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		3B9D88CDF51B429C8409E4B6 /* [CP] Copy Pods Resources */ = {
@@ -2277,6 +2287,7 @@
 				68B8A4E31CBDB958007E4543 /* ASWeakProxy.m in Sources */,
 				69E1006F1CA89CB600D88C1B /* ASEnvironmentInternal.mm in Sources */,
 				AC026B711BD57DBF00BBC17E /* _ASHierarchyChangeSet.mm in Sources */,
+				8079E69A1E3C4A07009D5BB2 /* ASNodeController.mm in Sources */,
 				257754BF1BEE458E00737CA5 /* ASTextKitCoreTextAdditions.m in Sources */,
 				058D0A18195D050800B7D73C /* _ASDisplayLayer.mm in Sources */,
 				68355B3C1CB57A5A001D4E68 /* ASImageContainerProtocolCategories.m in Sources */,
@@ -2470,6 +2481,7 @@
 				AC026B721BD57DBF00BBC17E /* _ASHierarchyChangeSet.mm in Sources */,
 				B35062421B010EFD0018CF92 /* _ASAsyncTransactionGroup.m in Sources */,
 				B350624A1B010EFD0018CF92 /* _ASCoreAnimationExtras.mm in Sources */,
+				8079E69B1E3C4A07009D5BB2 /* ASNodeController.mm in Sources */,
 				68EE0DC01C1B4ED300BA1B99 /* ASMainSerialQueue.mm in Sources */,
 				B35062101B010EFD0018CF92 /* _ASDisplayLayer.mm in Sources */,
 				9C55866B1BD54A1900B50E3A /* ASAsciiArtBoxCreator.m in Sources */,
