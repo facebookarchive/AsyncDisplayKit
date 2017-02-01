@@ -25,7 +25,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, copy, nullable) NSString *supplementaryElementKind;
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSize;
 @property (weak, nonatomic) id<ASEnvironment> environment;
-@property (nonatomic, readonly, assign) ASEnvironmentTraitCollection environmentTraitCollection;
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
                         indexPath:(NSIndexPath *)indexPath
