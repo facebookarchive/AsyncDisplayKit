@@ -318,6 +318,9 @@
 		CC0F88631E4281E700576FED /* ASSupplementaryNodeSource.h in Headers */ = {isa = PBXBuildFile; fileRef = CCE04B2B1E314A32006AEBBB /* ASSupplementaryNodeSource.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC0F88661E42822000576FED /* ASNodeController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC0F88641E42822000576FED /* ASNodeController.mm */; };
 		CC0F88671E42822000576FED /* ASNodeController.h in Headers */ = {isa = PBXBuildFile; fileRef = CC0F88651E42822000576FED /* ASNodeController.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		CC0F886B1E4286FA00576FED /* ReferenceImages_32 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F88681E4286FA00576FED /* ReferenceImages_32 */; };
+		CC0F886C1E4286FA00576FED /* ReferenceImages_64 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F88691E4286FA00576FED /* ReferenceImages_64 */; };
+		CC0F886D1E4286FA00576FED /* ReferenceImages_iOS_10 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */; };
 		CC11F97A1DB181180024D77B /* ASNetworkImageNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */; };
 		CC3B20841C3F76D600798563 /* ASPendingStateController.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20811C3F76D600798563 /* ASPendingStateController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		CC3B20861C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
@@ -705,6 +708,9 @@
 		CC0F885E1E4280B800576FED /* _ASCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _ASCollectionViewCell.h; sourceTree = "<group>"; };
 		CC0F88641E42822000576FED /* ASNodeController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASNodeController.mm; sourceTree = "<group>"; };
 		CC0F88651E42822000576FED /* ASNodeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASNodeController.h; sourceTree = "<group>"; };
+		CC0F88681E4286FA00576FED /* ReferenceImages_32 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ReferenceImages_32; sourceTree = "<group>"; };
+		CC0F88691E4286FA00576FED /* ReferenceImages_64 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ReferenceImages_64; sourceTree = "<group>"; };
+		CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ReferenceImages_iOS_10; sourceTree = "<group>"; };
 		CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASNetworkImageNodeTests.m; sourceTree = "<group>"; };
 		CC2E317F1DAC353700EEE891 /* ASCollectionView+Undeprecated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASCollectionView+Undeprecated.h"; sourceTree = "<group>"; };
 		CC3B20811C3F76D600798563 /* ASPendingStateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPendingStateController.h; sourceTree = "<group>"; };
@@ -1036,6 +1042,9 @@
 		058D09C6195D04C000B7D73C /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				CC0F88681E4286FA00576FED /* ReferenceImages_32 */,
+				CC0F88691E4286FA00576FED /* ReferenceImages_64 */,
+				CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */,
 				058D09C7195D04C000B7D73C /* AsyncDisplayKitTests-Info.plist */,
 				058D09C8195D04C000B7D73C /* InfoPlist.strings */,
 			);
@@ -1682,6 +1691,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				CC0F886B1E4286FA00576FED /* ReferenceImages_32 in Resources */,
+				CC0F886C1E4286FA00576FED /* ReferenceImages_64 in Resources */,
+				CC0F886D1E4286FA00576FED /* ReferenceImages_iOS_10 in Resources */,
 				052EE06B1A15A0D8002C6279 /* TestResources in Resources */,
 				058D09CA195D04C000B7D73C /* InfoPlist.strings in Resources */,
 			);
