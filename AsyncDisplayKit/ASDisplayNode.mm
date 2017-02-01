@@ -3853,15 +3853,18 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (ASEnvironmentState)environmentState
 {
+  ASDN::MutexLocker l(__instanceLock__);
   return _environmentState;
 }
 
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState
 {
+  __instanceLock__.lock();
   ASEnvironmentTraitCollection oldTraitCollection = _environmentState.environmentTraitCollection;
   _environmentState = environmentState;
   
   if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(oldTraitCollection, _environmentState.environmentTraitCollection) == NO) {
+    __instanceLock__.unlock();
     [self asyncTraitCollectionDidChange];
   }
 }
@@ -3883,21 +3886,12 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection
 {
+  ASDN::MutexLocker l(__instanceLock__);
   return _environmentState.environmentTraitCollection;
-}
-
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
-{
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, _environmentState.environmentTraitCollection) == NO) {
-    _environmentState.environmentTraitCollection = environmentTraitCollection;
-    ASDisplayNodeLogEvent(self, @"asyncTraitCollectionDidChange: %@", NSStringFromASEnvironmentTraitCollection(environmentTraitCollection));
-    [self asyncTraitCollectionDidChange];
-  }
 }
 
 - (ASTraitCollection *)asyncTraitCollection
 {
-  ASDN::MutexLocker l(__instanceLock__);
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
 }
 

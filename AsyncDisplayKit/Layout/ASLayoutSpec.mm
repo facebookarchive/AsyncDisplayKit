@@ -204,11 +204,13 @@
 
 - (ASEnvironmentState)environmentState
 {
+  ASDN::MutexLocker l(__instanceLock__);
   return _environmentState;
 }
 
 - (void)setEnvironmentState:(ASEnvironmentState)environmentState
 {
+  ASDN::MutexLocker l(__instanceLock__);
   _environmentState = environmentState;
 }
 
@@ -219,17 +221,12 @@
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection
 {
+  ASDN::MutexLocker l(__instanceLock__);
   return _environmentState.environmentTraitCollection;
-}
-
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
-{
-  _environmentState.environmentTraitCollection = environmentTraitCollection;
 }
 
 - (ASTraitCollection *)asyncTraitCollection
 {
-  ASDN::MutexLocker l(__instanceLock__);
   return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
 }
 
