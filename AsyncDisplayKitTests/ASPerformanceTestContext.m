@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "ASPerformanceTestContext.h"
-#import "ASAssert.h"
+#import <AsyncDisplayKit/ASAssert.h>
 
 @interface ASPerformanceTestResult ()
 @property (nonatomic) NSTimeInterval timePer1000;

@@ -10,10 +10,10 @@
 
 #import "ASLayoutSpecSnapshotTestsHelper.h"
 
-#import "ASDisplayNode.h"
-#import "ASLayoutSpec.h"
-#import "ASLayout.h"
-#import "ASDisplayNode+Beta.h"
+#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASLayoutSpec.h>
+#import <AsyncDisplayKit/ASLayout.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 
 @interface ASTestNode : ASDisplayNode
 @property (strong, nonatomic, nullable) ASLayoutSpec *layoutSpecUnderTest;

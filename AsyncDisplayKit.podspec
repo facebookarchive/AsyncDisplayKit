@@ -12,7 +12,7 @@ Pod::Spec.new do |spec|
   spec.weak_frameworks = 'Photos','MapKit','AssetsLibrary'
   spec.requires_arc = true
 
-  spec.ios.deployment_target = '7.0'
+  spec.ios.deployment_target = '8.0'
 
   # Uncomment when fixed: issues with tvOS build for release 2.0
   # spec.tvos.deployment_target = '9.0'

@@ -9,11 +9,12 @@
 //
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
-#import <AsyncDisplayKit/ASTextKitComponents.h>
+#import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASEditableTextNodeDelegate;
+@class ASTextKitComponents;
 
 /**
  @abstract Implements a node that supports text editing.

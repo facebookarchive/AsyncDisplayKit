@@ -10,7 +10,7 @@
 
 
 #import "ASLayoutSpecSnapshotTestsHelper.h"
-#import "ASBackgroundLayoutSpec.h"
+#import <AsyncDisplayKit/ASBackgroundLayoutSpec.h>
 
 @interface ASWrapperSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end

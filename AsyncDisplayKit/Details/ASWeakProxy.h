@@ -11,7 +11,9 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
+AS_SUBCLASSING_RESTRICTED
 @interface ASWeakProxy : NSProxy
 
 /**

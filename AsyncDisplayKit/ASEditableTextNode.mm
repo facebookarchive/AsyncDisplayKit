@@ -8,14 +8,16 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASEditableTextNode.h"
+#import <AsyncDisplayKit/ASEditableTextNode.h>
 
 #import <objc/message.h>
 #import <tgmath.h>
 
-#import "ASDisplayNode+Subclasses.h"
-#import "ASEqualityHelpers.h"
-#import "ASTextNodeWordKerner.h"
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASTextKitComponents.h>
+#import <AsyncDisplayKit/ASTextNodeWordKerner.h>
+#import <AsyncDisplayKit/ASThread.h>
 
 /**
  @abstract Object to hold UITextView's pending UITextInputTraits

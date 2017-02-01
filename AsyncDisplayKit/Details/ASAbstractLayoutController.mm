@@ -8,9 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASAbstractLayoutController.h"
+#import <AsyncDisplayKit/ASAbstractLayoutController.h>
 
-#import "ASAssert.h"
+#import <AsyncDisplayKit/ASAssert.h>
 
 #include <vector>
 

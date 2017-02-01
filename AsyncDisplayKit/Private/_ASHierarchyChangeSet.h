@@ -12,7 +12,7 @@
 
 #import <Foundation/Foundation.h>
 #import <vector>
-#import "ASObjectDescriptionHelpers.h"
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

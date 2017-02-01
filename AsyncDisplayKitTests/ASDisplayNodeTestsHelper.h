@@ -9,7 +9,7 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "ASDimension.h"
+#import <AsyncDisplayKit/ASDimension.h>
 
 @class ASDisplayNode;
 

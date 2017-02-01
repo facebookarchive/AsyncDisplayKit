@@ -13,12 +13,13 @@
 // These methods must never be called or overridden by other classes.
 //
 
-#import "ASDisplayNode.h"
-#import "ASThread.h"
-#import "ASObjectDescriptionHelpers.h"
-#import "ASDisplayNode+Subclasses.h"
+#import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+@protocol ASInterfaceStateDelegate;
 
 /**
  Hierarchy state is propagated from nodes to all of their children when certain behaviors are required from the subtree.

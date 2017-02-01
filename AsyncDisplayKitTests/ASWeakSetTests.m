@@ -11,7 +11,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ASWeakSet.h"
+#import <AsyncDisplayKit/ASWeakSet.h>
 
 @interface ASWeakSetTests : XCTestCase
 

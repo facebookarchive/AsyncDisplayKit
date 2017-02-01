@@ -8,9 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitAttributes.h"
+#import <AsyncDisplayKit/ASTextKitAttributes.h>
 
-#import "ASEqualityHashHelpers.h"
+#import <AsyncDisplayKit/ASEqualityHashHelpers.h>
 
 #include <functional>
 

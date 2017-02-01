@@ -12,7 +12,7 @@
 
 #import <XCTest/XCTest.h>
 
-#import "NSArray+Diffing.h"
+#import <AsyncDisplayKit/NSArray+Diffing.h>
 
 @interface NSArray (ArrayDiffingTests)
 - (NSIndexSet *)_asdk_commonIndexesWithArray:(NSArray *)array compareBlock:(BOOL (^)(id lhs, id rhs))comparison;

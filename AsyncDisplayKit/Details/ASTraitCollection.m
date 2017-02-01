@@ -10,7 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTraitCollection.h"
+#import <AsyncDisplayKit/ASTraitCollection.h>
 #import <AsyncDisplayKit/ASAvailability.h>
 
 @implementation ASTraitCollection
@@ -20,7 +20,7 @@
                  horizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
                    verticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
                 forceTouchCapability:(UIForceTouchCapability)forceTouchCapability
-                 containerSize:(CGSize)windowSize
+                       containerSize:(CGSize)windowSize
 {
     self = [super init];
     if (self) {
@@ -34,56 +34,41 @@
     return self;
 }
 
-+ (ASTraitCollection *)traitCollectionWithDisplayScale:(CGFloat)displayScale
-                                    userInterfaceIdiom:(UIUserInterfaceIdiom)userInterfaceIdiom
-                                   horizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
-                                     verticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
-                                  forceTouchCapability:(UIForceTouchCapability)forceTouchCapability
-                                   containerSize:(CGSize)windowSize
++ (instancetype)traitCollectionWithDisplayScale:(CGFloat)displayScale
+                             userInterfaceIdiom:(UIUserInterfaceIdiom)userInterfaceIdiom
+                            horizontalSizeClass:(UIUserInterfaceSizeClass)horizontalSizeClass
+                              verticalSizeClass:(UIUserInterfaceSizeClass)verticalSizeClass
+                           forceTouchCapability:(UIForceTouchCapability)forceTouchCapability
+                                  containerSize:(CGSize)windowSize
 {
-  return [[[self class] alloc] initWithDisplayScale:displayScale
-                                 userInterfaceIdiom:userInterfaceIdiom
-                                horizontalSizeClass:horizontalSizeClass
-                                  verticalSizeClass:verticalSizeClass
-                               forceTouchCapability:forceTouchCapability
-                             containerSize:windowSize];
+  return [[self alloc] initWithDisplayScale:displayScale
+                         userInterfaceIdiom:userInterfaceIdiom
+                        horizontalSizeClass:horizontalSizeClass
+                          verticalSizeClass:verticalSizeClass
+                       forceTouchCapability:forceTouchCapability
+                              containerSize:windowSize];
 }
 
-+ (ASTraitCollection *)traitCollectionWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits
++ (instancetype)traitCollectionWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits
 {
-    return [[[self class] alloc] initWithDisplayScale:traits.displayScale
-                                   userInterfaceIdiom:traits.userInterfaceIdiom
-                                  horizontalSizeClass:traits.horizontalSizeClass
-                                    verticalSizeClass:traits.verticalSizeClass
-                                 forceTouchCapability:traits.forceTouchCapability
-                                        containerSize:traits.containerSize];
-
+  return [self traitCollectionWithDisplayScale:traits.displayScale
+                            userInterfaceIdiom:traits.userInterfaceIdiom
+                           horizontalSizeClass:traits.horizontalSizeClass
+                             verticalSizeClass:traits.verticalSizeClass
+                          forceTouchCapability:traits.forceTouchCapability
+                                 containerSize:traits.containerSize];
 }
 
-+ (ASTraitCollection *)traitCollectionWithUITraitCollection:(UITraitCollection *)traitCollection
++ (instancetype)traitCollectionWithUITraitCollection:(UITraitCollection *)traitCollection
                                         containerSize:(CGSize)windowSize
 {
-  ASTraitCollection *asyncTraitCollection = nil;
-  if (AS_AT_LEAST_IOS9) {
-    asyncTraitCollection = [[[self class] alloc] initWithDisplayScale:traitCollection.displayScale
-                                                   userInterfaceIdiom:traitCollection.userInterfaceIdiom
-                                                  horizontalSizeClass:traitCollection.horizontalSizeClass
-                                                    verticalSizeClass:traitCollection.verticalSizeClass
-                                                 forceTouchCapability:traitCollection.forceTouchCapability
-                                                  containerSize:windowSize];
-  }
-  else if (AS_AT_LEAST_IOS8) {
-    asyncTraitCollection = [[[self class] alloc] initWithDisplayScale:traitCollection.displayScale
-                                                   userInterfaceIdiom:traitCollection.userInterfaceIdiom
-                                                  horizontalSizeClass:traitCollection.horizontalSizeClass
-                                                    verticalSizeClass:traitCollection.verticalSizeClass
-                                                 forceTouchCapability:UIForceTouchCapabilityUnknown
-                                                  containerSize:windowSize];
-  } else {
-    asyncTraitCollection = [[[self class] alloc] init];
-  }
-  
-  return asyncTraitCollection;
+  UIForceTouchCapability forceTouch = AS_AT_LEAST_IOS9 ? traitCollection.forceTouchCapability : UIForceTouchCapabilityUnknown;
+  return [self traitCollectionWithDisplayScale:traitCollection.displayScale
+                            userInterfaceIdiom:traitCollection.userInterfaceIdiom
+                           horizontalSizeClass:traitCollection.horizontalSizeClass
+                             verticalSizeClass:traitCollection.verticalSizeClass
+                          forceTouchCapability:forceTouch
+                                 containerSize:windowSize];
 }
 
 - (ASEnvironmentTraitCollection)environmentTraitCollection
@@ -100,6 +85,10 @@
 
 - (BOOL)isEqualToTraitCollection:(ASTraitCollection *)traitCollection
 {
+  if (self == traitCollection) {
+    return YES;
+  }
+
   return self.displayScale == traitCollection.displayScale &&
   self.horizontalSizeClass == traitCollection.horizontalSizeClass &&
   self.verticalSizeClass == traitCollection.verticalSizeClass &&

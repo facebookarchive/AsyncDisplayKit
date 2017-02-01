@@ -10,9 +10,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <Foundation/Foundation.h>
-
-#import "ASImageProtocols.h"
+#import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASImageProtocols.h>
 
 @interface UIImage (ASImageContainerProtocol) <ASImageContainerProtocol>
 

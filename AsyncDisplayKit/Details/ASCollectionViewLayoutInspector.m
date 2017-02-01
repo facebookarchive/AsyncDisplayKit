@@ -6,11 +6,11 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASCollectionViewLayoutInspector.h"
+#import <AsyncDisplayKit/ASCollectionViewLayoutInspector.h>
 
-#import "ASCollectionView.h"
-#import "ASCollectionView+Undeprecated.h"
-#import "ASCollectionInternal.h"
+#import <AsyncDisplayKit/ASCollectionView.h>
+#import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
+#import <AsyncDisplayKit/ASCollectionNode.h>
 
 #pragma mark - Helper Functions
 

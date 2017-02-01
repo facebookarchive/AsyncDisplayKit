@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASBaseDefines.h"
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 /** The direction children are stacked in */
 typedef NS_ENUM(NSUInteger, ASStackLayoutDirection) {

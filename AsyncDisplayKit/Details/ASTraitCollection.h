@@ -10,7 +10,11 @@
 
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASEnvironment.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
+AS_SUBCLASSING_RESTRICTED
 @interface ASTraitCollection : NSObject
 
 @property (nonatomic, assign, readonly) CGFloat displayScale;
@@ -20,11 +24,10 @@
 @property (nonatomic, assign, readonly) UIForceTouchCapability forceTouchCapability;
 @property (nonatomic, assign, readonly) CGSize containerSize;
 
-
 + (ASTraitCollection *)traitCollectionWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits;
 
 + (ASTraitCollection *)traitCollectionWithUITraitCollection:(UITraitCollection *)traitCollection
-                                        containerSize:(CGSize)windowSize;
+                                              containerSize:(CGSize)windowSize;
 
 
 + (ASTraitCollection *)traitCollectionWithDisplayScale:(CGFloat)displayScale
@@ -39,3 +42,5 @@
 - (BOOL)isEqualToTraitCollection:(ASTraitCollection *)traitCollection;
 
 @end
+
+NS_ASSUME_NONNULL_END

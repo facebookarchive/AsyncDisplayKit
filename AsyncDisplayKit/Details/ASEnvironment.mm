@@ -8,9 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASEnvironmentInternal.h"
-#import "ASAvailability.h"
-#import "ASObjectDescriptionHelpers.h"
+#import <AsyncDisplayKit/ASEnvironmentInternal.h>
+#import <AsyncDisplayKit/ASAvailability.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 
 ASEnvironmentLayoutOptionsState ASEnvironmentLayoutOptionsStateMakeDefault()
 {
@@ -38,14 +38,12 @@ ASEnvironmentTraitCollection ASEnvironmentTraitCollectionMakeDefault()
 ASEnvironmentTraitCollection ASEnvironmentTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection)
 {
   ASEnvironmentTraitCollection environmentTraitCollection = ASEnvironmentTraitCollectionMakeDefault();
-  if (AS_AT_LEAST_IOS8) {
-    environmentTraitCollection.displayScale = traitCollection.displayScale;
-    environmentTraitCollection.horizontalSizeClass = traitCollection.horizontalSizeClass;
-    environmentTraitCollection.verticalSizeClass = traitCollection.verticalSizeClass;
-    environmentTraitCollection.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
-    if (AS_AT_LEAST_IOS9) {
-      environmentTraitCollection.forceTouchCapability = traitCollection.forceTouchCapability;
-    }
+  environmentTraitCollection.displayScale = traitCollection.displayScale;
+  environmentTraitCollection.horizontalSizeClass = traitCollection.horizontalSizeClass;
+  environmentTraitCollection.verticalSizeClass = traitCollection.verticalSizeClass;
+  environmentTraitCollection.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
+  if (AS_AT_LEAST_IOS9) {
+    environmentTraitCollection.forceTouchCapability = traitCollection.forceTouchCapability;
   }
   return environmentTraitCollection;
 }

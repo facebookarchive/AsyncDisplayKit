@@ -10,9 +10,15 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASVideoPlayerNode.h"
-#import "ASDefaultPlaybackButton.h"
-#import "ASDisplayNode+FrameworkSubclasses.h"
+#if TARGET_OS_IOS
+
+#import <AsyncDisplayKit/ASVideoPlayerNode.h>
+
+#import <AVFoundation/AVFoundation.h>
+
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASDefaultPlaybackButton.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
 
 static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
@@ -968,3 +974,5 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 }
 
 @end
+
+#endif // TARGET_OS_IOS

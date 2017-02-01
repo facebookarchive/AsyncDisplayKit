@@ -8,9 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASBatchContext.h"
+#import <AsyncDisplayKit/ASBatchContext.h>
 
-#import "ASThread.h"
+#import <AsyncDisplayKit/ASThread.h>
 
 typedef NS_ENUM(NSInteger, ASBatchContextState) {
   ASBatchContextStateFetching,

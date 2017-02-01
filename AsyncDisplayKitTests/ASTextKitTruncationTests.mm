@@ -11,8 +11,8 @@
 #import <UIKit/UIKit.h>
 #import <XCTest/XCTest.h>
 
-#import "ASTextKitContext.h"
-#import "ASTextKitTailTruncater.h"
+#import <AsyncDisplayKit/ASTextKitContext.h>
+#import <AsyncDisplayKit/ASTextKitTailTruncater.h>
 
 @interface ASTextKitTruncationTests : XCTestCase
 

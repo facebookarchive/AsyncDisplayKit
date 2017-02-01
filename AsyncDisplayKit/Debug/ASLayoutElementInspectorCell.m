@@ -6,7 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASLayoutElementInspectorCell.h"
+#import <AsyncDisplayKit/ASLayoutElementInspectorCell.h>
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 
 typedef NS_ENUM(NSInteger, CellDataType) {

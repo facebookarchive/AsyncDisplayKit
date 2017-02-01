@@ -10,7 +10,7 @@
 
 #pragma once
 
-#import "ASDisplayNode.h"
+#import <AsyncDisplayKit/ASDisplayNode.h>
 
 @interface ASDisplayNode (Deprecated)
 

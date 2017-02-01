@@ -13,22 +13,22 @@
 #import "ASXCTExtensions.h"
 #import <XCTest/XCTest.h>
 
-#import "_ASDisplayLayer.h"
-#import "_ASDisplayView.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASDisplayNode+Deprecated.h"
+#import <AsyncDisplayKit/_ASDisplayLayer.h>
+#import <AsyncDisplayKit/_ASDisplayView.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASDisplayNode+Deprecated.h>
 #import "ASDisplayNodeTestsHelper.h"
-#import "UIView+ASConvenience.h"
-#import "ASCellNode.h"
-#import "ASImageNode.h"
-#import "ASOverlayLayoutSpec.h"
-#import "ASInsetLayoutSpec.h"
-#import "ASCenterLayoutSpec.h"
-#import "ASBackgroundLayoutSpec.h"
-#import "ASInternalHelpers.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASDisplayNode+Beta.h"
+#import <AsyncDisplayKit/UIView+ASConvenience.h>
+#import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASImageNode.h>
+#import <AsyncDisplayKit/ASOverlayLayoutSpec.h>
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASCenterLayoutSpec.h>
+#import <AsyncDisplayKit/ASBackgroundLayoutSpec.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 
 // Conveniences for making nodes named a certain way
 #define DeclareNodeNamed(n) ASDisplayNode *n = [[ASDisplayNode alloc] init]; n.debugName = @#n
@@ -1875,14 +1875,14 @@ static bool stringContainsPointer(NSString *description, id p) {
   ASDisplayNode *node = [[ASDisplayNode alloc] init];
   node.layerBacked = isLayerBacked;
 
-  XCTAssertFalse([node.description rangeOfString:@"debugName"].location != NSNotFound, @"Shouldn't reference 'debugName' in description");
+  XCTAssertFalse([node.description containsString:@"debugName"], @"Shouldn't reference 'debugName' in description");
   node.debugName = @"big troll eater name";
 
-  XCTAssertFalse([node.description rangeOfString:node.debugName].location == NSNotFound, @"debugName didn't end up in description");
-  XCTAssertFalse([node.description rangeOfString:@"debugName"].location == NSNotFound, @"Shouldn't reference 'debugName' in description");
+  XCTAssertTrue([node.description containsString:node.debugName], @"debugName didn't end up in description");
+  XCTAssertTrue([node.description containsString:@"debugName"], @"Node description should contain `debugName`.");
   [node layer];
-  XCTAssertFalse([node.description rangeOfString:node.debugName].location == NSNotFound, @"debugName didn't end up in description");
-  XCTAssertFalse([node.description rangeOfString:@"debugName"].location == NSNotFound, @"Shouldn't reference 'debugName' in description");
+  XCTAssertTrue([node.description containsString:node.debugName], @"debugName didn't end up in description");
+  XCTAssertTrue([node.description containsString:@"debugName"], @"Node description should contain `debugName`.");
 }
 
 - (void)testNameInDescriptionLayer

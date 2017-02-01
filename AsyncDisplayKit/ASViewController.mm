@@ -10,15 +10,15 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASViewController.h"
-#import "ASAssert.h"
-#import "ASAvailability.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASLayout.h"
-#import "ASTraitCollection.h"
-#import "ASEnvironmentInternal.h"
-#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
-#import "ASInternalHelpers.h"
+#import <AsyncDisplayKit/ASViewController.h>
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASAvailability.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASLayout.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
+#import <AsyncDisplayKit/ASEnvironmentInternal.h>
+#import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 #define AS_LOG_VISIBILITY_CHANGES 0
 
@@ -102,14 +102,8 @@
   
   // ensure that self.node has a valid trait collection before a subclass's implementation of viewDidLoad.
   // Any subnodes added in viewDidLoad will then inherit the proper environment.
-  if (AS_AT_LEAST_IOS8) {
-    ASEnvironmentTraitCollection traitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
-    [self progagateNewEnvironmentTraitCollection:traitCollection];
-  } else {
-    ASEnvironmentTraitCollection traitCollection = ASEnvironmentTraitCollectionMakeDefault();
-    traitCollection.containerSize = self.view.bounds.size;
-    [self progagateNewEnvironmentTraitCollection:traitCollection];
-  }
+  ASEnvironmentTraitCollection traitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
+  [self progagateNewEnvironmentTraitCollection:traitCollection];
 }
 
 - (void)viewWillLayoutSubviews
@@ -118,15 +112,11 @@
   
   // Before layout, make sure that our trait collection containerSize actually matches the size of our bounds.
   // If not, we need to update the traits and propagate them.
-  if (CGSizeEqualToSize(self.node.environmentTraitCollection.containerSize, self.view.bounds.size) == NO) {
+  CGSize boundsSize = self.view.bounds.size;
+  if (CGSizeEqualToSize(self.node.environmentTraitCollection.containerSize, boundsSize) == NO) {
     [UIView performWithoutAnimation:^{
-      ASEnvironmentTraitCollection environmentTraitCollection;
-      if (AS_AT_LEAST_IOS8) {
-        environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
-      } else {
-        environmentTraitCollection = ASEnvironmentTraitCollectionMakeDefault();
-      }
-      environmentTraitCollection.containerSize = self.view.bounds.size;
+      ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
+      environmentTraitCollection.containerSize = boundsSize;
       // this method will call measure
       [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
     }];

@@ -13,6 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+AS_SUBCLASSING_RESTRICTED
 @interface ASTextKitComponents : NSObject
 
 /**

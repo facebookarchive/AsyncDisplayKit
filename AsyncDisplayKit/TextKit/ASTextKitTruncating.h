@@ -8,13 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <Foundation/Foundation.h>
 #import <vector>
 
-#import <UIKit/UIKit.h>
-
-#import "ASTextKitRenderer.h"
-
 NS_ASSUME_NONNULL_BEGIN
+
+@class ASTextKitContext;
 
 @protocol ASTextKitTruncating <NSObject>
 

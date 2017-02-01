@@ -9,10 +9,12 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 /**
  * @abstract an immutable class for calculating shadow padding drawing a shadowed background for text
  */
+AS_SUBCLASSING_RESTRICTED
 @interface ASTextKitShadower : NSObject
 
 + (ASTextKitShadower *)shadowerWithShadowOffset:(CGSize)shadowOffset

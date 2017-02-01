@@ -8,7 +8,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import "NSIndexSet+ASHelpers.h"
+#import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
 
 @implementation NSIndexSet (ASHelpers)
 

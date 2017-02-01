@@ -13,12 +13,12 @@
 // These methods must never be called or overridden by other classes.
 //
 
-#import "ASDisplayNode.h"
-#import "ASThread.h"
+#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASThread.h>
 
 // These are included because most internal subclasses need it.
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

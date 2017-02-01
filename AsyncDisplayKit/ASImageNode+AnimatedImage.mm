@@ -10,15 +10,17 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASImageNode.h"
+#import <AsyncDisplayKit/ASImageNode.h>
 
-#import "ASAssert.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASEqualityHelpers.h"
-#import "ASImageNode+AnimatedImagePrivate.h"
-#import "ASInternalHelpers.h"
-#import "ASWeakProxy.h"
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASImageNode+AnimatedImagePrivate.h>
+#import <AsyncDisplayKit/ASImageProtocols.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASWeakProxy.h>
 
 NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
 

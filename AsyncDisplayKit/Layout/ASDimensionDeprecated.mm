@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDimensionDeprecated.h"
+#import <AsyncDisplayKit/ASDimensionDeprecated.h>
 
 ASDimension ASRelativeDimensionMake(ASRelativeDimensionType type, CGFloat value)
 {

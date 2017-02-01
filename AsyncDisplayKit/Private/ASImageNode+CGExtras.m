@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASImageNode+CGExtras.h"
+#import <AsyncDisplayKit/ASImageNode+CGExtras.h>
 
 #import <tgmath.h>
 

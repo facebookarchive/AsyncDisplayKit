@@ -11,7 +11,7 @@
 #import "ASXCTExtensions.h"
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "ASLayoutSpecSnapshotTestsHelper.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 
 @interface ASDisplayNodeLayoutTests : XCTestCase
 @end

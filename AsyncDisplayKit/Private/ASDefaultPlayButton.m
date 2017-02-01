@@ -10,8 +10,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDefaultPlayButton.h"
-#import "_ASDisplayLayer.h"
+#import <AsyncDisplayKit/ASDefaultPlayButton.h>
+#import <AsyncDisplayKit/_ASDisplayLayer.h>
 
 @implementation ASDefaultPlayButton
 

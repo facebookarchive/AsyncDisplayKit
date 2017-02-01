@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASLayoutManager.h"
+#import <AsyncDisplayKit/ASLayoutManager.h>
 
 @implementation ASLayoutManager
 
