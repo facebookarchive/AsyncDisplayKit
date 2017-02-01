@@ -444,6 +444,8 @@
 		B350625E1B0111780018CF92 /* AssetsLibrary.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 051943121A1575630030A7D0 /* AssetsLibrary.framework */; };
 		B350625F1B0111800018CF92 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 058D09AF195D04C000B7D73C /* Foundation.framework */; };
 		C78F7E2B1BF7809800CDEAFC /* ASTableNode.h in Headers */ = {isa = PBXBuildFile; fileRef = B0F880581BEAEC7500D17647 /* ASTableNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		C915D4541E033E6E00B47889 /* ASVideoPlayer.m in Sources */ = {isa = PBXBuildFile; fileRef = C915D4531E033E6E00B47889 /* ASVideoPlayer.m */; };
+		C937C1911E0342F900E56C10 /* ASVideoPlayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = C937C1901E0342F900E56C10 /* ASVideoPlayerTests.m */; };
 		CC051F1F1D7A286A006434CB /* ASCALayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC051F1E1D7A286A006434CB /* ASCALayerTests.m */; };
 		CC0AEEA41D66316E005D1C78 /* ASUICollectionViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC0AEEA31D66316E005D1C78 /* ASUICollectionViewTests.m */; };
 		CC11F97A1DB181180024D77B /* ASNetworkImageNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */; };
@@ -1172,6 +1174,9 @@
 		B35061DA1B010EDF0018CF92 /* AsyncDisplayKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = AsyncDisplayKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B35061DD1B010EDF0018CF92 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = Info.plist; path = "../AsyncDisplayKit-iOS/Info.plist"; sourceTree = "<group>"; };
 		BDC2D162BD55A807C1475DA5 /* Pods-AsyncDisplayKitTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.profile.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.profile.xcconfig"; sourceTree = "<group>"; };
+		C915D4521E033E6E00B47889 /* ASVideoPlayer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASVideoPlayer.h; sourceTree = "<group>"; };
+		C915D4531E033E6E00B47889 /* ASVideoPlayer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASVideoPlayer.m; sourceTree = "<group>"; };
+		C937C1901E0342F900E56C10 /* ASVideoPlayerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASVideoPlayerTests.m; sourceTree = "<group>"; };
 		CC051F1E1D7A286A006434CB /* ASCALayerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCALayerTests.m; sourceTree = "<group>"; };
 		CC0AEEA31D66316E005D1C78 /* ASUICollectionViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASUICollectionViewTests.m; sourceTree = "<group>"; };
 		CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASNetworkImageNodeTests.m; sourceTree = "<group>"; };
@@ -1367,6 +1372,8 @@
 				AEEC47E01C20C2DD00EC1693 /* ASVideoNode.mm */,
 				8BDA5FC31CDBDDE1007D13B2 /* ASVideoPlayerNode.h */,
 				8BDA5FC41CDBDDE1007D13B2 /* ASVideoPlayerNode.mm */,
+				C915D4521E033E6E00B47889 /* ASVideoPlayer.h */,
+				C915D4531E033E6E00B47889 /* ASVideoPlayer.m */,
 				055F1A3A19ABD43F004DAFF1 /* ASCellNode.h */,
 				AC6456071B0A335000CF11B8 /* ASCellNode.mm */,
 				18C2ED7C1B9B7DE800F627B3 /* ASCollectionNode.h */,
@@ -1508,6 +1515,7 @@
 				058D0A36195D057000B7D73C /* ASTextNodeTests.m */,
 				058D0A37195D057000B7D73C /* ASTextNodeWordKernerTests.mm */,
 				AEEC47E31C21D3D200EC1693 /* ASVideoNodeTests.m */,
+				C937C1901E0342F900E56C10 /* ASVideoPlayerTests.m */,
 				F711994D1D20C21100568860 /* ASDisplayNodeExtrasTests.m */,
 				058D09C6195D04C000B7D73C /* Supporting Files */,
 				052EE06A1A15A0D8002C6279 /* TestResources */,
@@ -2335,6 +2343,7 @@
 				764D83D61C8EA515009B4FB8 /* AsyncDisplayKit+Debug.m in Sources */,
 				058D0A2A195D050800B7D73C /* ASDisplayNode+UIViewBridge.mm in Sources */,
 				25E327581C16819500A2170C /* ASPagerNode.m in Sources */,
+				C915D4541E033E6E00B47889 /* ASVideoPlayer.m in Sources */,
 				058D0A14195D050800B7D73C /* ASDisplayNode.mm in Sources */,
 				DEC146B81C37A16A004A0EE7 /* ASCollectionInternal.m in Sources */,
 				058D0A15195D050800B7D73C /* ASDisplayNodeExtras.mm in Sources */,
@@ -2432,6 +2441,7 @@
 				2538B6F31BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m in Sources */,
 				058D0A39195D057000B7D73C /* ASDisplayNodeAppearanceTests.m in Sources */,
 				CCB2F34D1D63CCC6004E6DE9 /* ASDisplayNodeSnapshotTests.m in Sources */,
+				C937C1911E0342F900E56C10 /* ASVideoPlayerTests.m in Sources */,
 				AE6987C11DD04E1000B9E458 /* ASPagerNodeTests.m in Sources */,
 				058D0A3A195D057000B7D73C /* ASDisplayNodeTests.m in Sources */,
 				696FCB311D6E46050093471E /* ASBackgroundLayoutSpecSnapshotTests.mm in Sources */,
