@@ -41,7 +41,6 @@
     _supplementaryElementKind = [supplementaryElementKind copy];
     _constrainedSize = constrainedSize;
     _environment = environment;
-    _environmentTraitCollection = environment.environmentTraitCollection;
   }
   return self;
 }
@@ -59,7 +58,7 @@
     node.cachedIndexPath = _indexPath;
     node.supplementaryElementKind = _supplementaryElementKind;
     node.owningNode = (ASDisplayNode *)_environment;
-    ASEnvironmentStatePropagateDown(node, _environmentTraitCollection);
+    ASEnvironmentStatePropagateDown(node, [_environment environmentTraitCollection]);
     _node = node;
   }
   return _node;
