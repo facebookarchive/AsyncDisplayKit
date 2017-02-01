@@ -152,6 +152,8 @@
 		6977965F1D8AC8D3007E93D7 /* ASLayoutSpec+Subclasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 6977965D1D8AC8D3007E93D7 /* ASLayoutSpec+Subclasses.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		697796611D8AC8D3007E93D7 /* ASLayoutSpec+Subclasses.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6977965E1D8AC8D3007E93D7 /* ASLayoutSpec+Subclasses.mm */; };
 		697B315A1CFE4B410049936F /* ASEditableTextNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 697B31591CFE4B410049936F /* ASEditableTextNodeTests.m */; };
+		698371DB1E4379CD00437585 /* ASNodeController+Beta.h in Headers */ = {isa = PBXBuildFile; fileRef = 698371D91E4379CD00437585 /* ASNodeController+Beta.h */; };
+		698371DC1E4379CD00437585 /* ASNodeController+Beta.mm in Sources */ = {isa = PBXBuildFile; fileRef = 698371DA1E4379CD00437585 /* ASNodeController+Beta.mm */; };
 		698548641CA9E025008A345F /* ASEnvironment.h in Headers */ = {isa = PBXBuildFile; fileRef = 698548611CA9E025008A345F /* ASEnvironment.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		698C8B621CAB49FC0052DC3F /* ASLayoutElementExtensibility.h in Headers */ = {isa = PBXBuildFile; fileRef = 698C8B601CAB49FC0052DC3F /* ASLayoutElementExtensibility.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		698DFF441E36B6C9002891F1 /* ASStackLayoutSpecUtilities.h in Headers */ = {isa = PBXBuildFile; fileRef = 698DFF431E36B6C9002891F1 /* ASStackLayoutSpecUtilities.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -316,8 +318,6 @@
 		CC0F88611E4280C900576FED /* ASCollectionInteropProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = CC6363E11E32C00800D8A8DE /* ASCollectionInteropProtocols.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		CC0F88621E4281E200576FED /* ASSectionController.h in Headers */ = {isa = PBXBuildFile; fileRef = CCE04B1E1E313EA7006AEBBB /* ASSectionController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC0F88631E4281E700576FED /* ASSupplementaryNodeSource.h in Headers */ = {isa = PBXBuildFile; fileRef = CCE04B2B1E314A32006AEBBB /* ASSupplementaryNodeSource.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		CC0F88661E42822000576FED /* ASNodeController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC0F88641E42822000576FED /* ASNodeController.mm */; };
-		CC0F88671E42822000576FED /* ASNodeController.h in Headers */ = {isa = PBXBuildFile; fileRef = CC0F88651E42822000576FED /* ASNodeController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC0F886B1E4286FA00576FED /* ReferenceImages_32 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F88681E4286FA00576FED /* ReferenceImages_32 */; };
 		CC0F886C1E4286FA00576FED /* ReferenceImages_64 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F88691E4286FA00576FED /* ReferenceImages_64 */; };
 		CC0F886D1E4286FA00576FED /* ReferenceImages_iOS_10 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */; };
@@ -592,6 +592,8 @@
 		6977965D1D8AC8D3007E93D7 /* ASLayoutSpec+Subclasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "ASLayoutSpec+Subclasses.h"; path = "AsyncDisplayKit/Layout/ASLayoutSpec+Subclasses.h"; sourceTree = "<group>"; };
 		6977965E1D8AC8D3007E93D7 /* ASLayoutSpec+Subclasses.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; name = "ASLayoutSpec+Subclasses.mm"; path = "AsyncDisplayKit/Layout/ASLayoutSpec+Subclasses.mm"; sourceTree = "<group>"; };
 		697B31591CFE4B410049936F /* ASEditableTextNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASEditableTextNodeTests.m; sourceTree = "<group>"; };
+		698371D91E4379CD00437585 /* ASNodeController+Beta.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASNodeController+Beta.h"; sourceTree = "<group>"; };
+		698371DA1E4379CD00437585 /* ASNodeController+Beta.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = "ASNodeController+Beta.mm"; sourceTree = "<group>"; };
 		698548611CA9E025008A345F /* ASEnvironment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASEnvironment.h; sourceTree = "<group>"; };
 		698C8B601CAB49FC0052DC3F /* ASLayoutElementExtensibility.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ASLayoutElementExtensibility.h; path = AsyncDisplayKit/Layout/ASLayoutElementExtensibility.h; sourceTree = "<group>"; };
 		698DFF431E36B6C9002891F1 /* ASStackLayoutSpecUtilities.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASStackLayoutSpecUtilities.h; sourceTree = "<group>"; };
@@ -706,8 +708,6 @@
 		CC0F885A1E42807F00576FED /* ASCollectionViewFlowLayoutInspector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionViewFlowLayoutInspector.h; sourceTree = "<group>"; };
 		CC0F885D1E4280B800576FED /* _ASCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _ASCollectionViewCell.m; sourceTree = "<group>"; };
 		CC0F885E1E4280B800576FED /* _ASCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _ASCollectionViewCell.h; sourceTree = "<group>"; };
-		CC0F88641E42822000576FED /* ASNodeController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASNodeController.mm; sourceTree = "<group>"; };
-		CC0F88651E42822000576FED /* ASNodeController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASNodeController.h; sourceTree = "<group>"; };
 		CC0F88681E4286FA00576FED /* ReferenceImages_32 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ReferenceImages_32; sourceTree = "<group>"; };
 		CC0F88691E4286FA00576FED /* ReferenceImages_64 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ReferenceImages_64; sourceTree = "<group>"; };
 		CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ReferenceImages_iOS_10; sourceTree = "<group>"; };
@@ -923,8 +923,8 @@
 				68FC85DD1CE29AB700EDD713 /* ASNavigationController.m */,
 				055B9FA61A1C154B00035D6D /* ASNetworkImageNode.h */,
 				055B9FA71A1C154B00035D6D /* ASNetworkImageNode.mm */,
-				CC0F88651E42822000576FED /* ASNodeController.h */,
-				CC0F88641E42822000576FED /* ASNodeController.mm */,
+				698371D91E4379CD00437585 /* ASNodeController+Beta.h */,
+				698371DA1E4379CD00437585 /* ASNodeController+Beta.mm */,
 				25E327541C16819500A2170C /* ASPagerNode.h */,
 				25E327551C16819500A2170C /* ASPagerNode.m */,
 				A2763D771CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h */,
@@ -1463,6 +1463,7 @@
 				34EFC75F1B701C8600AD841F /* ASInsetLayoutSpec.h in Headers */,
 				34EFC7671B701CD900AD841F /* ASLayout.h in Headers */,
 				DBDB83951C6E879900D0098C /* ASPagerFlowLayout.h in Headers */,
+				698371DB1E4379CD00437585 /* ASNodeController+Beta.h in Headers */,
 				34EFC7691B701CE100AD841F /* ASLayoutElement.h in Headers */,
 				698DFF471E36B7E9002891F1 /* ASLayoutSpecUtilities.h in Headers */,
 				9C70F20D1CDBE9CB007D6C76 /* ASDefaultPlayButton.h in Headers */,
@@ -1516,7 +1517,6 @@
 				B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */,
 				AC6145411D8AFAE8003D62A2 /* ASSection.h in Headers */,
 				8BBBAB8C1CEBAF1700107FC6 /* ASDefaultPlaybackButton.h in Headers */,
-				CC0F88671E42822000576FED /* ASNodeController.h in Headers */,
 				690ED5991E36D118000627C0 /* ASImageNode+tvOS.h in Headers */,
 				254C6B741BF94DF4003EC431 /* ASTextNodeWordKerner.h in Headers */,
 				698DFF441E36B6C9002891F1 /* ASStackLayoutSpecUtilities.h in Headers */,
@@ -1851,6 +1851,7 @@
 				B35062121B010EFD0018CF92 /* _ASDisplayView.mm in Sources */,
 				DEFAD8131CC48914000527C4 /* ASVideoNode.mm in Sources */,
 				B350624C1B010EFD0018CF92 /* _ASPendingState.mm in Sources */,
+				698371DC1E4379CD00437585 /* ASNodeController+Beta.mm in Sources */,
 				69708BA81D76386D005C3CF9 /* ASEqualityHashHelpers.mm in Sources */,
 				509E68621B3AEDA5009B9150 /* ASAbstractLayoutController.mm in Sources */,
 				254C6B861BF94F8A003EC431 /* ASTextKitContext.mm in Sources */,
@@ -1863,7 +1864,6 @@
 				B35062141B010EFD0018CF92 /* ASBasicImageDownloader.mm in Sources */,
 				B35062161B010EFD0018CF92 /* ASBatchContext.mm in Sources */,
 				AC47D9421B3B891B00AAEE9D /* ASCellNode.mm in Sources */,
-				CC0F88661E42822000576FED /* ASNodeController.mm in Sources */,
 				34EFC7641B701CC600AD841F /* ASCenterLayoutSpec.mm in Sources */,
 				18C2ED831B9B7DE800F627B3 /* ASCollectionNode.mm in Sources */,
 				E55D86331CA8A14000A0C26F /* ASLayoutElement.mm in Sources */,
