@@ -339,7 +339,6 @@
 			baseConfigurationReference = 056298286C03B7760575CC56 /* Pods-Sample.debug.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = Sample/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -351,7 +350,6 @@
 			baseConfigurationReference = A7F0013FBBCBEA0C9FB68986 /* Pods-Sample.release.xcconfig */;
 			buildSettings = {
 				INFOPLIST_FILE = Sample/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = "1,2";
