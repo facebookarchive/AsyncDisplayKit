@@ -25,6 +25,7 @@
 #import <AsyncDisplayKit/ASTableNode.h>
 #import <AsyncDisplayKit/ASRangeController.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASTableLayoutController.h>
 #import <AsyncDisplayKit/ASTableView+Undeprecated.h>
 #import <AsyncDisplayKit/ASBatchContext.h>
 
@@ -120,7 +121,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASTableViewProxy *_proxyDataSource;
   ASTableViewProxy *_proxyDelegate;
 
-  ASFlowLayoutController *_layoutController;
+  ASTableLayoutController *_layoutController;
 
   ASRangeController *_rangeController;
 
@@ -250,7 +251,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)configureWithDataControllerClass:(Class)dataControllerClass eventLog:(ASEventLog *)eventLog
 {
-  _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
+  _layoutController = [[ASTableLayoutController alloc] initWithTableView:self];
   
   _rangeController = [[ASRangeController alloc] init];
   _rangeController.layoutController = _layoutController;
@@ -260,8 +261,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _dataController = [[dataControllerClass alloc] initWithDataSource:self eventLog:eventLog];
   _dataController.delegate = _rangeController;
   _dataController.environmentDelegate = self;
-  
-  _layoutController.dataSource = _dataController;
 
   _leadingScreensForBatching = 2.0;
   _batchContext = [[ASBatchContext alloc] init];
