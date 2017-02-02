@@ -9,6 +9,7 @@
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h> // for ASInterfaceState protocol
 
+/* ASNodeController is currently beta and open to change in the future */
 @interface ASNodeController<__covariant DisplayNodeType : ASDisplayNode *> : NSObject <ASInterfaceStateDelegate>
 
 @property (nonatomic, strong) DisplayNodeType node;
