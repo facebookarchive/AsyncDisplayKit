@@ -153,11 +153,14 @@
 
 - (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   if (_pagerDelegateFlags.constrainedSizeForNode) {
     return [_pagerDelegate pagerNode:self constrainedSizeForNodeAtIndex:indexPath.item];
   }
+#pragma clang diagnostic pop
 
-  return ASSizeRangeMake(CGSizeZero, self.bounds.size);
+  return ASSizeRangeMake(self.bounds.size);
 }
 
 #pragma mark - Data Source Proxy
