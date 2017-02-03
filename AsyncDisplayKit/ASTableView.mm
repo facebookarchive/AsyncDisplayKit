@@ -1668,7 +1668,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 #pragma mark - ASDataControllerEnvironmentDelegate
 
-- (id<ASEnvironment>)dataControllerEnvironment
+- (id<ASTraitEnvironment>)dataControllerEnvironment
 {
   return self.tableNode;
 }

@@ -15,11 +15,34 @@
 #import <AsyncDisplayKit/ASDisplayNodeLayout.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
+#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASLayoutSpec.h>
+
 #import <memory>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class ASDisplayNode;
+#pragma mark - ASLayoutElementTransition
+
+/**
+ * Extend the layout element protocol to check if a the element can layout asynchronously.
+ */
+@protocol ASLayoutElementTransition <ASLayoutElement>
+
+/**
+ * @abstract Returns if the layoutElement can be used to layout in an asynchronous way on a background thread.
+ */
+@property (nonatomic, assign, readonly) BOOL canLayoutAsynchronous;
+
+@end
+
+@interface ASDisplayNode () <ASLayoutElementTransition>
+@end
+@interface ASLayoutSpec () <ASLayoutElementTransition>
+@end
+
+
+#pragma mark - ASLayoutTransition
 
 AS_SUBCLASSING_RESTRICTED
 @interface ASLayoutTransition : NSObject <_ASTransitionContextLayoutDelegate>

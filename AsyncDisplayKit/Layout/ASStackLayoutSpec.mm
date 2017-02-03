@@ -21,9 +21,6 @@
 #import <AsyncDisplayKit/ASStackPositionedLayout.h>
 #import <AsyncDisplayKit/ASStackUnpositionedLayout.h>
 
-#import <AsyncDisplayKit/ASInternalHelpers.h>
-#import <AsyncDisplayKit/ASThread.h>
-
 @implementation ASStackLayoutSpec
 
 - (instancetype)init

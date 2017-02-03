@@ -10,17 +10,17 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-
+#import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
-
 #import <AsyncDisplayKit/ASThread.h>
-#import <AsyncDisplayKit/ASEnvironmentInternal.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface ASLayoutSpec() {
   ASDN::RecursiveMutex __instanceLock__;
-  ASEnvironmentState _environmentState;
+#if AS_TARGET_OS_IOS
+  ASPrimitiveTraitCollection _primitiveTraitCollection;
+#endif
   ASLayoutElementStyle *_style;
   NSMutableArray *_childrenArray;
 }

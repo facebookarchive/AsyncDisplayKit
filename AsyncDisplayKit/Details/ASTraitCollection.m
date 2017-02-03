@@ -11,7 +11,105 @@
 //
 
 #import <AsyncDisplayKit/ASTraitCollection.h>
-#import <AsyncDisplayKit/ASAvailability.h>
+
+#if AS_TARGET_OS_IOS
+
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
+#import <AsyncDisplayKit/ASLayoutElement.h>
+
+#pragma mark - ASPrimitiveTraitCollection
+
+extern void ASTraitCollectionPropagateDown(id<ASLayoutElement> root, ASPrimitiveTraitCollection traitCollection) {
+  ASLayoutElementPerformBlockOnEveryElement(root, ^(id<ASLayoutElement>  _Nonnull element) {
+    element.primitiveTraitCollection = traitCollection;
+  });
+}
+
+ASPrimitiveTraitCollection ASPrimitiveTraitCollectionMakeDefault()
+{
+  return (ASPrimitiveTraitCollection) {
+    // Default values can be defined in here
+    .userInterfaceIdiom = UIUserInterfaceIdiomUnspecified,
+    .containerSize = CGSizeZero,
+  };
+}
+
+ASPrimitiveTraitCollection ASPrimitiveTraitCollectionFromUITraitCollection(UITraitCollection *traitCollection)
+{
+  ASPrimitiveTraitCollection environmentTraitCollection = ASPrimitiveTraitCollectionMakeDefault();
+  environmentTraitCollection.displayScale = traitCollection.displayScale;
+  environmentTraitCollection.horizontalSizeClass = traitCollection.horizontalSizeClass;
+  environmentTraitCollection.verticalSizeClass = traitCollection.verticalSizeClass;
+  environmentTraitCollection.userInterfaceIdiom = traitCollection.userInterfaceIdiom;
+  if (AS_AT_LEAST_IOS9) {
+    environmentTraitCollection.forceTouchCapability = traitCollection.forceTouchCapability;
+  }
+  return environmentTraitCollection;
+}
+
+BOOL ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(ASPrimitiveTraitCollection lhs, ASPrimitiveTraitCollection rhs)
+{
+  return
+    lhs.verticalSizeClass == rhs.verticalSizeClass &&
+    lhs.horizontalSizeClass == rhs.horizontalSizeClass &&
+    lhs.displayScale == rhs.displayScale &&
+    lhs.userInterfaceIdiom == rhs.userInterfaceIdiom &&
+    lhs.forceTouchCapability == rhs.forceTouchCapability &&
+    CGSizeEqualToSize(lhs.containerSize, rhs.containerSize);
+}
+
+// Named so as not to conflict with a hidden Apple function, in case compiler decides not to inline
+ASDISPLAYNODE_INLINE NSString *AS_NSStringFromUIUserInterfaceIdiom(UIUserInterfaceIdiom idiom) {
+  switch (idiom) {
+    case UIUserInterfaceIdiomTV:
+      return @"TV";
+    case UIUserInterfaceIdiomPad:
+      return @"Pad";
+    case UIUserInterfaceIdiomPhone:
+      return @"Phone";
+    case UIUserInterfaceIdiomCarPlay:
+      return @"CarPlay";
+    default:
+      return @"Unspecified";
+  }
+}
+
+// Named so as not to conflict with a hidden Apple function, in case compiler decides not to inline
+ASDISPLAYNODE_INLINE NSString *AS_NSStringFromUIForceTouchCapability(UIForceTouchCapability capability) {
+  switch (capability) {
+    case UIForceTouchCapabilityAvailable:
+      return @"Available";
+    case UIForceTouchCapabilityUnavailable:
+      return @"Unavailable";
+    default:
+      return @"Unknown";
+  }
+}
+
+// Named so as not to conflict with a hidden Apple function, in case compiler decides not to inline
+ASDISPLAYNODE_INLINE NSString *AS_NSStringFromUIUserInterfaceSizeClass(UIUserInterfaceSizeClass sizeClass) {
+  switch (sizeClass) {
+    case UIUserInterfaceSizeClassCompact:
+      return @"Compact";
+    case UIUserInterfaceSizeClassRegular:
+      return @"Regular";
+    default:
+      return @"Unspecified";
+  }
+}
+
+NSString *NSStringFromASPrimitiveTraitCollection(ASPrimitiveTraitCollection traits)
+{
+  NSMutableArray<NSDictionary *> *props = [NSMutableArray array];
+  [props addObject:@{ @"userInterfaceIdiom": AS_NSStringFromUIUserInterfaceIdiom(traits.userInterfaceIdiom) }];
+  [props addObject:@{ @"containerSize": NSStringFromCGSize(traits.containerSize) }];
+  [props addObject:@{ @"horizontalSizeClass": AS_NSStringFromUIUserInterfaceSizeClass(traits.horizontalSizeClass) }];
+  [props addObject:@{ @"verticalSizeClass": AS_NSStringFromUIUserInterfaceSizeClass(traits.verticalSizeClass) }];
+  [props addObject:@{ @"forceTouchCapability": AS_NSStringFromUIForceTouchCapability(traits.forceTouchCapability) }];
+  return ASObjectDescriptionMakeWithoutObject(props);
+}
+
+#pragma mark - ASTraitCollection
 
 @implementation ASTraitCollection
 
@@ -49,7 +147,7 @@
                               containerSize:windowSize];
 }
 
-+ (instancetype)traitCollectionWithASEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traits
++ (instancetype)traitCollectionWithASPrimitiveTraitCollection:(ASPrimitiveTraitCollection)traits
 {
   return [self traitCollectionWithDisplayScale:traits.displayScale
                             userInterfaceIdiom:traits.userInterfaceIdiom
@@ -71,9 +169,9 @@
                                  containerSize:windowSize];
 }
 
-- (ASEnvironmentTraitCollection)environmentTraitCollection
+- (ASPrimitiveTraitCollection)primitiveTraitCollection
 {
-  return (ASEnvironmentTraitCollection) {
+  return (ASPrimitiveTraitCollection) {
     .displayScale = self.displayScale,
     .horizontalSizeClass = self.horizontalSizeClass,
     .userInterfaceIdiom = self.userInterfaceIdiom,
@@ -98,3 +196,9 @@
 }
 
 @end
+
+#else
+
+// Non iOS
+
+#endif

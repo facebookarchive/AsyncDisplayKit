@@ -17,7 +17,6 @@
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
-#import <AsyncDisplayKit/ASEnvironmentInternal.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
@@ -596,9 +595,9 @@
   }
 }
 
-#pragma mark ASEnvironment
+#pragma mark - ASPrimitiveTraitCollection
 
-ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
+ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 
 #pragma mark - Debugging (Private)
 

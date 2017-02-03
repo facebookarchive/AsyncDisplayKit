@@ -17,6 +17,8 @@
 #import <AsyncDisplayKit/ASLayoutElementStylePrivate.h>
 #import <AsyncDisplayKit/ASTraitCollection.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASAvailability.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 #import <objc/runtime.h>
 #import <map>
@@ -27,7 +29,6 @@
 // Dynamic properties for ASLayoutElements
 @dynamic layoutElementType;
 @synthesize debugName = _debugName;
-@synthesize isFinalLayoutElement = _isFinalLayoutElement;
 
 #pragma mark - Class
 
@@ -49,7 +50,9 @@
   }
   
   _isMutable = YES;
-  _environmentState = ASEnvironmentStateMakeDefault();
+#if AS_TARGET_OS_IOS
+  _primitiveTraitCollection = ASPrimitiveTraitCollectionMakeDefault();
+#endif
   _childrenArray = [[NSMutableArray alloc] init];
   
   return self;
@@ -67,23 +70,30 @@
 
 #pragma mark - Final LayoutElement
 
+@synthesize isFinalLayoutElement = _isFinalLayoutElement;
+
 - (id<ASLayoutElement>)finalLayoutElement
 {
+#if ASLAYOUTSPEC_DEBUG
   if (ASLayoutElementGetCurrentContext().needsVisualizeNode && !self.neverShouldVisualize) {
     return [[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:self];
   } else {
     return self;
   }
+#else
+  return self;
+#endif
 }
 
 - (void)recursivelySetShouldVisualize:(BOOL)visualize
 {
   NSMutableArray *mutableChildren = [self.children mutableCopy];
-  
+
+#if ASLAYOUTSPEC_DEBUG
   for (id<ASLayoutElement>layoutElement in self.children) {
     if (layoutElement.layoutElementType == ASLayoutElementTypeLayoutSpec) {
+
       ASLayoutSpec *layoutSpec = (ASLayoutSpec *)layoutElement;
-      
       [mutableChildren replaceObjectAtIndex:[mutableChildren indexOfObjectIdenticalTo:layoutSpec]
                                  withObject:[[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:layoutSpec]];
       
@@ -91,6 +101,7 @@
       layoutSpec.shouldVisualize = visualize;
     }
   }
+#endif
   
   if ([mutableChildren count] == 1) {         // HACK for wrapper layoutSpecs (e.g. insetLayoutSpec)
     self.child = mutableChildren[0];
@@ -110,7 +121,7 @@
   return _style;
 }
 
-- (instancetype)styledWithBlock:(void (^)(ASLayoutElementStyle *style))styleBlock
+- (instancetype)styledWithBlock:(AS_NOESCAPE void (^)(__kindof ASLayoutElementStyle *style))styleBlock
 {
   styleBlock(self.style);
   return self;
@@ -190,7 +201,12 @@
   }
 }
 
-- (NSArray *)children
+- (nullable NSArray<id<ASLayoutElement>> *)children
+{
+  return [_childrenArray copy];
+}
+
+- (NSArray<id<ASLayoutElement>> *)sublayoutElements
 {
   return [_childrenArray copy];
 }
@@ -202,40 +218,35 @@
   return [_childrenArray countByEnumeratingWithState:state objects:buffer count:len];
 }
 
-#pragma mark - ASEnvironment
+#pragma mark - ASTraitEnvironment
 
-- (ASEnvironmentState)environmentState
+#if AS_TARGET_OS_IOS
+
+- (ASPrimitiveTraitCollection)primitiveTraitCollection
 {
-  return _environmentState;
+  return _primitiveTraitCollection;
 }
 
-- (void)setEnvironmentState:(ASEnvironmentState)environmentState
+- (void)setPrimitiveTraitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
-  _environmentState = environmentState;
-}
-
-- (BOOL)supportsTraitsCollectionPropagation
-{
-  return ASEnvironmentStateTraitCollectionPropagationEnabled();
-}
-
-- (ASEnvironmentTraitCollection)environmentTraitCollection
-{
-  return _environmentState.environmentTraitCollection;
-}
-
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
-{
-  _environmentState.environmentTraitCollection = environmentTraitCollection;
+  _primitiveTraitCollection = traitCollection;
 }
 
 - (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
+  return [ASTraitCollection traitCollectionWithASPrimitiveTraitCollection:self.primitiveTraitCollection];
 }
 
-ASEnvironmentLayoutExtensibilityForwarding
+#endif
+
+#if AS_TARGET_OS_IOS
+ASPrimitiveTraitCollectionDeprecatedImplementation
+#endif
+
+#pragma mark - ASLayoutElementStyleExtensibility
+
+ASLayoutElementStyleExtensibilityForwarding
 
 #pragma mark - Framework Private
 
