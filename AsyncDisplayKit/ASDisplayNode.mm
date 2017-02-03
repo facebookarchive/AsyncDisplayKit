@@ -1633,6 +1633,10 @@ ASLayoutElementFinalLayoutElementDefault
     insertedSubnode.frame = [context finalFrameForNode:insertedSubnode];
     insertedSubnode.alpha = 0;
   }
+  
+  // Adjust groupOpacity for animation
+  BOOL originAllowsGroupOpacity = node.allowsGroupOpacity;
+  node.allowsGroupOpacity = YES;
 
   [UIView animateWithDuration:self.defaultLayoutTransitionDuration delay:self.defaultLayoutTransitionDelay options:self.defaultLayoutTransitionOptions animations:^{
     // Fade removed subnodes and views out
@@ -1661,6 +1665,10 @@ ASLayoutElementFinalLayoutElementDefault
     for (_ASAnimatedTransitionContext *removedSubnodeContext in removedSubnodeContexts) {
       removedSubnodeContext.node.alpha = removedSubnodeContext.alpha;
     }
+    
+    // Restore group opacity
+    node.allowsGroupOpacity = originAllowsGroupOpacity;
+    
     // Subnode removals are automatically performed
     [context completeTransition:finished];
   }];
