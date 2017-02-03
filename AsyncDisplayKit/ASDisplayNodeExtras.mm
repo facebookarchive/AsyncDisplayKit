@@ -103,6 +103,18 @@ extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDi
   }
 }
 
+#if YOGA
+extern void ASDisplayNodePerformBlockOnEveryYogaChild(ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node))
+{
+  if (node) {
+    block(node);
+    for (ASDisplayNode *child in [node yogaChildren]) {
+      ASDisplayNodePerformBlockOnEveryYogaChild(child, block);
+    }
+  }
+}
+#endif
+
 extern void ASDisplayNodePerformBlockOnEveryNodeBFS(ASDisplayNode *node, void(^block)(ASDisplayNode *node))
 {
   // Queue used to keep track of subnodes while traversing this layout in a BFS fashion.

@@ -12,6 +12,10 @@
 #import "ASLayoutRangeType.h"
 #import "ASEventLog.h"
 
+#if YOGA
+  #import YOGA_HEADER_PATH
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
@@ -144,6 +148,17 @@ typedef struct {
  * rendering model.
  */
 @property (nonatomic, assign) BOOL shouldRasterizeDescendants;
+
+#pragma mark - Yoga Layout
+
+#if YOGA
+
+@property (nonatomic, strong) NSArray *yogaChildren;
+
+- (void)addYogaChild:(ASDisplayNode *)child;
+- (void)removeYogaChild:(ASDisplayNode *)child;
+
+#endif
 
 @end
 

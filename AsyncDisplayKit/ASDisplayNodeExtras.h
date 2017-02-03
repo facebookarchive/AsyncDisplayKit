@@ -103,6 +103,13 @@ extern ASDisplayNode *ASDisplayNodeUltimateParentOfNode(ASDisplayNode *node) AS_
  */
 extern void ASDisplayNodePerformBlockOnEveryNode(CALayer * _Nullable layer, ASDisplayNode * _Nullable node, BOOL traverseSublayers, void(^block)(ASDisplayNode *node));
 
+#if YOGA
+/**
+ Same as method above, but walks yogaChildren instead of subnodes. Does invoke block on the node provided as well as children.
+ */
+extern void ASDisplayNodePerformBlockOnEveryYogaChild(ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
+#endif
+
 /**
  This function will walk the node hierarchy in a breadth first fashion. It does run the block on the node provided
  directly to the function call.  It does NOT traverse sublayers.

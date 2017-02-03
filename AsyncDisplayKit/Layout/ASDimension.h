@@ -191,6 +191,15 @@ ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT NSString *NSStringFromASLayoutSize(AS
           NSStringFromASDimension(size.height)];
 }
 
+#pragma mark - ASEdgeInsets
+
+typedef struct {
+  ASDimension top;
+  ASDimension left;
+  ASDimension bottom;
+  ASDimension right;
+} ASEdgeInsets;
+
 #pragma mark - ASSizeRange
 
 /**

@@ -108,7 +108,11 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   
 @protected
   ASDisplayNode * __weak _supernode;
-  NSMutableArray *_subnodes;
+  NSMutableArray<ASDisplayNode *> *_subnodes;
+#if YOGA
+  NSMutableArray<ASDisplayNode *> *_yogaChildren;
+  YGNodeRef _yogaNode;
+#endif
   
   ASLayoutElementStyle *_style;
 
@@ -197,6 +201,11 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 /// Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
+
+#if YOGA
+@property (nonatomic, weak) ASDisplayNode *yogaParent;
+@property (nonatomic, assign) YGNodeRef yogaNode;
+#endif
 
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;
