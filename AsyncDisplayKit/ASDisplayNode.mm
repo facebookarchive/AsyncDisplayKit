@@ -1122,7 +1122,7 @@ ASLayoutElementFinalLayoutElementDefault
   {
     
     ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-    ASPrimitiveTraitCollectionPropagateDown(layoutElement, self.primitiveTraitCollection);
+    ASTraitCollectionPropagateDown(layoutElement, self.primitiveTraitCollection);
   }
   
   BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
@@ -2488,7 +2488,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       }
       
       // Now that we have a supernode, propagate its traits to self.
-      ASPrimitiveTraitCollectionPropagateDown(self, newSupernode.primitiveTraitCollection);
+      ASTraitCollectionPropagateDown(self, newSupernode.primitiveTraitCollection);
       
     } else {
       // If a node will be removed from the supernode it should go out from the layout pending state to remove all

@@ -59,7 +59,7 @@ extern NSString *NSStringFromASPrimitiveTraitCollection(ASPrimitiveTraitCollecti
  * This function will walk the layout element hierarchy and updates the layout element trait collection for every
  * layout element within the hierarchy.
  */
-extern void ASPrimitiveTraitCollectionPropagateDown(id<ASLayoutElement> root, ASPrimitiveTraitCollection traitCollection);
+extern void ASTraitCollectionPropagateDown(id<ASLayoutElement> root, ASPrimitiveTraitCollection traitCollection);
 
 /// For backward compatibility reasons we redefine the old layout element trait collection struct name
 #define ASEnvironmentTraitCollection ASPrimitiveTraitCollection
@@ -70,7 +70,7 @@ ASDISPLAYNODE_EXTERN_C_END
 /**
  * Abstraction on top of UITraitCollection for propagation within AsyncDisplayKit-Layout
  */
-@protocol ASPrimitiveTraitEnvironment <NSObject>
+@protocol ASTraitEnvironment <NSObject>
 
 /**
  * Returns a struct-representation of the environment's ASEnvironmentDisplayTraits. This only exists as a internal
@@ -127,7 +127,7 @@ ASDISPLAYNODE_EXTERN_C_END
       NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
       for (NSArray *sectionArray in completedNodes) {\
         for (ASCellNode *cellNode in sectionArray) {\
-          ASPrimitiveTraitCollectionPropagateDown(cellNode, currentTraits);\
+          ASTraitCollectionPropagateDown(cellNode, currentTraits);\
         }\
       }\
     });\

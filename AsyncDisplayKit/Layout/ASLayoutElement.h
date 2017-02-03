@@ -21,7 +21,7 @@
 
 #if AS_TARGET_OS_IOS
 #import "ASTraitCollection.h"
-@protocol ASPrimitiveTraitEnvironment;
+@protocol ASTraitEnvironment;
 #endif
 
 NS_ASSUME_NONNULL_BEGIN
@@ -67,7 +67,7 @@ ASDISPLAYNODE_EXTERN_C_END
  * extend the backing layout options class to accommodate any new layout options.
  */
 #if AS_TARGET_OS_IOS
-@protocol ASLayoutElement <ASLayoutElementExtensibility, ASLayoutElementFinalLayoutElement, ASPrimitiveTraitEnvironment>
+@protocol ASLayoutElement <ASLayoutElementExtensibility, ASLayoutElementFinalLayoutElement, ASTraitEnvironment>
 #else
 @protocol ASLayoutElement <ASLayoutElementExtensibility, ASLayoutElementFinalLayoutElement>
 #endif

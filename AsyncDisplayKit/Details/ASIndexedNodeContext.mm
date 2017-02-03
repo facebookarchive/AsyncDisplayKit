@@ -30,7 +30,7 @@
                         indexPath:(NSIndexPath *)indexPath
          supplementaryElementKind:(nullable NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
-                      environment:(id<ASPrimitiveTraitEnvironment>)environment
+                      environment:(id<ASTraitEnvironment>)environment
 {
   NSAssert(nodeBlock != nil && indexPath != nil, @"Node block and index path must not be nil");
   self = [super init];
@@ -57,7 +57,7 @@
     node.cachedIndexPath = _indexPath;
     node.supplementaryElementKind = _supplementaryElementKind;
     node.owningNode = (ASDisplayNode *)_traitEnvironment;
-    ASPrimitiveTraitCollectionPropagateDown(node, [_traitEnvironment primitiveTraitCollection]);
+    ASTraitCollectionPropagateDown(node, [_traitEnvironment primitiveTraitCollection]);
     _node = node;
   }
   return _node;

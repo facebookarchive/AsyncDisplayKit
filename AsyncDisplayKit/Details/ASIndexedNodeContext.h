@@ -24,13 +24,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, strong) NSIndexPath *indexPath;
 @property (nonatomic, readonly, copy, nullable) NSString *supplementaryElementKind;
 @property (nonatomic, readonly, assign) ASSizeRange constrainedSize;
-@property (weak, nonatomic) id<ASPrimitiveTraitEnvironment> traitEnvironment;
+@property (weak, nonatomic) id<ASTraitEnvironment> traitEnvironment;
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
                         indexPath:(NSIndexPath *)indexPath
          supplementaryElementKind:(nullable NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
-                      environment:(id<ASPrimitiveTraitEnvironment>)environment;
+                      environment:(id<ASTraitEnvironment>)environment;
 
 /**
  * @return The node, running the node block if necessary. The node block will be discarded

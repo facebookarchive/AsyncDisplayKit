@@ -218,7 +218,7 @@
   return [_childrenArray countByEnumeratingWithState:state objects:buffer count:len];
 }
 
-#pragma mark - ASPrimitiveTraitEnvironment
+#pragma mark - ASTraitEnvironment
 
 #if AS_TARGET_OS_IOS
 

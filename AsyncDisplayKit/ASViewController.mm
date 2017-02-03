@@ -102,7 +102,7 @@
   // ensure that self.node has a valid trait collection before a subclass's implementation of viewDidLoad.
   // Any subnodes added in viewDidLoad will then inherit the proper environment.
   ASPrimitiveTraitCollection traitCollection = [self primitiveTraitCollectionForUITraitCollection:self.traitCollection];
-  [self progagateNewPrimitiveTraitCollection:traitCollection];
+  [self propagateNewTraitCollection:traitCollection];
 }
 
 - (void)viewWillLayoutSubviews
@@ -115,11 +115,11 @@
   CGSize boundsSize = self.view.bounds.size;
   if (CGSizeEqualToSize(self.node.primitiveTraitCollection.containerSize, boundsSize) == NO) {
     [UIView performWithoutAnimation:^{
-      ASEnvironmentTraitCollection primitiveTraitCollection = [self primitiveTraitCollectionForUITraitCollection:self.traitCollection];
-      primitiveTraitCollection.containerSize = boundsSize;
+      ASPrimitiveTraitCollection traitCollection = [self primitiveTraitCollectionForUITraitCollection:self.traitCollection];
+      traitCollection.containerSize = boundsSize;
         
       // this method will call measure
-      [self progagateNewPrimitiveTraitCollection:primitiveTraitCollection];
+      [self propagateNewTraitCollection:traitCollection];
     }];
   } else {
 #pragma clang diagnostic push
@@ -237,7 +237,7 @@ ASVisibilityDepthImplementation;
   return _node.interfaceState;
 }
 
-#pragma mark - ASPrimitiveTraitEnvironment
+#pragma mark - ASTraitEnvironment
 
 - (ASPrimitiveTraitCollection)primitiveTraitCollectionForUITraitCollection:(UITraitCollection *)traitCollection
 {
@@ -252,7 +252,7 @@ ASVisibilityDepthImplementation;
   return asyncTraitCollection;
 }
 
-- (void)progagateNewPrimitiveTraitCollection:(ASPrimitiveTraitCollection)traitCollection
+- (void)propagateNewTraitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASPrimitiveTraitCollection oldTraitCollection = self.node.primitiveTraitCollection;
   
@@ -261,7 +261,7 @@ ASVisibilityDepthImplementation;
     
     NSArray<id<ASLayoutElement>> *children = [self.node sublayoutElements];
     for (id<ASLayoutElement> child in children) {
-      ASPrimitiveTraitCollectionPropagateDown(child, traitCollection);
+      ASTraitCollectionPropagateDown(child, traitCollection);
     }
     
 #pragma clang diagnostic push
@@ -279,7 +279,7 @@ ASVisibilityDepthImplementation;
   
   ASPrimitiveTraitCollection traitCollection = [self primitiveTraitCollectionForUITraitCollection:self.traitCollection];
   traitCollection.containerSize = self.view.bounds.size;
-  [self progagateNewPrimitiveTraitCollection:traitCollection];
+  [self propagateNewTraitCollection:traitCollection];
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
@@ -288,7 +288,7 @@ ASVisibilityDepthImplementation;
   
   ASPrimitiveTraitCollection traitCollection = self.node.primitiveTraitCollection;
   traitCollection.containerSize = self.view.bounds.size;
-  [self progagateNewPrimitiveTraitCollection:traitCollection];
+  [self propagateNewTraitCollection:traitCollection];
 }
 
 @end

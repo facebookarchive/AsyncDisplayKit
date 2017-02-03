@@ -19,7 +19,7 @@
 
 #pragma mark - ASPrimitiveTraitCollection
 
-extern void ASPrimitiveTraitCollectionPropagateDown(id<ASLayoutElement> root, ASPrimitiveTraitCollection traitCollection) {
+extern void ASTraitCollectionPropagateDown(id<ASLayoutElement> root, ASPrimitiveTraitCollection traitCollection) {
   ASLayoutElementPerformBlockOnEveryElement(root, ^(id<ASLayoutElement>  _Nonnull element) {
     element.primitiveTraitCollection = traitCollection;
   });
