@@ -10,8 +10,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASSection.h"
-#import "ASSectionContext.h"
+#import <AsyncDisplayKit/ASSection.h>
+#import <AsyncDisplayKit/ASSectionContext.h>
 
 @implementation ASSection
 

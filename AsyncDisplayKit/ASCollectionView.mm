@@ -8,32 +8,28 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASCollectionView.h"
-
-#import <objc/runtime.h>
-
-#import "_ASCollectionViewCell.h"
-#import "ASAssert.h"
-#import "ASAvailability.h"
-#import "ASBatchFetching.h"
-#import "ASDelegateProxy.h"
-#import "ASCellNode+Internal.h"
-#import "ASCollectionDataController.h"
-#import "ASCollectionInternal.h"
-#import "ASCollectionViewLayoutController.h"
-#import "ASCollectionViewFlowLayoutInspector.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASInternalHelpers.h"
-#import "UICollectionViewLayout+ASConvenience.h"
-#import "ASRangeController.h"
-#import "ASCollectionNode.h"
-#import "_ASDisplayLayer.h"
-#import "ASCollectionViewLayoutFacilitatorProtocol.h"
-#import "ASSectionContext.h"
-#import "ASCollectionView+Undeprecated.h"
-#import "_ASHierarchyChangeSet.h"
-#import "ASCollectionInteropProtocols.h"
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASAvailability.h>
+#import <AsyncDisplayKit/ASBatchFetching.h>
+#import <AsyncDisplayKit/ASDelegateProxy.h>
+#import <AsyncDisplayKit/ASCellNode+Internal.h>
+#import <AsyncDisplayKit/ASCollectionDataController.h>
+#import <AsyncDisplayKit/ASCollectionInternal.h>
+#import <AsyncDisplayKit/ASCollectionViewLayoutController.h>
+#import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
+#import <AsyncDisplayKit/ASRangeController.h>
+#import <AsyncDisplayKit/ASCollectionNode.h>
+#import <AsyncDisplayKit/_ASCollectionViewCell.h>
+#import <AsyncDisplayKit/_ASDisplayLayer.h>
+#import <AsyncDisplayKit/ASCollectionViewLayoutFacilitatorProtocol.h>
+#import <AsyncDisplayKit/ASSectionContext.h>
+#import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
+#import <AsyncDisplayKit/ASCollectionInteropProtocols.h>
+#import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
 
 /**
  * A macro to get self.collectionNode and assign it to a local variable, or return
@@ -206,10 +202,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   } _layoutInspectorFlags;
 }
 
-@end
-
-@interface ASCollectionNode ()
-- (instancetype)_initWithCollectionView:(ASCollectionView *)collectionView;
 @end
 
 @implementation ASCollectionView
@@ -903,12 +895,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   cell.node = node;
   [_rangeController configureContentView:cell.contentView forCellNode:node];
   
-  if (!AS_AT_LEAST_IOS8) {
-    // Even though UICV was introduced in iOS 6, and UITableView has always had the equivalent method,
-    // -willDisplayCell: was not introduced until iOS 8 for UICV.  didEndDisplayingCell, however, is available.
-    [self collectionView:collectionView willDisplayCell:cell forItemAtIndexPath:indexPath];
-  }
-  
   return cell;
 }
 
@@ -1474,7 +1460,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
 }
 
-- (id<ASEnvironment>)dataControllerEnvironment
+- (id<ASTraitEnvironment>)dataControllerEnvironment
 {
   return self.collectionNode;
 }

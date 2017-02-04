@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASBaseDefines.h"
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 /**
  @abstract Correctly equates two objects, including cases where both objects are nil. The latter is a case where `isEqual:` fails.

@@ -8,6 +8,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#pragma once 
+
 #import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN

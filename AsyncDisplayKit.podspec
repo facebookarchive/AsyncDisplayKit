@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name         = 'AsyncDisplayKit'
-  spec.version      = '2.0.2'
+  spec.version      = '2.1'
   spec.license      =  { :type => 'BSD' }
   spec.homepage     = 'http://asyncdisplaykit.org'
   spec.authors      = { 'Scott Goodson' => 'scottgoodson@gmail.com' }
@@ -12,7 +12,7 @@ Pod::Spec.new do |spec|
   spec.weak_frameworks = 'Photos','MapKit','AssetsLibrary'
   spec.requires_arc = true
 
-  spec.ios.deployment_target = '7.0'
+  spec.ios.deployment_target = '8.0'
 
   # Uncomment when fixed: issues with tvOS build for release 2.0
   # spec.tvos.deployment_target = '9.0'

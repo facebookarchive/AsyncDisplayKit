@@ -8,15 +8,15 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitRenderer+Positioning.h"
+#import <AsyncDisplayKit/ASTextKitRenderer+Positioning.h>
 
 #import <CoreText/CoreText.h>
 #import <tgmath.h>
 
-#import "ASAssert.h"
+#import <AsyncDisplayKit/ASAssert.h>
 
-#import "ASTextKitContext.h"
-#import "ASTextKitShadower.h"
+#import <AsyncDisplayKit/ASTextKitContext.h>
+#import <AsyncDisplayKit/ASTextKitShadower.h>
 
 static const CGFloat ASTextKitRendererGlyphTouchHitSlop = 5.0;
 static const CGFloat ASTextKitRendererTextCapHeightPadding = 1.3;

@@ -9,6 +9,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -39,6 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * Please note that ALL of the standard NSString methods are left unimplemented.
  */
+AS_SUBCLASSING_RESTRICTED
 @interface ASMutableAttributedStringBuilder : NSMutableAttributedString
 
 - (instancetype)initWithString:(NSString *)str attributes:(nullable NSDictionary<NSString *, id> *)attrs;

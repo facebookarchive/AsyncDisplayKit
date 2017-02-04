@@ -9,8 +9,8 @@
 //
 
 #pragma once
-#import <UIKit/UIKit.h>
-
+#import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASAssert.h>
 

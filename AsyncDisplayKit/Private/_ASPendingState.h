@@ -10,7 +10,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import "UIView+ASConvenience.h"
+#import <AsyncDisplayKit/UIView+ASConvenience.h>
 
 /**
 

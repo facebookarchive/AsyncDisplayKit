@@ -11,12 +11,12 @@
 //
 
 #if TARGET_OS_TV
-#import "ASImageNode+tvOS.h"
+#import <AsyncDisplayKit/ASImageNode+tvOS.h>
 
 #import <GLKit/GLKit.h>
 #import <tgmath.h>
 
-#import "ASDisplayNodeExtras.h"
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
 @implementation ASImageNode (tvOS)
 

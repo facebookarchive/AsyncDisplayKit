@@ -8,13 +8,13 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASCellNode+Internal.h"
+#import <AsyncDisplayKit/ASCellNode+Internal.h>
 
-#import "ASEqualityHelpers.h"
-#import "ASInternalHelpers.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASCollectionView+Undeprecated.h"
-#import "ASTableView+Undeprecated.h"
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
+#import <AsyncDisplayKit/ASTableView+Undeprecated.h>
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
@@ -338,7 +338,7 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   CGRect cellFrame = CGRectZero;
   
   // Ensure our _scrollView is still valid before converting.  It's also possible that we have already been removed from the _scrollView,
-  // in which case it is not valid to perform a convertRect (this actually crashes on iOS 7 and 8).
+  // in which case it is not valid to perform a convertRect (this actually crashes on iOS 8).
   UIScrollView *scrollView = (_scrollView != nil && view.superview != nil && [view isDescendantOfView:_scrollView]) ? _scrollView : nil;
   if (scrollView) {
     cellFrame = [view convertRect:view.bounds toView:_scrollView];

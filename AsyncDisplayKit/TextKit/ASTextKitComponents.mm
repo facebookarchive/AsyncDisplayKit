@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitComponents.h"
+#import <AsyncDisplayKit/ASTextKitComponents.h>
 
 #import <tgmath.h>
 

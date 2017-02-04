@@ -10,7 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASThread.h"
+#import <AsyncDisplayKit/ASThread.h>
 
 extern NSString *const ASAnimatedImageDefaultRunLoopMode;
 

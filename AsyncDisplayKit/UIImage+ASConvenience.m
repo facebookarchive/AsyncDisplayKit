@@ -10,9 +10,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "UIImage+ASConvenience.h"
-#import "ASInternalHelpers.h"
-#import "ASAssert.h"
+#import <AsyncDisplayKit/UIImage+ASConvenience.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASAssert.h>
 
 @implementation UIImage (ASDKAdditions)
 

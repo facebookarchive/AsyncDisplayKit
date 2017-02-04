@@ -6,11 +6,12 @@
 //  Copyright © 2017 Facebook. All rights reserved.
 //
 
-#import "ASNodeController.h"
+#import "ASNodeController+Beta.h"
 
 #import "ASDisplayNode+FrameworkPrivate.h"
 
 @implementation ASNodeController
+
 @synthesize node = _node;
 
 - (instancetype)init

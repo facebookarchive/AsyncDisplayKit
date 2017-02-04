@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <UIKit/UIKit.h>
+#import <CoreGraphics/CoreGraphics.h>
 
 #import <algorithm>
 #import <functional>
@@ -102,4 +102,3 @@ inline UIEdgeInsets operator-(const UIEdgeInsets &e)
 {
   return { -e.top, -e.left, -e.bottom, -e.right };
 }
-

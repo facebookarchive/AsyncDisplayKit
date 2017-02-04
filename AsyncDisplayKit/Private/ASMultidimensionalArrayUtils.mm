@@ -8,8 +8,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASAssert.h"
-#import "ASMultidimensionalArrayUtils.h"
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASMultidimensionalArrayUtils.h>
 
 // Import UIKit to get [NSIndexPath indexPathForItem:inSection:] which uses
 // tagged pointers.

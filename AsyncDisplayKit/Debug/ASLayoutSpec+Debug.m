@@ -6,10 +6,13 @@
 //
 //
 
-#import "ASLayoutSpec+Debug.h"
-#import "ASDisplayNode+Beta.h"
-#import "AsyncDisplayKit.h"
-#import "ASLayoutElementInspectorNode.h"
+#import <AsyncDisplayKit/ASLayoutSpec+Debug.h>
+
+#if ASLAYOUTSPEC_DEBUG
+
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASLayoutElementInspectorNode.h>
 
 @implementation ASLayoutSpecVisualizerNode
 
@@ -71,3 +74,4 @@
 
 @end
 
+#endif

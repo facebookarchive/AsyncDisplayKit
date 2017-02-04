@@ -10,15 +10,16 @@
 
 #import <XCTest/XCTest.h>
 
-#import "ASTableView.h"
-#import "ASTableViewInternal.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASCellNode.h"
-#import "ASTableNode.h"
-#import "ASTableView+Undeprecated.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASTableView.h>
+#import <AsyncDisplayKit/ASTableViewInternal.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASTableNode.h>
+#import <AsyncDisplayKit/ASTableView+Undeprecated.h>
 #import <JGMethodSwizzler/JGMethodSwizzler.h>
 #import "ASXCTExtensions.h"
-#import "ASInternalHelpers.h"
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 #define NumberOfSections 10
 #define NumberOfReloadIterations 50
@@ -815,7 +816,7 @@
     XCTFail(@"Expected validation to fail.");
   } @catch (NSException *e) {
     XCTAssertEqual(e.name, ASCollectionInvalidUpdateException);
-    XCTAssert([e.reason rangeOfString:NSStringFromClass([ds class])].location != NSNotFound, @"Expected validation reason to contain the data source class name. Got:\n%@", e.reason);
+    XCTAssert([e.reason containsString:NSStringFromClass([ds class])], @"Expected validation reason to contain the data source class name. Got:\n%@", e.reason);
   }
 }
 

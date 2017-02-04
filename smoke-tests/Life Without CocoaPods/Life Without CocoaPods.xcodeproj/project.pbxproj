@@ -21,9 +21,7 @@
 		F729B8C91D2E176700C9EDBC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F729B8C71D2E176700C9EDBC /* LaunchScreen.storyboard */; };
 		F729B8D11D2E17A300C9EDBC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 058968F71ABCE06E0059CE2A /* AppDelegate.m */; };
 		F729B8D21D2E17A300C9EDBC /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 058968FA1ABCE06E0059CE2A /* ViewController.m */; };
-		F729B8D31D2E17C800C9EDBC /* AsyncDisplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CE6CB31D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */; };
-		F729B8D41D2E17C800C9EDBC /* AsyncDisplayKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F7CE6CB31D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		F7CE6CB61D2CE00800BE4C15 /* libAsyncDisplayKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CE6CAD1D2CDFFB00BE4C15 /* libAsyncDisplayKit.a */; };
+		F7CE6CB61D2CE00800BE4C15 /* AsyncDisplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F7CE6CAD1D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,18 +53,11 @@
 			remoteGlobalIDString = 057D02BF1AC0A66700C7AC3C;
 			remoteInfo = AsyncDisplayKitTestHost;
 		};
-		F7CE6CB21D2CDFFB00BE4C15 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = B35061DA1B010EDF0018CF92;
-			remoteInfo = "AsyncDisplayKit-iOS";
-		};
 		F7CE6CB41D2CE00300BE4C15 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F7CE6CA51D2CDFFB00BE4C15 /* AsyncDisplayKit.xcodeproj */;
 			proxyType = 1;
-			remoteGlobalIDString = 058D09AB195D04C000B7D73C;
+			remoteGlobalIDString = B35061D91B010EDF0018CF92;
 			remoteInfo = AsyncDisplayKit;
 		};
 /* End PBXContainerItemProxy section */
@@ -78,7 +69,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				F729B8D41D2E17C800C9EDBC /* AsyncDisplayKit.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -112,7 +102,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F7CE6CB61D2CE00800BE4C15 /* libAsyncDisplayKit.a in Frameworks */,
+				F7CE6CB61D2CE00800BE4C15 /* AsyncDisplayKit.framework in Frameworks */,
 				92DD2FEC1BF4D8BB0074C9DD /* MapKit.framework in Frameworks */,
 				0589692C1ABCE1820059CE2A /* Photos.framework in Frameworks */,
 				0589692A1ABCE17C0059CE2A /* AssetsLibrary.framework in Frameworks */,
@@ -123,7 +113,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F729B8D31D2E17C800C9EDBC /* AsyncDisplayKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,10 +190,9 @@
 		F7CE6CA61D2CDFFB00BE4C15 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F7CE6CAD1D2CDFFB00BE4C15 /* libAsyncDisplayKit.a */,
+				F7CE6CAD1D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */,
 				F7CE6CAF1D2CDFFB00BE4C15 /* AsyncDisplayKitTests.xctest */,
 				F7CE6CB11D2CDFFB00BE4C15 /* AsyncDisplayKitTestHost.app */,
-				F7CE6CB31D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -292,10 +280,10 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		F7CE6CAD1D2CDFFB00BE4C15 /* libAsyncDisplayKit.a */ = {
+		F7CE6CAD1D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */ = {
 			isa = PBXReferenceProxy;
-			fileType = archive.ar;
-			path = libAsyncDisplayKit.a;
+			fileType = wrapper.framework;
+			path = AsyncDisplayKit.framework;
 			remoteRef = F7CE6CAC1D2CDFFB00BE4C15 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
@@ -311,13 +299,6 @@
 			fileType = wrapper.application;
 			path = AsyncDisplayKitTestHost.app;
 			remoteRef = F7CE6CB01D2CDFFB00BE4C15 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		F7CE6CB31D2CDFFB00BE4C15 /* AsyncDisplayKit.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = AsyncDisplayKit.framework;
-			remoteRef = F7CE6CB21D2CDFFB00BE4C15 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -478,7 +459,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "Life Without CocoaPods/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
@@ -495,7 +475,6 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				INFOPLIST_FILE = "Life Without CocoaPods/Info.plist";
-				IPHONEOS_DEPLOYMENT_TARGET = 7.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = "$(inherited)";
 				OTHER_LDFLAGS = (
@@ -568,6 +547,7 @@
 				F729B8CC1D2E176700C9EDBC /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

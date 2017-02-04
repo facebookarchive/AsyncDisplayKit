@@ -8,29 +8,29 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASImageNode.h"
+#import <AsyncDisplayKit/ASImageNode.h>
 
 #import <tgmath.h>
 
-#import "_ASDisplayLayer.h"
-#import "ASAssert.h"
-#import "ASDimension.h"
-#import "ASDisplayNode+FrameworkSubclasses.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASDisplayNode+Beta.h"
-#import "ASLayout.h"
-#import "ASTextNode.h"
-#import "ASImageNode+AnimatedImagePrivate.h"
-#import "ASImageNode+CGExtras.h"
-#import "AsyncDisplayKit+Debug.h"
-#import "ASInternalHelpers.h"
-#import "ASEqualityHelpers.h"
-#import "ASEqualityHashHelpers.h"
-#import "ASWeakMap.h"
-#import "CoreGraphics+ASConvenience.h"
+#import <AsyncDisplayKit/_ASDisplayLayer.h>
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASLayout.h>
+#import <AsyncDisplayKit/ASTextNode.h>
+#import <AsyncDisplayKit/ASImageNode+AnimatedImagePrivate.h>
+#import <AsyncDisplayKit/ASImageNode+CGExtras.h>
+#import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASEqualityHashHelpers.h>
+#import <AsyncDisplayKit/ASWeakMap.h>
+#import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
 
 // TODO: It would be nice to remove this dependency; it's the only subclass using more than +FrameworkSubclasses.h
-#import "ASDisplayNodeInternal.h"
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 
 #include <functional>
 

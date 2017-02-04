@@ -17,13 +17,13 @@
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
 #import <AsyncDisplayKit/ASLayoutElement.h>
-#import <AsyncDisplayKit/ASContextTransitioning.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 #define ASDisplayNodeLoggingEnabled 0
 
 @class ASDisplayNode;
+@protocol ASContextTransitioning;
 
 /**
  * UIView creation block. Used to create the backing view of a new display node.
@@ -107,7 +107,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  */
 
-@interface ASDisplayNode : NSObject <ASLayoutElement>
+@interface ASDisplayNode : NSObject <ASLayoutElement, ASLayoutElementStylability, NSFastEnumeration>
 
 /** @name Initializing a node object */
 

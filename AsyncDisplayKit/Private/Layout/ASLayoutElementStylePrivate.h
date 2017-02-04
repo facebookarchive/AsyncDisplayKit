@@ -10,7 +10,7 @@
 
 #pragma once
 
-#import "ASObjectDescriptionHelpers.h"
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 
 @interface ASLayoutElementStyle () <ASDescriptionProvider>
 

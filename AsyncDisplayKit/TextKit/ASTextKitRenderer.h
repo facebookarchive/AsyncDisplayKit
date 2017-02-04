@@ -12,7 +12,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import "ASTextKitAttributes.h"
+#import <AsyncDisplayKit/ASTextKitAttributes.h>
 
 @class ASTextKitContext;
 @class ASTextKitShadower;

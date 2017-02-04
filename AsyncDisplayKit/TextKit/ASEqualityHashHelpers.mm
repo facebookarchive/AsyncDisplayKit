@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASEqualityHashHelpers.h"
+#import <AsyncDisplayKit/ASEqualityHashHelpers.h>
 
 NSUInteger ASIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count)
 {

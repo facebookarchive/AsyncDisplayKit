@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "NSMutableAttributedString+TextKitAdditions.h"
+#import <AsyncDisplayKit/NSMutableAttributedString+TextKitAdditions.h>
 
 @implementation NSMutableAttributedString (TextKitAdditions)
 

@@ -8,12 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitCoreTextAdditions.h"
+#import <AsyncDisplayKit/ASTextKitCoreTextAdditions.h>
 
 #import <CoreText/CTFont.h>
 #import <CoreText/CTStringAttributes.h>
 
-#import "ASAssert.h"
+#import <AsyncDisplayKit/ASAssert.h>
 
 #pragma mark - Public
 BOOL ASAttributeWithNameIsUnsupportedCoreTextAttribute(NSString *attributeName)

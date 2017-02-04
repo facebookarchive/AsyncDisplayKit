@@ -7,7 +7,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ASDispatch.h"
+#import <AsyncDisplayKit/ASDispatch.h>
 
 @interface ASDispatchTests : XCTestCase
 

@@ -8,11 +8,17 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDimension.h"
+#import <AsyncDisplayKit/ASDimension.h>
 
-#import "CoreGraphics+ASConvenience.h"
+#if AS_TARGET_OS_IOS
+#import <UIKit/UIGeometry.h>
+#else
+#import <Foundation/NSGeometry.h>
+#endif
 
-#import "ASAssert.h"
+#import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
+
+#import <AsyncDisplayKit/ASAssert.h>
 
 #pragma mark - ASDimension
 
@@ -99,7 +105,13 @@ ASSizeRange ASSizeRangeIntersect(ASSizeRange sizeRange, ASSizeRange otherSizeRan
 
 NSString *NSStringFromASSizeRange(ASSizeRange sizeRange)
 {
+#if AS_TARGET_OS_IOS
   return [NSString stringWithFormat:@"<ASSizeRange: min=%@, max=%@>",
           NSStringFromCGSize(sizeRange.min),
           NSStringFromCGSize(sizeRange.max)];
+#else
+  return [NSString stringWithFormat:@"<ASSizeRange: min=%@, max=%@>",
+          NSStringFromRect(NSRectFromCGRect(sizeRange.min)),
+          NSStringFromRect(NSRectFromCGRect(sizeRange.max))];
+#endif
 }

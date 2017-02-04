@@ -10,8 +10,8 @@
 
 #import "ASLayoutSpecSnapshotTestsHelper.h"
 
-#import "ASBackgroundLayoutSpec.h"
-#import "ASInsetLayoutSpec.h"
+#import <AsyncDisplayKit/ASBackgroundLayoutSpec.h>
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 
 typedef NS_OPTIONS(NSUInteger, ASInsetLayoutSpecTestEdge) {
   ASInsetLayoutSpecTestEdgeTop    = 1 << 0,

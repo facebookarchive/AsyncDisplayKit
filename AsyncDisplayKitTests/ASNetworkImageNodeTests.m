@@ -9,7 +9,7 @@
 #import <XCTest/XCTest.h>
 #import <OCMock/OCMock.h>
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 
 @interface ASNetworkImageNodeTests : XCTestCase
 

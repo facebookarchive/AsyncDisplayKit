@@ -6,7 +6,8 @@
 //  Copyright © 2017 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASCollectionViewProtocols.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

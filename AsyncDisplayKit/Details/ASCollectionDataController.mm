@@ -8,16 +8,16 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASCollectionDataController.h"
+#import <AsyncDisplayKit/ASCollectionDataController.h>
 
-#import "ASAssert.h"
-#import "ASMultidimensionalArrayUtils.h"
-#import "ASCellNode.h"
-#import "ASDataController+Subclasses.h"
-#import "ASIndexedNodeContext.h"
-#import "ASSection.h"
-#import "ASSectionContext.h"
-#import "NSIndexSet+ASHelpers.h"
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASMultidimensionalArrayUtils.h>
+#import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASDataController+Subclasses.h>
+#import <AsyncDisplayKit/ASIndexedNodeContext.h>
+#import <AsyncDisplayKit/ASSection.h>
+#import <AsyncDisplayKit/ASSectionContext.h>
+#import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -209,7 +209,7 @@
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind withSections:(NSIndexSet *)sections mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
 {
-  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
 
   [sections enumerateRangesUsingBlock:^(NSRange range, BOOL * _Nonnull stop) {
     for (NSUInteger sec = range.location; sec < NSMaxRange(range); sec++) {
@@ -224,7 +224,7 @@
 
 - (void)_populateSupplementaryNodesOfKind:(NSString *)kind atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts
 {
-  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
 
   NSMutableIndexSet *sections = [NSMutableIndexSet indexSet];
   for (NSIndexPath *indexPath in indexPaths) {
@@ -242,7 +242,7 @@
   }];
 }
 
-- (void)_populateSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts environment:(id<ASEnvironment>)environment
+- (void)_populateSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath mutableContexts:(NSMutableArray<ASIndexedNodeContext *> *)contexts environment:(id<ASTraitEnvironment>)environment
 {
   ASCellNodeBlock supplementaryCellBlock;
   if (_dataSourceImplementsSupplementaryNodeBlockOfKindAtIndexPath) {

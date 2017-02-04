@@ -10,6 +10,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
+
 #ifndef ASEVENTLOG_CAPACITY
 #define ASEVENTLOG_CAPACITY 5
 #endif
@@ -20,6 +23,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+AS_SUBCLASSING_RESTRICTED
 @interface ASEventLog : NSObject
 
 /**

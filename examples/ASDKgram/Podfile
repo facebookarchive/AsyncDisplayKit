@@ -4,4 +4,3 @@ target 'Sample' do
 	pod 'AsyncDisplayKit/IGListKit', :path => '../..'
 	pod 'AsyncDisplayKit/PINRemoteImage', :path => '../..'
 end
-

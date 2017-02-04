@@ -10,7 +10,15 @@
 
 #pragma once
 
-#import "ASLog.h"
+#import <AsyncDisplayKit/ASLog.h>
+
+#ifndef PIN_REMOTE_IMAGE
+#if __has_include(<PINRemoteImage/PINRemoteImage.h>)
+#define PIN_REMOTE_IMAGE 1
+#else
+#define PIN_REMOTE_IMAGE 0
+#endif
+#endif
 
 // The C++ compiler mangles C function names. extern "C" { /* your C functions */ } prevents this.
 // You should wrap all C function prototypes declared in headers with ASDISPLAYNODE_EXTERN_C_BEGIN/END, even if

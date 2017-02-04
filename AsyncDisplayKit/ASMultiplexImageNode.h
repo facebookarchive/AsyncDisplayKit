@@ -8,8 +8,6 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#if TARGET_OS_IOS
-
 #import <AsyncDisplayKit/ASImageNode.h>
 #import <AsyncDisplayKit/ASImageProtocols.h>
 #import <Photos/Photos.h>
@@ -276,5 +274,3 @@ didFinishDownloadingImageWithIdentifier:(ASImageIdentifier)imageIdentifier
 #endif
 
 NS_ASSUME_NONNULL_END
-
-#endif

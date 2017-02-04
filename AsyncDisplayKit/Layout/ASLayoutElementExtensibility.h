@@ -10,7 +10,11 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#if AS_TARGET_OS_IOS
 #import <UIKit/UIGeometry.h>
+#else
+#import <Foundation/NSGeometry.h>
+#endif
 
 @protocol ASLayoutElementExtensibility <NSObject>
 
@@ -25,5 +29,6 @@
 
 - (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx;
 - (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx;
+
 
 @end

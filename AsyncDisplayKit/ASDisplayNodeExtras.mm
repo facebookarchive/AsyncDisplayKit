@@ -8,12 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDisplayNodeExtras.h"
-#import "ASDisplayNodeInternal.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 
 #import <queue>
-#import "ASRunLoopQueue.h"
+#import <AsyncDisplayKit/ASRunLoopQueue.h>
 
 extern void ASPerformMainThreadDeallocation(_Nullable id object)
 {

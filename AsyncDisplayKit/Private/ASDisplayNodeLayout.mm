@@ -10,7 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDisplayNodeLayout.h"
+#import <AsyncDisplayKit/ASDisplayNodeLayout.h>
 
 BOOL ASDisplayNodeLayout::isDirty()
 {

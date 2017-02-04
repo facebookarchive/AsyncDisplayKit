@@ -11,9 +11,7 @@
 #pragma once
 
 #import <UIKit/UIKit.h>
-#import "ASEqualityHelpers.h"
-
-@protocol ASTextKitTruncating;
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
 
 extern NSString *const ASTextKitTruncationAttributeName;
 /**

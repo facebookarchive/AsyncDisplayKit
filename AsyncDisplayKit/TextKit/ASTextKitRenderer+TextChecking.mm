@@ -8,11 +8,11 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitRenderer+TextChecking.h"
+#import <AsyncDisplayKit/ASTextKitRenderer+TextChecking.h>
 
-#import "ASTextKitEntityAttribute.h"
-#import "ASTextKitRenderer+Positioning.h"
-#import "ASTextKitTailTruncater.h"
+#import <AsyncDisplayKit/ASTextKitEntityAttribute.h>
+#import <AsyncDisplayKit/ASTextKitRenderer+Positioning.h>
+#import <AsyncDisplayKit/ASTextKitTailTruncater.h>
 
 @implementation ASTextKitTextCheckingResult
 

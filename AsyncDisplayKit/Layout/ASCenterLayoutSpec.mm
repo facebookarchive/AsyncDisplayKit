@@ -8,9 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASCenterLayoutSpec.h"
+#import <AsyncDisplayKit/ASCenterLayoutSpec.h>
 
-#import "ASLayout.h"
+#import <AsyncDisplayKit/ASLayout.h>
 
 @implementation ASCenterLayoutSpec
 {

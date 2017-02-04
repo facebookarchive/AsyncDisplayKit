@@ -8,33 +8,34 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDisplayNodeInternal.h"
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 
-#import "ASDisplayNode+FrameworkSubclasses.h"
-#import "ASDisplayNode+Beta.h"
-#import "AsyncDisplayKit+Debug.h"
-#import "ASLayoutSpec+Subclasses.h"
-#import "ASCellNode+Internal.h"
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASDisplayNode+Deprecated.h>
+#import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
+#import <AsyncDisplayKit/ASLayoutSpec+Subclasses.h>
+#import <AsyncDisplayKit/ASCellNode+Internal.h>
 
 #import <objc/runtime.h>
 
-#import "_ASAsyncTransaction.h"
-#import "_ASAsyncTransactionContainer+Private.h"
-#import "_ASCoreAnimationExtras.h"
-#import "_ASDisplayView.h"
-#import "_ASPendingState.h"
-#import "_ASScopeTimer.h"
-#import "ASDimension.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASEnvironmentInternal.h"
-#import "ASEqualityHelpers.h"
-#import "ASInternalHelpers.h"
-#import "ASLayoutElementStylePrivate.h"
-#import "ASLayoutSpec.h"
-#import "ASLayoutSpecPrivate.h"
-#import "ASRunLoopQueue.h"
-#import "ASTraitCollection.h"
-#import "ASWeakProxy.h"
+#import <AsyncDisplayKit/_ASAsyncTransaction.h>
+#import <AsyncDisplayKit/_ASAsyncTransactionContainer+Private.h>
+#import <AsyncDisplayKit/_ASCoreAnimationExtras.h>
+#import <AsyncDisplayKit/_ASDisplayLayer.h>
+#import <AsyncDisplayKit/_ASDisplayView.h>
+#import <AsyncDisplayKit/_ASPendingState.h>
+#import <AsyncDisplayKit/_ASScopeTimer.h>
+#import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASLayoutElementStylePrivate.h>
+#import <AsyncDisplayKit/ASLayoutSpec.h>
+#import <AsyncDisplayKit/ASLayoutSpecPrivate.h>
+#import <AsyncDisplayKit/ASRunLoopQueue.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
+#import <AsyncDisplayKit/ASWeakProxy.h>
 
 /**
  * Assert if the current thread owns a mutex.
@@ -66,7 +67,7 @@
 // We have to forward declare the protocol as this place otherwise it will not compile compiling with an Base SDK < iOS 10
 @protocol CALayerDelegate;
 
-@interface ASDisplayNode () <UIGestureRecognizerDelegate, _ASDisplayLayerDelegate, _ASTransitionContextCompletionDelegate> {}
+@interface ASDisplayNode () <UIGestureRecognizerDelegate, _ASDisplayLayerDelegate, _ASTransitionContextCompletionDelegate>
 
 /**
  * See ASDisplayNodeInternal.h for ivars
@@ -79,7 +80,6 @@
 @dynamic layoutElementType;
 
 @synthesize debugName = _debugName;
-@synthesize isFinalLayoutElement = _isFinalLayoutElement;
 @synthesize threadSafeBounds = _threadSafeBounds;
 @synthesize layoutSpecBlock = _layoutSpecBlock;
 
@@ -287,7 +287,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   _contentsScaleForDisplay = ASScreenScale();
   
-  _environmentState = ASEnvironmentStateMakeDefault();
+  _primitiveTraitCollection = ASPrimitiveTraitCollectionMakeDefault();
   
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
   _pendingDisplayNodeLayout = nullptr;
@@ -815,12 +815,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return _style;
 }
 
-- (instancetype)styledWithBlock:(void (^)(ASLayoutElementStyle *style))styleBlock
-{
-  styleBlock(self.style);
-  return self;
-}
-
 - (ASLayoutElementType)layoutElementType
 {
   return ASLayoutElementTypeDisplayNode;
@@ -831,10 +825,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   return !self.isNodeLoaded;
 }
 
-- (id<ASLayoutElement>)finalLayoutElement
+- (NSArray<id<ASLayoutElement>> *)sublayoutElements
 {
+  return self.subnodes;
+}
+
+- (instancetype)styledWithBlock:(AS_NOESCAPE void (^)(__kindof ASLayoutElementStyle *style))styleBlock
+{
+  styleBlock(self.style);
   return self;
 }
+
+ASLayoutElementFinalLayoutElementDefault
 
 - (NSString *)debugName
 {
@@ -1132,8 +1134,9 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   
   // Manually propagate the trait collection here so that any layoutSpec children of layoutSpec will get a traitCollection
   {
+    
     ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
-    ASEnvironmentStatePropagateDown(layoutElement, [self environmentTraitCollection]);
+    ASTraitCollectionPropagateDown(layoutElement, self.primitiveTraitCollection);
   }
   
   BOOL measureLayoutComputation = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutComputation;
@@ -2499,7 +2502,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       }
       
       // Now that we have a supernode, propagate its traits to self.
-      ASEnvironmentStatePropagateDown(self, [newSupernode environmentTraitCollection]);
+      ASTraitCollectionPropagateDown(self, newSupernode.primitiveTraitCollection);
+      
     } else {
       // If a node will be removed from the supernode it should go out from the layout pending state to remove all
       // layout pending state related properties on the node
@@ -3875,48 +3879,18 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   return [self.subnodes countByEnumeratingWithState:state objects:buffer count:len];
 }
 
-#pragma mark - ASEnvironment
+#pragma mark - ASPrimitiveTraitCollection
 
-- (ASEnvironmentState)environmentState
+- (ASPrimitiveTraitCollection)primitiveTraitCollection
 {
-  return _environmentState;
+  return _primitiveTraitCollection;
 }
 
-- (void)setEnvironmentState:(ASEnvironmentState)environmentState
+- (void)setPrimitiveTraitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
-  ASEnvironmentTraitCollection oldTraitCollection = _environmentState.environmentTraitCollection;
-  _environmentState = environmentState;
-  
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(oldTraitCollection, _environmentState.environmentTraitCollection) == NO) {
-    [self asyncTraitCollectionDidChange];
-  }
-}
-
-- (ASDisplayNode *)parent
-{
-  return self.supernode;
-}
-
-- (NSArray<ASDisplayNode *> *)children
-{
-  return self.subnodes;
-}
-
-- (BOOL)supportsTraitsCollectionPropagation
-{
-  return ASEnvironmentStateTraitCollectionPropagationEnabled();
-}
-
-- (ASEnvironmentTraitCollection)environmentTraitCollection
-{
-  return _environmentState.environmentTraitCollection;
-}
-
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
-{
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, _environmentState.environmentTraitCollection) == NO) {
-    _environmentState.environmentTraitCollection = environmentTraitCollection;
-    ASDisplayNodeLogEvent(self, @"asyncTraitCollectionDidChange: %@", NSStringFromASEnvironmentTraitCollection(environmentTraitCollection));
+  if (ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(traitCollection, _primitiveTraitCollection) == NO) {
+    _primitiveTraitCollection = traitCollection;
+    ASDisplayNodeLogEvent(self, @"asyncTraitCollectionDidChange: %@", NSStringFromASPrimitiveTraitCollection(traitCollection));
     [self asyncTraitCollectionDidChange];
   }
 }
@@ -3924,7 +3898,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (ASTraitCollection *)asyncTraitCollection
 {
   ASDN::MutexLocker l(__instanceLock__);
-  return [ASTraitCollection traitCollectionWithASEnvironmentTraitCollection:self.environmentTraitCollection];
+  return [ASTraitCollection traitCollectionWithASPrimitiveTraitCollection:self.primitiveTraitCollection];
 }
 
 - (void)asyncTraitCollectionDidChange
@@ -3932,7 +3906,11 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   // Subclass override
 }
 
-ASEnvironmentLayoutExtensibilityForwarding
+ASPrimitiveTraitCollectionDeprecatedImplementation
+
+#pragma mark - ASLayoutElementStyleExtensibility
+
+ASLayoutElementStyleExtensibilityForwarding
 
 // TODO(appleguy): After this lands initially, we can move it to another file like ASDisplayNode+Yoga.mm.
 // For now due to merge conflict risk and working across multiple build systems, avoiding file adds.

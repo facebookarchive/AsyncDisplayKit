@@ -69,18 +69,20 @@ ASIGSectionControllerCellForIndexImplementation;
 
 - (void)beginBatchFetchWithContext:(ASBatchContext *)context
 {
-  // Immediately add the loading spinner if needed.
-  if (self.items.count > 0) {
-    NSArray *newItems = [self.items arrayByAddingObject:_paginatingSpinner];
-    [self setItems:newItems animated:NO completion:nil];
-  }
+  dispatch_async(dispatch_get_main_queue(), ^{
+    // Immediately add the loading spinner if needed.
+    if (self.items.count > 0) {
+      NSArray *newItems = [self.items arrayByAddingObject:_paginatingSpinner];
+      [self setItems:newItems animated:NO completion:nil];
+    }
 
-  // Start the fetch, then update the items (removing the spinner) when they are loaded.
-  [_photoFeed requestPageWithCompletionBlock:^(NSArray *newPhotos){
-    [self setItems:_photoFeed.photos animated:NO completion:^{
-      [context completeBatchFetching:YES];
-    }];
-  } numResultsToReturn:20];
+    // Start the fetch, then update the items (removing the spinner) when they are loaded.
+    [_photoFeed requestPageWithCompletionBlock:^(NSArray *newPhotos){
+      [self setItems:_photoFeed.photos animated:NO completion:^{
+        [context completeBatchFetching:YES];
+      }];
+    } numResultsToReturn:20];
+  });
 }
 
 #pragma mark - RefreshingSectionControllerType

@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "UICollectionViewLayout+ASConvenience.h"
+#import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
 
 @implementation UICollectionViewLayout (ASConvenience)
 

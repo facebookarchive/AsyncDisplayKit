@@ -10,7 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASWeakSet.h"
+#import <AsyncDisplayKit/ASWeakSet.h>
 
 @interface ASWeakSet<__covariant ObjectType> ()
 @property (nonatomic, strong, readonly) NSHashTable<ObjectType> *hashTable;

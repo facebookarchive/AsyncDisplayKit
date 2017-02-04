@@ -10,13 +10,13 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASPagerNode.h"
-#import "ASDelegateProxy.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASPagerFlowLayout.h"
-#import "ASAssert.h"
-#import "ASCellNode.h"
-#import "ASCollectionView+Undeprecated.h"
+#import <AsyncDisplayKit/ASPagerNode.h>
+#import <AsyncDisplayKit/ASDelegateProxy.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASPagerFlowLayout.h>
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
@@ -153,11 +153,14 @@
 
 - (ASSizeRange)collectionNode:(ASCollectionNode *)collectionNode constrainedSizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
   if (_pagerDelegateFlags.constrainedSizeForNode) {
     return [_pagerDelegate pagerNode:self constrainedSizeForNodeAtIndex:indexPath.item];
   }
+#pragma clang diagnostic pop
 
-  return ASSizeRangeMake(CGSizeZero, self.bounds.size);
+  return ASSizeRangeMake(self.bounds.size);
 }
 
 #pragma mark - Data Source Proxy

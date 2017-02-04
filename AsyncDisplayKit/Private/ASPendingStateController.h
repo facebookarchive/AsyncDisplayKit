@@ -11,6 +11,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 @class ASDisplayNode;
 
@@ -24,6 +25,7 @@ NS_ASSUME_NONNULL_BEGIN
  This controller will enqueue run-loop events to flush changes
  but if you need them flushed now you can call `flush` from the main thread.
  */
+AS_SUBCLASSING_RESTRICTED
 @interface ASPendingStateController : NSObject
 
 + (ASPendingStateController *)sharedInstance;

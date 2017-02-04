@@ -8,12 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASControlNode.h>
 
-#import "ASImageProtocols.h"
-#import "ASBaseDefines.h"
-
 NS_ASSUME_NONNULL_BEGIN
+
+@protocol ASAnimatedImageProtocol;
 
 /**
  * Image modification block.  Use to transform an image before display.

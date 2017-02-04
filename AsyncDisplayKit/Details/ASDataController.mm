@@ -8,21 +8,20 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDataController.h"
+#import <AsyncDisplayKit/ASDataController.h>
 
-#import "_ASHierarchyChangeSet.h"
-#import "ASAssert.h"
-#import "ASCellNode.h"
-#import "ASEnvironmentInternal.h"
-#import "ASLayout.h"
-#import "ASMainSerialQueue.h"
-#import "ASMultidimensionalArrayUtils.h"
-#import "ASThread.h"
-#import "ASIndexedNodeContext.h"
-#import "ASDataController+Subclasses.h"
-#import "ASDispatch.h"
-#import "ASInternalHelpers.h"
-#import "ASCellNode+Internal.h"
+#import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASLayout.h>
+#import <AsyncDisplayKit/ASMainSerialQueue.h>
+#import <AsyncDisplayKit/ASMultidimensionalArrayUtils.h>
+#import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASIndexedNodeContext.h>
+#import <AsyncDisplayKit/ASDataController+Subclasses.h>
+#import <AsyncDisplayKit/ASDispatch.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASCellNode+Internal.h>
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -518,7 +517,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
 {
   ASDisplayNodeAssertMainThread();
   
-  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   std::vector<NSInteger> counts = [self itemCountsFromDataSource];
   NSMutableArray<ASIndexedNodeContext *> *contexts = [NSMutableArray array];
@@ -807,7 +806,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   NSArray *sortedIndexPaths = [indexPaths sortedArrayUsingSelector:@selector(compare:)];
   NSMutableArray<ASIndexedNodeContext *> *contexts = [[NSMutableArray alloc] initWithCapacity:indexPaths.count];
 
-  __weak id<ASEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   for (NSIndexPath *indexPath in sortedIndexPaths) {
     ASCellNodeBlock nodeBlock = [_dataSource dataController:self nodeBlockAtIndexPath:indexPath];

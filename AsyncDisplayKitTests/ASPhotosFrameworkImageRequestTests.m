@@ -11,7 +11,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ASPhotosFrameworkImageRequest.h"
+#import <AsyncDisplayKit/ASPhotosFrameworkImageRequest.h>
 
 static NSString *const kTestAssetID = @"testAssetID";
 
