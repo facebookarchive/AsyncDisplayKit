@@ -40,6 +40,7 @@ Pod::Spec.new do |spec|
         # See https://github.com/facebook/AsyncDisplayKit/issues/1153
         'AsyncDisplayKit/TextKit/*.h',
     ]
+    core.xcconfig = { 'GCC_PRECOMPILE_PREFIX_HEADER' => 'YES' }
   end
   
   spec.subspec 'PINRemoteImage' do |pin|
