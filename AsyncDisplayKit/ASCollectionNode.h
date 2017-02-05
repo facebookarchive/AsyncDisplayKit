@@ -706,4 +706,39 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
+@protocol ASCollectionDataSourceInterop <ASCollectionDataSource>
+
+/**
+ * This method offers compatibility with synchronous, standard UICollectionViewCell objects.
+ * These cells will **not** have the performance benefits of ASCellNodes (like preloading, async layout, and
+ * async drawing) - even when mixed within the same ASCollectionNode.
+ *
+ * In order to use this method, you must:
+ * 1. Implement it on your ASCollectionDataSource object.
+ * 2. Call registerCellClass: on the collectionNode.view (in viewDidLoad, or register an onDidLoad: block).
+ * 3. Return nil from the nodeBlockForItem...: or nodeForItem...: method. NOTE: it is an error to return
+ *    nil from within a nodeBlock, if you have returned a nodeBlock object.
+ * 4. Lastly, you must implement a method to provide the size for the cell. There are two ways this is done:
+ * 4a. UICollectionViewFlowLayout (incl. ASPagerNode). Implement
+ collectionNode:constrainedSizeForItemAtIndexPath:.
+ * 4b. Custom collection layouts. Set .view.layoutInspector and have it implement
+ collectionView:constrainedSizeForNodeAtIndexPath:.
+ *
+ * For an example of using this method with all steps above (including a custom layout, 4b.),
+ * see the app in examples/CustomCollectionView and enable kShowUICollectionViewCells = YES.
+ */
+- (__kindof UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath;
+
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+@end
+
+@protocol ASCollectionDelegateInterop <ASCollectionDelegate>
+
+- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath;
+
+- (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath;
+
+@end
+
 NS_ASSUME_NONNULL_END

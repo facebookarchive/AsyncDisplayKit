@@ -10,6 +10,7 @@
 		25A1FA851C02F7AC00193875 /* MosaicCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = 25A1FA841C02F7AC00193875 /* MosaicCollectionViewLayout.m */; };
 		25A1FA881C02FCB000193875 /* ImageCellNode.m in Sources */ = {isa = PBXBuildFile; fileRef = 25A1FA871C02FCB000193875 /* ImageCellNode.m */; };
 		576F970133B34DFD583D5CE4 /* libPods-Sample.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4CC0FB9EE0030992E8FBC0A0 /* libPods-Sample.a */; };
+		80364CCA1E3D95A90094400C /* ImageCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 80364CC91E3D95A90094400C /* ImageCollectionViewCell.m */; };
 		9BA2CEA11BB2579C00D18414 /* Launchboard.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 9BA2CEA01BB2579C00D18414 /* Launchboard.storyboard */; };
 		AC3C4A641A11F47200143C57 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = AC3C4A631A11F47200143C57 /* main.m */; };
 		AC3C4A671A11F47200143C57 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = AC3C4A661A11F47200143C57 /* AppDelegate.m */; };
@@ -23,6 +24,8 @@
 		25A1FA861C02FCB000193875 /* ImageCellNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageCellNode.h; sourceTree = "<group>"; };
 		25A1FA871C02FCB000193875 /* ImageCellNode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageCellNode.m; sourceTree = "<group>"; };
 		4CC0FB9EE0030992E8FBC0A0 /* libPods-Sample.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-Sample.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		80364CC81E3D95A90094400C /* ImageCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ImageCollectionViewCell.h; sourceTree = "<group>"; };
+		80364CC91E3D95A90094400C /* ImageCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ImageCollectionViewCell.m; sourceTree = "<group>"; };
 		9BA2CEA01BB2579C00D18414 /* Launchboard.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; path = Launchboard.storyboard; sourceTree = "<group>"; };
 		AC3C4A5E1A11F47200143C57 /* Sample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Sample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC3C4A621A11F47200143C57 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -84,6 +87,8 @@
 				AC3C4A661A11F47200143C57 /* AppDelegate.m */,
 				AC3C4A681A11F47200143C57 /* ViewController.h */,
 				AC3C4A691A11F47200143C57 /* ViewController.m */,
+				80364CC81E3D95A90094400C /* ImageCollectionViewCell.h */,
+				80364CC91E3D95A90094400C /* ImageCollectionViewCell.m */,
 				25A1FA861C02FCB000193875 /* ImageCellNode.h */,
 				25A1FA871C02FCB000193875 /* ImageCellNode.m */,
 				AC3C4A8D1A11F80C00143C57 /* Images.xcassets */,
@@ -120,12 +125,12 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = AC3C4A811A11F47200143C57 /* Build configuration list for PBXNativeTarget "Sample" */;
 			buildPhases = (
-				F868CFBB21824CC9521B6588 /* Check Pods Manifest.lock */,
+				F868CFBB21824CC9521B6588 /* [CP] Check Pods Manifest.lock */,
 				AC3C4A5A1A11F47200143C57 /* Sources */,
 				AC3C4A5B1A11F47200143C57 /* Frameworks */,
 				AC3C4A5C1A11F47200143C57 /* Resources */,
-				A6902C454C7661D0D277AC62 /* Copy Pods Resources */,
-				3760AAE3843D6EA89A9A166B /* Embed Pods Frameworks */,
+				A6902C454C7661D0D277AC62 /* [CP] Copy Pods Resources */,
+				3760AAE3843D6EA89A9A166B /* [CP] Embed Pods Frameworks */,
 			);
 			buildRules = (
 			);
@@ -181,14 +186,14 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		3760AAE3843D6EA89A9A166B /* Embed Pods Frameworks */ = {
+		3760AAE3843D6EA89A9A166B /* [CP] Embed Pods Frameworks */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Embed Pods Frameworks";
+			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -196,14 +201,14 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Sample/Pods-Sample-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		A6902C454C7661D0D277AC62 /* Copy Pods Resources */ = {
+		A6902C454C7661D0D277AC62 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Copy Pods Resources";
+			name = "[CP] Copy Pods Resources";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -211,19 +216,19 @@
 			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-Sample/Pods-Sample-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
-		F868CFBB21824CC9521B6588 /* Check Pods Manifest.lock */ = {
+		F868CFBB21824CC9521B6588 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
 			inputPaths = (
 			);
-			name = "Check Pods Manifest.lock";
+			name = "[CP] Check Pods Manifest.lock";
 			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [[ $? != 0 ]] ; then\n    cat << EOM\nerror: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\nEOM\n    exit 1\nfi\n";
+			shellScript = "diff \"${PODS_ROOT}/../Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -237,6 +242,7 @@
 				AC3C4A6A1A11F47200143C57 /* ViewController.m in Sources */,
 				AC3C4A671A11F47200143C57 /* AppDelegate.m in Sources */,
 				AC3C4A641A11F47200143C57 /* main.m in Sources */,
+				80364CCA1E3D95A90094400C /* ImageCollectionViewCell.m in Sources */,
 				25A1FA881C02FCB000193875 /* ImageCellNode.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -328,6 +334,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = Sample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -340,6 +347,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				INFOPLIST_FILE = Sample/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				TARGETED_DEVICE_FAMILY = 1;
