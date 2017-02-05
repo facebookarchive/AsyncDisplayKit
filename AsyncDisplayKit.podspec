@@ -19,6 +19,7 @@ Pod::Spec.new do |spec|
 
   # Subspecs
   spec.subspec 'Core' do |core|
+    core.prefix_header_file = 'AsyncDisplayKit/AsyncDisplayKit-Prefix.pch'
     core.public_header_files = [
         'AsyncDisplayKit/*.h',
         'AsyncDisplayKit/Details/**/*.h',
