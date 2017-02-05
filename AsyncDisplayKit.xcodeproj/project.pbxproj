@@ -311,7 +311,6 @@
 		CC0F885C1E42807F00576FED /* ASCollectionViewFlowLayoutInspector.h in Headers */ = {isa = PBXBuildFile; fileRef = CC0F885A1E42807F00576FED /* ASCollectionViewFlowLayoutInspector.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		CC0F885F1E4280B800576FED /* _ASCollectionViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CC0F885D1E4280B800576FED /* _ASCollectionViewCell.m */; };
 		CC0F88601E4280B800576FED /* _ASCollectionViewCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CC0F885E1E4280B800576FED /* _ASCollectionViewCell.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		CC0F88611E4280C900576FED /* ASCollectionInteropProtocols.h in Headers */ = {isa = PBXBuildFile; fileRef = CC6363E11E32C00800D8A8DE /* ASCollectionInteropProtocols.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		CC0F88621E4281E200576FED /* ASSectionController.h in Headers */ = {isa = PBXBuildFile; fileRef = CCE04B1E1E313EA7006AEBBB /* ASSectionController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC0F88631E4281E700576FED /* ASSupplementaryNodeSource.h in Headers */ = {isa = PBXBuildFile; fileRef = CCE04B2B1E314A32006AEBBB /* ASSupplementaryNodeSource.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC0F886B1E4286FA00576FED /* ReferenceImages_32 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F88681E4286FA00576FED /* ReferenceImages_32 */; };
@@ -721,7 +720,6 @@
 		CC54A81D1D7008B300296A24 /* ASDispatchTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = ASDispatchTests.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		CC57EAF91E394EA40034C595 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CC58AA4A1E398E1D002C8CB4 /* ASBlockTypes.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASBlockTypes.h; sourceTree = "<group>"; };
-		CC6363E11E32C00800D8A8DE /* ASCollectionInteropProtocols.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionInteropProtocols.h; sourceTree = "<group>"; };
 		CC7FD9DC1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPhotosFrameworkImageRequest.h; sourceTree = "<group>"; };
 		CC7FD9DD1BB5E962005CCB2B /* ASPhotosFrameworkImageRequest.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequest.m; sourceTree = "<group>"; };
 		CC7FD9E01BB5F750005CCB2B /* ASPhotosFrameworkImageRequestTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASPhotosFrameworkImageRequestTests.m; sourceTree = "<group>"; };
@@ -1340,7 +1338,6 @@
 		CCE04B2A1E313EDA006AEBBB /* Collection Data Adapter */ = {
 			isa = PBXGroup;
 			children = (
-				CC6363E11E32C00800D8A8DE /* ASCollectionInteropProtocols.h */,
 				CCBD05DF1E4147B000D18509 /* ASIGListAdapterBasedDataSource.h */,
 				CCBD05DE1E4147B000D18509 /* ASIGListAdapterBasedDataSource.m */,
 			);
@@ -1416,7 +1413,6 @@
 				A2763D7A1CBDD57D00A9ADBD /* ASPINRemoteImageDownloader.h in Headers */,
 				34EFC7611B701C9C00AD841F /* ASBackgroundLayoutSpec.h in Headers */,
 				B35062591B010F070018CF92 /* ASBaseDefines.h in Headers */,
-				CC0F88611E4280C900576FED /* ASCollectionInteropProtocols.h in Headers */,
 				B35062131B010EFD0018CF92 /* ASBasicImageDownloader.h in Headers */,
 				B35062151B010EFD0018CF92 /* ASBatchContext.h in Headers */,
 				B35061F31B010EFD0018CF92 /* ASCellNode.h in Headers */,
