@@ -470,7 +470,9 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
   
   // Draw text
-  [renderer drawInContext:context bounds:drawParameterBounds];
+  [renderer drawInContext:context bounds:drawParameterBounds completion:^(BOOL isTruncated) {
+    [_delegate textNode:self truncated:isTruncated];
+  }];
   
   CGContextRestoreGState(context);
 }

@@ -14,6 +14,8 @@
 
 #import <AsyncDisplayKit/ASTextKitAttributes.h>
 
+typedef void (^ASTextNodeDrawCompletionBlock)(BOOL isTruncated);
+
 @class ASTextKitContext;
 @class ASTextKitShadower;
 @class ASTextKitFontSizeAdjuster;
@@ -63,7 +65,7 @@
 
  @param bounds The rect in which to draw the contents of the renderer.
  */
-- (void)drawInContext:(CGContextRef)context bounds:(CGRect)bounds;
+- (void)drawInContext:(CGContextRef)context bounds:(CGRect)bounds completion:(ASTextNodeDrawCompletionBlock)completionBlock;
 
 #pragma mark - Layout
 

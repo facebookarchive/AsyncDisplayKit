@@ -278,6 +278,8 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 - (BOOL)textNode:(ASTextNode *)textNode shouldLongPressLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point;
 
+- (void)textNode:(ASTextNode *)textNode truncated:(BOOL)truncated;
+
 @end
 
 @interface ASTextNode (Unavailable)
