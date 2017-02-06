@@ -59,7 +59,7 @@ ASDK_STYLE_PROP_OBJ(NSString *, extendedName, setExtendedName);
 - (void)doUseSomeStyleValuesFromChildren
 {
   for (id<ASLayoutElement> child in self.children) {
-    __unused CGFloat extendedWidht = child.style.extendedWidth;
+    __unused CGFloat extendedWidth = child.style.extendedWidth;
     __unused ASDimension extendedDimension = child.style.extendedDimension;
     __unused NSString *extendedName = child.style.extendedName;
   }
