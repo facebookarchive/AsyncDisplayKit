@@ -36,7 +36,7 @@
   collectionNode.delegate = dataSource;
   __weak IGListAdapter *weakSelf = self;
   [collectionNode onDidLoad:^(__kindof ASCollectionNode * _Nonnull collectionNode) {
-    weakSelf.collectionView = collectionNode.view;
+    weakSelf.collectionView = (IGListCollectionView *)collectionNode.view;
   }];
 }
 
