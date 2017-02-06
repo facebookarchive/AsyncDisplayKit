@@ -1114,7 +1114,6 @@ ASLayoutElementFinalLayoutElementDefault
       ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
     }
     
-    layoutSpec.parent = self;
     layoutSpec.isMutable = NO;
   }
   

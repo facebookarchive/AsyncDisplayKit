@@ -26,11 +26,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL isMutable;
 
 /**
- * Parent of the layout spec
- */
-@property (nullable, nonatomic, weak) id<ASLayoutElement> parent;
-
-/**
  * First child within the children's array.
  *
  * @discussion Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
