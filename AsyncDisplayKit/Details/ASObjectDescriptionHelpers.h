@@ -11,6 +11,16 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@protocol ASDebugNameProvider <NSObject>
+
+@required
+/**
+ * @abstract Name that is printed by ascii art string and displayed in description.
+ */
+@property (nullable, nonatomic, copy) NSString *debugName;
+
+@end
+
 /**
  * Your base class should conform to this and override `-debugDescription`
  * to call `[self propertiesForDebugDescription]` and use `ASObjectDescriptionMake`
