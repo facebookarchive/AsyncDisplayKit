@@ -63,6 +63,8 @@
   #define TIME_SCOPED(outVar)
 #endif
 
+static ASDisplayNodeNonFatalErrorBlock _nonFatalErrorBlock = nil;
+
 // Forward declare CALayerDelegate protocol as the iOS 10 SDK moves CALayerDelegate from a formal delegate to a protocol.
 // We have to forward declare the protocol as this place otherwise it will not compile compiling with an Base SDK < iOS 10
 @protocol CALayerDelegate;
@@ -2257,6 +2259,20 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
   ASDisplayNodeAssert(_flags.layerBacked, @"We shouldn't get called back here if there is no layer");
   return (id)kCFNull;
+}
+
+#pragma mark - Error Handling
+
++ (void)setNonFatalErrorBlock:(ASDisplayNodeNonFatalErrorBlock)nonFatalErrorBlock
+{
+  if (_nonFatalErrorBlock != nonFatalErrorBlock) {
+    _nonFatalErrorBlock = [nonFatalErrorBlock copy];
+  }
+}
+
++ (ASDisplayNodeNonFatalErrorBlock)nonFatalErrorBlock
+{
+  return _nonFatalErrorBlock;
 }
 
 #pragma mark - Converting to and from the Node's Coordinate System
