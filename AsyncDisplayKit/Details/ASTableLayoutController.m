@@ -102,9 +102,9 @@
        searchRect = [ASTableLayoutController growSearchRect:searchRect downward:downward]) {
     NSArray *rows = [_tableView indexPathsForRowsInRect:searchRect];
     if (downward) {
-      result = [ASTableLayoutController fastArrayMax:rows];
-    } else {
       result = [ASTableLayoutController fastArrayMin:rows];
+    } else {
+      result = [ASTableLayoutController fastArrayMax:rows];
     }
   }
   return result;
