@@ -36,7 +36,9 @@
   collectionNode.delegate = dataSource;
   __weak IGListAdapter *weakSelf = self;
   [collectionNode onDidLoad:^(__kindof ASCollectionNode * _Nonnull collectionNode) {
-    weakSelf.collectionView = collectionNode.view;
+    // We manually set the superclass of ASCollectionView to IGListCollectionView at runtime.
+    // Issue tracked at https://github.com/Instagram/IGListKit/issues/409
+    weakSelf.collectionView = (IGListCollectionView *)collectionNode.view;
   }];
 }
 
