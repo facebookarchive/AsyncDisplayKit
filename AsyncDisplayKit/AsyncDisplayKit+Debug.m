@@ -11,6 +11,7 @@
 //
 
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
+#import <AsyncDisplayKit/ASAbstractLayoutController.h>
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASWeakSet.h>
 #import <AsyncDisplayKit/UIImage+ASConvenience.h>

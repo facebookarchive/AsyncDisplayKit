@@ -13,7 +13,6 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBlockTypes.h>
 #import <AsyncDisplayKit/ASDimension.h>
-#import <AsyncDisplayKit/ASFlowLayoutController.h>
 #import <AsyncDisplayKit/ASEventLog.h>
 #ifdef __cplusplus
 #import <vector>
@@ -112,7 +111,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
  * will be updated asynchronously. The dataSource must be updated to reflect the changes before these methods has been called.
  * For each data updating, the corresponding methods in delegate will be called.
  */
-@interface ASDataController : NSObject <ASFlowLayoutControllerDataSource>
+@interface ASDataController : NSObject
 
 - (instancetype)initWithDataSource:(id<ASDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
 

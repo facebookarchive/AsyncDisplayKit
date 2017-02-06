@@ -70,6 +70,14 @@
 # endif
 #endif
 
+#ifndef ASDISPLAYNODE_CONST
+# if ASDISPLAYNODE_GNUC (3, 0)
+#  define ASDISPLAYNODE_CONST __attribute__ ((const))
+# else
+#  define ASDISPLAYNODE_CONST /* no const */
+# endif
+#endif
+
 #ifndef ASDISPLAYNODE_WARN_UNUSED
 # if ASDISPLAYNODE_GNUC (3, 4)
 #  define ASDISPLAYNODE_WARN_UNUSED __attribute__ ((warn_unused_result))
