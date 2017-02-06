@@ -17,12 +17,6 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ASDisplayNode (Visualization)
-@property (nonatomic, assign) BOOL shouldVisualizeLayoutSpecs;
-@property (nonatomic, assign) BOOL shouldCacheLayoutSpec;
-
-@end
-
 @interface ASImageNode (Debugging)
 
 /**

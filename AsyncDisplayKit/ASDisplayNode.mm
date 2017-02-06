@@ -972,19 +972,11 @@ ASLayoutElementFinalLayoutElementDefault
   [self cancelLayoutTransition];
   
   BOOL didCreateNewContext = NO;
-  BOOL didOverrideExistingContext = NO;
-  BOOL shouldVisualizeLayout = ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
   ASLayoutElementContext context = ASLayoutElementGetCurrentContext();
   if (ASLayoutElementContextIsNull(context)) {
-    context = ASLayoutElementContextMake(ASLayoutElementContextDefaultTransitionID, shouldVisualizeLayout);
+    context = ASLayoutElementContextMake(ASLayoutElementContextDefaultTransitionID);
     ASLayoutElementSetCurrentContext(context);
     didCreateNewContext = YES;
-  } else {
-    if (context.needsVisualizeNode != shouldVisualizeLayout) {
-      context.needsVisualizeNode = shouldVisualizeLayout;
-      ASLayoutElementSetCurrentContext(context);
-      didOverrideExistingContext = YES;
-    }
   }
   
   // Figure out previous and pending layouts for layout transition
@@ -1005,9 +997,6 @@ ASLayoutElementFinalLayoutElementDefault
   
   if (didCreateNewContext) {
     ASLayoutElementClearCurrentContext();
-  } else if (didOverrideExistingContext) {
-    context.needsVisualizeNode = !context.needsVisualizeNode;
-    ASLayoutElementSetCurrentContext(context);
   }
   
   // If our new layout's desired size for self doesn't match current size, ask our parent to update it.
@@ -1125,11 +1114,7 @@ ASLayoutElementFinalLayoutElementDefault
     }
 #endif
 
-    if (_shouldCacheLayoutSpec) {
-      _layoutSpec = layoutSpec;
-    } else {
-      ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
-    }
+    ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
     
     layoutSpec.isMutable = NO;
   }
@@ -1183,9 +1168,7 @@ ASLayoutElementFinalLayoutElementDefault
   
   BOOL measureLayoutSpec = _measurementOptions & ASDisplayNodePerformanceMeasurementOptionLayoutSpec;
   
-  if (_shouldCacheLayoutSpec && _layoutSpec != nil) {
-    return _layoutSpec;
-  } else if (_layoutSpecBlock != NULL) {
+  if (_layoutSpecBlock != NULL) {
     return ({
       ASDN::MutexLocker l(__instanceLock__);
       ASDN::SumScopeTimer t(_layoutSpecTotalTime, measureLayoutSpec);
@@ -1417,9 +1400,8 @@ ASLayoutElementFinalLayoutElementDefault
     ASLayout *newLayout;
     {
       ASDN::MutexLocker l(__instanceLock__);
-
-      BOOL shouldVisualizeLayout = ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
-      ASLayoutElementSetCurrentContext(ASLayoutElementContextMake(transitionID, shouldVisualizeLayout));
+      
+      ASLayoutElementSetCurrentContext(ASLayoutElementContextMake(transitionID));
 
       BOOL automaticallyManagesSubnodesDisabled = (self.automaticallyManagesSubnodes == NO);
       self.automaticallyManagesSubnodes = YES; // Temporary flag for 1.9.x
@@ -4002,44 +3984,6 @@ ASLayoutElementStyleExtensibilityForwarding
     string = [string stringByAppendingString:[NSString stringWithFormat:@"\"%@\"",_debugName]];
   }
   return string;
-}
-
-#pragma mark - ASDisplayNode (Visualization)
-
-- (void)setShouldVisualizeLayoutSpecs:(BOOL)shouldVisualizeLayoutSpecs
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  if (shouldVisualizeLayoutSpecs != [self shouldVisualizeLayoutSpecs]) {
-    if (shouldVisualizeLayoutSpecs) {
-      [self enterHierarchyState:ASHierarchyStateVisualizeLayout];
-    } else {
-      [self exitHierarchyState:ASHierarchyStateVisualizeLayout];
-    }
-    [self setNeedsLayout];
-  }
-}
-
-- (BOOL)shouldVisualizeLayoutSpecs
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return ASHierarchyStateIncludesVisualizeLayout(_hierarchyState);
-}
-
-- (void)setShouldCacheLayoutSpec:(BOOL)shouldCacheLayoutSpec
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  if (_shouldCacheLayoutSpec != shouldCacheLayoutSpec) {
-    _shouldCacheLayoutSpec = shouldCacheLayoutSpec;
-    if (_shouldCacheLayoutSpec == NO) {
-      _layoutSpec = nil;
-    }
-  }
-}
-
-- (BOOL)shouldCacheLayoutSpec
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  return _shouldCacheLayoutSpec;
 }
 
 @end
