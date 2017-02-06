@@ -14,7 +14,7 @@
 
 #import <AsyncDisplayKit/ASTextKitAttributes.h>
 
-typedef void (^ASTextNodeDrawCompletionBlock)(BOOL isTruncated);
+typedef void (^ASTextNodeRenderCompletionBlock)();
 
 @class ASTextKitContext;
 @class ASTextKitShadower;
@@ -65,7 +65,7 @@ typedef void (^ASTextNodeDrawCompletionBlock)(BOOL isTruncated);
 
  @param bounds The rect in which to draw the contents of the renderer.
  */
-- (void)drawInContext:(CGContextRef)context bounds:(CGRect)bounds completion:(ASTextNodeDrawCompletionBlock)completionBlock;
+- (void)drawInContext:(CGContextRef)context bounds:(CGRect)bounds completion:(ASTextNodeRenderCompletionBlock)completionBlock;
 
 #pragma mark - Layout
 
