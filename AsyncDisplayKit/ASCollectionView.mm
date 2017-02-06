@@ -173,8 +173,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     unsigned int collectionNodeWillDisplaySupplementaryElement:1;
     unsigned int collectionNodeDidEndDisplayingSupplementaryElement:1;
     unsigned int shouldBatchFetchForCollectionNode:1;
-    // Whether this delegate conforms to ASCollectionDataSourceInterop
+
+    // Interop flags
     unsigned int interop:1;
+    unsigned int interopWillDisplayCell:1;
+    unsigned int interopDidEndDisplayingCell:1;
   } _asyncDelegateFlags;
   
   struct {
@@ -193,6 +196,10 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
     // Whether this data source conforms to ASCollectionDataSourceInterop
     unsigned int interop:1;
+    // Whether this interop data source returns YES from +dequeuesCellsForNodeBackedItems
+    unsigned int interopAlwaysDequeue:1;
+    // Whether this interop data source implements viewForSupplementaryElementOfKind:
+    unsigned int interopViewForSupplementaryElement:1;
   } _asyncDataSourceFlags;
   
   struct {
@@ -411,7 +418,13 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     _asyncDataSourceFlags.collectionNodeContextForSection = [_asyncDataSource respondsToSelector:@selector(collectionNode:contextForSection:)];
     _asyncDataSourceFlags.collectionNodeNodeForSupplementaryElement = [_asyncDataSource respondsToSelector:@selector(collectionNode:nodeForSupplementaryElementOfKind:atIndexPath:)];
     _asyncDataSourceFlags.collectionNodeSupplementaryElementKindsInSection = [_asyncDataSource respondsToSelector:@selector(collectionNode:supplementaryElementKindsInSection:)];
+
     _asyncDataSourceFlags.interop = [_asyncDataSource conformsToProtocol:@protocol(ASCollectionDataSourceInterop)];
+    if (_asyncDataSourceFlags.interop) {
+      id<ASCollectionDataSourceInterop> interopDataSource = (id<ASCollectionDataSourceInterop>)_asyncDataSource;
+      _asyncDataSourceFlags.interopAlwaysDequeue = [[interopDataSource class] respondsToSelector:@selector(dequeuesCellsForNodeBackedItems)] && [[interopDataSource class] dequeuesCellsForNodeBackedItems];
+      _asyncDataSourceFlags.interopViewForSupplementaryElement = [interopDataSource respondsToSelector:@selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:)];
+    }
 
     ASDisplayNodeAssert(_asyncDataSourceFlags.collectionNodeNumberOfItemsInSection || _asyncDataSourceFlags.collectionViewNumberOfItemsInSection, @"Data source must implement collectionNode:numberOfItemsInSection:");
     ASDisplayNodeAssert(_asyncDataSourceFlags.collectionNodeNodeBlockForItem
@@ -490,6 +503,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     _asyncDelegateFlags.collectionNodeCanPerformActionForItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:canPerformAction:forItemAtIndexPath:sender:)];
     _asyncDelegateFlags.collectionNodePerformActionForItem = [_asyncDelegate respondsToSelector:@selector(collectionNode:performAction:forItemAtIndexPath:sender:)];
     _asyncDelegateFlags.interop = [_asyncDelegate conformsToProtocol:@protocol(ASCollectionDelegateInterop)];
+    if (_asyncDelegateFlags.interop) {
+      id<ASCollectionDelegateInterop> interopDelegate = (id<ASCollectionDelegateInterop>)_asyncDelegate;
+      _asyncDelegateFlags.interopWillDisplayCell = [interopDelegate respondsToSelector:@selector(collectionView:willDisplayCell:forItemAtIndexPath:)];
+      _asyncDelegateFlags.interopDidEndDisplayingCell = [interopDelegate respondsToSelector:@selector(collectionView:didEndDisplayingCell:forItemAtIndexPath:)];
+    }
   }
 
   super.delegate = (id<UICollectionViewDelegate>)_proxyDelegate;
@@ -882,20 +900,26 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
+  if ([_registeredSupplementaryKinds containsObject:kind] == NO) {
+    [self registerSupplementaryNodeOfKind:kind];
+  }
+  
   UICollectionReusableView *view = nil;
   ASCellNode *node = [_dataController supplementaryNodeOfKind:kind atIndexPath:indexPath];
 
-  if (node.shouldUseUIKitCell && _asyncDataSourceFlags.interop) {
+  BOOL shouldDequeueExternally = _asyncDataSourceFlags.interopViewForSupplementaryElement && (_asyncDataSourceFlags.interopAlwaysDequeue || node.shouldUseUIKitCell);
+  if (shouldDequeueExternally) {
     view = [(id<ASCollectionDataSourceInterop>)_asyncDataSource collectionView:collectionView viewForSupplementaryElementOfKind:kind atIndexPath:indexPath];
   } else {
-    ASDisplayNodeAssert(node != nil, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self);
-    if ([_registeredSupplementaryKinds containsObject:kind] == NO) {
-      [self registerSupplementaryNodeOfKind:kind];
-    }
     view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kReuseIdentifier forIndexPath:indexPath];
-    if (node) {
-      [_rangeController configureContentView:view forCellNode:node];
-    }
+  }
+
+  if (!node.shouldUseUIKitCell) {
+    ASDisplayNodeAssert(node != nil, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self);
+  }
+
+  if (node) {
+    [_rangeController configureContentView:view forCellNode:node];
   }
 
   return view;
@@ -906,25 +930,32 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   UICollectionViewCell *cell = nil;
   ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
 
-  if (node.shouldUseUIKitCell && _asyncDataSourceFlags.interop) {
+  BOOL shouldDequeueExternally = _asyncDataSourceFlags.interopAlwaysDequeue || (_asyncDataSourceFlags.interop && node.shouldUseUIKitCell);
+  if (shouldDequeueExternally) {
     cell = [(id<ASCollectionDataSourceInterop>)_asyncDataSource collectionView:collectionView cellForItemAtIndexPath:indexPath];
   } else {
-    ASDisplayNodeAssert(node != nil, @"Cell node should exist. indexPath = %@, collectionDataSource = %@", indexPath, self);
     cell = [self dequeueReusableCellWithReuseIdentifier:kReuseIdentifier forIndexPath:indexPath];
-    [(_ASCollectionViewCell *)cell setNode:node];
+  }
+
+  ASDisplayNodeAssert(node != nil, @"Cell node should exist. indexPath = %@, collectionDataSource = %@", indexPath, self);
+
+  if (_ASCollectionViewCell *asCell = ASDynamicCast(cell, _ASCollectionViewCell)) {
+    asCell.node = node;
     [_rangeController configureContentView:cell.contentView forCellNode:node];
   }
+  
   return cell;
 }
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(_ASCollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
+  if (_asyncDelegateFlags.interopWillDisplayCell) {
+    [(id <ASCollectionDelegateInterop>)_asyncDelegate collectionView:collectionView willDisplayCell:cell forItemAtIndexPath:indexPath];
+  }
+
   // Since _ASCollectionViewCell is not available for subclassing, this is faster than isKindOfClass:
   // We must exit early here, because only _ASCollectionViewCell implements the -node accessor method.
   if ([cell class] != [_ASCollectionViewCell class]) {
-    if (_asyncDelegateFlags.interop) {
-    	[(id <ASCollectionDelegateInterop>)_asyncDelegate collectionView:collectionView willDisplayCell:cell forItemAtIndexPath:indexPath];
-    }
     [_rangeController setNeedsUpdate];
     return;
   }
@@ -963,12 +994,13 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(_ASCollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath
 {
+  if (_asyncDelegateFlags.interopDidEndDisplayingCell) {
+    [(id <ASCollectionDelegateInterop>)_asyncDelegate collectionView:collectionView didEndDisplayingCell:cell forItemAtIndexPath:indexPath];
+  }
+
   // Since _ASCollectionViewCell is not available for subclassing, this is faster than isKindOfClass:
   // We must exit early here, because only _ASCollectionViewCell implements the -node accessor method.
   if ([cell class] != [_ASCollectionViewCell class]) {
-    if (_asyncDelegateFlags.interop) {
-    	[(id <ASCollectionDelegateInterop>)_asyncDelegate collectionView:collectionView didEndDisplayingCell:cell forItemAtIndexPath:indexPath];
-    }
     [_rangeController setNeedsUpdate];
     return;
   }
