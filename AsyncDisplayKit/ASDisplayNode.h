@@ -56,7 +56,7 @@ typedef void (^ASDisplayNodeContextModifier)(CGContextRef context);
 typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize);
 
 /**
- * AsyncDisplayKit non-faltal error block. This block can be used for handling non-fatal errors. Useful for reporting
+ * AsyncDisplayKit non-fatal error block. This block can be used for handling non-fatal errors. Useful for reporting
  * errors that happens in production.
  */
 typedef void (^ASDisplayNodeNonFatalErrorBlock)(__kindof NSError * _Nonnull error);
@@ -260,8 +260,9 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 /**
  * @abstract Class property that allows to set a block that can be called on non-fatal errors. This
- * property can be useful for cases when Async Display Kit can recover from an anormal behavior, but
- * still gives the opportunity to use a reporting mechanism to catch occurrences in production.
+ * property can be useful for cases when Async Display Kit can recover from an abnormal behavior, but
+ * still gives the opportunity to use a reporting mechanism to catch occurrences in production. In
+ * development, Async Display Kit will assert instead of calling this block.
  *
  * @warning This method is not thread-safe.
  */
