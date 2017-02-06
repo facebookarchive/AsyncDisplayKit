@@ -1086,9 +1086,10 @@ ASLayoutElementFinalLayoutElementDefault
   ASDN::MutexLocker l(__instanceLock__);
 
 #if YOGA /* YOGA */
-  if (ASHierarchyStateIncludesYogaLayout(_hierarchyState)) {
+  if (ASHierarchyStateIncludesYogaLayoutEnabled(_hierarchyState) == YES &&
+      ASHierarchyStateIncludesYogaLayoutMeasuring(_hierarchyState) == NO) {
     ASDN::MutexUnlocker ul(__instanceLock__);
-    return [self calculateLayoutFromYogaRootYogaLayoutFromRoot:constrainedSize];
+    return [self calculateLayoutFromYogaRoot:constrainedSize];
   }
 #endif /* YOGA */
 
@@ -3203,8 +3204,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   }
 
 #if YOGA /* YOGA */
-  if ((newState & ASHierarchyStateYogaLayout) != (oldState & ASHierarchyStateYogaLayout)) {
-    if (newState & ASHierarchyStateYogaLayout) {
+  if ((newState & ASHierarchyStateYogaLayoutEnabled) != (oldState & ASHierarchyStateYogaLayoutEnabled)) {
+    if (newState & ASHierarchyStateYogaLayoutEnabled) {
       // Entering Yoga Layout Mode; ensure YGNodeRef points to allocated node.
       ASDN::MutexLocker l(__instanceLock__);
       if (_yogaNode == NULL) {
@@ -3922,9 +3923,9 @@ ASLayoutElementStyleExtensibilityForwarding
 {
   _yogaParent = yogaParent;
   if (yogaParent) {
-    [self enterHierarchyState:ASHierarchyStateYogaLayout];
+    self.hierarchyState |= ASHierarchyStateYogaLayoutEnabled;
   } else {
-    [self exitHierarchyState:ASHierarchyStateYogaLayout];
+    self.hierarchyState &= ~ASHierarchyStateYogaLayoutEnabled;
   }
 }
 
@@ -3956,7 +3957,7 @@ ASLayoutElementStyleExtensibilityForwarding
   [self removeYogaChild:child];
   [_yogaChildren addObject:child];
 
-  [self enterHierarchyState:ASHierarchyStateYogaLayout];
+  self.hierarchyState |= ASHierarchyStateYogaLayoutEnabled;
 
   child.yogaParent = self;
   YGNodeInsertChild(_yogaNode, child.yogaNode, YGNodeGetChildCount(_yogaNode));
@@ -3974,7 +3975,7 @@ ASLayoutElementStyleExtensibilityForwarding
     YGNodeRemoveChild(_yogaNode, child.yogaNode);
   }
   if (_yogaChildren.count == 0 && self.yogaParent == nil) {
-    [self exitHierarchyState:ASHierarchyStateYogaLayout];
+    self.hierarchyState &= ~ASHierarchyStateYogaLayoutEnabled;
   }
 }
 
@@ -4012,13 +4013,17 @@ ASLayoutElementStyleExtensibilityForwarding
   }
 }
 
-- (ASLayout *)calculateLayoutFromYogaRootYogaLayoutFromRoot:(ASSizeRange)rootConstrainedSize
+- (ASLayout *)calculateLayoutFromYogaRoot:(ASSizeRange)rootConstrainedSize
 {
-  if (self.yogaParent != nil) {
-    ASDisplayNodeAssert(NO, @"A Yoga Layout hierarchy must perform layout from the root: %@", [self displayNodeRecursiveDescription]);
+  if (ASHierarchyStateIncludesYogaLayoutMeasuring(self.hierarchyState)) {
+    ASDisplayNodeAssert(NO, @"A Yoga layout is being performed by a parent; children must not perform their own until it is done! %@", [self displayNodeRecursiveDescription]);
     return [ASLayout layoutWithLayoutElement:self size:CGSizeZero];
   }
 
+  ASDisplayNodePerformBlockOnEveryYogaChild(self, ^(ASDisplayNode * _Nonnull node) {
+    node.hierarchyState |= ASHierarchyStateYogaLayoutMeasuring;
+  });
+  
   YGNodeRef rootYogaNode = self.yogaNode;
 
   // Apply the constrainedSize as a base, known frame of reference.
@@ -4113,6 +4118,11 @@ ASLayoutElementStyleExtensibilityForwarding
 #endif
 
   ASLayout *yogaLayout = [self layoutTreeForYogaNode];
+
+  ASDisplayNodePerformBlockOnEveryYogaChild(self, ^(ASDisplayNode * _Nonnull node) {
+    node.hierarchyState &= ~ASHierarchyStateYogaLayoutMeasuring;
+  });
+
   return yogaLayout;
 }
 
