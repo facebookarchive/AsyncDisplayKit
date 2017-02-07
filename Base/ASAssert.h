@@ -60,7 +60,7 @@
 #define ASDisplayNodeCAssertInfOrPositiveReal(description, num) ASDisplayNodeCAssert(isinf(num) || (num >= 0 && num <= CGFLOAT_MAX), @"%@ must be infinite or a real positive integer.", description)
 
 #define ASDisplayNodeErrorDomain @"ASDisplayNodeErrorDomain"
-#define ASDisplayNodeNonFatalErrorCode 0
+#define ASDisplayNodeNonFatalErrorCode 1
 
 #define ASDisplayNodeAssertNonFatal(desc, ...)                                                                                  \
   ASDisplayNodeAssert(NO, desc, ##__VA_ARGS__);                                                                                 \
