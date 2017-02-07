@@ -729,11 +729,29 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (__kindof UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath;
 
+@optional
+
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Implement this property and return YES if you want your interop data source to be
+ * used when dequeuing cells for node-backed items.
+ *
+ * If NO (the default), the interop data source will only be consulted in cases
+ * where no ASCellNode was provided to AsyncDisplayKit.
+ *
+ * If YES, the interop data source will always be consulted to dequeue cells, and
+ * will be expected to return _ASCollectionViewCells in cases where a node was provided.
+ *
+ * The default value is NO.
+ */
+@property (class, nonatomic, readonly) BOOL dequeuesCellsForNodeBackedItems;
 
 @end
 
 @protocol ASCollectionDelegateInterop <ASCollectionDelegate>
+
+@optional
 
 - (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath;
 
