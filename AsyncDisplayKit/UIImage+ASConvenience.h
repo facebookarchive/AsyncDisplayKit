@@ -32,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param fillColor    The fill color of the rounded-corner image
  */
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
-                                          cornerColor:(UIColor *)cornerColor
+                                          cornerColor:(nullable UIColor *)cornerColor
                                             fillColor:(UIColor *)fillColor AS_WARN_UNUSED_RESULT;
 
 /**
@@ -62,7 +62,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param scale           The number of pixels per point. Provide 0.0 to use the screen scale.
  */
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
-                                          cornerColor:(UIColor *)cornerColor
+                                          cornerColor:(nullable UIColor *)cornerColor
                                             fillColor:(UIColor *)fillColor
                                           borderColor:(nullable UIColor *)borderColor
                                           borderWidth:(CGFloat)borderWidth
