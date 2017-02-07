@@ -3826,7 +3826,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
   if (self.layerBacked) {
     CALayer *rootLayer = _layer;
-    CALayer *nextLayer = rootLayer;
+    CALayer *nextLayer = nil;
     while ((nextLayer = rootLayer.superlayer) != nil) {
       rootLayer = nextLayer;
     }

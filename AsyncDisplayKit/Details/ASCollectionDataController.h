@@ -44,7 +44,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (instancetype)initWithDataSource:(id<ASCollectionDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
 
-- (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+- (nullable ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
 - (nullable id<ASSectionContext>)contextForSection:(NSInteger)section;
 

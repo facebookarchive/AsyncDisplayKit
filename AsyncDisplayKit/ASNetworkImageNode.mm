@@ -414,17 +414,22 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     } callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:newDownloadIDForProgressBlock];
   }
 
-  // Update state.
+  // Update state local state with lock held.
   {
     ASDN::MutexLocker l(__instanceLock__);
+    // Check if the oldDownloadIDForProgressBlock still is the same as the _downloadIdentifierForProgressBlock
     if (_downloadIdentifierForProgressBlock == oldDownloadIDForProgressBlock) {
       _downloadIdentifierForProgressBlock = newDownloadIDForProgressBlock;
-    } else {
+    } else if (newDownloadIDForProgressBlock != nil) {
+      // If this is not the case another thread did change the _downloadIdentifierForProgressBlock already so
+      // we have to deregister the newDownloadIDForProgressBlock that we registered above
       clearAndReattempt = YES;
     }
   }
   
   if (clearAndReattempt) {
+    // In this case another thread changed the _downloadIdentifierForProgressBlock before we finished registering
+    // the new progress block for newDownloadIDForProgressBlock ID. Let's clear it now and reattempt to register
     [_downloader setProgressImageBlock:nil callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:newDownloadIDForProgressBlock];
     [self _updateProgressImageBlockOnDownloaderIfNeeded];
   }
