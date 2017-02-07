@@ -62,8 +62,8 @@
 #define ASDisplayNodeErrorDomain @"ASDisplayNodeErrorDomain"
 #define ASDisplayNodeNonFatalErrorCode 1
 
-#define ASDisplayNodeAssertNonFatal(desc, ...)                                                                                  \
-  ASDisplayNodeAssert(NO, desc, ##__VA_ARGS__);                                                                                 \
+#define ASDisplayNodeAssertNonFatal(condition, desc, ...)                                                                       \
+  ASDisplayNodeAssert(condition, desc, ##__VA_ARGS__);                                                                          \
   ASDisplayNodeNonFatalErrorBlock block = [ASDisplayNode nonFatalErrorBlock];                                                   \
   if (block != nil) {                                                                                                           \
     NSDictionary *userInfo = nil;                                                                                               \
