@@ -16,6 +16,7 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 #import <AsyncDisplayKit/ASLayoutElement.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -558,7 +559,7 @@ extern NSInteger const ASDefaultDrawingPriority;
 /**
  * Convenience methods for debugging.
  */
-@interface ASDisplayNode (Debugging) <ASLayoutElementAsciiArtProtocol>
+@interface ASDisplayNode (Debugging) <ASLayoutElementAsciiArtProtocol, ASDebugNameProvider>
 
 /**
  * @abstract Return a description of the node hierarchy.

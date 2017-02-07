@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASLayoutElement.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -91,7 +92,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface ASLayoutSpec (Debugging) <ASLayoutElementAsciiArtProtocol>
+@interface ASLayoutSpec (Debugging) <ASLayoutElementAsciiArtProtocol, ASDebugNameProvider>
 /**
  *  Used by other layout specs to create ascii art debug strings
  */
