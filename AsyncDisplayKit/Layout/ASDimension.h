@@ -212,6 +212,14 @@ extern ASSizeRange const ASSizeRangeZero;
 extern ASSizeRange const ASSizeRangeUnconstrained;
 
 /**
+ * Returns whether a size range has zero max width or height.
+ */
+ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT BOOL ASSizeRangeIsEmpty(ASSizeRange sizeRange)
+{
+  return (sizeRange.max.width == 0 || sizeRange.max.height == 0);
+}
+
+/**
  * Creates an ASSizeRange with provided min and max size.
  */
 ASOVERLOADABLE ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASSizeRange ASSizeRangeMake(CGSize min, CGSize max)
