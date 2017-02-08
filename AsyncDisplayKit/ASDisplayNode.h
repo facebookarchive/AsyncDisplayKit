@@ -57,6 +57,12 @@ typedef void (^ASDisplayNodeContextModifier)(CGContextRef context);
 typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize);
 
 /**
+ * AsyncDisplayKit non-fatal error block. This block can be used for handling non-fatal errors. Useful for reporting
+ * errors that happens in production.
+ */
+typedef void (^ASDisplayNodeNonFatalErrorBlock)(__kindof NSError * _Nonnull error);
+
+/**
  * Interface state is available on ASDisplayNode and ASViewController, and
  * allows checking whether a node is in an interface situation where it is prudent to trigger certain
  * actions: measurement, data loading, display, and visibility (the latter for animations or other onscreen-only effects).
@@ -252,6 +258,16 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @see ASInterfaceState
  */
 @property (readonly) ASInterfaceState interfaceState;
+
+/**
+ * @abstract Class property that allows to set a block that can be called on non-fatal errors. This
+ * property can be useful for cases when Async Display Kit can recover from an abnormal behavior, but
+ * still gives the opportunity to use a reporting mechanism to catch occurrences in production. In
+ * development, Async Display Kit will assert instead of calling this block.
+ *
+ * @warning This method is not thread-safe.
+ */
+@property (nonatomic, class, copy) ASDisplayNodeNonFatalErrorBlock nonFatalErrorBlock;
 
 
 /** @name Managing dimensions */
