@@ -181,7 +181,6 @@
 		92DD2FE61BF4D05E0074C9DD /* MapKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 92DD2FE51BF4D05E0074C9DD /* MapKit.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 		92DD2FE71BF4D0850074C9DD /* ASMapNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 92DD2FE21BF4B97E0074C9DD /* ASMapNode.mm */; };
 		92DD2FE81BF4D0A80074C9DD /* ASMapNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 92DD2FE11BF4B97E0074C9DD /* ASMapNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		9B92C8851BC2EB6E00EE46B2 /* ASCollectionDataController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 251B8EF31BBB3D690087C538 /* ASCollectionDataController.mm */; };
 		9C49C3701B853961000B0DD5 /* ASStackLayoutElement.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C49C36E1B853957000B0DD5 /* ASStackLayoutElement.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C55866B1BD54A1900B50E3A /* ASAsciiArtBoxCreator.m in Sources */ = {isa = PBXBuildFile; fileRef = 9C5586681BD549CB00B50E3A /* ASAsciiArtBoxCreator.m */; };
 		9C55866C1BD54A3000B50E3A /* ASAsciiArtBoxCreator.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C5586671BD549CB00B50E3A /* ASAsciiArtBoxCreator.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -190,8 +189,6 @@
 		9C70F2061CDA4F0C007D6C76 /* ASTraitCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 9C70F2011CDA4EFA007D6C76 /* ASTraitCollection.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C70F2091CDABA36007D6C76 /* ASViewController.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9CFFC6BF1CCAC73C006A6476 /* ASViewController.mm */; };
 		9C70F20A1CDBE949007D6C76 /* ASTableNode.mm in Sources */ = {isa = PBXBuildFile; fileRef = 9CFFC6C11CCAC768006A6476 /* ASTableNode.mm */; };
-		9C70F20B1CDBE9A4007D6C76 /* ASDataController+Subclasses.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF61BBB3D690087C538 /* ASDataController+Subclasses.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		9C70F20C1CDBE9B6007D6C76 /* ASCollectionDataController.h in Headers */ = {isa = PBXBuildFile; fileRef = 251B8EF21BBB3D690087C538 /* ASCollectionDataController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		9C70F20D1CDBE9CB007D6C76 /* ASDefaultPlayButton.h in Headers */ = {isa = PBXBuildFile; fileRef = AEB7B0181C5962EA00662EF4 /* ASDefaultPlayButton.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		9C70F20E1CDBE9E5007D6C76 /* NSArray+Diffing.h in Headers */ = {isa = PBXBuildFile; fileRef = DBC452D91C5BF64600B16017 /* NSArray+Diffing.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		9C70F20F1CDBE9FF007D6C76 /* ASLayoutManager.h in Headers */ = {isa = PBXBuildFile; fileRef = B30BF6501C5964B0004FCD53 /* ASLayoutManager.h */; settings = {ATTRIBUTES = (Private, ); }; };
@@ -489,9 +486,6 @@
 		205F0E1F1B376416007741D0 /* CoreGraphics+ASConvenience.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CoreGraphics+ASConvenience.h"; sourceTree = "<group>"; };
 		205F0E201B376416007741D0 /* CoreGraphics+ASConvenience.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CoreGraphics+ASConvenience.m"; sourceTree = "<group>"; };
 		242995D21B29743C00090100 /* ASBasicImageDownloaderTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBasicImageDownloaderTests.m; sourceTree = "<group>"; };
-		251B8EF21BBB3D690087C538 /* ASCollectionDataController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; path = ASCollectionDataController.h; sourceTree = "<group>"; };
-		251B8EF31BBB3D690087C538 /* ASCollectionDataController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = ASCollectionDataController.mm; sourceTree = "<group>"; };
-		251B8EF61BBB3D690087C538 /* ASDataController+Subclasses.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASDataController+Subclasses.h"; sourceTree = "<group>"; };
 		2538B6F21BC5D2A2003CA0B4 /* ASCollectionViewFlowLayoutInspectorTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; path = ASCollectionViewFlowLayoutInspectorTests.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		254C6B511BF8FE6D003EC431 /* ASTextKitTruncationTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASTextKitTruncationTests.mm; sourceTree = "<group>"; };
 		254C6B531BF8FF2A003EC431 /* ASTextKitTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASTextKitTests.mm; sourceTree = "<group>"; };
@@ -1152,7 +1146,6 @@
 				CC0F88591E42807F00576FED /* ASCollectionViewFlowLayoutInspector.m */,
 				9F98C0231DBDF2A300476D92 /* ASControlTargetAction.h */,
 				9F98C0241DBDF2A300476D92 /* ASControlTargetAction.m */,
-				251B8EF61BBB3D690087C538 /* ASDataController+Subclasses.h */,
 				8B0768B11CE752EC002E1453 /* ASDefaultPlaybackButton.h */,
 				8B0768B21CE752EC002E1453 /* ASDefaultPlaybackButton.m */,
 				AEB7B0181C5962EA00662EF4 /* ASDefaultPlayButton.h */,
@@ -1241,8 +1234,6 @@
 			children = (
 				DE8BEABF1C2DF3FC00D57C12 /* ASDelegateProxy.h */,
 				DE8BEAC01C2DF3FC00D57C12 /* ASDelegateProxy.m */,
-				251B8EF21BBB3D690087C538 /* ASCollectionDataController.h */,
-				251B8EF31BBB3D690087C538 /* ASCollectionDataController.mm */,
 				464052191A3F83C40061C0BA /* ASDataController.h */,
 				4640521A1A3F83C40061C0BA /* ASDataController.mm */,
 				E5711A2A1C840C81009619D4 /* ASIndexedNodeContext.h */,
@@ -1464,7 +1455,6 @@
 				044285081BAA63FE00D16268 /* ASBatchFetching.h in Headers */,
 				AC026B701BD57DBF00BBC17E /* _ASHierarchyChangeSet.h in Headers */,
 				CC87BB951DA8193C0090E380 /* ASCellNode+Internal.h in Headers */,
-				9C70F20C1CDBE9B6007D6C76 /* ASCollectionDataController.h in Headers */,
 				9C8898BD1C738BB800D6B02E /* ASTextKitFontSizeAdjuster.h in Headers */,
 				254C6B791BF94DF4003EC431 /* ASTextKitEntityAttribute.h in Headers */,
 				CC3B20841C3F76D600798563 /* ASPendingStateController.h in Headers */,
@@ -1481,7 +1471,6 @@
 				CC58AA4B1E398E1D002C8CB4 /* ASBlockTypes.h in Headers */,
 				6977965F1D8AC8D3007E93D7 /* ASLayoutSpec+Subclasses.h in Headers */,
 				692BE8D71E36B65B00C86D87 /* ASLayoutSpecPrivate.h in Headers */,
-				9C70F20B1CDBE9A4007D6C76 /* ASDataController+Subclasses.h in Headers */,
 				34EFC75D1B701BE900AD841F /* ASInternalHelpers.h in Headers */,
 				DEC146B71C37A16A004A0EE7 /* ASCollectionInternal.h in Headers */,
 				68B8A4E21CBDB958007E4543 /* ASWeakProxy.h in Headers */,
@@ -1812,7 +1801,6 @@
 				690C35671E0567C600069B91 /* ASDimensionDeprecated.mm in Sources */,
 				92DD2FE71BF4D0850074C9DD /* ASMapNode.mm in Sources */,
 				636EA1A51C7FF4EF00EE152F /* ASDefaultPlayButton.m in Sources */,
-				9B92C8851BC2EB6E00EE46B2 /* ASCollectionDataController.mm in Sources */,
 				B350623D1B010EFD0018CF92 /* _ASAsyncTransaction.mm in Sources */,
 				6947B0C51E36B5040007C478 /* ASStackPositionedLayout.mm in Sources */,
 				B35062401B010EFD0018CF92 /* _ASAsyncTransactionContainer.m in Sources */,

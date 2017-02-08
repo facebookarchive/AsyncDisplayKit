@@ -21,7 +21,7 @@
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
 #import <AsyncDisplayKit/ASSectionContext.h>
-#import <AsyncDisplayKit/ASCollectionDataController.h>
+#import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 #import <AsyncDisplayKit/ASThread.h>
 
@@ -202,9 +202,9 @@
 #pragma mark Setter / Getter
 
 // TODO: Implement this without the view.
-- (ASCollectionDataController *)dataController
+- (ASDataController *)dataController
 {
-  return (ASCollectionDataController *)self.view.dataController;
+  return self.view.dataController;
 }
 
 // TODO: Implement this without the view.

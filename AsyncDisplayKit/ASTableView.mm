@@ -466,10 +466,21 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
+  ASDisplayNodeAssertMainThread();
+  //TODO consider to change the definition of completion block
+  void (^batchUpdatesCompletion)(BOOL) = nil;
+  if (completion) {
+    batchUpdatesCompletion = ^(BOOL) {
+      completion();
+    };
+  }
+  
   ASPerformBlockOnMainThread(^{
     [super reloadData];
   });
-  [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
+  [self beginUpdates];
+  [_changeSet reloadData];
+  [self endUpdatesCompletion:batchUpdatesCompletion];
 }
 
 - (void)reloadData
@@ -480,7 +491,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController reloadDataImmediatelyWithAnimationOptions:UITableViewRowAnimationNone];
+  [self beginUpdates];
+  [_changeSet reloadData];
+  [self endUpdatesCompletion:nil];
+  [_dataController waitUntilAllUpdatesAreCommitted];
   [super reloadData];
 }
 
@@ -652,11 +666,16 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)endUpdates
 {
-  // We capture the current state of whether animations are enabled if they don't provide us with one.
-  [self endUpdatesAnimated:[UIView areAnimationsEnabled] completion:nil];
+  [self endUpdatesCompletion:nil];
 }
 
-- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion;
+- (void)endUpdatesCompletion:(void (^)(BOOL completed))completion
+{
+  // We capture the current state of whether animations are enabled if they don't provide us with one.
+  [self endUpdatesAnimated:[UIView areAnimationsEnabled] completion:completion];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssertNotNil(_changeSet, @"_changeSet must be available when batch update ends");
@@ -1432,6 +1451,33 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (completion) {
     completion(YES);
   }
+}
+
+- (void)rangeControllerDidReloadData:(ASRangeController *)rangeController
+{
+  ASDisplayNodeAssertMainThread();
+  LOG(@"UITableView reloadData");
+  
+  if (!self.asyncDataSource) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+  
+  ASPerformBlockWithoutAnimation(YES, ^{
+    if (self.test_enableSuperUpdateCallLogging) {
+      NSLog(@"-[super reloadData]");
+    }
+    [super reloadData];
+    if (!_performingBatchUpdates) {
+      [_rangeController updateIfNeeded];
+    }
+    // TODO check this
+//    [self _scheduleCheckForBatchFetchingForNumberOfChanges:<#(NSUInteger)#>
+  });
+  
+  //TODO check this
+//  if (_automaticallyAdjustsContentOffset) {
+//    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
+//  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions

@@ -76,16 +76,4 @@ ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView *collectionVi
   return ASScrollDirectionNone;
 }
 
-- (ASSizeRange)collectionView:(ASCollectionView *)collectionView constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
-  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
-}
-
-- (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
-{
-  ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
-  return 0;
-}
-
 @end

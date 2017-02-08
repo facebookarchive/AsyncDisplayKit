@@ -30,6 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASDataController;
 @class _ASHierarchyChangeSet;
 @protocol ASTraitEnvironment;
+@protocol ASSectionContext;
 
 typedef NSUInteger ASDataControllerAnimationOptions;
 
@@ -63,6 +64,18 @@ extern NSString * const ASCollectionInvalidUpdateException;
  */
 - (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController;
 
+@optional
+
+- (NSArray<NSString *> *)dataController:(ASDataController *)dataController supplementaryNodeKindsInSections:(NSIndexSet *)sections;
+
+- (NSUInteger)dataController:(ASDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section;
+
+- (ASCellNodeBlock)dataController:(ASDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+- (nullable id<ASSectionContext>)dataController:(ASDataController *)dataController contextForSection:(NSInteger)section;
+
 @end
 
 @protocol ASDataControllerEnvironmentDelegate
@@ -83,6 +96,11 @@ extern NSString * const ASCollectionInvalidUpdateException;
 - (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL))completion;
 
 /**
+ Called for reload data
+ */
+- (void)dataControllerDidReloadData:(ASDataController *)dataController;
+
+/**
  Called for insertion of elements.
  */
 - (void)dataController:(ASDataController *)dataController didInsertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
@@ -95,7 +113,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
 /**
  Called for insertion of sections.
  */
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray<NSArray<ASCellNode *> *> *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for deletion of sections.
@@ -173,10 +191,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
  */
 - (void)relayoutAllNodes;
 
-- (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^ _Nullable)())completion;
-
-- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
 - (void)waitUntilAllUpdatesAreCommitted;
 
 /** @name Data Querying */
@@ -210,6 +224,10 @@ extern NSString * const ASCollectionInvalidUpdateException;
  * Direct access to the nodes that have completed calculation and layout
  */
 - (NSArray<NSArray <ASCellNode *> *> *)completedNodes;
+
+- (nullable ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+- (nullable id<ASSectionContext>)contextForSection:(NSInteger)section;
 
 /**
  * Immediately move this item. This is called by ASTableView when the user has finished an interactive

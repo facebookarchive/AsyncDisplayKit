@@ -29,6 +29,7 @@
 
 @interface ASRangeController ()
 {
+  //TODO revisit this
   BOOL _rangeIsValid;
   BOOL _needsRangeUpdate;
   BOOL _layoutControllerImplementsSetVisibleIndexPaths;
@@ -500,6 +501,13 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [_delegate rangeController:self didEndUpdatesAnimated:animated completion:completion];
 }
 
+- (void)dataControllerDidReloadData:(ASDataController *)dataController
+{
+  ASDisplayNodeAssertMainThread();
+  _rangeIsValid = NO;
+  [_delegate rangeControllerDidReloadData:self];
+}
+
 - (void)dataController:(ASDataController *)dataController didInsertItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
@@ -514,9 +522,8 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [_delegate rangeController:self didDeleteItemsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
 }
 
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)dataController:(ASDataController *)dataController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
-  ASDisplayNodeAssert(sections.count == indexSet.count, @"Invalid sections");
   ASDisplayNodeAssertMainThread();
   _rangeIsValid = NO;
   [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];

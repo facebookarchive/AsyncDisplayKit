@@ -13,10 +13,10 @@
 #import <AsyncDisplayKit/ASBatchFetching.h>
 #import <AsyncDisplayKit/ASDelegateProxy.h>
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
-#import <AsyncDisplayKit/ASCollectionDataController.h>
 #import <AsyncDisplayKit/ASCollectionInternal.h>
 #import <AsyncDisplayKit/ASCollectionViewLayoutController.h>
 #import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
+#import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
@@ -68,11 +68,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASCollectionDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate, ASCALayerExtendedDelegate, UICollectionViewDelegateFlowLayout> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate, ASCALayerExtendedDelegate, UICollectionViewDelegateFlowLayout> {
   ASCollectionViewProxy *_proxyDataSource;
   ASCollectionViewProxy *_proxyDelegate;
   
-  ASCollectionDataController *_dataController;
+  ASDataController *_dataController;
   ASRangeController *_rangeController;
   ASCollectionViewLayoutController *_layoutController;
   id<ASCollectionViewLayoutInspecting> _defaultLayoutInspector;
@@ -118,6 +118,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
    * The number of items after the update (1) must be equal to the number of items before the update (1) plus or minus the items added and removed (1 added, 0 removed).`
    * The collection view never queried your data source before the update to see that it actually had 0 items.
    */
+  //TODO revisit this
   BOOL _superIsPendingDataLoad;
 
   /**
@@ -205,6 +206,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   } _asyncDataSourceFlags;
   
   struct {
+    unsigned int constrainedSizeForSupplementaryNodeOfKindAtIndexPath:1;
+    unsigned int supplementaryNodesOfKindInSection:1;
     unsigned int didChangeCollectionViewDataSource:1;
     unsigned int didChangeCollectionViewDelegate:1;
   } _layoutInspectorFlags;
@@ -257,7 +260,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   _rangeController.delegate = self;
   _rangeController.layoutController = _layoutController;
   
-  _dataController = [[ASCollectionDataController alloc] initWithDataSource:self eventLog:eventLog];
+  _dataController = [[ASDataController alloc] initWithDataSource:self eventLog:eventLog];
   _dataController.delegate = _rangeController;
   _dataController.environmentDelegate = self;
   
@@ -314,11 +317,23 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
+  ASDisplayNodeAssertMainThread();
+  //TODO consider to change the definition of completion block
+  void (^batchUpdatesCompletion)(BOOL) = nil;
+  if (completion) {
+    batchUpdatesCompletion = ^(BOOL) {
+      completion();
+    };
+  }
+  
   ASPerformBlockOnMainThread(^{
+    //TODO Do we still need this?
     _superIsPendingDataLoad = YES;
     [super reloadData];
   });
-  [_dataController reloadDataWithAnimationOptions:kASCollectionViewAnimationNone completion:completion];
+  [self performBatchUpdates:^{
+    [_changeSet reloadData];
+  } completion: batchUpdatesCompletion];
 }
 
 - (void)reloadData
@@ -337,7 +352,10 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 {
   ASDisplayNodeAssertMainThread();
   _superIsPendingDataLoad = YES;
-  [_dataController reloadDataImmediatelyWithAnimationOptions:kASCollectionViewAnimationNone];
+  [self performBatchUpdates:^{
+    [_changeSet reloadData];
+  } completion:nil];
+  [_dataController waitUntilAllUpdatesAreCommitted];
   [super reloadData];
 }
 
@@ -552,6 +570,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 {
   _layoutInspector = layoutInspector;
   
+  _layoutInspectorFlags.constrainedSizeForSupplementaryNodeOfKindAtIndexPath = [_layoutInspector respondsToSelector:@selector(collectionView:constrainedSizeForSupplementaryNodeOfKind:atIndexPath:)];
+  _layoutInspectorFlags.supplementaryNodesOfKindInSection = [_layoutInspector respondsToSelector:@selector(collectionView:supplementaryNodesOfKind:inSection:)];
   _layoutInspectorFlags.didChangeCollectionViewDataSource = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDataSource:)];
   _layoutInspectorFlags.didChangeCollectionViewDelegate = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDelegate:)];
 
@@ -1545,13 +1565,14 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   return self.collectionNode;
 }
 
-#pragma mark - ASCollectionViewDataControllerSource
+#pragma mark - ASDataControllerSource optional methods
 
-- (ASCellNode *)dataController:(ASCollectionDataController *)dataController supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+- (ASCellNodeBlock)dataController:(ASDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
+  //TODO support supplementary node block
   ASCellNode *node = nil;
   if (_asyncDataSourceFlags.collectionNodeNodeForSupplementaryElement) {
-    GET_COLLECTIONNODE_OR_RETURN(collectionNode, [[ASCellNode alloc] init] );
+    GET_COLLECTIONNODE_OR_RETURN(collectionNode, ^{ return [[ASCellNode alloc] init]; });
     node = [_asyncDataSource collectionNode:collectionNode nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
   } else if (_asyncDataSourceFlags.collectionViewNodeForSupplementaryElement) {
 #pragma clang diagnostic push
@@ -1566,16 +1587,16 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
   
   ASDisplayNodeAssert(node != nil, @"A node must be returned for supplementary element of kind '%@' at index path '%@'", kind, indexPath);
-  return node;
+  return ^{ return node; };
 }
 
-- (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController sections:(NSIndexSet *)sections
+- (NSArray<NSString *> *)dataController:(ASDataController *)dataController supplementaryNodeKindsInSections:(NSIndexSet *)sections
 {
   if (_asyncDataSourceFlags.collectionNodeSupplementaryElementKindsInSection) {
     NSMutableSet *kinds = [NSMutableSet set];
     GET_COLLECTIONNODE_OR_RETURN(collectionNode, @[]);
     [sections enumerateIndexesUsingBlock:^(NSUInteger section, BOOL * _Nonnull stop) {
-      NSArray *kindsForSection = [_asyncDataSource collectionNode:collectionNode supplementaryElementKindsInSection:section];
+      NSArray<NSString *> *kindsForSection = [_asyncDataSource collectionNode:collectionNode supplementaryElementKindsInSection:section];
       [kinds addObjectsFromArray:kindsForSection];
     }];
     return [kinds allObjects];
@@ -1585,18 +1606,28 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
 }
 
-- (ASSizeRange)dataController:(ASCollectionDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  return [self.layoutInspector collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+  if (_layoutInspectorFlags.constrainedSizeForSupplementaryNodeOfKindAtIndexPath) {
+    return [self.layoutInspector collectionView:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+  }
+  
+  ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
+  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
 }
 
-- (NSUInteger)dataController:(ASCollectionDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
+- (NSUInteger)dataController:(ASDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section
 {
   if (_asyncDataSource == nil) {
     return 0;
   }
+  
+  if (_layoutInspectorFlags.supplementaryNodesOfKindInSection) {
+    return [self.layoutInspector collectionView:self supplementaryNodesOfKind:kind inSection:section];
+  }
 
-  return [self.layoutInspector collectionView:self supplementaryNodesOfKind:kind inSection:section];
+  ASDisplayNodeAssert(NO, @"To support supplementary nodes in ASCollectionView, it must have a layoutInspector for layout inspection. (See ASCollectionViewFlowLayoutInspector for an example.)");
+  return 0;
 }
 
 - (id<ASSectionContext>)dataController:(ASDataController *)dataController contextForSection:(NSInteger)section
@@ -1695,6 +1726,30 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   
   [_batchUpdateBlocks removeAllObjects];
   _performingBatchUpdates = NO;
+}
+
+- (void)rangeControllerDidReloadData:(ASRangeController *)rangeController
+{
+  ASDisplayNodeAssertMainThread();
+  if (!self.asyncDataSource || _superIsPendingDataLoad) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+  
+  //TODO check this
+//  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:_performingBatchUpdates];
+  if (_performingBatchUpdates) {
+    [_batchUpdateBlocks addObject:^{
+      [super reloadData];
+    }];
+  } else {
+    [UIView performWithoutAnimation:^{
+      [super reloadData];
+      // Flush any range changes that happened as part of submitting the update.
+      [_rangeController updateIfNeeded];
+      // TODO check this
+//      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
+    }];
+  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions

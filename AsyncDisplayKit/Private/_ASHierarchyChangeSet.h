@@ -59,7 +59,10 @@ BOOL ASHierarchyChangeTypeIsFinal(_ASHierarchyChangeType changeType);
 
 NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 
-@interface _ASHierarchySectionChange : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider>
+@interface _ASHierarchyReloadDataChange : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider, NSCopying>
+@end
+
+@interface _ASHierarchySectionChange : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider, NSCopying>
 
 // FIXME: Generalize this to `changeMetadata` dict?
 @property (nonatomic, readonly) ASDataControllerAnimationOptions animationOptions;
@@ -74,7 +77,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 - (_ASHierarchySectionChange *)changeByFinalizingType;
 @end
 
-@interface _ASHierarchyItemChange : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider>
+@interface _ASHierarchyItemChange : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider, NSCopying>
 @property (nonatomic, readonly) ASDataControllerAnimationOptions animationOptions;
 
 /// Index paths are sorted descending for changeType .Delete, ascending otherwise
@@ -133,12 +136,14 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 /// NOTE: Calling this method will cause the changeset to convert all reloads into delete/insert pairs.
 - (void)markCompletedWithNewItemCounts:(std::vector<NSInteger>)newItemCounts;
 
+- (nullable _ASHierarchyReloadDataChange *)reloadDataChange;
 - (nullable NSArray <_ASHierarchySectionChange *> *)sectionChangesOfType:(_ASHierarchyChangeType)changeType;
 - (nullable NSArray <_ASHierarchyItemChange *> *)itemChangesOfType:(_ASHierarchyChangeType)changeType;
 
 /// Returns all item indexes affected by changes of the given type in the given section.
 - (NSIndexSet *)indexesForItemChangesOfType:(_ASHierarchyChangeType)changeType inSection:(NSUInteger)section;
 
+- (void)reloadData;
 - (void)deleteSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)insertSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)reloadSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;

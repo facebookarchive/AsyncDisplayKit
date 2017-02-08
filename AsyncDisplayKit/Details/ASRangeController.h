@@ -162,6 +162,14 @@ AS_SUBCLASSING_RESTRICTED
  */
 - (void)rangeController:(ASRangeController * )rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
 
+
+/**
+ * Called for reload data.
+ *
+ * @param rangeController Sender.
+ */
+- (void)rangeControllerDidReloadData:(ASRangeController *)rangeController;
+
 /**
  * Called for nodes insertion.
  *
