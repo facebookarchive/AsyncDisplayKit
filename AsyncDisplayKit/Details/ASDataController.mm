@@ -173,7 +173,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
  */
 - (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
 {
-  ASDisplayNodeAssertFalse(ASSizeRangeIsEmpty(constrainedSize));
+  ASDisplayNodeAssert(ASSizeRangeHasSignificantArea(constrainedSize));
 
   CGRect frame = CGRectZero;
   frame.size = [node layoutThatFits:constrainedSize].size;
@@ -218,7 +218,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
     
     // Layout the node if the size range is valid.
     ASSizeRange sizeRange = context.constrainedSize;
-    if (ASSizeRangeIsEmpty(sizeRange) == NO) {
+    if (ASSizeRangeHasSignificantArea(sizeRange)) {
       [self _layoutNode:node withConstrainedSize:sizeRange];
     }
 
@@ -900,7 +900,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
       RETURN_IF_NO_DATASOURCE();
       NSIndexPath *indexPath = [NSIndexPath indexPathForRow:rowIndex inSection:sectionIndex];
       ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
-      if (ASSizeRangeIsEmpty(constrainedSize) == NO) {
+      if (ASSizeRangeHasSignificantArea(constrainedSize)) {
         [self _layoutNode:node withConstrainedSize:constrainedSize];
       }
       rowIndex += 1;
