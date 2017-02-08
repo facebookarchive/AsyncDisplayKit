@@ -13,7 +13,6 @@
 #import <CoreGraphics/CoreGraphics.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASAssert.h>
-#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 NS_ASSUME_NONNULL_BEGIN
@@ -213,12 +212,12 @@ extern ASSizeRange const ASSizeRangeZero;
 extern ASSizeRange const ASSizeRangeUnconstrained;
 
 /**
- * Returns whether a size range has >= 1px max width and max height.
+ * Returns whether a size range has > 0.1 max width and max height.
  */
 ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT BOOL ASSizeRangeHasSignificantArea(ASSizeRange sizeRange)
 {
-  CGFloat pixel = 1.0 / ASScreenScale();
-  return (sizeRange.max.width >= pixel && sizeRange.max.height >= pixel);
+  static CGFloat const limit = 0.1;
+  return (sizeRange.max.width > limit && sizeRange.max.height > limit);
 }
 
 /**
