@@ -126,6 +126,17 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)_setImage:(UIImage *)image
 {
+  // when the defaultImage is stretchable, the layer's contentsGravity is set to kCAGravityResize
+  // this will ensure the contentMode is properly set when the final image is loaded
+  if (_hasStretchableDefaultImage) {
+    if (!_needsToApplyPendingContentMode && ASObjectIsEqual(image, _defaultImage)) {
+      _pendingContentModeState = self.contentMode;
+      _needsToApplyPendingContentMode = YES;
+    } else if (_needsToApplyPendingContentMode && !ASObjectIsEqual(image, _defaultImage)) {
+      _needsToApplyPendingContentMode = NO;
+      self.contentMode = _pendingContentModeState;
+    }
+  }
   super.image = image;
 }
 
@@ -197,22 +208,6 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _defaultImage;
-}
-
-- (void)setImage:(UIImage *)image
-{
-  // when the defaultImage is stretchable, the layer's contentsGravity is set to kCAGravityResize
-  // this will ensure the contentMode is properly set when the final image is loaded
-  if (_hasStretchableDefaultImage) {
-    if (!_needsToApplyPendingContentMode && ASObjectIsEqual(image, _defaultImage)) {
-      _pendingContentModeState = self.contentMode;
-      _needsToApplyPendingContentMode = YES;
-    } else if (_needsToApplyPendingContentMode && !ASObjectIsEqual(image, _defaultImage)) {
-      _needsToApplyPendingContentMode = NO;
-      self.contentMode = _pendingContentModeState;
-    }
-  }
-  [super setImage:image];
 }
 
 - (void)setAnimatedImage:(id<ASAnimatedImageProtocol>)animatedImage
