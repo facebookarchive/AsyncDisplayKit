@@ -27,7 +27,8 @@ Pod::Spec.new do |spec|
         'Base/*.h',
         'AsyncDisplayKit/Debug/ASLayoutElementInspectorNode.h',
         'AsyncDisplayKit/TextKit/ASTextNodeTypes.h',
-        'AsyncDisplayKit/TextKit/ASTextKitComponents.h'
+        'AsyncDisplayKit/TextKit/ASTextKitComponents.h',
+        'AsyncDisplayKit/TextKit/ASLayoutManager.h'
     ]
     
     core.source_files = [

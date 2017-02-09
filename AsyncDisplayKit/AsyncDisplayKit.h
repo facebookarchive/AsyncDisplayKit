@@ -94,6 +94,7 @@
 #import <AsyncDisplayKit/ASThread.h>
 #import <AsyncDisplayKit/ASRunLoopQueue.h>
 #import <AsyncDisplayKit/ASTextKitComponents.h>
+#import <AsyncDisplayKit/ASLayoutManager.h>
 #import <AsyncDisplayKit/ASTraitCollection.h>
 #import <AsyncDisplayKit/ASVisibilityProtocols.h>
 #import <AsyncDisplayKit/ASWeakSet.h>
