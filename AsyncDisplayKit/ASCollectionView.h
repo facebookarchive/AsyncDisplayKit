@@ -125,6 +125,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASCollectionView (Deprecated)
 
+@property (nonatomic, weak) id<UICollectionViewDelegate> delegate AS_UNAVAILABLE("Use ASCollectionNode.delegate instead.");
+@property (nonatomic, weak) id<UICollectionViewDataSource> dataSource AS_UNAVAILABLE("Use ASCollectionNode.dataSource instead.");
+
 /**
  * The object that acts as the asynchronous delegate of the collection view
  *

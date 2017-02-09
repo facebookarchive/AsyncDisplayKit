@@ -69,6 +69,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASTableView (Deprecated)
 
+@property (nonatomic, weak) id<UITableViewDelegate> delegate AS_UNAVAILABLE("Use ASTableNode.delegate instead.");
+@property (nonatomic, weak) id<UITableViewDataSource> dataSource AS_UNAVAILABLE("Use ASTableNode.dataSource instead.");
+
 @property (nonatomic, weak) id<ASTableDelegate>   asyncDelegate ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode's .delegate property instead.");
 @property (nonatomic, weak) id<ASTableDataSource> asyncDataSource ASDISPLAYNODE_DEPRECATED_MSG("Use ASTableNode .dataSource property instead.");
 
