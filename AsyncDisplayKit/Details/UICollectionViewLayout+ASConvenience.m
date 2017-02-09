@@ -10,11 +10,20 @@
 
 #import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
 
-@implementation UICollectionViewLayout (ASConvenience)
+#import <UIKit/UICollectionViewFlowLayout.h>
 
-- (BOOL)asdk_isFlowLayout
+#import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
+
+@implementation UICollectionViewLayout (ASLayoutInspectorProviding)
+
+- (id<ASCollectionViewLayoutInspecting>)asdk_layoutInspector
 {
-  return [self isKindOfClass:[UICollectionViewFlowLayout class]];
+  UICollectionViewFlowLayout *flow = ASDynamicCast(self, UICollectionViewFlowLayout);
+  if (flow != nil) {
+    return [[ASCollectionViewFlowLayoutInspector alloc] initWithFlowLayout:flow];
+  } else {
+    return [[ASCollectionViewLayoutInspector alloc] init];
+  }
 }
 
 @end
