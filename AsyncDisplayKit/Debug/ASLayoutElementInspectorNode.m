@@ -192,7 +192,7 @@
 //    UIImage *colorBtnImg = [ASLayoutElementInspectorNode imageForButtonWithBackgroundColor:nodeBackgroundColor
 //                                                                            borderColor:[UIColor whiteColor]
 //                                                                            borderWidth:3];
-//    [_itemBackgroundColorBtn setBackgroundImage:colorBtnImg forState:ASControlStateNormal];
+//    [_itemBackgroundColorBtn setBackgroundImage:colorBtnImg forState:UIControlStateNormal];
 //  } else {
 //    _itemBackgroundColorBtn.enabled = NO;
 //  }
@@ -209,13 +209,13 @@
 //  
 //  NSUInteger alignSelfValue = [self.layoutElementToEdit alignSelf];
 //  NSString *newTitle = [@"alignSelf:" stringByAppendingString:[self alignSelfName:alignSelfValue]];
-//  [_alignSelfBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:ASControlStateNormal];
+//  [_alignSelfBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:UIControlStateNormal];
 //  
 //  if ([self layoutSpec]) {
 //    _alignItemsBtn.enabled = YES;
 ////    NSUInteger alignItemsValue = [[self layoutSpec] alignItems];
 ////    newTitle = [@"alignItems:" stringByAppendingString:[self alignSelfName:alignItemsValue]];
-////    [_alignItemsBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:ASControlStateNormal];
+////    [_alignItemsBtn setAttributedTitle:[self attributedStringFromString:newTitle] forState:UIControlStateNormal];
 //  }
 //
 //  [self setNeedsLayout];
