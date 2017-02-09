@@ -36,14 +36,12 @@
 
 #pragma mark Lifecycle
 
-- (instancetype)initWithCollectionView:(ASCollectionView *)collectionView flowLayout:(UICollectionViewFlowLayout *)flowLayout;
+- (instancetype)initWithFlowLayout:(UICollectionViewFlowLayout *)flowLayout;
 {
-  NSParameterAssert(collectionView);
   NSParameterAssert(flowLayout);
   
   self = [super init];
   if (self != nil) {
-    [self didChangeCollectionViewDelegate:collectionView.asyncDelegate];
     _layout = flowLayout;
   }
   return self;

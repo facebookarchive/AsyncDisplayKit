@@ -39,11 +39,7 @@ ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView *collectionVi
 
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView
 {
-  self = [super init];
-  if (self != nil) {
-    [self didChangeCollectionViewDelegate:collectionView.asyncDelegate];
-  }
-  return self;
+  return [self init];
 }
 
 #pragma mark ASCollectionViewLayoutInspecting

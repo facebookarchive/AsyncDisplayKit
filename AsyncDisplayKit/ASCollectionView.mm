@@ -533,19 +533,13 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 - (id<ASCollectionViewLayoutInspecting>)layoutInspector
 {
   if (_layoutInspector == nil) {
-    UICollectionViewFlowLayout *layout = (UICollectionViewFlowLayout *)self.collectionViewLayout;
+    UICollectionViewLayout *layout = self.collectionViewLayout;
     if (layout == nil) {
       // Layout hasn't been set yet, we're still init'ing
       return nil;
     }
-    
-    if ([layout asdk_isFlowLayout]) {
-      // Register the default layout inspector delegate for flow layouts only
-      _defaultLayoutInspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithCollectionView:self flowLayout:layout];
-    } else {
-      // Register the default layout inspector delegate for custom collection view layouts
-      _defaultLayoutInspector = [[ASCollectionViewLayoutInspector alloc] initWithCollectionView:self];
-    }
+
+    _defaultLayoutInspector = [layout asdk_layoutInspector];
     
     // Explicitly call the setter to wire up the _layoutInspectorFlags
     self.layoutInspector = _defaultLayoutInspector;
@@ -560,6 +554,13 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   
   _layoutInspectorFlags.didChangeCollectionViewDataSource = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDataSource:)];
   _layoutInspectorFlags.didChangeCollectionViewDelegate = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDelegate:)];
+
+  if (_layoutInspectorFlags.didChangeCollectionViewDataSource) {
+    [_layoutInspector didChangeCollectionViewDataSource:self.asyncDataSource];
+  }
+  if (_layoutInspectorFlags.didChangeCollectionViewDelegate) {
+    [_layoutInspector didChangeCollectionViewDelegate:self.asyncDelegate];
+  }
 }
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeType:(ASLayoutRangeType)rangeType
