@@ -39,10 +39,6 @@ static CGFloat kTextPadding = 10.0f;
 #pragma mark -
 #pragma mark ASCellNode.
 
-+ (CGFloat)desiredHeightForWidth:(CGFloat)width {
-  return kFixedHeight;
-}
-
 - (instancetype)init
 {
   if (!(self = [super init]))

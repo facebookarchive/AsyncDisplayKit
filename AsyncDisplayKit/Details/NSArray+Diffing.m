@@ -10,8 +10,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "NSArray+Diffing.h"
-#import "ASAssert.h"
+#import <AsyncDisplayKit/NSArray+Diffing.h>
+#import <AsyncDisplayKit/ASAssert.h>
 
 @implementation NSArray (Diffing)
 

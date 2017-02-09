@@ -10,7 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASWeakMap.h"
+#import <AsyncDisplayKit/ASWeakMap.h>
 
 @interface ASWeakMapEntry ()
 @property (nonatomic, strong) NSObject *key;

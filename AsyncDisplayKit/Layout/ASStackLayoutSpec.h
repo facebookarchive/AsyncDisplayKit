@@ -55,12 +55,10 @@ NS_ASSUME_NONNULL_BEGIN
  Thus, it is preferred to those properties
  */
 @property (nonatomic, assign) ASVerticalAlignment verticalAlignment;
-/** The amount of space between each child. */
+/** The amount of space between each child. Defaults to ASStackLayoutJustifyContentStart */
 @property (nonatomic, assign) ASStackLayoutJustifyContent justifyContent;
-/** Orientation of children along cross axis */
+/** Orientation of children along cross axis. Defaults to ASStackLayoutAlignItemsStretch */
 @property (nonatomic, assign) ASStackLayoutAlignItems alignItems;
-/** If YES the vertical spacing between two views is measured from the last baseline of the top view to the top of the bottom view */
-@property (nonatomic, assign) BOOL baselineRelativeArrangement;
 
 - (instancetype)init;
 

@@ -10,7 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASNavigationController.h"
+#import <AsyncDisplayKit/ASNavigationController.h>
 
 @implementation ASNavigationController
 {

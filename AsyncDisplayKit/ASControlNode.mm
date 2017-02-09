@@ -8,14 +8,15 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASControlNode.h"
-#import "ASControlNode+Subclasses.h"
-#import "ASImageNode.h"
-#import "AsyncDisplayKit+Debug.h"
-#import "ASInternalHelpers.h"
-#import "ASControlTargetAction.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASLayoutElementInspectorNode.h"
+#import <AsyncDisplayKit/ASControlNode.h>
+#import <AsyncDisplayKit/ASControlNode+Subclasses.h>
+#import <AsyncDisplayKit/ASImageNode.h>
+#import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASControlTargetAction.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASLayoutElementInspectorNode.h>
+#import <AsyncDisplayKit/ASThread.h>
 
 // UIControl allows dragging some distance outside of the control itself during
 // tracking. This value depends on the device idiom (25 or 70 points), so
@@ -62,6 +63,14 @@ id<NSCopying> _ASControlNodeEventKeyForControlEvent(ASControlNodeEvent controlEv
   @param anEvent An even that is included in mask.
  */
 void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, void (^block)(ASControlNodeEvent anEvent));
+
+/**
+ @abstract Returns the expanded bounds used to determine if a touch is considered 'inside' during tracking.
+ @param controlNode A control node.
+ @result The expanded bounds of the node.
+ */
+CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
+
 
 @end
 
@@ -158,7 +167,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   BOOL dragIsInsideBounds = [self pointInside:touchLocation withEvent:nil];
 
   // Update our highlighted state.
-  CGRect expandedBounds = CGRectInset(self.view.bounds, kASControlNodeExpandedInset, kASControlNodeExpandedInset);
+  CGRect expandedBounds = _ASControlNodeGetExpandedBounds(self);
   BOOL dragIsInsideExpandedBounds = CGRectContainsPoint(expandedBounds, touchLocation);
   self.touchInside = dragIsInsideExpandedBounds;
   self.highlighted = dragIsInsideExpandedBounds;
@@ -216,7 +225,7 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   [self endTrackingWithTouch:theTouch withEvent:event];
 
   // Send the appropriate touch-up control event.
-  CGRect expandedBounds = CGRectInset(self.view.bounds, kASControlNodeExpandedInset, kASControlNodeExpandedInset);
+  CGRect expandedBounds = _ASControlNodeGetExpandedBounds(self);
   BOOL touchUpIsInsideExpandedBounds = CGRectContainsPoint(expandedBounds, touchLocation);
 
   [self sendActionsForControlEvents:(touchUpIsInsideExpandedBounds ? ASControlNodeEventTouchUpInside : ASControlNodeEventTouchUpOutside)
@@ -420,12 +429,16 @@ void _ASEnumerateControlEventsIncludedInMaskWithBlock(ASControlNodeEvent mask, v
   if (block == nil) {
     return;
   }
-  // Start with our first event (touch down) and work our way up to the last event (touch cancel)
-  for (ASControlNodeEvent thisEvent = ASControlNodeEventTouchDown; thisEvent <= ASControlNodeEventTouchCancel; thisEvent <<= 1){
+  // Start with our first event (touch down) and work our way up to the last event (PrimaryActionTriggered)
+  for (ASControlNodeEvent thisEvent = ASControlNodeEventTouchDown; thisEvent <= ASControlNodeEventPrimaryActionTriggered; thisEvent <<= 1) {
     // If it's included in the mask, invoke the block.
     if ((mask & thisEvent) == thisEvent)
       block(thisEvent);
   }
+}
+
+CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode) {
+  return CGRectInset(UIEdgeInsetsInsetRect(controlNode.view.bounds, controlNode.hitTestSlop), kASControlNodeExpandedInset, kASControlNodeExpandedInset);
 }
 
 #pragma mark - For Subclasses

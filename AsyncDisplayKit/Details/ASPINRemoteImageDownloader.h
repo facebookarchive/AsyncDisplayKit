@@ -12,11 +12,11 @@
 
 #if PIN_REMOTE_IMAGE
 
-#import <Foundation/Foundation.h>
-#import "ASImageProtocols.h"
-#import <PINRemoteImage/PINRemoteImageManager.h>
+#import <AsyncDisplayKit/ASImageProtocols.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+@class PINRemoteImageManager;
 
 @interface ASPINRemoteImageDownloader : NSObject <ASImageCacheProtocol, ASImageDownloaderProtocol>
 

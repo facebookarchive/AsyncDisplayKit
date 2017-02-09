@@ -9,16 +9,13 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ASCollectionView.h"
-#import "ASCollectionDataController.h"
-#import "ASCollectionViewFlowLayoutInspector.h"
-#import "ASCellNode.h"
-#import "ASCollectionNode.h"
-#import "ASDisplayNode+Beta.h"
-#import "ASSectionContext.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <AsyncDisplayKit/ASCollectionDataController.h>
+#import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
+#import <AsyncDisplayKit/ASSectionContext.h>
 #import <vector>
 #import <OCMock/OCMock.h>
-#import "ASCollectionView+Undeprecated.h"
+#import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 
 @interface ASTextCellNodeWithSetSelectedCounter : ASTextCellNode
 
@@ -58,6 +55,7 @@
 @interface ASCollectionViewTestDelegate : NSObject <ASCollectionDataSource, ASCollectionDelegate, UICollectionViewDelegateFlowLayout>
 
 @property (nonatomic, assign) NSInteger sectionGeneration;
+@property (nonatomic, copy) void(^willBeginBatchFetch)(ASBatchContext *);
 
 @end
 
@@ -93,16 +91,6 @@
   };
 }
 
-- (void)collectionView:(ASCollectionView *)collectionView willDisplayNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssertNotNil(node.layoutAttributes, @"Expected layout attributes for node in %@ to be non-nil.", NSStringFromSelector(_cmd));
-}
-
-- (void)collectionView:(ASCollectionView *)collectionView didEndDisplayingNode:(ASCellNode *)node forItemAtIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssertNotNil(node.layoutAttributes, @"Expected layout attributes for node in %@ to be non-nil.", NSStringFromSelector(_cmd));
-}
-
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
   return _itemCounts.size();
 }
@@ -127,6 +115,15 @@
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   return [[ASCellNode alloc] init];
+}
+
+- (void)collectionNode:(ASCollectionNode *)collectionNode willBeginBatchFetchWithContext:(ASBatchContext *)context
+{
+  if (_willBeginBatchFetch != nil) {
+    _willBeginBatchFetch(context);
+  } else {
+    [context cancelBatchFetching];
+  }
 }
 
 @end
@@ -164,7 +161,7 @@
 
 @interface ASCollectionView (InternalTesting)
 
-- (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController;
+- (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController sections:(nonnull NSIndexSet *)sections;
 
 @end
 
@@ -173,6 +170,18 @@
 @end
 
 @implementation ASCollectionViewTests
+
+- (void)tearDown
+{
+  // We can't prevent the system from retaining windows, but we can at least clear them out to avoid
+  // pollution between test cases.
+  for (UIWindow *window in [UIApplication sharedApplication].windows) {
+    for (UIView *subview in window.subviews) {
+      [subview removeFromSuperview];
+    }
+  }
+  [super tearDown];
+}
 
 - (void)testDataSourceImplementsNecessaryMethods
 {
@@ -207,13 +216,11 @@
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   [collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  XCTAssertEqualObjects([collectionView supplementaryNodeKindsInDataController:nil], @[UICollectionElementKindSectionHeader]);
+  XCTAssertEqualObjects([collectionView supplementaryNodeKindsInDataController:nil sections:[NSIndexSet indexSetWithIndex:0]], @[UICollectionElementKindSectionHeader]);
 }
 
 - (void)testReloadIfNeeded
 {
-  [ASDisplayNode setSuppressesInvalidCollectionUpdateExceptions:NO];
-
   __block ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
   __block ASCollectionViewTestDelegate *del = testController.asyncDelegate;
   __block ASCollectionNode *cn = testController.collectionNode;
@@ -323,26 +330,26 @@
 - (void)testTuningParametersWithExplicitRangeMode
 {
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
+  ASCollectionNode *collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:layout];
   
   ASRangeTuningParameters minimumRenderParams = { .leadingBufferScreenfuls = 0.1, .trailingBufferScreenfuls = 0.1 };
   ASRangeTuningParameters minimumPreloadParams = { .leadingBufferScreenfuls = 0.1, .trailingBufferScreenfuls = 0.1 };
   ASRangeTuningParameters fullRenderParams = { .leadingBufferScreenfuls = 0.5, .trailingBufferScreenfuls = 0.5 };
   ASRangeTuningParameters fullPreloadParams = { .leadingBufferScreenfuls = 1, .trailingBufferScreenfuls = 0.5 };
   
-  [collectionView setTuningParameters:minimumRenderParams forRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypeDisplay];
-  [collectionView setTuningParameters:minimumPreloadParams forRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypePreload];
-  [collectionView setTuningParameters:fullRenderParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeDisplay];
-  [collectionView setTuningParameters:fullPreloadParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypePreload];
+  [collectionNode setTuningParameters:minimumRenderParams forRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypeDisplay];
+  [collectionNode setTuningParameters:minimumPreloadParams forRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypePreload];
+  [collectionNode setTuningParameters:fullRenderParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeDisplay];
+  [collectionNode setTuningParameters:fullPreloadParams forRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypePreload];
   
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(minimumRenderParams,
-                                                                    [collectionView tuningParametersForRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypeDisplay]));
+                                                                    [collectionNode tuningParametersForRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypeDisplay]));
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(minimumPreloadParams,
-                                                                    [collectionView tuningParametersForRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypePreload]));
+                                                                    [collectionNode tuningParametersForRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypePreload]));
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(fullRenderParams,
-                                                                    [collectionView tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeDisplay]));
+                                                                    [collectionNode tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypeDisplay]));
   XCTAssertTrue(ASRangeTuningParametersEqualToRangeTuningParameters(fullPreloadParams,
-                                                                    [collectionView tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypePreload]));
+                                                                    [collectionNode tuningParametersForRangeMode:ASLayoutRangeModeFull rangeType:ASLayoutRangeTypePreload]));
 }
 
 - (void)testTuningParameters
@@ -373,7 +380,6 @@
 #pragma mark - Update Validations
 
 #define updateValidationTestPrologue \
-  [ASDisplayNode setSuppressesInvalidCollectionUpdateExceptions:NO];\
   ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];\
   __unused ASCollectionViewTestDelegate *del = testController.asyncDelegate;\
   __unused ASCollectionView *cv = testController.collectionView;\
@@ -699,7 +705,7 @@
   XCTAssertTrue(toSection < originalSection);
   ASTestSectionContext *movedSectionContext = (ASTestSectionContext *)[cn contextForSection:toSection];
   XCTAssertNotNil(movedSectionContext);
-  // ASCollectionView currently uses ASChangeSetDataController which splits a move operation to a pair of delete and insert ones.
+  // ASCollectionView currently splits a move operation to a pair of delete and insert ones.
   // So this movedSectionContext is newly loaded and thus is second generation.
   XCTAssertEqual(movedSectionContext.sectionGeneration, 2);
   XCTAssertEqual(movedSectionContext.sectionIndex, toSection);
@@ -806,6 +812,253 @@
   // Passing nil blocks should not crash
   [cn performBatchUpdates:nil completion:nil];
   [cn performBatchAnimated:NO updates:nil completion:nil];
+}
+
+- (void)testThatDeletedItemsAreMarkedInvisible
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  window.rootViewController = testController;
+
+  __block NSInteger itemCount = 1;
+  testController.asyncDelegate->_itemCounts = {itemCount};
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+
+  ASCollectionNode *cn = testController.collectionNode;
+  [cn waitUntilAllUpdatesAreCommitted];
+  ASCellNode *node = [cn nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
+  XCTAssertTrue(node.visible);
+  testController.asyncDelegate->_itemCounts = {0};
+  [cn deleteItemsAtIndexPaths: @[[NSIndexPath indexPathForItem:0 inSection:0]]];
+  [self expectationForPredicate:[NSPredicate predicateWithFormat:@"visible = NO"] evaluatedWithObject:node handler:nil];
+  [self waitForExpectationsWithTimeout:3 handler:nil];
+}
+
+- (void)testThatMultipleBatchFetchesDontHappenUnnecessarily
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  window.rootViewController = testController;
+
+  // Start with 1 item so that our content does not fill bounds.
+  __block NSInteger itemCount = 1;
+  testController.asyncDelegate->_itemCounts = {itemCount};
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+
+  ASCollectionNode *cn = testController.collectionNode;
+  [cn waitUntilAllUpdatesAreCommitted];
+  XCTAssertGreaterThan(cn.bounds.size.height, cn.view.contentSize.height, @"Expected initial data not to fill collection view area.");
+
+  __block NSUInteger batchFetchCount = 0;
+  XCTestExpectation *expectation = [self expectationWithDescription:@"Batch fetching completed and then some"];
+  __weak ASCollectionViewTestController *weakController = testController;
+  testController.asyncDelegate.willBeginBatchFetch = ^(ASBatchContext *context) {
+
+    // Ensure only 1 batch fetch happens
+    batchFetchCount += 1;
+    if (batchFetchCount > 1) {
+      XCTFail(@"Too many batch fetches!");
+      return;
+    }
+
+    dispatch_async(dispatch_get_main_queue(), ^{
+      // Up the item count to 1000 so that we're well beyond the
+      // edge of the collection view and not ready for another batch fetch.
+      NSMutableArray *indexPaths = [NSMutableArray array];
+      for (; itemCount < 1000; itemCount++) {
+        [indexPaths addObject:[NSIndexPath indexPathForItem:itemCount inSection:0]];
+      }
+      weakController.asyncDelegate->_itemCounts = {itemCount};
+      [cn insertItemsAtIndexPaths:indexPaths];
+      [context completeBatchFetching:YES];
+
+      // Let the run loop turn before we consider the test passed.
+      dispatch_async(dispatch_get_main_queue(), ^{
+        [expectation fulfill];
+      });
+    });
+  };
+  [self waitForExpectationsWithTimeout:3 handler:nil];
+}
+
+- (void)testThatBatchFetchHappensForEmptyCollection
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  window.rootViewController = testController;
+
+  testController.asyncDelegate->_itemCounts = {};
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+
+  ASCollectionNode *cn = testController.collectionNode;
+  [cn waitUntilAllUpdatesAreCommitted];
+
+  __block NSUInteger batchFetchCount = 0;
+  XCTestExpectation *e = [self expectationWithDescription:@"Batch fetching completed"];
+  testController.asyncDelegate.willBeginBatchFetch = ^(ASBatchContext *context) {
+    // Ensure only 1 batch fetch happens
+    batchFetchCount += 1;
+    if (batchFetchCount > 1) {
+      XCTFail(@"Too many batch fetches!");
+      return;
+    }
+    [e fulfill];
+  };
+  [self waitForExpectationsWithTimeout:3 handler:nil];
+}
+
+- (void)testThatWeBatchFetchUntilContentRequirementIsMet_Animated
+{
+  [self _primitiveBatchFetchingFillTestAnimated:YES visible:YES controller:nil];
+}
+
+- (void)testThatWeBatchFetchUntilContentRequirementIsMet_Nonanimated
+{
+  [self _primitiveBatchFetchingFillTestAnimated:NO visible:YES controller:nil];
+}
+
+- (void)testThatWeBatchFetchUntilContentRequirementIsMet_Invisible
+{
+  [self _primitiveBatchFetchingFillTestAnimated:NO visible:NO controller:nil];
+}
+
+- (void)testThatWhenWeBecomeVisibleWeWillFetchAdditionalContent
+{
+  ASCollectionViewTestController *ctrl = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  // Start with 1 empty section
+  ctrl.asyncDelegate->_itemCounts = {0};
+  [self _primitiveBatchFetchingFillTestAnimated:NO visible:NO controller:ctrl];
+  XCTAssertGreaterThan([ctrl.collectionNode numberOfItemsInSection:0], 0);
+  [self _primitiveBatchFetchingFillTestAnimated:NO visible:YES controller:ctrl];
+}
+
+- (void)_primitiveBatchFetchingFillTestAnimated:(BOOL)animated visible:(BOOL)visible controller:(nullable ASCollectionViewTestController *)testController
+{
+  if (testController == nil) {
+    testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+    // Start with 1 empty section
+    testController.asyncDelegate->_itemCounts = {0};
+  }
+  ASCollectionNode *cn = testController.collectionNode;
+
+  UIWindow *window = nil;
+  UIView *view = nil;
+  if (visible) {
+    window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+    view = window;
+  } else {
+    view = cn.view;
+    view.frame = [UIScreen mainScreen].bounds;
+  }
+
+  XCTestExpectation *expectation = [self expectationWithDescription:@"Completed all batch fetches"];
+  __weak ASCollectionViewTestController *weakController = testController;
+  __block NSInteger batchFetchCount = 0;
+  testController.asyncDelegate.willBeginBatchFetch = ^(ASBatchContext *context) {
+    dispatch_async(dispatch_get_main_queue(), ^{
+      NSInteger fetchIndex = batchFetchCount++;
+
+      NSInteger itemCount = weakController.asyncDelegate->_itemCounts[0];
+      weakController.asyncDelegate->_itemCounts[0] = (itemCount + 1);
+      if (animated) {
+        [cn insertItemsAtIndexPaths:@[ [NSIndexPath indexPathForItem:itemCount inSection:0] ]];
+      } else {
+        [cn performBatchAnimated:NO updates:^{
+          [cn insertItemsAtIndexPaths:@[ [NSIndexPath indexPathForItem:itemCount inSection:0] ]];
+        } completion:nil];
+      }
+
+      [context completeBatchFetching:YES];
+
+      // If no more batch fetches have happened in 1 second, assume we're done.
+      dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        if (fetchIndex == batchFetchCount - 1) {
+          [expectation fulfill];
+        }
+      });
+    });
+  };
+  window.rootViewController = testController;
+
+  [window makeKeyAndVisible];
+  [view layoutIfNeeded];
+
+  [self waitForExpectationsWithTimeout:60 handler:nil];
+  CGFloat contentHeight = cn.view.contentSize.height;
+  CGFloat requiredContentHeight;
+  CGFloat itemHeight = [cn.view layoutAttributesForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]].size.height;
+  if (visible) {
+    requiredContentHeight = CGRectGetMaxY(cn.bounds) + CGRectGetHeight(cn.bounds) * cn.view.leadingScreensForBatching;
+  } else {
+    requiredContentHeight = CGRectGetMaxY(cn.bounds);
+  }
+  XCTAssertGreaterThan(batchFetchCount, 2);
+  XCTAssertGreaterThanOrEqual(contentHeight, requiredContentHeight, @"Loaded too little content.");
+  XCTAssertLessThanOrEqual(contentHeight, requiredContentHeight + 3 * itemHeight, @"Loaded too much content.");
+}
+
+- (void)testInitialRangeBounds
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  ASCollectionNode *cn = testController.collectionNode;
+  [cn setTuningParameters:{ .leadingBufferScreenfuls = 2, .trailingBufferScreenfuls = 0 } forRangeMode:ASLayoutRangeModeMinimum rangeType:ASLayoutRangeTypePreload];
+  window.rootViewController = testController;
+
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+
+  [cn waitUntilAllUpdatesAreCommitted];
+
+  CGRect preloadBounds = ({
+    CGRect r = CGRectNull;
+    for (NSInteger s = 0; s < cn.numberOfSections; s++) {
+      NSInteger c = [cn numberOfItemsInSection:s];
+      for (NSInteger i = 0; i < c; i++) {
+        NSIndexPath *ip = [NSIndexPath indexPathForItem:i inSection:s];
+        ASCellNode *node = [cn nodeForItemAtIndexPath:ip];
+        if (node.inPreloadState) {
+          CGRect frame = [cn.view layoutAttributesForItemAtIndexPath:ip].frame;
+          r = CGRectUnion(r, frame);
+        }
+      }
+    }
+    r;
+  });
+  CGFloat expectedHeight = cn.bounds.size.height * 3;
+  XCTAssertEqualWithAccuracy(CGRectGetHeight(preloadBounds), expectedHeight, 100);
+  XCTAssertEqual([[cn valueForKeyPath:@"rangeController.currentRangeMode"] integerValue], ASLayoutRangeModeMinimum, @"Expected range mode to be minimum before scrolling begins.");
+}
+
+/**
+ * This tests an issue where, since subnode insertions aren't applied until the UIKit layout pass,
+ * which we trigger during the display phase, subnodes like network image nodes are not preloading
+ * until this layout pass happens which is too late.
+ */
+- (void)DISABLED_testThatAutomaticallyManagedSubnodesGetPreloadCallBeforeDisplay
+{
+  UIWindow *window = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  window.rootViewController = testController;
+  ASCollectionNode *cn = testController.collectionNode;
+
+  __block NSInteger itemCount = 100;
+  testController.asyncDelegate->_itemCounts = {itemCount};
+  [window makeKeyAndVisible];
+  [window layoutIfNeeded];
+
+  [cn waitUntilAllUpdatesAreCommitted];
+  for (NSInteger i = 0; i < itemCount; i++) {
+    ASTextCellNodeWithSetSelectedCounter *node = [cn nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:i inSection:0]];
+    XCTAssert(node.automaticallyManagesSubnodes, @"Expected test cell node to use automatic subnode management. Can modify the test with a different class if needed.");
+    ASDisplayNode *subnode = node.textNode;
+    XCTAssertEqualObjects(NSStringFromASInterfaceState(subnode.interfaceState), NSStringFromASInterfaceState(node.interfaceState), @"Subtree interface state should match cell node interface state for ASM nodes.");
+    XCTAssert(node.inDisplayState || !node.nodeLoaded, @"Only nodes in the display range should be loaded.");
+  }
+
 }
 
 @end

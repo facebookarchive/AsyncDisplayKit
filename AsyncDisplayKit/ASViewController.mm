@@ -10,16 +10,14 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASViewController.h"
-#import "ASAssert.h"
-#import "ASAvailability.h"
-#import "ASDisplayNodeInternal.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASLayout.h"
-#import "ASTraitCollection.h"
-#import "ASEnvironmentInternal.h"
-#import "ASRangeControllerUpdateRangeProtocol+Beta.h"
-#import "ASInternalHelpers.h"
+#import <AsyncDisplayKit/ASViewController.h>
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASAvailability.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASLayout.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
+#import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 #define AS_LOG_VISIBILITY_CHANGES 0
 
@@ -58,6 +56,21 @@
   _selfConformsToRangeModeProtocol = [self conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
   _nodeConformsToRangeModeProtocol = [_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
   _automaticallyAdjustRangeModeBasedOnViewEvents = _selfConformsToRangeModeProtocol || _nodeConformsToRangeModeProtocol;
+  
+  // In case the node will get loaded
+  if (_node.nodeLoaded) {
+    // Node already loaded the view
+    [self view];
+  } else {
+    // If the node didn't load yet add ourselves as on did load observer to laod the view in case the node gets loaded
+    // before the view controller
+    __weak __typeof__(self) weakSelf = self;
+    [_node onDidLoad:^(__kindof ASDisplayNode * _Nonnull node) {
+      if ([weakSelf isViewLoaded] == NO) {
+        [weakSelf view];
+      }
+    }];
+  }
 
   return self;
 }
@@ -88,14 +101,8 @@
   
   // ensure that self.node has a valid trait collection before a subclass's implementation of viewDidLoad.
   // Any subnodes added in viewDidLoad will then inherit the proper environment.
-  if (AS_AT_LEAST_IOS8) {
-    ASEnvironmentTraitCollection traitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
-    [self progagateNewEnvironmentTraitCollection:traitCollection];
-  } else {
-    ASEnvironmentTraitCollection traitCollection = ASEnvironmentTraitCollectionMakeDefault();
-    traitCollection.containerSize = self.view.bounds.size;
-    [self progagateNewEnvironmentTraitCollection:traitCollection];
-  }
+  ASPrimitiveTraitCollection traitCollection = [self primitiveTraitCollectionForUITraitCollection:self.traitCollection];
+  [self propagateNewTraitCollection:traitCollection];
 }
 
 - (void)viewWillLayoutSubviews
@@ -104,24 +111,23 @@
   
   // Before layout, make sure that our trait collection containerSize actually matches the size of our bounds.
   // If not, we need to update the traits and propagate them.
-  if (CGSizeEqualToSize(self.node.environmentTraitCollection.containerSize, self.view.bounds.size) == NO) {
+
+  CGSize boundsSize = self.view.bounds.size;
+  if (CGSizeEqualToSize(self.node.primitiveTraitCollection.containerSize, boundsSize) == NO) {
     [UIView performWithoutAnimation:^{
-      ASEnvironmentTraitCollection environmentTraitCollection;
-      if (AS_AT_LEAST_IOS8) {
-        environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
-      } else {
-        environmentTraitCollection = ASEnvironmentTraitCollectionMakeDefault();
-      }
-      environmentTraitCollection.containerSize = self.view.bounds.size;
+      ASPrimitiveTraitCollection traitCollection = [self primitiveTraitCollectionForUITraitCollection:self.traitCollection];
+      traitCollection.containerSize = boundsSize;
+        
       // this method will call measure
-      [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
+      [self propagateNewTraitCollection:traitCollection];
     }];
   } else {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    // Call layoutThatFits: to let the node prepare for a layout that will happen shortly in the layout pass of the view.
+    // If the node's constrained size didn't change between the last layout pass it's a no-op
     [_node layoutThatFits:[self nodeConstrainedSize]];
-  }
-  
-  if (!AS_AT_LEAST_IOS9) {
-    [self _legacyHandleViewDidLayoutSubviews];
+#pragma clang diagnostic pop
   }
 }
 
@@ -141,13 +147,10 @@ ASVisibilityDidMoveToParentViewController;
   [super viewWillAppear:animated];
   _ensureDisplayed = YES;
 
-  // A measure as well as layout pass is forced this early to get nodes like ASCollectionNode, ASTableNode etc.
+  // A layout pass is forced this early to get nodes like ASCollectionNode, ASTableNode etc.
   // into the hierarchy before UIKit applies the scroll view inset adjustments, if automatic subnode management
   // is enabled. Otherwise the insets would not be applied.
-  [_node layoutThatFits:[self nodeConstrainedSize]];
   [_node.view layoutIfNeeded];
-
-  [_node recursivelyFetchData];
   
   if (_parentManagesVisibilityDepth == NO) {
     [self setVisibilityDepth:0];
@@ -226,12 +229,7 @@ ASVisibilityDepthImplementation;
 
 - (ASSizeRange)nodeConstrainedSize
 {
-  if (AS_AT_LEAST_IOS9) {
-    CGSize viewSize = self.view.bounds.size;
-    return ASSizeRangeMake(viewSize);
-  } else {
-    return [self _legacyConstrainedSize];
-  }
+  return ASSizeRangeMake(self.view.bounds.size);
 }
 
 - (ASInterfaceState)interfaceState
@@ -239,83 +237,39 @@ ASVisibilityDepthImplementation;
   return _node.interfaceState;
 }
 
-#pragma mark - Legacy Layout Handling
+#pragma mark - ASTraitEnvironment
 
-- (BOOL)_shouldLayoutTheLegacyWay
-{
-  BOOL isModalViewController = (self.presentingViewController != nil && self.presentedViewController == nil);
-  BOOL hasNavigationController = (self.navigationController != nil);
-  BOOL hasParentViewController = (self.parentViewController != nil);
-  if (isModalViewController && !hasNavigationController && !hasParentViewController) {
-    return YES;
-  }
-  
-  // Check if the view controller is a root view controller
-  BOOL isRootViewController = self.view.window.rootViewController == self;
-  if (isRootViewController) {
-    return YES;
-  }
-  
-  return NO;
-}
-
-- (ASSizeRange)_legacyConstrainedSize
-{
-  // In modal presentation the view does not have the right bounds in iOS7 and iOS8. As workaround using the superviews
-  // view bounds
-  UIView *view = self.view;
-  CGSize viewSize = view.bounds.size;
-  if ([self _shouldLayoutTheLegacyWay]) {
-    UIView *superview = view.superview;
-    if (superview != nil) {
-      viewSize = superview.bounds.size;
-    }
-  }
-  return ASSizeRangeMake(viewSize, viewSize);
-}
-
-- (void)_legacyHandleViewDidLayoutSubviews
-{
-  // In modal presentation or as root viw controller the view does not automatic resize in iOS7 and iOS8.
-  // As workaround we adjust the frame of the view manually
-  if ([self _shouldLayoutTheLegacyWay]) {
-    CGSize maxConstrainedSize = [self nodeConstrainedSize].max;
-    _node.frame = (CGRect){.origin = CGPointZero, .size = maxConstrainedSize};
-  }
-}
-
-#pragma mark - ASEnvironmentTraitCollection
-
-- (ASEnvironmentTraitCollection)environmentTraitCollectionForUITraitCollection:(UITraitCollection *)traitCollection
+- (ASPrimitiveTraitCollection)primitiveTraitCollectionForUITraitCollection:(UITraitCollection *)traitCollection
 {
   if (self.overrideDisplayTraitsWithTraitCollection) {
     ASTraitCollection *asyncTraitCollection = self.overrideDisplayTraitsWithTraitCollection(traitCollection);
-    return [asyncTraitCollection environmentTraitCollection];
+    return [asyncTraitCollection primitiveTraitCollection];
   }
   
   ASDisplayNodeAssertMainThread();
-  ASEnvironmentTraitCollection asyncTraitCollection = ASEnvironmentTraitCollectionFromUITraitCollection(traitCollection);
+  ASPrimitiveTraitCollection asyncTraitCollection = ASPrimitiveTraitCollectionFromUITraitCollection(traitCollection);
   asyncTraitCollection.containerSize = self.view.frame.size;
   return asyncTraitCollection;
 }
 
-- (void)progagateNewEnvironmentTraitCollection:(ASEnvironmentTraitCollection)environmentTraitCollection
+- (void)propagateNewTraitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
-  ASEnvironmentState environmentState = self.node.environmentState;
-  ASEnvironmentTraitCollection oldEnvironmentTraitCollection = environmentState.environmentTraitCollection;
+  ASPrimitiveTraitCollection oldTraitCollection = self.node.primitiveTraitCollection;
   
-  if (ASEnvironmentTraitCollectionIsEqualToASEnvironmentTraitCollection(environmentTraitCollection, oldEnvironmentTraitCollection) == NO) {
-    environmentState.environmentTraitCollection = environmentTraitCollection;
-    self.node.environmentState = environmentState;
+  if (ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(traitCollection, oldTraitCollection) == NO) {
+    self.node.primitiveTraitCollection = traitCollection;
     
-    NSArray<id<ASEnvironment>> *children = [self.node children];
-    for (id<ASEnvironment> child in children) {
-      ASEnvironmentStatePropagateDown(child, environmentState.environmentTraitCollection);
+    NSArray<id<ASLayoutElement>> *children = [self.node sublayoutElements];
+    for (id<ASLayoutElement> child in children) {
+      ASTraitCollectionPropagateDown(child, traitCollection);
     }
     
-    // once we've propagated all the traits, layout this node.
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+    // Once we've propagated all the traits, layout this node.
     // Remeasure the node with the latest constrained size – old constrained size may be incorrect.
     [self.node layoutThatFits:[self nodeConstrainedSize]];
+#pragma clang diagnostic pop
   }
 }
 
@@ -323,18 +277,18 @@ ASVisibilityDepthImplementation;
 {
   [super traitCollectionDidChange:previousTraitCollection];
   
-  ASEnvironmentTraitCollection environmentTraitCollection = [self environmentTraitCollectionForUITraitCollection:self.traitCollection];
-  environmentTraitCollection.containerSize = self.view.bounds.size;
-  [self progagateNewEnvironmentTraitCollection:environmentTraitCollection];
+  ASPrimitiveTraitCollection traitCollection = [self primitiveTraitCollectionForUITraitCollection:self.traitCollection];
+  traitCollection.containerSize = self.view.bounds.size;
+  [self propagateNewTraitCollection:traitCollection];
 }
 
 - (void)didRotateFromInterfaceOrientation:(UIInterfaceOrientation)fromInterfaceOrientation
 {
   [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
   
-  ASEnvironmentTraitCollection traitCollection = self.node.environmentTraitCollection;
+  ASPrimitiveTraitCollection traitCollection = self.node.primitiveTraitCollection;
   traitCollection.containerSize = self.view.bounds.size;
-  [self progagateNewEnvironmentTraitCollection:traitCollection];
+  [self propagateNewTraitCollection:traitCollection];
 }
 
 @end

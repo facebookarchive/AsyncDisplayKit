@@ -8,9 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDisplayNode.h"
-#import "ASLayoutRangeType.h"
-#import "ASEventLog.h"
+#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASLayoutRangeType.h>
+#import <AsyncDisplayKit/ASEventLog.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -58,8 +58,8 @@ typedef struct {
  *
  * This property defaults to NO. It will be removed in a future release.
  */
-+ (BOOL)suppressesInvalidCollectionUpdateExceptions AS_WARN_UNUSED_RESULT;
-+ (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses;
++ (BOOL)suppressesInvalidCollectionUpdateExceptions AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Collection update exceptions are thrown if assertions are enabled.");
++ (void)setSuppressesInvalidCollectionUpdateExceptions:(BOOL)suppresses ASDISPLAYNODE_DEPRECATED_MSG("Collection update exceptions are thrown if assertions are enabled.");;
 
 /**
  * @abstract Recursively ensures node and all subnodes are displayed.
@@ -122,6 +122,28 @@ typedef struct {
  * enabling .neverShowPlaceholders on ASCellNodes so that the navigation operation is blocked on redisplay completing, etc.
  */
 + (void)setRangeModeForMemoryWarnings:(ASLayoutRangeMode)rangeMode;
+
+/**
+ * @abstract Whether to draw all descendant nodes' layers/views into this node's layer/view's backing store.
+ *
+ * @discussion
+ * When set to YES, causes all descendant nodes' layers/views to be drawn directly into this node's layer/view's backing
+ * store.  Defaults to NO.
+ *
+ * If a node's descendants are static (never animated or never change attributes after creation) then that node is a
+ * good candidate for rasterization.  Rasterizing descendants has two main benefits:
+ * 1) Backing stores for descendant layers are not created.  Instead the layers are drawn directly into the rasterized
+ * container.  This can save a great deal of memory.
+ * 2) Since the entire subtree is drawn into one backing store, compositing and blending are eliminated in that subtree
+ * which can help improve animation/scrolling/etc performance.
+ *
+ * Rasterization does not currently support descendants with transform, sublayerTransform, or alpha. Those properties
+ * will be ignored when rasterizing descendants.
+ *
+ * Note: this has nothing to do with -[CALayer shouldRasterize], which doesn't work with ASDisplayNode's asynchronous
+ * rendering model.
+ */
+@property (nonatomic, assign) BOOL shouldRasterizeDescendants;
 
 @end
 

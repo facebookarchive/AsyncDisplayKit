@@ -9,10 +9,10 @@
 //  LICENSE file in the root directory of this source tree. An additional grant
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
-#if TARGET_OS_IOS
-#import "ASPhotosFrameworkImageRequest.h"
-#import "ASBaseDefines.h"
-#import "ASAvailability.h"
+
+#import <AsyncDisplayKit/ASPhotosFrameworkImageRequest.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
+#import <AsyncDisplayKit/ASAvailability.h>
 
 NSString *const ASPhotosURLScheme = @"ph";
 
@@ -105,8 +105,8 @@ static NSString *const _ASPhotosURLQueryKeyCropHeight = @"crop_h";
 
 + (ASPhotosFrameworkImageRequest *)requestWithURL:(NSURL *)url
 {
-  // not a photos URL or iOS < 8
-  if (![url.scheme isEqualToString:ASPhotosURLScheme] || !AS_AT_LEAST_IOS8) {
+  // not a photos URL
+  if (![url.scheme isEqualToString:ASPhotosURLScheme]) {
     return nil;
   }
   
@@ -163,4 +163,3 @@ static NSString *const _ASPhotosURLQueryKeyCropHeight = @"crop_h";
 }
 
 @end
-#endif

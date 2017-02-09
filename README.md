@@ -1,19 +1,18 @@
-![AsyncDisplayKit](https://github.com/facebook/AsyncDisplayKit/blob/gh-pages/static/images/logo.png)
+![AsyncDisplayKit](https://github.com/AsyncDisplayKit/Documentation/raw/master/docs/static/images/logo.png)
 
-[![Apps Using](https://img.shields.io/badge/Apps%20Using%20ASDK-%3E4,974-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
-[![Downloads](https://img.shields.io/badge/Total%20Downloads-%3E512,000-28B9FE.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
+[![Apps Using](https://img.shields.io/cocoapods/at/AsyncDisplayKit.svg?label=Apps%20Using%20ASDK&colorB=28B9FE)](http://cocoapods.org/pods/AsyncDisplayKit)
+[![Downloads](https://img.shields.io/cocoapods/dt/AsyncDisplayKit.svg?label=Total%20Downloads&colorB=28B9FE)](http://cocoapods.org/pods/AsyncDisplayKit)
 
 [![Platform](https://img.shields.io/badge/platforms-iOS%20%7C%20tvOS-orange.svg)](http://AsyncDisplayKit.org)
 [![Languages](https://img.shields.io/badge/languages-ObjC%20%7C%20Swift-orange.svg)](http://AsyncDisplayKit.org)
 
 [![Version](https://img.shields.io/cocoapods/v/AsyncDisplayKit.svg)](http://cocoapods.org/pods/AsyncDisplayKit)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-59C939.svg?style=flat)](https://github.com/Carthage/Carthage)
-[![Build Status](https://travis-ci.org/facebook/AsyncDisplayKit.svg)](https://travis-ci.org/facebook/AsyncDisplayKit)
 [![License](https://img.shields.io/cocoapods/l/AsyncDisplayKit.svg)](https://github.com/facebook/AsyncDisplayKit/blob/master/LICENSE)
- 
+
 ## Installation
 
-ASDK is available via CocoaPods or Carthage. See our [Installation](http://asyncdisplaykit.org/docs/installation.html) guide for instructions. 
+ASDK is available via CocoaPods or Carthage. See our [Installation](http://asyncdisplaykit.org/docs/installation.html) guide for instructions.
 
 ## Performance Gains
 
@@ -21,7 +20,7 @@ AsyncDisplayKit's basic unit is the `node`. An ASDisplayNode is an abstraction o
 
 To keep its user interface smooth and responsive, your app should render at 60 frames per second — the gold standard on iOS. This means the main thread has one-sixtieth of a second to push each frame. That's 16 milliseconds to execute all layout and drawing code! And because of system overhead, your code usually has less than ten milliseconds to run before it causes a frame drop.
 
-AsyncDisplayKit lets you move image decoding, text sizing and rendering, layout, and other expensive UI operations off the main thread, to keep the main thread available to respond to user interaction. 
+AsyncDisplayKit lets you move image decoding, text sizing and rendering, layout, and other expensive UI operations off the main thread, to keep the main thread available to respond to user interaction.
 
 ## Advanced Developer Features
 
@@ -35,7 +34,7 @@ As the framework has grown, many features have been added that can save develope
 
 ## Getting Help
 
-We use Slack for real-time debugging, community updates, and general talk about ASDK. [Signup](http://asdk-slack-auto-invite.herokuapp.com) youself or email AsyncDisplayKit(at)gmail.com to get an invite.
+We use Slack for real-time debugging, community updates, and general talk about ASDK. [Signup](http://asdk-slack-auto-invite.herokuapp.com) yourself or email AsyncDisplayKit(at)gmail.com to get an invite.
 
 ## Contributing
 

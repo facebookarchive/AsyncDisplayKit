@@ -8,12 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDisplayNodeExtras.h"
-#import "ASDisplayNodeInternal.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 
 #import <queue>
-#import "ASRunLoopQueue.h"
+#import <AsyncDisplayKit/ASRunLoopQueue.h>
 
 extern void ASPerformMainThreadDeallocation(_Nullable id object)
 {
@@ -30,6 +30,24 @@ extern void ASPerformMainThreadDeallocation(_Nullable id object)
   if (object != nil) {
   	[queue enqueue:object];
   }
+}
+
+extern void _ASSetDebugNames(Class _Nonnull owningClass, NSString * _Nonnull names, ASDisplayNode * _Nullable object, ...)
+{
+  NSString *owningClassName = NSStringFromClass(owningClass);
+  NSArray *nameArray = [names componentsSeparatedByString:@", "];
+  va_list args;
+  va_start(args, object);
+  NSInteger i = 0;
+  for (ASDisplayNode *node = object; node != nil; node = va_arg(args, id), i++) {
+    NSMutableString *symbolName = [nameArray[i] mutableCopy];
+    // Remove any `self.` or `_` prefix
+    [symbolName replaceOccurrencesOfString:@"self." withString:@"" options:NSAnchoredSearch range:NSMakeRange(0, symbolName.length)];
+    [symbolName replaceOccurrencesOfString:@"_" withString:@"" options:NSAnchoredSearch range:NSMakeRange(0, symbolName.length)];
+    node.debugName = [NSString stringWithFormat:@"%@.%@", owningClassName, symbolName];
+  }
+  ASDisplayNodeCAssert(nameArray.count == i, @"Malformed call to ASSetDebugNames: %@", names);
+  va_end(args);
 }
 
 extern ASInterfaceState ASInterfaceStateForDisplayNode(ASDisplayNode *displayNode, UIWindow *window)
@@ -229,6 +247,21 @@ static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *possible
   }
   
   return NO;
+}
+
+extern UIWindow * _Nullable ASFindWindowOfLayer(CALayer *layer)
+{
+  while (layer != nil) {
+    if (UIView *view = ASDynamicCast(layer.delegate, UIView)) {
+      if ([view isKindOfClass:[UIWindow class]]) {
+        return (UIWindow *)view;
+      } else {
+        return view.window;
+      }
+    }
+    layer = layer.superlayer;
+  }
+  return nil;
 }
 
 extern ASDisplayNode *ASDisplayNodeFindClosestCommonAncestor(ASDisplayNode *node1, ASDisplayNode *node2)

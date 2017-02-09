@@ -20,15 +20,15 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Background layoutElement for this layout spec
  */
-@property (nullable, nonatomic, strong) id<ASLayoutElement> background;
+@property (nonatomic, strong) id<ASLayoutElement> background;
 
 /**
  * Creates and returns an ASBackgroundLayoutSpec object
  *
  * @param child A child that is laid out to determine the size of this spec.
- * @param background A layoutElement object that is laid out behind the child. If this is nil, the background is omitted.
+ * @param background A layoutElement object that is laid out behind the child.
  */
-+ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutElement>)child background:(nullable id<ASLayoutElement>)background AS_WARN_UNUSED_RESULT;
++ (instancetype)backgroundLayoutSpecWithChild:(id<ASLayoutElement>)child background:(id<ASLayoutElement>)background AS_WARN_UNUSED_RESULT;
 
 @end
 

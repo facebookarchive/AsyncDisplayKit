@@ -20,6 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
  * This class is used in conjunction with ASWeakMap.  Instances of this type are returned by an ASWeakMap,
  * must retain this value for as long as they want the entry to exist in the map.
  */
+AS_SUBCLASSING_RESTRICTED
 @interface ASWeakMapEntry<Value> : NSObject
 
 @property (nonatomic, retain, readonly) Value value;
@@ -42,6 +43,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * The underlying storage is a hash table and the Key type should implement `hash` and `isEqual:`.
  */
+AS_SUBCLASSING_RESTRICTED
 @interface ASWeakMap<__covariant Key : NSObject *, Value> : NSObject
 
 /**

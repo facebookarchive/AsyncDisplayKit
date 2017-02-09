@@ -8,10 +8,19 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDimension.h"
+#import <AsyncDisplayKit/ASAvailability.h>
+#import <AsyncDisplayKit/ASDimension.h>
+
+#if AS_TARGET_OS_IOS
+#import <UIKit/UIGeometry.h>
+#else
+#import <Foundation/NSGeometry.h>
+#endif
 
 @protocol ASLayoutElement;
 @class ASLayoutElementStyle;
+
+#pragma mark - ASLayoutElementContext
 
 struct ASLayoutElementContext {
   int32_t transitionID;
@@ -34,11 +43,39 @@ extern struct ASLayoutElementContext ASLayoutElementGetCurrentContext();
 
 extern void ASLayoutElementClearCurrentContext();
 
+
+#pragma mark - ASLayoutElementLayoutDefaults
+
+#define ASLayoutElementLayoutCalculationDefaults \
+- (ASLayout *)layoutThatFits:(ASSizeRange)constrainedSize\
+{\
+  _Pragma("clang diagnostic push")\
+  _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")\
+  /* For now we just call the deprecated measureWithSizeRange: method to not break old API */ \
+  return [self measureWithSizeRange:constrainedSize]; \
+  _Pragma("clang diagnostic pop")\
+} \
+\
+- (ASLayout *)measureWithSizeRange:(ASSizeRange)constrainedSize\
+{\
+  return [self layoutThatFits:constrainedSize parentSize:constrainedSize.max];\
+}\
+\
+- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize\
+                     restrictedToSize:(ASLayoutElementSize)size\
+                 relativeToParentSize:(CGSize)parentSize\
+{\
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutElementSizeResolve(self.style.size, parentSize));\
+  return [self calculateLayoutThatFits:resolvedRange];\
+}\
+
+
+#pragma mark - ASLayoutElementFinalLayoutElement
 /**
- *  The base protocol for ASLayoutElement. Generally the methods/properties in this class do not need to be
+ *  The base protocol for ASLayoutElementFinalLayoutElement. Generally the methods/properties in this class do not need to be
  *  called by the end user and are only called internally. However, there may be a case where the methods are useful.
  */
-@protocol ASLayoutElementPrivate <NSObject>
+@protocol ASLayoutElementFinalLayoutElement <NSObject>
 
 /**
  *  @abstract This method can be used to give the user a chance to wrap an ASLayoutElement in an ASLayoutSpec 
@@ -61,39 +98,64 @@ extern void ASLayoutElementClearCurrentContext();
 
 @end
 
+// Default implementation for ASLayoutElementPrivate that can be used in classes that comply to ASLayoutElementPrivate
+
+#define ASLayoutElementFinalLayoutElementDefault \
+\
+@synthesize isFinalLayoutElement = _isFinalLayoutElement;\
+\
+- (id<ASLayoutElement>)finalLayoutElement\
+{\
+    return self;\
+}\
+
+
 #pragma mark - ASLayoutElementExtensibility
 
-#define ASEnvironmentLayoutExtensibilityForwarding \
+// Provides extension points for elments that comply to ASLayoutElement like ASLayoutSpec to add additional
+// properties besides the default one provided in ASLayoutElementStyle
+
+static const int kMaxLayoutElementBoolExtensions = 1;
+static const int kMaxLayoutElementStateIntegerExtensions = 4;
+static const int kMaxLayoutElementStateEdgeInsetExtensions = 1;
+
+typedef struct ASLayoutElementStyleExtensions {
+  // Values to store extensions
+  BOOL boolExtensions[kMaxLayoutElementBoolExtensions];
+  NSInteger integerExtensions[kMaxLayoutElementStateIntegerExtensions];
+  UIEdgeInsets edgeInsetsExtensions[kMaxLayoutElementStateEdgeInsetExtensions];
+} ASLayoutElementStyleExtensions;
+
+#define ASLayoutElementStyleExtensibilityForwarding \
 - (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx\
 {\
-  _ASEnvironmentLayoutOptionsExtensionSetBoolAtIndex(self, idx, value);\
+  [self.style setLayoutOptionExtensionBool:value atIndex:idx];\
 }\
 \
 - (BOOL)layoutOptionExtensionBoolAtIndex:(int)idx\
 {\
-  return _ASEnvironmentLayoutOptionsExtensionGetBoolAtIndex(self, idx);\
+  return [self.style layoutOptionExtensionBoolAtIndex:idx];\
 }\
 \
 - (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx\
 {\
-  _ASEnvironmentLayoutOptionsExtensionSetIntegerAtIndex(self, idx, value);\
+  [self.style setLayoutOptionExtensionInteger:value atIndex:idx];\
 }\
 \
 - (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx\
 {\
-  return _ASEnvironmentLayoutOptionsExtensionGetIntegerAtIndex(self, idx);\
+  return [self.style layoutOptionExtensionIntegerAtIndex:idx];\
 }\
 \
 - (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx\
 {\
-  _ASEnvironmentLayoutOptionsExtensionSetEdgeInsetsAtIndex(self, idx, value);\
+  [self.style setLayoutOptionExtensionEdgeInsets:value atIndex:idx];\
 }\
 \
 - (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx\
 {\
-  return _ASEnvironmentLayoutOptionsExtensionGetEdgeInsetsAtIndex(self, idx);\
+  return [self.style layoutOptionExtensionEdgeInsetsAtIndex:idx];\
 }\
-
 
 #pragma mark ASLayoutElementStyleForwardingDeclaration (Deprecated)
 

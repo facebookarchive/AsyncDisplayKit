@@ -15,6 +15,12 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+/**
+ * A class similar to NSSet that stores objects weakly.
+ * Note that this class uses NSPointerFunctionsObjectPointerPersonality –
+ * that is, it uses shifted pointer for hashing, and identity comparison for equality.
+ */
+AS_SUBCLASSING_RESTRICTED
 @interface ASWeakSet<__covariant ObjectType> : NSObject<NSFastEnumeration>
 
 /// Returns YES if the receiver is empty, NO otherwise.
@@ -33,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)removeAllObjects;
 
 /// Returns a standard *retained* NSArray of all objects.  Not free to generate, but useful for iterating over contents.
-- (NSArray *)allObjects AS_WARN_UNUSED_RESULT;
+- (NSArray<ObjectType> *)allObjects AS_WARN_UNUSED_RESULT;
 
 /**
  * How many objects are contained in this set.

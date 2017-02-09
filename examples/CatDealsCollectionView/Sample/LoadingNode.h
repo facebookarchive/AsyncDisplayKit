@@ -21,6 +21,4 @@
 
 @interface LoadingNode : ASCellNode
 
-+ (CGFloat)desiredHeightForWidth:(CGFloat)width;
-
 @end

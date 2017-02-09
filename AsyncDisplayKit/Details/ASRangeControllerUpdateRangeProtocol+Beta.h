@@ -8,6 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <Foundation/Foundation.h>
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
 
 @protocol ASRangeControllerUpdateRangeProtocol <NSObject>

@@ -12,7 +12,7 @@
 
 #pragma once
 
-#import "ASDimension.h"
+#import <AsyncDisplayKit/ASDimension.h>
 
 @class ASLayout;
 

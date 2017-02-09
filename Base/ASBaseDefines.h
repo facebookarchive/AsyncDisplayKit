@@ -10,7 +10,15 @@
 
 #pragma once
 
-#import "ASLog.h"
+#import <AsyncDisplayKit/ASLog.h>
+
+#ifndef PIN_REMOTE_IMAGE
+#if __has_include(<PINRemoteImage/PINRemoteImage.h>)
+#define PIN_REMOTE_IMAGE 1
+#else
+#define PIN_REMOTE_IMAGE 0
+#endif
+#endif
 
 // The C++ compiler mangles C function names. extern "C" { /* your C functions */ } prevents this.
 // You should wrap all C function prototypes declared in headers with ASDISPLAYNODE_EXTERN_C_BEGIN/END, even if
@@ -59,6 +67,14 @@
 #  define ASDISPLAYNODE_PURE __attribute__ ((pure))
 # else
 #  define ASDISPLAYNODE_PURE /* no pure */
+# endif
+#endif
+
+#ifndef ASDISPLAYNODE_CONST
+# if ASDISPLAYNODE_GNUC (3, 0)
+#  define ASDISPLAYNODE_CONST __attribute__ ((const))
+# else
+#  define ASDISPLAYNODE_CONST /* no const */
 # endif
 #endif
 
@@ -183,5 +199,21 @@
 
 #define ASOVERLOADABLE __attribute__((overloadable))
 
+
+#if __has_attribute(noescape)
+#define AS_NOESCAPE __attribute__((noescape))
+#else
+#define AS_NOESCAPE
+#endif
+
+#if __has_attribute(objc_subclassing_restricted)
+#define AS_SUBCLASSING_RESTRICTED __attribute__((objc_subclassing_restricted))
+#else
+#define AS_SUBCLASSING_RESTRICTED
+#endif
+
 /// Ensure that class is of certain kind
-#define ASDynamicCast(x, c) ((c *) ([x isKindOfClass:[c class]] ? x : nil))
+#define ASDynamicCast(x, c) ({ \
+  id __val = x;\
+  ((c *) ([__val isKindOfClass:[c class]] ? __val : nil));\
+})

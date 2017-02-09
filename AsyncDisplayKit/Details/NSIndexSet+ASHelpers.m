@@ -6,9 +6,15 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASAvailability.h>
 
-#import "NSIndexSet+ASHelpers.h"
+#if AS_TARGET_OS_IOS
+  #import <UIKit/UIKit.h>
+#else
+  #import <Cocoa/Cocoa.h>
+#endif
+
+#import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
 
 @implementation NSIndexSet (ASHelpers)
 
@@ -74,6 +80,15 @@
     }
   }];
   [result appendString:@"}"];
+  return result;
+}
+
++ (NSIndexSet *)as_sectionsFromIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+{
+  NSMutableIndexSet *result = [NSMutableIndexSet indexSet];
+  for (NSIndexPath *indexPath in indexPaths) {
+    [result addIndex:indexPath.section];
+  }
   return result;
 }
 

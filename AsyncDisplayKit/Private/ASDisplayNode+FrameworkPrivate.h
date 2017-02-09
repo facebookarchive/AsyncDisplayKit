@@ -13,10 +13,13 @@
 // These methods must never be called or overridden by other classes.
 //
 
-#import "ASDisplayNode.h"
-#import "ASThread.h"
+#import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+@protocol ASInterfaceStateDelegate;
 
 /**
  Hierarchy state is propagated from nodes to all of their children when certain behaviors are required from the subtree.
@@ -95,7 +98,7 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
 	return [NSString stringWithFormat:@"{ %@ }", [states componentsJoinedByString:@" | "]];
 }
 
-@interface ASDisplayNode ()
+@interface ASDisplayNode () <ASDescriptionProvider, ASDebugDescriptionProvider>
 {
 @protected
   ASInterfaceState _interfaceState;
@@ -104,6 +107,12 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
 
 // The view class to use when creating a new display node instance. Defaults to _ASDisplayView.
 + (Class)viewClass;
+
+// Thread safe way to access the bounds of the node
+@property (nonatomic, assign) CGRect threadSafeBounds;
+
+// delegate to inform of ASInterfaceState changes (used by ASNodeController)
+@property (nonatomic, weak) id<ASInterfaceStateDelegate> interfaceStateDelegate;
 
 // These methods are recursive, and either union or remove the provided interfaceState to all sub-elements.
 - (void)enterInterfaceState:(ASInterfaceState)interfaceState;
@@ -115,7 +124,7 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
 - (void)exitHierarchyState:(ASHierarchyState)hierarchyState;
 
 // Changed before calling willEnterHierarchy / didExitHierarchy.
-@property (nonatomic, readwrite, assign, getter = isInHierarchy) BOOL inHierarchy;
+@property (readonly, assign, getter = isInHierarchy) BOOL inHierarchy;
 // Call willEnterHierarchy if necessary and set inHierarchy = YES if visibility notifications are enabled on all of its parents
 - (void)__enterHierarchy;
 // Call didExitHierarchy if necessary and set inHierarchy = NO if visibility notifications are enabled on all of its parents
@@ -155,6 +164,31 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
  * It may block on the private queue, [_ASDisplayLayer displayQueue]
  */
 - (void)recursivelyEnsureDisplaySynchronously:(BOOL)synchronously;
+
+/**
+ * @abstract Calls -didExitPreloadState on the receiver and its subnode hierarchy.
+ *
+ * @discussion Clears any memory-intensive preloaded content.
+ * This method is used to notify the node that it should purge any content that is both expensive to fetch and to
+ * retain in memory.
+ *
+ * @see [ASDisplayNode(Subclassing) didExitPreloadState] and [ASDisplayNode(Subclassing) didEnterPreloadState]
+ */
+- (void)recursivelyClearPreloadedData;
+
+/**
+ * @abstract Calls -didEnterPreloadState on the receiver and its subnode hierarchy.
+ *
+ * @discussion Fetches content from remote sources for the current node and all subnodes.
+ *
+ * @see [ASDisplayNode(Subclassing) didEnterPreloadState] and [ASDisplayNode(Subclassing) didExitPreloadState]
+ */
+- (void)recursivelyPreload;
+
+/**
+ * @abstract Triggers a recursive call to -didEnterPreloadState when the node has an interfaceState of ASInterfaceStatePreload
+ */
+- (void)setNeedsPreload;
 
 /**
  * @abstract Allows a node to bypass all ensureDisplay passes.  Defaults to NO.

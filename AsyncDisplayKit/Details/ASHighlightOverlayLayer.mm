@@ -8,12 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASHighlightOverlayLayer.h"
+#import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
 
 #import <UIKit/UIKit.h>
 #import <tgmath.h>
 
-#import "ASInternalHelpers.h"
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 static const CGFloat kCornerRadius = 2.5;
 static const UIEdgeInsets padding = {2, 4, 1.5, 4};

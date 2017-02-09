@@ -20,11 +20,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
 #pragma mark - Internal editing & completed store querying
 
 /**
- * Provides a collection of index paths for nodes of the given kind that are currently in the editing store
- */
-- (NSArray<NSIndexPath *> *)indexPathsForEditingNodesOfKind:(NSString *)kind;
-
-/**
  * Read-only access to the underlying editing nodes of the given kind
  */
 - (NSMutableArray *)editingNodesOfKind:(NSString *)kind;
@@ -33,21 +28,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
  * Read only access to the underlying completed nodes of the given kind
  */
 - (NSMutableArray *)completedNodesOfKind:(NSString *)kind;
-
-/**
- * Ensure that next time `itemCountsFromDataSource` is called, new values are retrieved.
- *
- * This must be called on the main thread.
- */
-- (void)invalidateDataSourceItemCounts;
-
-/**
- * Returns the most recently gathered item counts from the data source. If the counts
- * have been invalidated, this synchronously queries the data source and saves the result.
- *
- * This must be called on the main thread.
- */
-- (std::vector<NSInteger>)itemCountsFromDataSource;
 
 #pragma mark - Node sizing
 
@@ -82,9 +62,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
 - (void)insertSections:(NSMutableArray *)sections ofKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSArray *sections, NSIndexSet *indexSet))completionBlock;
 
 /**
- * Deletes the given sections of the specified kind in the backing store, calling completion on the main thread when finished.
+ * Deletes the given sections in the backing store, calling completion on the main thread when finished.
  */
-- (void)deleteSectionsOfKind:(NSString *)kind atIndexSet:(NSIndexSet *)indexSet completion:(void (^)(NSIndexSet *indexSet))completionBlock;
+- (void)deleteSections:(NSIndexSet *)indexSet completion:(void (^)())completionBlock;
 
 #pragma mark - Data Manipulation Hooks
 
@@ -129,6 +109,17 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
 - (void)willInsertSections:(NSIndexSet *)sections;
 
 /**
+ * Notifies the subclass to perform setup before sections are deleted in the data controller
+ *
+ * @discussion This method will be performed before the data controller enters its editing queue.
+ * The data source is locked at this point and accessing it is safe. Use this method to set up any nodes or
+ * data stores before entering into editing the backing store on a background thread.
+ *
+ * @param sections Indices of sections to be inserted
+ */
+- (void)prepareForDeleteSections:(NSIndexSet *)sections;
+
+/**
  * Notifies the subclass that the data controller will delete sections at the given positions
  *
  * @discussion This method will be performed on the data controller's editing background queue before the parent's
@@ -138,18 +129,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCellNode *> *nodes, NS
  * @param sections Indices of sections to be deleted
  */
 - (void)willDeleteSections:(NSIndexSet *)sections;
-
-/**
- * Notifies the subclass that the data controller will move a section to a new position
- *
- * @discussion This method will be performed on the data controller's editing background queue before the parent's
- * concrete implementation. This is a great place to perform any additional transformations like supplementary views
- * or header/footer nodes.
- *
- * @param section    Index of current section position
- * @param newSection Index of new section position
- */
-- (void)willMoveSection:(NSInteger)section toSection:(NSInteger)newSection;
 
 /**
  * Notifies the subclass to perform setup before rows are inserted in the data controller.

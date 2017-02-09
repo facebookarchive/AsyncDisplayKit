@@ -20,7 +20,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASRangeController;
 
 @interface ASCollectionView ()
-- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(nullable id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator eventLog:(ASEventLog*)eventLog;
+- (instancetype)_initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(nullable id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator eventLog:(nullable ASEventLog *)eventLog;
 
 @property (nonatomic, weak, readwrite) ASCollectionNode *collectionNode;
 @property (nonatomic, strong, readonly) ASDataController *dataController;
@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @param indexPath The index path of the row.
  */
-- (NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath;
+- (nullable NSIndexPath *)convertIndexPathToCollectionNode:(NSIndexPath *)indexPath;
 
 /**
  * Attempt to get the node index paths given the view-layer index paths.
@@ -47,6 +47,10 @@ NS_ASSUME_NONNULL_BEGIN
  * @param indexPaths An array of index paths in the view space
  */
 - (nullable NSArray<NSIndexPath *> *)convertIndexPathsToCollectionNode:(nullable NSArray<NSIndexPath *> *)indexPaths;
+
+- (void)beginUpdates;
+
+- (void)endUpdatesAnimated:(BOOL)animated completion:(nullable void (^)(BOOL))completion;
 
 @end
 

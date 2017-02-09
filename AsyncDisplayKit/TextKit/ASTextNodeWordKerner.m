@@ -8,11 +8,11 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextNodeWordKerner.h"
+#import <AsyncDisplayKit/ASTextNodeWordKerner.h>
 
 #import <UIKit/UIKit.h>
 
-#import "ASTextNodeTypes.h"
+#import <AsyncDisplayKit/ASTextNodeTypes.h>
 
 @implementation ASTextNodeWordKerner
 

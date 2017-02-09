@@ -7,7 +7,11 @@
 //
 
 #pragma once
-#import "ASControlNode.h"
+#import <AsyncDisplayKit/ASControlNode.h>
+
+#define ASLAYOUTSPEC_DEBUG 1
+
+#if ASLAYOUTSPEC_DEBUG
 
 @class ASLayoutSpec;
 
@@ -18,4 +22,6 @@
 - (instancetype)initWithLayoutSpec:(ASLayoutSpec *)layoutSpec;
 
 @end
+
+#endif
 

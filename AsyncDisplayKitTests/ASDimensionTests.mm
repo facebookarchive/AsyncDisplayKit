@@ -10,7 +10,7 @@
 
 #import <XCTest/XCTest.h>
 #import "ASXCTExtensions.h"
-#import "ASDimension.h"
+#import <AsyncDisplayKit/ASDimension.h>
 
 
 @interface ASDimensionTests : XCTestCase

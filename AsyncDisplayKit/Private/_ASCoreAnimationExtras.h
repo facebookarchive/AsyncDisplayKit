@@ -10,7 +10,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import "ASBaseDefines.h"
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
@@ -52,5 +52,12 @@ extern UIViewContentMode ASDisplayNodeUIContentModeFromCAContentsGravity(NSStrin
  @param innerSize Unfortunately, 4 seems to be the smallest inner size that works if you're applying this stretchable to a larger box, whereas it does not display correctly for larger boxes. Thus some adjustment is necessary for the size of box you're displaying. If you're showing a 1px horizontal line, pass 1 height and at least 4 width. 2px vertical line: 2px wide, 4px high. Passing an innerSize greater that you desire is wasteful
  */
 extern UIImage *ASDisplayNodeStretchableBoxContentsWithColor(UIColor *color, CGSize innerSize);
+
+/**
+ Checks whether a layer has ongoing animations
+ @param layer A layer to check if animations are ongoing
+ @return YES if the layer has ongoing animations, otherwise NO
+ */
+extern BOOL ASDisplayNodeLayerHasAnimations(CALayer *layer);
 
 ASDISPLAYNODE_EXTERN_C_END

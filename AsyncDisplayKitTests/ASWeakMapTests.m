@@ -11,7 +11,7 @@
 //
 
 #import <XCTest/XCTest.h>
-#import "ASWeakMap.h"
+#import <AsyncDisplayKit/ASWeakMap.h>
 
 NS_ASSUME_NONNULL_BEGIN
 

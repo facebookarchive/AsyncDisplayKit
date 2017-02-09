@@ -6,9 +6,16 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASObjectDescriptionHelpers.h"
-#import <UIKit/UIKit.h>
-#import "NSIndexSet+ASHelpers.h"
+#import <AsyncDisplayKit/ASAvailability.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
+
+#if AS_TARGET_OS_IOS
+#import <UIKit/UIGeometry.h>
+#else
+#import <Foundation/NSGeometry.h>
+#endif
+
+#import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
 
 NSString *ASGetDescriptionValueString(id object)
 {
@@ -16,6 +23,7 @@ NSString *ASGetDescriptionValueString(id object)
     // Use shortened NSValue descriptions
     NSValue *value = object;
     const char *type = value.objCType;
+    
     if (strcmp(type, @encode(CGRect)) == 0) {
       CGRect rect = [value CGRectValue];
       return [NSString stringWithFormat:@"(%g %g; %g %g)", rect.origin.x, rect.origin.y, rect.size.width, rect.size.height];
@@ -24,6 +32,7 @@ NSString *ASGetDescriptionValueString(id object)
     } else if (strcmp(type, @encode(CGPoint)) == 0) {
       return NSStringFromCGPoint(value.CGPointValue);
     }
+    
   } else if ([object isKindOfClass:[NSIndexSet class]]) {
     return [object as_smallDescription];
   } else if ([object isKindOfClass:[NSIndexPath class]]) {

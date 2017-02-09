@@ -12,7 +12,7 @@
 
 #import <Foundation/Foundation.h>
 
-#import "ASContextTransitioning.h"
+#import <AsyncDisplayKit/ASContextTransitioning.h>
 
 @class ASLayout;
 @class _ASTransitionContext;
@@ -43,4 +43,10 @@
                    layoutDelegate:(id<_ASTransitionContextLayoutDelegate>)layoutDelegate
                completionDelegate:(id<_ASTransitionContextCompletionDelegate>)completionDelegate;
 
+@end
+
+@interface _ASAnimatedTransitionContext : NSObject
+@property (nonatomic, strong, readonly) ASDisplayNode *node;
+@property (nonatomic, assign, readonly) CGFloat alpha;
++ (instancetype)contextForNode:(ASDisplayNode *)node alpha:(CGFloat)alphaValue;
 @end

@@ -8,8 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDimension.h"
-#import "ASStackLayoutDefines.h"
+#import <AsyncDisplayKit/ASDimension.h>
+
+#import <AsyncDisplayKit/ASStackLayoutDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -46,13 +47,14 @@ NS_ASSUME_NONNULL_BEGIN
 
 /**
  * @abstract Specifies the initial size in the stack dimension for this object.
- * Default to ASDimensionAuto
+ * Defaults to ASDimensionAuto.
  * Used when attached to a stack layout.
  */
 @property (nonatomic, readwrite) ASDimension flexBasis;
 
 /**
- * @abstract Orientation of the object along cross axis, overriding alignItems
+ * @abstract Orientation of the object along cross axis, overriding alignItems.
+ * Defaults to ASStackLayoutAlignSelfAuto.
  * Used when attached to a stack layout.
  */
 @property (nonatomic, readwrite) ASStackLayoutAlignSelf alignSelf;

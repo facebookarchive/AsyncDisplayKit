@@ -10,15 +10,17 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <AsyncDisplayKit/ASTableView.h>
+#import <AsyncDisplayKit/ASBlockTypes.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
+#import <AsyncDisplayKit/ASTableView.h>
+
 
 NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASTableDataSource;
 @protocol ASTableDelegate;
-@class ASTableView;
+@class ASTableView, ASBatchContext;
 
 /**
  * ASTableNode is a node based class that wraps an ASTableView. It can be used
@@ -35,6 +37,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property (weak, nonatomic) id <ASTableDelegate>   delegate;
 @property (weak, nonatomic) id <ASTableDataSource> dataSource;
 
+/*
+ * A Boolean value that determines whether the table will be flipped.
+ * If the value of this property is YES, the first cell node will be at the bottom of the table (as opposed to the top by default). This is useful for chat/messaging apps. The default value is NO.
+ */
+@property (nonatomic, assign) BOOL inverted;
 /*
  * A Boolean value that determines whether users can select a row.
  * If the value of this property is YES (the default), users can select rows. If you set it to NO, they cannot select rows. Setting this property affects cell selection only when the table view is not in editing mode. If you want to restrict selection of cells in editing mode, use `allowsSelectionDuringEditing`.
@@ -148,7 +155,7 @@ NS_ASSUME_NONNULL_BEGIN
  *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
-- (void)performBatchAnimated:(BOOL)animated updates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
+- (void)performBatchAnimated:(BOOL)animated updates:(nullable AS_NOESCAPE void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
 
 /**
  *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread.
@@ -159,7 +166,7 @@ NS_ASSUME_NONNULL_BEGIN
  *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
-- (void)performBatchUpdates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
+- (void)performBatchUpdates:(nullable AS_NOESCAPE void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
 
 /**
  *  Blocks execution of the main thread until all section and row updates are committed. This method must be called from the main thread.

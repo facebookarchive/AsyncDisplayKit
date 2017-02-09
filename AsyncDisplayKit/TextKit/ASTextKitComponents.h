@@ -13,6 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+AS_SUBCLASSING_RESTRICTED
 @interface ASTextKitComponents : NSObject
 
 /**
@@ -43,6 +44,10 @@ NS_ASSUME_NONNULL_BEGIN
  @result A CGSize representing the bounding size for the receiver's text.
  */
 - (CGSize)sizeForConstrainedWidth:(CGFloat)constrainedWidth;
+
+
+- (CGSize)sizeForConstrainedWidth:(CGFloat)constrainedWidth
+              forMaxNumberOfLines:(NSInteger)numberOfLines;
 
 @property (nonatomic, strong, readonly) NSTextStorage *textStorage;
 @property (nonatomic, strong, readonly) NSTextContainer *textContainer;

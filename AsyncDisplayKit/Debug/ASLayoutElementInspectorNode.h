@@ -6,7 +6,10 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASDisplayNode.h>
+
+@protocol ASLayoutElement;
 
 @protocol ASLayoutElementInspectorNodeDelegate <NSObject>
 

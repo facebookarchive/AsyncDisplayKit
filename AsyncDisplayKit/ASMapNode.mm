@@ -9,16 +9,15 @@
 //
 
 #if TARGET_OS_IOS
-#import "ASMapNode.h"
+#import <AsyncDisplayKit/ASMapNode.h>
 
 #import <tgmath.h>
 
-#import "ASDisplayNodeInternal.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASInsetLayoutSpec.h"
-#import "ASInternalHelpers.h"
-#import "ASLayout.h"
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASLayout.h>
 
 @interface ASMapNode()
 {
@@ -72,9 +71,9 @@
   [super setLayerBacked:layerBacked];
 }
 
-- (void)fetchData
+- (void)didEnterPreloadState
 {
-  [super fetchData];
+  [super didEnterPreloadState];
   ASPerformBlockOnMainThread(^{
     if (self.isLiveMap) {
       [self addLiveMap];
@@ -84,9 +83,9 @@
   });
 }
 
-- (void)clearFetchedData
+- (void)didExitPreloadState
 {
-  [super clearFetchedData];
+  [super didExitPreloadState];
   ASPerformBlockOnMainThread(^{
     if (self.isLiveMap) {
       [self removeLiveMap];

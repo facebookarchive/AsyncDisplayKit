@@ -6,10 +6,11 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASCollectionViewLayoutInspector.h"
+#import <AsyncDisplayKit/ASCollectionViewLayoutInspector.h>
 
-#import "ASCollectionView.h"
-#import "ASCollectionView+Undeprecated.h"
+#import <AsyncDisplayKit/ASCollectionView.h>
+#import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
+#import <AsyncDisplayKit/ASCollectionNode.h>
 
 #pragma mark - Helper Functions
 
@@ -38,11 +39,7 @@ ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView *collectionVi
 
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView
 {
-  self = [super init];
-  if (self != nil) {
-    [self didChangeCollectionViewDelegate:collectionView.asyncDelegate];
-  }
-  return self;
+  return [self init];
 }
 
 #pragma mark ASCollectionViewLayoutInspecting

@@ -10,16 +10,19 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASLayoutTransition.h"
+#import <AsyncDisplayKit/ASLayoutTransition.h>
 
-#import "ASDisplayNodeInternal.h"
-#import "ASLayout.h"
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/NSArray+Diffing.h>
+
+#import <AsyncDisplayKit/ASLayout.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h> // Required for _insertSubnode... / _removeFromSupernode.
 
 #import <queue>
 #import <memory>
 
-#import "NSArray+Diffing.h"
-#import "ASEqualityHelpers.h"
+#import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
 
 /**
  * Search the whole layout stack if at least one layout has a layoutElement object that can not be layed out asynchronous.
@@ -34,7 +37,10 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
     layout = queue.front();
     queue.pop();
     
-    if (layout.layoutElement.canLayoutAsynchronous == NO) {
+#if DEBUG
+    ASDisplayNodeCAssert([layout.layoutElement conformsToProtocol:@protocol(ASLayoutElementTransition)], @"ASLayoutElement in a layout transition needs to conforms to the ASLayoutElementTransition protocol.");
+#endif
+    if (((id<ASLayoutElementTransition>)layout.layoutElement).canLayoutAsynchronous == NO) {
       return NO;
     }
     
@@ -233,7 +239,7 @@ static inline std::vector<NSUInteger> findNodesInLayoutAtIndexesWithFilteredNode
     if (idx > lastIndex) { break; }
     if (idx >= firstIndex && [indexes containsIndex:idx]) {
       ASDisplayNode *node = (ASDisplayNode *)sublayout.layoutElement;
-      ASDisplayNodeCAssert(node, @"A flattened layout must consist exclusively of node sublayouts");
+      ASDisplayNodeCAssert(node, @"ASDisplayNode was deallocated before it was added to a subnode. It's likely the case that you use automatically manages subnodes and allocate a ASDisplayNode in layoutSpecThatFits: and don't have any strong reference to it.");
       // Ignore the odd case in which a non-node sublayout is accessed and the type cast fails
       if (node != nil) {
         BOOL notFiltered = (filteredNodes == nil || [filteredNodes indexOfObjectIdenticalTo:node] == NSNotFound);

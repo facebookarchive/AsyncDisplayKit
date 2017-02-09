@@ -8,8 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <XCTest/XCTest.h>
 #import "ASXCTExtensions.h"
-#import "ASLayoutElement.h"
+#import <AsyncDisplayKit/ASLayoutElement.h>
 
 #pragma mark - ASLayoutElementStyleTestsDelegate
 

@@ -12,8 +12,8 @@
 
 #import "ASLayoutSpecSnapshotTestsHelper.h"
 
-#import "ASAbsoluteLayoutSpec.h"
-#import "ASBackgroundLayoutSpec.h"
+#import <AsyncDisplayKit/ASAbsoluteLayoutSpec.h>
+#import <AsyncDisplayKit/ASBackgroundLayoutSpec.h>
 
 @interface ASAbsoluteLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end

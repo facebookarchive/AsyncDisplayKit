@@ -10,13 +10,14 @@
 
 #import <AsyncDisplayKit/ASLayoutElement.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 /**
  * A layout spec is an immutable object that describes a layout, loosely inspired by React.
  */
-@interface ASLayoutSpec : NSObject <ASLayoutElement>
+@interface ASLayoutSpec : NSObject <ASLayoutElement, ASLayoutElementStylability, NSFastEnumeration>
 
 /** 
  * Creation of a layout spec should only happen by a user in layoutSpecThatFits:. During that method, a
@@ -26,14 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL isMutable;
 
 /**
- * Parent of the layout spec
- */
-@property (nullable, nonatomic, weak) id<ASLayoutElement> parent;
-
-/**
- * Adds a child to this layout spec using a default identifier.
- *
- * @param child A child to be added.
+ * First child within the children's array.
  *
  * @discussion Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
  * responsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
@@ -48,9 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, strong, nonatomic) id<ASLayoutElement> child;
 
 /**
- * Adds childen to this layout spec.
- *
- * @param children An array of ASLayoutElement children to be added.
+ * An array of ASLayoutElement children
  * 
  * @discussion Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
  * reponsibility of holding on to the spec children. Some layout specs, like ASStackLayoutSpec,
@@ -100,7 +92,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface ASLayoutSpec (Debugging) <ASLayoutElementAsciiArtProtocol>
+@interface ASLayoutSpec (Debugging) <ASLayoutElementAsciiArtProtocol, ASDebugNameProvider>
 /**
  *  Used by other layout specs to create ascii art debug strings
  */

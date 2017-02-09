@@ -10,8 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <UIKit/UIImage.h>
-#import <UIKit/UIBezierPath.h>
+#import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -33,7 +32,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param fillColor    The fill color of the rounded-corner image
  */
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
-                                          cornerColor:(UIColor *)cornerColor
+                                          cornerColor:(nullable UIColor *)cornerColor
                                             fillColor:(UIColor *)fillColor AS_WARN_UNUSED_RESULT;
 
 /**
@@ -63,12 +62,33 @@ NS_ASSUME_NONNULL_BEGIN
  * @param scale           The number of pixels per point. Provide 0.0 to use the screen scale.
  */
 + (UIImage *)as_resizableRoundedImageWithCornerRadius:(CGFloat)cornerRadius
-                                          cornerColor:(UIColor *)cornerColor
+                                          cornerColor:(nullable UIColor *)cornerColor
                                             fillColor:(UIColor *)fillColor
                                           borderColor:(nullable UIColor *)borderColor
                                           borderWidth:(CGFloat)borderWidth
                                        roundedCorners:(UIRectCorner)roundedCorners
                                                 scale:(CGFloat)scale AS_WARN_UNUSED_RESULT;
+
+/**
+ *  A version of imageNamed that caches results because loading an image is expensive.
+ *  Calling with the same name value will usually return the same object.  A UIImage,
+ *  after creation, is immutable and thread-safe so it's fine to share these objects across multiple threads.
+ *
+ *  @param imageName The name of the image to load
+ *  @return The loaded image or nil
+ */
++ (UIImage *)as_imageNamed:(NSString *)imageName;
+
+/**
+ *  A version of imageNamed that caches results because loading an image is expensive.
+ *  Calling with the same name value will usually return the same object.  A UIImage,
+ *  after creation, is immutable and thread-safe so it's fine to share these objects across multiple threads.
+ *
+ *  @param imageName The name of the image to load
+ *  @param traitCollection The traits associated with the intended environment for the image.
+ *  @return The loaded image or nil
+ */
++ (UIImage *)as_imageNamed:(NSString *)imageName compatibleWithTraitCollection:(nullable UITraitCollection *)traitCollection;
 
 @end
 

@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# **** Update me when new Xcode versions are released! ****
-PLATFORM="platform=iOS Simulator,OS=10.1,name=iPhone 7"
-SDK="iphonesimulator10.1"
+PLATFORM="platform=iOS Simulator,name=iPhone 7"
+SDK="iphonesimulator"
 
 
 # It is pitch black.
@@ -31,7 +30,20 @@ if [ "$MODE" = "tests" ]; then
         -scheme AsyncDisplayKit \
         -sdk "$SDK" \
         -destination "$PLATFORM" \
-        build test | xcpretty $FORMATTER
+        build-for-testing test | xcpretty $FORMATTER
+    trap - EXIT
+    exit 0
+fi
+
+if [ "$MODE" = "tests_listkit" ]; then
+    echo "Building & testing AsyncDisplayKit+IGListKit."
+    pod install --project-directory=ASDKListKit
+    set -o pipefail && xcodebuild \
+        -workspace ASDKListKit/ASDKListKit.xcworkspace \
+        -scheme ASDKListKitTests \
+        -sdk "$SDK" \
+        -destination "$PLATFORM" \
+        build-for-testing test | xcpretty $FORMATTER
     trap - EXIT
     exit 0
 fi
@@ -290,6 +302,20 @@ if [ "$MODE" = "framework" ]; then
         build | xcpretty $FORMATTER
     trap - EXIT
     exit 0
+fi
+
+if [ "$MODE" = "cocoapods-lint" ]; then
+    echo "Verifying that podspec lints."
+
+    set -o pipefail && pod env && pod lib lint
+    trap - EXIT
+    exit 0
+fi
+
+if [ "$MODE" = "carthage" ]; then
+    echo "Verifying carthage works."
+    
+    set -o pipefail && carthage update && carthage build --no-skip-current
 fi
 
 echo "Unrecognised mode '$MODE'."

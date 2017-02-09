@@ -8,16 +8,16 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitRenderer.h"
+#import <AsyncDisplayKit/ASTextKitRenderer.h>
 
-#import "ASAssert.h"
+#import <AsyncDisplayKit/ASAssert.h>
 
-#import "ASTextKitContext.h"
-#import "ASTextKitShadower.h"
-#import "ASTextKitTailTruncater.h"
-#import "ASTextKitFontSizeAdjuster.h"
-#import "ASInternalHelpers.h"
-#import "ASRunLoopQueue.h"
+#import <AsyncDisplayKit/ASTextKitContext.h>
+#import <AsyncDisplayKit/ASTextKitShadower.h>
+#import <AsyncDisplayKit/ASTextKitTailTruncater.h>
+#import <AsyncDisplayKit/ASTextKitFontSizeAdjuster.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASRunLoopQueue.h>
 
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
@@ -37,7 +37,6 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 @implementation ASTextKitRenderer {
   CGSize _calculatedSize;
-  BOOL _sizeIsCalculated;
 }
 @synthesize attributes = _attributes, context = _context, shadower = _shadower, truncater = _truncater, fontSizeAdjuster = _fontSizeAdjuster;
 
@@ -49,62 +48,38 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   if (self = [super init]) {
     _constrainedSize = constrainedSize;
     _attributes = attributes;
-    _sizeIsCalculated = NO;
     _currentScaleFactor = 1;
-  }
-  return self;
-}
-
-- (ASTextKitShadower *)shadower
-{
-  if (!_shadower) {
-    ASTextKitAttributes attributes = _attributes;
+    
+    // As the renderer should be thread safe, create all subcomponents in the initialization method
     _shadower = [ASTextKitShadower shadowerWithShadowOffset:attributes.shadowOffset
                                                 shadowColor:attributes.shadowColor
                                               shadowOpacity:attributes.shadowOpacity
                                                shadowRadius:attributes.shadowRadius];
-  }
-  return _shadower;
-}
-
-- (ASTextKitTailTruncater *)truncater
-{
-  if (!_truncater) {
-    ASTextKitAttributes attributes = _attributes;
-    NSCharacterSet *avoidTailTruncationSet = attributes.avoidTailTruncationSet ? : _defaultAvoidTruncationCharacterSet();
-    _truncater = [[ASTextKitTailTruncater alloc] initWithContext:[self context]
-                                      truncationAttributedString:attributes.truncationAttributedString
-                                          avoidTailTruncationSet:avoidTailTruncationSet];
-  }
-  return _truncater;
-}
-
-- (ASTextKitFontSizeAdjuster *)fontSizeAdjuster
-{
-  if (!_fontSizeAdjuster) {
-    ASTextKitAttributes attributes = _attributes;
+    
     // We must inset the constrained size by the size of the shadower.
     CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:_constrainedSize];
-    _fontSizeAdjuster = [[ASTextKitFontSizeAdjuster alloc] initWithContext:[self context]
-                                                           constrainedSize:shadowConstrainedSize
-                                                         textKitAttributes:attributes];
-  }
-  return _fontSizeAdjuster;
-}
-
-- (ASTextKitContext *)context
-{
-  if (!_context) {
-    ASTextKitAttributes attributes = _attributes;
-    // We must inset the constrained size by the size of the shadower.
-    CGSize shadowConstrainedSize = [[self shadower] insetSizeWithConstrainedSize:_constrainedSize];
+    
     _context = [[ASTextKitContext alloc] initWithAttributedString:attributes.attributedString
                                                     lineBreakMode:attributes.lineBreakMode
                                              maximumNumberOfLines:attributes.maximumNumberOfLines
                                                    exclusionPaths:attributes.exclusionPaths
                                                   constrainedSize:shadowConstrainedSize];
+    
+    NSCharacterSet *avoidTailTruncationSet = attributes.avoidTailTruncationSet ?: _defaultAvoidTruncationCharacterSet();
+    _truncater = [[ASTextKitTailTruncater alloc] initWithContext:[self context]
+                                      truncationAttributedString:attributes.truncationAttributedString
+                                          avoidTailTruncationSet:avoidTailTruncationSet];
+      
+    ASTextKitAttributes attributes = _attributes;
+    // We must inset the constrained size by the size of the shadower.
+    _fontSizeAdjuster = [[ASTextKitFontSizeAdjuster alloc] initWithContext:[self context]
+                                                           constrainedSize:shadowConstrainedSize
+                                                         textKitAttributes:attributes];
+    
+    // Calcualate size immediately
+    [self _calculateSize];
   }
-  return _context;
+  return self;
 }
 
 - (NSStringDrawingContext *)stringDrawingContext
@@ -127,10 +102,6 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 
 - (CGSize)size
 {
-  if (!_sizeIsCalculated) {
-    [self _calculateSize];
-    _sizeIsCalculated = YES;
-  }
   return _calculatedSize;
 }
 
@@ -222,12 +193,6 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
 {
   // We add an assertion so we can track the rare conditions where a graphics context is not present
   ASDisplayNodeAssertNotNil(context, @"This is no good without a context.");
-  
-  // This renderer may not be the one that did the sizing. If that is the case its truncation and currentScaleFactor may not have been evaluated.
-  // If there's any possibility we need to truncate or scale (i.e. width is not infinite), perform the size calculation.
-  if (_sizeIsCalculated == NO && isinf(_constrainedSize.width) == NO) {
-    [self _calculateSize];
-  }
 
   bounds = CGRectIntersection(bounds, { .size = _constrainedSize });
   CGRect shadowInsetBounds = [[self shadower] insetRectWithConstrainedRect:bounds];
@@ -242,10 +207,6 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   // fast path.
   if (self.canUseFastPath) {
     CGRect drawingBounds = shadowInsetBounds;
-    // Add a fudge-factor to the height, to workaround a bug in iOS 7
-    if (AS_AT_LEAST_IOS8 == NO) {
-      drawingBounds.size.height += 3;
-    }
     [_attributes.attributedString drawWithRect:drawingBounds options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine context:self.stringDrawingContext];
   } else {
     BOOL isScaled = [self isScaled];
@@ -265,7 +226,7 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
       
       LOG(@"usedRect: %@", NSStringFromCGRect([layoutManager usedRectForTextContainer:textContainer]));
 
-      NSRange glyphRange = [layoutManager glyphRangeForBoundingRect:CGRectMake(0,0,textContainer.size.width, textContainer.size.height) inTextContainer:textContainer];
+      NSRange glyphRange = [layoutManager glyphRangeForBoundingRect:(CGRect){ .size = textContainer.size } inTextContainer:textContainer];
       LOG(@"boundingRect: %@", NSStringFromCGRect([layoutManager boundingRectForGlyphRange:glyphRange inTextContainer:textContainer]));
       
       [layoutManager drawBackgroundForGlyphRange:glyphRange atPoint:shadowInsetBounds.origin];
@@ -296,11 +257,21 @@ static NSCharacterSet *_defaultAvoidTruncationCharacterSet()
   return lineCount;
 }
 
+- (BOOL)isTruncated
+{
+  if (self.canUseFastPath) {
+    CGRect boundedRect = [_attributes.attributedString boundingRectWithSize:CGSizeMake(_constrainedSize.width, CGFLOAT_MAX)
+                                                                    options:NSStringDrawingUsesLineFragmentOrigin | NSStringDrawingTruncatesLastVisibleLine
+                                                                    context:nil];
+    return boundedRect.size.height > _constrainedSize.height;
+  } else {
+    return self.firstVisibleRange.length < _attributes.attributedString.length;
+  }
+}
+
 - (std::vector<NSRange>)visibleRanges
 {
-  ASTextKitTailTruncater *truncater = [self truncater];
-  [truncater truncate];
-  return truncater.visibleRanges;
+  return _truncater.visibleRanges;
 }
 
 @end

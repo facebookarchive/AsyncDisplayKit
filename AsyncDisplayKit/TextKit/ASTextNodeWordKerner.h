@@ -10,6 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/NSLayoutManager.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -18,6 +19,7 @@ NS_ASSUME_NONNULL_BEGIN
   @discussion Its current job is word kerning, i.e. adjusting the width of spaces to match the set
     wordKernedSpaceWidth. If word kerning is not needed, set the layoutManager's delegate to nil.
  */
+AS_SUBCLASSING_RESTRICTED
 @interface ASTextNodeWordKerner : NSObject <NSLayoutManagerDelegate>
 
 /**

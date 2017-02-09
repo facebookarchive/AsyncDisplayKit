@@ -74,6 +74,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
 
+/*
+ * A Boolean value that determines whether the collection node will be flipped.
+ * If the value of this property is YES, the first cell node will be at the bottom of the collection node (as opposed to the top by default). This is useful for chat/messaging apps. The default value is NO.
+ */
+@property (nonatomic, assign) BOOL inverted;
+
 /**
  * A Boolean value that indicates whether users can select items in the collection node.
  * If the value of this property is YES (the default), users can select items. If you want more fine-grained control over the selection of items, you must provide a delegate object and implement the appropriate methods of the UICollectionNodeDelegate protocol.
@@ -171,7 +177,7 @@ NS_ASSUME_NONNULL_BEGIN
  *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
-- (void)performBatchAnimated:(BOOL)animated updates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
+- (void)performBatchAnimated:(BOOL)animated updates:(nullable AS_NOESCAPE void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
 
 /**
  *  Perform a batch of updates asynchronously, optionally disabling all animations in the batch. This method must be called from the main thread.
@@ -182,7 +188,7 @@ NS_ASSUME_NONNULL_BEGIN
  *                    Boolean parameter that contains the value YES if all of the related animations completed successfully or
  *                    NO if they were interrupted. This parameter may be nil. If supplied, the block is run on the main thread.
  */
-- (void)performBatchUpdates:(nullable __attribute((noescape)) void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
+- (void)performBatchUpdates:(nullable AS_NOESCAPE void (^)())updates completion:(nullable void (^)(BOOL finished))completion;
 
 /**
  *  Blocks execution of the main thread until all section and item updates are committed to the view. This method must be called from the main thread.
@@ -465,7 +471,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Similar to -collectionView:cellForItemAtIndexPath:.
  *
- * @param collectionView The sender.
+ * @param collectionNode The sender.
  * @param indexPath The index path of the item.
  *
  * @return A node to display for the given item. This will be called on the main thread and should
@@ -494,6 +500,16 @@ NS_ASSUME_NONNULL_BEGIN
  * @return A context object to assign to the given section, or @c nil.
  */
 - (nullable id<ASSectionContext>)collectionNode:(ASCollectionNode *)collectionNode contextForSection:(NSInteger)section;
+
+/**
+ * Asks the data source to provide an array of supplementary element kinds that exist in a given section.
+ *
+ * @param collectionNode The sender.
+ * @param section The index of the section to provide supplementary kinds for.
+ *
+ * @return The supplementary element kinds that exist in the given section, if any.
+ */
+- (NSArray<NSString *> *)collectionNode:(ASCollectionNode *)collectionNode supplementaryElementKindsInSection:(NSInteger)section;
 
 /**
  * Similar to -collectionView:cellForItemAtIndexPath:.
@@ -687,6 +703,59 @@ NS_ASSUME_NONNULL_BEGIN
  * This method is deprecated. Use @c collectionView:willDisplayNode:forItemAtIndexPath: instead.
  */
 - (void)collectionView:(ASCollectionView *)collectionView willDisplayNodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
+
+@end
+
+@protocol ASCollectionDataSourceInterop <ASCollectionDataSource>
+
+/**
+ * This method offers compatibility with synchronous, standard UICollectionViewCell objects.
+ * These cells will **not** have the performance benefits of ASCellNodes (like preloading, async layout, and
+ * async drawing) - even when mixed within the same ASCollectionNode.
+ *
+ * In order to use this method, you must:
+ * 1. Implement it on your ASCollectionDataSource object.
+ * 2. Call registerCellClass: on the collectionNode.view (in viewDidLoad, or register an onDidLoad: block).
+ * 3. Return nil from the nodeBlockForItem...: or nodeForItem...: method. NOTE: it is an error to return
+ *    nil from within a nodeBlock, if you have returned a nodeBlock object.
+ * 4. Lastly, you must implement a method to provide the size for the cell. There are two ways this is done:
+ * 4a. UICollectionViewFlowLayout (incl. ASPagerNode). Implement
+ collectionNode:constrainedSizeForItemAtIndexPath:.
+ * 4b. Custom collection layouts. Set .view.layoutInspector and have it implement
+ collectionView:constrainedSizeForNodeAtIndexPath:.
+ *
+ * For an example of using this method with all steps above (including a custom layout, 4b.),
+ * see the app in examples/CustomCollectionView and enable kShowUICollectionViewCells = YES.
+ */
+- (__kindof UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath;
+
+@optional
+
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * Implement this property and return YES if you want your interop data source to be
+ * used when dequeuing cells for node-backed items.
+ *
+ * If NO (the default), the interop data source will only be consulted in cases
+ * where no ASCellNode was provided to AsyncDisplayKit.
+ *
+ * If YES, the interop data source will always be consulted to dequeue cells, and
+ * will be expected to return _ASCollectionViewCells in cases where a node was provided.
+ *
+ * The default value is NO.
+ */
+@property (class, nonatomic, readonly) BOOL dequeuesCellsForNodeBackedItems;
+
+@end
+
+@protocol ASCollectionDelegateInterop <ASCollectionDelegate>
+
+@optional
+
+- (void)collectionView:(UICollectionView *)collectionView willDisplayCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath;
+
+- (void)collectionView:(UICollectionView *)collectionView didEndDisplayingCell:(UICollectionViewCell *)cell forItemAtIndexPath:(NSIndexPath *)indexPath;
 
 @end
 

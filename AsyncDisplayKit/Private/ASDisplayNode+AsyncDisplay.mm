@@ -8,13 +8,13 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "_ASCoreAnimationExtras.h"
-#import "_ASAsyncTransaction.h"
-#import "_ASDisplayLayer.h"
-#import "ASAssert.h"
-#import "ASDisplayNodeInternal.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
-#import "ASInternalHelpers.h"
+#import <AsyncDisplayKit/_ASCoreAnimationExtras.h>
+#import <AsyncDisplayKit/_ASAsyncTransaction.h>
+#import <AsyncDisplayKit/_ASDisplayLayer.h>
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 @interface ASDisplayNode () <_ASDisplayLayerDelegate>
 @end

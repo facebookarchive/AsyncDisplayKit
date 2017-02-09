@@ -10,7 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASCellNode.h"
+#import <AsyncDisplayKit/ASCellNode.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -63,7 +63,9 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, copy, nullable) NSIndexPath *cachedIndexPath;
 
-@property (weak, nonatomic, nullable) ASDisplayNode *owningNode;
+@property (nonatomic, weak, nullable) ASDisplayNode *owningNode;
+
+@property (nonatomic, assign) BOOL shouldUseUIKitCell;
 
 @end
 

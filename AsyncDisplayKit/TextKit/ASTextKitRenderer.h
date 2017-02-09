@@ -12,7 +12,7 @@
 
 #import <UIKit/UIKit.h>
 
-#import "ASTextKitAttributes.h"
+#import <AsyncDisplayKit/ASTextKitAttributes.h>
 
 @class ASTextKitContext;
 @class ASTextKitShadower;
@@ -84,6 +84,11 @@
  The number of lines shown in the string.
  */
 - (NSUInteger)lineCount;
+
+/**
+ Whether or not the text is truncated.
+ */
+- (BOOL)isTruncated;
 
 @end
 

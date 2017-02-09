@@ -10,11 +10,12 @@
 
 #import "ASLayoutSpecSnapshotTestsHelper.h"
 
-#import "ASStackLayoutSpec.h"
-#import "ASStackLayoutSpecUtilities.h"
-#import "ASBackgroundLayoutSpec.h"
-#import "ASRatioLayoutSpec.h"
-#import "ASInsetLayoutSpec.h"
+#import <AsyncDisplayKit/ASStackLayoutSpec.h>
+#import <AsyncDisplayKit/ASStackLayoutSpecUtilities.h>
+#import <AsyncDisplayKit/ASBackgroundLayoutSpec.h>
+#import <AsyncDisplayKit/ASRatioLayoutSpec.h>
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASTextNode.h>
 
 @interface ASStackLayoutSpecSnapshotTests : ASLayoutSpecSnapshotTestCase
 @end
@@ -57,17 +58,21 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   node.style.height = ASDimensionMakeWithPoints(size.height);
 }
 
-- (void)testDefaultStackLayoutElementFlexProperties
+static NSArray<ASTextNode*> *defaultTextNodes()
 {
-  ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
+  ASTextNode *textNode1 = [[ASTextNode alloc] init];
+  textNode1.attributedText = [[NSAttributedString alloc] initWithString:@"Hello"
+                                                             attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:20]}];
+  textNode1.backgroundColor = [UIColor redColor];
+  textNode1.layerBacked = YES;
   
-  XCTAssertEqual(displayNode.style.flexShrink, NO);
-  XCTAssertEqual(displayNode.style.flexGrow, NO);
+  ASTextNode *textNode2 = [[ASTextNode alloc] init];
+  textNode2.attributedText = [[NSAttributedString alloc] initWithString:@"Why, hello there! How are you?"
+                                                             attributes:@{NSFontAttributeName: [UIFont systemFontOfSize:12]}];
+  textNode2.backgroundColor = [UIColor blueColor];
+  textNode2.layerBacked = YES;
   
-  const ASDimension unconstrainedDimension = ASDimensionAuto;
-  const ASDimension flexBasis = displayNode.style.flexBasis;
-  XCTAssertEqual(flexBasis.unit, unconstrainedDimension.unit);
-  XCTAssertEqual(flexBasis.value, unconstrainedDimension.value);
+  return @[textNode1, textNode2];
 }
 
 - (void)testStackLayoutSpecWithJustify:(ASStackLayoutJustifyContent)justify
@@ -83,24 +88,6 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, flex);
   
   [self testStackLayoutSpecWithStyle:style sizeRange:sizeRange subnodes:subnodes identifier:identifier];
-}
-
-- (void)testStackLayoutSpecWithDirection:(ASStackLayoutDirection)direction
-                itemsHorizontalAlignment:(ASHorizontalAlignment)horizontalAlignment
-                  itemsVerticalAlignment:(ASVerticalAlignment)verticalAlignment
-                              identifier:(NSString *)identifier
-{
-  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, 0);
-  
-  ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init];
-  stackLayoutSpec.direction = direction;
-  stackLayoutSpec.children = subnodes;
-  stackLayoutSpec.horizontalAlignment = horizontalAlignment;
-  stackLayoutSpec.verticalAlignment = verticalAlignment;
-  
-  CGSize exactSize = CGSizeMake(200, 200);
-  static ASSizeRange kSize = ASSizeRangeMake(exactSize, exactSize);
-  [self testStackLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:subnodes identifier:identifier];
 }
 
 - (void)testStackLayoutSpecWithStyle:(ASStackLayoutSpecStyle)style
@@ -128,6 +115,39 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   [self testStackLayoutSpec:stackLayoutSpec sizeRange:sizeRange subnodes:subnodes identifier:identifier];
 }
 
+- (void)testStackLayoutSpecWithDirection:(ASStackLayoutDirection)direction
+                itemsHorizontalAlignment:(ASHorizontalAlignment)horizontalAlignment
+                  itemsVerticalAlignment:(ASVerticalAlignment)verticalAlignment
+                              identifier:(NSString *)identifier
+{
+  NSArray<ASDisplayNode *> *subnodes = defaultSubnodesWithSameSize({50, 50}, 0);
+  
+  ASStackLayoutSpec *stackLayoutSpec = [[ASStackLayoutSpec alloc] init];
+  stackLayoutSpec.direction = direction;
+  stackLayoutSpec.children = subnodes;
+  stackLayoutSpec.horizontalAlignment = horizontalAlignment;
+  stackLayoutSpec.verticalAlignment = verticalAlignment;
+  
+  CGSize exactSize = CGSizeMake(200, 200);
+  static ASSizeRange kSize = ASSizeRangeMake(exactSize, exactSize);
+  [self testStackLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:subnodes identifier:identifier];
+}
+
+- (void)testStackLayoutSpecWithBaselineAlignment:(ASStackLayoutAlignItems)baselineAlignment
+                                      identifier:(NSString *)identifier
+{
+  NSAssert(baselineAlignment == ASStackLayoutAlignItemsBaselineFirst || baselineAlignment == ASStackLayoutAlignItemsBaselineLast, @"Unexpected baseline alignment");
+  NSArray<ASTextNode *> *textNodes = defaultTextNodes();
+  textNodes[1].style.flexShrink = 1.0;
+  
+  ASStackLayoutSpec *stackLayoutSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
+  stackLayoutSpec.children = textNodes;
+  stackLayoutSpec.alignItems = baselineAlignment;
+  
+  static ASSizeRange kSize = ASSizeRangeMake(CGSizeMake(150, 0), CGSizeMake(150, CGFLOAT_MAX));
+  [self testStackLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:textNodes identifier:identifier];
+}
+
 - (void)testStackLayoutSpec:(ASStackLayoutSpec *)stackLayoutSpec
                   sizeRange:(ASSizeRange)sizeRange
                    subnodes:(NSArray *)subnodes
@@ -142,7 +162,21 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   [self testLayoutSpec:layoutSpec sizeRange:sizeRange subnodes:newSubnodes identifier:identifier];
 }
 
+
 #pragma mark -
+
+- (void)testDefaultStackLayoutElementFlexProperties
+{
+  ASDisplayNode *displayNode = [[ASDisplayNode alloc] init];
+  
+  XCTAssertEqual(displayNode.style.flexShrink, NO);
+  XCTAssertEqual(displayNode.style.flexGrow, NO);
+  
+  const ASDimension unconstrainedDimension = ASDimensionAuto;
+  const ASDimension flexBasis = displayNode.style.flexBasis;
+  XCTAssertEqual(flexBasis.unit, unconstrainedDimension.unit);
+  XCTAssertEqual(flexBasis.value, unconstrainedDimension.value);
+}
 
 - (void)testUnderflowBehaviors
 {
@@ -1063,6 +1097,74 @@ static void setCGSizeToNode(CGSize size, ASDisplayNode *node)
   stackLayoutSpec.justifyContent = ASStackLayoutJustifyContentEnd;
   XCTAssertEqual(stackLayoutSpec.alignItems, ASStackLayoutAlignItemsEnd);
   XCTAssertEqual(stackLayoutSpec.justifyContent, ASStackLayoutJustifyContentEnd);
+}
+
+#pragma mark - Baseline alignment tests
+
+- (void)testBaselineAlignment
+{
+  [self testStackLayoutSpecWithBaselineAlignment:ASStackLayoutAlignItemsBaselineFirst identifier:@"baselineFirst"];
+  [self testStackLayoutSpecWithBaselineAlignment:ASStackLayoutAlignItemsBaselineLast identifier:@"baselineLast"];
+}
+
+- (void)testNestedBaselineAlignments
+{
+  NSArray<ASTextNode *> *textNodes = defaultTextNodes();
+  
+  ASDisplayNode *stretchedNode = [[ASDisplayNode alloc] init];
+  stretchedNode.layerBacked = YES;
+  stretchedNode.backgroundColor = [UIColor greenColor];
+  stretchedNode.style.alignSelf = ASStackLayoutAlignSelfStretch;
+  stretchedNode.style.height = ASDimensionMake(100);
+  
+  ASStackLayoutSpec *verticalStack = [ASStackLayoutSpec verticalStackLayoutSpec];
+  verticalStack.children = @[stretchedNode, textNodes[1]];
+  verticalStack.style.flexShrink = 1.0;
+  
+  ASStackLayoutSpec *horizontalStack = [ASStackLayoutSpec horizontalStackLayoutSpec];
+  horizontalStack.children = @[textNodes[0], verticalStack];
+  horizontalStack.alignItems = ASStackLayoutAlignItemsBaselineLast;
+  
+  NSArray<ASDisplayNode *> *subnodes = @[textNodes[0], textNodes[1], stretchedNode];
+  
+  static ASSizeRange kSize = ASSizeRangeMake(CGSizeMake(150, 0), CGSizeMake(150, CGFLOAT_MAX));
+  [self testStackLayoutSpec:horizontalStack sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+- (void)testBaselineAlignmentWithSpaceBetween
+{
+  NSArray<ASTextNode *> *textNodes = defaultTextNodes();
+  
+  ASStackLayoutSpec *stackLayoutSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
+  stackLayoutSpec.children = textNodes;
+  stackLayoutSpec.alignItems = ASStackLayoutAlignItemsBaselineFirst;
+  stackLayoutSpec.justifyContent = ASStackLayoutJustifyContentSpaceBetween;
+  
+  static ASSizeRange kSize = ASSizeRangeMake(CGSizeMake(300, 0), CGSizeMake(300, CGFLOAT_MAX));
+  [self testStackLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:textNodes identifier:nil];
+}
+
+- (void)testBaselineAlignmentWithStretchedItem
+{
+  NSArray<ASTextNode *> *textNodes = defaultTextNodes();
+  
+  ASDisplayNode *stretchedNode = [[ASDisplayNode alloc] init];
+  stretchedNode.layerBacked = YES;
+  stretchedNode.backgroundColor = [UIColor greenColor];
+  stretchedNode.style.alignSelf = ASStackLayoutAlignSelfStretch;
+  stretchedNode.style.flexShrink = 1.0;
+  stretchedNode.style.flexGrow = 1.0;
+  
+  NSMutableArray<ASDisplayNode *> *children = [NSMutableArray arrayWithArray:textNodes];
+  [children insertObject:stretchedNode atIndex:1];
+  
+  ASStackLayoutSpec *stackLayoutSpec = [ASStackLayoutSpec horizontalStackLayoutSpec];
+  stackLayoutSpec.children = children;
+  stackLayoutSpec.alignItems = ASStackLayoutAlignItemsBaselineLast;
+  stackLayoutSpec.justifyContent = ASStackLayoutJustifyContentSpaceBetween;
+  
+  static ASSizeRange kSize = ASSizeRangeMake(CGSizeMake(300, 0), CGSizeMake(300, CGFLOAT_MAX));
+  [self testStackLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:children identifier:nil];
 }
 
 @end

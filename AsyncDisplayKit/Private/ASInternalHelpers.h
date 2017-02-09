@@ -8,7 +8,13 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import "ASAvailability.h"
+
+#if AS_TARGET_OS_IOS
 #import <UIKit/UIKit.h>
+#else
+#import <QuartzCore/QuartzCore.h>
+#endif
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
@@ -45,7 +51,7 @@ CGFloat ASRoundPixelValue(CGFloat f);
 
 BOOL ASClassRequiresMainThreadDeallocation(Class _Nullable c);
 
-Class _Nullable ASGetClassFromType(const char *type);
+Class _Nullable ASGetClassFromType(const char * _Nullable type);
 
 ASDISPLAYNODE_EXTERN_C_END
 
@@ -71,7 +77,14 @@ ASDISPLAYNODE_INLINE BOOL ASImageAlphaInfoIsOpaque(CGImageAlphaInfo info) {
  */
 ASDISPLAYNODE_INLINE void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   if (withoutAnimation) {
+#if AS_TARGET_OS_IOS
     [UIView performWithoutAnimation:block];
+#else
+    [CATransaction begin];
+    [CATransaction setDisableActions: YES];
+    block();
+    [CATransaction commit];
+#endif
   } else {
     block();
   }

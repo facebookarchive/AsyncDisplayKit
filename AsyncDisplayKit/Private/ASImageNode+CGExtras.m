@@ -8,7 +8,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASImageNode+CGExtras.h"
+#import <AsyncDisplayKit/ASImageNode+CGExtras.h>
+
 #import <tgmath.h>
 
 // TODO rewrite these to be closer to the intended use -- take UIViewContentMode as param, CGRect destinationBounds, CGSize sourceSize.
@@ -66,7 +67,7 @@ void ASCroppedImageBackingSizeAndDrawRectInBounds(CGSize sourceImageSize,
   }
 
   // If fitting the desired aspect ratio to the image size actually results in a larger buffer, use the input values.
-  // However, if there is a pixel savings (e.g. we would have to upscale the image), overwrite the function arguments.
+  // However, if there is a pixel savings (e.g. we would have to upscale the image), override the function arguments.
   if (CGSizeEqualToSize(CGSizeZero, forcedSize) == NO) {
     destinationWidth = (size_t)round(forcedSize.width);
     destinationHeight = (size_t)round(forcedSize.height);

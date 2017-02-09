@@ -1,0 +1,18 @@
+apple_library(
+  name = 'FLAnimatedImage',
+  exported_headers = glob(['FLAnimatedImage/*.h']),
+  srcs = glob(['FLAnimatedImage/*.m']),
+  preprocessor_flags = ['-fobjc-arc', '-Wno-deprecated-declarations'],
+  lang_preprocessor_flags = {
+    'C': ['-std=gnu99'],
+    'CXX': ['-std=gnu++11', '-stdlib=libc++'],
+  },
+  frameworks = [
+    '$SDKROOT/System/Library/Frameworks/Foundation.framework',
+    '$SDKROOT/System/Library/Frameworks/UIKit.framework',
+    '$SDKROOT/System/Library/Frameworks/ImageIO.framework',
+    '$SDKROOT/System/Library/Frameworks/MobileCoreServices.framework',
+    '$SDKROOT/System/Library/Frameworks/QuartzCore.framework',
+  ],
+  visibility = ['PUBLIC'],
+)

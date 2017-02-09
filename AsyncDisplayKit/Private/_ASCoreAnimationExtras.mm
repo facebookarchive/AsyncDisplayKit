@@ -8,9 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "_ASCoreAnimationExtras.h"
-#import "ASEqualityHelpers.h"
-#import "ASAssert.h"
+#import <AsyncDisplayKit/_ASCoreAnimationExtras.h>
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASAssert.h>
 
 extern void ASDisplayNodeSetupLayerContentsWithResizableImage(CALayer *layer, UIImage *image)
 {
@@ -153,4 +153,9 @@ UIViewContentMode ASDisplayNodeUIContentModeFromCAContentsGravity(NSString *cons
   ASDisplayNodeCAssert(!contentsGravity, @"You passed nil to ASDisplayNodeUIContentModeFromCAContentsGravity. We're falling back to resize, but this is probably a bug.");
   // If asserts disabled, fall back to this
   return UIViewContentModeScaleToFill;
+}
+
+BOOL ASDisplayNodeLayerHasAnimations(CALayer *layer)
+{
+  return (layer.animationKeys.count != 0);
 }

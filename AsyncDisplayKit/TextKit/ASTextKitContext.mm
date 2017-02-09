@@ -8,9 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTextKitContext.h"
-#import "ASLayoutManager.h"
-#import "ASThread.h"
+#import <AsyncDisplayKit/ASTextKitContext.h>
+#import <AsyncDisplayKit/ASLayoutManager.h>
+#import <AsyncDisplayKit/ASThread.h>
 
 #include <memory>
 
@@ -52,18 +52,6 @@
     [_layoutManager addTextContainer:_textContainer];
   }
   return self;
-}
-
-- (CGSize)constrainedSize
-{
-  ASDN::MutexSharedLocker l(__instanceLock__);
-  return _textContainer.size;
-}
-
-- (void)setConstrainedSize:(CGSize)constrainedSize
-{
-  ASDN::MutexSharedLocker l(__instanceLock__);
-  _textContainer.size = constrainedSize;
 }
 
 - (void)performBlockWithLockedTextKitComponents:(void (^)(NSLayoutManager *,

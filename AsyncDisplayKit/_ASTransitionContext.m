@@ -10,9 +10,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "_ASTransitionContext.h"
-#import "ASDisplayNode.h"
-#import "ASLayout.h"
+#import <AsyncDisplayKit/_ASTransitionContext.h>
+#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASLayout.h>
 
 
 NSString * const ASTransitionContextFromLayoutKey = @"org.asyncdisplaykit.ASTransitionContextFromLayoutKey";
@@ -94,6 +94,24 @@ NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransi
 - (void)completeTransition:(BOOL)didComplete
 {
   [_completionDelegate transitionContext:self didComplete:didComplete];
+}
+
+@end
+
+
+@interface _ASAnimatedTransitionContext ()
+@property (nonatomic, strong, readwrite) ASDisplayNode *node;
+@property (nonatomic, assign, readwrite) CGFloat alpha;
+@end
+
+@implementation _ASAnimatedTransitionContext
+
++ (instancetype)contextForNode:(ASDisplayNode *)node alpha:(CGFloat)alpha
+{
+  _ASAnimatedTransitionContext *context = [[_ASAnimatedTransitionContext alloc] init];
+  context.node = node;
+  context.alpha = alpha;
+  return context;
 }
 
 @end

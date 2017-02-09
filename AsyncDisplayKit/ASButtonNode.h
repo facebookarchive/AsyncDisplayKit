@@ -8,10 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <AsyncDisplayKit/ASTextNode.h>
-#import <AsyncDisplayKit/ASImageNode.h>
+#import <AsyncDisplayKit/ASControlNode.h>
+#import <UIKit/UIKit.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+@class ASImageNode, ASTextNode;
 
 /**
  Image alignment defines where the image will be placed relative to the text.

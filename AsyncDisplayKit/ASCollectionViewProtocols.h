@@ -8,6 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
+
 NS_ASSUME_NONNULL_BEGIN
 
 /**
@@ -23,7 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView ASDISPLAYNODE_DEPRECATED_MSG("Implement -numberOfSectionsInCollectionNode: instead.");
 
-- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Implement - collectionNode:viewForSupplementaryElementOfKind:atIndexPath: instead.");
+- (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Implement - collectionNode:nodeForSupplementaryElementOfKind:atIndexPath: instead.");
 
 @end
 

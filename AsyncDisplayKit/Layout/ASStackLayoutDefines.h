@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASBaseDefines.h"
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 /** The direction children are stacked in */
 typedef NS_ENUM(NSUInteger, ASStackLayoutDirection) {
@@ -98,11 +98,11 @@ typedef NS_ENUM(NSUInteger, ASHorizontalAlignment) {
 
   // After 2.0 has landed, we'll add ASDISPLAYNODE_DEPRECATED here - for now, avoid triggering errors for projects with -Werror
   /** @deprecated Use ASHorizontalAlignmentLeft instead */
-  ASAlignmentLeft = ASHorizontalAlignmentLeft,
+  ASAlignmentLeft ASDISPLAYNODE_DEPRECATED = ASHorizontalAlignmentLeft,
   /** @deprecated Use ASHorizontalAlignmentMiddle instead */
-  ASAlignmentMiddle = ASHorizontalAlignmentMiddle,
+  ASAlignmentMiddle ASDISPLAYNODE_DEPRECATED = ASHorizontalAlignmentMiddle,
   /** @deprecated Use ASHorizontalAlignmentRight instead */
-  ASAlignmentRight = ASHorizontalAlignmentRight,
+  ASAlignmentRight ASDISPLAYNODE_DEPRECATED = ASHorizontalAlignmentRight,
 };
 
 /** Orientation of children along vertical axis */
@@ -118,9 +118,9 @@ typedef NS_ENUM(NSUInteger, ASVerticalAlignment) {
 
   // After 2.0 has landed, we'll add ASDISPLAYNODE_DEPRECATED here - for now, avoid triggering errors for projects with -Werror
   /** @deprecated Use ASVerticalAlignmentTop instead */
-  ASAlignmentTop = ASVerticalAlignmentTop,
+  ASAlignmentTop ASDISPLAYNODE_DEPRECATED = ASVerticalAlignmentTop,
   /** @deprecated Use ASVerticalAlignmentCenter instead */
-  ASAlignmentCenter = ASVerticalAlignmentCenter,
+  ASAlignmentCenter ASDISPLAYNODE_DEPRECATED = ASVerticalAlignmentCenter,
   /** @deprecated Use ASVerticalAlignmentBottom instead */
-  ASAlignmentBottom = ASVerticalAlignmentBottom,
+  ASAlignmentBottom ASDISPLAYNODE_DEPRECATED = ASVerticalAlignmentBottom,
 };

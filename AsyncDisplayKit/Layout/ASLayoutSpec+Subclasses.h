@@ -6,9 +6,13 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASLayoutSpec.h>
+#import <AsyncDisplayKit/ASLayout.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+@protocol ASLayoutElement;
 
 @interface ASLayoutSpec (Subclassing)
 

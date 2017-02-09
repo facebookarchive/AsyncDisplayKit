@@ -14,23 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "058D09AB195D04C000B7D73C"
-               BuildableName = "libAsyncDisplayKit.a"
+               BlueprintIdentifier = "B35061D91B010EDF0018CF92"
+               BuildableName = "AsyncDisplayKit.framework"
                BlueprintName = "AsyncDisplayKit"
-               ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "058D09BB195D04C000B7D73C"
-               BuildableName = "AsyncDisplayKitTests.xctest"
-               BlueprintName = "AsyncDisplayKitTests"
                ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -40,8 +26,7 @@
       buildConfiguration = "Debug"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
-      shouldUseLaunchSchemeArgsEnv = "YES"
-      codeCoverageEnabled = "YES">
+      shouldUseLaunchSchemeArgsEnv = "YES">
       <Testables>
          <TestableReference
             skipped = "NO">
@@ -56,17 +41,14 @@
                <Test
                   Identifier = "ASTextNodePerformanceTests">
                </Test>
-               <Test
-                  Identifier = "ASUIViewTests">
-               </Test>
             </SkippedTests>
          </TestableReference>
       </Testables>
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "058D09AB195D04C000B7D73C"
-            BuildableName = "libAsyncDisplayKit.a"
+            BlueprintIdentifier = "B35061D91B010EDF0018CF92"
+            BuildableName = "AsyncDisplayKit.framework"
             BlueprintName = "AsyncDisplayKit"
             ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
          </BuildableReference>
@@ -87,19 +69,12 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "058D09AB195D04C000B7D73C"
-            BuildableName = "libAsyncDisplayKit.a"
+            BlueprintIdentifier = "B35061D91B010EDF0018CF92"
+            BuildableName = "AsyncDisplayKit.framework"
             BlueprintName = "AsyncDisplayKit"
             ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
-      <EnvironmentVariables>
-         <EnvironmentVariable
-            key = "FB_REFERENCE_IMAGE_DIR"
-            value = "$(SOURCE_ROOT)/$(PROJECT_NAME)Tests/ReferenceImages"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-      </EnvironmentVariables>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
@@ -112,8 +87,8 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "058D09AB195D04C000B7D73C"
-            BuildableName = "libAsyncDisplayKit.a"
+            BlueprintIdentifier = "B35061D91B010EDF0018CF92"
+            BuildableName = "AsyncDisplayKit.framework"
             BlueprintName = "AsyncDisplayKit"
             ReferencedContainer = "container:AsyncDisplayKit.xcodeproj">
          </BuildableReference>

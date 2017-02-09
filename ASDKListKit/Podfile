@@ -1,0 +1,8 @@
+source 'https://github.com/CocoaPods/Specs.git'
+
+platform :ios, '8.0'
+target 'ASDKListKitTests' do
+	pod 'AsyncDisplayKit/IGListKit', :path => '..'
+	pod 'JGMethodSwizzler', :git => 'https://github.com/JonasGessner/JGMethodSwizzler', :branch => 'master'
+end
+

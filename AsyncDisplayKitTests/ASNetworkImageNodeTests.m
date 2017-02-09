@@ -9,7 +9,7 @@
 #import <XCTest/XCTest.h>
 #import <OCMock/OCMock.h>
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 
 @interface ASNetworkImageNodeTests : XCTestCase
 
@@ -34,7 +34,8 @@
   node = [[ASNetworkImageNode alloc] initWithCache:cache downloader:downloader];
 }
 
-- (void)testThatProgressBlockIsSetAndClearedCorrectlyOnVisibility
+/// Test is flaky: https://github.com/facebook/AsyncDisplayKit/issues/2898
+- (void)DISABLED_testThatProgressBlockIsSetAndClearedCorrectlyOnVisibility
 {
   node.URL = [NSURL URLWithString:@"http://imageA"];
 
@@ -69,6 +70,17 @@
   [[downloader expect] setProgressImageBlock:[OCMArg isNotNil] callbackQueue:OCMOCK_ANY withDownloadIdentifier:@1];
   node.URL = [NSURL URLWithString:@"http://imageB"];
   [downloader verifyWithDelay:5];
+}
+
+- (void)testThatSettingAnImageWillStayForEnteringAndExitingPreloadState
+{
+  UIImage *image = [[UIImage alloc] init];
+  ASNetworkImageNode *networkImageNode = [[ASNetworkImageNode alloc] init];
+  networkImageNode.image = image;
+  [networkImageNode enterInterfaceState:ASInterfaceStatePreload];
+  XCTAssertEqualObjects(image, networkImageNode.image);
+  [networkImageNode exitInterfaceState:ASInterfaceStatePreload];
+  XCTAssertEqualObjects(image, networkImageNode.image);
 }
 
 @end

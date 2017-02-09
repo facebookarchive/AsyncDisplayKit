@@ -10,10 +10,10 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASPendingStateController.h"
-#import "ASThread.h"
-#import "ASWeakSet.h"
-#import "ASDisplayNodeInternal.h"
+#import <AsyncDisplayKit/ASPendingStateController.h>
+#import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASWeakSet.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h> // Required for -applyPendingViewState; consider moving this to +FrameworkPrivate
 
 @interface ASPendingStateController()
 {

@@ -10,12 +10,10 @@
 
 #import <pthread.h>
 
-#import <AsyncDisplayKit/_ASDisplayLayer.h>
-#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASBlockTypes.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
-#import <AsyncDisplayKit/ASThread.h>
 
-@class ASLayoutSpec;
+@class ASLayoutSpec, _ASDisplayLayer;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -39,7 +37,61 @@ NS_ASSUME_NONNULL_BEGIN
  * variables.
  */
 
-@interface ASDisplayNode (Subclassing)
+@protocol ASInterfaceStateDelegate <NSObject>
+@required
+
+/**
+ * @abstract Called whenever any bit in the ASInterfaceState bitfield is changed.
+ * @discussion Subclasses may use this to monitor when they become visible, should free cached data, and much more.
+ * @see ASInterfaceState
+ */
+- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState;
+
+/**
+ * @abstract Called whenever the node becomes visible.
+ * @discussion Subclasses may use this to monitor when they become visible.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didEnterVisibleState;
+
+/**
+ * @abstract Called whenever the node is no longer visible.
+ * @discussion Subclasses may use this to monitor when they are no longer visible.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didExitVisibleState;
+
+/**
+ * @abstract Called whenever the the node has entered the display state.
+ * @discussion Subclasses may use this to monitor when a node should be rendering its content.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didEnterDisplayState;
+
+/**
+ * @abstract Called whenever the the node has exited the display state.
+ * @discussion Subclasses may use this to monitor when a node should no longer be rendering its content.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didExitDisplayState;
+
+/**
+ * @abstract Called whenever the the node has entered the preload state.
+ * @discussion Subclasses may use this to monitor data for a node should be preloaded, either from a local or remote source.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didEnterPreloadState;
+
+/**
+ * @abstract Called whenever the the node has exited the preload state.
+ * @discussion Subclasses may use this to monitor whether preloading data for a node should be canceled.
+ * @note This method is guaranteed to be called on main.
+ */
+- (void)didExitPreloadState;
+
+@end
+
+@interface ASDisplayNode (Subclassing) <ASInterfaceStateDelegate>
 
 #pragma mark - Properties
 /** @name Properties */
@@ -176,6 +228,32 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)invalidateCalculatedLayout;
 
+#pragma mark - Observing Node State Changes
+/** @name Observing node state changes */
+
+/**
+  * Declare <ASInterfaceState> methods as requiring super calls (this can't be required in the protocol).
+  * For descriptions, see <ASInterfaceState> definition.
+  */
+
+- (void)didEnterVisibleState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitVisibleState  ASDISPLAYNODE_REQUIRES_SUPER;
+
+- (void)didEnterDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitDisplayState  ASDISPLAYNODE_REQUIRES_SUPER;
+
+- (void)didEnterPreloadState ASDISPLAYNODE_REQUIRES_SUPER;
+- (void)didExitPreloadState  ASDISPLAYNODE_REQUIRES_SUPER;
+
+- (void)interfaceStateDidChange:(ASInterfaceState)newState
+                      fromState:(ASInterfaceState)oldState ASDISPLAYNODE_REQUIRES_SUPER;
+
+/**
+ * @abstract Called when the node's ASTraitCollection changes
+ *
+ * @discussion Subclasses can override this method to react to a trait collection change.
+ */
+- (void)asyncTraitCollectionDidChange;
 
 #pragma mark - Drawing
 /** @name Drawing */
@@ -195,7 +273,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
  */
 + (void)drawRect:(CGRect)bounds withParameters:(nullable id <NSObject>)parameters
-                                   isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock
+                                   isCancelled:(AS_NOESCAPE asdisplaynode_iscancelled_block_t)isCancelledBlock
                                  isRasterizing:(BOOL)isRasterizing;
 
 /**
@@ -212,7 +290,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
  */
 + (nullable UIImage *)displayWithParameters:(nullable id<NSObject>)parameters
-                       isCancelled:(asdisplaynode_iscancelled_block_t)isCancelledBlock;
+                                isCancelled:(AS_NOESCAPE asdisplaynode_iscancelled_block_t)isCancelledBlock;
 
 /**
  * @abstract Delegate override for drawParameters
@@ -244,70 +322,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)displayDidFinish ASDISPLAYNODE_REQUIRES_SUPER;
 
-/** @name Observing node-related changes */
-
-/**
- * @abstract Called whenever any bit in the ASInterfaceState bitfield is changed.
- *
- * @discussion Subclasses may use this to monitor when they become visible, should free cached data, and much more.
- * @see ASInterfaceState
- */
-- (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the node becomes visible.
- *
- * @discussion Subclasses may use this to monitor when they become visible.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didEnterVisibleState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the node is no longer visible.
- *
- * @discussion Subclasses may use this to monitor when they are no longer visible.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didExitVisibleState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the the node has entered the display state.
- *
- * @discussion Subclasses may use this to monitor when a node should be rendering its content.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didEnterDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the the node has exited the display state.
- *
- * @discussion Subclasses may use this to monitor when a node should no longer be rendering its content.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didExitDisplayState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the the node has entered the preload state.
- *
- * @discussion Subclasses may use this to monitor data for a node should be preloaded, either from a local or remote source.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didEnterPreloadState ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * @abstract Called whenever the the node has exited the preload state.
- *
- * @discussion Subclasses may use this to monitor whether preloading data for a node should be canceled.
- *
- * @note This method is guaranteed to be called on main.
- */
-- (void)didExitPreloadState ASDISPLAYNODE_REQUIRES_SUPER;
-
 /**
  * Called just before the view is added to a window.
  */
@@ -324,27 +338,10 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, assign, getter=isInHierarchy) BOOL inHierarchy;
 
 /**
- * @abstract Indicates that the node should fetch any external data, such as images.
- *
- * @discussion Subclasses may override this method to be notified when they should begin to fetch data. Fetching
- * should be done asynchronously. The node is also responsible for managing the memory of any data.
- * The data may be remote and accessed via the network, but could also be a local database query.
- */
-- (void)fetchData ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
- * Provides an opportunity to clear any fetched data (e.g. remote / network or database-queried) on the current node.
- *
- * @discussion This will not clear data recursively for all subnodes. Either call -recursivelyClearFetchedData or
- * selectively clear fetched data.
- */
-- (void)clearFetchedData ASDISPLAYNODE_REQUIRES_SUPER;
-
-/**
  * Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers
  * on the current node.
  *
- * @discussion Called by -recursivelyClearContents. Base class implements self.contents = nil, clearing any backing
+ * @discussion Called by -recursivelyClearContents. Always called on main thread. Base class implements self.contents = nil, clearing any backing
  * store, for asynchronous regeneration when needed.
  */
 - (void)clearContents ASDISPLAYNODE_REQUIRES_SUPER;
@@ -507,13 +504,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @discussion The function that gets called for each display node in -recursiveDescription
  */
 - (NSString *)descriptionForRecursiveDescription;
-
-/**
- * @abstract Called when the node's ASTraitCollection changes
- *
- * @discussion Subclasses can override this method to react to a trait collection change.
- */
-- (void)asyncTraitCollectionDidChange;
 
 @end
 

@@ -8,14 +8,12 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#if TARGET_OS_IOS
-#import <AsyncDisplayKit/ASButtonNode.h>
 #import <AsyncDisplayKit/ASNetworkImageNode.h>
 
 @class AVAsset, AVPlayer, AVPlayerLayer, AVPlayerItem, AVVideoComposition, AVAudioMix;
 @protocol ASVideoNodeDelegate;
 
-typedef enum {
+typedef NS_ENUM(NSInteger, ASVideoNodePlayerState) {
   ASVideoNodePlayerStateUnknown,
   ASVideoNodePlayerStateInitialLoading,
   ASVideoNodePlayerStateReadyToPlay,
@@ -24,7 +22,7 @@ typedef enum {
   ASVideoNodePlayerStateLoading,
   ASVideoNodePlayerStatePaused,
   ASVideoNodePlayerStateFinished
-} ASVideoNodePlayerState;
+};
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -44,7 +42,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nullable, nonatomic, strong, readwrite) AVAsset *asset;
 /**
  ** @abstract The URL with which the asset was initialized.
- ** @discussion Setting the URL will overwrite the current asset with a newly created AVURLAsset created from the given URL, and AVAsset *asset will point to that newly created AVURLAsset.  Please don't set both assetURL and asset.
+ ** @discussion Setting the URL will override the current asset with a newly created AVURLAsset created from the given URL, and AVAsset *asset will point to that newly created AVURLAsset.  Please don't set both assetURL and asset.
  ** @return Current URL the asset was initialized or nil if no URL was given.
  **/
 @property (nullable, nonatomic, strong, readwrite) NSURL *assetURL;
@@ -71,7 +69,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) int32_t periodicTimeObserverTimescale;
 
 //! Defaults to AVLayerVideoGravityResizeAspect
-@property (nonatomic) NSString *gravity;
+@property (nonatomic, copy) NSString *gravity;
 
 @property (nullable, nonatomic, weak, readwrite) id<ASVideoNodeDelegate, ASNetworkImageNodeDelegate> delegate;
 
@@ -152,5 +150,3 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 
 NS_ASSUME_NONNULL_END
-#endif
-

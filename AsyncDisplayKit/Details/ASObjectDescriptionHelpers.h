@@ -8,9 +8,18 @@
 
 #import <Foundation/Foundation.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
-#import <CoreGraphics/CoreGraphics.h>
 
 NS_ASSUME_NONNULL_BEGIN
+
+@protocol ASDebugNameProvider <NSObject>
+
+@required
+/**
+ * @abstract Name that is printed by ascii art string and displayed in description.
+ */
+@property (nullable, nonatomic, copy) NSString *debugName;
+
+@end
 
 /**
  * Your base class should conform to this and override `-debugDescription`
@@ -50,7 +59,7 @@ NSString *ASObjectDescriptionMake(__autoreleasing id object, NSArray<NSDictionar
  * Note: `object` param is autoreleasing so that this function is dealloc-safe.
  *   No, unsafe_unretained isn't acceptable here – the optimizer may deallocate object early.
  */
-NSString *ASObjectDescriptionMakeTiny(__autoreleasing id object);
+NSString *ASObjectDescriptionMakeTiny(__autoreleasing id _Nullable object);
 
 NSString * _Nullable ASStringWithQuotesIfMultiword(NSString * _Nullable string);
 

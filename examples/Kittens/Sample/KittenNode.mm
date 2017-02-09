@@ -88,10 +88,11 @@ static const CGFloat kInnerPadding = 10.0f;
   
   // kitten image, with a solid background colour serving as placeholder
   _imageNode = [[ASNetworkImageNode alloc] init];
-  _imageNode.backgroundColor = ASDisplayNodeDefaultPlaceholderColor();
   _imageNode.URL = [NSURL URLWithString:[NSString stringWithFormat:@"https://placekitten.com/%zd/%zd",
                                          (NSInteger)roundl(_kittenSize.width),
                                          (NSInteger)roundl(_kittenSize.height)]];
+  _imageNode.placeholderFadeDuration = .5;
+  _imageNode.placeholderColor = ASDisplayNodeDefaultPlaceholderColor();
   //  _imageNode.contentMode = UIViewContentModeCenter;
   [_imageNode addTarget:self action:@selector(toggleNodesSwap) forControlEvents:ASControlNodeEventTouchUpInside];
   [self addSubnode:_imageNode];

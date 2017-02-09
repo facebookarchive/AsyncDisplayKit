@@ -6,7 +6,7 @@
 //  Copyright © 2016 Facebook. All rights reserved.
 //
 
-#import "ASTraceEvent.h"
+#import <AsyncDisplayKit/ASTraceEvent.h>
 #import <QuartzCore/QuartzCore.h>
 
 static NSString *const ASTraceEventThreadDescriptionKey = @"ASThreadTraceEventDescription";

@@ -29,3 +29,8 @@ build
 timeline.xctimeline
 playground.xcworkspace
 
+# Buck
+/buck-out
+/.buckconfig.local
+/.buckd
+

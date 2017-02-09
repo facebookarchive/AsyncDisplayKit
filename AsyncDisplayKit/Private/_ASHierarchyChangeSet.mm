@@ -10,22 +10,32 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "_ASHierarchyChangeSet.h"
-#import "ASInternalHelpers.h"
-#import "NSIndexSet+ASHelpers.h"
-#import "ASAssert.h"
-#import "ASDisplayNode+Beta.h"
-#import "ASObjectDescriptionHelpers.h"
+#import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 #import <unordered_map>
+#import <AsyncDisplayKit/ASDataController.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
-// NOTE: We log before throwing so they don't have to let it bubble up to see the error.
-#define ASFailUpdateValidation(...)\
-  if ([ASDisplayNode suppressesInvalidCollectionUpdateExceptions]) {\
-    NSLog(__VA_ARGS__);\
-  } else {\
-    NSLog(__VA_ARGS__);\
-    ASDisplayNodeFailAssert(__VA_ARGS__);\
-  }
+// If assertions are enabled and they haven't forced us to suppress the exception,
+// then throw, otherwise log.
+#if ASDISPLAYNODE_ASSERTIONS_ENABLED
+  #define ASFailUpdateValidation(...)\
+    _Pragma("clang diagnostic push")\
+    _Pragma("clang diagnostic ignored \"-Wdeprecated-declarations\"")\
+    if ([ASDisplayNode suppressesInvalidCollectionUpdateExceptions]) {\
+      NSLog(__VA_ARGS__);\
+    } else {\
+      NSLog(__VA_ARGS__);\
+      [NSException raise:ASCollectionInvalidUpdateException format:__VA_ARGS__];\
+    }\
+  _Pragma("clang diagnostic pop")
+#else
+  #define ASFailUpdateValidation(...) NSLog(__VA_ARGS__);
+#endif
 
 BOOL ASHierarchyChangeTypeIsFinal(_ASHierarchyChangeType changeType) {
     switch (changeType) {
@@ -275,6 +285,24 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   [self _ensureNotCompleted];
   _ASHierarchySectionChange *change = [[_ASHierarchySectionChange alloc] initWithChangeType:_ASHierarchyChangeTypeReload indexSet:sections animationOptions:options];
   [_reloadSectionChanges addObject:change];
+}
+
+- (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath animationOptions:(ASDataControllerAnimationOptions)options
+{
+  /**
+   * TODO: Proper move implementation.
+   */
+  [self deleteItems:@[ indexPath ] animationOptions:options];
+  [self insertItems:@[ newIndexPath ] animationOptions:options];
+}
+
+- (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection animationOptions:(ASDataControllerAnimationOptions)options
+{
+  /**
+   * TODO: Proper move implementation.
+   */
+  [self deleteSections:[NSIndexSet indexSetWithIndex:section] animationOptions:options];
+  [self insertSections:[NSIndexSet indexSetWithIndex:newSection] animationOptions:options];
 }
 
 #pragma mark Private

@@ -9,11 +9,12 @@
 //
 
 #import <Foundation/Foundation.h>
-#import <CoreGraphics/CoreGraphics.h>
 
-#import "ASBaseDefines.h"
-#import "ASLayoutController.h"
-#include "tgmath.h"
+#import <CoreGraphics/CoreGraphics.h>
+#import <tgmath.h>
+
+#import <AsyncDisplayKit/ASBaseDefines.h>
+
 
 #ifndef CGFLOAT_EPSILON
   #if CGFLOAT_IS_DOUBLE
@@ -49,23 +50,6 @@ ASDISPLAYNODE_INLINE BOOL CGSizeEqualToSizeWithIn(CGSize size1, CGSize size2, CG
 {
   return fabs(size1.width - size2.width) < delta && fabs(size1.height - size2.height) < delta;
 };
-
-struct ASDirectionalScreenfulBuffer {
-  CGFloat positiveDirection; // Positive relative to iOS Core Animation layer coordinate space.
-  CGFloat negativeDirection;
-};
-typedef struct ASDirectionalScreenfulBuffer ASDirectionalScreenfulBuffer;
-
-ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferHorizontal(ASScrollDirection scrollDirection,
-                                                                    ASRangeTuningParameters rangeTuningParameters);
-
-ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferVertical(ASScrollDirection scrollDirection,
-                                                                  ASRangeTuningParameters rangeTuningParameters);
-
-CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect,
-                                                   ASRangeTuningParameters tuningParameters,
-                                                   ASScrollDirection scrollableDirections,
-                                                   ASScrollDirection scrollDirection);
 
 ASDISPLAYNODE_EXTERN_C_END
 

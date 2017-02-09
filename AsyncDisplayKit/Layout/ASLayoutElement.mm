@@ -10,10 +10,26 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDisplayNodeInternal.h"
+#import <AsyncDisplayKit/ASLayoutElement.h>
 
 #import <map>
 #import <atomic>
+#import <AsyncDisplayKit/ASThread.h>
+
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
+
+extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> element, void(^block)(id<ASLayoutElement> element))
+{
+  if (element) {
+    block(element);
+  }
+
+  for (id<ASLayoutElement> subelement in element.sublayoutElements) {
+    ASLayoutElementPerformBlockOnEveryElement(subelement, block);
+  }
+}
+
+#pragma mark - ASLayoutElementContext
 
 CGFloat const ASLayoutElementParentDimensionUndefined = NAN;
 CGSize const ASLayoutElementParentSizeUndefined = {ASLayoutElementParentDimensionUndefined, ASLayoutElementParentDimensionUndefined};
@@ -111,6 +127,7 @@ do {\
 @implementation ASLayoutElementStyle {
   ASDN::RecursiveMutex __instanceLock__;
   ASLayoutElementSize _size;
+  ASLayoutElementStyleExtensions _extensions;
   
   std::atomic<CGFloat> _spacingBefore;
   std::atomic<CGFloat> _spacingAfter;
@@ -437,6 +454,56 @@ do {\
   return _layoutPosition.load();
 }
 
+#pragma mark - Extensions
+
+- (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementBoolExtensions, @"Setting index outside of max bool extensions space");
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  _extensions.boolExtensions[idx] = value;
+}
+
+- (BOOL)layoutOptionExtensionBoolAtIndex:(int)idx\
+{
+  NSCAssert(idx < kMaxLayoutElementBoolExtensions, @"Accessing index outside of max bool extensions space");
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  return _extensions.boolExtensions[idx];
+}
+
+- (void)setLayoutOptionExtensionInteger:(NSInteger)value atIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementStateIntegerExtensions, @"Setting index outside of max integer extensions space");
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  _extensions.integerExtensions[idx] = value;
+}
+
+- (NSInteger)layoutOptionExtensionIntegerAtIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementStateIntegerExtensions, @"Accessing index outside of max integer extensions space");
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  return _extensions.integerExtensions[idx];
+}
+
+- (void)setLayoutOptionExtensionEdgeInsets:(UIEdgeInsets)value atIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementStateEdgeInsetExtensions, @"Setting index outside of max edge insets extensions space");
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  _extensions.edgeInsetsExtensions[idx] = value;
+}
+
+- (UIEdgeInsets)layoutOptionExtensionEdgeInsetsAtIndex:(int)idx
+{
+  NSCAssert(idx < kMaxLayoutElementStateEdgeInsetExtensions, @"Accessing index outside of max edge insets extensions space");
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  return _extensions.edgeInsetsExtensions[idx];
+}
+
 #pragma mark - Debugging
 
 - (NSString *)description
@@ -463,9 +530,7 @@ do {\
     [result addObject:@{ @"maxLayoutSize" : NSStringFromASLayoutSize(self.maxLayoutSize) }];
   }
   
-  const ASEnvironmentLayoutOptionsState defaultState = ASEnvironmentLayoutOptionsStateMakeDefault();
-  
-  if (self.alignSelf != defaultState.alignSelf) {
+  if (self.alignSelf != ASStackLayoutAlignSelfAuto) {
     [result addObject:@{ @"alignSelf" : [@[@"ASStackLayoutAlignSelfAuto",
                                           @"ASStackLayoutAlignSelfStart",
                                           @"ASStackLayoutAlignSelfEnd",
@@ -473,35 +538,35 @@ do {\
                                           @"ASStackLayoutAlignSelfStretch"] objectAtIndex:self.alignSelf] }];
   }
   
-  if (self.ascender != defaultState.ascender) {
+  if (self.ascender != 0) {
     [result addObject:@{ @"ascender" : @(self.ascender) }];
   }
   
-  if (self.descender != defaultState.descender) {
+  if (self.descender != 0) {
     [result addObject:@{ @"descender" : @(self.descender) }];
   }
   
-  if (ASDimensionEqualToDimension(self.flexBasis, defaultState.flexBasis) == NO) {
+  if (ASDimensionEqualToDimension(self.flexBasis, ASDimensionAuto) == NO) {
     [result addObject:@{ @"flexBasis" : NSStringFromASDimension(self.flexBasis) }];
   }
   
-  if (self.flexGrow != defaultState.flexGrow) {
+  if (self.flexGrow != 0) {
     [result addObject:@{ @"flexGrow" : @(self.flexGrow) }];
   }
   
-  if (self.flexShrink != defaultState.flexShrink) {
+  if (self.flexShrink != 0) {
     [result addObject:@{ @"flexShrink" : @(self.flexShrink) }];
   }
   
-  if (self.spacingAfter != defaultState.spacingAfter) {
+  if (self.spacingAfter != 0) {
     [result addObject:@{ @"spacingAfter" : @(self.spacingAfter) }];
   }
   
-  if (self.spacingBefore != defaultState.spacingBefore) {
+  if (self.spacingBefore != 0) {
     [result addObject:@{ @"spacingBefore" : @(self.spacingBefore) }];
   }
   
-  if (CGPointEqualToPoint(self.layoutPosition, defaultState.layoutPosition) == NO) {
+  if (CGPointEqualToPoint(self.layoutPosition, CGPointZero) == NO) {
     [result addObject:@{ @"layoutPosition" : [NSValue valueWithCGPoint:self.layoutPosition] }];
   }
 
@@ -527,4 +592,3 @@ do {\
 #pragma clang diagnostic pop
 
 @end
-

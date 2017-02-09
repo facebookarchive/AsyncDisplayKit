@@ -10,11 +10,13 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
-typedef enum {
+#import <AsyncDisplayKit/ASControlNode.h>
+
+typedef NS_ENUM(NSInteger, ASDefaultPlaybackButtonType) {
   ASDefaultPlaybackButtonTypePlay,
   ASDefaultPlaybackButtonTypePause
-} ASDefaultPlaybackButtonType;
+};
+
 @interface ASDefaultPlaybackButton : ASControlNode
 @property (nonatomic, assign) ASDefaultPlaybackButtonType buttonType;
 @end

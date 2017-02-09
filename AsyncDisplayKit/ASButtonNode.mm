@@ -8,18 +8,18 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASButtonNode.h"
-#import "ASStackLayoutSpec.h"
-#import "ASThread.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASBackgroundLayoutSpec.h"
-#import "ASInsetLayoutSpec.h"
-#import "ASAbsoluteLayoutSpec.h"
+#import <AsyncDisplayKit/ASButtonNode.h>
+#import <AsyncDisplayKit/ASStackLayoutSpec.h>
+#import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
+#import <AsyncDisplayKit/ASBackgroundLayoutSpec.h>
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASAbsoluteLayoutSpec.h>
+#import <AsyncDisplayKit/ASTextNode.h>
+#import <AsyncDisplayKit/ASImageNode.h>
 
 @interface ASButtonNode ()
 {
-  ASDN::RecursiveMutex __instanceLock__;
-  
   NSAttributedString *_normalAttributedTitle;
   NSAttributedString *_highlightedAttributedTitle;
   NSAttributedString *_selectedAttributedTitle;

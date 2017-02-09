@@ -16,14 +16,15 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 #import <AsyncDisplayKit/ASLayoutElement.h>
-#import <AsyncDisplayKit/ASContextTransitioning.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
 #define ASDisplayNodeLoggingEnabled 0
 
 @class ASDisplayNode;
+@protocol ASContextTransitioning;
 
 /**
  * UIView creation block. Used to create the backing view of a new display node.
@@ -56,11 +57,19 @@ typedef void (^ASDisplayNodeContextModifier)(CGContextRef context);
 typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize);
 
 /**
- Interface state is available on ASDisplayNode and ASViewController, and
- allows checking whether a node is in an interface situation where it is prudent to trigger certain
- actions: measurement, data loading, display, and visibility (the latter for animations or other onscreen-only effects).
+ * AsyncDisplayKit non-fatal error block. This block can be used for handling non-fatal errors. Useful for reporting
+ * errors that happens in production.
  */
+typedef void (^ASDisplayNodeNonFatalErrorBlock)(__kindof NSError * _Nonnull error);
 
+/**
+ * Interface state is available on ASDisplayNode and ASViewController, and
+ * allows checking whether a node is in an interface situation where it is prudent to trigger certain
+ * actions: measurement, data loading, display, and visibility (the latter for animations or other onscreen-only effects).
+ * 
+ * The defualt state, ASInterfaceStateNone, means that the element is not predicted to be onscreen soon and
+ * preloading should not be performed. Swift: use [] for the default behavior.
+ */
 typedef NS_OPTIONS(NSUInteger, ASInterfaceState)
 {
   /** The element is not predicted to be onscreen soon and preloading should not be performed */
@@ -105,7 +114,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  */
 
-@interface ASDisplayNode : NSObject <ASLayoutElement>
+@interface ASDisplayNode : NSObject <ASLayoutElement, ASLayoutElementStylability, NSFastEnumeration>
 
 /** @name Initializing a node object */
 
@@ -249,6 +258,16 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @see ASInterfaceState
  */
 @property (readonly) ASInterfaceState interfaceState;
+
+/**
+ * @abstract Class property that allows to set a block that can be called on non-fatal errors. This
+ * property can be useful for cases when Async Display Kit can recover from an abnormal behavior, but
+ * still gives the opportunity to use a reporting mechanism to catch occurrences in production. In
+ * development, Async Display Kit will assert instead of calling this block.
+ *
+ * @warning This method is not thread-safe.
+ */
+@property (nonatomic, class, copy) ASDisplayNodeNonFatalErrorBlock nonFatalErrorBlock;
 
 
 /** @name Managing dimensions */
@@ -417,28 +436,6 @@ extern NSInteger const ASDefaultDrawingPriority;
 @property (nonatomic, assign) BOOL displaysAsynchronously;
 
 /** 
- * @abstract Whether to draw all descendant nodes' layers/views into this node's layer/view's backing store.
- *
- * @discussion
- * When set to YES, causes all descendant nodes' layers/views to be drawn directly into this node's layer/view's backing 
- * store.  Defaults to NO.
- *
- * If a node's descendants are static (never animated or never change attributes after creation) then that node is a 
- * good candidate for rasterization.  Rasterizing descendants has two main benefits:
- * 1) Backing stores for descendant layers are not created.  Instead the layers are drawn directly into the rasterized
- * container.  This can save a great deal of memory.
- * 2) Since the entire subtree is drawn into one backing store, compositing and blending are eliminated in that subtree
- * which can help improve animation/scrolling/etc performance.
- *
- * Rasterization does not currently support descendants with transform, sublayerTransform, or alpha. Those properties 
- * will be ignored when rasterizing descendants.
- *
- * Note: this has nothing to do with -[CALayer shouldRasterize], which doesn't work with ASDisplayNode's asynchronous 
- * rendering model.
- */
-@property (nonatomic, assign) BOOL shouldRasterizeDescendants;
-
-/** 
  * @abstract Prevent the node's layer from displaying.
  *
  * @discussion A subclass may check this flag during -display or -drawInContext: to cancel a display that is already in 
@@ -477,31 +474,6 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @see displaySuspended and setNeedsDisplay
  */
 - (void)recursivelyClearContents;
-
-/**
- * @abstract Calls -clearFetchedData on the receiver and its subnode hierarchy.
- *
- * @discussion Clears any memory-intensive fetched content.
- * This method is used to notify the node that it should purge any content that is both expensive to fetch and to
- * retain in memory.
- *
- * @see [ASDisplayNode(Subclassing) clearFetchedData] and [ASDisplayNode(Subclassing) fetchData]
- */
-- (void)recursivelyClearFetchedData;
-
-/**
- * @abstract Calls -fetchData on the receiver and its subnode hierarchy.
- *
- * @discussion Fetches content from remote sources for the current node and all subnodes.
- *
- * @see [ASDisplayNode(Subclassing) fetchData] and [ASDisplayNode(Subclassing) clearFetchedData]
- */
-- (void)recursivelyFetchData;
-
-/**
- * @abstract Triggers a recursive call to fetchData when the node has an interfaceState of ASInterfaceStatePreload
- */
-- (void)setNeedsDataFetch;
 
 /**
  * @abstract Toggle displaying a placeholder over the node that covers content until the node and all subnodes are
@@ -603,7 +575,7 @@ extern NSInteger const ASDefaultDrawingPriority;
 /**
  * Convenience methods for debugging.
  */
-@interface ASDisplayNode (Debugging) <ASLayoutElementAsciiArtProtocol>
+@interface ASDisplayNode (Debugging) <ASLayoutElementAsciiArtProtocol, ASDebugNameProvider>
 
 /**
  * @abstract Return a description of the node hierarchy.

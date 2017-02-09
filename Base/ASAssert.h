@@ -13,47 +13,65 @@
 #import <Foundation/NSException.h>
 #import <pthread.h>
 
-#define ASDisplayNodeAssertWithSignalAndLogFunction(condition, description, logFunction, ...) NSAssert(condition, description, ##__VA_ARGS__);
-#define ASDisplayNodeCAssertWithSignalAndLogFunction(condition, description, logFunction, ...) NSCAssert(condition, description, ##__VA_ARGS__);
-#define ASDisplayNodeAssertWithSignal(condition, description, ...) NSAssert(condition, description, ##__VA_ARGS__)
-#define ASDisplayNodeCAssertWithSignal(condition, description, ...) NSCAssert(condition, description, ##__VA_ARGS__)
-
 #define ASDISPLAYNODE_ASSERTIONS_ENABLED (!defined(NS_BLOCK_ASSERTIONS))
 
-#define ASDisplayNodeAssert(...) NSAssert(__VA_ARGS__)
-#define ASDisplayNodeCAssert(...) NSCAssert(__VA_ARGS__)
+/**
+ * Note: In some cases it would be sufficient to do e.g.:
+ *  ASDisplayNodeAssert(...) NSAssert(__VA_ARGS__)
+ * but we prefer not to, because we want to match the autocomplete behavior of NSAssert.
+ * The construction listed above does not show the user what arguments are required and what are optional.
+ */
 
-#define ASDisplayNodeAssertNil(condition, description, ...) ASDisplayNodeAssertWithSignal(!(condition), nil, (description), ##__VA_ARGS__)
-#define ASDisplayNodeCAssertNil(condition, description, ...) ASDisplayNodeCAssertWithSignal(!(condition), nil, (description), ##__VA_ARGS__)
+#define ASDisplayNodeAssert(condition, desc, ...) NSAssert(condition, desc, ##__VA_ARGS__)
+#define ASDisplayNodeCAssert(condition, desc, ...) NSCAssert(condition, desc, ##__VA_ARGS__)
 
-#define ASDisplayNodeAssertNotNil(condition, description, ...) ASDisplayNodeAssertWithSignal((condition), nil, (description), ##__VA_ARGS__)
-#define ASDisplayNodeCAssertNotNil(condition, description, ...) ASDisplayNodeCAssertWithSignal((condition), nil, (description), ##__VA_ARGS__)
+#define ASDisplayNodeAssertNil(condition, desc, ...) ASDisplayNodeAssert((condition) == nil, desc, ##__VA_ARGS__)
+#define ASDisplayNodeCAssertNil(condition, desc, ...) ASDisplayNodeCAssert((condition) == nil, desc, ##__VA_ARGS__)
 
-#define ASDisplayNodeAssertImplementedBySubclass() ASDisplayNodeAssertWithSignal(NO, nil, @"This method must be implemented by subclass %@", [self class]);
-#define ASDisplayNodeAssertNotInstantiable() ASDisplayNodeAssertWithSignal(NO, nil, @"This class is not instantiable.");
-#define ASDisplayNodeAssertNotSupported() ASDisplayNodeAssertWithSignal(NO, nil, @"This method is not supported by class %@", [self class]);
+#define ASDisplayNodeAssertNotNil(condition, desc, ...) ASDisplayNodeAssert((condition) != nil, desc, ##__VA_ARGS__)
+#define ASDisplayNodeCAssertNotNil(condition, desc, ...) ASDisplayNodeCAssert((condition) != nil, desc, ##__VA_ARGS__)
 
-#define ASDisplayNodeAssertMainThread() ASDisplayNodeAssertWithSignal(0 != pthread_main_np(), nil, @"This method must be called on the main thread")
-#define ASDisplayNodeCAssertMainThread() ASDisplayNodeCAssertWithSignal(0 != pthread_main_np(), nil, @"This function must be called on the main thread")
+#define ASDisplayNodeAssertImplementedBySubclass() ASDisplayNodeAssert(NO, @"This method must be implemented by subclass %@", [self class]);
+#define ASDisplayNodeAssertNotInstantiable() ASDisplayNodeAssert(NO, nil, @"This class is not instantiable.");
+#define ASDisplayNodeAssertNotSupported() ASDisplayNodeAssert(NO, nil, @"This method is not supported by class %@", [self class]);
 
-#define ASDisplayNodeAssertNotMainThread() ASDisplayNodeAssertWithSignal(0 == pthread_main_np(), nil, @"This method must be called off the main thread")
-#define ASDisplayNodeCAssertNotMainThread() ASDisplayNodeCAssertWithSignal(0 == pthread_main_np(), nil, @"This function must be called off the main thread")
+#define ASDisplayNodeAssertMainThread() ASDisplayNodeAssert(0 != pthread_main_np(), @"This method must be called on the main thread")
+#define ASDisplayNodeCAssertMainThread() ASDisplayNodeCAssert(0 != pthread_main_np(), @"This function must be called on the main thread")
 
-#define ASDisplayNodeAssertFlag(X) ASDisplayNodeAssertWithSignal((1 == __builtin_popcount(X)), nil, nil)
-#define ASDisplayNodeCAssertFlag(X) ASDisplayNodeCAssertWithSignal((1 == __builtin_popcount(X)), nil, nil)
+#define ASDisplayNodeAssertNotMainThread() ASDisplayNodeAssert(0 == pthread_main_np(), @"This method must be called off the main thread")
+#define ASDisplayNodeCAssertNotMainThread() ASDisplayNodeCAssert(0 == pthread_main_np(), @"This function must be called off the main thread")
 
-#define ASDisplayNodeAssertTrue(condition) ASDisplayNodeAssertWithSignal((condition), nil, nil)
-#define ASDisplayNodeCAssertTrue(condition) ASDisplayNodeCAssertWithSignal((condition), nil, nil)
+#define ASDisplayNodeAssertFlag(X, desc, ...) ASDisplayNodeAssert((1 == __builtin_popcount(X)), desc, ##__VA_ARGS__)
+#define ASDisplayNodeCAssertFlag(X, desc, ...) ASDisplayNodeCAssert((1 == __builtin_popcount(X)), desc, ##__VA_ARGS__)
 
-#define ASDisplayNodeAssertFalse(condition) ASDisplayNodeAssertWithSignal(!(condition), nil, nil)
-#define ASDisplayNodeCAssertFalse(condition) ASDisplayNodeCAssertWithSignal(!(condition), nil, nil)
+#define ASDisplayNodeAssertTrue(condition) ASDisplayNodeAssert((condition), @"Expected %s to be true.", #condition)
+#define ASDisplayNodeCAssertTrue(condition) ASDisplayNodeCAssert((condition), @"Expected %s to be true.", #condition)
 
-#define ASDisplayNodeFailAssert(description, ...) ASDisplayNodeAssertWithSignal(NO, (description), ##__VA_ARGS__)
-#define ASDisplayNodeCFailAssert(description, ...) ASDisplayNodeCAssertWithSignal(NO, (description), ##__VA_ARGS__)
+#define ASDisplayNodeAssertFalse(condition) ASDisplayNodeAssert(!(condition), @"Expected %s to be false.", #condition)
+#define ASDisplayNodeCAssertFalse(condition) ASDisplayNodeCAssert(!(condition), @"Expected %s to be false.", #condition)
 
-#define ASDisplayNodeConditionalAssert(shouldTestCondition, condition, description, ...) ASDisplayNodeAssert((!(shouldTestCondition) || (condition)), nil, (description), ##__VA_ARGS__)
-#define ASDisplayNodeConditionalCAssert(shouldTestCondition, condition, description, ...) ASDisplayNodeCAssert((!(shouldTestCondition) || (condition)), nil, (description), ##__VA_ARGS__)
+#define ASDisplayNodeFailAssert(desc, ...) ASDisplayNodeAssert(NO, desc, ##__VA_ARGS__)
+#define ASDisplayNodeCFailAssert(desc, ...) ASDisplayNodeCAssert(NO, desc, ##__VA_ARGS__)
+
+#define ASDisplayNodeConditionalAssert(shouldTestCondition, condition, desc, ...) ASDisplayNodeAssert((!(shouldTestCondition) || (condition)), desc, ##__VA_ARGS__)
+#define ASDisplayNodeConditionalCAssert(shouldTestCondition, condition, desc, ...) ASDisplayNodeCAssert((!(shouldTestCondition) || (condition)), desc, ##__VA_ARGS__)
 
 #define ASDisplayNodeCAssertPositiveReal(description, num) ASDisplayNodeCAssert(num >= 0 && num <= CGFLOAT_MAX, @"%@ must be a real positive integer.", description)
 #define ASDisplayNodeCAssertInfOrPositiveReal(description, num) ASDisplayNodeCAssert(isinf(num) || (num >= 0 && num <= CGFLOAT_MAX), @"%@ must be infinite or a real positive integer.", description)
 
+#define ASDisplayNodeErrorDomain @"ASDisplayNodeErrorDomain"
+#define ASDisplayNodeNonFatalErrorCode 1
+
+#define ASDisplayNodeAssertNonFatal(condition, desc, ...)                                                                         \
+  ASDisplayNodeAssert(condition, desc, ##__VA_ARGS__);                                                                            \
+  if (condition ==  NO) {                                                                                                         \
+    ASDisplayNodeNonFatalErrorBlock block = [ASDisplayNode nonFatalErrorBlock];                                                   \
+    if (block != nil) {                                                                                                           \
+      NSDictionary *userInfo = nil;                                                                                               \
+      if (desc.length > 0) {                                                                                                      \
+        userInfo = @{ NSLocalizedDescriptionKey : desc };                                                                         \
+      }                                                                                                                           \
+      NSError *error = [NSError errorWithDomain:ASDisplayNodeErrorDomain code:ASDisplayNodeNonFatalErrorCode userInfo:userInfo];  \
+      block(error);                                                                                                               \
+    }                                                                                                                             \
+  }

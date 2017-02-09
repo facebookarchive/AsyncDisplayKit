@@ -10,9 +10,10 @@
 
 #ifndef ASDK_ACCESSIBILITY_DISABLE
 
-#import "_ASDisplayView.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASDisplayNode+FrameworkPrivate.h"
+#import <AsyncDisplayKit/_ASDisplayView.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 
 #pragma mark - UIAccessibilityElement
 

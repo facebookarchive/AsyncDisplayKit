@@ -25,12 +25,6 @@
 }
 @end
 
-@interface ASNetworkImageNode () {
-  @public __weak id<ASNetworkImageNodeDelegate> _delegate;
-}
-@end
-
-
 @interface ASVideoNode () {
   ASDisplayNode *_playerNode;
   AVPlayer *_player;
@@ -133,7 +127,7 @@
   XCTAssertNil(_videoNode.player);
 }
 
-- (void)testPlayerIsCreatedAsynchronouslyInFetchData
+- (void)testPlayerIsCreatedAsynchronouslyInPreload
 {
   AVAsset *asset = _firstAsset;
   
@@ -151,7 +145,7 @@
   XCTAssertNotNil(_videoNode.player);
 }
 
-- (void)testPlayerIsCreatedAsynchronouslyInFetchDataWithURL
+- (void)testPlayerIsCreatedAsynchronouslyInPreloadWithURL
 {
   AVAsset *asset = [AVAsset assetWithURL:_url];
   
@@ -387,7 +381,7 @@
   XCTAssertNotEqual(firstImage, _videoNode.image);
 }
 
-- (void)testClearingFetchedContentShouldClearAssetData
+- (void)testClearingPreloadedContentShouldClearAssetData
 {
   AVAsset *asset = _firstAsset;
   
@@ -398,7 +392,7 @@
   [[[videoNodeMock expect] andForwardToRealObject] prepareToPlayAsset:assetMock withKeys:_requestedKeys];
   
   _videoNode.asset = assetMock;
-  [_videoNode fetchData];
+  [_videoNode didEnterPreloadState];
   [_videoNode setVideoPlaceholderImage:[[UIImage alloc] init]];
   
   [videoNodeMock verifyWithDelay:1.0f];
@@ -407,10 +401,9 @@
   XCTAssertNotNil(_videoNode.currentItem);
   XCTAssertNotNil(_videoNode.image);
 
-  [_videoNode clearFetchedData];
+  [_videoNode didExitPreloadState];
   XCTAssertNil(_videoNode.player);
   XCTAssertNil(_videoNode.currentItem);
-  XCTAssertNil(_videoNode.image);
 }
 
 - (void)testDelegateProperlySetForClassHierarchy
@@ -420,11 +413,9 @@
   XCTAssertTrue([_videoNode.delegate conformsToProtocol:@protocol(ASVideoNodeDelegate)]);
   XCTAssertTrue([_videoNode.delegate conformsToProtocol:@protocol(ASNetworkImageNodeDelegate)]);
   XCTAssertTrue([((ASNetworkImageNode*)_videoNode).delegate conformsToProtocol:@protocol(ASNetworkImageNodeDelegate)]);
-  XCTAssertTrue([((ASNetworkImageNode*)_videoNode)->_delegate conformsToProtocol:@protocol(ASNetworkImageNodeDelegate)]);
   
   XCTAssertEqual(_videoNode.delegate, self);
   XCTAssertEqual(((ASNetworkImageNode*)_videoNode).delegate, self);
-  XCTAssertEqual(((ASNetworkImageNode*)_videoNode)->_delegate, self);
 }
 
 @end

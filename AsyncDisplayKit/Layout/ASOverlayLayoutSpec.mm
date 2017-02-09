@@ -8,11 +8,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASOverlayLayoutSpec.h"
-#import "ASLayoutSpec+Subclasses.h"
-
-#import "ASAssert.h"
-#import "ASLayoutSpec+Subclasses.h"
+#import <AsyncDisplayKit/ASOverlayLayoutSpec.h>
+#import <AsyncDisplayKit/ASLayoutSpec+Subclasses.h>
+#import <AsyncDisplayKit/ASAssert.h>
 
 static NSUInteger const kUnderlayChildIndex = 0;
 static NSUInteger const kOverlayChildIndex = 1;
@@ -43,6 +41,7 @@ static NSUInteger const kOverlayChildIndex = 1;
 
 - (void)setOverlay:(id<ASLayoutElement>)overlay
 {
+  ASDisplayNodeAssertNotNil(overlay, @"Overlay cannot be nil");
   [super setChild:overlay atIndex:kOverlayChildIndex];
 }
 

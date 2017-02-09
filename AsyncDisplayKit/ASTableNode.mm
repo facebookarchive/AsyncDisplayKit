@@ -10,15 +10,16 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASTableNode.h"
-#import "ASTableViewInternal.h"
-#import "ASEnvironmentInternal.h"
-#import "ASDisplayNodeInternal.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASInternalHelpers.h"
-#import "ASCellNode+Internal.h"
-#import "AsyncDisplayKit+Debug.h"
-#import "ASTableView+Undeprecated.h"
+#import <AsyncDisplayKit/ASTableNode.h>
+#import <AsyncDisplayKit/ASTableViewInternal.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASCellNode+Internal.h>
+#import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
+#import <AsyncDisplayKit/ASTableView+Undeprecated.h>
+#import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 
 #pragma mark - _ASTablePendingState
 
@@ -30,6 +31,7 @@
 @property (nonatomic, assign) BOOL allowsSelectionDuringEditing;
 @property (nonatomic, assign) BOOL allowsMultipleSelection;
 @property (nonatomic, assign) BOOL allowsMultipleSelectionDuringEditing;
+@property (nonatomic, assign) BOOL inverted;
 @end
 
 @implementation _ASTablePendingState
@@ -42,6 +44,7 @@
     _allowsSelectionDuringEditing = NO;
     _allowsMultipleSelection = NO;
     _allowsMultipleSelectionDuringEditing = NO;
+    _inverted = NO;
   }
   return self;
 }
@@ -79,8 +82,11 @@
 
 - (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
 {
+  __weak __typeof__(self) weakSelf = self;
   ASDisplayNodeViewBlock tableViewBlock = ^UIView *{
-    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass eventLog:ASDisplayNodeGetEventLog(self)];
+    // Variable will be unused if event logging is off.
+    __unused __typeof__(self) strongSelf = weakSelf;
+    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass eventLog:ASDisplayNodeGetEventLog(strongSelf)];
   };
 
   if (self = [super initWithViewBlock:tableViewBlock]) {
@@ -113,6 +119,7 @@
     self.pendingState    = nil;
     view.asyncDelegate   = pendingState.delegate;
     view.asyncDataSource = pendingState.dataSource;
+    view.inverted        = pendingState.inverted;
     view.allowsSelection = pendingState.allowsSelection;
     view.allowsSelectionDuringEditing = pendingState.allowsSelectionDuringEditing;
     view.allowsMultipleSelection = pendingState.allowsMultipleSelection;
@@ -134,10 +141,10 @@
   [self.rangeController clearContents];
 }
 
-- (void)clearFetchedData
+- (void)didExitPreloadState
 {
-  [super clearFetchedData];
-  [self.rangeController clearFetchedData];
+  [super didExitPreloadState];
+  [self.rangeController clearPreloadedData];
 }
 
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
@@ -183,6 +190,26 @@
   return _pendingState;
 }
 
+- (void)setInverted:(BOOL)inverted
+{
+  self.transform = inverted ? CATransform3DMakeScale(1, -1, 1)  : CATransform3DIdentity;
+  if ([self pendingState]) {
+    _pendingState.inverted = inverted;
+  } else {
+    ASDisplayNodeAssert([self isNodeLoaded], @"ASTableNode should be loaded if pendingState doesn't exist");
+    self.view.inverted = inverted;
+  }
+}
+
+- (BOOL)inverted
+{
+  if ([self pendingState]) {
+    return _pendingState.inverted;
+  } else {
+    return self.view.inverted;
+  }
+}
+
 - (void)setDelegate:(id <ASTableDelegate>)delegate
 {
   if ([self pendingState]) {
@@ -194,7 +221,7 @@
     // and asserting here isn't an option – it is a common pattern for users to clear
     // the delegate/dataSource in dealloc, which may be running on a background thread.
     // It is important that we avoid retaining self in this block, so that this method is dealloc-safe.
-    ASTableView *view = (ASTableView *)_view;
+    ASTableView *view = self.view;
     ASPerformBlockOnMainThread(^{
       view.asyncDelegate = delegate;
     });
@@ -221,7 +248,7 @@
     // and asserting here isn't an option – it is a common pattern for users to clear
     // the delegate/dataSource in dealloc, which may be running on a background thread.
     // It is important that we avoid retaining self in this block, so that this method is dealloc-safe.
-    ASTableView *view = (ASTableView *)_view;
+    ASTableView *view = self.view;
     ASPerformBlockOnMainThread(^{
       view.asyncDataSource = dataSource;
     });
@@ -328,7 +355,7 @@
 
 #pragma mark ASEnvironment
 
-ASEnvironmentCollectionTableSetEnvironmentState(_environmentStateLock)
+ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 
 #pragma mark - Range Tuning
 

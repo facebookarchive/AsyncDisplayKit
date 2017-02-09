@@ -8,10 +8,10 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASDelegateProxy.h"
-#import "ASTableNode.h"
-#import "ASCollectionNode.h"
-#import "ASAssert.h"
+#import <AsyncDisplayKit/ASDelegateProxy.h>
+#import <AsyncDisplayKit/ASTableNode.h>
+#import <AsyncDisplayKit/ASCollectionNode.h>
+#import <AsyncDisplayKit/ASAssert.h>
 
 @implementation ASTableViewProxy
 
@@ -68,6 +68,8 @@
           // handled by ASCollectionView node<->cell machinery
           selector == @selector(collectionView:cellForItemAtIndexPath:) ||
           selector == @selector(collectionView:layout:sizeForItemAtIndexPath:) ||
+          selector == @selector(collectionView:layout:referenceSizeForHeaderInSection:) ||
+          selector == @selector(collectionView:layout:referenceSizeForFooterInSection:) ||
           selector == @selector(collectionView:viewForSupplementaryElementOfKind:atIndexPath:) ||
           
           // Selection, highlighting, menu

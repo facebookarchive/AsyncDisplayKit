@@ -8,28 +8,29 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASImageNode.h"
+#import <AsyncDisplayKit/ASImageNode.h>
 
 #import <tgmath.h>
 
-#import "_ASDisplayLayer.h"
-#import "ASAssert.h"
-#import "ASDimension.h"
-#import "ASDisplayNode+Subclasses.h"
-#import "ASDisplayNodeInternal.h"
-#import "ASDisplayNodeExtras.h"
-#import "ASDisplayNode+Beta.h"
-#import "ASLayout.h"
-#import "ASTextNode.h"
-#import "ASImageNode+AnimatedImagePrivate.h"
+#import <AsyncDisplayKit/_ASDisplayLayer.h>
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASDimension.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
+#import <AsyncDisplayKit/ASDisplayNodeExtras.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASLayout.h>
+#import <AsyncDisplayKit/ASTextNode.h>
+#import <AsyncDisplayKit/ASImageNode+AnimatedImagePrivate.h>
+#import <AsyncDisplayKit/ASImageNode+CGExtras.h>
+#import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASEqualityHashHelpers.h>
+#import <AsyncDisplayKit/ASWeakMap.h>
+#import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
 
-#import "ASImageNode+CGExtras.h"
-#import "AsyncDisplayKit+Debug.h"
-
-#import "ASInternalHelpers.h"
-#import "ASEqualityHelpers.h"
-#import "ASEqualityHashHelpers.h"
-#import "ASWeakMap.h"
+// TODO: It would be nice to remove this dependency; it's the only subclass using more than +FrameworkSubclasses.h
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 
 #include <functional>
 
@@ -183,6 +184,26 @@ struct ASImageNodeDrawParameters {
   [self invalidateAnimatedImage];
 }
 
+- (UIImage *)placeholderImage
+{
+  // FIXME: Replace this implementation with reusable CALayers that have .backgroundColor set.
+  // This would completely eliminate the memory and performance cost of the backing store.
+  CGSize size = self.calculatedSize;
+  if ((size.width * size.height) < CGFLOAT_EPSILON) {
+    return nil;
+  }
+  
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  UIGraphicsBeginImageContext(size);
+  [self.placeholderColor setFill];
+  UIRectFill(CGRectMake(0, 0, size.width, size.height));
+  UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+  UIGraphicsEndImageContext();
+  
+  return image;
+}
+
 #pragma mark - Layout and Sizing
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
@@ -244,7 +265,7 @@ struct ASImageNodeDrawParameters {
   _drawParameter = {
     .bounds = self.bounds,
     .opaque = self.opaque,
-    .contentsScale = _contentsScaleForDisplay,
+    .contentsScale = self.contentsScaleForDisplay,
     .backgroundColor = self.backgroundColor,
     .contentMode = self.contentMode,
     .cropEnabled = _cropEnabled,
@@ -273,34 +294,21 @@ struct ASImageNodeDrawParameters {
     return nil;
   }
   
-  CGRect drawParameterBounds    = CGRectZero;
-  BOOL forceUpscaling           = NO;
-  CGSize forcedSize             = CGSizeZero;
-  BOOL cropEnabled              = YES;
-  BOOL isOpaque                 = NO;
-  UIColor *backgroundColor      = nil;
-  UIViewContentMode contentMode = UIViewContentModeScaleAspectFill;
-  CGFloat contentsScale         = 0.0;
-  CGRect cropDisplayBounds      = CGRectZero;
-  CGRect cropRect               = CGRectZero;
-  asimagenode_modification_block_t imageModificationBlock;
-
-  {
-    ASDN::MutexLocker l(__instanceLock__);
-    ASImageNodeDrawParameters drawParameter = _drawParameter;
-    
-    drawParameterBounds       = drawParameter.bounds;
-    forceUpscaling            = drawParameter.forceUpscaling;
-    forcedSize                = drawParameter.forcedSize;
-    cropEnabled               = drawParameter.cropEnabled;
-    isOpaque                  = drawParameter.opaque;
-    backgroundColor           = drawParameter.backgroundColor;
-    contentMode               = drawParameter.contentMode;
-    contentsScale             = drawParameter.contentsScale;
-    cropDisplayBounds         = drawParameter.cropDisplayBounds;
-    cropRect                  = drawParameter.cropRect;
-    imageModificationBlock    = drawParameter.imageModificationBlock;
-  }
+  __instanceLock__.lock();
+  ASImageNodeDrawParameters drawParameter = _drawParameter;
+  __instanceLock__.unlock();
+  
+  CGRect drawParameterBounds       = drawParameter.bounds;
+  BOOL forceUpscaling              = drawParameter.forceUpscaling;
+  CGSize forcedSize                = drawParameter.forcedSize;
+  BOOL cropEnabled                 = drawParameter.cropEnabled;
+  BOOL isOpaque                    = drawParameter.opaque;
+  UIColor *backgroundColor         = drawParameter.backgroundColor;
+  UIViewContentMode contentMode    = drawParameter.contentMode;
+  CGFloat contentsScale            = drawParameter.contentsScale;
+  CGRect cropDisplayBounds         = drawParameter.cropDisplayBounds;
+  CGRect cropRect                  = drawParameter.cropRect;
+  asimagenode_modification_block_t imageModificationBlock    = drawParameter.imageModificationBlock;
   
   BOOL hasValidCropBounds = cropEnabled && !CGRectIsEmpty(cropDisplayBounds);
   CGRect bounds = (hasValidCropBounds ? cropDisplayBounds : drawParameterBounds);
@@ -374,26 +382,30 @@ struct ASImageNodeDrawParameters {
     return nil;
   }
 
-    ASImageNodeContentsKey *contentsKey = [[ASImageNodeContentsKey alloc] init];
-    contentsKey.image = image;
-    contentsKey.backingSize = backingSize;
-    contentsKey.imageDrawRect = imageDrawRect;
-    contentsKey.isOpaque = isOpaque;
-    contentsKey.backgroundColor = backgroundColor;
-    contentsKey.preContextBlock = preContextBlock;
-    contentsKey.postContextBlock = postContextBlock;
-    contentsKey.imageModificationBlock = imageModificationBlock;
+  ASImageNodeContentsKey *contentsKey = [[ASImageNodeContentsKey alloc] init];
+  contentsKey.image = image;
+  contentsKey.backingSize = backingSize;
+  contentsKey.imageDrawRect = imageDrawRect;
+  contentsKey.isOpaque = isOpaque;
+  contentsKey.backgroundColor = backgroundColor;
+  contentsKey.preContextBlock = preContextBlock;
+  contentsKey.postContextBlock = postContextBlock;
+  contentsKey.imageModificationBlock = imageModificationBlock;
 
-    if (isCancelled()) {
-        return nil;
-    }
+  if (isCancelled()) {
+    return nil;
+  }
 
-    ASWeakMapEntry<UIImage *> *entry = [self.class contentsForkey:contentsKey isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled];
-    if (entry == nil) {  // If nil, we were cancelled.
-        return nil;
-    }
+  ASWeakMapEntry<UIImage *> *entry = [self.class contentsForkey:contentsKey isCancelled:(asdisplaynode_iscancelled_block_t)isCancelled];
+  if (entry == nil) {  // If nil, we were cancelled.
+    return nil;
+  }
+  
+  __instanceLock__.lock();
     _weakCacheEntry = entry; // Retain so that the entry remains in the weak cache
-    return entry.value;
+  __instanceLock__.unlock();
+
+  return entry.value;
 }
 
 static ASWeakMap<ASImageNodeContentsKey *, UIImage *> *cache = nil;
@@ -536,9 +548,11 @@ static ASDN::Mutex cacheLock;
 
 - (void)clearContents
 {
-    [super clearContents];
+  [super clearContents];
     
+  __instanceLock__.lock();
     _weakCacheEntry = nil;  // release contents from the cache.
+  __instanceLock__.unlock();
 }
 
 #pragma mark - Cropping

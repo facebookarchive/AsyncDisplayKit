@@ -10,9 +10,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASWeakProxy.h"
-#import "ASObjectDescriptionHelpers.h"
-#import "ASAssert.h"
+#import <AsyncDisplayKit/ASWeakProxy.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
+#import <AsyncDisplayKit/ASAssert.h>
 
 @implementation ASWeakProxy
 
@@ -37,6 +37,11 @@
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
   return [_target respondsToSelector:aSelector];
+}
+
+- (BOOL)conformsToProtocol:(Protocol *)aProtocol
+{
+  return [_target conformsToProtocol:aProtocol];
 }
 
 /// Strangely, this method doesn't get forwarded by ObjC.

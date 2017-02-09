@@ -8,13 +8,13 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "_ASPendingState.h"
+#import <AsyncDisplayKit/_ASPendingState.h>
 
-#import "_ASCoreAnimationExtras.h"
-#import "_ASAsyncTransactionContainer.h"
-#import "ASAssert.h"
-#import "ASInternalHelpers.h"
-#import "ASDisplayNodeInternal.h"
+#import <AsyncDisplayKit/_ASCoreAnimationExtras.h>
+#import <AsyncDisplayKit/_ASAsyncTransactionContainer.h>
+#import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 
 #define __shouldSetNeedsDisplay(layer) (flags.needsDisplay \
   || (flags.setOpaque && opaque != (layer).opaque)\
@@ -947,10 +947,10 @@ static BOOL defaultAllowsEdgeAntialiasing = NO;
 
   if (flags.setFrame && specialPropertiesHandling) {
     // Frame is only defined when transform is identity because we explicitly diverge from CALayer behavior and define frame without transform
-#if DEBUG
-    // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
-    ASDisplayNodeAssert(CATransform3DIsIdentity(layer.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
-#endif
+//#if DEBUG
+//    // Checking if the transform is identity is expensive, so disable when unnecessary. We have assertions on in Release, so DEBUG is the only way I know of.
+//    ASDisplayNodeAssert(CATransform3DIsIdentity(layer.transform), @"-[ASDisplayNode setFrame:] - self.transform must be identity in order to set the frame property.  (From Apple's UIView documentation: If the transform property is not the identity transform, the value of this property is undefined and therefore should be ignored.)");
+//#endif
     view.frame = frame;
   } else {
     ASPendingStateApplyMetricsToLayer(self, layer);

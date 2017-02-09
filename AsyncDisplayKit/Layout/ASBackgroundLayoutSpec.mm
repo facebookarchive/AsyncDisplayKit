@@ -8,9 +8,11 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import "ASBackgroundLayoutSpec.h"
-#import "ASLayoutSpec+Subclasses.h"
-#import "ASAssert.h"
+#import <AsyncDisplayKit/ASBackgroundLayoutSpec.h>
+
+#import <AsyncDisplayKit/ASLayoutSpec+Subclasses.h>
+
+#import <AsyncDisplayKit/ASAssert.h>
 
 static NSUInteger const kForegroundChildIndex = 0;
 static NSUInteger const kBackgroundChildIndex = 1;
@@ -67,6 +69,7 @@ static NSUInteger const kBackgroundChildIndex = 1;
 
 - (void)setBackground:(id<ASLayoutElement>)background
 {
+  ASDisplayNodeAssertNotNil(background, @"Background cannot be nil");
   [super setChild:background atIndex:kBackgroundChildIndex];
 }
 

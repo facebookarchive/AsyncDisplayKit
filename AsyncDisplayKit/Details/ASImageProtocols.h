@@ -9,7 +9,6 @@
 //
 
 #import <UIKit/UIKit.h>
-#import <AsyncDisplayKit/ASBaseDefines.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -25,6 +24,19 @@ NS_ASSUME_NONNULL_BEGIN
 typedef void(^ASImageCacherCompletion)(id <ASImageContainerProtocol> _Nullable imageFromCache);
 
 @protocol ASImageCacheProtocol <NSObject>
+
+/**
+ @abstract Attempts to fetch an image with the given URL from the cache.
+ @param URL The URL of the image to retrieve from the cache.
+ @param callbackQueue The queue to call `completion` on.
+ @param completion The block to be called when the cache has either hit or missed.
+ @param imageFromCache The image that was retrieved from the cache, if the image could be retrieved; nil otherwise.
+ @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image. This method should not block
+ the calling thread as it is likely to be called from the main thread.
+ */
+- (void)cachedImageWithURL:(NSURL *)URL
+             callbackQueue:(dispatch_queue_t)callbackQueue
+                completion:(ASImageCacherCompletion)completion;
 
 @optional
 
@@ -42,20 +54,7 @@ typedef void(^ASImageCacherCompletion)(id <ASImageContainerProtocol> _Nullable i
 - (nullable id <ASImageContainerProtocol>)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
 
 /**
- @abstract Attempts to fetch an image with the given URL from the cache.
- @param URL The URL of the image to retrieve from the cache.
- @param callbackQueue The queue to call `completion` on.
- @param completion The block to be called when the cache has either hit or missed.
- @param imageFromCache The image that was retrieved from the cache, if the image could be retrieved; nil otherwise.
- @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image. This method should not block
- the calling thread as it is likely to be called from the main thread.
- */
-- (void)cachedImageWithURL:(NSURL *)URL
-             callbackQueue:(dispatch_queue_t)callbackQueue
-                completion:(ASImageCacherCompletion)completion;
-
-/**
- @abstract Called during clearFetchedData. Allows the cache to optionally trim items.
+ @abstract Called during clearPreloadedData. Allows the cache to optionally trim items.
  @note Depending on your caches implementation you may *not* wish to respond to this method. It is however useful
  if you have a memory and disk cache in which case you'll likely want to clear out the memory cache.
  */
@@ -87,6 +86,21 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
 @required
 
 /**
+ @abstract Downloads an image with the given URL.
+ @param URL The URL of the image to download.
+ @param callbackQueue The queue to call `downloadProgressBlock` and `completion` on.
+ @param downloadProgress The block to be invoked when the download of `URL` progresses.
+ @param completion The block to be invoked when the download has completed, or has failed.
+ @discussion This method is likely to be called on the main thread, so any custom implementations should make sure to background any expensive download operations.
+ @result An opaque identifier to be used in canceling the download, via `cancelImageDownloadForIdentifier:`. You must
+ retain the identifier if you wish to use it later.
+ */
+- (nullable id)downloadImageWithURL:(NSURL *)URL
+                      callbackQueue:(dispatch_queue_t)callbackQueue
+                   downloadProgress:(nullable ASImageDownloaderProgress)downloadProgress
+                         completion:(ASImageDownloaderCompletion)completion;
+
+/**
   @abstract Cancels an image download.
   @param downloadIdentifier The opaque download identifier object returned from 
       `downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:`.
@@ -101,23 +115,6 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
  @param animatedImageData Data that represents an animated image.
  */
 - (nullable id <ASAnimatedImageProtocol>)animatedImageWithData:(NSData *)animatedImageData;
-
-//You must implement the following method OR the deprecated method at the bottom
-
-/**
- @abstract Downloads an image with the given URL.
- @param URL The URL of the image to download.
- @param callbackQueue The queue to call `downloadProgressBlock` and `completion` on.
- @param downloadProgress The block to be invoked when the download of `URL` progresses.
- @param completion The block to be invoked when the download has completed, or has failed.
- @discussion This method is likely to be called on the main thread, so any custom implementations should make sure to background any expensive download operations.
- @result An opaque identifier to be used in canceling the download, via `cancelImageDownloadForIdentifier:`. You must
- retain the identifier if you wish to use it later.
- */
-- (nullable id)downloadImageWithURL:(NSURL *)URL
-                      callbackQueue:(dispatch_queue_t)callbackQueue
-                   downloadProgress:(nullable ASImageDownloaderProgress)downloadProgress
-                         completion:(ASImageDownloaderCompletion)completion;
 
 
 /**

@@ -11,7 +11,6 @@
 //
 
 #import <AsyncDisplayKit/ASCollectionNode.h>
-#import <AsyncDisplayKit/ASDataController.h>
 
 @class ASPagerNode;
 @class ASPagerFlowLayout;
@@ -67,7 +66,7 @@ NS_ASSUME_NONNULL_BEGIN
  * @param index The index of the node.
  * @return A constrained size range for layout the node at this index.
  */
-- (ASSizeRange)pagerNode:(ASPagerNode *)pagerNode constrainedSizeForNodeAtIndex:(NSInteger)index;
+- (ASSizeRange)pagerNode:(ASPagerNode *)pagerNode constrainedSizeForNodeAtIndex:(NSInteger)index ASDISPLAYNODE_DEPRECATED_MSG("Pages in a pager node should be the exact size of the collection node (default behavior).");
 
 @end
 
