@@ -35,6 +35,9 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 @interface ASTextNode : ASControlNode
 
+- (instancetype)init; // ASLayoutManager
+- (instancetype)initWithLayoutManagerClass:(Class)layoutManagerClass;
+
 /**
  @abstract The styled text displayed by the node.
  @discussion Defaults to nil, no text is shown.
