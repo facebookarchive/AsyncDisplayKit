@@ -353,7 +353,7 @@
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
-  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithFlowLayout:layout];
+  ASCollectionViewFlowLayoutInspector *inspector = ASDynamicCast(collectionView.layoutInspector, ASCollectionViewFlowLayoutInspector);
   NSUInteger count = [inspector collectionView:collectionView supplementaryNodesOfKind:UICollectionElementKindSectionFooter inSection:0];
   XCTAssert(count == 1, @"should have a footer supplementary view");
   
@@ -369,7 +369,7 @@
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   collectionView.asyncDataSource = dataSource;
   collectionView.asyncDelegate = delegate;
-  ASCollectionViewFlowLayoutInspector *inspector = [[ASCollectionViewFlowLayoutInspector alloc] initWithFlowLayout:layout];
+  ASCollectionViewFlowLayoutInspector *inspector = ASDynamicCast(collectionView.layoutInspector, ASCollectionViewFlowLayoutInspector);
   NSUInteger count = [inspector collectionView:collectionView supplementaryNodesOfKind:UICollectionElementKindSectionFooter inSection:0];
   XCTAssert(count == 0, @"should not have a footer supplementary view");
   
