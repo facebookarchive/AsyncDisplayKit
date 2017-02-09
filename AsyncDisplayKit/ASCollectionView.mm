@@ -540,6 +540,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     }
 
     _defaultLayoutInspector = [layout asdk_layoutInspector];
+    ASDisplayNodeAssertNotNil(_defaultLayoutInspector, @"You must not return nil from -asdk_layoutInspector. Return [super asdk_layoutInspector] if you have to! Layout: %@", layout);
     
     // Explicitly call the setter to wire up the _layoutInspectorFlags
     self.layoutInspector = _defaultLayoutInspector;
