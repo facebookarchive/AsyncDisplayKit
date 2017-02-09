@@ -59,3 +59,19 @@
 #define ASDisplayNodeCAssertPositiveReal(description, num) ASDisplayNodeCAssert(num >= 0 && num <= CGFLOAT_MAX, @"%@ must be a real positive integer.", description)
 #define ASDisplayNodeCAssertInfOrPositiveReal(description, num) ASDisplayNodeCAssert(isinf(num) || (num >= 0 && num <= CGFLOAT_MAX), @"%@ must be infinite or a real positive integer.", description)
 
+#define ASDisplayNodeErrorDomain @"ASDisplayNodeErrorDomain"
+#define ASDisplayNodeNonFatalErrorCode 1
+
+#define ASDisplayNodeAssertNonFatal(condition, desc, ...)                                                                         \
+  ASDisplayNodeAssert(condition, desc, ##__VA_ARGS__);                                                                            \
+  if (condition ==  NO) {                                                                                                         \
+    ASDisplayNodeNonFatalErrorBlock block = [ASDisplayNode nonFatalErrorBlock];                                                   \
+    if (block != nil) {                                                                                                           \
+      NSDictionary *userInfo = nil;                                                                                               \
+      if (desc.length > 0) {                                                                                                      \
+        userInfo = @{ NSLocalizedDescriptionKey : desc };                                                                         \
+      }                                                                                                                           \
+      NSError *error = [NSError errorWithDomain:ASDisplayNodeErrorDomain code:ASDisplayNodeNonFatalErrorCode userInfo:userInfo];  \
+      block(error);                                                                                                               \
+    }                                                                                                                             \
+  }

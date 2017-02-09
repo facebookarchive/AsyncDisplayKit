@@ -63,6 +63,8 @@
   #define TIME_SCOPED(outVar)
 #endif
 
+static ASDisplayNodeNonFatalErrorBlock _nonFatalErrorBlock = nil;
+
 // Forward declare CALayerDelegate protocol as the iOS 10 SDK moves CALayerDelegate from a formal delegate to a protocol.
 // We have to forward declare the protocol as this place otherwise it will not compile compiling with an Base SDK < iOS 10
 @protocol CALayerDelegate;
@@ -1129,7 +1131,6 @@ ASLayoutElementFinalLayoutElementDefault
       ASDisplayNodeAssert(layoutSpec.isMutable, @"Node %@ returned layout spec %@ that has already been used. Layout specs should always be regenerated.", self, layoutSpec);
     }
     
-    layoutSpec.parent = self;
     layoutSpec.isMutable = NO;
   }
   
@@ -1615,7 +1616,6 @@ ASLayoutElementFinalLayoutElementDefault
   NSAssert(node.isNodeLoaded == YES, @"Invalid node state");
   
   NSArray<ASDisplayNode *> *removedSubnodes = [context removedSubnodes];
-  NSMutableArray<UIView *> *removedViews = [NSMutableArray array];
   NSMutableArray<ASDisplayNode *> *insertedSubnodes = [[context insertedSubnodes] mutableCopy];
   NSMutableArray<ASDisplayNode *> *movedSubnodes = [NSMutableArray array];
   
@@ -1628,15 +1628,6 @@ ASLayoutElementFinalLayoutElementDefault
       CGRect fromFrame = [context initialFrameForNode:subnode];
       CGRect toFrame = [context finalFrameForNode:subnode];
       if (CGSizeEqualToSize(fromFrame.size, toFrame.size) == NO) {
-        // To crossfade resized subnodes, show a snapshot of it on top.
-        // The node itself can then be treated as a newly-inserted one.
-        UIView *snapshotView = [subnode.view snapshotViewAfterScreenUpdates:YES];
-        snapshotView.frame = [context initialFrameForNode:subnode];
-        snapshotView.alpha = 1;
-        
-        [node.view insertSubview:snapshotView aboveSubview:subnode.view];
-        [removedViews addObject:snapshotView];
-        
         [insertedSubnodes addObject:subnode];
       }
       if (CGPointEqualToPoint(fromFrame.origin, toFrame.origin) == NO) {
@@ -1658,14 +1649,15 @@ ASLayoutElementFinalLayoutElementDefault
     insertedSubnode.frame = [context finalFrameForNode:insertedSubnode];
     insertedSubnode.alpha = 0;
   }
+  
+  // Adjust groupOpacity for animation
+  BOOL originAllowsGroupOpacity = node.allowsGroupOpacity;
+  node.allowsGroupOpacity = YES;
 
   [UIView animateWithDuration:self.defaultLayoutTransitionDuration delay:self.defaultLayoutTransitionDelay options:self.defaultLayoutTransitionOptions animations:^{
     // Fade removed subnodes and views out
     for (ASDisplayNode *removedSubnode in removedSubnodes) {
       removedSubnode.alpha = 0;
-    }
-    for (UIView *removedView in removedViews) {
-      removedView.alpha = 0;
     }
     
     // Fade inserted subnodes in
@@ -1689,9 +1681,10 @@ ASLayoutElementFinalLayoutElementDefault
     for (_ASAnimatedTransitionContext *removedSubnodeContext in removedSubnodeContexts) {
       removedSubnodeContext.node.alpha = removedSubnodeContext.alpha;
     }
-    for (UIView *removedView in removedViews) {
-      [removedView removeFromSuperview];
-    }
+    
+    // Restore group opacity
+    node.allowsGroupOpacity = originAllowsGroupOpacity;
+    
     // Subnode removals are automatically performed
     [context completeTransition:finished];
   }];
@@ -2272,6 +2265,20 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
   ASDisplayNodeAssert(_flags.layerBacked, @"We shouldn't get called back here if there is no layer");
   return (id)kCFNull;
+}
+
+#pragma mark - Error Handling
+
++ (void)setNonFatalErrorBlock:(ASDisplayNodeNonFatalErrorBlock)nonFatalErrorBlock
+{
+  if (_nonFatalErrorBlock != nonFatalErrorBlock) {
+    _nonFatalErrorBlock = [nonFatalErrorBlock copy];
+  }
+}
+
++ (ASDisplayNodeNonFatalErrorBlock)nonFatalErrorBlock
+{
+  return _nonFatalErrorBlock;
 }
 
 #pragma mark - Converting to and from the Node's Coordinate System
@@ -3862,7 +3869,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
   if (self.layerBacked) {
     CALayer *rootLayer = _layer;
-    CALayer *nextLayer = rootLayer;
+    CALayer *nextLayer = nil;
     while ((nextLayer = rootLayer.superlayer) != nil) {
       rootLayer = nextLayer;
     }

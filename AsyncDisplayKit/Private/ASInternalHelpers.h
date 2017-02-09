@@ -51,7 +51,7 @@ CGFloat ASRoundPixelValue(CGFloat f);
 
 BOOL ASClassRequiresMainThreadDeallocation(Class _Nullable c);
 
-Class _Nullable ASGetClassFromType(const char *type);
+Class _Nullable ASGetClassFromType(const char * _Nullable type);
 
 ASDISPLAYNODE_EXTERN_C_END
 

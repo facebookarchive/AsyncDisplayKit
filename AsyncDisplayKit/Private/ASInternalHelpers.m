@@ -124,7 +124,7 @@ BOOL ASClassRequiresMainThreadDeallocation(Class c)
   return NO;
 }
 
-Class _Nullable ASGetClassFromType(const char *type)
+Class _Nullable ASGetClassFromType(const char  * _Nullable type)
 {
   // Class types all start with @"
   if (type == NULL || strncmp(type, "@\"", 2) != 0) {

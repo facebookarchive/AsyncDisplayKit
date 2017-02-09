@@ -93,11 +93,6 @@ ASDISPLAYNODE_EXTERN_C_END
  */
 - (nullable NSArray<id<ASLayoutElement>> *)sublayoutElements;
 
-/**
- * @abstract Optional name that is printed by ascii art string and displayed in description.
- */
-@property (nullable, nonatomic, copy) NSString *debugName;
-
 #pragma mark - Calculate layout
 
 /**

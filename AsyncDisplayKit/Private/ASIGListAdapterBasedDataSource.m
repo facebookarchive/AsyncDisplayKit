@@ -221,6 +221,11 @@ typedef struct {
   return [self.dataSource collectionView:collectionView viewForSupplementaryElementOfKind:kind atIndexPath:indexPath];
 }
 
++ (BOOL)dequeuesCellsForNodeBackedItems
+{
+  return YES;
+}
+
 #pragma mark - Helpers
 
 - (id<ASIGSupplementaryNodeSource>)supplementaryElementSourceForSection:(NSInteger)section

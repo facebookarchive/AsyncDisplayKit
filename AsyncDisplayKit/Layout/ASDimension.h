@@ -221,6 +221,15 @@ extern ASSizeRange const ASSizeRangeZero;
 extern ASSizeRange const ASSizeRangeUnconstrained;
 
 /**
+ * Returns whether a size range has > 0.1 max width and max height.
+ */
+ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT BOOL ASSizeRangeHasSignificantArea(ASSizeRange sizeRange)
+{
+  static CGFloat const limit = 0.1;
+  return (sizeRange.max.width > limit && sizeRange.max.height > limit);
+}
+
+/**
  * Creates an ASSizeRange with provided min and max size.
  */
 ASOVERLOADABLE ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT ASSizeRange ASSizeRangeMake(CGSize min, CGSize max)
