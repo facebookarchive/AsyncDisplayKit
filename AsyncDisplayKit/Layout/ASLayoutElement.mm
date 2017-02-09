@@ -150,7 +150,6 @@ do {\
   std::atomic<ASEdgeInsets> _margin;
   std::atomic<ASEdgeInsets> _padding;
   std::atomic<ASEdgeInsets> _border;
-
   std::atomic<CGFloat> _aspectRatio;
   std::atomic<YGWrap> _flexWrap;
 #endif
@@ -469,122 +468,6 @@ do {\
   return _layoutPosition.load();
 }
 
-#pragma mark - Yoga Flexbox Properties
-
-#if YOGA
-
-- (void)setDirection:(ASStackLayoutDirection)direction
-{
-  _direction.store(direction);
-}
-
-- (ASStackLayoutDirection)direction
-{
-  return _direction.load();
-}
-
-- (void)setSpacing:(CGFloat)spacing
-{
-  _spacing.store(spacing);
-}
-
-- (CGFloat)spacing
-{
-  return _spacing.load();
-}
-
-- (void)setJustifyContent:(ASStackLayoutJustifyContent)justifyContent
-{
-  _justifyContent.store(justifyContent);
-}
-
-- (ASStackLayoutJustifyContent)justifyContent
-{
-  return _justifyContent.load();
-}
-
-- (void)setAlignItems:(ASStackLayoutAlignItems)alignItems
-{
-  _alignItems.store(alignItems);
-}
-
-- (ASStackLayoutAlignItems)alignItems
-{
-  return _alignItems.load();
-}
-
-- (YGPositionType)positionType
-{
-  return _positionType.load();
-}
-
-- (void)setPositionType:(YGPositionType)positionType
-{
-  _positionType.store(positionType);
-}
-
-- (ASEdgeInsets)position
-{
-  return _position.load();
-}
-
-- (void)setPosition:(ASEdgeInsets)position
-{
-  _position.store(position);
-}
-
-- (ASEdgeInsets)margin
-{
-  return _margin.load();
-}
-
-- (void)setMargin:(ASEdgeInsets)margin
-{
-  _margin.store(margin);
-}
-
-- (ASEdgeInsets)padding
-{
-  return _padding.load();
-}
-
-- (void)setPadding:(ASEdgeInsets)padding
-{
-  _padding.store(padding);
-}
-
-- (ASEdgeInsets)border
-{
-  return _border.load();
-}
-
-- (void)setBorder:(ASEdgeInsets)border
-{
-  _border.store(border);
-}
-
-- (CGFloat)aspectRatio
-{
-  return _aspectRatio.load();
-}
-
-- (void)setAspectRatio:(CGFloat)aspectRatio
-{
-  _aspectRatio.store(aspectRatio);
-}
-
-- (YGWrap)flexWrap
-{
-  return _flexWrap.load();
-}
-
-- (void)setFlexWrap:(YGWrap)flexWrap
-{
-  _flexWrap.store(flexWrap);
-}
-
-#endif
-
 #pragma mark - Extensions
 
 - (void)setLayoutOptionExtensionBool:(BOOL)value atIndex:(int)idx
@@ -704,6 +587,36 @@ do {\
   return result;
 }
 
+#pragma mark - Yoga Flexbox Properties
+
+#if YOGA
+
+- (ASStackLayoutDirection)direction           { return _direction.load(); }
+- (CGFloat)spacing                            { return _spacing.load(); }
+- (ASStackLayoutJustifyContent)justifyContent { return _justifyContent.load(); }
+- (ASStackLayoutAlignItems)alignItems         { return _alignItems.load(); }
+- (YGPositionType)positionType                { return _positionType.load(); }
+- (ASEdgeInsets)position                      { return _position.load(); }
+- (ASEdgeInsets)margin                        { return _margin.load(); }
+- (ASEdgeInsets)padding                       { return _padding.load(); }
+- (ASEdgeInsets)border                        { return _border.load(); }
+- (CGFloat)aspectRatio                        { return _aspectRatio.load(); }
+- (YGWrap)flexWrap                            { return _flexWrap.load(); }
+
+- (void)setDirection:(ASStackLayoutDirection)direction         { _direction.store(direction); }
+- (void)setSpacing:(CGFloat)spacing                            { _spacing.store(spacing); }
+- (void)setJustifyContent:(ASStackLayoutJustifyContent)justify { _justifyContent.store(justify); }
+- (void)setAlignItems:(ASStackLayoutAlignItems)alignItems      { _alignItems.store(alignItems); }
+- (void)setPositionType:(YGPositionType)positionType           { _positionType.store(positionType); }
+- (void)setPosition:(ASEdgeInsets)position                     { _position.store(position); }
+- (void)setMargin:(ASEdgeInsets)margin                         { _margin.store(margin); }
+- (void)setPadding:(ASEdgeInsets)padding                       { _padding.store(padding); }
+- (void)setBorder:(ASEdgeInsets)border                         { _border.store(border); }
+- (void)setAspectRatio:(CGFloat)aspectRatio                    { _aspectRatio.store(aspectRatio); }
+- (void)setFlexWrap:(YGWrap)flexWrap                           { _flexWrap.store(flexWrap); }
+
+#endif
+
 #pragma mark Deprecated
 
 #pragma clang diagnostic push
@@ -723,102 +636,3 @@ do {\
 #pragma clang diagnostic pop
 
 @end
-
-#pragma mark - Yoga Type Conversion Helpers
-
-#if YOGA
-
-YGAlign yogaAlignItems(ASStackLayoutAlignItems alignItems)
-{
-  switch (alignItems) {
-    case ASStackLayoutAlignItemsStart:          return YGAlignFlexStart;
-    case ASStackLayoutAlignItemsEnd:            return YGAlignFlexEnd;
-    case ASStackLayoutAlignItemsCenter:         return YGAlignCenter;
-    case ASStackLayoutAlignItemsStretch:        return YGAlignStretch;
-    case ASStackLayoutAlignItemsBaselineFirst:  return YGAlignBaseline;
-      // FIXME: WARNING, Yoga does not currently support last-baseline item alignment.
-    case ASStackLayoutAlignItemsBaselineLast:   return YGAlignBaseline;
-  }
-}
-
-YGJustify yogaJustifyContent(ASStackLayoutJustifyContent justifyContent)
-{
-  switch (justifyContent) {
-    case ASStackLayoutJustifyContentStart:        return YGJustifyFlexStart;
-    case ASStackLayoutJustifyContentCenter:       return YGJustifyCenter;
-    case ASStackLayoutJustifyContentEnd:          return YGJustifyFlexEnd;
-    case ASStackLayoutJustifyContentSpaceBetween: return YGJustifySpaceBetween;
-    case ASStackLayoutJustifyContentSpaceAround:  return YGJustifySpaceAround;
-  }
-}
-
-YGAlign yogaAlignSelf(ASStackLayoutAlignSelf alignSelf)
-{
-  switch (alignSelf) {
-    case ASStackLayoutAlignSelfStart:   return YGAlignFlexStart;
-    case ASStackLayoutAlignSelfCenter:  return YGAlignCenter;
-    case ASStackLayoutAlignSelfEnd:     return YGAlignFlexEnd;
-    case ASStackLayoutAlignSelfStretch: return YGAlignStretch;
-    case ASStackLayoutAlignSelfAuto:    return YGAlignAuto;
-  }
-}
-
-YGFlexDirection yogaFlexDirection(ASStackLayoutDirection direction)
-{
-  return direction == ASStackLayoutDirectionVertical ? YGFlexDirectionColumn : YGFlexDirectionRow;
-}
-
-float yogaFloatForCGFloat(CGFloat value)
-{
-  if (value < CGFLOAT_MAX / 2) {
-    return value;
-  } else {
-    return YGUndefined;
-  }
-}
-
-float yogaDimensionToPoints(ASDimension dimension)
-{
-  ASDisplayNodeCAssert(dimension.unit == ASDimensionUnitPoints,
-                       @"Dimensions should not be type Fraction for this method: %f", dimension.value);
-  return yogaFloatForCGFloat(dimension.value);
-}
-
-float yogaDimensionToPercent(ASDimension dimension)
-{
-  ASDisplayNodeCAssert(dimension.unit == ASDimensionUnitFraction,
-                       @"Dimensions should not be type Points for this method: %f", dimension.value);
-  return 100.0 * yogaFloatForCGFloat(dimension.value);
-
-}
-
-ASDimension dimensionForEdgeWithEdgeInsets(YGEdge edge, ASEdgeInsets insets)
-{
-  switch (edge) {
-    case YGEdgeLeft:   return insets.left;
-    case YGEdgeTop:    return insets.top;
-    case YGEdgeRight:  return insets.right;
-    case YGEdgeBottom: return insets.bottom;
-    default: ASDisplayNodeCAssert(NO, @"YGEdge other than ASEdgeInsets is not supported.");
-      return ASDimensionAuto;
-  }
-}
-
-YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasureMode widthMode,
-                                                          float height, YGMeasureMode heightMode)
-{
-  id <ASLayoutElement> layoutElement = (__bridge id <ASLayoutElement>)YGNodeGetContext(yogaNode);
-  ASSizeRange sizeRange;
-  sizeRange.max = CGSizeMake(width, height);
-  sizeRange.min = sizeRange.max;
-  if (widthMode == YGMeasureModeAtMost) {
-    sizeRange.min.width = 0.0;
-  }
-  if (heightMode == YGMeasureModeAtMost) {
-    sizeRange.min.height = 0.0;
-  }
-  CGSize size = [[layoutElement layoutThatFits:sizeRange] size];
-  return (YGSize){ .width = (float)size.width, .height = (float)size.height };
-}
-
-#endif

@@ -3212,14 +3212,17 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 #if YOGA /* YOGA */
   if ((newState & ASHierarchyStateYogaLayoutEnabled) != (oldState & ASHierarchyStateYogaLayoutEnabled)) {
+    ASDN::MutexLocker l(__instanceLock__);
     if (newState & ASHierarchyStateYogaLayoutEnabled) {
       // Entering Yoga Layout Mode; ensure YGNodeRef points to allocated node.
-      ASDN::MutexLocker l(__instanceLock__);
       if (_yogaNode == NULL) {
         _yogaNode = YGNodeNew();
       }
     } else {
-      // TODO: Tear down Yoga Layout Tree.
+      // Release any allocated memory for the YGNodeRef, if it exists.
+      if (_yogaNode != NULL) {
+        YGNodeFree(_yogaNode);
+      }
     }
   }
 #endif /* YOGA */
@@ -3919,221 +3922,6 @@ ASPrimitiveTraitCollectionDeprecatedImplementation
 #pragma mark - ASLayoutElementStyleExtensibility
 
 ASLayoutElementStyleExtensibilityForwarding
-
-// TODO(appleguy): After this lands initially, we can move it to another file like ASDisplayNode+Yoga.mm.
-// For now due to merge conflict risk and working across multiple build systems, avoiding file adds.
-#pragma mark - Yoga Layout
-
-#if YOGA /* YOGA */
-
-- (void)setYogaParent:(ASDisplayNode *)yogaParent
-{
-  _yogaParent = yogaParent;
-  if (yogaParent) {
-    self.hierarchyState |= ASHierarchyStateYogaLayoutEnabled;
-  } else {
-    self.hierarchyState &= ~ASHierarchyStateYogaLayoutEnabled;
-  }
-}
-
-- (void)setYogaChildren:(NSArray *)yogaChildren
-{
-  for (ASDisplayNode *child in _yogaChildren) {
-    [self removeYogaChild:child];
-  }
-  _yogaChildren = nil;
-  for (ASDisplayNode *child in yogaChildren) {
-    [self addYogaChild:child];
-  }
-}
-
-- (NSArray *)yogaChildren
-{
-  return _yogaChildren;
-}
-
-- (void)addYogaChild:(ASDisplayNode *)child
-{
-  if (child == nil) {
-    return;
-  }
-  if (_yogaChildren == nil) {
-    _yogaChildren = [NSMutableArray array];
-  }
-
-  [self removeYogaChild:child];
-  [_yogaChildren addObject:child];
-
-  self.hierarchyState |= ASHierarchyStateYogaLayoutEnabled;
-
-  child.yogaParent = self;
-  YGNodeInsertChild(_yogaNode, child.yogaNode, YGNodeGetChildCount(_yogaNode));
-}
-
-- (void)removeYogaChild:(ASDisplayNode *)child
-{
-  if (child == nil) {
-    return;
-  }
-  child.yogaParent = nil;
-  NSInteger index = [_yogaChildren indexOfObjectIdenticalTo:child];
-  if (index != NSNotFound) {
-    [_yogaChildren removeObjectAtIndex:index];
-    YGNodeRemoveChild(_yogaNode, child.yogaNode);
-  }
-  if (_yogaChildren.count == 0 && self.yogaParent == nil) {
-    self.hierarchyState &= ~ASHierarchyStateYogaLayoutEnabled;
-  }
-}
-
-- (ASLayout *)layoutTreeForYogaNode
-{
-  uint32_t childCount = YGNodeGetChildCount(_yogaNode);
-  ASDisplayNodeAssert(childCount == self.yogaChildren.count,
-                      @"Yoga tree should always be in sync with .yogaNodes array! %@", self.yogaChildren);
-
-  NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:childCount];
-  for (ASDisplayNode *subnode in self.yogaChildren) {
-    [sublayouts addObject:[subnode layoutTreeForYogaNode]];
-  }
-
-  CGSize  size     = CGSizeMake(YGNodeLayoutGetWidth(_yogaNode), YGNodeLayoutGetHeight(_yogaNode));
-  CGPoint position = CGPointMake(YGNodeLayoutGetLeft(_yogaNode), YGNodeLayoutGetTop(_yogaNode));
-
-  ASDisplayNodeLogEvent(self, @"Yoga calculatedSize: %@", NSStringFromCGSize(size));
-
-  ASLayout *layout = [ASLayout layoutWithLayoutElement:self
-                                                  size:size
-                                              position:position
-                                            sublayouts:sublayouts];
-  return layout;
-}
-
-- (void)setYogaMeasureFuncIfNeeded
-{
-  // Manual size calculation via calculateSizeThatFits:
-  // This will be used for ASTextNode, as well as any other leaf node that has no layout spec.
-  if ((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) == NO
-      && _layoutSpecBlock == NULL &&  self.yogaChildren.count == 0) {
-    YGNodeSetContext(_yogaNode, (__bridge void *)self);
-    YGNodeSetMeasureFunc(_yogaNode, &ASLayoutElementYogaMeasureFunc);
-  }
-}
-
-- (ASLayout *)calculateLayoutFromYogaRoot:(ASSizeRange)rootConstrainedSize
-{
-  if (ASHierarchyStateIncludesYogaLayoutMeasuring(self.hierarchyState)) {
-    ASDisplayNodeAssert(NO, @"A Yoga layout is being performed by a parent; children must not perform their own until it is done! %@", [self displayNodeRecursiveDescription]);
-    return [ASLayout layoutWithLayoutElement:self size:CGSizeZero];
-  }
-
-  ASDisplayNodePerformBlockOnEveryYogaChild(self, ^(ASDisplayNode * _Nonnull node) {
-    node.hierarchyState |= ASHierarchyStateYogaLayoutMeasuring;
-  });
-  
-  YGNodeRef rootYogaNode = self.yogaNode;
-
-  // Apply the constrainedSize as a base, known frame of reference.
-  // If the root node also has style.*Size set, these will be overridden below.
-  YGNodeStyleSetMinWidth (rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.min.width));
-  YGNodeStyleSetMinHeight(rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.min.height));
-
-  // TODO(appleguy); Is it sufficient to set only Width OR MaxWidth (+ same for height), or do we need all four?
-  YGNodeStyleSetMaxWidth (rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.max.width));
-  YGNodeStyleSetMaxHeight(rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.max.height));
-  YGNodeStyleSetWidth    (rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.max.width));
-  YGNodeStyleSetHeight   (rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.max.height));
-
-  // TODO(appleguy): We need this on all containers, not just the root. Need to be able to check for "unset"
-  YGNodeStyleSetAlignItems(rootYogaNode, yogaAlignItems(self.style.alignItems));
-
-  ASDisplayNodePerformBlockOnEveryYogaChild(self, ^(ASDisplayNode * _Nonnull node) {
-    ASLayoutElementStyle *style = node.style;
-    YGNodeRef yogaNode = node.yogaNode;
-
-    YGNodeStyleSetDirection     (yogaNode, YGDirectionInherit);
-
-    YGNodeStyleSetFlexWrap      (yogaNode, style.flexWrap);
-    YGNodeStyleSetFlexGrow      (yogaNode, style.flexGrow);
-    YGNodeStyleSetFlexShrink    (yogaNode, style.flexShrink);
-    YGNODE_STYLE_SET_DIMENSION  (yogaNode, FlexBasis, style.flexBasis);
-
-    YGNodeStyleSetFlexDirection (yogaNode, yogaFlexDirection(style.direction));
-    YGNodeStyleSetAlignSelf     (yogaNode, yogaAlignSelf(style.alignSelf));
-    YGNodeStyleSetAlignItems    (yogaNode, yogaAlignItems(style.alignItems));
-    YGNodeStyleSetJustifyContent(yogaNode, yogaJustifyContent(style.justifyContent));
-
-    YGNodeStyleSetPositionType  (yogaNode, style.positionType);
-
-    ASEdgeInsets position = style.position;
-    ASEdgeInsets margin   = style.margin;
-    ASEdgeInsets padding  = style.padding;
-    ASEdgeInsets border   = style.border;
-
-    YGEdge edge = YGEdgeLeft;
-    for (int i = 0; i < 4; i++) {
-      YGNODE_STYLE_SET_DIMENSION_WITH_EDGE(yogaNode, Position, dimensionForEdgeWithEdgeInsets(edge, position), edge);
-      YGNODE_STYLE_SET_DIMENSION_WITH_EDGE(yogaNode, Margin, dimensionForEdgeWithEdgeInsets(edge, margin), edge);
-      YGNODE_STYLE_SET_DIMENSION_WITH_EDGE(yogaNode, Padding, dimensionForEdgeWithEdgeInsets(edge, padding), edge);
-      YGNODE_STYLE_SET_FLOAT_WITH_EDGE(yogaNode, Border, dimensionForEdgeWithEdgeInsets(edge, border), edge);
-      edge = (edge == YGEdgeLeft ? YGEdgeTop : (edge == YGEdgeTop ? YGEdgeRight : YGEdgeBottom));
-    }
-
-    CGFloat aspectRatio = style.aspectRatio;
-    if (aspectRatio > FLT_EPSILON && aspectRatio < CGFLOAT_MAX / 2.0) {
-      YGNodeStyleSetAspectRatio(yogaNode, aspectRatio);
-    }
-
-    // For the root node, we use rootConstrainedSize above. For children, consult the style for their size.
-    if (node != self) {
-      YGNODE_STYLE_SET_DIMENSION(yogaNode, Width, style.width);
-      YGNODE_STYLE_SET_DIMENSION(yogaNode, Height, style.height);
-
-      YGNODE_STYLE_SET_DIMENSION(yogaNode, MinWidth, style.minWidth);
-      YGNODE_STYLE_SET_DIMENSION(yogaNode, MinHeight, style.minHeight);
-
-      YGNODE_STYLE_SET_DIMENSION(yogaNode, MaxWidth, style.maxWidth);
-      YGNODE_STYLE_SET_DIMENSION(yogaNode, MaxHeight, style.maxHeight);
-    }
-
-    [node setYogaMeasureFuncIfNeeded];
-
-    /* TODO(appleguy): STYLE SETTER METHODS LEFT TO IMPLEMENT
-     typedef enum YGFlexDirection {
-     YGFlexDirectionColumnReverse,    // Not yet possible to set through ASDK .style
-     YGFlexDirectionRowReverse,       // Not yet possible to set through ASDK .style
-     } YGFlexDirection;
-
-     typedef enum YGOverflow {          // Not yet possible to set through ASDK .style
-     YGOverflowVisible,
-     YGOverflowHidden,
-     YGOverflowScroll,
-     } YGOverflow;
-
-     void YGNodeStyleSetFlexDirection(YGNodeRef node, YGFlexDirection flexDirection);
-     void YGNodeStyleSetOverflow(YGNodeRef node, YGOverflow overflow);
-     void YGNodeStyleSetFlex(YGNodeRef node, float flex);
-     */
-  });
-
-  // It is crucial to use yogaFloat... to convert CGFLOAT_MAX into YGUndefined here.
-  YGNodeCalculateLayout(_yogaNode, yogaFloatForCGFloat(rootConstrainedSize.max.width),
-                        yogaFloatForCGFloat(rootConstrainedSize.max.height), YGDirectionInherit);
-
-#if ASEVENTLOG_ENABLE
-  YGNodePrint(_yogaNode, (YGPrintOptions)(YGPrintOptionsChildren | YGPrintOptionsStyle | YGPrintOptionsLayout));
-#endif
-
-  ASLayout *yogaLayout = [self layoutTreeForYogaNode];
-
-  ASDisplayNodePerformBlockOnEveryYogaChild(self, ^(ASDisplayNode * _Nonnull node) {
-    node.hierarchyState &= ~ASHierarchyStateYogaLayoutMeasuring;
-  });
-
-  return yogaLayout;
-}
-
-#endif /* YOGA */
 
 #if TARGET_OS_TV
 #pragma mark - UIFocusEnvironment Protocol (tvOS)

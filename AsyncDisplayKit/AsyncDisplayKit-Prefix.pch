@@ -22,10 +22,3 @@
 #ifndef IG_LIST_KIT
   #define IG_LIST_KIT __has_include(<IGListKit/IGListKit.h>)
 #endif
-
-#ifndef YOGA
-  #ifndef YOGA_HEADER_PATH
-    #define YOGA_HEADER_PATH <Yoga/Yoga.h>
-  #endif
-  #define YOGA __has_include(YOGA_HEADER_PATH)
-#endif

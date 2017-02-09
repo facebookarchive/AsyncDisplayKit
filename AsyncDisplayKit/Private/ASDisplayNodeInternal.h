@@ -15,13 +15,12 @@
 
 #import <atomic>
 #import <AsyncDisplayKit/ASDisplayNode.h>
-#import <AsyncDisplayKit/ASThread.h>
-#import <AsyncDisplayKit/_ASTransitionContext.h>
+#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASLayoutElement.h>
 #import <AsyncDisplayKit/ASLayoutTransition.h>
+#import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/_ASTransitionContext.h>
 #import <AsyncDisplayKit/ASWeakSet.h>
-
-#import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -108,11 +107,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 @protected
   ASDisplayNode * __weak _supernode;
   NSMutableArray<ASDisplayNode *> *_subnodes;
-#if YOGA
-  NSMutableArray<ASDisplayNode *> *_yogaChildren;
-  YGNodeRef _yogaNode;
-#endif
-  
+
   ASLayoutElementStyle *_style;
   ASPrimitiveTraitCollection _primitiveTraitCollection;
 
@@ -183,6 +178,12 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   NSTimeInterval _layoutComputationTotalTime;
   NSInteger _layoutComputationNumberOfPasses;
 
+#if YOGA
+  YGNodeRef _yogaNode;
+  ASDisplayNode *_yogaParent;
+  NSMutableArray<ASDisplayNode *> *_yogaChildren;
+#endif
+
 #if TIME_DISPLAYNODE_OPS
 @public
   NSTimeInterval _debugTimeToCreateView;
@@ -199,11 +200,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 
 /// Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
-
-#if YOGA
-@property (nonatomic, weak) ASDisplayNode *yogaParent;
-@property (nonatomic, assign) YGNodeRef yogaNode;
-#endif
 
 // Swizzle to extend the builtin functionality with custom logic
 - (BOOL)__shouldLoadViewOrLayer;

@@ -15,10 +15,6 @@
 #import <AsyncDisplayKit/ASStackLayoutElement.h>
 #import <AsyncDisplayKit/ASAbsoluteLayoutElement.h>
 
-#if YOGA
-  #import YOGA_HEADER_PATH
-#endif
-
 @class ASLayout;
 @class ASLayoutSpec;
 @protocol ASLayoutElementStylability;
@@ -265,21 +261,6 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  */
 @property (nonatomic, assign, readwrite) ASDimension maxWidth;
 
-#if YOGA
-@property (nonatomic, assign, readwrite) ASStackLayoutDirection direction;
-@property (nonatomic, assign, readwrite) CGFloat spacing;
-@property (nonatomic, assign, readwrite) ASStackLayoutJustifyContent justifyContent;
-@property (nonatomic, assign, readwrite) ASStackLayoutAlignItems alignItems;
-@property (nonatomic, assign, readwrite) YGPositionType positionType;
-@property (nonatomic, assign, readwrite) ASEdgeInsets position;
-@property (nonatomic, assign, readwrite) ASEdgeInsets margin;
-@property (nonatomic, assign, readwrite) ASEdgeInsets padding;
-@property (nonatomic, assign, readwrite) ASEdgeInsets border;
-
-@property (nonatomic, assign, readwrite) CGFloat aspectRatio;
-@property (nonatomic, assign, readwrite) YGWrap flexWrap;
-#endif
-
 #pragma mark - ASLayoutElementStyleSizeHelpers
 
 /**
@@ -352,50 +333,5 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 - (instancetype)styledWithBlock:(AS_NOESCAPE void (^)(__kindof ASLayoutElementStyle *style))styleBlock;
 
 @end
-
-#pragma mark - Yoga Type Conversion Helpers
-
-#if YOGA
-
-extern YGAlign yogaAlignItems(ASStackLayoutAlignItems alignItems);
-extern YGJustify yogaJustifyContent(ASStackLayoutJustifyContent justifyContent);
-extern YGAlign yogaAlignSelf(ASStackLayoutAlignSelf alignSelf);
-extern YGFlexDirection yogaFlexDirection(ASStackLayoutDirection direction);
-extern float yogaFloatForCGFloat(CGFloat value);
-extern float yogaDimensionToPoints(ASDimension dimension);
-extern float yogaDimensionToPercent(ASDimension dimension);
-extern ASDimension dimensionForEdgeWithEdgeInsets(YGEdge edge, ASEdgeInsets insets);
-extern YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode,
-                                             float width, YGMeasureMode widthMode,
-                                             float height, YGMeasureMode heightMode);
-
-#define YGNODE_STYLE_SET_DIMENSION(yogaNode, property, dimension) \
-  if (dimension.unit == ASDimensionUnitPoints) { \
-    YGNodeStyleSet##property(yogaNode, yogaDimensionToPoints(dimension)); \
-  } else if (dimension.unit == ASDimensionUnitFraction) { \
-    YGNodeStyleSet##property##Percent(yogaNode, yogaDimensionToPercent(dimension)); \
-  } else { \
-    YGNodeStyleSet##property(yogaNode, YGUndefined); \
-  }\
-
-#define YGNODE_STYLE_SET_DIMENSION_WITH_EDGE(yogaNode, property, dimension, edge) \
-  if (dimension.unit == ASDimensionUnitPoints) { \
-    YGNodeStyleSet##property(yogaNode, edge, yogaDimensionToPoints(dimension)); \
-  } else if (dimension.unit == ASDimensionUnitFraction) { \
-    YGNodeStyleSet##property##Percent(yogaNode, edge, yogaDimensionToPercent(dimension)); \
-  } else { \
-    YGNodeStyleSet##property(yogaNode, edge, YGUndefined); \
-  } \
-
-#define YGNODE_STYLE_SET_FLOAT_WITH_EDGE(yogaNode, property, dimension, edge) \
-  if (dimension.unit == ASDimensionUnitPoints) { \
-    YGNodeStyleSet##property(yogaNode, edge, yogaDimensionToPoints(dimension)); \
-  } else if (dimension.unit == ASDimensionUnitFraction) { \
-    ASDisplayNodeAssert(NO, @"Unexpected Fraction value in applying ##property## values to YGNode"); \
-  } else { \
-    YGNodeStyleSet##property(yogaNode, edge, YGUndefined); \
-  } \
-
-#endif
 
 NS_ASSUME_NONNULL_END
