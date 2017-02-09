@@ -171,11 +171,36 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
 
 @implementation ASDisplayNode (Yoga)
 
+- (void)setYogaNode:(YGNodeRef)yogaNode
+{
+  _yogaNode = yogaNode;
+}
+
+- (YGNodeRef)yogaNode
+{
+  if (_yogaNode == NULL) {
+    _yogaNode = YGNodeNew();
+  }
+  return _yogaNode;
+}
+
 - (void)setYogaParent:(ASDisplayNode *)yogaParent
 {
+  if (_yogaParent == yogaParent) {
+    return;
+  }
+
+  YGNodeRef yogaNode = self.yogaNode; // Use property to assign Ref if needed.
+  YGNodeRef oldParentRef = YGNodeGetParent(yogaNode);
+  if (oldParentRef != NULL) {
+    YGNodeRemoveChild(oldParentRef, yogaNode);
+  }
+
   _yogaParent = yogaParent;
   if (yogaParent) {
     self.hierarchyState |= ASHierarchyStateYogaLayoutEnabled;
+    YGNodeRef newParentRef = yogaParent.yogaNode;
+    YGNodeInsertChild(newParentRef, yogaNode, YGNodeGetChildCount(newParentRef));
   } else {
     self.hierarchyState &= ~ASHierarchyStateYogaLayoutEnabled;
   }
@@ -189,6 +214,8 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
 - (void)setYogaChildren:(NSArray *)yogaChildren
 {
   for (ASDisplayNode *child in _yogaChildren) {
+    // Make sure to un-associate the YGNodeRef tree before replacing _yogaChildren
+    // If this becomes a performance bottleneck, it can be optimized by not doing the NSArray removals here.
     [self removeYogaChild:child];
   }
   _yogaChildren = nil;
@@ -211,13 +238,14 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
     _yogaChildren = [NSMutableArray array];
   }
 
+  // Clean up state in case this child had another parent.
   [self removeYogaChild:child];
+
+  // YGNodeRef insertion is done in setParent:
+  child.yogaParent = self;
   [_yogaChildren addObject:child];
 
   self.hierarchyState |= ASHierarchyStateYogaLayoutEnabled;
-
-  child.yogaParent = self;
-  YGNodeInsertChild(_yogaNode, child.yogaNode, YGNodeGetChildCount(_yogaNode));
 }
 
 - (void)removeYogaChild:(ASDisplayNode *)child
@@ -225,12 +253,10 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
   if (child == nil) {
     return;
   }
+  // YGNodeRef removal is done in setParent:
   child.yogaParent = nil;
-  NSInteger index = [_yogaChildren indexOfObjectIdenticalTo:child];
-  if (index != NSNotFound) {
-    [_yogaChildren removeObjectAtIndex:index];
-    YGNodeRemoveChild(_yogaNode, child.yogaNode);
-  }
+  [_yogaChildren removeObjectIdenticalTo:child];
+
   if (_yogaChildren.count == 0 && self.yogaParent == nil) {
     self.hierarchyState &= ~ASHierarchyStateYogaLayoutEnabled;
   }
@@ -238,7 +264,8 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
 
 - (ASLayout *)layoutTreeForYogaNode
 {
-  uint32_t childCount = YGNodeGetChildCount(_yogaNode);
+  YGNodeRef yogaNode = self.yogaNode; // Use property to assign Ref if needed.
+  uint32_t childCount = YGNodeGetChildCount(yogaNode);
   ASDisplayNodeAssert(childCount == self.yogaChildren.count,
                       @"Yoga tree should always be in sync with .yogaNodes array! %@", self.yogaChildren);
 
@@ -247,8 +274,8 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
     [sublayouts addObject:[subnode layoutTreeForYogaNode]];
   }
 
-  CGSize  size     = CGSizeMake(YGNodeLayoutGetWidth(_yogaNode), YGNodeLayoutGetHeight(_yogaNode));
-  CGPoint position = CGPointMake(YGNodeLayoutGetLeft(_yogaNode), YGNodeLayoutGetTop(_yogaNode));
+  CGSize  size     = CGSizeMake(YGNodeLayoutGetWidth(yogaNode), YGNodeLayoutGetHeight(yogaNode));
+  CGPoint position = CGPointMake(YGNodeLayoutGetLeft(yogaNode), YGNodeLayoutGetTop(yogaNode));
 
   ASDisplayNodeLogEvent(self, @"Yoga calculatedSize: %@", NSStringFromCGSize(size));
 
@@ -265,8 +292,9 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
   // This will be used for ASTextNode, as well as any other leaf node that has no layout spec.
   if ((self.methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) == NO
       && self.layoutSpecBlock == NULL &&  self.yogaChildren.count == 0) {
-    YGNodeSetContext(_yogaNode, (__bridge void *)self);
-    YGNodeSetMeasureFunc(_yogaNode, &ASLayoutElementYogaMeasureFunc);
+    YGNodeRef yogaNode = self.yogaNode; // Use property to assign Ref if needed.
+    YGNodeSetContext(yogaNode, (__bridge void *)self);
+    YGNodeSetMeasureFunc(yogaNode, &ASLayoutElementYogaMeasureFunc);
   }
 }
 
@@ -356,11 +384,13 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
   });
 
   // It is crucial to use yogaFloat... to convert CGFLOAT_MAX into YGUndefined here.
-  YGNodeCalculateLayout(_yogaNode, yogaFloatForCGFloat(rootConstrainedSize.max.width),
-                        yogaFloatForCGFloat(rootConstrainedSize.max.height), YGDirectionInherit);
+  YGNodeCalculateLayout(rootYogaNode,
+                        yogaFloatForCGFloat(rootConstrainedSize.max.width),
+                        yogaFloatForCGFloat(rootConstrainedSize.max.height),
+                        YGDirectionInherit);
 
 #if ASEVENTLOG_ENABLE
-  YGNodePrint(_yogaNode, (YGPrintOptions)(YGPrintOptionsChildren | YGPrintOptionsStyle | YGPrintOptionsLayout));
+  YGNodePrint(rootYogaNode, (YGPrintOptions)(YGPrintOptionsChildren | YGPrintOptionsStyle | YGPrintOptionsLayout));
 #endif
 
   ASLayout *yogaLayout = [self layoutTreeForYogaNode];

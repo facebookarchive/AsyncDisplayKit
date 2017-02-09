@@ -3210,23 +3210,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     }
   }
 
-#if YOGA /* YOGA */
-  if ((newState & ASHierarchyStateYogaLayoutEnabled) != (oldState & ASHierarchyStateYogaLayoutEnabled)) {
-    ASDN::MutexLocker l(__instanceLock__);
-    if (newState & ASHierarchyStateYogaLayoutEnabled) {
-      // Entering Yoga Layout Mode; ensure YGNodeRef points to allocated node.
-      if (_yogaNode == NULL) {
-        _yogaNode = YGNodeNew();
-      }
-    } else {
-      // Release any allocated memory for the YGNodeRef, if it exists.
-      if (_yogaNode != NULL) {
-        YGNodeFree(_yogaNode);
-      }
-    }
-  }
-#endif /* YOGA */
-
   ASDisplayNodeLogEvent(self, @"setHierarchyState: oldState = %@, newState = %@", NSStringFromASHierarchyState(oldState), NSStringFromASHierarchyState(newState));
 }
 
