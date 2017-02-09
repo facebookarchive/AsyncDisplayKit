@@ -9,6 +9,7 @@
 //
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASScrollDirection.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -32,6 +33,18 @@ NS_ASSUME_NONNULL_BEGIN
  * NOTE: Most users of ASScrollView will want to use this, and may be enabled by default later.
  */
 @property (nonatomic, assign) BOOL automaticallyManagesContentSize;
+
+/**
+ * @abstract This property controls how the constrainedSize is interpreted when sizing the content.
+ * if you are using automaticallyManagesContentSize, it can be crucial to ensure that the sizing is
+ * done how you expect.
+ * Vertical: The constrainedSize is interpreted as having unbounded .height (CGFLOAT_MAX), allowing
+ * stacks and other content in the layout spec to expand and result in scrollable content.
+ * Horizontal: The constrainedSize is interpreted as having unbounded .width (CGFLOAT_MAX), ...
+ * Vertical & Horizontal: the constrainedSize is interpreted as unbounded in both directions.
+ * @default ASScrollDirectionVerticalDirections
+ */
+@property (nonatomic, assign) ASScrollDirection scrollableDirections;
 
 @end
 
