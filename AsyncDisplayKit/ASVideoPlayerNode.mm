@@ -363,7 +363,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     _fullScreenButtonNode.style.preferredSize = CGSizeMake(16.0, 22.0);
     
     if (_delegateFlags.delegateFullScreenButtonImage) {
-      [_fullScreenButtonNode setImage:[_delegate videoPlayerNodeFullScreenButtonImage:self] forState:ASControlStateNormal];
+      [_fullScreenButtonNode setImage:[_delegate videoPlayerNodeFullScreenButtonImage:self] forState:UIControlStateNormal];
     }
 
     [_fullScreenButtonNode addTarget:self action:@selector(didTapFullScreenButton:) forControlEvents:ASControlNodeEventTouchUpInside];

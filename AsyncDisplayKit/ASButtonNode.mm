@@ -303,7 +303,7 @@
 
 
 #if TARGET_OS_IOS
-- (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(ASControlState)state
+- (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(UIControlState)state
 {
   NSDictionary *attributes = @{
                                NSFontAttributeName: font ? : [UIFont systemFontOfSize:[UIFont buttonFontSize]],
@@ -316,23 +316,23 @@
 }
 #endif
 
-- (NSAttributedString *)attributedTitleForState:(ASControlState)state
+- (NSAttributedString *)attributedTitleForState:(UIControlState)state
 {
   ASDN::MutexLocker l(__instanceLock__);
   switch (state) {
-    case ASControlStateNormal:
+    case UIControlStateNormal:
       return _normalAttributedTitle;
       
-    case ASControlStateHighlighted:
+    case UIControlStateHighlighted:
       return _highlightedAttributedTitle;
       
-    case ASControlStateSelected:
+    case UIControlStateSelected:
       return _selectedAttributedTitle;
         
-    case ASControlStateSelected | ASControlStateHighlighted:
+    case UIControlStateSelected | UIControlStateHighlighted:
       return _selectedHighlightedAttributedTitle;
       
-    case ASControlStateDisabled:
+    case UIControlStateDisabled:
       return _disabledAttributedTitle;
           
     default:
@@ -340,27 +340,27 @@
   }
 }
 
-- (void)setAttributedTitle:(NSAttributedString *)title forState:(ASControlState)state
+- (void)setAttributedTitle:(NSAttributedString *)title forState:(UIControlState)state
 {
   ASDN::MutexLocker l(__instanceLock__);
   switch (state) {
-    case ASControlStateNormal:
+    case UIControlStateNormal:
       _normalAttributedTitle = [title copy];
       break;
       
-    case ASControlStateHighlighted:
+    case UIControlStateHighlighted:
       _highlightedAttributedTitle = [title copy];
       break;
       
-    case ASControlStateSelected:
+    case UIControlStateSelected:
       _selectedAttributedTitle = [title copy];
       break;
           
-    case ASControlStateSelected | ASControlStateHighlighted:
+    case UIControlStateSelected | UIControlStateHighlighted:
       _selectedHighlightedAttributedTitle = [title copy];
       break;
       
-    case ASControlStateDisabled:
+    case UIControlStateDisabled:
       _disabledAttributedTitle = [title copy];
       break;
       
@@ -371,23 +371,23 @@
   [self updateTitle];
 }
 
-- (UIImage *)imageForState:(ASControlState)state
+- (UIImage *)imageForState:(UIControlState)state
 {
   ASDN::MutexLocker l(__instanceLock__);
   switch (state) {
-    case ASControlStateNormal:
+    case UIControlStateNormal:
       return _normalImage;
       
-    case ASControlStateHighlighted:
+    case UIControlStateHighlighted:
       return _highlightedImage;
       
-    case ASControlStateSelected:
+    case UIControlStateSelected:
       return _selectedImage;
       
-    case ASControlStateSelected | ASControlStateHighlighted:
+    case UIControlStateSelected | UIControlStateHighlighted:
       return _selectedHighlightedImage;
           
-    case ASControlStateDisabled:
+    case UIControlStateDisabled:
       return _disabledImage;
       
     default:
@@ -395,27 +395,27 @@
   }
 }
 
-- (void)setImage:(UIImage *)image forState:(ASControlState)state
+- (void)setImage:(UIImage *)image forState:(UIControlState)state
 {
   ASDN::MutexLocker l(__instanceLock__);
   switch (state) {
-    case ASControlStateNormal:
+    case UIControlStateNormal:
       _normalImage = image;
       break;
       
-    case ASControlStateHighlighted:
+    case UIControlStateHighlighted:
       _highlightedImage = image;
       break;
       
-    case ASControlStateSelected:
+    case UIControlStateSelected:
       _selectedImage = image;
       break;
     
-    case ASControlStateSelected | ASControlStateHighlighted:
+    case UIControlStateSelected | UIControlStateHighlighted:
       _selectedHighlightedImage = image;
       break;
           
-    case ASControlStateDisabled:
+    case UIControlStateDisabled:
       _disabledImage = image;
       break;
       
@@ -425,23 +425,23 @@
   [self updateImage];
 }
 
-- (UIImage *)backgroundImageForState:(ASControlState)state
+- (UIImage *)backgroundImageForState:(UIControlState)state
 {
   ASDN::MutexLocker l(__instanceLock__);
   switch (state) {
-    case ASControlStateNormal:
+    case UIControlStateNormal:
       return _normalBackgroundImage;
     
-    case ASControlStateHighlighted:
+    case UIControlStateHighlighted:
       return _highlightedBackgroundImage;
     
-    case ASControlStateSelected:
+    case UIControlStateSelected:
       return _selectedBackgroundImage;
     
-    case ASControlStateSelected | ASControlStateHighlighted:
+    case UIControlStateSelected | UIControlStateHighlighted:
       return _selectedHighlightedBackgroundImage;
     
-    case ASControlStateDisabled:
+    case UIControlStateDisabled:
       return _disabledBackgroundImage;
     
     default:
@@ -449,27 +449,27 @@
   }
 }
 
-- (void)setBackgroundImage:(UIImage *)image forState:(ASControlState)state
+- (void)setBackgroundImage:(UIImage *)image forState:(UIControlState)state
 {
   ASDN::MutexLocker l(__instanceLock__);
   switch (state) {
-    case ASControlStateNormal:
+    case UIControlStateNormal:
       _normalBackgroundImage = image;
       break;
       
-    case ASControlStateHighlighted:
+    case UIControlStateHighlighted:
       _highlightedBackgroundImage = image;
       break;
       
-    case ASControlStateSelected:
+    case UIControlStateSelected:
       _selectedBackgroundImage = image;
       break;
           
-    case ASControlStateSelected | ASControlStateHighlighted:
+    case UIControlStateSelected | UIControlStateHighlighted:
       _selectedHighlightedBackgroundImage = image;
       break;
       
-    case ASControlStateDisabled:
+    case UIControlStateDisabled:
       _disabledBackgroundImage = image;
       break;
       

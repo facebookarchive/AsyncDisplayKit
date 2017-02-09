@@ -431,11 +431,11 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
                                                                                  borderWidth:3];
   ASButtonNode *btn = [[ASButtonNode alloc] init];
   btn.contentEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
-  [btn setAttributedTitle:[ASLayoutElementInspectorCell attributedStringFromString:title] forState:ASControlStateNormal];
-  [btn setAttributedTitle:[ASLayoutElementInspectorCell attributedStringFromString:title withTextColor:[UIColor lightGrayColor]] forState:ASControlStateDisabled];
-  [btn setBackgroundImage:clearStretchBtnImg forState:ASControlStateNormal];
-  [btn setBackgroundImage:orangeStretchBtnImg forState:ASControlStateSelected];
-  [btn setBackgroundImage:greyStretchBtnImg forState:ASControlStateDisabled];
+  [btn setAttributedTitle:[ASLayoutElementInspectorCell attributedStringFromString:title] forState:UIControlStateNormal];
+  [btn setAttributedTitle:[ASLayoutElementInspectorCell attributedStringFromString:title withTextColor:[UIColor lightGrayColor]] forState:UIControlStateDisabled];
+  [btn setBackgroundImage:clearStretchBtnImg forState:UIControlStateNormal];
+  [btn setBackgroundImage:orangeStretchBtnImg forState:UIControlStateSelected];
+  [btn setBackgroundImage:greyStretchBtnImg forState:UIControlStateDisabled];
   
   return btn;
 }
@@ -485,9 +485,9 @@ __weak static ASLayoutElementInspectorCell *__currentlyOpenedCell = nil;
     int index = 0;
     for (NSString *optionStr in options) {
       ASButtonNode *btn = [[ASButtonNode alloc] init];
-      [btn setAttributedTitle:[ASLayoutElementInspectorCell attributedStringFromString:optionStr] forState:ASControlStateNormal];
+      [btn setAttributedTitle:[ASLayoutElementInspectorCell attributedStringFromString:optionStr] forState:UIControlStateNormal];
       [btn setAttributedTitle:[ASLayoutElementInspectorCell attributedStringFromString:optionStr withTextColor:[UIColor redColor]]
-                     forState:ASControlStateSelected];
+                     forState:UIControlStateSelected];
       [btn addTarget:self action:@selector(enumOptionSelected:) forControlEvents:ASControlNodeEventTouchUpInside];
       btn.selected = (index == currentOption) ? YES : NO;
       [_textNodes addObject:btn];
