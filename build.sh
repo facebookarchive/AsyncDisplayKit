@@ -7,7 +7,7 @@ DERIVED_DATA_PATH="~/ASDKDerivedData"
 
 # It is pitch black.
 set -e
-function trap_handler() {
+function trap_handler {
     echo -e "\n\nOh no! You walked directly into the slavering fangs of a lurking grue!"
     echo "**** You have died ****"
     exit 255
@@ -16,12 +16,12 @@ trap trap_handler INT TERM EXIT
 
 # Derived data handling
 [ -d DERIVED_DATA_PATH ] || mkdir DERIVED_DATA_PATH
-function clean_derived_data() {
-    rm -rf "$DERIVED_DATA_PATH"
+function clean_derived_data {
+    eval find $DERIVED_DATA_PATH -mindepth 1 -delete
 }
 
 # Build example
-function build_example() {
+function build_example {
     example="$1"
 
     clean_derived_data
@@ -103,7 +103,6 @@ if [ "$MODE" = "examples" ]; then
     for example in examples/*/; do
         echo "Building (examples) $example."
 
-        clean_derived_data
         build_example $example
     done
     trap - EXIT
@@ -118,7 +117,6 @@ if [ "$MODE" = "examples-pt1" ]; then
     for example in $((find ./examples -type d -maxdepth 1 \( ! -iname ".*" \)) | head -6 | head); do
         echo "Building (examples-pt1) $example."
 
-        clean_derived_data
         build_example $example
     done
     trap - EXIT
@@ -133,7 +131,6 @@ if [ "$MODE" = "examples-pt2" ]; then
     for example in $((find ./examples -type d -maxdepth 1 \( ! -iname ".*" \)) | head -12 | tail -6 | head); do
         echo "Building $example (examples-pt2)."
 
-        clean_derived_data
         build_example $example
     done
     trap - EXIT
@@ -148,7 +145,6 @@ if [ "$MODE" = "examples-pt3" ]; then
     for example in $((find ./examples -type d -maxdepth 1 \( ! -iname ".*" \)) | head -7 | head); do
         echo "Building $example (examples-pt3)."
 
-        clean_derived_data
         build_example $example
     done
     trap - EXIT
@@ -163,8 +159,7 @@ if [ "$MODE" = "examples-extra" ]; then
     for example in $((find ./examples_extra -type d -maxdepth 1 \( ! -iname ".*" \)) | head -7 | head); do
         echo "Building $example (examples-extra)."
 
-        clean_derived_data
-        build_example "$example"
+        build_example $example
     done
     trap - EXIT
     exit 0
@@ -176,8 +171,7 @@ if [ "$MODE" = "example" ]; then
     #Update cocoapods repo
     pod repo update master
 
-    clean_derived_data
-    build_example "$2"
+    build_example $2
     trap - EXIT
     exit 0
 fi
