@@ -70,7 +70,7 @@ if [ "$MODE" = "examples" ]; then
               -sdk "$SDK" \
               -destination "$PLATFORM" \
               -derivedDataPath ~/ \
-              build | xcpretty $FORMATTER
+              clean build | xcpretty $FORMATTER
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
           local_repo=`pwd`
