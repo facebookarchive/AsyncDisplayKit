@@ -19,6 +19,10 @@
 #import <map>
 #import <atomic>
 
+#if YOGA
+  #import <Yoga/Yoga.h>
+#endif
+
 extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> element, void(^block)(id<ASLayoutElement> element))
 {
   if (element) {

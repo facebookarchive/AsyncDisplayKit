@@ -27,9 +27,9 @@
 #define AS_TARGET_OS_IOS TARGET_OS_IPHONE
 
 // If Yoga is available, make it available anywhere we use ASAvailability.
-// This reduces Yoga-specific code in other files.
-#if YOGA
-  #import <Yoga/Yoga.h>
+// This reduces Yoga-specific code in other files.// If Yoga is available, make it available anywhere we use ASAvailability.
+#if __has_include(<Yoga/Yoga.h>)
+#define YOGA 1
 #endif
 
 #if AS_TARGET_OS_OSX
