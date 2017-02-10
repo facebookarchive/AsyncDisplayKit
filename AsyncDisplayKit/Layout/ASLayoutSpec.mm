@@ -12,7 +12,6 @@
 #import <AsyncDisplayKit/ASLayoutSpecPrivate.h>
 
 #import <AsyncDisplayKit/ASLayoutSpec+Subclasses.h>
-#import <AsyncDisplayKit/ASLayoutSpec+Debug.h>
 
 #import <AsyncDisplayKit/ASLayoutElementStylePrivate.h>
 #import <AsyncDisplayKit/ASTraitCollection.h>
@@ -70,45 +69,7 @@
 
 #pragma mark - Final LayoutElement
 
-@synthesize isFinalLayoutElement = _isFinalLayoutElement;
-
-- (id<ASLayoutElement>)finalLayoutElement
-{
-#if ASLAYOUTSPEC_DEBUG
-  if (ASLayoutElementGetCurrentContext().needsVisualizeNode && !self.neverShouldVisualize) {
-    return [[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:self];
-  } else {
-    return self;
-  }
-#else
-  return self;
-#endif
-}
-
-- (void)recursivelySetShouldVisualize:(BOOL)visualize
-{
-  NSMutableArray *mutableChildren = [self.children mutableCopy];
-
-#if ASLAYOUTSPEC_DEBUG
-  for (id<ASLayoutElement>layoutElement in self.children) {
-    if (layoutElement.layoutElementType == ASLayoutElementTypeLayoutSpec) {
-
-      ASLayoutSpec *layoutSpec = (ASLayoutSpec *)layoutElement;
-      [mutableChildren replaceObjectAtIndex:[mutableChildren indexOfObjectIdenticalTo:layoutSpec]
-                                 withObject:[[ASLayoutSpecVisualizerNode alloc] initWithLayoutSpec:layoutSpec]];
-      
-      [layoutSpec recursivelySetShouldVisualize:visualize];
-      layoutSpec.shouldVisualize = visualize;
-    }
-  }
-#endif
-  
-  if ([mutableChildren count] == 1) {         // HACK for wrapper layoutSpecs (e.g. insetLayoutSpec)
-    self.child = mutableChildren[0];
-  } else if ([mutableChildren count] > 1) {
-    self.children = mutableChildren;
-  }
-}
+ASLayoutElementFinalLayoutElementDefault
 
 #pragma mark - Style
 
@@ -160,9 +121,6 @@
   ASDisplayNodeAssert(_childrenArray.count < 2, @"This layout spec does not support more than one child. Use the setChildren: or the setChild:AtIndex: API");
  
   if (child) {
-    if (child.layoutElementType == ASLayoutElementTypeLayoutSpec) {
-      [(ASLayoutSpec *)child setShouldVisualize:self.shouldVisualize];
-    }
     id<ASLayoutElement> finalLayoutElement = [self layoutElementToAddFromLayoutElement:child];
     if (finalLayoutElement) {
       _childrenArray[0] = finalLayoutElement;
@@ -192,11 +150,7 @@
   NSUInteger i = 0;
   for (id<ASLayoutElement> child in children) {
     ASDisplayNodeAssert([child conformsToProtocol:NSProtocolFromString(@"ASLayoutElement")], @"Child %@ of spec %@ is not an ASLayoutElement!", child, self);
-    id <ASLayoutElement> finalLayoutElement = [self layoutElementToAddFromLayoutElement:child];
-    if (finalLayoutElement.layoutElementType == ASLayoutElementTypeLayoutSpec) {
-      [(ASLayoutSpec *)finalLayoutElement setShouldVisualize:self.shouldVisualize];
-    }
-    _childrenArray[i] = finalLayoutElement;
+    _childrenArray[i] = [self layoutElementToAddFromLayoutElement:child];
     i += 1;
   }
 }

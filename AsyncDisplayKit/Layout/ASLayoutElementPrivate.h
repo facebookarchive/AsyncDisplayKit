@@ -24,7 +24,6 @@
 
 struct ASLayoutElementContext {
   int32_t transitionID;
-  BOOL needsVisualizeNode;
 };
 
 extern int32_t const ASLayoutElementContextInvalidTransitionID;
@@ -35,7 +34,7 @@ extern struct ASLayoutElementContext const ASLayoutElementContextNull;
 
 extern BOOL ASLayoutElementContextIsNull(struct ASLayoutElementContext context);
 
-extern struct ASLayoutElementContext ASLayoutElementContextMake(int32_t transitionID, BOOL needsVisualizeNode);
+extern struct ASLayoutElementContext ASLayoutElementContextMake(int32_t transitionID);
 
 extern void ASLayoutElementSetCurrentContext(struct ASLayoutElementContext context);
 

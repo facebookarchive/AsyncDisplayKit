@@ -42,11 +42,10 @@ CGSize const ASLayoutElementParentSizeUndefined = {ASLayoutElementParentDimensio
 int32_t const ASLayoutElementContextInvalidTransitionID = 0;
 int32_t const ASLayoutElementContextDefaultTransitionID = ASLayoutElementContextInvalidTransitionID + 1;
 
-static inline ASLayoutElementContext _ASLayoutElementContextMake(int32_t transitionID, BOOL needsVisualizeNode)
+static inline ASLayoutElementContext _ASLayoutElementContextMake(int32_t transitionID)
 {
   struct ASLayoutElementContext context;
   context.transitionID = transitionID;
-  context.needsVisualizeNode = needsVisualizeNode;
   return context;
 }
 
@@ -55,17 +54,17 @@ static inline BOOL _IsValidTransitionID(int32_t transitionID)
   return transitionID > ASLayoutElementContextInvalidTransitionID;
 }
 
-struct ASLayoutElementContext const ASLayoutElementContextNull = _ASLayoutElementContextMake(ASLayoutElementContextInvalidTransitionID, NO);
+struct ASLayoutElementContext const ASLayoutElementContextNull = _ASLayoutElementContextMake(ASLayoutElementContextInvalidTransitionID);
 
 BOOL ASLayoutElementContextIsNull(struct ASLayoutElementContext context)
 {
   return !_IsValidTransitionID(context.transitionID);
 }
 
-ASLayoutElementContext ASLayoutElementContextMake(int32_t transitionID, BOOL needsVisualizeNode)
+ASLayoutElementContext ASLayoutElementContextMake(int32_t transitionID)
 {
   NSCAssert(_IsValidTransitionID(transitionID), @"Invalid transition ID");
-  return _ASLayoutElementContextMake(transitionID, needsVisualizeNode);
+  return _ASLayoutElementContextMake(transitionID);
 }
 
 // Note: This is a non-recursive static lock. If it needs to be recursive, use ASDISPLAYNODE_MUTEX_RECURSIVE_INITIALIZER

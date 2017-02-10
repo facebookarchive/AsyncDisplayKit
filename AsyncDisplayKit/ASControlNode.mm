@@ -15,7 +15,6 @@
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASControlTargetAction.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
-#import <AsyncDisplayKit/ASLayoutElementInspectorNode.h>
 #import <AsyncDisplayKit/ASThread.h>
 
 // UIControl allows dragging some distance outside of the control itself during
@@ -465,22 +464,4 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode) {
 {
   return _debugHighlightOverlay;
 }
-
-// methods for visualizing ASLayoutSpecs
-- (void)setHierarchyState:(ASHierarchyState)hierarchyState
-{
-  [super setHierarchyState:hierarchyState];
-  
-  if (self.shouldVisualizeLayoutSpecs) {
-    [self addTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];
-  } else {
-    [self removeTarget:self action:@selector(inspectElement) forControlEvents:ASControlNodeEventTouchUpInside];
-  }
-}
-
-- (void)inspectElement
-{
-  [ASLayoutElementInspectorNode sharedInstance].layoutElementToEdit = self;
-}
-
 @end
