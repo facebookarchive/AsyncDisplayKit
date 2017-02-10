@@ -49,7 +49,9 @@ typedef NS_OPTIONS(NSUInteger, ASHierarchyState)
   /** One of the supernodes of this node is performing a transition.
       Any layout calculated during this state should not be applied immediately, but pending until later. */
   ASHierarchyStateLayoutPending           = 1 << 3,
-  ASHierarchyStateVisualizeLayout         = 1 << 4
+  ASHierarchyStateYogaLayoutEnabled       = 1 << 4,
+  ASHierarchyStateYogaLayoutMeasuring     = 1 << 5,
+  ASHierarchyStateVisualizeLayout         = 1 << 6
 };
 
 ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState hierarchyState)
@@ -59,7 +61,17 @@ ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesLayoutPending(ASHierarchyState
 
 ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesRangeManaged(ASHierarchyState hierarchyState)
 {
-    return ((hierarchyState & ASHierarchyStateRangeManaged) == ASHierarchyStateRangeManaged);
+  return ((hierarchyState & ASHierarchyStateRangeManaged) == ASHierarchyStateRangeManaged);
+}
+
+ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesYogaLayoutMeasuring(ASHierarchyState hierarchyState)
+{
+  return ((hierarchyState & ASHierarchyStateYogaLayoutMeasuring) == ASHierarchyStateYogaLayoutMeasuring);
+}
+
+ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesYogaLayoutEnabled(ASHierarchyState hierarchyState)
+{
+  return ((hierarchyState & ASHierarchyStateYogaLayoutEnabled) == ASHierarchyStateYogaLayoutEnabled);
 }
 
 ASDISPLAYNODE_INLINE BOOL ASHierarchyStateIncludesVisualizeLayout(ASHierarchyState hierarchyState)

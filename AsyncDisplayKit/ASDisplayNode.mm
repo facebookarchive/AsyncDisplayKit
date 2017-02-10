@@ -427,6 +427,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   _subnodes = nil;
 
+#if YOGA
+  if (_yogaNode != NULL) {
+    YGNodeFree(_yogaNode);
+  }
+#endif
+
   // TODO: Remove this? If supernode isn't already nil, this method isn't dealloc-safe anyway.
   [self __setSupernode:nil];
 }
@@ -1070,7 +1076,8 @@ ASLayoutElementFinalLayoutElementDefault
                      restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, ASLayoutElementSizeResolve(self.style.size, parentSize));
+  ASSizeRange styleAndParentSize = ASLayoutElementSizeResolve(self.style.size, parentSize);
+  const ASSizeRange resolvedRange = ASSizeRangeIntersect(constrainedSize, styleAndParentSize);
   return [self calculateLayoutThatFits:resolvedRange];
 }
 
@@ -1079,6 +1086,14 @@ ASLayoutElementFinalLayoutElementDefault
   __ASDisplayNodeCheckForLayoutMethodOverrides;
 
   ASDN::MutexLocker l(__instanceLock__);
+
+#if YOGA /* YOGA */
+  if (ASHierarchyStateIncludesYogaLayoutEnabled(_hierarchyState) == YES &&
+      ASHierarchyStateIncludesYogaLayoutMeasuring(_hierarchyState) == NO) {
+    ASDN::MutexUnlocker ul(__instanceLock__);
+    return [self calculateLayoutFromYogaRoot:constrainedSize];
+  }
+#endif /* YOGA */
 
   // Manual size calculation via calculateSizeThatFits:
   if (((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) ||
@@ -3189,11 +3204,9 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       // Entering layout pending state
     } else {
       // Leaving layout pending state, reset related properties
-      {
-        ASDN::MutexLocker l(__instanceLock__);
-        _pendingTransitionID = ASLayoutElementContextInvalidTransitionID;
-        _pendingLayoutTransition = nil;
-      }
+      ASDN::MutexLocker l(__instanceLock__);
+      _pendingTransitionID = ASLayoutElementContextInvalidTransitionID;
+      _pendingLayoutTransition = nil;
     }
   }
 

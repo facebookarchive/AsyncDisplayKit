@@ -157,6 +157,8 @@ ASDISPLAYNODE_EXTERN_C_END
 
 #pragma mark - Deprecated
 
+#define ASLayoutable ASLayoutElement
+
 /**
  * @abstract Calculate a layout based on given size range.
  *
@@ -259,7 +261,6 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  */
 @property (nonatomic, assign, readwrite) ASDimension maxWidth;
 
-
 #pragma mark - ASLayoutElementStyleSizeHelpers
 
 /**
@@ -324,7 +325,6 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 @property (nonatomic, assign, readwrite) ASLayoutSize maxLayoutSize;
 
 @end
-
 
 #pragma mark - ASLayoutElementStylability
 
