@@ -285,6 +285,51 @@ if [ "$MODE" = "examples-extra" ]; then
     exit 0
 fi
 
+if [ "$MODE" = "example" ]; then
+    echo "Verifying that all AsyncDisplayKit examples compile."
+    #Update cocoapods repo
+    pod repo update master
+
+    example="examples/$2"
+    echo "Building (examples) $example."
+
+    if [ -f "${example}/Podfile" ]; then
+        echo "Using CocoaPods"
+        if [ -f "${example}/Podfile.lock" ]; then
+            rm "$example/Podfile.lock"
+        fi
+        rm -rf "$example/Pods"
+        pod install --project-directory=$example
+
+        set -o pipefail && xcodebuild \
+            -workspace "${example}/Sample.xcworkspace" \
+            -scheme Sample \
+            -sdk "$SDK" \
+            -destination "$PLATFORM" \
+            -derivedDataPath "$DERIVED_DATA_PATH" \
+            build | xcpretty $FORMATTER
+    elif [ -f "${example}/Cartfile" ]; then
+        echo "Using Carthage"
+        local_repo=`pwd`
+        current_branch=`git rev-parse --abbrev-ref HEAD`
+        cd $example
+
+        echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
+        carthage update --platform iOS
+
+        set -o pipefail && xcodebuild \
+            -project "Sample.xcodeproj" \
+            -scheme Sample \
+            -sdk "$SDK" \
+            -destination "$PLATFORM" \
+            build | xcpretty $FORMATTER
+
+        cd ../..
+    fi
+    trap - EXIT
+    exit 0
+fi
+
 if [ "$MODE" = "life-without-cocoapods" ]; then
     echo "Verifying that AsyncDisplayKit functions as a static library."
 
