@@ -59,6 +59,7 @@ Pod::Spec.new do |spec|
   end
   
   spec.subspec 'Yoga' do |yoga|
+      yoga.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) YOGA=1' }
       yoga.dependency 'Yoga', '1.0.2'
       yoga.dependency 'AsyncDisplayKit/Core'
   end
