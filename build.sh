@@ -56,6 +56,10 @@ if [ "$MODE" = "examples" ]; then
     for example in examples/*/; do
         echo "Building (examples) $example."
 
+        rm -rf "~/ModuleCache"
+        rm -rf "~/Build"
+        rm -rf "~/Info.plist"
+
         if [ -f "${example}/Podfile" ]; then
           echo "Using CocoaPods"
           if [ -f "${example}/Podfile.lock" ]; then
