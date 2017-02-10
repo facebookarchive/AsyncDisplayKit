@@ -126,9 +126,9 @@
 - (void)setMuteButtonIcon
 {
   if (_videoPlayerNode.muted) {
-    [_muteButtonNode setImage:[UIImage imageNamed:@"ico-mute"] forState:ASControlStateNormal];
+    [_muteButtonNode setImage:[UIImage imageNamed:@"ico-mute"] forState:UIControlStateNormal];
   } else {
-    [_muteButtonNode setImage:[UIImage imageNamed:@"ico-unmute"] forState:ASControlStateNormal];
+    [_muteButtonNode setImage:[UIImage imageNamed:@"ico-unmute"] forState:UIControlStateNormal];
   }
 }
 

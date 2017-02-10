@@ -39,7 +39,7 @@ static NSString *kLinkAttributeName = @"PlaceKittenNodeLinkAttributeName";
   [self addSubnode:_textNode];
   
   _buttonNode = [[ASButtonNode alloc] init];
-  [_buttonNode setAttributedTitle:[[NSAttributedString alloc] initWithString:@"Close"] forState:ASControlStateNormal];
+  [_buttonNode setAttributedTitle:[[NSAttributedString alloc] initWithString:@"Close"] forState:UIControlStateNormal];
   [self addSubnode:_buttonNode];
   
   self.backgroundColor = [UIColor lightGrayColor];
