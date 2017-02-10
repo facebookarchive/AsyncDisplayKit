@@ -13,6 +13,10 @@
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
 #import <AsyncDisplayKit/ASEventLog.h>
 
+#if YOGA
+#import <Yoga/Yoga.h>
+#endif
+
 NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN

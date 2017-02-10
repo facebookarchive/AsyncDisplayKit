@@ -10,6 +10,8 @@
 
 #import <CoreFoundation/CFBase.h>
 
+#pragma once
+
 #ifndef kCFCoreFoundationVersionNumber_iOS_9_0
   #define kCFCoreFoundationVersionNumber_iOS_9_0 1240.10
 #endif
@@ -24,18 +26,10 @@
 #define AS_TARGET_OS_OSX (!(TARGET_OS_IOS || TARGET_OS_TV || TARGET_OS_WATCH))
 #define AS_TARGET_OS_IOS TARGET_OS_IPHONE
 
-#ifndef YOGA_HEADER_PATH
-  #define YOGA_HEADER_PATH <Yoga/Yoga.h>
-#endif
-
-#ifndef YOGA
-  #define YOGA __has_include(YOGA_HEADER_PATH)
-#endif
-
 // If Yoga is available, make it available anywhere we use ASAvailability.
-// This reduces Yoga-specific code in other files.
-#if YOGA
-  #import YOGA_HEADER_PATH
+// This reduces Yoga-specific code in other files.// If Yoga is available, make it available anywhere we use ASAvailability.
+#if __has_include(<Yoga/Yoga.h>)
+#define YOGA 1
 #endif
 
 #if AS_TARGET_OS_OSX

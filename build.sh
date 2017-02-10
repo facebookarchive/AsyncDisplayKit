@@ -56,6 +56,11 @@ if [ "$MODE" = "examples" ]; then
     for example in examples/*/; do
         echo "Building (examples) $example."
 
+        rm -rf ~/ModuleCache
+        rm -rf ~/Build
+        rm -rf ~/Info.plist
+        rm -rf ~/Logs
+
         if [ -f "${example}/Podfile" ]; then
           echo "Using CocoaPods"
           if [ -f "${example}/Podfile.lock" ]; then
@@ -70,7 +75,7 @@ if [ "$MODE" = "examples" ]; then
               -sdk "$SDK" \
               -destination "$PLATFORM" \
               -derivedDataPath ~/ \
-              build | xcpretty $FORMATTER
+              clean build | xcpretty $FORMATTER
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
           local_repo=`pwd`
