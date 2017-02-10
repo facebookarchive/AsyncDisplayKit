@@ -15,6 +15,49 @@ trap trap_handler INT TERM EXIT
 
 DERIVED_DATA_PATH="~/ASDKDerivedData"
 [ -d DERIVED_DATA_PATH ] || mkdir DERIVED_DATA_PATH
+function clean_derived_data() {
+    rm -rf "$DERIVED_DATA_PATH"
+}
+
+function build_example() {
+    example="$1"
+
+    clean_derived_data
+    
+    if [ -f "${example}/Podfile" ]; then
+        echo "Using CocoaPods"
+        if [ -f "${example}/Podfile.lock" ]; then
+            rm "$example/Podfile.lock"
+        fi
+        rm -rf "$example/Pods"
+        pod install --project-directory=$example
+
+        set -o pipefail && xcodebuild \
+            -workspace "${example}/Sample.xcworkspace" \
+            -scheme Sample \
+            -sdk "$SDK" \
+            -destination "$PLATFORM" \
+            -derivedDataPath "$DERIVED_DATA_PATH" \
+            build | xcpretty $FORMATTER
+    elif [ -f "${example}/Cartfile" ]; then
+        echo "Using Carthage"
+        local_repo=`pwd`
+        current_branch=`git rev-parse --abbrev-ref HEAD`
+        cd $example
+
+        echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
+        carthage update --platform iOS
+
+        set -o pipefail && xcodebuild \
+            -project "Sample.xcodeproj" \
+            -scheme Sample \
+            -sdk "$SDK" \
+            -destination "$PLATFORM" \
+            build | xcpretty $FORMATTER
+
+        cd ../..
+    fi
+}
 
 MODE="$1"
 
@@ -58,44 +101,9 @@ if [ "$MODE" = "examples" ]; then
     for example in examples/*/; do
         echo "Building (examples) $example."
 
-        rm -rf ~/ModuleCache
-        rm -rf ~/Build
-        rm -rf ~/Info.plist
-        rm -rf ~/Logs
+        clean_derived_data
 
-        if [ -f "${example}/Podfile" ]; then
-          echo "Using CocoaPods"
-          if [ -f "${example}/Podfile.lock" ]; then
-              rm "$example/Podfile.lock"
-          fi
-          rm -rf "$example/Pods"
-          pod install --project-directory=$example
-
-          set -o pipefail && xcodebuild \
-              -workspace "${example}/Sample.xcworkspace" \
-              -scheme Sample \
-              -sdk "$SDK" \
-              -destination "$PLATFORM" \
-              -derivedDataPath "$DERIVED_DATA_PATH" \
-              build | xcpretty $FORMATTER
-        elif [ -f "${example}/Cartfile" ]; then
-          echo "Using Carthage"
-          local_repo=`pwd`
-          current_branch=`git rev-parse --abbrev-ref HEAD`
-          cd $example
-
-          echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
-          carthage update --platform iOS
-
-          set -o pipefail && xcodebuild \
-              -project "Sample.xcodeproj" \
-              -scheme Sample \
-              -sdk "$SDK" \
-              -destination "$PLATFORM" \
-              build | xcpretty $FORMATTER
-
-          cd ../..
-        fi
+        build_example $example
     done
     trap - EXIT
     exit 0
@@ -247,39 +255,7 @@ if [ "$MODE" = "examples-extra" ]; then
     for example in $((find ./examples_extra -type d -maxdepth 1 \( ! -iname ".*" \)) | head -7 | head); do
         echo "Building $example (examples-extra)."
 
-        if [ -f "${example}/Podfile" ]; then
-          echo "Using CocoaPods"
-          if [ -f "${example}/Podfile.lock" ]; then
-              rm "$example/Podfile.lock"
-          fi
-          rm -rf "$example/Pods"
-          pod install --project-directory=$example
-
-          set -o pipefail && xcodebuild \
-              -workspace "${example}/Sample.xcworkspace" \
-              -scheme Sample \
-              -sdk "$SDK" \
-              -destination "$PLATFORM" \
-              -derivedDataPath "$DERIVED_DATA_PATH" \
-              build | xcpretty $FORMATTER
-        elif [ -f "${example}/Cartfile" ]; then
-          echo "Using Carthage"
-          local_repo=`pwd`
-          current_branch=`git rev-parse --abbrev-ref HEAD`
-          cd $example
-
-          echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
-          carthage update --platform iOS
-
-          set -o pipefail && xcodebuild \
-              -project "Sample.xcodeproj" \
-              -scheme Sample \
-              -sdk "$SDK" \
-              -destination "$PLATFORM" \
-              build | xcpretty $FORMATTER
-
-          cd ../..
-        fi
+        build_example "examples_extra/$example"
     done
     trap - EXIT
     exit 0
@@ -290,42 +266,7 @@ if [ "$MODE" = "example" ]; then
     #Update cocoapods repo
     pod repo update master
 
-    example="examples/$2"
-    echo "Building (examples) $example."
-
-    if [ -f "${example}/Podfile" ]; then
-        echo "Using CocoaPods"
-        if [ -f "${example}/Podfile.lock" ]; then
-            rm "$example/Podfile.lock"
-        fi
-        rm -rf "$example/Pods"
-        pod install --project-directory=$example
-
-        set -o pipefail && xcodebuild \
-            -workspace "${example}/Sample.xcworkspace" \
-            -scheme Sample \
-            -sdk "$SDK" \
-            -destination "$PLATFORM" \
-            -derivedDataPath "$DERIVED_DATA_PATH" \
-            build | xcpretty $FORMATTER
-    elif [ -f "${example}/Cartfile" ]; then
-        echo "Using Carthage"
-        local_repo=`pwd`
-        current_branch=`git rev-parse --abbrev-ref HEAD`
-        cd $example
-
-        echo "git \"file://${local_repo}\" \"${current_branch}\"" > "Cartfile"
-        carthage update --platform iOS
-
-        set -o pipefail && xcodebuild \
-            -project "Sample.xcodeproj" \
-            -scheme Sample \
-            -sdk "$SDK" \
-            -destination "$PLATFORM" \
-            build | xcpretty $FORMATTER
-
-        cd ../..
-    fi
+    build_example "examples/$2"
     trap - EXIT
     exit 0
 fi
