@@ -60,8 +60,8 @@
   UIColor *buttonColor = [UIColor blueColor];
   
   _buttonNode = [[ASButtonNode alloc] init];
-  [_buttonNode setTitle:buttonTitle withFont:buttonFont withColor:buttonColor forState:ASControlStateNormal];
-  [_buttonNode setTitle:buttonTitle withFont:buttonFont withColor:[buttonColor colorWithAlphaComponent:0.5] forState:ASControlStateHighlighted];
+  [_buttonNode setTitle:buttonTitle withFont:buttonFont withColor:buttonColor forState:UIControlStateNormal];
+  [_buttonNode setTitle:buttonTitle withFont:buttonFont withColor:[buttonColor colorWithAlphaComponent:0.5] forState:UIControlStateHighlighted];
   
   
   // Some debug colors

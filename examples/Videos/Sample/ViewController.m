@@ -147,8 +147,8 @@
   ASButtonNode *playButtonNode = [[ASButtonNode alloc] init];
   
   UIImage *image = [UIImage imageNamed:@"playButton@2x.png"];
-  [playButtonNode setImage:image forState:ASControlStateNormal];
-  [playButtonNode setImage:[UIImage imageNamed:@"playButtonSelected@2x.png"] forState:ASControlStateHighlighted];
+  [playButtonNode setImage:image forState:UIControlStateNormal];
+  [playButtonNode setImage:[UIImage imageNamed:@"playButtonSelected@2x.png"] forState:UIControlStateHighlighted];
   
   // Change placement of play button if necessary
   //playButtonNode.contentHorizontalAlignment = ASHorizontalAlignmentStart;
