@@ -13,6 +13,8 @@ function trap_handler() {
 }
 trap trap_handler INT TERM EXIT
 
+DERIVED_DATA_PATH="~/ASDKDerivedData"
+[ -d DERIVED_DATA_PATH ] || mkdir DERIVED_DATA_PATH
 
 MODE="$1"
 
@@ -74,8 +76,8 @@ if [ "$MODE" = "examples" ]; then
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
-              -derivedDataPath ~/ \
-              clean build | xcpretty $FORMATTER
+              -derivedDataPath "$DERIVED_DATA_PATH" \
+              build | xcpretty $FORMATTER
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
           local_repo=`pwd`
@@ -120,7 +122,7 @@ if [ "$MODE" = "examples-pt1" ]; then
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
-              -derivedDataPath ~/ \
+              -derivedDataPath "$DERIVED_DATA_PATH" \
               build | xcpretty $FORMATTER
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
@@ -166,7 +168,7 @@ if [ "$MODE" = "examples-pt2" ]; then
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
-              -derivedDataPath ~/ \
+              -derivedDataPath "$DERIVED_DATA_PATH" \
               build | xcpretty $FORMATTER
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
@@ -212,7 +214,7 @@ if [ "$MODE" = "examples-pt3" ]; then
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
-              -derivedDataPath ~/ \
+              -derivedDataPath "$DERIVED_DATA_PATH" \
               build | xcpretty $FORMATTER
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
@@ -258,7 +260,7 @@ if [ "$MODE" = "examples-extra" ]; then
               -scheme Sample \
               -sdk "$SDK" \
               -destination "$PLATFORM" \
-              -derivedDataPath ~/ \
+              -derivedDataPath "$DERIVED_DATA_PATH" \
               build | xcpretty $FORMATTER
         elif [ -f "${example}/Cartfile" ]; then
           echo "Using Carthage"
