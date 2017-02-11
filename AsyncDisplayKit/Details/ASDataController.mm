@@ -277,6 +277,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
         
         // Step 3: Now that _completedNodeContexts is ready, call UIKit to update using the original change set.
         [_delegate dataControllerDidReloadData:self];
+        
+        if (completion) {
+          completion();
+        }
       }];
     }];
   });
