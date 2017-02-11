@@ -240,6 +240,72 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
 
 #pragma mark - Initial Load & Full Reload (External API)
 
+- (void)reloadDataWithCompletion:(void (^)())completion
+{
+  ASDisplayNodeAssertMainThread();
+  
+  _initialReloadDataHasBeenCalled = YES;
+  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
+  
+  [self invalidateDataSourceItemCounts];
+  NSUInteger sectionCount = [self itemCountsFromDataSource].size();
+  NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
+  
+  // Step 1: update _sections and _nodeContexts.
+  // After this step, those properties are up-to-date with dataSource's index space.
+  if (_dataSourceFlags.contextForSection) {
+    [_sections removeAllObjects];  
+    [sectionIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+      id<ASSectionContext> context = [_dataSource dataController:self contextForSection:idx];
+      ASSection *section = [[ASSection alloc] initWithSectionID:_nextSectionID context:context];
+      [_sections insertObject:section atIndex:idx];
+      _nextSectionID++;
+    }];
+  }
+  // Repopulate all contexts
+  __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  [_nodeContexts removeAllObjects];
+  // Return immediately because reloadData can't be used in conjuntion with other updates.
+  BOOL hasNewContexts = [self _insertSections:sectionIndexes environment:environment];
+  
+  // Prepare loadingNodeContexts to be used in editing queue.
+  // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _nodeContexts and _completedNodeContexts on different threads.
+  NSMutableArray<ASNodeContextTwoDimensionalArray *> *deepCopiedSections = [NSMutableArray arrayWithCapacity:_nodeContexts.count];
+  for (ASNodeContextTwoDimensionalArray *sections in _nodeContexts.allValues) {
+    [deepCopiedSections addObject:ASTwoDimensionalArrayDeepMutableCopy(sections)];
+  }
+  ASNodeContextTwoDimensionalDictionary *loadingNodeContexts = [NSDictionary dictionaryWithObjects:deepCopiedSections
+                                                                                           forKeys:_nodeContexts.allKeys];
+  
+  dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
+    // Step 2: Layout **all** new node contexts without batching in background.
+    // This step doesn't change any internal state.
+    NSMutableArray<ASIndexedNodeContext *> *newContexts = [NSMutableArray array];
+    if (hasNewContexts) {
+      for (ASNodeContextTwoDimensionalArray *allSections in loadingNodeContexts.allValues) {
+        for (NSArray<ASIndexedNodeContext *> *section in allSections) {
+          for (ASIndexedNodeContext *context in section) {
+            if (context.nodeIfAllocated == nil) [newContexts addObject:context];
+          }
+        }
+      }
+    }
+    [self batchLayoutNodesFromContexts:newContexts batchSize:newContexts.count batchCompletion:^(id, id) {
+      ASSERT_ON_EDITING_QUEUE;
+      [_mainSerialQueue performBlockOnMainThread:^{
+        // Because loadingNodeContexts is immutable, it can be safely assigned to _loadNodeContexts instead of deep copied.
+        _completedNodeContexts = loadingNodeContexts;
+        
+        // TODO Redo Automatic content offset adjustment by diffing old and new _completedNodeContexts
+        
+        // Step 3: Now that _completedNodeContexts is ready, call UIKit to update using the original change set.
+        [_delegate dataControllerWillDeleteAllData:self];
+        [_delegate dataControllerDidReloadData:self];
+      }];
+    }];
+  });
+}
+
 //TODO Revisit this
 - (void)waitUntilAllUpdatesAreCommitted
 {
@@ -442,10 +508,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
 {
   ASDisplayNodeAssertMainThread();
   
-  if (changeSet.reloadDataChange != nil) {
-    _initialReloadDataHasBeenCalled = YES;
-  }
-
   //TODO need this?
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
@@ -564,17 +626,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
 
   __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
-  if (changeSet.reloadDataChange != nil) {
-    // Clear all contexts
-    [_nodeContexts removeAllObjects];
-    
-    // Repopulate all contexts
-    NSUInteger sectionCount = [self itemCountsFromDataSource].size();
-    NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-    // Return immediately because reloadData can't be used in conjuntion with other updates.
-    return [self _insertSections:sectionIndexes environment:environment];
-  }
-  
   BOOL result = NO;
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
@@ -645,15 +696,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
 {
   ASDisplayNodeAssertMainThread();
   
-  //TODO handle original deletes and inserts, be aware of potential invalid index paths in those original changes
-  //TODO handle reloads, moves
+  //TODO use original deletes and inserts instead? be aware of potential invalid index paths in those original changes changes
+  //TODO handle moves
   
   [_delegate dataControllerBeginUpdates:self];
-  
-  if (changeSet.reloadDataChange != nil) {
-    [_delegate dataControllerWillDeleteAllData:self];
-    [_delegate dataControllerDidReloadData:self];
-  }
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
     [_delegate dataController:self didDeleteNodes:deletedRowNodes[change] atIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];

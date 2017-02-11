@@ -96,8 +96,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 @interface _ASHierarchyChangeSet () 
 
-@property (nonatomic, strong, readonly) _ASHierarchyReloadDataChange *reloadDataChange;
-
 @property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *insertItemChanges;
 @property (nonatomic, strong, readonly) NSMutableArray<_ASHierarchyItemChange *> *originalInsertItemChanges;
 
@@ -245,13 +243,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   NSUInteger newIndex = oldSection - [_deletedSections countOfIndexesInRange:NSMakeRange(0, oldSection)];
   newIndex += [_insertedSections as_indexChangeByInsertingItemsBelowIndex:newIndex];
   return newIndex;
-}
-
-- (void)reloadData
-{
-  [self _ensureNotCompleted];
-  NSAssert(!_reloadDataChange, @"Attempt to reload data multiple times %@", self);
-  _reloadDataChange = [[_ASHierarchyReloadDataChange alloc] init];
 }
 
 - (void)deleteItems:(NSArray *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options
@@ -420,16 +411,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 - (void)_validateUpdate
 {
-  // Assert that if reloadData exists, it's the only change in this set
-  if (_reloadDataChange) {
-    if (_originalDeleteItemChanges.count || _originalDeleteSectionChanges.count
-        || _originalInsertSectionChanges.count || _originalDeleteItemChanges.count
-        || _reloadSectionChanges.count || _reloadItemChanges.count) {
-      ASFailUpdateValidation(@"Attempt to reload data in conjuntion with other updates.");
-    }
-    return;
-  }
-  
   NSIndexSet *allReloadedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_reloadSectionChanges];
   
   NSInteger newSectionCount = _newItemCounts.size();
@@ -555,9 +536,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 - (NSMutableArray<NSDictionary *> *)propertiesForDescription
 {
   NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
-  if (_reloadDataChange) {
-    [result addObject:@{ @"reloadData" : ASObjectDescriptionMakeTiny(_reloadDataChange) }];
-  }
   if (_reloadSectionChanges.count > 0) {
     [result addObject:@{ @"reloadSections" : [_ASHierarchySectionChange smallDescriptionForSectionChanges:_reloadSectionChanges] }];
   }
@@ -577,39 +555,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
     [result addObject:@{ @"insertItems" : [_ASHierarchyItemChange smallDescriptionForItemChanges:_originalInsertItemChanges] }];
   }
   return result;
-}
-
-- (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription
-{
-  return [self propertiesForDescription];
-}
-
-@end
-
-@implementation _ASHierarchyReloadDataChange
-
-#pragma mark - NSCopying
-
-- (id)copyWithZone:(NSZone *)zone
-{
-  return [[_ASHierarchyReloadDataChange alloc] init];
-}
-
-#pragma mark - Debugging (Private)
-
-- (NSString *)description
-{
-  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
-}
-
-- (NSString *)debugDescription
-{
-  return ASObjectDescriptionMake(self, [self propertiesForDebugDescription]);
-}
-
-- (NSMutableArray<NSDictionary *> *)propertiesForDescription
-{
-  return [NSMutableArray array];
 }
 
 - (NSMutableArray<NSDictionary *> *)propertiesForDebugDescription

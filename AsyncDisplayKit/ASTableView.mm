@@ -467,20 +467,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssertMainThread();
-  //TODO consider to change the definition of completion block
-  void (^batchUpdatesCompletion)(BOOL) = nil;
-  if (completion) {
-    batchUpdatesCompletion = ^(BOOL) {
-      completion();
-    };
-  }
-  
   ASPerformBlockOnMainThread(^{
     [super reloadData];
   });
-  [self beginUpdates];
-  [_changeSet reloadData];
-  [self endUpdatesCompletion:batchUpdatesCompletion];
+  [_dataController reloadDataWithCompletion:completion];
 }
 
 - (void)reloadData
@@ -491,9 +481,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
-  [self beginUpdates];
-  [_changeSet reloadData];
-  [self endUpdatesCompletion:nil];
+  [_dataController reloadDataWithCompletion:nil];
   [_dataController waitUntilAllUpdatesAreCommitted];
   [super reloadData];
 }
@@ -1420,9 +1408,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _performingBatchUpdates = YES;
   [super beginUpdates];
 
-  if (_automaticallyAdjustsContentOffset) {
-    [self beginAdjustingContentOffset];
-  }
+  //TODO Reimplement _automaticallyAdjustsContentOffset
+//  if (_automaticallyAdjustsContentOffset) {
+//    [self beginAdjustingContentOffset];
+//  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
@@ -1470,11 +1459,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     if (!_performingBatchUpdates) {
       [_rangeController updateIfNeeded];
     }
-    // TODO check this
-//    [self _scheduleCheckForBatchFetchingForNumberOfChanges:<#(NSUInteger)#>
+    // TODO Should reloadData triggers batch fetching?
+//    [self _scheduleCheckForBatchFetchingForNumberOfChanges:];
   });
   
-  //TODO check this
+  //TODO _automaticallyAdjustsContentOffset is probably not needed for reloadData, no?
 //  if (_automaticallyAdjustsContentOffset) {
 //    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
 //  }

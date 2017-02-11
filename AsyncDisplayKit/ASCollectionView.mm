@@ -318,22 +318,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssertMainThread();
-  //TODO consider to change the definition of completion block
-  void (^batchUpdatesCompletion)(BOOL) = nil;
-  if (completion) {
-    batchUpdatesCompletion = ^(BOOL) {
-      completion();
-    };
-  }
-  
   ASPerformBlockOnMainThread(^{
-    //TODO Do we still need this?
     _superIsPendingDataLoad = YES;
     [super reloadData];
   });
-  [self performBatchUpdates:^{
-    [_changeSet reloadData];
-  } completion: batchUpdatesCompletion];
+  [_dataController reloadDataWithCompletion:completion];
 }
 
 - (void)reloadData
@@ -352,9 +341,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 {
   ASDisplayNodeAssertMainThread();
   _superIsPendingDataLoad = YES;
-  [self performBatchUpdates:^{
-    [_changeSet reloadData];
-  } completion:nil];
+  [_dataController reloadDataWithCompletion:nil];
   [_dataController waitUntilAllUpdatesAreCommitted];
   [super reloadData];
 }
