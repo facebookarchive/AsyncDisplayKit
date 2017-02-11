@@ -15,7 +15,7 @@ function trap_handler {
 trap trap_handler INT TERM EXIT
 
 # Derived data handling
-[ -d DERIVED_DATA_PATH ] || mkdir DERIVED_DATA_PATH
+eval [ ! -d $DERIVED_DATA_PATH ] && eval mkdir $DERIVED_DATA_PATH
 function clean_derived_data {
     eval find $DERIVED_DATA_PATH -mindepth 1 -delete
 }
