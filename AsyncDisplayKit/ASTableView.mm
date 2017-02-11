@@ -1463,7 +1463,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 //    [self _scheduleCheckForBatchFetchingForNumberOfChanges:];
   });
   
-  //TODO _automaticallyAdjustsContentOffset is probably not needed for reloadData, no?
+  //TODO is _automaticallyAdjustsContentOffset needed for reloadData?
 //  if (_automaticallyAdjustsContentOffset) {
 //    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
 //  }

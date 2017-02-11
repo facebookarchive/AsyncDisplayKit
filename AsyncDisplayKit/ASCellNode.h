@@ -74,6 +74,7 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  */
 @property (nonatomic, assign) BOOL neverShowPlaceholders;
 
+//TODO shouldn't this be a generic kind (e.g includes ASDataControllerRowNodeKind)?
 /*
  * The kind of supplementary element this node represents, if any.
  *

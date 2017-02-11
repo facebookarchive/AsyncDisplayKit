@@ -29,7 +29,7 @@
 
 @interface ASRangeController ()
 {
-  //TODO revisit this
+  //TODO Do we still need _rangeIsValid?
   BOOL _rangeIsValid;
   BOOL _needsRangeUpdate;
   BOOL _layoutControllerImplementsSetVisibleIndexPaths;
@@ -490,11 +490,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [_delegate didBeginUpdatesInRangeController:self];
 }
 
-- (void)dataControllerWillDeleteAllData:(ASDataController *)dataController
-{
-  [self _setVisibleNodes:nil];
-}
-
 - (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
   ASDisplayNodeAssertMainThread();
@@ -504,6 +499,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 - (void)dataControllerDidReloadData:(ASDataController *)dataController
 {
   ASDisplayNodeAssertMainThread();
+  [self _setVisibleNodes:nil];
   _rangeIsValid = NO;
   [_delegate rangeControllerDidReloadData:self];
 }

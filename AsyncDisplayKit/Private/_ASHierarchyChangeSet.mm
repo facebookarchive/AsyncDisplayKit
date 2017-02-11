@@ -672,15 +672,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   return indexes;
 }
 
-#pragma mark - NSCopying
-
-- (id)copyWithZone:(NSZone *)zone
-{
-  return [[_ASHierarchySectionChange alloc] initWithChangeType:_changeType
-                                                      indexSet:[_indexSet copy]
-                                              animationOptions:_animationOptions];
-}
-
 #pragma mark - Debugging (Private)
 
 + (NSString *)smallDescriptionForSectionChanges:(NSArray<_ASHierarchySectionChange *> *)changes
@@ -849,16 +840,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   }
 
   [changes setArray:result];
-}
-
-#pragma mark - NSCopying
-
-- (id)copyWithZone:(NSZone *)zone
-{
-  return [[_ASHierarchyItemChange alloc] initWithChangeType:_changeType
-                                                 indexPaths:[_indexPaths copy]
-                                           animationOptions:_animationOptions
-                                                  presorted:YES];
 }
 
 #pragma mark - Debugging (Private)

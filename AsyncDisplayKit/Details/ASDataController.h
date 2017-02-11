@@ -92,7 +92,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
  Called for batch update.
  */
 - (void)dataControllerBeginUpdates:(ASDataController *)dataController;
-- (void)dataControllerWillDeleteAllData:(ASDataController *)dataController;
 - (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL))completion;
 
 /**

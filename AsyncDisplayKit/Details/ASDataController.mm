@@ -33,15 +33,13 @@
 #define RETURN_IF_NO_DATASOURCE(val) if (_dataSource == nil) { return val; }
 #define ASSERT_ON_EDITING_QUEUE ASDisplayNodeAssertNotNil(dispatch_get_specific(&kASDataControllerEditingQueueKey), @"%@ must be called on the editing transaction queue.", NSStringFromSelector(_cmd))
 
-#define ASNodeContextTwoDimensionalMutableArray NSMutableArray<NSMutableArray<ASIndexedNodeContext *> *>
-#define ASNodeContextTwoDimensionalArray        NSArray<NSArray<ASIndexedNodeContext *> *>
+#define ASNodeContextTwoDimensionalMutableArray  NSMutableArray<NSMutableArray<ASIndexedNodeContext *> *>
+#define ASNodeContextTwoDimensionalArray         NSArray<NSArray<ASIndexedNodeContext *> *>
 
 // Dictionary with each entry is a pair of "kind" key and two dimensional array of node contexts
-#define ASNodeContextTwoDimensionalDictionary               NSDictionary<NSString *, ASNodeContextTwoDimensionalArray *>
+#define ASNodeContextTwoDimensionalDictionary         NSDictionary<NSString *, ASNodeContextTwoDimensionalArray *>
 // Mutable dictionary with each entry is a pair of "kind" key and two dimensional array of node contexts
-#define ASNodeContextTwoDimensionalMutableDictionary        NSMutableDictionary<NSString *, ASNodeContextTwoDimensionalMutableArray *>
-
-#define ASHierarchyChange                         id<NSCopying>
+#define ASNodeContextTwoDimensionalMutableDictionary  NSMutableDictionary<NSString *, ASNodeContextTwoDimensionalMutableArray *>
 
 const static NSUInteger kASDataControllerSizingCountPerProcessor = 5;
 const static char * kASDataControllerEditingQueueKey = "kASDataControllerEditingQueueKey";
@@ -149,7 +147,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
 - (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts batchSize:(NSUInteger)batchSize batchCompletion:(ASDataControllerCompletionBlock)batchCompletionHandler
 {
   ASSERT_ON_EDITING_QUEUE;
-  //TODO add back Logs and AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
+  //TODO add Logs and AS_MEASURE_AVOIDED_DATACONTROLLER_WORK back
 #if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
     [ASDataController _expectToInsertNodes:contexts.count];
 #endif
@@ -251,62 +249,39 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   NSUInteger sectionCount = [self itemCountsFromDataSource].size();
   NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
   
-  // Step 1: update _sections and _nodeContexts.
-  // After this step, those properties are up-to-date with dataSource's index space.
-  if (_dataSourceFlags.contextForSection) {
-    [_sections removeAllObjects];  
-    [sectionIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-      id<ASSectionContext> context = [_dataSource dataController:self contextForSection:idx];
-      ASSection *section = [[ASSection alloc] initWithSectionID:_nextSectionID context:context];
-      [_sections insertObject:section atIndex:idx];
-      _nextSectionID++;
-    }];
-  }
-  // Repopulate all contexts
+  // Step 1: Repopulate _sections and _nodeContexts. After this step, those properties are up-to-date with dataSource's index space.
+  // Repopulate _sections
+  [_sections removeAllObjects];
+  [self _insertSectionContextsForSections:sectionIndexes];
+  // Repopulate _nodeContexts
   __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   [_nodeContexts removeAllObjects];
-  // Return immediately because reloadData can't be used in conjuntion with other updates.
-  BOOL hasNewContexts = [self _insertSections:sectionIndexes environment:environment];
+  [self _insertNodeContextsForSections:sectionIndexes environment:environment];
   
-  // Prepare loadingNodeContexts to be used in editing queue.
-  // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _nodeContexts and _completedNodeContexts on different threads.
-  NSMutableArray<ASNodeContextTwoDimensionalArray *> *deepCopiedSections = [NSMutableArray arrayWithCapacity:_nodeContexts.count];
-  for (ASNodeContextTwoDimensionalArray *sections in _nodeContexts.allValues) {
-    [deepCopiedSections addObject:ASTwoDimensionalArrayDeepMutableCopy(sections)];
-  }
-  ASNodeContextTwoDimensionalDictionary *loadingNodeContexts = [NSDictionary dictionaryWithObjects:deepCopiedSections
-                                                                                           forKeys:_nodeContexts.allKeys];
+  // Prepare loadingNodeContexts to be used in editing queue. Deep copy is critical here,
+  // or future edits to the sub-arrays will pollute state between _nodeContexts
+  // and _completedNodeContexts on different threads.
+  ASNodeContextTwoDimensionalDictionary *loadingNodeContexts = [ASDataController deepImmutableCopyOfNodeContextsDictionary:_nodeContexts];
   
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     // Step 2: Layout **all** new node contexts without batching in background.
     // This step doesn't change any internal state.
-    NSMutableArray<ASIndexedNodeContext *> *newContexts = [NSMutableArray array];
-    if (hasNewContexts) {
-      for (ASNodeContextTwoDimensionalArray *allSections in loadingNodeContexts.allValues) {
-        for (NSArray<ASIndexedNodeContext *> *section in allSections) {
-          for (ASIndexedNodeContext *context in section) {
-            if (context.nodeIfAllocated == nil) [newContexts addObject:context];
-          }
-        }
-      }
-    }
-    [self batchLayoutNodesFromContexts:newContexts batchSize:newContexts.count batchCompletion:^(id, id) {
+    NSArray<ASIndexedNodeContext *> *unloadedContexts = [ASDataController unloadedNodeContextsFromDictionary:loadingNodeContexts];
+    
+    // TODO layout in batches
+    [self batchLayoutNodesFromContexts:unloadedContexts batchSize:unloadedContexts.count batchCompletion:^(id, id) {
       ASSERT_ON_EDITING_QUEUE;
       [_mainSerialQueue performBlockOnMainThread:^{
         // Because loadingNodeContexts is immutable, it can be safely assigned to _loadNodeContexts instead of deep copied.
         _completedNodeContexts = loadingNodeContexts;
         
-        // TODO Redo Automatic content offset adjustment by diffing old and new _completedNodeContexts
-        
         // Step 3: Now that _completedNodeContexts is ready, call UIKit to update using the original change set.
-        [_delegate dataControllerWillDeleteAllData:self];
         [_delegate dataControllerDidReloadData:self];
       }];
     }];
   });
 }
 
-//TODO Revisit this
 - (void)waitUntilAllUpdatesAreCommitted
 {
   ASDisplayNodeAssertMainThread();
@@ -358,18 +333,16 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
  *
  * @param originalIndexPaths The index paths belongs to sections whose supplementary nodes need to be repopulated.
  * @param environment The trait environment needed to initialize contexts
- * @return YES if at least 1 new contexts was repopulated, NO otherwise.
  */
-- (BOOL)_repopulateSupplementaryNodesForAllSectionsContainingIndexPaths:(NSArray<NSIndexPath *> *)originalIndexPaths
+- (void)_repopulateSupplementaryNodesForAllSectionsContainingIndexPaths:(NSArray<NSIndexPath *> *)originalIndexPaths
                                                             environment:(id<ASTraitEnvironment>)environment
 {
   ASDisplayNodeAssertMainThread();
   
   if (originalIndexPaths.count ==  0) {
-    return NO;
+    return;
   }
   
-  BOOL result = NO;
   // Get all the sections that need to be repopulated
   NSIndexSet *sectionIndexes = [NSIndexSet as_sectionsFromIndexPaths:originalIndexPaths];
   for (NSString *kind in [self supplementaryKindsInSections:sectionIndexes]) {
@@ -380,57 +353,52 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
       [obj removeAllObjects];
     }];
     // Step 2: populate new contexts for all index paths in these sections
-    BOOL populated = [self _populateNodeContextsOfKind:kind forSections:sectionIndexes environment:environment];
-    result = populated ?: result;
+    [self _insertNodeContextsOfKind:kind forSections:sectionIndexes environment:environment];
   }
-  return result;
 }
 
 /**
- * Populates and inserts new node contexts of a certain kind for some sections
- * 
+ * Inserts new node contexts of a certain kind for some sections
+ *
  * @param kind The kind of the node contexts, e.g ASDataControllerRowNodeKind
  * @param sections The sections that should be populated by new contexts
  * @param environment The trait environment needed to initialize contexts
- * @return YES if at least 1 new contexts was populated, NO otherwise.
  */
-- (BOOL)_populateNodeContextsOfKind:(NSString *)kind
-                        forSections:(NSIndexSet *)sections
-                        environment:(id<ASTraitEnvironment>)environment
+- (void)_insertNodeContextsOfKind:(NSString *)kind
+                      forSections:(NSIndexSet *)sections
+                      environment:(id<ASTraitEnvironment>)environment
 {
   ASDisplayNodeAssertMainThread();
   
   if (sections.count == 0) {
-    return NO;
+    return;
   }
   
   NSArray<NSIndexPath *> *indexPaths = [self _allIndexPathsForNodeContextsOfKind:kind inSections:sections];
-  return [self _populateNodeContextsOfKind:kind atIndexPaths:indexPaths environment:environment];
+  [self _insertNodeContextsOfKind:kind atIndexPaths:indexPaths environment:environment];
 }
 
-//TODO revisit the naming or don't insert
 /**
- * Populates and inserts new node contexts of a certain kind at some index paths
+ * Inserts new node contexts of a certain kind at some index paths
  *
  * @param kind The kind of the node contexts, e.g ASDataControllerRowNodeKind
  * @param indexPaths The index paths at which new contexts should be populated
  * @param environment The trait environment needed to initialize contexts
- * @return YES if at least 1 new contexts was populated, NO otherwise.
  */
-- (BOOL)_populateNodeContextsOfKind:(NSString *)kind
-                       atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-                        environment:(id<ASTraitEnvironment>)environment
+- (void)_insertNodeContextsOfKind:(NSString *)kind
+                     atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+                      environment:(id<ASTraitEnvironment>)environment
 {
   ASDisplayNodeAssertMainThread();
   
   if (indexPaths.count == 0 || _dataSource == nil) {
-    return NO;
+    return;
   }
   
   BOOL isRowKind = [kind isEqualToString:ASDataControllerRowNodeKind];
   if (!isRowKind && !_dataSourceFlags.supplementaryNodeBlockOfKindAtIndexPath) {
     // Populating supplementary contexts but data source doesn't support.
-    return NO;
+    return;
   }
   
   LOG(@"Populating node contexts of kind: %@, for index paths: %@", kind, indexPaths);
@@ -452,7 +420,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   }
   
   ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(_nodeContexts[kind], indexPaths, contexts);
-  return YES;
 }
 
 - (void)invalidateDataSourceItemCounts
@@ -546,41 +513,26 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   
   // Step 1: update _sections and _nodeContexts.
   // After this step, those properties are up-to-date with dataSource's index space.
-  [self updateSectionContextsWithChangeSet:changeSet];
-  BOOL hasNewContexts = [self updateNodeContextsWithChangeSet:changeSet];
+  [self _updateSectionContextsWithChangeSet:changeSet];
+  [self _updateNodeContextsWithChangeSet:changeSet];
   
-  // Prepare loadingNodeContexts to be used in editing queue.
-  // Deep copy is critical here, or future edits to the sub-arrays will pollute state between _nodeContexts and _completedNodeContexts on different threads.
-  NSMutableArray<ASNodeContextTwoDimensionalArray *> *deepCopiedSections = [NSMutableArray arrayWithCapacity:_nodeContexts.count];
-  for (ASNodeContextTwoDimensionalArray *sections in _nodeContexts.allValues) {
-    [deepCopiedSections addObject:ASTwoDimensionalArrayDeepMutableCopy(sections)];
-  }
-  ASNodeContextTwoDimensionalDictionary *loadingNodeContexts = [NSDictionary dictionaryWithObjects:deepCopiedSections
-                                                                                           forKeys:_nodeContexts.allKeys];
+  // Prepare loadingNodeContexts to be used in editing queue. Deep copy is critical here,
+  // or future edits to the sub-arrays will pollute state between _nodeContexts
+  // and _completedNodeContexts on different threads.
+  ASNodeContextTwoDimensionalDictionary *loadingNodeContexts = [ASDataController deepImmutableCopyOfNodeContextsDictionary:_nodeContexts];
   
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     // Step 2: Layout **all** new node contexts without batching in background.
     // This step doesn't change any internal state.
-    NSMutableArray<ASIndexedNodeContext *> *newContexts = [NSMutableArray array];
-    if (hasNewContexts) {
-      for (ASNodeContextTwoDimensionalArray *allSections in loadingNodeContexts.allValues) {
-        for (NSArray<ASIndexedNodeContext *> *section in allSections) {
-          for (ASIndexedNodeContext *context in section) {
-            if (context.nodeIfAllocated == nil) [newContexts addObject:context];
-          }
-        }
-      }
-    }
-    [self batchLayoutNodesFromContexts:newContexts batchSize:newContexts.count batchCompletion:^(id, id) {
+    NSArray<ASIndexedNodeContext *> *unloadedContexts = [ASDataController unloadedNodeContextsFromDictionary:loadingNodeContexts];
+    [self batchLayoutNodesFromContexts:unloadedContexts batchSize:unloadedContexts.count batchCompletion:^(id, id) {
       ASSERT_ON_EDITING_QUEUE;
       [_mainSerialQueue performBlockOnMainThread:^{
         // Because loadingNodeContexts is immutable, it can be safely assigned to _loadNodeContexts instead of deep copied.
         _completedNodeContexts = loadingNodeContexts;
         
-        // TODO Redo Automatic content offset adjustment by diffing old and new _completedNodeContexts
-        
         // Step 3: Now that _completedNodeContexts is ready, call UIKit to update using the original change set.
-        [self forwardChangeSetToDelegate:changeSet insertedRowNodes:nil deletedRowNodes:nil animated:animated];
+        [self _forwardChangeSetToDelegate:changeSet animated:animated];
       }];
     }];
   });
@@ -590,7 +542,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
  * Update _sections based on the given change set.
  * After this method returns, _sections will be up-to-date with dataSource.
  */
-- (void)updateSectionContextsWithChangeSet:(_ASHierarchyChangeSet *)changeSet
+- (void)_updateSectionContextsWithChangeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
   
@@ -603,14 +555,24 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    NSIndexSet *sectionIndexes = change.indexSet;
-    [sectionIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
-      id<ASSectionContext> context = [_dataSource dataController:self contextForSection:idx];
-      ASSection *section = [[ASSection alloc] initWithSectionID:_nextSectionID context:context];
-      [_sections insertObject:section atIndex:idx];
-      _nextSectionID++;
-    }];
+    [self _insertSectionContextsForSections:change.indexSet];
   }
+}
+
+- (void)_insertSectionContextsForSections:(NSIndexSet *)sectionIndexes
+{
+  ASDisplayNodeAssertMainThread();
+  
+  if (!_dataSourceFlags.contextForSection) {
+    return;
+  }
+  
+  [sectionIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+    id<ASSectionContext> context = [_dataSource dataController:self contextForSection:idx];
+    ASSection *section = [[ASSection alloc] initWithSectionID:_nextSectionID context:context];
+    [_sections insertObject:section atIndex:idx];
+    _nextSectionID++;
+  }];
 }
 
 /**
@@ -618,22 +580,18 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
  * After this method returns, _nodeContexts will be up-to-date with dataSource's index space.
  *
  * @param changeSet The change set to be processed
- * @return YES if at least one new context was populated, NO otherwise.
  */
-- (BOOL)updateNodeContextsWithChangeSet:(_ASHierarchyChangeSet *)changeSet
+- (void)_updateNodeContextsWithChangeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
-
-  __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
-  BOOL result = NO;
+  __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
     ASDeleteElementsInMultidimensionalArrayAtIndexPaths(_nodeContexts[ASDataControllerRowNodeKind], change.indexPaths);
     // Aggressively repopulate supplementary nodes (#1773 & #1629)
-    BOOL repopulated = [self _repopulateSupplementaryNodesForAllSectionsContainingIndexPaths:change.indexPaths
-                                                                                 environment:environment];
-    result = repopulated ?: result;
+    [self _repopulateSupplementaryNodesForAllSectionsContainingIndexPaths:change.indexPaths
+                                                              environment:environment];
   }
 
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
@@ -646,26 +604,19 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertSections:change.indexSet environment:environment];
+    [self _insertNodeContextsForSections:change.indexSet environment:environment];
   }
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    BOOL populatedRowNodes = [self _populateNodeContextsOfKind:ASDataControllerRowNodeKind
-                                                  atIndexPaths:change.indexPaths
-                                                   environment:environment];
+    [self _insertNodeContextsOfKind:ASDataControllerRowNodeKind atIndexPaths:change.indexPaths environment:environment];
     // Aggressively reload supplementary nodes (#1773 & #1629)
-    BOOL repopulatedSupplementaryNodes = [self _repopulateSupplementaryNodesForAllSectionsContainingIndexPaths:change.indexPaths
-                                                                                                   environment:environment];
-    result = (populatedRowNodes || repopulatedSupplementaryNodes) ?: result;
+    [self _repopulateSupplementaryNodesForAllSectionsContainingIndexPaths:change.indexPaths
+                                                              environment:environment];
   }
-  
-  return result;
 }
 
-// TODO revisit naming
-- (BOOL)_insertSections:(NSIndexSet *)sectionIndexes environment:(id<ASTraitEnvironment>)environment
+- (void)_insertNodeContextsForSections:(NSIndexSet *)sectionIndexes environment:(id<ASTraitEnvironment>)environment
 {
-  BOOL result = NO;
   NSMutableArray<NSString *> *kinds = [NSMutableArray arrayWithObject:ASDataControllerRowNodeKind];
   [kinds addObjectsFromArray:[self supplementaryKindsInSections:sectionIndexes]];
   
@@ -682,19 +633,17 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
     }
     [nodeContextsOfKind insertObjects:sectionArray atIndexes:sectionIndexes];
     // Step 2: Populate new contexts for all sections
-    BOOL populated = [self _populateNodeContextsOfKind:kind forSections:sectionIndexes environment:environment];
-    result = populated ?: result;
+    [self _insertNodeContextsOfKind:kind forSections:sectionIndexes environment:environment];
   }
-  
-  return result;
 }
 
-- (void)forwardChangeSetToDelegate:(_ASHierarchyChangeSet *)changeSet
-                  insertedRowNodes:(id _Nullable)insertedRowNodes
-                   deletedRowNodes:(id _Nullable)deletedRowNodes
-                          animated:(BOOL)animated
+- (void)_forwardChangeSetToDelegate:(_ASHierarchyChangeSet *)changeSet animated:(BOOL)animated
 {
   ASDisplayNodeAssertMainThread();
+  
+  //TODO Because we decompose the change set here, ASTableView and ASCollectionView
+  // need to maintain lots of states to use between these delegate methods.
+  // Howabout we give these objects the whole change set in 1 go?
   
   //TODO use original deletes and inserts instead? be aware of potential invalid index paths in those original changes changes
   //TODO handle moves
@@ -702,7 +651,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   [_delegate dataControllerBeginUpdates:self];
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
-    [_delegate dataController:self didDeleteNodes:deletedRowNodes[change] atIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+    //TODO Reimplement _automaticallyAdjustsContentOffset
+    [_delegate dataController:self didDeleteNodes:nil atIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
@@ -714,7 +664,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   }
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [_delegate dataController:self didInsertNodes:insertedRowNodes[change] atIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
+    //TODO Reimplement _automaticallyAdjustsContentOffset
+    [_delegate dataController:self didInsertNodes:nil atIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
   }
   
   void (^batchCompletion)(BOOL) = changeSet.completionHandler;
@@ -935,6 +886,31 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssertTrue(section >= 0 && section < _sections.count);
   return _sections[section].context;
+}
+
+#pragma mark - Node contexts dictionary
+
+//TODO Move this to somewhere else?
++ (ASNodeContextTwoDimensionalDictionary *)deepImmutableCopyOfNodeContextsDictionary:(ASNodeContextTwoDimensionalDictionary *)originalDict
+{
+  NSMutableArray<ASNodeContextTwoDimensionalArray *> *deepCopy = [NSMutableArray arrayWithCapacity:originalDict.count];
+  for (ASNodeContextTwoDimensionalArray *sections in originalDict.allValues) {
+    [deepCopy addObject:ASTwoDimensionalArrayDeepMutableCopy(sections)];
+  }
+  return [NSDictionary dictionaryWithObjects:deepCopy forKeys:originalDict.allKeys];
+}
+
++ (NSArray<ASIndexedNodeContext *> *)unloadedNodeContextsFromDictionary:(ASNodeContextTwoDimensionalDictionary *)dict
+{
+  NSMutableArray<ASIndexedNodeContext *> *unloadedContexts = [NSMutableArray array];
+  for (ASNodeContextTwoDimensionalArray *allSections in dict.allValues) {
+    for (NSArray<ASIndexedNodeContext *> *section in allSections) {
+      for (ASIndexedNodeContext *context in section) {
+        if (context.nodeIfAllocated == nil) [unloadedContexts addObject:context];
+      }
+    }
+  }
+  return unloadedContexts;
 }
 
 @end

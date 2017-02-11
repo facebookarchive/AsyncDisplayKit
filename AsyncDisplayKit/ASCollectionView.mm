@@ -118,7 +118,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
    * The number of items after the update (1) must be equal to the number of items before the update (1) plus or minus the items added and removed (1 added, 0 removed).`
    * The collection view never queried your data source before the update to see that it actually had 0 items.
    */
-  //TODO revisit this
+  //TODO Do we still need _superIsPendingDataLoad?
   BOOL _superIsPendingDataLoad;
 
   /**
@@ -1556,7 +1556,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  //TODO support supplementary node block
+  //TODO _asyncDataSource to support supplementary node block and deprecate nodeForSupplementaryElementOfKind
   ASCellNode *node = nil;
   if (_asyncDataSourceFlags.collectionNodeNodeForSupplementaryElement) {
     GET_COLLECTIONNODE_OR_RETURN(collectionNode, ^{ return [[ASCellNode alloc] init]; });
@@ -1722,8 +1722,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
-  //TODO check this
-//  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:_performingBatchUpdates];
+  //TODO Do we need to notify _layoutFacilitator?
   if (_performingBatchUpdates) {
     [_batchUpdateBlocks addObject:^{
       [super reloadData];
@@ -1733,7 +1732,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
       [super reloadData];
       // Flush any range changes that happened as part of submitting the update.
       [_rangeController updateIfNeeded];
-      // TODO check this
+      // TODO Should reloadData triggers batch fetching?
 //      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
     }];
   }
