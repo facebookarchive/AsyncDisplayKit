@@ -8,10 +8,15 @@
 
 #import <AsyncDisplayKit/ASAvailability.h>
 
-#if YOGA /* YOGA */
+#if YOGA
+
+#import <Yoga/Yoga.h>
+
+#import <AsyncDisplayKit/ASInternalHelpers.h>
 
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASLayout.h>
 
@@ -170,6 +175,31 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
 @end
 
 @implementation ASDisplayNode (Yoga)
+
++ (void)load
+{
+  // Swizzle calculateLayoutThatFits: for special Yoga handling
+  __block IMP originalInitWithFrame = ASReplaceMethodWithBlock(self, @selector(calculateLayoutThatFits:), ^(ASDisplayNode *_self, ASSizeRange constrainedSize) {
+    
+    // Check if it's a yoga node
+    if (ASHierarchyStateIncludesYogaLayoutEnabled(_self->_hierarchyState) == YES &&
+        ASHierarchyStateIncludesYogaLayoutMeasuring(_self->_hierarchyState) == NO) {
+      ASDN::MutexUnlocker ul(_self->__instanceLock__); // Be carefule in case in the
+      return [_self calculateLayoutFromYogaRoot:constrainedSize];
+    }
+    
+    // Otherwise call through to original impl
+    return ((ASLayout * (*)(id, SEL, ASSizeRange))originalInitWithFrame)(_self, @selector(calculateLayoutThatFits:), constrainedSize);
+  });
+  
+  // Swizzle dealloc - we have to use sel_getUid as arc forbids using dealloc in a selector
+  __block IMP originalDealloc = ASReplaceMethodWithBlock(self, sel_getUid("dealloc"), ^(ASDisplayNode *_self) {
+    if (_self->_yogaNode != NULL) {
+      YGNodeFree(_self->_yogaNode);
+    }
+    ((void (*)(id, SEL))originalDealloc)(_self, sel_getUid("dealloc"));
+  });
+}
 
 - (void)setYogaNode:(YGNodeRef)yogaNode
 {
@@ -404,4 +434,4 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
 
 @end
 
-#endif /* YOGA */
+#endif

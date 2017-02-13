@@ -427,12 +427,6 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
   _subnodes = nil;
 
-#if YOGA
-  if (_yogaNode != NULL) {
-    YGNodeFree(_yogaNode);
-  }
-#endif
-
   // TODO: Remove this? If supernode isn't already nil, this method isn't dealloc-safe anyway.
   [self __setSupernode:nil];
 }
@@ -1075,14 +1069,6 @@ ASLayoutElementFinalLayoutElementDefault
   __ASDisplayNodeCheckForLayoutMethodOverrides;
 
   ASDN::MutexLocker l(__instanceLock__);
-
-#if YOGA /* YOGA */
-  if (ASHierarchyStateIncludesYogaLayoutEnabled(_hierarchyState) == YES &&
-      ASHierarchyStateIncludesYogaLayoutMeasuring(_hierarchyState) == NO) {
-    ASDN::MutexUnlocker ul(__instanceLock__);
-    return [self calculateLayoutFromYogaRoot:constrainedSize];
-  }
-#endif /* YOGA */
 
   // Manual size calculation via calculateSizeThatFits:
   if (((_methodOverrides & ASDisplayNodeMethodOverrideLayoutSpecThatFits) ||
