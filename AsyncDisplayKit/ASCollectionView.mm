@@ -367,10 +367,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (void)setDelegate:(id<UICollectionViewDelegate>)delegate
 {
-  // The compiler will prevent users from calling this,
-  // but we will automatically route to @c asyncDelegate
-  // to support interop with frameworks like TLYShyNavBar.
-  self.asyncDelegate = (id<ASCollectionDelegate>)delegate;
+  // Our UIScrollView superclass sets its delegate to nil on dealloc. Only assert if we get a non-nil value here. We also allow this when we're doing interop.
+  ASDisplayNodeAssert(_asyncDelegateFlags.interop || delegate == nil, @"ASCollectionView uses asyncDelegate, not UICollectionView's delegate property.");
 }
 
 - (void)proxyTargetHasDeallocated:(ASDelegateProxy *)proxy
