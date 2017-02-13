@@ -100,7 +100,7 @@
     
     _photoCommentsNode = [[CommentsNode alloc] init];
     
-    _photoCommentsNode.shouldRasterizeDescendants = YES;
+    _photoCommentsNode.layerBacked = YES;
     
     // instead of adding everything addSubnode:
     self.automaticallyManagesSubnodes = YES;

@@ -283,6 +283,12 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  */
 - (ASPrimitiveTraitCollection)primitiveTraitCollection;
 
+/**
+ * This is a non-deprecated internal declaration of the property. Public declaration
+ * is in ASDisplayNode+Beta.h
+ */
+@property (nonatomic, assign) BOOL shouldRasterizeDescendants;
+
 @end
 
 NS_ASSUME_NONNULL_END
