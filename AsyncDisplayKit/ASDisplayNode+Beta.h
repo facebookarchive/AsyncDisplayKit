@@ -13,10 +13,6 @@
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
 #import <AsyncDisplayKit/ASEventLog.h>
 
-#if YOGA
-#import <Yoga/Yoga.h>
-#endif
-
 NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
@@ -152,9 +148,16 @@ typedef struct {
 
 @end
 
+NS_ASSUME_NONNULL_END
+
+
 #pragma mark - Yoga Layout Support
 
 #if YOGA
+
+#import <Yoga/Yoga.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 @interface ASDisplayNode (Yoga)
 
@@ -184,6 +187,6 @@ typedef struct {
 
 @end
 
-#endif
-
 NS_ASSUME_NONNULL_END
+
+#endif
