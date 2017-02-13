@@ -1087,5 +1087,24 @@ static volatile int64_t _totalMeasuredNodes = 0;
     OSAtomicAdd64((int64_t)count, &_totalExpectedItems);
 }
 
+
+#pragma mark - Dealloc
+
+- (void)dealloc {
+  [self _cleanupNodes];
+}
+
+#pragma mark - Node Cleanup
+
+- (void)_cleanupNodes {
+  if (nil != _nodes && [_nodes count] > 0) {
+    for (id nodeObj in [_nodes objectAtIndex:0]) {
+      if ([nodeObj isKindOfClass:[ASDisplayNode class]]) {
+        [((ASDisplayNode *) nodeObj).view removeFromSuperview];
+      }
+    }
+  }
+}
+
 @end
 #endif
