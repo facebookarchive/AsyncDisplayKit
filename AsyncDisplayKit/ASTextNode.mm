@@ -134,6 +134,7 @@ static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, 
 
   NSArray *_exclusionPaths;
 
+  NSAttributedString *_attributedText;
   NSAttributedString *_composedTruncationText;
 
   NSString *_highlightedLinkAttributeName;
@@ -366,6 +367,12 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     lineHeight = MIN(lineHeight, paragraphStyle.maximumLineHeight);
   }
   return lineHeight + font.descender;
+}
+
+- (NSAttributedString *)attributedText
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  return _attributedText;
 }
 
 - (void)setAttributedText:(NSAttributedString *)attributedText
