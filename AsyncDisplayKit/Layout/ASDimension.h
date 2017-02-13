@@ -39,6 +39,21 @@ ASDISPLAYNODE_INLINE BOOL AS_WARN_UNUSED_RESULT ASIsCGSizeValidForSize(CGSize si
   return (ASPointsValidForSize(size.width) && ASPointsValidForSize(size.height));
 }
 
+ASDISPLAYNODE_INLINE BOOL ASIsCGPositionPointsValidForLayout(CGFloat points)
+{
+  return ((isnormal(points) || points == 0.0) && points < (CGFLOAT_MAX / 2.0));
+}
+
+ASDISPLAYNODE_INLINE BOOL ASIsCGPositionValidForLayout(CGPoint point)
+{
+  return (ASIsCGPositionPointsValidForLayout(point.x) && ASIsCGPositionPointsValidForLayout(point.y));
+}
+
+ASDISPLAYNODE_INLINE BOOL ASIsCGRectValidForLayout(CGRect rect)
+{
+  return (ASIsCGPositionValidForLayout(rect.origin) && ASIsCGSizeValidForLayout(rect.size));
+}
+
 #pragma mark - ASDimension
 
 /**
