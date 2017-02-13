@@ -256,7 +256,7 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
       ASBoundsAndPositionForFrame(rect, origin, anchorPoint, &newBounds, &newPosition);
 
       if (ASIsCGRectValidForLayout(newBounds) == NO || ASIsCGPointValidForLayout(newPosition) == NO) {
-        ASDisplayNodeFailAssert(@"-[ASDisplayNode setFrame:] - The new frame (%@) is invalid and unsafe to be set.", NSStringFromCGRect(rect));
+        ASDisplayNodeAssertNonFatal(NO, @"-[ASDisplayNode setFrame:] - The new frame (%@) is invalid and unsafe to be set.", NSStringFromCGRect(rect));
         return;
       }
       
