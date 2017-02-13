@@ -337,10 +337,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)setDelegate:(id<UITableViewDelegate>)delegate
 {
-  // The compiler will prevent users from calling this,
-  // but we will automatically route to @c asyncDelegate
-  // to support interop with frameworks like TLYShyNavBar.
-  self.asyncDelegate = (id<ASTableDelegate>)delegate;
+  // Our UIScrollView superclass sets its delegate to nil on dealloc. Only assert if we get a non-nil value here.
+  ASDisplayNodeAssert(delegate == nil, @"ASTableView uses asyncDelegate, not UITableView's delegate property.");
 }
 
 - (id<ASTableDataSource>)asyncDataSource
@@ -357,7 +355,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   // the (common) case of nilling the asyncDataSource in the ViewController's dealloc. In this case our _asyncDataSource
   // will return as nil (ARC magic) even though the _proxyDataSource still exists. It's really important to hold a strong
   // reference to the old dataSource in this case because calls to ASTableViewProxy will start failing and cause crashes.
-  NS_VALID_UNTIL_END_OF_SCOPE id oldDataSource = super.dataSource;
+  NS_VALID_UNTIL_END_OF_SCOPE id oldDataSource = self.dataSource;
   
   if (asyncDataSource == nil) {
     _asyncDataSource = nil;

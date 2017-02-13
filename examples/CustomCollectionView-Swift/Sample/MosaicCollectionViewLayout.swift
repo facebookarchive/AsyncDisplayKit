@@ -229,6 +229,17 @@ class MosaicCollectionViewLayoutInspector: NSObject, ASCollectionViewLayoutInspe
   }
   
   /**
+   * Asks the inspector for the number of supplementary sections in the collection view for the given kind.
+   */
+  func collectionView(_ collectionView: ASCollectionView, numberOfSectionsForSupplementaryNodeOfKind kind: String) -> UInt {
+    if (kind == UICollectionElementKindSectionHeader) {
+      return UInt((collectionView.dataSource?.numberOfSections!(in: collectionView))!)
+    } else {
+      return 0
+    }
+  }
+  
+  /**
    * Asks the inspector for the number of supplementary views for the given kind in the specified section.
    */
   func collectionView(_ collectionView: ASCollectionView, supplementaryNodesOfKind kind: String, inSection section: UInt) -> UInt {
@@ -240,6 +251,6 @@ class MosaicCollectionViewLayoutInspector: NSObject, ASCollectionViewLayoutInspe
   }
   
   func scrollableDirections() -> ASScrollDirection {
-    return ASScrollDirectionVerticalDirections
+    return ASScrollDirectionVerticalDirections;
   }
 }
