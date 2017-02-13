@@ -18,8 +18,9 @@
 //
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
-#import "AppDelegate.h"
+#import "PhotoFeedControllerProtocol.h"
 
+@protocol PhotoFeedControllerProtocol;
 @class PhotoFeedModel;
 
 @interface PhotoFeedBaseController : ASViewController <PhotoFeedControllerProtocol>

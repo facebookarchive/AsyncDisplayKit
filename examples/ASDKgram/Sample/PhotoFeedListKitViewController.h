@@ -7,7 +7,7 @@
 //
 
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
-#import "AppDelegate.h"
+#import "PhotoFeedControllerProtocol.h"
 
 @interface PhotoFeedListKitViewController<ASCollectionNode> : ASViewController <PhotoFeedControllerProtocol>
 
