@@ -133,18 +133,4 @@
     return self.socialAppDataSource.count;
 }
 
-- (void)tableNode:(ASTableNode *)tableNode didSelectRowAtIndexPath:(NSIndexPath *)indexPath
-{
-    PostNode *postNode = (PostNode *)[_tableNode nodeForRowAtIndexPath:indexPath];
-    Post *post = self.socialAppDataSource[indexPath.row];
-  
-    BOOL shouldRasterize = postNode.shouldRasterizeDescendants;
-    shouldRasterize = !shouldRasterize;
-    postNode.shouldRasterizeDescendants = shouldRasterize;
-    
-    NSLog(@"%@ rasterization for %@'s post: %@", shouldRasterize ? @"Enabling" : @"Disabling", post.name, postNode);
-    
-    [tableNode deselectRowAtIndexPath:indexPath animated:YES];
-}
-
 @end

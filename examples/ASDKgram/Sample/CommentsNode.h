@@ -20,7 +20,7 @@
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
 #import "CommentFeedModel.h"
 
-@interface CommentsNode : ASTextCellNode
+@interface CommentsNode : ASDisplayNode
 
 - (void)updateWithCommentFeedModel:(CommentFeedModel *)feed;
 

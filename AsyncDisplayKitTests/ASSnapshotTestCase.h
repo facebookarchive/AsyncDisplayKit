@@ -19,12 +19,6 @@ NSOrderedSet *ASSnapshotTestCaseDefaultSuffixes(void);
 { \
   [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:node__]; \
   FBSnapshotVerifyLayerWithOptions(node__.layer, identifier__, ASSnapshotTestCaseDefaultSuffixes(), 0) \
-  [node__ setShouldRasterizeDescendants:YES]; \
-  [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:node__]; \
-  FBSnapshotVerifyLayerWithOptions(node__.layer, identifier__, ASSnapshotTestCaseDefaultSuffixes(), 0) \
-  [node__ setShouldRasterizeDescendants:NO]; \
-  [ASSnapshotTestCase hackilySynchronouslyRecursivelyRenderNode:node__]; \
-  FBSnapshotVerifyLayerWithOptions(node__.layer, identifier__, ASSnapshotTestCaseDefaultSuffixes(), 0) \
 }
 
 #define ASSnapshotVerifyLayer(layer__, identifier__) \

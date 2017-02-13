@@ -148,7 +148,7 @@ typedef struct {
  * Note: this has nothing to do with -[CALayer shouldRasterize], which doesn't work with ASDisplayNode's asynchronous
  * rendering model.
  */
-@property (nonatomic, assign) BOOL shouldRasterizeDescendants;
+@property (nonatomic, assign) BOOL shouldRasterizeDescendants ASDISPLAYNODE_DEPRECATED_MSG("Deprecated in version 2.2");
 
 @end
 

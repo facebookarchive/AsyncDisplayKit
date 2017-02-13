@@ -50,6 +50,8 @@
     if (self) {
         _post = post;
         
+        self.selectionStyle = UITableViewCellSelectionStyleNone;
+
         // Name node
         _nameNode = [[ASTextNode alloc] init];
         _nameNode.attributedText = [[NSAttributedString alloc] initWithString:_post.name attributes:[TextStyles nameStyle]];
@@ -180,6 +182,10 @@
         _optionsNode = [[ASImageNode alloc] init];
         _optionsNode.image = [UIImage imageNamed:@"icon_more"];
         [self addSubnode:_optionsNode];
+
+        for (ASDisplayNode *node in self.subnodes) {
+            node.layerBacked = YES;
+        }
     }
     return self;
 }
