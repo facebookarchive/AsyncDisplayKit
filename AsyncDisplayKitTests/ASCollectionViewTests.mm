@@ -828,7 +828,8 @@
   ASCollectionNode *cn = testController.collectionNode;
   [cn waitUntilAllUpdatesAreCommitted];
   ASCellNode *node = [cn nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
-  XCTAssertTrue(node.visible);
+  [self expectationForPredicate:[NSPredicate predicateWithFormat:@"visible = YES"] evaluatedWithObject:node handler:nil];
+  [self waitForExpectationsWithTimeout:3 handler:nil];
   testController.asyncDelegate->_itemCounts = {0};
   [cn deleteItemsAtIndexPaths: @[[NSIndexPath indexPathForItem:0 inSection:0]]];
   [self expectationForPredicate:[NSPredicate predicateWithFormat:@"visible = NO"] evaluatedWithObject:node handler:nil];
