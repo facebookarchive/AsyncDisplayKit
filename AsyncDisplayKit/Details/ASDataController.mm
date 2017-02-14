@@ -728,7 +728,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
         context.constrainedSize = constrainedSize;
 
         // Node may not be allocated yet (e.g node virtualization or same size optimization)
-        // Avoid acidentally allocate and layout it
+        // Call context.nodeIfAllocated here to avoid immature node allocation and layout
         ASCellNode *node = context.nodeIfAllocated;
         if (node) {
           [self _layoutNode:node withConstrainedSize:constrainedSize];
@@ -777,7 +777,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   
   ASIndexedNodeContext *context = ASGetElementInTwoDimensionalArray(_nodeContexts[ASDataControllerRowNodeKind],
                                                                     indexPath);
-  return context.nodeIfAllocated;
+  // Note: Node may not be allocated and laid out yet (e.g node virtualization or same size optimization)
+  // In that case, calling context.node here will force an allocation
+  return context.node;
 }
 
 - (ASCellNode *)nodeAtCompletedIndexPath:(NSIndexPath *)indexPath
