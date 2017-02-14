@@ -41,10 +41,14 @@ typedef ASTraitCollection * _Nonnull (^ASDisplayTraitsForTraitWindowSizeBlock)(C
  */
 - (instancetype)initWithNode:(DisplayNodeType)node;
 
+NS_ASSUME_NONNULL_END
+
 /**
  * @return node Returns the ASDisplayNode which provides the backing view to the view controller.
  */
-@property (nonatomic, strong, readonly) DisplayNodeType node;
+@property (nonatomic, strong, readonly, null_unspecified) DisplayNodeType node;
+
+NS_ASSUME_NONNULL_BEGIN
 
 /**
  * Set this block to customize the ASDisplayTraits returned when the VC transitions to the given traitCollection.

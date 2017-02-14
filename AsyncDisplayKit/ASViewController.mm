@@ -23,7 +23,6 @@
 
 @implementation ASViewController
 {
-  BOOL _nodeProvided;
   BOOL _ensureDisplayed;
   BOOL _automaticallyAdjustRangeModeBasedOnViewEvents;
   BOOL _parentManagesVisibilityDepth;
@@ -38,7 +37,6 @@
     return nil;
   }
   
-  _node = [[ASDisplayNode alloc] init];
   [self _initializeInstance];
   
   return self;
@@ -50,7 +48,6 @@
     return nil;
   }
   
-  _node = [[ASDisplayNode alloc] init];
   [self _initializeInstance];
   
   return self;
@@ -62,7 +59,6 @@
     return nil;
   }
   
-  _nodeProvided = YES;
   _node = node;
   [self _initializeInstance];
 
@@ -71,8 +67,9 @@
 
 - (void)_initializeInstance
 {
-  ASDisplayNodeAssertNotNil(_node, @"Node must not be nil");
-  ASDisplayNodeAssertTrue(!_node.layerBacked);
+  if (_node == nil) {
+    return;
+  }
   
   _selfConformsToRangeModeProtocol = [self conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
   _nodeConformsToRangeModeProtocol = [_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
@@ -107,7 +104,9 @@
   // will have a greater performance benefit than the impact of this transient view.
   [super loadView];
   
-  if (!_nodeProvided) { return; }
+  if (_node == nil) {
+    return;
+  }
   
   ASDisplayNodeAssertTrue(!_node.layerBacked);
   
@@ -157,7 +156,7 @@
 {
   if (_ensureDisplayed && self.neverShowPlaceholders) {
     _ensureDisplayed = NO;
-    [self.node recursivelyEnsureDisplaySynchronously:YES];
+    [_node recursivelyEnsureDisplaySynchronously:YES];
   }
   [super viewDidLayoutSubviews];
 }
@@ -234,7 +233,9 @@ ASVisibilityDepthImplementation;
 
 - (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
 {
-  if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
+  if (!_automaticallyAdjustRangeModeBasedOnViewEvents) {
+    return;
+  }
   
   if (_selfConformsToRangeModeProtocol) {
     id<ASRangeControllerUpdateRangeProtocol> rangeUpdater = (id<ASRangeControllerUpdateRangeProtocol>)self;
@@ -290,7 +291,7 @@ ASVisibilityDepthImplementation;
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     // Once we've propagated all the traits, layout this node.
     // Remeasure the node with the latest constrained size – old constrained size may be incorrect.
-    [self.node layoutThatFits:[self nodeConstrainedSize]];
+    [_node layoutThatFits:[self nodeConstrainedSize]];
 #pragma clang diagnostic pop
   }
 }
@@ -308,7 +309,7 @@ ASVisibilityDepthImplementation;
 {
   [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
   
-  ASPrimitiveTraitCollection traitCollection = self.node.primitiveTraitCollection;
+  ASPrimitiveTraitCollection traitCollection = _node.primitiveTraitCollection;
   traitCollection.containerSize = self.view.bounds.size;
   [self propagateNewTraitCollection:traitCollection];
 }
