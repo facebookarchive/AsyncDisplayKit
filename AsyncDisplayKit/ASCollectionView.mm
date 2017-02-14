@@ -26,6 +26,7 @@
 #import <AsyncDisplayKit/_ASCollectionViewCell.h>
 #import <AsyncDisplayKit/_ASDisplayLayer.h>
 #import <AsyncDisplayKit/ASCollectionViewLayoutFacilitatorProtocol.h>
+#import <AsyncDisplayKit/ASPagerNode.h>
 #import <AsyncDisplayKit/ASSectionContext.h>
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 #import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
@@ -93,6 +94,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   NSMutableSet *_registeredSupplementaryKinds;
   
   CGPoint _deceleratingVelocity;
+
+  BOOL _zeroContentInsets;
   
   ASCollectionViewInvalidationStyle _nextLayoutInvalidationStyle;
   
@@ -582,6 +585,16 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 - (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   return [_rangeController tuningParametersForRangeMode:rangeMode rangeType:rangeType];
+}
+
+- (void)setZeroContentInsets:(BOOL)zeroContentInsets
+{
+  _zeroContentInsets = zeroContentInsets;
+}
+
+- (BOOL)zeroContentInsets
+{
+  return _zeroContentInsets;
 }
 
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
@@ -1911,19 +1924,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     BOOL changedInNonScrollingDirection = (fixedHorizontally && newBounds.size.width != lastUsedSize.width) || (fixedVertically && newBounds.size.height != lastUsedSize.height);
 
     if (changedInNonScrollingDirection) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-      // This actually doesn't perform an animation, but prevents the transaction block from being processed in the
-      // data controller's prevent animation block that would interrupt an interrupted relayout happening in an animation block
-      // ie. ASCollectionView bounds change on rotation or multi-tasking split view resize.
-      [self performBatchAnimated:YES updates:^{
-        [_dataController relayoutAllNodes];
-      } completion:nil];
+      [_dataController relayoutAllNodes];
+      [_dataController waitUntilAllUpdatesAreCommitted];
       // We need to ensure the size requery is done before we update our layout.
-      [self waitUntilAllUpdatesAreCommitted];
       [self.collectionViewLayout invalidateLayout];
     }
-#pragma clang diagnostic pop
   }
 }
 

@@ -36,6 +36,7 @@
 #import <AsyncDisplayKit/ASRunLoopQueue.h>
 #import <AsyncDisplayKit/ASTraitCollection.h>
 #import <AsyncDisplayKit/ASWeakProxy.h>
+#import <AsyncDisplayKit/ASResponderChainEnumerator.h>
 
 /**
  * Assert if the current thread owns a mutex.
@@ -3782,6 +3783,20 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   CGRect windowFrame = [self _frameInWindow];
   if (CGRectIsNull(windowFrame) == NO) {
     [result addObject:@{ @"frameInWindow" : [NSValue valueWithCGRect:windowFrame] }];
+  }
+  
+  // Attempt to find view controller.
+  // Note that the convenience method asdk_associatedViewController has an assertion
+  // that it's run on main. Since this is a debug method, let's bypass the assertion
+  // and run up the chain ourselves.
+  if (_view != nil) {
+    for (UIResponder *responder in [_view asdk_responderChainEnumerator]) {
+      UIViewController *vc = ASDynamicCast(responder, UIViewController);
+      if (vc) {
+        [result addObject:@{ @"viewController" : ASObjectDescriptionMakeTiny(vc) }];
+        break;
+      }
+    }
   }
   
   if (_view != nil) {
