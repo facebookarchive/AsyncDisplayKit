@@ -412,19 +412,20 @@
 {
   if (!self.dataController.initialReloadDataHasBeenCalled) {
     [self reloadData];
+    [self waitUntilAllUpdatesAreCommitted];
   }
 }
 
 - (NSInteger)numberOfItemsInSection:(NSInteger)section
 {
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController numberOfRowsInSection:section];
+  return [self.dataController completedNumberOfRowsInSection:section];
 }
 
 - (NSInteger)numberOfSections
 {
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController numberOfSections];
+  return [self.dataController completedNumberOfSections];
 }
 
 - (NSArray<__kindof ASCellNode *> *)visibleNodes
@@ -436,12 +437,12 @@
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController nodeAtIndexPath:indexPath];
+  return [self.dataController nodeAtCompletedIndexPath:indexPath];
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
-  return [self.dataController indexPathForNode:cellNode];
+  return [self.dataController completedIndexPathForNode:cellNode];
 }
 
 - (NSArray<NSIndexPath *> *)indexPathsForVisibleItems
