@@ -1,8 +1,8 @@
 //
-//  PhotoFeedViewController.h
+//  PhotoFeedBaseController.h
 //  Sample
 //
-//  Created by Hannah Troisi on 2/17/16.
+//  Created by Huy Nguyen on 20/12/16.
 //
 //  Copyright (c) 2014-present, Facebook, Inc.  All rights reserved.
 //  This source code is licensed under the BSD-style license found in the
@@ -17,8 +17,23 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#import "PhotoFeedBaseController.h"
+#import <AsyncDisplayKit/AsyncDisplayKit.h>
+#import "PhotoFeedControllerProtocol.h"
 
-@interface PhotoFeedViewController : PhotoFeedBaseController
+@protocol PhotoFeedControllerProtocol;
+@class PhotoFeedModel;
+
+@interface PhotoFeedBaseController : ASViewController <PhotoFeedControllerProtocol>
+
+@property (nonatomic, strong, readonly) PhotoFeedModel *photoFeed;
+@property (nonatomic, strong, readonly) UITableView *tableView;
+
+- (void)refreshFeed;
+- (void)insertNewRows:(NSArray *)newPhotos;
+
+#pragma mark - Subclasses must override these methods
+
+- (void)loadPage;
+- (void)requestCommentsForPhotos:(NSArray *)newPhotos;
 
 @end
