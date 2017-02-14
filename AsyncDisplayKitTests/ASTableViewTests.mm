@@ -606,12 +606,8 @@
   // Assert that the beginning of the call pattern is correct.
   // There is currently noise that comes after that we will allow for this test.
   NSArray *expectedSelectors = @[ NSStringFromSelector(@selector(reloadData)),
-                                  NSStringFromSelector(@selector(beginUpdates)),
-                                  NSStringFromSelector(@selector(insertSections:withRowAnimation:)),
-                                  NSStringFromSelector(@selector(insertRowsAtIndexPaths:withRowAnimation:)),
-                                  NSStringFromSelector(@selector(endUpdates))];
-  NSArray *firstSelectors = [selectors subarrayWithRange:NSMakeRange(0, expectedSelectors.count)];
-  XCTAssertEqualObjects(firstSelectors, expectedSelectors);
+                                  NSStringFromSelector(@selector(reloadData)) ];
+  XCTAssertEqualObjects(selectors, expectedSelectors);
 
   [UITableView deswizzleAllInstanceMethods];
 }
@@ -640,13 +636,8 @@
   // Assert that the beginning of the call pattern is correct.
   // There is currently noise that comes after that we will allow for this test.
   NSArray *expectedSelectors = @[NSStringFromSelector(@selector(reloadData)),
-                                 NSStringFromSelector(@selector(beginUpdates)),
-                                 NSStringFromSelector(@selector(deleteSections:withRowAnimation:)),
-                                 NSStringFromSelector(@selector(insertSections:withRowAnimation:)),
-                                 NSStringFromSelector(@selector(insertRowsAtIndexPaths:withRowAnimation:)),
-                                 NSStringFromSelector(@selector(endUpdates))];
-  NSArray *firstSelectors = [selectors subarrayWithRange:NSMakeRange(0, expectedSelectors.count)];
-  XCTAssertEqualObjects(firstSelectors, expectedSelectors);
+                                 NSStringFromSelector(@selector(reloadData))];
+  XCTAssertEqualObjects(selectors, expectedSelectors);
 
   [UITableView deswizzleAllInstanceMethods];
 }
