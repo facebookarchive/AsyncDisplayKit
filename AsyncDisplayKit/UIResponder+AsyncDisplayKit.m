@@ -27,10 +27,5 @@
   return nil;
 }
 
-- (NSEnumerator *)asdk_responderChainEnumerator
-{
-  return [[ASResponderChainEnumerator alloc] initWithResponder:self];
-}
-
 @end
 

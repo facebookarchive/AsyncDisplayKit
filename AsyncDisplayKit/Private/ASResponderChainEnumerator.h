@@ -18,5 +18,11 @@ AS_SUBCLASSING_RESTRICTED
 
 @end
 
+@interface UIResponder (ASResponderChainEnumerator)
+
+- (ASResponderChainEnumerator *)asdk_responderChainEnumerator;
+
+@end
+
 
 NS_ASSUME_NONNULL_END

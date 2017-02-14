@@ -30,3 +30,12 @@
 }
 
 @end
+
+@implementation UIResponder (ASResponderChainEnumerator)
+
+- (NSEnumerator *)asdk_responderChainEnumerator
+{
+  return [[ASResponderChainEnumerator alloc] initWithResponder:self];
+}
+
+@end
