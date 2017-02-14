@@ -12,11 +12,13 @@
 
 #import <AsyncDisplayKit/ASPagerNode.h>
 #import <AsyncDisplayKit/ASDelegateProxy.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASPagerFlowLayout.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
+#import <AsyncDisplayKit/UIResponder+AsyncDisplayKit.h>
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
@@ -80,11 +82,6 @@
   cv.allowsSelection = NO;
   cv.showsVerticalScrollIndicator = NO;
   cv.showsHorizontalScrollIndicator = NO;
-  
-  // Zeroing contentInset is important, as UIKit will set the top inset for the navigation bar even though
-  // our view is only horizontally scrollable.  This causes UICollectionViewFlowLayout to log a warning.
-  // From here we cannot disable this directly (UIViewController's automaticallyAdjustsScrollViewInsets).
-  cv.zeroContentInsets = YES;
 
   ASRangeTuningParameters minimumRenderParams = { .leadingBufferScreenfuls = 0.0, .trailingBufferScreenfuls = 0.0 };
   ASRangeTuningParameters minimumPreloadParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
@@ -209,6 +206,19 @@
 {
   [self setDataSource:nil];
   [self setDelegate:nil];
+}
+
+- (void)enterHierarchyState:(ASHierarchyState)hierarchyState
+{
+  [super enterHierarchyState:hierarchyState];
+  
+  if (_allowsAutomaticInsetsAdjustment == NO && hierarchyState == ASHierarchyStateNormal) {
+    UIViewController *vc = [self.view asdk_associatedViewController];
+    if (vc.automaticallyAdjustsScrollViewInsets) {
+      NSLog(@"AsyncDisplayKit: ASPagerNode is setting automaticallyAdjustsScrollViewInsets=NO on its owning view controller %@. This automatic behavior will be disabled in the future. Set allowsAutomaticInsetsAdjustment=YES on the pager node to silence this warning.", vc);
+      vc.automaticallyAdjustsScrollViewInsets = NO;
+    }
+  }
 }
 
 @end

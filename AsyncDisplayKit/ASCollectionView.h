@@ -111,6 +111,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL inverted;
 
+@end
+
+@interface ASCollectionView (Deprecated)
+
 /**
  * Forces the .contentInset to be UIEdgeInsetsZero.
  *
@@ -119,11 +123,7 @@ NS_ASSUME_NONNULL_BEGIN
  * automaticallyAdjustsScrollViewInsets, which may not be accessible.  ASPagerNode uses this to ensure
  * its flow layout behaves predictably and does not log undefined layout warnings.
  */
-@property (nonatomic) BOOL zeroContentInsets;
-
-@end
-
-@interface ASCollectionView (Deprecated)
+@property (nonatomic) BOOL zeroContentInsets ASDISPLAYNODE_DEPRECATED_MSG("Set automaticallyAdjustsScrollViewInsets=NO on your view controller instead.");
 
 /**
  * The object that acts as the asynchronous delegate of the collection view

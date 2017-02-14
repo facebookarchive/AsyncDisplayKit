@@ -11,62 +11,51 @@
 //
 
 #import <AsyncDisplayKit/ASPagerFlowLayout.h>
+#import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASCollectionView.h>
 
 @interface ASPagerFlowLayout () {
-  BOOL _didRotate;
-  CGRect _cachedCollectionViewBounds;
-  NSIndexPath *_currentIndexPath;
+  __weak ASCellNode *_currentCellNode;
 }
 
 @end
 
 @implementation ASPagerFlowLayout
 
-- (CGPoint)targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset withScrollingVelocity:(CGPoint)velocity
+- (ASCollectionView *)asCollectionView
 {
-  NSInteger currentPage = ceil(proposedContentOffset.x / self.collectionView.bounds.size.width);
-  _currentIndexPath = [NSIndexPath indexPathForItem:currentPage inSection:0];
-  
-  return [super targetContentOffsetForProposedContentOffset:proposedContentOffset withScrollingVelocity:velocity];
+  // Dynamic cast is too slow and not worth it.
+  return (ASCollectionView *)self.collectionView;
 }
 
-
-- (void)prepareForAnimatedBoundsChange:(CGRect)oldBounds
+- (void)prepareLayout
 {
-  // Cache the current page if a rotation did happen. This happens before the rotation animation
-  // is occuring and the bounds changed so we use this as an opportunity to cache the current index path
-  if (_cachedCollectionViewBounds.size.width != self.collectionView.bounds.size.width) {
-      _cachedCollectionViewBounds = self.collectionView.bounds;
-        
-    // Figurring out current page based on the old bounds visible space
-    CGRect visibleRect = oldBounds;
-           
-    CGFloat visibleXCenter = CGRectGetMidX(visibleRect);
-    NSArray<UICollectionViewLayoutAttributes *> *layoutAttributes = [self layoutAttributesForElementsInRect:visibleRect];
-    for (UICollectionViewLayoutAttributes *attributes in layoutAttributes) {
-      if ([attributes representedElementCategory] == UICollectionElementCategoryCell && attributes.center.x == visibleXCenter) {
-        _currentIndexPath = attributes.indexPath;
-        break;
-      }
-    }
-      
-      _didRotate = YES;
-    }
-    
-    [super prepareForAnimatedBoundsChange:oldBounds];
+  [super prepareLayout];
+  if (_currentCellNode == nil) {
+    [self _updateCurrentNode];
+  }
 }
+
+- (void)prepareForCollectionViewUpdates:(NSArray<UICollectionViewUpdateItem *> *)updateItems
+{
+  [super prepareForCollectionViewUpdates:updateItems];
+  if (!self.collectionView.decelerating && !self.collectionView.tracking) {
+    [self _updateCurrentNode];
+  }
+}
+
 - (CGPoint)targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 {
-    // Don't mess around if the user is interacting with the page node. Although if just a rotation happened we should
-    // try to use the current index path to not end up setting the target content offset to something in between pages
-    if (_didRotate || (!self.collectionView.isDecelerating && !self.collectionView.isTracking)) {
-        _didRotate = NO;
-        if (_currentIndexPath) {
-          return [self _targetContentOffsetForItemAtIndexPath:_currentIndexPath proposedContentOffset:proposedContentOffset];
-        }
+  // Don't mess around if the user is interacting with the page node. Although if just a rotation happened we should
+  // try to use the current index path to not end up setting the target content offset to something in between pages
+  if (!self.collectionView.decelerating && !self.collectionView.tracking) {
+    NSIndexPath *indexPath = [self.asCollectionView indexPathForNode:_currentCellNode];
+    if (indexPath) {
+      return [self _targetContentOffsetForItemAtIndexPath:indexPath proposedContentOffset:proposedContentOffset];
     }
-    
-    return [super targetContentOffsetForProposedContentOffset:proposedContentOffset];
+  }
+
+  return [super targetContentOffsetForProposedContentOffset:proposedContentOffset];
 }
 
 - (CGPoint)_targetContentOffsetForItemAtIndexPath:(NSIndexPath *)indexPath proposedContentOffset:(CGPoint)proposedContentOffset
@@ -75,19 +64,50 @@
     return proposedContentOffset;
   }
   
-  UICollectionViewLayoutAttributes *attributes = [self layoutAttributesForItemAtIndexPath:_currentIndexPath];
+  UICollectionViewLayoutAttributes *attributes = [self layoutAttributesForItemAtIndexPath:indexPath];
   if (attributes == nil) {
     return proposedContentOffset;
   }
-  
+
   CGFloat xOffset = (CGRectGetWidth(self.collectionView.bounds) - CGRectGetWidth(attributes.frame)) / 2.0;
   return CGPointMake(attributes.frame.origin.x - xOffset, proposedContentOffset.y);
 }
 
 - (BOOL)_dataSourceIsEmpty
 {
-    return ([self.collectionView numberOfSections] == 0 ||
-            [self.collectionView numberOfItemsInSection:0] == 0);
+  return ([self.collectionView numberOfSections] == 0 ||
+          [self.collectionView numberOfItemsInSection:0] == 0);
+}
+
+- (void)_updateCurrentNode
+{
+  UICollectionView *collectionView = self.collectionView;
+  CGRect bounds = collectionView.bounds;
+  CGRect rect = CGRectMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds), 1, 1);
+
+  NSIndexPath *indexPath = [self layoutAttributesForElementsInRect:rect].firstObject.indexPath;
+  if (indexPath) {
+    ASCellNode *node = [self.asCollectionView nodeForItemAtIndexPath:indexPath];
+    if (node) {
+      _currentCellNode = node;
+    }
+  }
+}
+
+- (BOOL)shouldInvalidateLayoutForBoundsChange:(CGRect)newBounds
+{/*
+  BOOL sizeChanged = !CGSizeEqualToSize(newBounds.size, self.collectionView.bounds.size);
+  if (!sizeChanged) {
+    return NO;
+  }
+  BOOL anim = ([self.collectionView.layer animationForKey:@"bounds.size"] != nil);
+  if (!anim) {
+    return NO;
+  }
+  if (!anim && !sizeChanged) {*/
+    [self _updateCurrentNode];
+  //}
+  return NO;
 }
 
 @end
