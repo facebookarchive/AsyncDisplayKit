@@ -910,7 +910,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   for (ASNodeContextTwoDimensionalArray *allSections in dict.allValues) {
     for (NSArray<ASIndexedNodeContext *> *section in allSections) {
       for (ASIndexedNodeContext *context in section) {
-        if (context.nodeIfAllocated == nil) [unloadedContexts addObject:context];
+        ASCellNode *node = context.nodeIfAllocated;
+        if (node == nil || node.calculatedLayout == nil) [unloadedContexts addObject:context];
       }
     }
   }
