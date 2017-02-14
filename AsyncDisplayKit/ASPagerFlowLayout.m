@@ -36,14 +36,6 @@
   }
 }
 
-- (void)prepareForCollectionViewUpdates:(NSArray<UICollectionViewUpdateItem *> *)updateItems
-{
-  [super prepareForCollectionViewUpdates:updateItems];
-  if (!self.collectionView.decelerating && !self.collectionView.tracking) {
-    [self _updateCurrentNode];
-  }
-}
-
 - (CGPoint)targetContentOffsetForProposedContentOffset:(CGPoint)proposedContentOffset
 {
   // Don't mess around if the user is interacting with the page node. Although if just a rotation happened we should
@@ -81,8 +73,17 @@
 
 - (void)_updateCurrentNode
 {
-  UICollectionView *collectionView = self.collectionView;
-  CGRect bounds = collectionView.bounds;
+  // Never change node during an animated bounds change (rotation)
+  // NOTE! Listening for -prepareForAnimatedBoundsChange and -finalizeAnimatedBoundsChange
+  // isn't sufficient here! It's broken!
+  NSArray *animKeys = self.collectionView.layer.animationKeys;
+  for (NSString *key in animKeys) {
+    if ([key hasPrefix:@"bounds"]) {
+      return;
+    }
+  }
+  
+  CGRect bounds = self.collectionView.bounds;
   CGRect rect = CGRectMake(CGRectGetMidX(bounds), CGRectGetMidY(bounds), 1, 1);
 
   NSIndexPath *indexPath = [self layoutAttributesForElementsInRect:rect].firstObject.indexPath;
@@ -95,19 +96,9 @@
 }
 
 - (BOOL)shouldInvalidateLayoutForBoundsChange:(CGRect)newBounds
-{/*
-  BOOL sizeChanged = !CGSizeEqualToSize(newBounds.size, self.collectionView.bounds.size);
-  if (!sizeChanged) {
-    return NO;
-  }
-  BOOL anim = ([self.collectionView.layer animationForKey:@"bounds.size"] != nil);
-  if (!anim) {
-    return NO;
-  }
-  if (!anim && !sizeChanged) {*/
-    [self _updateCurrentNode];
-  //}
-  return NO;
+{
+  [self _updateCurrentNode];
+  return [super shouldInvalidateLayoutForBoundsChange:newBounds];
 }
 
 @end
