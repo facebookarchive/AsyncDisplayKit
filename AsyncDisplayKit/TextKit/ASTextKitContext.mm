@@ -43,6 +43,13 @@
     _layoutManager = [[ASLayoutManager alloc] init];
     _layoutManager.usesFontLeading = NO;
     [_textStorage addLayoutManager:_layoutManager];
+    
+    // Set attributed string again(_textStorage has just been init by the same atttributedString), so this should bring no side effect, while magically fix text layout issue for CJK languages.
+    // See https://github.com/facebook/AsyncDisplayKit/issues/2894
+    if (attributedString) {
+      [_textStorage setAttributedString:attributedString];
+    }
+    
     _textContainer = [[NSTextContainer alloc] initWithSize:constrainedSize];
     // We want the text laid out up to the very edges of the container.
     _textContainer.lineFragmentPadding = 0;
