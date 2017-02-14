@@ -438,14 +438,14 @@ ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 {
   ASDisplayNodeAssertMainThread();
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController completedNumberOfRowsInSection:section];
+  return [self.dataController numberOfRowsInSection:section];
 }
 
 - (NSInteger)numberOfSections
 {
   ASDisplayNodeAssertMainThread();
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController completedNumberOfSections];
+  return [self.dataController numberOfSections];
 }
 
 - (NSArray<__kindof ASCellNode *> *)visibleNodes
@@ -462,7 +462,7 @@ ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController nodeAtCompletedIndexPath:indexPath];
+  return [self.dataController nodeAtIndexPath:indexPath];
 }
 
 - (CGRect)rectForRowAtIndexPath:(NSIndexPath *)indexPath
