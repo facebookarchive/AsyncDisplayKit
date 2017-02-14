@@ -482,8 +482,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   //TODO need this?
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
-  void (^batchCompletion)(BOOL) = changeSet.completionHandler;
-  
   /**
    * If the initial reloadData has not been called, just bail because we don't have
    * our old data source counts.
@@ -491,6 +489,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
    * For the issue that UICollectionView has that we're choosing to workaround.
    */
   if (!_initialReloadDataHasBeenCalled) {
+    void (^batchCompletion)(BOOL) = changeSet.completionHandler;
     if (batchCompletion != nil) {
       batchCompletion(YES);
     }
