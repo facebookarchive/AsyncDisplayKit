@@ -1451,14 +1451,14 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
   
+  //TODO Assert that this is not part of batch updates
   ASPerformBlockWithoutAnimation(YES, ^{
     if (self.test_enableSuperUpdateCallLogging) {
       NSLog(@"-[super reloadData]");
     }
     [super reloadData];
-    if (!_performingBatchUpdates) {
-      [_rangeController updateIfNeeded];
-    }
+    // Flush any range changes that happened as part of submitting the reload.
+    [_rangeController updateIfNeeded];
     // TODO Should reloadData triggers batch fetching?
 //    [self _scheduleCheckForBatchFetchingForNumberOfChanges:];
   });

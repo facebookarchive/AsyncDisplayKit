@@ -1723,19 +1723,14 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
   
   //TODO Do we need to notify _layoutFacilitator?
-  if (_performingBatchUpdates) {
-    [_batchUpdateBlocks addObject:^{
-      [super reloadData];
-    }];
-  } else {
-    [UIView performWithoutAnimation:^{
-      [super reloadData];
-      // Flush any range changes that happened as part of submitting the update.
-      [_rangeController updateIfNeeded];
-      // TODO Should reloadData triggers batch fetching?
-//      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
-    }];
-  }
+  //TODO Assert that this is not part of batch updates
+  ASPerformBlockWithoutAnimation(NO, ^{
+    [super reloadData];
+    // Flush any range changes that happened as part of submitting the reload.
+    [_rangeController updateIfNeeded];
+    // TODO Should reloadData triggers batch fetching?
+    //      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
+  });
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
