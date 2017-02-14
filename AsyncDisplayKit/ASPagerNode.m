@@ -208,17 +208,21 @@
   [self setDelegate:nil];
 }
 
-- (void)enterHierarchyState:(ASHierarchyState)hierarchyState
+- (void)didEnterVisibleState
 {
-  [super enterHierarchyState:hierarchyState];
-  
-  if (_allowsAutomaticInsetsAdjustment == NO && hierarchyState == ASHierarchyStateNormal) {
-    UIViewController *vc = [self.view asdk_associatedViewController];
-    if (vc.automaticallyAdjustsScrollViewInsets) {
-      NSLog(@"AsyncDisplayKit: ASPagerNode is setting automaticallyAdjustsScrollViewInsets=NO on its owning view controller %@. This automatic behavior will be disabled in the future. Set allowsAutomaticInsetsAdjustment=YES on the pager node to silence this warning.", vc);
-      vc.automaticallyAdjustsScrollViewInsets = NO;
-    }
-  }
+	[super didEnterVisibleState];
+
+	// Check that our view controller does not automatically set our content insets
+	// It would be better to have a -didEnterHierarchy hook to put this in, but
+	// such a hook doesn't currently exist, and in every use case I can imagine,
+	// the pager is not hosted inside a range-managed node.
+	if (_allowsAutomaticInsetsAdjustment == NO) {
+		UIViewController *vc = [self.view asdk_associatedViewController];
+		if (vc.automaticallyAdjustsScrollViewInsets) {
+			NSLog(@"AsyncDisplayKit: ASPagerNode is setting automaticallyAdjustsScrollViewInsets=NO on its owning view controller %@. This automatic behavior will be disabled in the future. Set allowsAutomaticInsetsAdjustment=YES on the pager node to suppress this behavior.", vc);
+			vc.automaticallyAdjustsScrollViewInsets = NO;
+		}
+	}
 }
 
 @end
