@@ -1417,16 +1417,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
 
-  if (_automaticallyAdjustsContentOffset) {
-    [self endAdjustingContentOffsetAnimated:animated];
-  }
-
   ASPerformBlockWithoutAnimation(!animated, ^{
     [super endUpdates];
     [_rangeController updateIfNeeded];
   });
 
   _performingBatchUpdates = NO;
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self endAdjustingContentOffsetAnimated:animated];
+  }
+  
   if (completion) {
     completion(YES);
   }
