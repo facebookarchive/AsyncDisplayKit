@@ -73,6 +73,20 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
+ * Similar to -indexPathForCell:.
+ *
+ * @param cellNode a cellNode in the collection view
+ *
+ * @return The index path for this cell node.
+ *
+ * @discussion This index path returned by this method is in the _view's_ index space
+ *    and should only be used with @c ASCollectionView directly. To get an index path suitable
+ *    for use with your data source and @c ASCollectionNode, call @c indexPathForNode: on the
+ *    collection node instead.
+ */
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
+
+/**
  * Similar to -supplementaryViewForElementKind:atIndexPath:
  *
  * @param elementKind The kind of supplementary node to locate.
@@ -390,20 +404,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @return an array containing the nodes being displayed on screen.
  */
 - (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
-
-/**
- * Similar to -indexPathForCell:.
- *
- * @param cellNode a cellNode in the collection view
- *
- * @return The index path for this cell node.
- *
- * @discussion This index path returned by this method is in the _view's_ index space
- *    and should only be used with @c ASCollectionView directly. To get an index path suitable
- *    for use with your data source and @c ASCollectionNode, call @c indexPathForNode: on the
- *    collection node instead.
- */
-- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 @end
 
