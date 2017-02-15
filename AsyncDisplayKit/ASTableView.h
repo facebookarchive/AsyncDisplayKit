@@ -45,9 +45,11 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
- * YES to automatically adjust the contentOffset when cells are inserted or deleted "before"
- * visible cells, maintaining the users' visible scroll position. Currently this feature tracks insertions, moves and deletions of
- * cells, but section edits are ignored.
+ * YES to automatically adjust the contentOffset when cells are inserted or deleted above
+ * visible cells, maintaining the users' visible scroll position. 
+ *
+ * @note This is only applied to non-animated updates. For animated updates, there is no way to
+ * synchronize or "cancel out" the appearance of a scroll due to UITableView API limitations.
  *
  * default is NO.
  */
