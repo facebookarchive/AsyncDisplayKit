@@ -853,6 +853,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_rangeController configureContentView:cell.contentView forCellNode:node];
 
     cell.node = node;
+    cell.selectedBackgroundView = node.selectedBackgroundView;
   }
 
   return cell;

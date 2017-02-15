@@ -952,6 +952,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
   if (_ASCollectionViewCell *asCell = ASDynamicCast(cell, _ASCollectionViewCell)) {
     asCell.node = node;
+    asCell.selectedBackgroundView = node.selectedBackgroundView;
     [_rangeController configureContentView:cell.contentView forCellNode:node];
   }
   
