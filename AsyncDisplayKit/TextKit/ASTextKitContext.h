@@ -29,7 +29,8 @@ AS_SUBCLASSING_RESTRICTED
                            lineBreakMode:(NSLineBreakMode)lineBreakMode
                     maximumNumberOfLines:(NSUInteger)maximumNumberOfLines
                           exclusionPaths:(NSArray *)exclusionPaths
-                         constrainedSize:(CGSize)constrainedSize;
+                         constrainedSize:(CGSize)constrainedSize
+                      layoutManagerClass:(Class)layoutManagerClass;
 
 /**
  All operations on TextKit values MUST occur within this locked context.  Simultaneous access (even non-mutative) to

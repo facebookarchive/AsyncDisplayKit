@@ -22,6 +22,7 @@
 #import <AsyncDisplayKit/ASTextKitCoreTextAdditions.h>
 #import <AsyncDisplayKit/ASTextKitRenderer+Positioning.h>
 #import <AsyncDisplayKit/ASTextKitShadower.h>
+#import <AsyncDisplayKit/ASLayoutManager.h>
 
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASLayout.h>
@@ -102,7 +103,7 @@ static NSCache *sharedRendererCache()
  we maintain a LRU renderer cache that is queried via a unique key based on text kit attributes and constrained size. 
  */
 
-static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, CGSize constrainedSize)
+static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, CGSize constrainedSize, Class layoutManagerClass)
 {
   NSCache *cache = sharedRendererCache();
   
@@ -112,7 +113,7 @@ static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, 
 
   ASTextKitRenderer *renderer = [cache objectForKey:key];
   if (renderer == nil) {
-    renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes constrainedSize:constrainedSize];
+    renderer = [[ASTextKitRenderer alloc] initWithTextKitAttributes:attributes constrainedSize:constrainedSize layoutManagerClass:layoutManagerClass];
     [cache setObject:renderer forKey:key];
   }
   
@@ -130,6 +131,8 @@ static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, 
   CGFloat _shadowOpacity;
   CGFloat _shadowRadius;
   
+  Class _layoutManagerClass;
+
   UIEdgeInsets _textContainerInset;
 
   NSArray *_exclusionPaths;
@@ -163,7 +166,11 @@ static ASTextKitRenderer *rendererForAttributes(ASTextKitAttributes attributes, 
 
 static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
-- (instancetype)init
+- (instancetype)init {
+    return [self initWithLayoutManagerClass:[ASLayoutManager class]];
+}
+
+- (instancetype)initWithLayoutManagerClass:(Class)layoutManagerClass
 {
   if (self = [super init]) {
     // Load default values from superclass.
@@ -172,6 +179,8 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     _shadowOpacity = [super shadowOpacity];
     _shadowRadius = [super shadowRadius];
 
+    _layoutManagerClass = layoutManagerClass;
+    
     // Disable user interaction for text node by default.
     self.userInteractionEnabled = NO;
     self.needsDisplayOnBoundsChange = YES;
@@ -278,7 +287,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   ASDN::MutexLocker l(__instanceLock__);
   bounds.size.width -= (_textContainerInset.left + _textContainerInset.right);
   bounds.size.height -= (_textContainerInset.top + _textContainerInset.bottom);
-  return rendererForAttributes([self _rendererAttributes], bounds.size);
+  return rendererForAttributes([self _rendererAttributes], bounds.size, _layoutManagerClass);
 }
 
 
@@ -391,7 +400,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
     _attributedText = ASCleanseAttributedStringOfCoreTextAttributes(attributedText);
 #if AS_TEXTNODE_RECORD_ATTRIBUTED_STRINGS
-	  [ASTextNode _registerAttributedText:_attributedText];
+    [ASTextNode _registerAttributedText:_attributedText];
 #endif
     // Sync the truncation string with attributes from the updated _attributedString
     // Without this, the size calculation of the text with truncation applied will

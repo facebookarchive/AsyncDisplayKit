@@ -41,7 +41,8 @@
  @discussion Sizing will occur as a result of initialization, so be careful when/where you use this.
  */
 - (instancetype)initWithTextKitAttributes:(const ASTextKitAttributes &)textComponentAttributes
-                          constrainedSize:(const CGSize)constrainedSize;
+                          constrainedSize:(const CGSize)constrainedSize
+                       layoutManagerClass:(Class)layoutManagerClass;
 
 @property (nonatomic, strong, readonly) ASTextKitContext *context;
 

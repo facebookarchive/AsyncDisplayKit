@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASTextKitContext.h>
 #import <AsyncDisplayKit/ASTextKitTailTruncater.h>
+#import <AsyncDisplayKit/ASLayoutManager.h>
 
 @implementation ASTextKitTailTruncater
 {
@@ -66,7 +67,8 @@
                                                                              lineBreakMode:NSLineBreakByWordWrapping
                                                                       maximumNumberOfLines:1
                                                                             exclusionPaths:nil
-                                                                           constrainedSize:constrainedRect.size];
+                                                                           constrainedSize:constrainedRect.size
+                                                                        layoutManagerClass:[ASLayoutManager class]];
   __block CGRect truncationUsedRect;
 
   [truncationContext performBlockWithLockedTextKitComponents:^(NSLayoutManager *truncationLayoutManager, NSTextStorage *truncationTextStorage, NSTextContainer *truncationTextContainer) {
