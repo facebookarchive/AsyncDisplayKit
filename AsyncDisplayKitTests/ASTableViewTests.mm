@@ -797,6 +797,35 @@
   }
 }
 
+- (void)testAutomaticallyAdjustingContentOffset
+{
+  ASTableNode *node = [[ASTableNode alloc] initWithStyle:UITableViewStylePlain];
+  node.view.automaticallyAdjustsContentOffset = YES;
+  node.bounds = CGRectMake(0, 0, 100, 100);
+  ASTableViewFilledDataSource *ds = [[ASTableViewFilledDataSource alloc] init];
+  node.dataSource = ds;
+  
+  [node.view layoutIfNeeded];
+  [node waitUntilAllUpdatesAreCommitted];
+  CGFloat rowHeight = [node.view rectForRowAtIndexPath:[NSIndexPath indexPathForRow:0 inSection:0]].size.height;
+  // Scroll to row (0,1) + 10pt
+  node.view.contentOffset = CGPointMake(0, rowHeight + 10);
+  
+  [node performBatchAnimated:NO updates:^{
+    // Delete row 0 from all sections.
+    // This is silly but it's a consequence of how ASTableViewFilledDataSource is built.
+    ds.rowsPerSection -= 1;
+    for (NSInteger i = 0; i < NumberOfSections; i++) {
+      [node deleteRowsAtIndexPaths:@[ [NSIndexPath indexPathForItem:0 inSection:i]] withRowAnimation:UITableViewRowAnimationAutomatic];
+    }
+  } completion:nil];
+  [node waitUntilAllUpdatesAreCommitted];
+  
+  // Now that row (0,0) is deleted, we should have slid up to be at just 10
+  // i.e. we should have subtracted the deleted row height from our content offset.
+  XCTAssertEqual(node.view.contentOffset.y, 10);
+}
+
 @end
 
 @implementation UITableView (Testing)

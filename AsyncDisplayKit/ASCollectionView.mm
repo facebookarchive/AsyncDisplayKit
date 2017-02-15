@@ -1697,7 +1697,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   _performingBatchUpdates = NO;
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didInsertItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
   if (!self.asyncDataSource || _superIsPendingDataLoad) {
@@ -1719,7 +1719,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didDeleteItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
   if (!self.asyncDataSource || _superIsPendingDataLoad) {

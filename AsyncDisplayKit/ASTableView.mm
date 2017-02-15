@@ -128,8 +128,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   NSIndexPath *_pendingVisibleIndexPath;
 
-  NSIndexPath *_contentOffsetAdjustmentTopVisibleRow;
-  CGFloat _contentOffsetAdjustment;
+  // The top cell node that was visible before the update.
+  __weak ASCellNode *_contentOffsetAdjustmentTopVisibleNode;
+  // The y-offset of the top visible row's origin before the update.
+  CGFloat _contentOffsetAdjustmentTopVisibleNodeOffset;
   
   CGPoint _deceleratingVelocity;
   
@@ -778,52 +780,40 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)beginAdjustingContentOffset
 {
-  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
-  _contentOffsetAdjustment = 0;
-  _contentOffsetAdjustmentTopVisibleRow = self.indexPathsForVisibleRows.firstObject;
-}
-
-- (void)endAdjustingContentOffset
-{
-  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
-  if (_contentOffsetAdjustment != 0) {
-    self.contentOffset = CGPointMake(0, self.contentOffset.y+_contentOffsetAdjustment);
-  }
-
-  _contentOffsetAdjustment = 0;
-  _contentOffsetAdjustmentTopVisibleRow = nil;
-}
-
-- (void)adjustContentOffsetWithNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths inserting:(BOOL)inserting {
-  // Maintain the users visible window when inserting or deleting cells by adjusting the content offset for nodes
-  // before the visible area. If in a begin/end updates block this will update _contentOffsetAdjustment, otherwise it will
-  // update self.contentOffset directly.
-
-  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
-
-  CGFloat dir = (inserting) ? +1 : -1;
-  CGFloat adjustment = 0;
-  NSIndexPath *top = _contentOffsetAdjustmentTopVisibleRow ? : self.indexPathsForVisibleRows.firstObject;
-
-  for (int index = 0; index < indexPaths.count; index++) {
-    NSIndexPath *indexPath = indexPaths[index];
-    if ([indexPath compare:top] <= 0) { // if this row is before or equal to the topmost visible row, make adjustments...
-      ASCellNode *cellNode = nodes[index];
-      adjustment += cellNode.calculatedSize.height * dir;
-      if (indexPath.section == top.section) {
-        top = [NSIndexPath indexPathForRow:top.row+dir inSection:top.section];
-      }
+  NSIndexPath *firstVisibleIndexPath = [self.indexPathsForVisibleRows sortedArrayUsingSelector:@selector(compare:)].firstObject;
+  if (firstVisibleIndexPath) {
+    ASCellNode *node = [self nodeForRowAtIndexPath:firstVisibleIndexPath];
+    if (node) {
+      _contentOffsetAdjustmentTopVisibleNode = node;
+      _contentOffsetAdjustmentTopVisibleNodeOffset = [self rectForRowAtIndexPath:firstVisibleIndexPath].origin.y - self.bounds.origin.y;
     }
   }
-
-  if (_contentOffsetAdjustmentTopVisibleRow) { // true of we are in a begin/end update block (see beginAdjustingContentOffset)
-    _contentOffsetAdjustmentTopVisibleRow = top;
-    _contentOffsetAdjustment += adjustment;
-  } else if (adjustment != 0) {
-    self.contentOffset = CGPointMake(0, self.contentOffset.y+adjustment);
-  }
 }
 
+- (void)endAdjustingContentOffsetAnimated:(BOOL)animated
+{
+  // We can't do this for animated updates.
+  if (animated) {
+    return;
+  }
+  
+  // We can't do this if we didn't have a top visible row before.
+  if (_contentOffsetAdjustmentTopVisibleNode == nil) {
+    return;
+  }
+  
+  NSIndexPath *newIndexPathForTopVisibleRow = [self indexPathForNode:_contentOffsetAdjustmentTopVisibleNode];
+  // We can't do this if our top visible row was deleted
+  if (newIndexPathForTopVisibleRow == nil) {
+    return;
+  }
+  
+  CGFloat newRowOriginYInSelf = [self rectForRowAtIndexPath:newIndexPathForTopVisibleRow].origin.y - self.bounds.origin.y;
+  CGPoint newContentOffset = self.contentOffset;
+  newContentOffset.y += (newRowOriginYInSelf - _contentOffsetAdjustmentTopVisibleNodeOffset);
+  self.contentOffset = newContentOffset;
+  _contentOffsetAdjustmentTopVisibleNode = nil;
+}
 
 #pragma mark - Intercepted selectors
 
@@ -1428,22 +1418,23 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
 
-  if (_automaticallyAdjustsContentOffset) {
-    [self endAdjustingContentOffset];
-  }
-
   ASPerformBlockWithoutAnimation(!animated, ^{
     [super endUpdates];
     [_rangeController updateIfNeeded];
   });
 
   _performingBatchUpdates = NO;
+
+  if (_automaticallyAdjustsContentOffset) {
+    [self endAdjustingContentOffsetAnimated:animated];
+  }
+  
   if (completion) {
     completion(YES);
   }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didInsertItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
   LOG(@"UITableView insertRows:%ld rows", indexPaths.count);
@@ -1463,13 +1454,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     }
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
   });
-
-  if (_automaticallyAdjustsContentOffset) {
-    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
-  }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)rangeController:(ASRangeController *)rangeController didDeleteItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
   LOG(@"UITableView deleteRows:%ld rows", indexPaths.count);
@@ -1489,10 +1476,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     }
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
   });
-
-  if (_automaticallyAdjustsContentOffset) {
-    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:NO];
-  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions

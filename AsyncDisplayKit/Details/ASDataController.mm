@@ -59,11 +59,6 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   dispatch_group_t _editingTransactionGroup;     // Group of all edit transaction blocks. Useful for waiting.
   
   BOOL _initialReloadDataHasBeenCalled;
-
-  BOOL _delegateDidInsertNodes;
-  BOOL _delegateDidDeleteNodes;
-  BOOL _delegateDidInsertSections;
-  BOOL _delegateDidDeleteSections;
 }
 
 @end
@@ -108,21 +103,6 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   id<ASDataControllerSource> fakeDataSource = nil;
   ASEventLog *eventLog = nil;
   return [self initWithDataSource:fakeDataSource eventLog:eventLog];
-}
-
-- (void)setDelegate:(id<ASDataControllerDelegate>)delegate
-{
-  if (_delegate == delegate) {
-    return;
-  }
-  
-  _delegate = delegate;
-  
-  // Interrogate our delegate to understand its capabilities, optimizing away expensive respondsToSelector: calls later.
-  _delegateDidInsertNodes     = [_delegate respondsToSelector:@selector(dataController:didInsertNodes:atIndexPaths:withAnimationOptions:)];
-  _delegateDidDeleteNodes     = [_delegate respondsToSelector:@selector(dataController:didDeleteNodes:atIndexPaths:withAnimationOptions:)];
-  _delegateDidInsertSections  = [_delegate respondsToSelector:@selector(dataController:didInsertSections:atIndexSet:withAnimationOptions:)];
-  _delegateDidDeleteSections  = [_delegate respondsToSelector:@selector(dataController:didDeleteSectionsAtIndexSet:withAnimationOptions:)];
 }
 
 + (NSUInteger)parallelProcessorCount
@@ -349,8 +329,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   [self insertNodes:nodes ofKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
     ASDisplayNodeAssertMainThread();
     
-    if (_delegateDidInsertNodes)
-      [_delegate dataController:self didInsertNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    [_delegate dataController:self didInsertItemsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
   }];
 }
 
@@ -367,8 +346,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   [self deleteNodesOfKind:ASDataControllerRowNodeKind atIndexPaths:indexPaths completion:^(NSArray *nodes, NSArray *indexPaths) {
     ASDisplayNodeAssertMainThread();
     
-    if (_delegateDidDeleteNodes)
-      [_delegate dataController:self didDeleteNodes:nodes atIndexPaths:indexPaths withAnimationOptions:animationOptions];
+    [_delegate dataController:self didDeleteItemsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
   }];
 }
 
@@ -385,8 +363,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   [self insertSections:sections ofKind:ASDataControllerRowNodeKind atIndexSet:indexSet completion:^(NSArray *sections, NSIndexSet *indexSet) {
     ASDisplayNodeAssertMainThread();
     
-    if (_delegateDidInsertSections)
-      [_delegate dataController:self didInsertSections:sections atIndexSet:indexSet withAnimationOptions:animationOptions];
+    [_delegate dataController:self didInsertSections:sections atIndexSet:indexSet withAnimationOptions:animationOptions];
   }];
 }
 
@@ -403,8 +380,7 @@ NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdat
   [self deleteSections:indexSet completion:^() {
     ASDisplayNodeAssertMainThread();
     
-    if (_delegateDidDeleteSections)
-      [_delegate dataController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
+    [_delegate dataController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
   }];
 }
 
