@@ -659,11 +659,11 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
-    [_delegate dataController:self didDeleteSectionsAtIndexSet:change.indexSet withAnimationOptions:change.animationOptions];
+    [_delegate dataController:self didDeleteSections:change.indexSet withAnimationOptions:change.animationOptions];
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [_delegate dataController:self didInsertSectionsAtIndexSet:change.indexSet withAnimationOptions:change.animationOptions];
+    [_delegate dataController:self didInsertSections:change.indexSet withAnimationOptions:change.animationOptions];
   }
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
@@ -898,24 +898,24 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
 //TODO Move this to somewhere else?
 + (ASNodeContextTwoDimensionalDictionary *)deepImmutableCopyOfNodeContextsDictionary:(ASNodeContextTwoDimensionalDictionary *)originalDict
 {
-  NSMutableArray<ASNodeContextTwoDimensionalArray *> *deepCopy = [NSMutableArray arrayWithCapacity:originalDict.count];
-  for (ASNodeContextTwoDimensionalArray *sections in originalDict.allValues) {
-    [deepCopy addObject:ASTwoDimensionalArrayDeepMutableCopy(sections)];
-  }
-  return [NSDictionary dictionaryWithObjects:deepCopy forKeys:originalDict.allKeys];
+  ASNodeContextTwoDimensionalMutableDictionary *deepCopy = [NSMutableDictionary dictionaryWithCapacity:originalDict.count];
+  [originalDict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, ASNodeContextTwoDimensionalArray * _Nonnull obj, BOOL * _Nonnull stop) {
+    deepCopy[kind] = (ASNodeContextTwoDimensionalMutableArray *)ASTwoDimensionalArrayDeepMutableCopy(obj);
+  }];
+  return deepCopy;
 }
 
 + (NSArray<ASIndexedNodeContext *> *)unloadedNodeContextsFromDictionary:(ASNodeContextTwoDimensionalDictionary *)dict
 {
   NSMutableArray<ASIndexedNodeContext *> *unloadedContexts = [NSMutableArray array];
-  for (ASNodeContextTwoDimensionalArray *allSections in dict.allValues) {
-    for (NSArray<ASIndexedNodeContext *> *section in allSections) {
-      for (ASIndexedNodeContext *context in section) {
+  [dict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, ASNodeContextTwoDimensionalArray * _Nonnull allSections, BOOL * _Nonnull stop) {
+    [allSections enumerateObjectsUsingBlock:^(NSArray<ASIndexedNodeContext *> * _Nonnull section, NSUInteger idx, BOOL * _Nonnull stop) {
+      [section enumerateObjectsUsingBlock:^(ASIndexedNodeContext * _Nonnull context, NSUInteger idx, BOOL * _Nonnull stop) {
         ASCellNode *node = context.nodeIfAllocated;
         if (node == nil || node.calculatedLayout == nil) [unloadedContexts addObject:context];
-      }
-    }
-  }
+      }];
+    }];
+  }];
   return unloadedContexts;
 }
 

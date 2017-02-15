@@ -518,18 +518,18 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [_delegate rangeController:self didDeleteItemsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
 }
 
-- (void)dataController:(ASDataController *)dataController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSIndexSet *)sectionIndexes withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
   _rangeIsValid = NO;
-  [_delegate rangeController:self didInsertSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
+  [_delegate rangeController:self didInsertSectionsAtIndexSet:sectionIndexes withAnimationOptions:animationOptions];
 }
 
-- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)dataController:(ASDataController *)dataController didDeleteSections:(NSIndexSet *)sectionIndexes withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
 {
   ASDisplayNodeAssertMainThread();
   _rangeIsValid = NO;
-  [_delegate rangeController:self didDeleteSectionsAtIndexSet:indexSet withAnimationOptions:animationOptions];
+  [_delegate rangeController:self didDeleteSectionsAtIndexSet:sectionIndexes withAnimationOptions:animationOptions];
 }
 
 #pragma mark - Memory Management

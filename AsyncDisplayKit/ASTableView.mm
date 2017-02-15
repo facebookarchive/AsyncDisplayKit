@@ -650,13 +650,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)endUpdates
 {
-  [self endUpdatesCompletion:nil];
-}
-
-- (void)endUpdatesCompletion:(void (^)(BOOL completed))completion
-{
   // We capture the current state of whether animations are enabled if they don't provide us with one.
-  [self endUpdatesAnimated:[UIView areAnimationsEnabled] completion:completion];
+  [self endUpdatesAnimated:[UIView areAnimationsEnabled] completion:nil];
 }
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion
@@ -1457,11 +1452,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_rangeController updateIfNeeded];
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:1];
   });
-  
-  //TODO is _automaticallyAdjustsContentOffset needed for reloadData?
-//  if (_automaticallyAdjustsContentOffset) {
-//    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
-//  }
 }
 
 - (void)rangeController:(ASRangeController *)rangeController didInsertItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions

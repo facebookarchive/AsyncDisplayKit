@@ -112,12 +112,12 @@ extern NSString * const ASCollectionInvalidUpdateException;
 /**
  Called for insertion of sections.
  */
-- (void)dataController:(ASDataController *)dataController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didInsertSections:(NSIndexSet *)sectionIndexes withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 /**
  Called for deletion of sections.
  */
-- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didDeleteSections:(NSIndexSet *)sectionIndexes withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 @end
 
