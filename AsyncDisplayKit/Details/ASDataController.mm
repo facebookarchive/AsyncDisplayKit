@@ -632,10 +632,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   //TODO use original deletes and inserts instead? be aware of potential invalid index paths in those original changes changes
   //TODO handle moves
   
-  void (^batchCompletion)(BOOL) = changeSet.completionHandler;
-  
   if (changeSet.includesReloadData) {
     [_delegate dataControllerDidReloadData:self];
+    void (^batchCompletion)(BOOL) = changeSet.completionHandler;
     if (batchCompletion != nil) {
       batchCompletion(YES);
     }
@@ -663,7 +662,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
     [_delegate dataController:self didInsertNodes:nil atIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
   }
   
-  [_delegate dataController:self endUpdatesAnimated:animated completion:batchCompletion];
+  [_delegate dataController:self endUpdatesAnimated:animated completion:changeSet.completionHandler];
 }
 
 #pragma mark - Relayout
