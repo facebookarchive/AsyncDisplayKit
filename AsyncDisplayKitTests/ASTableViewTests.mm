@@ -605,8 +605,7 @@
 
   // Assert that the beginning of the call pattern is correct.
   // There is currently noise that comes after that we will allow for this test.
-  NSArray *expectedSelectors = @[ NSStringFromSelector(@selector(reloadData)),
-                                  NSStringFromSelector(@selector(reloadData)) ];
+  NSArray *expectedSelectors = @[ NSStringFromSelector(@selector(reloadData)) ];
   XCTAssertEqualObjects(selectors, expectedSelectors);
 
   [UITableView deswizzleAllInstanceMethods];
@@ -635,8 +634,7 @@
 
   // Assert that the beginning of the call pattern is correct.
   // There is currently noise that comes after that we will allow for this test.
-  NSArray *expectedSelectors = @[NSStringFromSelector(@selector(reloadData)),
-                                 NSStringFromSelector(@selector(reloadData))];
+  NSArray *expectedSelectors = @[ NSStringFromSelector(@selector(reloadData)) ];
   XCTAssertEqualObjects(selectors, expectedSelectors);
 
   [UITableView deswizzleAllInstanceMethods];

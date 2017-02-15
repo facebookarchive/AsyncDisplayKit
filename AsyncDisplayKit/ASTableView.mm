@@ -467,9 +467,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssertMainThread();
-  ASPerformBlockOnMainThread(^{
-    [super reloadData];
-  });
   [_dataController reloadDataWithCompletion:completion];
 }
 
@@ -483,7 +480,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASDisplayNodeAssertMainThread();
   [_dataController reloadDataWithCompletion:nil];
   [_dataController waitUntilAllUpdatesAreCommitted];
-  [super reloadData];
 }
 
 - (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
@@ -1459,8 +1455,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [super reloadData];
     // Flush any range changes that happened as part of submitting the reload.
     [_rangeController updateIfNeeded];
-    // TODO Should reloadData triggers batch fetching?
-//    [self _scheduleCheckForBatchFetchingForNumberOfChanges:];
+    [self _scheduleCheckForBatchFetchingForNumberOfChanges:1];
   });
   
   //TODO is _automaticallyAdjustsContentOffset needed for reloadData?
