@@ -395,29 +395,6 @@
   [self triggerSizeChangeAndAssertRelayoutAllNodesForTableView:tableView newSize:tableViewFinalSize];
 }
 
-- (void)testRelayoutAllNodesWithZeroSizeInitially
-{
-  // Initial width of the table view is 0. The first size change is part of the initial config.
-  // Any subsequence size change after that must trigger a relayout.
-  CGSize tableViewFinalSize = CGSizeMake(100, 500);
-  ASTestTableView *tableView = [[ASTestTableView alloc] __initWithFrame:CGRectZero
-                                                                style:UITableViewStylePlain];
-  ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
-
-  tableView.asyncDelegate = dataSource;
-  tableView.asyncDataSource = dataSource;
-  
-  // Initial configuration
-  UIView *superview = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 500, 500)];
-  [superview addSubview:tableView];
-  // Width and height are swapped so that a later size change will simulate a rotation
-  tableView.frame = CGRectMake(0, 0, tableViewFinalSize.height, tableViewFinalSize.width);
-  [tableView layoutIfNeeded];
-  
-  XCTAssertEqual(tableView.testDataController.numberOfAllNodesRelayouts, 0);
-  [self triggerSizeChangeAndAssertRelayoutAllNodesForTableView:tableView newSize:tableViewFinalSize];
-}
-
 - (void)testRelayoutVisibleRowsWhenEditingModeIsChanged
 {
   CGSize tableViewSize = CGSizeMake(100, 500);
