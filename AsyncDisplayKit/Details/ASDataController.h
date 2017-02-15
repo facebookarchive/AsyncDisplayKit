@@ -190,8 +190,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
  */
 - (void)relayoutAllNodes;
 
-- (void)reloadDataWithCompletion:(nullable void (^)())completion;
-
 - (void)waitUntilAllUpdatesAreCommitted;
 
 /** @name Data Querying */

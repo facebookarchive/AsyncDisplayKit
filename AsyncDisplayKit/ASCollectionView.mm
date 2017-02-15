@@ -317,7 +317,17 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController reloadDataWithCompletion:completion];
+  
+  void (^batchUpdatesCompletion)(BOOL);
+  if (completion) {
+    batchUpdatesCompletion = ^(BOOL) {
+      completion();
+    };
+  }
+  
+  [self performBatchUpdates:^{
+    [_changeSet reloadData];
+  } completion:batchUpdatesCompletion];
 }
 
 - (void)reloadData
@@ -335,7 +345,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController reloadDataWithCompletion:nil];
+  [self reloadData];
   [_dataController waitUntilAllUpdatesAreCommitted];
 }
 

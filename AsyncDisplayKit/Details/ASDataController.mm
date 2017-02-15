@@ -236,67 +236,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   return nodes;
 }
 
-#pragma mark - Initial Load & Full Reload (External API)
-
-- (void)reloadDataWithCompletion:(void (^)())completion
-{
-  ASDisplayNodeAssertMainThread();
-  
-  _initialReloadDataHasBeenCalled = YES;
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
-  
-  [self invalidateDataSourceItemCounts];
-  NSUInteger sectionCount = [self itemCountsFromDataSource].size();
-  NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-  
-  // Step 1: Repopulate _sections and _nodeContexts. After this step, those properties are up-to-date with dataSource's index space.
-  // Repopulate _sections
-  [_sections removeAllObjects];
-  [self _insertSectionContextsForSections:sectionIndexes];
-  // Repopulate _nodeContexts
-  __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
-  [_nodeContexts removeAllObjects];
-  [self _insertNodeContextsForSections:sectionIndexes environment:environment];
-  
-  // Prepare loadingNodeContexts to be used in editing queue. Deep copy is critical here,
-  // or future edits to the sub-arrays will pollute state between _nodeContexts
-  // and _completedNodeContexts on different threads.
-  ASNodeContextTwoDimensionalDictionary *loadingNodeContexts = [ASDataController deepImmutableCopyOfNodeContextsDictionary:_nodeContexts];
-  
-  dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
-    // Step 2: Layout **all** new node contexts without batching in background.
-    // This step doesn't change any internal state.
-    NSArray<ASIndexedNodeContext *> *unloadedContexts = [ASDataController unloadedNodeContextsFromDictionary:loadingNodeContexts];
-    
-    // TODO layout in batches
-    [self batchLayoutNodesFromContexts:unloadedContexts batchSize:unloadedContexts.count batchCompletion:^(id, id) {
-      ASSERT_ON_EDITING_QUEUE;
-      [_mainSerialQueue performBlockOnMainThread:^{
-        // Because loadingNodeContexts is immutable, it can be safely assigned to _loadNodeContexts instead of deep copied.
-        _completedNodeContexts = loadingNodeContexts;
-        
-        // Step 3: Now that _completedNodeContexts is ready, call UIKit to update using the original change set.
-        [_delegate dataControllerDidReloadData:self];
-        
-        if (completion) {
-          completion();
-        }
-      }];
-    }];
-  });
-}
-
-- (void)waitUntilAllUpdatesAreCommitted
-{
-  ASDisplayNodeAssertMainThread();
-  
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
-  
-  // Schedule block in main serial queue to wait until all operations are finished that are
-  // where scheduled while waiting for the _editingTransactionQueue to finish
-  [_mainSerialQueue performBlockOnMainThread:^{ }];
-}
-
 #pragma mark - Data Source Access (Calling _dataSource)
 
 - (NSArray<NSIndexPath *> *)_allIndexPathsForNodeContextsOfKind:(NSString *)kind inSections:(NSIndexSet *)sections
@@ -475,11 +414,25 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
 
 #pragma mark - Batching (External API)
 
+- (void)waitUntilAllUpdatesAreCommitted
+{
+  ASDisplayNodeAssertMainThread();
+  
+  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
+  
+  // Schedule block in main serial queue to wait until all operations are finished that are
+  // where scheduled while waiting for the _editingTransactionQueue to finish
+  [_mainSerialQueue performBlockOnMainThread:^{ }];
+}
+
 - (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet animated:(BOOL)animated
 {
   ASDisplayNodeAssertMainThread();
   
-  //TODO need this?
+  if (changeSet.includesReloadData) {
+   _initialReloadDataHasBeenCalled = YES;
+  }
+  
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
   /**
@@ -498,6 +451,15 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   
   [self invalidateDataSourceItemCounts];
   
+  ASDataControllerLogEvent(self, @"triggeredUpdate: %@", changeSet);
+#if ASEVENTLOG_ENABLE
+  NSString *changeSetDescription = ASObjectDescriptionMakeTiny(changeSet);
+  [changeSet addCompletionHandler:^(BOOL finished) {
+    ASDataControllerLogEvent(self, @"finishedUpdate: %@", changeSetDescription);
+  }];
+#endif
+
+  
   // Attempt to mark the update completed. This is when update validation will occur inside the changeset.
   // If an invalid update exception is thrown, we catch it and inject our "validationErrorSource" object,
   // which is the table/collection node's data source, into the exception reason to help debugging.
@@ -511,8 +473,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
       @throw e;
     }
   }
-  
-  ASDataControllerLogEvent(self, @"triggeredUpdate: %@", changeSet);
   
   // Step 1: update _sections and _nodeContexts.
   // After this step, those properties are up-to-date with dataSource's index space.
@@ -528,6 +488,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
     // Step 2: Layout **all** new node contexts without batching in background.
     // This step doesn't change any internal state.
     NSArray<ASIndexedNodeContext *> *unloadedContexts = [ASDataController unloadedNodeContextsFromDictionary:loadingNodeContexts];
+    // TODO layout in batches, esp reloads
     [self batchLayoutNodesFromContexts:unloadedContexts batchSize:unloadedContexts.count batchCompletion:^(id, id) {
       ASSERT_ON_EDITING_QUEUE;
       [_mainSerialQueue performBlockOnMainThread:^{
@@ -550,6 +511,16 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   ASDisplayNodeAssertMainThread();
   
   if (!_dataSourceFlags.contextForSection) {
+    return;
+  }
+  
+  if (changeSet.includesReloadData) {
+    [_sections removeAllObjects];
+    
+    NSUInteger sectionCount = [self itemCountsFromDataSource].size();
+    NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
+    [self _insertSectionContextsForSections:sectionIndexes];
+    // Return immediately because reloadData can't be used in conjuntion with other updates.
     return;
   }
   
@@ -589,6 +560,16 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   ASDisplayNodeAssertMainThread();
   
   __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  
+  if (changeSet.includesReloadData) {
+    [_nodeContexts removeAllObjects];
+    
+    NSUInteger sectionCount = [self itemCountsFromDataSource].size();
+    NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
+    [self _insertNodeContextsForSections:sectionIndexes environment:environment];
+    // Return immediately because reloadData can't be used in conjuntion with other updates.
+    return;
+  }
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
     ASDeleteElementsInMultidimensionalArrayAtIndexPaths(_nodeContexts[ASDataControllerRowNodeKind], change.indexPaths);
@@ -651,6 +632,17 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   //TODO use original deletes and inserts instead? be aware of potential invalid index paths in those original changes changes
   //TODO handle moves
   
+  void (^batchCompletion)(BOOL) = changeSet.completionHandler;
+  
+  if (changeSet.includesReloadData) {
+    [_delegate dataControllerDidReloadData:self];
+    if (batchCompletion != nil) {
+      batchCompletion(YES);
+    }
+    // Return immediately because reloadData can't be used in conjuntion with other updates.
+    return;
+  }
+  
   [_delegate dataControllerBeginUpdates:self];
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
@@ -671,18 +663,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
     [_delegate dataController:self didInsertNodes:nil atIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
   }
   
-  void (^batchCompletion)(BOOL) = changeSet.completionHandler;
-#if ASEVENTLOG_ENABLE
-  NSString *changeSetDescription = ASObjectDescriptionMakeTiny(changeSet);
-  [_delegate dataController:self endUpdatesAnimated:animated completion:^(BOOL finished) {
-    if (batchCompletion != nil) {
-      batchCompletion(finished);
-    }
-    ASDataControllerLogEvent(self, @"finishedUpdate: %@", changeSetDescription);
-  }];
-#else
   [_delegate dataController:self endUpdatesAnimated:animated completion:batchCompletion];
-#endif
 }
 
 #pragma mark - Relayout

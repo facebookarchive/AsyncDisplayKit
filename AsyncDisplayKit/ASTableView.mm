@@ -467,7 +467,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController reloadDataWithCompletion:completion];
+  
+  void (^batchUpdatesCompletion)(BOOL);
+  if (completion) {
+    batchUpdatesCompletion = ^(BOOL) {
+      completion();
+    };
+  }
+  
+  [self beginUpdates];
+  [_changeSet reloadData];
+  [self endUpdatesWithCompletion:batchUpdatesCompletion];
 }
 
 - (void)reloadData
@@ -478,7 +488,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController reloadDataWithCompletion:nil];
+  [self reloadData];
   [_dataController waitUntilAllUpdatesAreCommitted];
 }
 
@@ -650,8 +660,13 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)endUpdates
 {
+  [self endUpdatesWithCompletion:nil];
+}
+
+- (void)endUpdatesWithCompletion:(void (^)(BOOL completed))completion
+{
   // We capture the current state of whether animations are enabled if they don't provide us with one.
-  [self endUpdatesAnimated:[UIView areAnimationsEnabled] completion:nil];
+  [self endUpdatesAnimated:[UIView areAnimationsEnabled] completion:completion];
 }
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion

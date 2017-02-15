@@ -128,6 +128,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 - (NSUInteger)newSectionForOldSection:(NSUInteger)oldSection;
 
 @property (nonatomic, readonly) BOOL completed;
+@property (nonatomic, readonly) BOOL includesReloadData;
 
 /// Call this once the change set has been constructed to prevent future modifications to the changeset. Calling this more than once is a programmer error.
 /// NOTE: Calling this method will cause the changeset to convert all reloads into delete/insert pairs.
@@ -139,6 +140,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 /// Returns all item indexes affected by changes of the given type in the given section.
 - (NSIndexSet *)indexesForItemChangesOfType:(_ASHierarchyChangeType)changeType inSection:(NSUInteger)section;
 
+- (void)reloadData;
 - (void)deleteSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)insertSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)reloadSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;
