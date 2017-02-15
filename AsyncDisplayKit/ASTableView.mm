@@ -29,7 +29,6 @@
 #import <AsyncDisplayKit/ASTableView+Undeprecated.h>
 #import <AsyncDisplayKit/ASBatchContext.h>
 
-static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 //#define LOG(...) NSLog(__VA_ARGS__)
@@ -144,7 +143,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   CALayer *_retainedLayer;
 
   CGFloat _nodesConstrainedWidth;
-  BOOL _ignoreNodesConstrainedWidthChange;
   BOOL _queuedNodeHeightUpdate;
   BOOL _isDeallocating;
   BOOL _performingBatchUpdates;
@@ -268,9 +266,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _automaticallyAdjustsContentOffset = NO;
   
   _nodesConstrainedWidth = self.bounds.size.width;
-  // If the initial size is 0, expect a size change very soon which is part of the initial configuration
-  // and should not trigger a relayout.
-  _ignoreNodesConstrainedWidthChange = (_nodesConstrainedWidth == 0);
   
   _proxyDelegate = [[ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
@@ -690,19 +685,14 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)layoutSubviews
 {
+  // Remeasure all rows if our row width has changed.
   CGFloat constrainedWidth = self.bounds.size.width - [self sectionIndexWidth];
-  if (_nodesConstrainedWidth != constrainedWidth) {
+  if (constrainedWidth > 0 && _nodesConstrainedWidth != constrainedWidth) {
     _nodesConstrainedWidth = constrainedWidth;
 
-    // First width change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
-    // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
-    if (_ignoreNodesConstrainedWidthChange) {
-      _ignoreNodesConstrainedWidthChange = NO;
-    } else {
-      [self beginUpdates];
-      [_dataController relayoutAllNodes];
-      [self endUpdatesAnimated:(ASDisplayNodeLayerHasAnimations(self.layer) == NO) completion:nil];
-    }
+    [self beginUpdates];
+    [_dataController relayoutAllNodes];
+    [self endUpdatesAnimated:(ASDisplayNodeLayerHasAnimations(self.layer) == NO) completion:nil];
   }
   
   // To ensure _nodesConstrainedWidth is up-to-date for every usage, this call to super must be done last
@@ -1613,7 +1603,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASSizeRange constrainedSize = kInvalidSizeRange;
+  ASSizeRange constrainedSize = ASSizeRangeZero;
   if (_asyncDelegateFlags.tableNodeConstrainedSizeForRow) {
     GET_TABLENODE_OR_RETURN(tableNode, constrainedSize);
     ASSizeRange delegateConstrainedSize = [_asyncDelegate tableNode:tableNode constrainedSizeForRowAtIndexPath:indexPath];

@@ -89,7 +89,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   ASBatchContext *_batchContext;
   
   CGSize _lastBoundsSizeUsedForMeasuringNodes;
-  BOOL _ignoreNextBoundsSizeChangeForMeasuringNodes;
   
   NSMutableSet *_registeredSupplementaryKinds;
   
@@ -272,9 +271,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   _superIsPendingDataLoad = YES;
   
   _lastBoundsSizeUsedForMeasuringNodes = self.bounds.size;
-  // If the initial size is 0, expect a size change very soon which is part of the initial configuration
-  // and should not trigger a relayout.
-  _ignoreNextBoundsSizeChangeForMeasuringNodes = CGSizeEqualToSize(_lastBoundsSizeUsedForMeasuringNodes, CGSizeZero);
   
   _layoutFacilitator = layoutFacilitator;
   
@@ -1904,31 +1900,22 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
   _lastBoundsSizeUsedForMeasuringNodes = newBounds.size;
 
-  // First size change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
-  // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
-  if (_ignoreNextBoundsSizeChangeForMeasuringNodes) {
-    _ignoreNextBoundsSizeChangeForMeasuringNodes = NO;
-  } else {
-    // Laying out all nodes is expensive, and performing an empty update may be unsafe
-    // if the data source has pending changes that it hasn't reported yet – the collection
-    // view will requery the new counts and expect them to match the previous counts.
-    //
-    // We only need to do this if the bounds changed in the non-scrollable direction.
-    // If, for example, a vertical flow layout has its height changed due to a status bar
-    // appearance update, we do not need to relayout all nodes.
-    // For a more permanent fix to the unsafety mentioned above, see https://github.com/facebook/AsyncDisplayKit/pull/2182
-    ASScrollDirection scrollDirection = self.scrollableDirections;
-    BOOL fixedVertically = (ASScrollDirectionContainsVerticalDirection(scrollDirection) == NO);
-    BOOL fixedHorizontally = (ASScrollDirectionContainsHorizontalDirection(scrollDirection) == NO);
+  // Laying out all nodes is expensive.
+  // We only need to do this if the bounds changed in the non-scrollable direction.
+  // If, for example, a vertical flow layout has its height changed due to a status bar
+  // appearance update, we do not need to relayout all nodes.
+  // For a more permanent fix to the unsafety mentioned above, see https://github.com/facebook/AsyncDisplayKit/pull/2182
+  ASScrollDirection scrollDirection = self.scrollableDirections;
+  BOOL fixedVertically = (ASScrollDirectionContainsVerticalDirection(scrollDirection) == NO);
+  BOOL fixedHorizontally = (ASScrollDirectionContainsHorizontalDirection(scrollDirection) == NO);
 
-    BOOL changedInNonScrollingDirection = (fixedHorizontally && newBounds.size.width != lastUsedSize.width) || (fixedVertically && newBounds.size.height != lastUsedSize.height);
+  BOOL changedInNonScrollingDirection = (fixedHorizontally && newBounds.size.width != lastUsedSize.width) || (fixedVertically && newBounds.size.height != lastUsedSize.height);
 
-    if (changedInNonScrollingDirection) {
-      [_dataController relayoutAllNodes];
-      [_dataController waitUntilAllUpdatesAreCommitted];
-      // We need to ensure the size requery is done before we update our layout.
-      [self.collectionViewLayout invalidateLayout];
-    }
+  if (changedInNonScrollingDirection) {
+    [_dataController relayoutAllNodes];
+    [_dataController waitUntilAllUpdatesAreCommitted];
+    // We need to ensure the size requery is done before we update our layout.
+    [self.collectionViewLayout invalidateLayout];
   }
 }
 
