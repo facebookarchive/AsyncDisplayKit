@@ -133,7 +133,7 @@ NS_ASSUME_NONNULL_BEGIN
  * have automaticallyAdjustsScrollViewInsets=NO.
  *
  * If this property is NO, but your view controller has automaticallyAdjustsScrollViewInsets=YES,
- * the pager node will set the property to NO and log a warning message. In the future,
+ * the pager node will set the property on the view controller to NO and log a warning message. In the future,
  * the pager node will just log the warning, and you'll need to configure your view controller on your own.
  */
 @property (nonatomic, assign) BOOL allowsAutomaticInsetsAdjustment;
