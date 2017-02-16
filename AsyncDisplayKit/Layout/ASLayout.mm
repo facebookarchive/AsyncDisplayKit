@@ -45,10 +45,6 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 {
   ASLayoutElementType _layoutElementType;
 }
-/**
- * A boolean describing if the current layout has been flattened.
- */
-@property (nonatomic, getter=isFlattened) BOOL flattened;
 
 /*
  * Caches all sublayouts if set to YES or destroys the sublayout cache if set to NO. Defaults to YES
@@ -101,7 +97,6 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     }
 
     _sublayouts = sublayouts != nil ? [sublayouts copy] : @[];
-    _flattened = NO;
     _retainSublayoutLayoutElements = NO;
   }
   
@@ -177,6 +172,10 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
 #pragma mark - Layout Flattening
 
+/**
+ * BFS algorithm to filter the layout tree to only contain sublayouts with layout elements of
+ * type ASLayoutElementTypeDisplayNode
+ */
 - (ASLayout *)filteredNodeLayoutTree
 {
   NSMutableArray *flattenedSublayouts = [NSMutableArray array];
@@ -184,6 +183,7 @@ static inline NSString * descriptionIndents(NSUInteger indents)
   struct Context {
     ASLayout *layout;
     CGPoint absolutePosition;
+    BOOL visited;
   };
   
   // Queue used to keep track of sublayouts while traversing this layout in a DFS fashion.
@@ -196,14 +196,14 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 
     if (self != context.layout && context.layout.type == ASLayoutElementTypeDisplayNode) {
       ASLayout *layout = [ASLayout layoutWithLayout:context.layout position:context.absolutePosition];
-      layout.flattened = YES;
+      context.visited = YES;
       [flattenedSublayouts addObject:layout];
     }
     
     std::vector<Context> sublayoutContexts;
     for (ASLayout *sublayout in context.layout.sublayouts) {
-      if (sublayout.isFlattened == NO) {
-        sublayoutContexts.push_back({sublayout, context.absolutePosition + sublayout.position});
+      if (context.visited == NO) {
+        sublayoutContexts.push_back({sublayout, context.absolutePosition + sublayout.position, NO});
       }
     }
     queue.insert(queue.cbegin(), sublayoutContexts.begin(), sublayoutContexts.end());
