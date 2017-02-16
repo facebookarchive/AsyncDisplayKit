@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASRangeController.h>
 
+#import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
@@ -29,7 +30,6 @@
 
 @interface ASRangeController ()
 {
-  //TODO Do we still need _rangeIsValid?
   BOOL _rangeIsValid;
   BOOL _needsRangeUpdate;
   BOOL _layoutControllerImplementsSetVisibleIndexPaths;
@@ -484,52 +484,20 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 #pragma mark - ASDataControllerDelegete
 
-- (void)dataControllerBeginUpdates:(ASDataController *)dataController
+- (void)dataController:(ASDataController *)dataController willUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
-  [_delegate didBeginUpdatesInRangeController:self];
+  if (changeSet.includesReloadData) {
+    [self _setVisibleNodes:nil];
+  }
+  [_delegate rangeController:self willUpdateWithChangeSet:changeSet];
 }
 
-- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
-{
-  ASDisplayNodeAssertMainThread();
-  [_delegate rangeController:self didEndUpdatesAnimated:animated completion:completion];
-}
-
-- (void)dataControllerDidReloadData:(ASDataController *)dataController
-{
-  ASDisplayNodeAssertMainThread();
-  [self _setVisibleNodes:nil];
-  _rangeIsValid = NO;
-  [_delegate rangeControllerDidReloadData:self];
-}
-
-- (void)dataController:(ASDataController *)dataController didInsertItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
+- (void)dataController:(ASDataController *)dataController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
   _rangeIsValid = NO;
-  [_delegate rangeController:self didInsertItemsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-}
-
-- (void)dataController:(ASDataController *)dataController didDeleteItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  _rangeIsValid = NO;
-  [_delegate rangeController:self didDeleteItemsAtIndexPaths:indexPaths withAnimationOptions:animationOptions];
-}
-
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSIndexSet *)sectionIndexes withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  _rangeIsValid = NO;
-  [_delegate rangeController:self didInsertSectionsAtIndexSet:sectionIndexes withAnimationOptions:animationOptions];
-}
-
-- (void)dataController:(ASDataController *)dataController didDeleteSections:(NSIndexSet *)sectionIndexes withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  _rangeIsValid = NO;
-  [_delegate rangeController:self didDeleteSectionsAtIndexSet:sectionIndexes withAnimationOptions:animationOptions];
+  [_delegate rangeController:self didUpdateWithChangeSet:changeSet];
 }
 
 #pragma mark - Memory Management

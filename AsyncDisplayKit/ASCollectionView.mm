@@ -80,10 +80,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   NSMutableSet *_cellsForVisibilityUpdates;
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
-  BOOL _performingBatchUpdates;
   NSUInteger _superBatchUpdateCount;
-  NSMutableArray *_batchUpdateBlocks;
-
   BOOL _isDeallocating;
   
   ASBatchContext *_batchContext;
@@ -266,9 +263,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   _batchContext = [[ASBatchContext alloc] init];
   
   _leadingScreensForBatching = 2.0;
-  
-  _performingBatchUpdates = NO;
-  _batchUpdateBlocks = [NSMutableArray array];
   
   _superIsPendingDataLoad = YES;
   
@@ -772,7 +766,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   [_changeSet addCompletionHandler:completion];
   
   if (_batchUpdateCount == 0) {
-    [_dataController updateWithChangeSet:_changeSet animated:animated];
+    _changeSet.animated = animated;
+    [_dataController updateWithChangeSet:_changeSet];
     _changeSet = nil;
   }
 }
@@ -1680,147 +1675,87 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 #pragma mark - ASRangeControllerDelegate
 
-- (void)didBeginUpdatesInRangeController:(ASRangeController *)rangeController
+- (void)rangeController:(ASRangeController *)rangeController willUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
-  _performingBatchUpdates = YES;
+  
+  if (!self.asyncDataSource || _superIsPendingDataLoad) {
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+  
+  if (changeSet.includesReloadData) {
+    //TODO Do we need to notify _layoutFacilitator?
+    return;
+  }
+  
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
+    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:change.indexPaths batched:YES];
+  }
+  
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
+    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:change.indexSet batched:YES];
+  }
+  
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
+    [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:change.indexSet batched:YES];
+  }
+  
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
+    [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:change.indexPaths batched:YES];
+  }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
+- (void)rangeController:(ASRangeController *)rangeController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
   if (!self.asyncDataSource || _superIsPendingDataLoad) {
-    if (completion) {
-      completion(NO);
+    [changeSet executeCompletionHandlerWithFinished:NO];
+    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
+  }
+  
+  ASPerformBlockWithoutAnimation(!changeSet.animated, ^{
+    if(changeSet.includesReloadData) {
+      //TODO _superIsPendingDataLoad is true for reloadData so this block may not execute
+      // reloadData can't be used in conjuntion with other updates. So calling it inside a batch is unnecessary.
+      [super reloadData];
+      // Flush any range changes that happened as part of submitting the reload.
+      [_rangeController updateIfNeeded];
+      [self _scheduleCheckForBatchFetchingForNumberOfChanges:1];
+    } else {
+      [_layoutFacilitator collectionViewWillPerformBatchUpdates];
+      
+      __block NSUInteger numberOfUpdates = 0;
+      [self _superPerformBatchUpdates:^{
+        for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
+          [super deleteItemsAtIndexPaths:change.indexPaths];
+          numberOfUpdates++;
+        }
+        
+        for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
+          [super deleteSections:change.indexSet];
+          numberOfUpdates++;
+        }
+        
+        for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
+          [super insertSections:change.indexSet];
+          numberOfUpdates++;
+        }
+        
+        for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
+          [super insertItemsAtIndexPaths:change.indexPaths];
+          numberOfUpdates++;
+        }
+      } completion:^(BOOL finished){
+        // Flush any range changes that happened as part of the update animations ending.
+        [_rangeController updateIfNeeded];
+        [self _scheduleCheckForBatchFetchingForNumberOfChanges:numberOfUpdates];
+        [changeSet executeCompletionHandlerWithFinished:finished];
+      }];
+      
+      // Flush any range changes that happened as part of submitting the update.
+      [_rangeController updateIfNeeded];
     }
-    _performingBatchUpdates = NO;
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-  
-  ASPerformBlockWithoutAnimation(!animated, ^{
-    NSUInteger numberOfUpdateBlocks = _batchUpdateBlocks.count;
-    [_layoutFacilitator collectionViewWillPerformBatchUpdates];
-    [self _superPerformBatchUpdates:^{
-      for (dispatch_block_t block in _batchUpdateBlocks) {
-        block();
-      }
-    } completion:^(BOOL finished){
-      // Flush any range changes that happened as part of the update animations ending.
-      [_rangeController updateIfNeeded];
-      [self _scheduleCheckForBatchFetchingForNumberOfChanges:numberOfUpdateBlocks];
-      if (completion) { completion(finished); }
-    }];
-    // Flush any range changes that happened as part of submitting the update.
-    [_rangeController updateIfNeeded];
   });
-  
-  [_batchUpdateBlocks removeAllObjects];
-  _performingBatchUpdates = NO;
-}
-
-- (void)rangeControllerDidReloadData:(ASRangeController *)rangeController
-{
-  ASDisplayNodeAssertMainThread();
-  if (!self.asyncDataSource || _superIsPendingDataLoad) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-  
-  //TODO Do we need to notify _layoutFacilitator?
-  //TODO Assert that this is not part of batch updates
-  ASPerformBlockWithoutAnimation(NO, ^{
-    [super reloadData];
-    // Flush any range changes that happened as part of submitting the reload.
-    [_rangeController updateIfNeeded];
-    [self _scheduleCheckForBatchFetchingForNumberOfChanges:1];
-  });
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didInsertItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  if (!self.asyncDataSource || _superIsPendingDataLoad) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-  
-  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:_performingBatchUpdates];
-  if (_performingBatchUpdates) {
-    [_batchUpdateBlocks addObject:^{
-      [super insertItemsAtIndexPaths:indexPaths];
-    }];
-  } else {
-    [UIView performWithoutAnimation:^{
-      [super insertItemsAtIndexPaths:indexPaths];
-      // Flush any range changes that happened as part of submitting the update.
-      [_rangeController updateIfNeeded];
-      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
-    }];
-  }
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didDeleteItemsAtIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  if (!self.asyncDataSource || _superIsPendingDataLoad) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-  
-  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:indexPaths batched:_performingBatchUpdates];
-  if (_performingBatchUpdates) {
-    [_batchUpdateBlocks addObject:^{
-      [super deleteItemsAtIndexPaths:indexPaths];
-    }];
-  } else {
-    [UIView performWithoutAnimation:^{
-      [super deleteItemsAtIndexPaths:indexPaths];
-      // Flush any range changes that happened as part of submitting the update.
-      [_rangeController updateIfNeeded];
-      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
-    }];
-  }
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  if (!self.asyncDataSource || _superIsPendingDataLoad) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-  
-  [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:_performingBatchUpdates];
-  if (_performingBatchUpdates) {
-    [_batchUpdateBlocks addObject:^{
-      [super insertSections:indexSet];
-    }];
-  } else {
-    [UIView performWithoutAnimation:^{
-      [super insertSections:indexSet];
-      // Flush any range changes that happened as part of submitting the update.
-      [_rangeController updateIfNeeded];
-      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
-    }];
-  }
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  if (!self.asyncDataSource || _superIsPendingDataLoad) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-  
-  [_layoutFacilitator collectionViewWillEditSectionsAtIndexSet:indexSet batched:_performingBatchUpdates];
-  if (_performingBatchUpdates) {
-    [_batchUpdateBlocks addObject:^{
-      [super deleteSections:indexSet];
-    }];
-  } else {
-    [UIView performWithoutAnimation:^{
-      [super deleteSections:indexSet];
-      // Flush any range changes that happened as part of submitting the update.
-      [_rangeController updateIfNeeded];
-      [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
-    }];
-  }
 }
 
 #pragma mark - ASCellNodeDelegate

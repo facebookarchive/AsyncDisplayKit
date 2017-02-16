@@ -149,13 +149,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 #pragma mark External API
 
-- (void (^)(BOOL finished))completionHandler
-{
-  void (^completionHandler)(BOOL) = _completionHandler;
-  _completionHandler = nil;
-  return completionHandler;
-}
-
 - (void)addCompletionHandler:(void (^)(BOOL))completion
 {
   [self _ensureNotCompleted];
@@ -170,6 +163,14 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
     }
     completion(finished);
   };
+}
+
+- (void)executeCompletionHandlerWithFinished:(BOOL)finished
+{
+  if (_completionHandler != nil) {
+    _completionHandler(finished);
+    _completionHandler = nil;
+  }
 }
 
 - (void)markCompletedWithNewItemCounts:(std::vector<NSInteger>)newItemCounts
@@ -422,11 +423,11 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 - (void)_validateUpdate
 {
-  // Assert that if reloadData exists, it's the only change in this set
+  // Assert that if reloadData exists, it's the only change
   if (_includesReloadData) {
-    if (_originalDeleteItemChanges.count > 0 || _originalDeleteSectionChanges.count > 0
-        || _originalInsertSectionChanges.count > 0 || _originalDeleteItemChanges.count > 0
-        || _reloadSectionChanges.count > 0 || _reloadItemChanges.count > 0) {
+    if (0 < (_originalDeleteSectionChanges.count + _originalDeleteItemChanges.count
+             +_originalInsertSectionChanges.count + _originalInsertItemChanges.count
+             + _reloadSectionChanges.count + _reloadItemChanges.count)) {
       ASFailUpdateValidation(@"Attempt to reload data in conjuntion with other updates.");
     }
     return;

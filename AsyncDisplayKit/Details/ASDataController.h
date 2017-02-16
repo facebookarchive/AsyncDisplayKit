@@ -89,35 +89,18 @@ extern NSString * const ASCollectionInvalidUpdateException;
 @protocol ASDataControllerDelegate <NSObject>
 
 /**
- Called for batch update.
+ * Called before updating with given change set.
+ *
+ * @param changeSet The change set that includes all updates
  */
-- (void)dataControllerBeginUpdates:(ASDataController *)dataController;
-- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL))completion;
+- (void)dataController:(ASDataController * )dataController willUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;;
 
 /**
- Called for reload data
+ * Called for change set updates.
+ *
+ * @param changeSet The change set that includes all updates
  */
-- (void)dataControllerDidReloadData:(ASDataController *)dataController;
-
-/**
- Called for insertion of elements.
- */
-- (void)dataController:(ASDataController *)dataController didInsertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for deletion of elements.
- */
-- (void)dataController:(ASDataController *)dataController didDeleteItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for insertion of sections.
- */
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSIndexSet *)sectionIndexes withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for deletion of sections.
- */
-- (void)dataController:(ASDataController *)dataController didDeleteSections:(NSIndexSet *)sectionIndexes withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 @end
 
@@ -180,7 +163,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
 
 /** @name Data Updating */
 
-- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet animated:(BOOL)animated;
+- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 /**
  * Re-measures all loaded nodes in the backing store.

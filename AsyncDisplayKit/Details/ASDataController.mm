@@ -425,7 +425,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   [_mainSerialQueue performBlockOnMainThread:^{ }];
 }
 
-- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet animated:(BOOL)animated
+- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
   
@@ -442,10 +442,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
    * For the issue that UICollectionView has that we're choosing to workaround.
    */
   if (!_initialReloadDataHasBeenCalled) {
-    void (^batchCompletion)(BOOL) = changeSet.completionHandler;
-    if (batchCompletion != nil) {
-      batchCompletion(YES);
-    }
+    [changeSet executeCompletionHandlerWithFinished:YES];
     return;
   }
   
@@ -492,11 +489,13 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
     [self batchLayoutNodesFromContexts:unloadedContexts batchSize:unloadedContexts.count batchCompletion:^(id, id) {
       ASSERT_ON_EDITING_QUEUE;
       [_mainSerialQueue performBlockOnMainThread:^{
+        [_delegate dataController:self willUpdateWithChangeSet:changeSet];
+        
         // Because loadingNodeContexts is immutable, it can be safely assigned to _loadNodeContexts instead of deep copied.
         _completedNodeContexts = loadingNodeContexts;
         
-        // Step 3: Now that _completedNodeContexts is ready, call UIKit to update using the original change set.
-        [self _forwardChangeSetToDelegate:changeSet animated:animated];
+        // Step 3: Now that _completedNodeContexts is ready, call delegate and then UICollectionView/UITableView to update using the original change set.
+        [_delegate dataController:self didUpdateWithChangeSet:changeSet];
       }];
     }];
   });
@@ -619,50 +618,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
     // Step 2: Populate new contexts for all sections
     [self _insertNodeContextsOfKind:kind forSections:sectionIndexes environment:environment];
   }
-}
-
-- (void)_forwardChangeSetToDelegate:(_ASHierarchyChangeSet *)changeSet animated:(BOOL)animated
-{
-  ASDisplayNodeAssertMainThread();
-  
-  //TODO Because we decompose the change set here, ASTableView and ASCollectionView
-  // need to maintain lots of states to use between these delegate methods.
-  // Howabout we give these objects the whole change set in 1 go?
-  
-  //TODO use original deletes and inserts instead? be aware of potential invalid index paths in those original changes changes
-  //TODO handle moves
-  
-  if (changeSet.includesReloadData) {
-    [_delegate dataControllerDidReloadData:self];
-    void (^batchCompletion)(BOOL) = changeSet.completionHandler;
-    if (batchCompletion != nil) {
-      batchCompletion(YES);
-    }
-    // Return immediately because reloadData can't be used in conjuntion with other updates.
-    return;
-  }
-  
-  [_delegate dataControllerBeginUpdates:self];
-  
-  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
-    //TODO Reimplement _automaticallyAdjustsContentOffset
-    [_delegate dataController:self didDeleteNodes:nil atIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
-  }
-  
-  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
-    [_delegate dataController:self didDeleteSections:change.indexSet withAnimationOptions:change.animationOptions];
-  }
-  
-  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [_delegate dataController:self didInsertSections:change.indexSet withAnimationOptions:change.animationOptions];
-  }
-  
-  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    //TODO Reimplement _automaticallyAdjustsContentOffset
-    [_delegate dataController:self didInsertNodes:nil atIndexPaths:change.indexPaths withAnimationOptions:change.animationOptions];
-  }
-  
-  [_delegate dataController:self endUpdatesAnimated:animated completion:changeSet.completionHandler];
 }
 
 #pragma mark - Relayout
