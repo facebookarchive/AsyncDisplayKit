@@ -13,6 +13,10 @@
 #import "ASLayoutSpecSnapshotTestsHelper.h"
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 
+@interface ASLayout ()
+- (ASLayout *)filteredNodeLayoutTree;
+@end
+
 @interface ASDisplayNodeLayoutTests : XCTestCase
 @end
 
@@ -169,6 +173,119 @@
       XCTFail(@"Expectation failed: %@", error);
     }
   }];
+}
+
+- (void)testThatFilteredNodeLayoutTreeIsWorking
+{
+  static CGSize kSize = CGSizeMake(100, 100);
+  static CGPoint kPosition = CGPointMake(10, 10);
+  
+  ASDisplayNode *subnodeOne = [[ASDisplayNode alloc] init];
+  ASLayout *subnodeOneLayout = [ASLayout layoutWithLayoutElement:subnodeOne size:kSize position:kPosition sublayouts:@[]];
+  
+  ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:subnodeOne];
+  ASLayout *insetSpecLayout = [ASLayout layoutWithLayoutElement:insetSpec size:kSize position:kPosition sublayouts:@[subnodeOneLayout]];
+  
+  ASDisplayNode *subnodeTwo = [[ASDisplayNode alloc] init];
+  ASLayout *subnodeTwoLayout = [ASLayout layoutWithLayoutElement:subnodeTwo size:kSize position:kPosition sublayouts:@[]];
+  
+  ASAbsoluteLayoutSpec *absoluteSpec = [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[insetSpec, subnodeTwo]];
+  ASLayout *absoluteSpecLayout = [ASLayout layoutWithLayoutElement:absoluteSpec size:kSize position:kPosition sublayouts:@[insetSpecLayout, subnodeTwoLayout]];
+  
+  ASDisplayNode *rootNode = [[ASDisplayNode alloc] init];
+  ASLayout *rootNodeLayout = [ASLayout layoutWithLayoutElement:rootNode size:kSize sublayouts:@[absoluteSpecLayout]];
+
+  NSArray<ASDisplayNode *> *subnodes = @[subnodeOne, subnodeTwo];
+  ASLayout *layout = [rootNodeLayout filteredNodeLayoutTree];
+  XCTAssertEqual(@(subnodes.count), @(layout.sublayouts.count), @"Initial filteredNodeLayoutTree is not working");
+  for (int i = 0; i < subnodes.count; i++) {
+    XCTAssertEqual(subnodes[i], layout.sublayouts[i].layoutElement, @"Initial filteredNodeLayoutTree is not working");
+  }
+  
+  layout = [rootNodeLayout filteredNodeLayoutTree];
+  XCTAssertEqual(@(subnodes.count), @(layout.sublayouts.count), @"Calling filteredNodeLayoutTree multiple times is not working");
+  for (int i = 0; i < subnodes.count; i++) {
+    XCTAssertEqual(subnodes[i], layout.sublayouts[i].layoutElement, @"Calling filteredNodeLayoutTree multiple times is not working");
+  }
+}
+
+- (void)testThatFilteredNodeLayoutTreeIsWorkingWithDisplayNodes
+{
+  static CGSize kSize = CGSizeMake(100, 100);
+  
+  ASDisplayNode *subnodeOne = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnodeTwo = [[ASDisplayNode alloc] init];
+  NSArray<ASDisplayNode *> *subnodes = @[subnodeOne, subnodeTwo];
+  
+  ASDisplayNode *rootNode = [[ASDisplayNode alloc] init];
+  rootNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:subnodeOne];
+    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[insetSpec, subnodeTwo]];
+  };
+  
+  // Initial layout and creating of pending layout
+  ASLayout *initialLayout = [rootNode layoutThatFits:ASSizeRangeMake(kSize)];
+  XCTAssertEqual(initialLayout.layoutElement, rootNode);
+  for (int i = 0; i < initialLayout.sublayouts.count; i++) {
+    XCTAssertEqual(subnodes[i], initialLayout.sublayouts[i].layoutElement, @"Initial filtering or node layout tree is wrong");
+  }
+  
+  // Multiple calls to filteredNodeLayoutTree
+  ASLayout *layout = [initialLayout filteredNodeLayoutTree];
+  for (int i = 0; i < layout.sublayouts.count; i++) {
+    XCTAssertEqual(subnodes[i], layout.sublayouts[i].layoutElement, @"Calling filteredNodeLayoutTree again on a layout should return the same result");
+  }
+  
+  // Force apply pending layout
+  rootNode.frame = CGRectMake(0, 0, initialLayout.size.width, initialLayout.size.height);
+  [rootNode.view layoutIfNeeded];
+  
+  // Check if cached layout that was returned still gives the same output
+  layout = [rootNode layoutThatFits:ASSizeRangeMake(kSize)];
+  XCTAssertEqual(layout.layoutElement, rootNode);
+  XCTAssertEqual(layout, initialLayout);
+  for (int i = 0; i < layout.sublayouts.count; i++) {
+    XCTAssertEqual(subnodes[i], layout.sublayouts[i].layoutElement, @"Calling filteredNodeLayoutTree on cached layout will not return same result");
+  }
+}
+
+- (void)testThatFilteredNodeLayoutTreeIsWorkingWithReusingALayout
+{
+  static CGSize kSize = CGSizeMake(100, 100);
+  static CGPoint kPoint = CGPointMake(100, 100);
+  
+  ASDisplayNode *subnodeOne = [[ASDisplayNode alloc] init];
+  ASDisplayNode *subnodeTwo = [[ASDisplayNode alloc] init];
+  NSArray<ASDisplayNode *> *subnodes = @[subnodeOne, subnodeTwo];
+  
+  ASDisplayNode *rootNode = [[ASDisplayNode alloc] init];
+  rootNode.layoutSpecBlock = ^(ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize) {
+    ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsZero child:subnodeOne];
+    return [ASAbsoluteLayoutSpec absoluteLayoutSpecWithChildren:@[insetSpec, subnodeTwo]];
+  };
+  
+  // Initial Layout
+  ASLayout *initialLayout = [rootNode layoutThatFits:ASSizeRangeMake(kSize)];
+  XCTAssertEqual(initialLayout.layoutElement, rootNode);
+  for (int i = 0; i < initialLayout.sublayouts.count; i++) {
+    XCTAssertEqual(subnodes[i], initialLayout.sublayouts[i].layoutElement, @"Initial filtering or node layout tree is wrong");
+  }
+  
+  // Reuse the first layout in another tree
+  ASLayout *layoutToReuse = initialLayout.sublayouts[0];
+  
+  ASDisplayNode *subnodeThree = [[ASDisplayNode alloc] init];
+  ASLayout *subnodeThreeLayout = [ASLayout layoutWithLayoutElement:subnodeThree size:kSize position:kPoint sublayouts:@[]];
+  
+  // Manually create layout tree to include the layout we gonna reuse
+  ASDisplayNode *rootNodeTwo = [[ASDisplayNode alloc] init];
+  NSArray *rootNodeTwoLayouts = @[subnodeThreeLayout, layoutToReuse];
+  ASLayout *rootNodeTwoLayout = [ASLayout layoutWithLayoutElement:rootNodeTwo size:kSize position:kPoint sublayouts:rootNodeTwoLayouts];
+  
+  // Check if layout element we reused is in filtered layout
+  ASLayout *filteredLayout = [rootNodeTwoLayout filteredNodeLayoutTree];
+  XCTAssertTrue(filteredLayout.sublayouts.count == 2, @"Filtered layout should have two sublayouts");
+  XCTAssertEqual(filteredLayout.sublayouts[1].layoutElement, layoutToReuse.layoutElement, @"Filter layout should include the reused layout element");
 }
 
 @end
