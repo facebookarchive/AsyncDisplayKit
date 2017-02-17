@@ -1721,6 +1721,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
       // Flush any range changes that happened as part of submitting the reload.
       [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:1];
+      [changeSet executeCompletionHandlerWithFinished:YES];
     } else {
       [_layoutFacilitator collectionViewWillPerformBatchUpdates];
       

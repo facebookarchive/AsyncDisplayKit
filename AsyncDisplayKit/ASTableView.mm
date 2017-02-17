@@ -1432,6 +1432,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
       // Flush any range changes that happened as part of submitting the reload.
       [_rangeController updateIfNeeded];
       [self _scheduleCheckForBatchFetchingForNumberOfChanges:1];
+      [changeSet executeCompletionHandlerWithFinished:YES];
     });
     return;
   }
@@ -1446,7 +1447,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
     
     LOG(@"UITableView deleteRows:%ld rows", indexPaths.count);
-    
     BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
     ASPerformBlockWithoutAnimation(preventAnimation, ^{
       if (self.test_enableSuperUpdateCallLogging) {
@@ -1463,7 +1463,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
     
     LOG(@"UITableView deleteSections:%@", sectionIndexes);
-    
     BOOL preventAnimation = (animationOptions == UITableViewRowAnimationNone);
     ASPerformBlockWithoutAnimation(preventAnimation, ^{
       if (self.test_enableSuperUpdateCallLogging) {
@@ -1480,7 +1479,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
     
     LOG(@"UITableView insertSections:%@", sectionIndexes);
-    
     BOOL preventAnimation = (animationOptions == UITableViewRowAnimationNone);
     ASPerformBlockWithoutAnimation(preventAnimation, ^{
       if (self.test_enableSuperUpdateCallLogging) {
@@ -1497,7 +1495,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
     
     LOG(@"UITableView insertRows:%ld rows", indexPaths.count);
-    
     BOOL preventAnimation = (animationOptions == UITableViewRowAnimationNone);
     ASPerformBlockWithoutAnimation(preventAnimation, ^{
       if (self.test_enableSuperUpdateCallLogging) {
@@ -1515,11 +1512,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_rangeController updateIfNeeded];
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:numberOfUpdates];
   });
-  
   if (_automaticallyAdjustsContentOffset) {
     [self endAdjustingContentOffsetAnimated:changeSet.animated];
   }
-  
   [changeSet executeCompletionHandlerWithFinished:YES];
 }
 

@@ -885,7 +885,7 @@ ASLayoutElementFinalLayoutElementDefault
     return _calculatedDisplayNodeLayout->layout ?: [ASLayout layoutWithLayoutElement:self size:{0, 0}];
   }
   
-  // Creat a pending display node layout for the layout pass
+  // Create a pending display node layout for the layout pass
   _pendingDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>(
     [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize],
     constrainedSize,

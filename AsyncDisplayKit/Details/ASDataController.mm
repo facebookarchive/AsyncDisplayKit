@@ -474,6 +474,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   // Step 1: update _sections and _nodeContexts.
   // After this step, those properties are up-to-date with dataSource's index space.
   [self _updateSectionContextsWithChangeSet:changeSet];
+  //TODO If _nodeContexts is the same, use a fast path
   [self _updateNodeContextsWithChangeSet:changeSet];
   
   // Prepare loadingNodeContexts to be used in editing queue. Deep copy is critical here,
