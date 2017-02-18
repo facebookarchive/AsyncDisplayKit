@@ -30,16 +30,16 @@ final class LabelSectionController: IGListSectionController, IGListSectionType, 
         self.object = String(describing: object)
     }
     
-    func didSelectItem(at index: Int) {
-        
-    }
+    func didSelectItem(at index: Int) {}
     
+    //ASDK Replacement
     func sizeForItem(at index: Int) -> CGSize {
         assert(true, "Did not expect to be called.")
-        return .zero
+        return ASIGSectionControllerSizeForItemImplementation()
     }
     
     func cellForItem(at index: Int) -> UICollectionViewCell {
-        return collectionContext!.dequeueReusableCell(of: _ASCollectionViewCell.self, for: self, at: index)
+        return ASIGSectionControllerCellForIndexImplementation(index: index)
     }
 }
+

@@ -38,10 +38,11 @@ final class SearchSectionController: IGListSectionController, IGListSectionType,
     //ASDK Replacement
     func sizeForItem(at index: Int) -> CGSize {
         assert(true, "Did not expect to be called.")
-        return .zero
+        return ASIGSectionControllerSizeForItemImplementation()
     }
+    
     func cellForItem(at index: Int) -> UICollectionViewCell {
-        return collectionContext!.dequeueReusableCell(of: _ASCollectionViewCell.self, for: self, at: index)
+        return ASIGSectionControllerCellForIndexImplementation(index: index)
     }
 }
 
