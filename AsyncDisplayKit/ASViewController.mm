@@ -33,14 +33,24 @@
 
 - (instancetype)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil
 {
-  ASDisplayNodeAssert(NO, @"ASViewController requires using -initWithNode:");
-  return [self initWithNode:[[ASDisplayNode alloc] init]];
+  if (!(self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil])) {
+    return nil;
+  }
+  
+  [self _initializeInstance];
+  
+  return self;
 }
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder
 {
-  ASDisplayNodeAssert(NO, @"ASViewController requires using -initWithNode:");
-  return [self initWithNode:[[ASDisplayNode alloc] init]];
+  if (!(self = [super initWithCoder:aDecoder])) {
+    return nil;
+  }
+  
+  [self _initializeInstance];
+  
+  return self;
 }
 
 - (instancetype)initWithNode:(ASDisplayNode *)node
@@ -49,10 +59,18 @@
     return nil;
   }
   
-  ASDisplayNodeAssertNotNil(node, @"Node must not be nil");
-  ASDisplayNodeAssertTrue(!node.layerBacked);
   _node = node;
+  [self _initializeInstance];
 
+  return self;
+}
+
+- (void)_initializeInstance
+{
+  if (_node == nil) {
+    return;
+  }
+  
   _selfConformsToRangeModeProtocol = [self conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
   _nodeConformsToRangeModeProtocol = [_node conformsToProtocol:@protocol(ASRangeControllerUpdateRangeProtocol)];
   _automaticallyAdjustRangeModeBasedOnViewEvents = _selfConformsToRangeModeProtocol || _nodeConformsToRangeModeProtocol;
@@ -62,7 +80,7 @@
     // Node already loaded the view
     [self view];
   } else {
-    // If the node didn't load yet add ourselves as on did load observer to laod the view in case the node gets loaded
+    // If the node didn't load yet add ourselves as on did load observer to load the view in case the node gets loaded
     // before the view controller
     __weak __typeof__(self) weakSelf = self;
     [_node onDidLoad:^(__kindof ASDisplayNode * _Nonnull node) {
@@ -71,8 +89,6 @@
       }
     }];
   }
-
-  return self;
 }
 
 - (void)dealloc
@@ -82,13 +98,18 @@
 
 - (void)loadView
 {
-  ASDisplayNodeAssertTrue(!_node.layerBacked);
-  
   // Apple applies a frame and autoresizing masks we need.  Allocating a view is not
   // nearly as expensive as adding and removing it from a hierarchy, and fortunately
   // we can avoid that here.  Enabling layerBacking on a single node in the hierarchy
   // will have a greater performance benefit than the impact of this transient view.
   [super loadView];
+  
+  if (_node == nil) {
+    return;
+  }
+  
+  ASDisplayNodeAssertTrue(!_node.layerBacked);
+  
   UIView *view = self.view;
   CGRect frame = view.frame;
   UIViewAutoresizing autoresizingMask = view.autoresizingMask;
@@ -135,7 +156,7 @@
 {
   if (_ensureDisplayed && self.neverShowPlaceholders) {
     _ensureDisplayed = NO;
-    [self.node recursivelyEnsureDisplaySynchronously:YES];
+    [_node recursivelyEnsureDisplaySynchronously:YES];
   }
   [super viewDidLayoutSubviews];
 }
@@ -212,7 +233,9 @@ ASVisibilityDepthImplementation;
 
 - (void)updateCurrentRangeModeWithModeIfPossible:(ASLayoutRangeMode)rangeMode
 {
-  if (!_automaticallyAdjustRangeModeBasedOnViewEvents) { return; }
+  if (!_automaticallyAdjustRangeModeBasedOnViewEvents) {
+    return;
+  }
   
   if (_selfConformsToRangeModeProtocol) {
     id<ASRangeControllerUpdateRangeProtocol> rangeUpdater = (id<ASRangeControllerUpdateRangeProtocol>)self;
@@ -268,7 +291,7 @@ ASVisibilityDepthImplementation;
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
     // Once we've propagated all the traits, layout this node.
     // Remeasure the node with the latest constrained size – old constrained size may be incorrect.
-    [self.node layoutThatFits:[self nodeConstrainedSize]];
+    [_node layoutThatFits:[self nodeConstrainedSize]];
 #pragma clang diagnostic pop
   }
 }
@@ -286,7 +309,7 @@ ASVisibilityDepthImplementation;
 {
   [super didRotateFromInterfaceOrientation:fromInterfaceOrientation];
   
-  ASPrimitiveTraitCollection traitCollection = self.node.primitiveTraitCollection;
+  ASPrimitiveTraitCollection traitCollection = _node.primitiveTraitCollection;
   traitCollection.containerSize = self.view.bounds.size;
   [self propagateNewTraitCollection:traitCollection];
 }

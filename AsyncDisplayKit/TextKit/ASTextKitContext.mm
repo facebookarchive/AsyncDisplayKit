@@ -39,10 +39,18 @@
     __instanceLock__ = std::make_shared<ASDN::Mutex>();
     
     // Create the TextKit component stack with our default configuration.
-    _textStorage = (attributedString ? [[NSTextStorage alloc] initWithAttributedString:attributedString] : [[NSTextStorage alloc] init]);
+    
+    _textStorage = [[NSTextStorage alloc] init];
     _layoutManager = [[ASLayoutManager alloc] init];
     _layoutManager.usesFontLeading = NO;
     [_textStorage addLayoutManager:_layoutManager];
+    
+    // Instead of calling [NSTextStorage initWithAttributedString:], setting attributedString just after calling addlayoutManager can fix CJK language layout issues.
+    // See https://github.com/facebook/AsyncDisplayKit/issues/2894
+    if (attributedString) {
+      [_textStorage setAttributedString:attributedString];
+    }
+    
     _textContainer = [[NSTextContainer alloc] initWithSize:constrainedSize];
     // We want the text laid out up to the very edges of the container.
     _textContainer.lineFragmentPadding = 0;

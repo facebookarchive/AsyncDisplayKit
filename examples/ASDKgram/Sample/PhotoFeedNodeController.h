@@ -17,9 +17,8 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
-#import "AppDelegate.h"
+#import "PhotoFeedBaseController.h"
 
-@interface PhotoFeedNodeController : ASViewController <PhotoFeedControllerProtocol>
+@interface PhotoFeedNodeController : PhotoFeedBaseController
 
 @end

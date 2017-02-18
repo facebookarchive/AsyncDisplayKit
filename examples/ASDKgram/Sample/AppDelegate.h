@@ -17,10 +17,6 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-@protocol PhotoFeedControllerProtocol <NSObject>
-- (void)resetAllData;
-@end
-
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 
 @end
