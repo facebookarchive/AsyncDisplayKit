@@ -828,8 +828,7 @@
   ASCollectionNode *cn = testController.collectionNode;
   [cn waitUntilAllUpdatesAreCommitted];
   ASCellNode *node = [cn nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
-  [self expectationForPredicate:[NSPredicate predicateWithFormat:@"visible = YES"] evaluatedWithObject:node handler:nil];
-  [self waitForExpectationsWithTimeout:3 handler:nil];
+  XCTAssertTrue(node.visible);
   testController.asyncDelegate->_itemCounts = {0};
   [cn deleteItemsAtIndexPaths: @[[NSIndexPath indexPathForItem:0 inSection:0]]];
   [self expectationForPredicate:[NSPredicate predicateWithFormat:@"visible = NO"] evaluatedWithObject:node handler:nil];
@@ -986,8 +985,10 @@
 
   [window makeKeyAndVisible];
   [view layoutIfNeeded];
-
+  
+  [cn waitUntilAllUpdatesAreCommitted];
   [self waitForExpectationsWithTimeout:60 handler:nil];
+  
   CGFloat contentHeight = cn.view.contentSize.height;
   CGFloat requiredContentHeight;
   CGFloat itemHeight = [cn.view layoutAttributesForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]].size.height;

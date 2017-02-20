@@ -264,8 +264,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   
   _leadingScreensForBatching = 2.0;
   
-  _superIsPendingDataLoad = YES;
-  
   _lastBoundsSizeUsedForMeasuringNodes = self.bounds.size;
   
   _layoutFacilitator = layoutFacilitator;
@@ -340,7 +338,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 {
   ASDisplayNodeAssertMainThread();
   [self reloadData];
-  [_dataController waitUntilAllUpdatesAreCommitted];
+  [self waitUntilAllUpdatesAreCommitted];
 }
 
 - (void)relayoutItems
@@ -358,6 +356,10 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
   
   [_dataController waitUntilAllUpdatesAreCommitted];
+  
+  // reloadData of UICollectionView doesn't requery its data source but defers until the next layout pass.
+  // A forced layout pass is neccessary here to make sure everything is ready after this method returns.
+  [self layoutIfNeeded];
 }
 
 - (void)setDataSource:(id<UICollectionViewDataSource>)dataSource
@@ -876,7 +878,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView
 {
-  _superIsPendingDataLoad = NO;
+  if (_superIsPendingDataLoad) {
+    [_rangeController setNeedsUpdate];
+    [self _scheduleCheckForBatchFetchingForNumberOfChanges:1];
+    _superIsPendingDataLoad = NO;
+  }
   return [_dataController completedNumberOfSections];
 }
 
@@ -1715,12 +1721,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   
   ASPerformBlockWithoutAnimation(!changeSet.animated, ^{
     if(changeSet.includesReloadData) {
-      //TODO _superIsPendingDataLoad is true for reloadData so this block may not execute
-      // reloadData can't be used in conjuntion with other updates. So calling it inside a batch is unnecessary.
+      _superIsPendingDataLoad = YES;
       [super reloadData];
-      // Flush any range changes that happened as part of submitting the reload.
-      [_rangeController updateIfNeeded];
-      [self _scheduleCheckForBatchFetchingForNumberOfChanges:1];
       [changeSet executeCompletionHandlerWithFinished:YES];
     } else {
       [_layoutFacilitator collectionViewWillPerformBatchUpdates];
@@ -1888,7 +1890,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
   if (changedInNonScrollingDirection) {
     [_dataController relayoutAllNodes];
-    [_dataController waitUntilAllUpdatesAreCommitted];
+    [self waitUntilAllUpdatesAreCommitted];
     // We need to ensure the size requery is done before we update our layout.
     [self.collectionViewLayout invalidateLayout];
   }
