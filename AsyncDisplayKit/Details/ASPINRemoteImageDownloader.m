@@ -164,8 +164,8 @@ static ASPINRemoteImageDownloader *sharedDownloader = nil;
 - (id <ASImageContainerProtocol>)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
 {
   PINRemoteImageManager *manager = [self sharedPINRemoteImageManager];
-  NSString *key = [manager cacheKeyForURL:URL processorKey:nil];
-  PINRemoteImageManagerResult *result = [manager synchronousImageFromCacheWithCacheKey:key options:PINRemoteImageManagerDownloadOptionsSkipDecode];
+  PINRemoteImageManagerResult *result = [manager synchronousImageFromCacheWithURL:URL processorKey:nil options:PINRemoteImageManagerDownloadOptionsSkipDecode];
+  
 #if PIN_ANIMATED_AVAILABLE
   if (result.alternativeRepresentation) {
     return result.alternativeRepresentation;
