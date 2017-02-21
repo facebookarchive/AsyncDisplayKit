@@ -544,6 +544,9 @@
       XCTFail(@"Expectation failed: %@", error);
     }
   }];
+  [tableView setNeedsLayout];
+  [tableView layoutIfNeeded];
+  [tableView waitUntilAllUpdatesAreCommitted];
 }
 
 - (void)triggerSizeChangeAndAssertRelayoutAllNodesForTableView:(ASTestTableView *)tableView newSize:(CGSize)newSize
