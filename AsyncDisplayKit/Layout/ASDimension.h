@@ -215,6 +215,8 @@ typedef struct {
   ASDimension right;
 } ASEdgeInsets;
 
+extern ASEdgeInsets const ASEdgeInsetsZero;
+
 #pragma mark - ASSizeRange
 
 /**

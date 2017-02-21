@@ -31,6 +31,7 @@ static CGFloat crossOffset(const ASStackLayoutSpecStyle &style,
       return baseline - ASStackUnpositionedLayout::baselineForItem(style, l);
     case ASStackLayoutAlignItemsStart:
     case ASStackLayoutAlignItemsStretch:
+    case ASStackLayoutAlignItemsNotSet:
       return 0;
   }
 }

@@ -915,6 +915,10 @@ ASLayoutElementFinalLayoutElementDefault
   if (_pendingDisplayNodeLayout != nullptr) {
     _pendingDisplayNodeLayout->invalidate();
   }
+
+#if YOGA
+  [self invalidateCalculatedYogaLayout];
+#endif
 }
 
 - (void)__layout
@@ -1081,7 +1085,11 @@ ASLayoutElementFinalLayoutElementDefault
   if (ASHierarchyStateIncludesYogaLayoutEnabled(_hierarchyState) == YES &&
       ASHierarchyStateIncludesYogaLayoutMeasuring(_hierarchyState) == NO) {
     ASDN::MutexUnlocker ul(__instanceLock__);
-    return [self calculateLayoutFromYogaRoot:constrainedSize];
+    [self calculateLayoutFromYogaRoot:constrainedSize];
+  }
+
+  if (ASHierarchyStateIncludesYogaLayoutEnabled(_hierarchyState) == YES && self.yogaCalculatedLayout) {
+    return self.yogaCalculatedLayout;
   }
 #endif /* YOGA */
 

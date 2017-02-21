@@ -22,7 +22,3 @@
 #ifndef IG_LIST_KIT
   #define IG_LIST_KIT __has_include(<IGListKit/IGListKit.h>)
 #endif
-
-#ifndef YOGA
-  #define YOGA __has_include(<Yoga/Yoga.h>)
-#endif

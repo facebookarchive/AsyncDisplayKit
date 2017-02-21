@@ -20,7 +20,7 @@
 #import <atomic>
 
 #if YOGA
-  #import <Yoga/Yoga.h>
+  #import YOGA_HEADER_PATH
 #endif
 
 extern void ASLayoutElementPerformBlockOnEveryElement(id<ASLayoutElement> element, void(^block)(id<ASLayoutElement> element))

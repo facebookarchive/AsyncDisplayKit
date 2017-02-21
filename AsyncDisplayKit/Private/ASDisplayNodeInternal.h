@@ -180,6 +180,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   YGNodeRef _yogaNode;
   ASDisplayNode *_yogaParent;
   NSMutableArray<ASDisplayNode *> *_yogaChildren;
+  ASLayout *_yogaCalculatedLayout;
 #endif
 
 #if TIME_DISPLAYNODE_OPS

@@ -14,7 +14,7 @@
 #import <AsyncDisplayKit/ASEventLog.h>
 
 #if YOGA
-#import <Yoga/Yoga.h>
+  #import YOGA_HEADER_PATH
 #endif
 
 NS_ASSUME_NONNULL_BEGIN
@@ -156,15 +156,19 @@ typedef struct {
 
 #if YOGA
 
+extern void ASDisplayNodePerformBlockOnEveryYogaChild(ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
+
 @interface ASDisplayNode (Yoga)
 
 @property (nonatomic, strong) NSArray *yogaChildren;
+@property (nonatomic, strong) ASLayout *yogaCalculatedLayout;
 
 - (void)addYogaChild:(ASDisplayNode *)child;
 - (void)removeYogaChild:(ASDisplayNode *)child;
 
-// This method should not normally be called directly.
-- (ASLayout *)calculateLayoutFromYogaRoot:(ASSizeRange)rootConstrainedSize;
+// These methods should not normally be called directly.
+- (void)invalidateCalculatedYogaLayout;
+- (void)calculateLayoutFromYogaRoot:(ASSizeRange)rootConstrainedSize;
 
 @end
 

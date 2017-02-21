@@ -64,6 +64,9 @@ NSString *NSStringFromASDimension(ASDimension dimension)
 
 ASLayoutSize const ASLayoutSizeAuto = {ASDimensionAuto, ASDimensionAuto};
 
+#pragma mark - ASEdgeInsets
+
+ASEdgeInsets const ASEdgeInsetsZero = {};
 
 #pragma mark - ASSizeRange
 
