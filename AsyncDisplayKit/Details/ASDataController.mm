@@ -430,7 +430,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   ASDisplayNodeAssertMainThread();
   
   if (changeSet.includesReloadData) {
-   _initialReloadDataHasBeenCalled = YES;
+    _initialReloadDataHasBeenCalled = YES;
   }
   
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
@@ -455,7 +455,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
     ASDataControllerLogEvent(self, @"finishedUpdate: %@", changeSetDescription);
   }];
 #endif
-
   
   // Attempt to mark the update completed. This is when update validation will occur inside the changeset.
   // If an invalid update exception is thrown, we catch it and inject our "validationErrorSource" object,
