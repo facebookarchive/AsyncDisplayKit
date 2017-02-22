@@ -13,11 +13,12 @@
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASLayout.h>
 
-// If Yoga support becomes a supported feature, move this traversal to ASDisplayNodeExtras.
-void ASDisplayNodePerformBlockOnEveryYogaChild(ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node));
-void ASDisplayNodePerformBlockOnEveryYogaChild(ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node))
+#define YOGA_LAYOUT_LOGGING 0
+
+extern void ASDisplayNodePerformBlockOnEveryYogaChild(ASDisplayNode * _Nullable node, void(^block)(ASDisplayNode *node))
 {
   if (node == nil) {
     return;
@@ -72,6 +73,7 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode,
 YGAlign yogaAlignItems(ASStackLayoutAlignItems alignItems)
 {
   switch (alignItems) {
+    case ASStackLayoutAlignItemsNotSet:         return YGAlignAuto;
     case ASStackLayoutAlignItemsStart:          return YGAlignFlexStart;
     case ASStackLayoutAlignItemsEnd:            return YGAlignFlexEnd;
     case ASStackLayoutAlignItemsCenter:         return YGAlignCenter;
@@ -262,7 +264,28 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
   }
 }
 
-- (ASLayout *)layoutTreeForYogaNode
+- (void)setYogaCalculatedLayout:(ASLayout *)yogaCalculatedLayout
+{
+  _yogaCalculatedLayout = yogaCalculatedLayout;
+}
+
+- (ASLayout *)yogaCalculatedLayout
+{
+  return _yogaCalculatedLayout;
+}
+
+- (ASLayout *)layoutForYogaNode
+{
+  YGNodeRef yogaNode = self.yogaNode;
+
+  CGSize  size     = CGSizeMake(YGNodeLayoutGetWidth(yogaNode), YGNodeLayoutGetHeight(yogaNode));
+  CGPoint position = CGPointMake(YGNodeLayoutGetLeft(yogaNode), YGNodeLayoutGetTop(yogaNode));
+
+  // TODO: If it were possible to set .flattened = YES, it would be valid to do so here.
+  return [ASLayout layoutWithLayoutElement:self size:size position:position sublayouts:nil];
+}
+
+- (void)setupYogaCalculatedLayout
 {
   YGNodeRef yogaNode = self.yogaNode; // Use property to assign Ref if needed.
   uint32_t childCount = YGNodeGetChildCount(yogaNode);
@@ -271,19 +294,13 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:childCount];
   for (ASDisplayNode *subnode in self.yogaChildren) {
-    [sublayouts addObject:[subnode layoutTreeForYogaNode]];
+    [sublayouts addObject:[subnode layoutForYogaNode]];
   }
 
-  CGSize  size     = CGSizeMake(YGNodeLayoutGetWidth(yogaNode), YGNodeLayoutGetHeight(yogaNode));
-  CGPoint position = CGPointMake(YGNodeLayoutGetLeft(yogaNode), YGNodeLayoutGetTop(yogaNode));
-
-  ASDisplayNodeLogEvent(self, @"Yoga calculatedSize: %@", NSStringFromCGSize(size));
-
-  ASLayout *layout = [ASLayout layoutWithLayoutElement:self
-                                                  size:size
-                                              position:position
-                                            sublayouts:sublayouts];
-  return layout;
+  // The layout for self should have position CGPointNull, but include the calculated size.
+  CGSize size = CGSizeMake(YGNodeLayoutGetWidth(yogaNode), YGNodeLayoutGetHeight(yogaNode));
+  ASLayout *layout = [ASLayout layoutWithLayoutElement:self size:size sublayouts:sublayouts];
+  self.yogaCalculatedLayout = layout;
 }
 
 - (void)setYogaMeasureFuncIfNeeded
@@ -298,11 +315,20 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
   }
 }
 
-- (ASLayout *)calculateLayoutFromYogaRoot:(ASSizeRange)rootConstrainedSize
+- (void)invalidateCalculatedYogaLayout
+{
+  // Yoga internally asserts that this method may only be called on nodes with a measurement function.
+  YGNodeRef yogaNode = self.yogaNode;
+  if (YGNodeGetMeasureFunc(yogaNode)) {
+    YGNodeMarkDirty(yogaNode);
+  }
+}
+
+- (void)calculateLayoutFromYogaRoot:(ASSizeRange)rootConstrainedSize
 {
   if (ASHierarchyStateIncludesYogaLayoutMeasuring(self.hierarchyState)) {
     ASDisplayNodeAssert(NO, @"A Yoga layout is being performed by a parent; children must not perform their own until it is done! %@", [self displayNodeRecursiveDescription]);
-    return [ASLayout layoutWithLayoutElement:self size:CGSizeZero];
+    return;
   }
 
   ASDisplayNodePerformBlockOnEveryYogaChild(self, ^(ASDisplayNode * _Nonnull node) {
@@ -313,17 +339,9 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
 
   // Apply the constrainedSize as a base, known frame of reference.
   // If the root node also has style.*Size set, these will be overridden below.
+  // YGNodeCalculateLayout currently doesn't offer the ability to pass a minimum size (max is passed there).
   YGNodeStyleSetMinWidth (rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.min.width));
   YGNodeStyleSetMinHeight(rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.min.height));
-
-  // TODO(appleguy); Is it sufficient to set only Width OR MaxWidth (+ same for height), or do we need all four?
-  YGNodeStyleSetMaxWidth (rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.max.width));
-  YGNodeStyleSetMaxHeight(rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.max.height));
-  YGNodeStyleSetWidth    (rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.max.width));
-  YGNodeStyleSetHeight   (rootYogaNode, yogaFloatForCGFloat(rootConstrainedSize.max.height));
-
-  // TODO(appleguy): We need this on all containers, not just the root. Need to be able to check for "unset"
-  YGNodeStyleSetAlignItems(rootYogaNode, yogaAlignItems(self.style.alignItems));
 
   ASDisplayNodePerformBlockOnEveryYogaChild(self, ^(ASDisplayNode * _Nonnull node) {
     ASLayoutElementStyle *style = node.style;
@@ -337,12 +355,14 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
     YGNODE_STYLE_SET_DIMENSION  (yogaNode, FlexBasis, style.flexBasis);
 
     YGNodeStyleSetFlexDirection (yogaNode, yogaFlexDirection(style.direction));
-    YGNodeStyleSetAlignSelf     (yogaNode, yogaAlignSelf(style.alignSelf));
-    YGNodeStyleSetAlignItems    (yogaNode, yogaAlignItems(style.alignItems));
     YGNodeStyleSetJustifyContent(yogaNode, yogaJustifyContent(style.justifyContent));
+    YGNodeStyleSetAlignSelf     (yogaNode, yogaAlignSelf(style.alignSelf));
+    ASStackLayoutAlignItems alignItems = style.alignItems;
+    if (alignItems != ASStackLayoutAlignItemsNotSet) {
+      YGNodeStyleSetAlignItems(yogaNode, yogaAlignItems(alignItems));
+    }
 
     YGNodeStyleSetPositionType  (yogaNode, style.positionType);
-
     ASEdgeInsets position = style.position;
     ASEdgeInsets margin   = style.margin;
     ASEdgeInsets padding  = style.padding;
@@ -389,17 +409,27 @@ YGSize ASLayoutElementYogaMeasureFunc(YGNodeRef yogaNode, float width, YGMeasure
                         yogaFloatForCGFloat(rootConstrainedSize.max.height),
                         YGDirectionInherit);
 
-#if ASEVENTLOG_ENABLE
-  YGNodePrint(rootYogaNode, (YGPrintOptions)(YGPrintOptionsChildren | YGPrintOptionsStyle | YGPrintOptionsLayout));
-#endif
-
-  ASLayout *yogaLayout = [self layoutTreeForYogaNode];
-
   ASDisplayNodePerformBlockOnEveryYogaChild(self, ^(ASDisplayNode * _Nonnull node) {
+    [node setupYogaCalculatedLayout];
     node.hierarchyState &= ~ASHierarchyStateYogaLayoutMeasuring;
   });
-  
-  return yogaLayout;
+
+#if YOGA_LAYOUT_LOGGING
+  // Concurrent layouts will interleave the NSLog messages unless we serialize.
+  // Use @synchornize rather than trampolining to the main thread so the tree state isn't changed.
+  @synchronized ([ASDisplayNode class]) {
+    NSLog(@"****************************************************************************");
+    NSLog(@"******************** STARTING YOGA -> ASLAYOUT CREATION ********************");
+    NSLog(@"****************************************************************************");
+    ASDisplayNodePerformBlockOnEveryYogaChild(self, ^(ASDisplayNode * _Nonnull node) {
+      NSLog(@" "); // Newline
+      NSLog(@"node = %@", node);
+      NSLog(@"style = %@", node.style);
+      NSLog(@"layout = %@", node.yogaCalculatedLayout);
+      YGNodePrint(node.yogaNode, (YGPrintOptions)(YGPrintOptionsStyle | YGPrintOptionsLayout));
+    });
+  }
+#endif
 }
 
 @end

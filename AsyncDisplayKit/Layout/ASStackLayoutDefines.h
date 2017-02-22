@@ -66,6 +66,7 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutAlignItems) {
   ASStackLayoutAlignItemsBaselineFirst,
   /** Children align to their last baseline. Only available for horizontal stack spec */
   ASStackLayoutAlignItemsBaselineLast,
+  ASStackLayoutAlignItemsNotSet
 };
 
 /**
