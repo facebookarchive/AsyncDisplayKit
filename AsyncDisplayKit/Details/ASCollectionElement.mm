@@ -1,5 +1,5 @@
 //
-//  ASCollectionItem.mm
+//  ASCollectionElement.mm
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 2/28/16.
@@ -10,18 +10,18 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <AsyncDisplayKit/ASCollectionItem.h>
+#import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
 #import <mutex>
 
-@interface ASCollectionItem ()
+@interface ASCollectionElement ()
 
 /// Required node block used to allocate a cell node. Nil after the first execution.
 @property (nonatomic, strong) ASCellNodeBlock nodeBlock;
 
 @end
 
-@implementation ASCollectionItem {
+@implementation ASCollectionElement {
   std::mutex _lock;
   ASCellNode *_node;
 }
