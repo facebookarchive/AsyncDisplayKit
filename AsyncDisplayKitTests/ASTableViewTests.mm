@@ -544,6 +544,9 @@
       XCTFail(@"Expectation failed: %@", error);
     }
   }];
+  [tableView setNeedsLayout];
+  [tableView layoutIfNeeded];
+  [tableView waitUntilAllUpdatesAreCommitted];
 }
 
 - (void)triggerSizeChangeAndAssertRelayoutAllNodesForTableView:(ASTestTableView *)tableView newSize:(CGSize)newSize
@@ -605,13 +608,8 @@
 
   // Assert that the beginning of the call pattern is correct.
   // There is currently noise that comes after that we will allow for this test.
-  NSArray *expectedSelectors = @[ NSStringFromSelector(@selector(reloadData)),
-                                  NSStringFromSelector(@selector(beginUpdates)),
-                                  NSStringFromSelector(@selector(insertSections:withRowAnimation:)),
-                                  NSStringFromSelector(@selector(insertRowsAtIndexPaths:withRowAnimation:)),
-                                  NSStringFromSelector(@selector(endUpdates))];
-  NSArray *firstSelectors = [selectors subarrayWithRange:NSMakeRange(0, expectedSelectors.count)];
-  XCTAssertEqualObjects(firstSelectors, expectedSelectors);
+  NSArray *expectedSelectors = @[ NSStringFromSelector(@selector(reloadData)) ];
+  XCTAssertEqualObjects(selectors, expectedSelectors);
 
   [UITableView deswizzleAllInstanceMethods];
 }
@@ -639,14 +637,8 @@
 
   // Assert that the beginning of the call pattern is correct.
   // There is currently noise that comes after that we will allow for this test.
-  NSArray *expectedSelectors = @[NSStringFromSelector(@selector(reloadData)),
-                                 NSStringFromSelector(@selector(beginUpdates)),
-                                 NSStringFromSelector(@selector(deleteSections:withRowAnimation:)),
-                                 NSStringFromSelector(@selector(insertSections:withRowAnimation:)),
-                                 NSStringFromSelector(@selector(insertRowsAtIndexPaths:withRowAnimation:)),
-                                 NSStringFromSelector(@selector(endUpdates))];
-  NSArray *firstSelectors = [selectors subarrayWithRange:NSMakeRange(0, expectedSelectors.count)];
-  XCTAssertEqualObjects(firstSelectors, expectedSelectors);
+  NSArray *expectedSelectors = @[ NSStringFromSelector(@selector(reloadData)) ];
+  XCTAssertEqualObjects(selectors, expectedSelectors);
 
   [UITableView deswizzleAllInstanceMethods];
 }
@@ -697,6 +689,12 @@
   // Trigger data load
   XCTAssertGreaterThan(node.numberOfSections, 0);
   XCTAssertGreaterThan([node numberOfRowsInSection:0], 0);
+  
+  // UITableView's section index view is added only after some rows were inserted to the table.
+  // All nodes loaded and measured during the initial reloadData used an outdated constrained width (i.e full width: 320).
+  // So we need to force a new layout pass so that the table will pick up a new constrained size and apply to its node.
+  [node setNeedsLayout];
+  [node.view layoutIfNeeded];
   [node waitUntilAllUpdatesAreCommitted];
 
   UITableViewCell *cell = [node.view cellForRowAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];

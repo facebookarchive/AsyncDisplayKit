@@ -149,13 +149,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 #pragma mark External API
 
-- (void (^)(BOOL finished))completionHandler
-{
-  void (^completionHandler)(BOOL) = _completionHandler;
-  _completionHandler = nil;
-  return completionHandler;
-}
-
 - (void)addCompletionHandler:(void (^)(BOOL))completion
 {
   [self _ensureNotCompleted];
@@ -170,6 +163,14 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
     }
     completion(finished);
   };
+}
+
+- (void)executeCompletionHandlerWithFinished:(BOOL)finished
+{
+  if (_completionHandler != nil) {
+    _completionHandler(finished);
+    _completionHandler = nil;
+  }
 }
 
 - (void)markCompletedWithNewItemCounts:(std::vector<NSInteger>)newItemCounts
@@ -243,6 +244,13 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
   NSUInteger newIndex = oldSection - [_deletedSections countOfIndexesInRange:NSMakeRange(0, oldSection)];
   newIndex += [_insertedSections as_indexChangeByInsertingItemsBelowIndex:newIndex];
   return newIndex;
+}
+
+- (void)reloadData
+{
+  [self _ensureNotCompleted];
+  NSAssert(_includesReloadData == NO, @"Attempt to reload data multiple times %@", self);
+  _includesReloadData = YES;
 }
 
 - (void)deleteItems:(NSArray *)indexPaths animationOptions:(ASDataControllerAnimationOptions)options
@@ -321,6 +329,10 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 - (void)_sortAndCoalesceChangeArrays
 {
+  if (_includesReloadData) {
+    return;
+  }
+  
   @autoreleasepool {
 
     // Split reloaded sections into [delete(oldIndex), insert(newIndex)]
@@ -411,6 +423,17 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 - (void)_validateUpdate
 {
+  // Assert that if reloadData exists, it's the only change
+  // TODO: remove this and be lenient on them?
+  if (_includesReloadData) {
+    if (0 < (_originalDeleteSectionChanges.count + _originalDeleteItemChanges.count
+             +_originalInsertSectionChanges.count + _originalInsertItemChanges.count
+             + _reloadSectionChanges.count + _reloadItemChanges.count)) {
+      ASFailUpdateValidation(@"Attempt to reload data in conjuntion with other updates.");
+    }
+    return;
+  }
+  
   NSIndexSet *allReloadedSections = [_ASHierarchySectionChange allIndexesInSectionChanges:_reloadSectionChanges];
   
   NSInteger newSectionCount = _newItemCounts.size();
@@ -536,6 +559,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 - (NSMutableArray<NSDictionary *> *)propertiesForDescription
 {
   NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
+  [result addObject:@{ @"includesReloadData" : @(_includesReloadData) }];
   if (_reloadSectionChanges.count > 0) {
     [result addObject:@{ @"reloadSections" : [_ASHierarchySectionChange smallDescriptionForSectionChanges:_reloadSectionChanges] }];
   }

@@ -77,7 +77,7 @@ ASDISPLAYNODE_EXTERN_C_END
 /**
  * @abstract Returns type of layoutElement
  */
-@property (nonatomic, assign, readonly) ASLayoutElementType layoutElementType;;
+@property (nonatomic, assign, readonly) ASLayoutElementType layoutElementType;
 
 /**
  * @abstract A size constraint that should apply to this ASLayoutElement.

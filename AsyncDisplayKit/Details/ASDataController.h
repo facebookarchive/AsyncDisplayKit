@@ -30,6 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASDataController;
 @class _ASHierarchyChangeSet;
 @protocol ASTraitEnvironment;
+@protocol ASSectionContext;
 
 typedef NSUInteger ASDataControllerAnimationOptions;
 
@@ -63,6 +64,18 @@ extern NSString * const ASCollectionInvalidUpdateException;
  */
 - (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController;
 
+@optional
+
+- (NSArray<NSString *> *)dataController:(ASDataController *)dataController supplementaryNodeKindsInSections:(NSIndexSet *)sections;
+
+- (NSUInteger)dataController:(ASDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section;
+
+- (ASCellNodeBlock)dataController:(ASDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+- (nullable id<ASSectionContext>)dataController:(ASDataController *)dataController contextForSection:(NSInteger)section;
+
 @end
 
 @protocol ASDataControllerEnvironmentDelegate
@@ -76,31 +89,18 @@ extern NSString * const ASCollectionInvalidUpdateException;
 @protocol ASDataControllerDelegate <NSObject>
 
 /**
- Called for batch update.
+ * Called before updating with given change set.
+ *
+ * @param changeSet The change set that includes all updates
  */
-- (void)dataControllerBeginUpdates:(ASDataController *)dataController;
-- (void)dataControllerWillDeleteAllData:(ASDataController *)dataController;
-- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL))completion;
+- (void)dataController:(ASDataController *)dataController willUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 /**
- Called for insertion of elements.
+ * Called for change set updates.
+ *
+ * @param changeSet The change set that includes all updates
  */
-- (void)dataController:(ASDataController *)dataController didInsertItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for deletion of elements.
- */
-- (void)dataController:(ASDataController *)dataController didDeleteItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for insertion of sections.
- */
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray<NSArray<ASCellNode *> *> *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for deletion of sections.
- */
-- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 @end
 
@@ -163,7 +163,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
 
 /** @name Data Updating */
 
-- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet animated:(BOOL)animated;
+- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 /**
  * Re-measures all loaded nodes in the backing store.
@@ -172,10 +172,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
  * (e.g. ASTableView or ASCollectionView after an orientation change).
  */
 - (void)relayoutAllNodes;
-
-- (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^ _Nullable)())completion;
-
-- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 - (void)waitUntilAllUpdatesAreCommitted;
 
@@ -210,6 +206,10 @@ extern NSString * const ASCollectionInvalidUpdateException;
  * Direct access to the nodes that have completed calculation and layout
  */
 - (NSArray<NSArray <ASCellNode *> *> *)completedNodes;
+
+- (nullable ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+- (nullable id<ASSectionContext>)contextForSection:(NSInteger)section;
 
 /**
  * Immediately move this item. This is called by ASTableView when the user has finished an interactive
