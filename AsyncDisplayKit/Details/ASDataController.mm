@@ -356,7 +356,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
     
     ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
     [contexts addObject:[[ASIndexedNodeContext alloc] initWithNodeBlock:nodeBlock
-                                                              indexPath:indexPath
                                                supplementaryElementKind:isRowKind ? nil : kind
                                                         constrainedSize:constrainedSize
                                                             environment:environment]];
