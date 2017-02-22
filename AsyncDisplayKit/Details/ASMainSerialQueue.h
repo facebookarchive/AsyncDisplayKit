@@ -13,9 +13,13 @@
 #import <Foundation/Foundation.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
+NS_ASSUME_NONNULL_BEGIN
+
 AS_SUBCLASSING_RESTRICTED
 @interface ASMainSerialQueue : NSObject
 
 - (void)performBlockOnMainThread:(dispatch_block_t)block;
 
 @end
+
+NS_ASSUME_NONNULL_END

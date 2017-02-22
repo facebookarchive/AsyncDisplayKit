@@ -313,6 +313,10 @@
 		CC0F886C1E4286FA00576FED /* ReferenceImages_64 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F88691E4286FA00576FED /* ReferenceImages_64 */; };
 		CC0F886D1E4286FA00576FED /* ReferenceImages_iOS_10 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */; };
 		CC11F97A1DB181180024D77B /* ASNetworkImageNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */; };
+		CC2F65E61E5D389D00DA57C9 /* ASCollectionViewLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = CC2F65E41E5D389D00DA57C9 /* ASCollectionViewLayout.h */; };
+		CC2F65E71E5D389D00DA57C9 /* ASCollectionViewLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = CC2F65E51E5D389D00DA57C9 /* ASCollectionViewLayout.m */; };
+		CC2F65EA1E5D50AB00DA57C9 /* ASCollectionLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = CC2F65E81E5D50AB00DA57C9 /* ASCollectionLayout.h */; };
+		CC2F65EB1E5D50AB00DA57C9 /* ASCollectionLayout.m in Sources */ = {isa = PBXBuildFile; fileRef = CC2F65E91E5D50AB00DA57C9 /* ASCollectionLayout.m */; };
 		CC3B20841C3F76D600798563 /* ASPendingStateController.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20811C3F76D600798563 /* ASPendingStateController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		CC3B20861C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
 		CC3B208A1C3F7A5400798563 /* ASWeakSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20871C3F7A5400798563 /* ASWeakSet.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -695,6 +699,10 @@
 		CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ReferenceImages_iOS_10; sourceTree = "<group>"; };
 		CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASNetworkImageNodeTests.m; sourceTree = "<group>"; };
 		CC2E317F1DAC353700EEE891 /* ASCollectionView+Undeprecated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASCollectionView+Undeprecated.h"; sourceTree = "<group>"; };
+		CC2F65E41E5D389D00DA57C9 /* ASCollectionViewLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionViewLayout.h; sourceTree = "<group>"; };
+		CC2F65E51E5D389D00DA57C9 /* ASCollectionViewLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionViewLayout.m; sourceTree = "<group>"; };
+		CC2F65E81E5D50AB00DA57C9 /* ASCollectionLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionLayout.h; sourceTree = "<group>"; };
+		CC2F65E91E5D50AB00DA57C9 /* ASCollectionLayout.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionLayout.m; sourceTree = "<group>"; };
 		CC3B20811C3F76D600798563 /* ASPendingStateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPendingStateController.h; sourceTree = "<group>"; };
 		CC3B20821C3F76D600798563 /* ASPendingStateController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASPendingStateController.mm; sourceTree = "<group>"; };
 		CC3B20871C3F7A5400798563 /* ASWeakSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASWeakSet.h; sourceTree = "<group>"; };
@@ -1124,6 +1132,10 @@
 		058D0A01195D050800B7D73C /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				CC2F65E81E5D50AB00DA57C9 /* ASCollectionLayout.h */,
+				CC2F65E91E5D50AB00DA57C9 /* ASCollectionLayout.m */,
+				CC2F65E41E5D389D00DA57C9 /* ASCollectionViewLayout.h */,
+				CC2F65E51E5D389D00DA57C9 /* ASCollectionViewLayout.m */,
 				CC55A70F1E52A0F200594372 /* ASResponderChainEnumerator.h */,
 				CC55A7101E52A0F200594372 /* ASResponderChainEnumerator.m */,
 				6947B0BB1E36B4E30007C478 /* Layout */,
@@ -1462,6 +1474,7 @@
 				9C70F20F1CDBE9FF007D6C76 /* ASLayoutManager.h in Headers */,
 				6947B0C31E36B5040007C478 /* ASStackPositionedLayout.h in Headers */,
 				DBABFAFC1C6A8D2F0039EA4A /* _ASTransitionContext.h in Headers */,
+				CC2F65E61E5D389D00DA57C9 /* ASCollectionViewLayout.h in Headers */,
 				B350624F1B010EFD0018CF92 /* ASDisplayNode+DebugTiming.h in Headers */,
 				CC57EAF71E3939350034C595 /* ASCollectionView+Undeprecated.h in Headers */,
 				B35062521B010EFD0018CF92 /* ASDisplayNodeInternal.h in Headers */,
@@ -1526,6 +1539,7 @@
 				2767E9411BB19BD600EA9B77 /* ASViewController.h in Headers */,
 				92DD2FE81BF4D0A80074C9DD /* ASMapNode.h in Headers */,
 				9C6BB3B31B8CC9C200F13F52 /* ASAbsoluteLayoutElement.h in Headers */,
+				CC2F65EA1E5D50AB00DA57C9 /* ASCollectionLayout.h in Headers */,
 				34EFC7731B701D0700AD841F /* ASAbsoluteLayoutSpec.h in Headers */,
 				B350620A1B010EFD0018CF92 /* ASTableView.h in Headers */,
 				B350620C1B010EFD0018CF92 /* ASTableViewProtocols.h in Headers */,
@@ -1827,6 +1841,7 @@
 				34EFC7641B701CC600AD841F /* ASCenterLayoutSpec.mm in Sources */,
 				18C2ED831B9B7DE800F627B3 /* ASCollectionNode.mm in Sources */,
 				E55D86331CA8A14000A0C26F /* ASLayoutElement.mm in Sources */,
+				CC2F65E71E5D389D00DA57C9 /* ASCollectionViewLayout.m in Sources */,
 				68FC85EC1CE29C7D00EDD713 /* ASVisibilityProtocols.m in Sources */,
 				CC55A7121E52A0F200594372 /* ASResponderChainEnumerator.m in Sources */,
 				68B8A4E41CBDB958007E4543 /* ASWeakProxy.m in Sources */,
@@ -1845,6 +1860,7 @@
 				B35062501B010EFD0018CF92 /* ASDisplayNode+DebugTiming.mm in Sources */,
 				DEC146B91C37A16A004A0EE7 /* ASCollectionInternal.m in Sources */,
 				254C6B891BF94F8A003EC431 /* ASTextKitRenderer+Positioning.mm in Sources */,
+				CC2F65EB1E5D50AB00DA57C9 /* ASCollectionLayout.m in Sources */,
 				68355B341CB579B9001D4E68 /* ASImageNode+AnimatedImage.mm in Sources */,
 				E5711A301C840C96009619D4 /* ASCollectionElement.mm in Sources */,
 				B35062511B010EFD0018CF92 /* ASDisplayNode+UIViewBridge.mm in Sources */,

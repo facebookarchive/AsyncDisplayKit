@@ -20,6 +20,8 @@
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
+#import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASStackLayoutSpec.h>
 #import <AsyncDisplayKit/ASSectionContext.h>
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
@@ -582,6 +584,30 @@
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
   [self.view moveItemAtIndexPath:indexPath toIndexPath:newIndexPath];
+}
+
+- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize
+{
+  NSInteger sectionCount = self.numberOfSections;
+  ASStackLayoutSpec *rootSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
+  NSMutableArray<id<ASLayoutElement>> *rootChildren = [NSMutableArray array];
+  for (NSInteger s = 0; s < sectionCount; s++) {
+    NSInteger itemCount = [self numberOfItemsInSection:s];
+    ASStackLayoutSpec *sectionSpec = [ASStackLayoutSpec verticalStackLayoutSpec];
+    NSMutableArray<ASCellNode *> *nodes = [NSMutableArray array];
+    for (NSInteger i = 0; i < itemCount; i++) {
+      NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:0];
+      ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
+      [nodes addObject:node];
+    }
+    sectionSpec.children = nodes;
+    
+    ASInsetLayoutSpec *insetSpec = [ASInsetLayoutSpec insetLayoutSpecWithInsets:UIEdgeInsetsMake(4, 4, 4, 4) child:sectionSpec];
+    [rootChildren addObject:insetSpec];
+  }
+  rootSpec.children = rootChildren;
+  return rootSpec;
+  
 }
 
 #pragma mark - ASRangeControllerUpdateRangeProtocol
