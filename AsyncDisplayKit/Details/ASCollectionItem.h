@@ -1,5 +1,5 @@
 //
-//  ASIndexedNodeContext.h
+//  ASCollectionItem.h
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 2/28/16.
@@ -16,7 +16,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 AS_SUBCLASSING_RESTRICTED
-@interface ASIndexedNodeContext : NSObject
+@interface ASCollectionItem : NSObject
 
 //TODO change this to be a generic "kind" or "elementKind" that exposes `nil` for row kind
 @property (nonatomic, readonly, copy, nullable) NSString *supplementaryElementKind;
