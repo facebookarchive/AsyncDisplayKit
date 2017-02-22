@@ -424,6 +424,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 - (void)_validateUpdate
 {
   // Assert that if reloadData exists, it's the only change
+  // TODO: remove this and be lenient on them?
   if (_includesReloadData) {
     if (0 < (_originalDeleteSectionChanges.count + _originalDeleteItemChanges.count
              +_originalInsertSectionChanges.count + _originalInsertItemChanges.count
@@ -558,7 +559,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 - (NSMutableArray<NSDictionary *> *)propertiesForDescription
 {
   NSMutableArray<NSDictionary *> *result = [NSMutableArray array];
-  [result addObject:@{ @"_includesReloadData" : @(_includesReloadData) }];
+  [result addObject:@{ @"includesReloadData" : @(_includesReloadData) }];
   if (_reloadSectionChanges.count > 0) {
     [result addObject:@{ @"reloadSections" : [_ASHierarchySectionChange smallDescriptionForSectionChanges:_reloadSectionChanges] }];
   }

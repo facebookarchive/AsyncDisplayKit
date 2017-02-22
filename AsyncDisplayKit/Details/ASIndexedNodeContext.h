@@ -22,7 +22,7 @@ NS_ASSUME_NONNULL_BEGIN
  * property too heavily – we should remove it in the future.
  */
 @property (nonatomic, readonly, strong) NSIndexPath *indexPath;
-//TODO shouldn't this be a generic kind (e.g includes ASDataControllerRowNodeKind)?
+//TODO change this to be a generic "kind" or "elementKind" that exposes `nil` for row kind
 @property (nonatomic, readonly, copy, nullable) NSString *supplementaryElementKind;
 @property (nonatomic, assign) ASSizeRange constrainedSize;
 @property (weak, nonatomic) id<ASTraitEnvironment> traitEnvironment;

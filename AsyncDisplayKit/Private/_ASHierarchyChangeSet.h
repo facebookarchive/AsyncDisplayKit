@@ -128,6 +128,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 
 @property (nonatomic, readonly) BOOL completed;
 /// Whether or not changes should be animated.
+// TODO: if any update in this chagne set is non-animated, the whole update should be non-animated.
 @property (nonatomic, readwrite) BOOL animated;
 @property (nonatomic, readonly) BOOL includesReloadData;
 

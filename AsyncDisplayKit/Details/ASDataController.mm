@@ -25,8 +25,8 @@
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
 
-#define LOG(...) NSLog(__VA_ARGS__)
-//#define LOG(...)
+//#define LOG(...) NSLog(__VA_ARGS__)
+#define LOG(...)
 
 #define AS_MEASURE_AVOIDED_DATACONTROLLER_WORK 0
 
@@ -144,10 +144,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
 
 #pragma mark - Cell Layout
 
-- (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts batchSize:(NSUInteger)batchSize batchCompletion:(ASDataControllerCompletionBlock)batchCompletionHandler
+- (void)batchLayoutNodesFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts batchSize:(NSInteger)batchSize batchCompletion:(ASDataControllerCompletionBlock)batchCompletionHandler
 {
   ASSERT_ON_EDITING_QUEUE;
-  //TODO add Logs and AS_MEASURE_AVOIDED_DATACONTROLLER_WORK back
 #if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
     [ASDataController _expectToInsertNodes:contexts.count];
 #endif
@@ -197,11 +196,11 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   }
 
   __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(nodeCount, sizeof(ASCellNode *));
-  
+
   dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
   ASDispatchApply(nodeCount, queue, 0, ^(size_t i) {
     RETURN_IF_NO_DATASOURCE();
-    
+
     // Allocate the node.
     ASIndexedNodeContext *context = contexts[i];
     ASCellNode *node = context.node;
@@ -209,7 +208,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
       ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
       node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
     }
-    
+
     // Layout the node if the size range is valid.
     ASSizeRange sizeRange = context.constrainedSize;
     if (ASSizeRangeHasSignificantArea(sizeRange)) {
@@ -221,9 +220,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
 #endif
     allocatedNodeBuffer[i] = node;
   });
-  
+
   BOOL canceled = _dataSource == nil;
-  
+
   // Create nodes array
   NSArray *nodes = canceled ? nil : [NSArray arrayWithObjects:allocatedNodeBuffer count:nodeCount];
   
@@ -232,7 +231,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
     allocatedNodeBuffer[i] = nil;
   }
   free(allocatedNodeBuffer);
-  
+
   return nodes;
 }
 
@@ -289,9 +288,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   // Get all the sections that need to be repopulated
   NSIndexSet *sectionIndexes = [NSIndexSet as_sectionsFromIndexPaths:originalIndexPaths];
   for (NSString *kind in [self supplementaryKindsInSections:sectionIndexes]) {
+    // TODO: Would it make more sense to do _nodeContexts enumerateKeysAndObjectsUsingBlock: for this removal step?
+    // That way we are sure we removed all the old supplementaries, even if that kind isn't present anymore.
+    
     // Step 1: Remove all existing contexts of this kind in these sections
-    // TODO: NSEnumerationConcurrent?
-    // TODO: Consider using a diffing algorithm here
     [_nodeContexts[kind] enumerateObjectsAtIndexes:sectionIndexes options:0 usingBlock:^(NSMutableArray<ASIndexedNodeContext *> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
       [obj removeAllObjects];
     }];
@@ -409,7 +409,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   }
   
   ASDisplayNodeAssert(NO, @"Unknown constrained size for node of kind %@ by data source %@", kind, _dataSource);
-  return ASSizeRangeMake(CGSizeZero, CGSizeZero);
+  return ASSizeRangeZero;
 }
 
 #pragma mark - Batching (External API)
@@ -750,10 +750,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   if (cellNode == nil) {
     return nil;
   }
-  
+
   NSString *kind = cellNode.supplementaryElementKind ?: ASDataControllerRowNodeKind;
   ASNodeContextTwoDimensionalArray *sections = contexts[kind];
-  
+
   // Check if the cached index path is still correct.
   NSIndexPath *indexPath = cellNode.cachedIndexPath;
   if (indexPath != nil) {
@@ -765,7 +765,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
       indexPath = nil;
     }
   }
-  
+
   // Loop through each section to look for the node context
   NSInteger sectionIdx = 0;
   for (NSArray<ASIndexedNodeContext *> *section in sections) {

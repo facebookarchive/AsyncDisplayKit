@@ -152,14 +152,14 @@ AS_SUBCLASSING_RESTRICTED
  *
  * @param changeSet The change set that includes all updates
  */
-- (void)rangeController:(ASRangeController * )rangeController willUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;;
+- (void)rangeController:(ASRangeController *)rangeController willUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 /**
  * Called after updating with given change set.
  *
  * @param changeSet The change set that includes all updates
  */
-- (void)rangeController:(ASRangeController * )rangeController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;;
+- (void)rangeController:(ASRangeController *)rangeController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 @end
 

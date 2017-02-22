@@ -92,7 +92,7 @@ ASDISPLAYNODE_EXTERN_C_END
  * Deprecated and should be replaced by the methods from above
  */
 - (ASEnvironmentTraitCollection)environmentTraitCollection;
-- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traitCollection;;
+- (void)setEnvironmentTraitCollection:(ASEnvironmentTraitCollection)traitCollection;
 
 
 @end

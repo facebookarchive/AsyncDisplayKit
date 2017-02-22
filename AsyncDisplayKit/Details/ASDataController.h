@@ -93,7 +93,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
  *
  * @param changeSet The change set that includes all updates
  */
-- (void)dataController:(ASDataController * )dataController willUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;;
+- (void)dataController:(ASDataController *)dataController willUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 /**
  * Called for change set updates.
