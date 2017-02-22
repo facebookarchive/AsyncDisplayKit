@@ -9,7 +9,7 @@ dependencies.
 
 ### ASCollectionView [ObjC]
 
-![ASCollectionView Example App Screenshot](https://github.com/AsyncDisplayKit/Documentation/tree/master/docs/static/images/example-app-screenshots/ASCollectionView.png)
+![ASCollectionView Example App Screenshot](https://github.com/AsyncDisplayKit/Documentation/raw/master/docs/static/images/example-app-screenshots/ASCollectionView.png)
  
 Featuring:
 - ASCollectionView with header/footer supplementary node support
