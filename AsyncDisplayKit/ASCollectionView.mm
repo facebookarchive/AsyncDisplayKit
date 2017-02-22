@@ -1890,7 +1890,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
   if (changedInNonScrollingDirection) {
     [_dataController relayoutAllNodes];
-    [self waitUntilAllUpdatesAreCommitted];
+    [_dataController waitUntilAllUpdatesAreCommitted];
     // We need to ensure the size requery is done before we update our layout.
     [self.collectionViewLayout invalidateLayout];
   }

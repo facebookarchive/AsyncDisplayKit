@@ -313,7 +313,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
 {
   ASDisplayNodeAssertMainThread();
   
-  if (sections.count == 0) {
+  if (sections.count == 0 || _dataSource == nil) {
     return;
   }
   
@@ -564,8 +564,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
     [_nodeContexts removeAllObjects];
     
     NSUInteger sectionCount = [self itemCountsFromDataSource].size();
-    NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-    [self _insertNodeContextsForSections:sectionIndexes environment:environment];
+    if (sectionCount > 0) {
+      NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
+      [self _insertNodeContextsForSections:sectionIndexes environment:environment];
+    }
     // Return immediately because reloadData can't be used in conjuntion with other updates.
     return;
   }
@@ -600,17 +602,29 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASIndexedNodeContext *> 
   }
 }
 
-- (void)_insertNodeContextsForSections:(NSIndexSet *)sectionIndexes environment:(id<ASTraitEnvironment>)environment
+- (void)_insertNodeContextsForSections:(NSIndexSet *)originalSectionIndexes environment:(id<ASTraitEnvironment>)environment
 {
+  ASDisplayNodeAssertMainThread();
+  
+  if (originalSectionIndexes.count == 0 || _dataSource == nil) {
+    return;
+  }
+  
   NSMutableArray<NSString *> *kinds = [NSMutableArray arrayWithObject:ASDataControllerRowNodeKind];
-  [kinds addObjectsFromArray:[self supplementaryKindsInSections:sectionIndexes]];
+  [kinds addObjectsFromArray:[self supplementaryKindsInSections:originalSectionIndexes]];
   
   for (NSString *kind in kinds) {
+    NSIndexSet *sectionIndexes = originalSectionIndexes;
     // Step 1: Ensure _nodeContexts has enough space for new contexts
     NSMutableArray *nodeContextsOfKind = _nodeContexts[kind];
     if (nodeContextsOfKind == nil) {
       nodeContextsOfKind = [NSMutableArray array];
       _nodeContexts[kind] = nodeContextsOfKind;
+      
+      // TODO If this is a new kind, agressively populate contexts for all sections including ones that are not inside the originalSectionIndexes.
+      if (sectionIndexes.lastIndex > 0) {
+        sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionIndexes.lastIndex + 1)];
+      }
     }
     NSMutableArray *sectionArray = [NSMutableArray arrayWithCapacity:sectionIndexes.count];
     for (NSUInteger i = 0; i < sectionIndexes.count; i++) {
