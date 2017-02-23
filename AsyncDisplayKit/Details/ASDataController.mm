@@ -468,12 +468,14 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       @throw e;
     }
   }
+
+  //
   
   // Step 1: update _sections and _elements.
   // After this step, those properties are up-to-date with dataSource's index space.
-  [self _updateSectionContextsWithChangeSet:changeSet];
+  [self _updateSectionContexts:_sections changeSet:changeSet];
   //TODO If _elements is the same, use a fast path
-  [self _updateElementsWithChangeSet:changeSet];
+  [self _updateElements:_elements changeSet:changeSet];
   
   // Prepare loadingElements to be used in editing queue. Deep copy is critical here,
   // or future edits to the sub-arrays will pollute state between _elements
@@ -501,10 +503,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 }
 
 /**
- * Update _sections based on the given change set.
- * After this method returns, _sections will be up-to-date with dataSource.
+ * Update given array based on the given change set.
  */
-- (void)_updateSectionContextsWithChangeSet:(_ASHierarchyChangeSet *)changeSet
+- (void)_updateSectionContexts:(NSMutableArray<ASSection *> *)contexts changeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
   
@@ -513,25 +514,25 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   if (changeSet.includesReloadData) {
-    [_sections removeAllObjects];
+    [contexts removeAllObjects];
     
     NSUInteger sectionCount = [self itemCountsFromDataSource].size();
     NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-    [self _insertSectionContextsForSections:sectionIndexes];
+    [self _insertSectionContextsIntoArray:contexts sections:sectionIndexes];
     // Return immediately because reloadData can't be used in conjuntion with other updates.
     return;
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
-    [_sections removeObjectsAtIndexes:change.indexSet];
+    [contexts removeObjectsAtIndexes:change.indexSet];
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertSectionContextsForSections:change.indexSet];
+    [self _insertSectionContextsIntoArray:contexts sections:change.indexSet];
   }
 }
 
-- (void)_insertSectionContextsForSections:(NSIndexSet *)sectionIndexes
+- (void)_insertSectionContextsIntoArray:(NSMutableArray<ASSection *> *)array sections:(NSIndexSet *)sectionIndexes
 {
   ASDisplayNodeAssertMainThread();
   
@@ -542,30 +543,27 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   [sectionIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
     id<ASSectionContext> context = [_dataSource dataController:self contextForSection:idx];
     ASSection *section = [[ASSection alloc] initWithSectionID:_nextSectionID context:context];
-    [_sections insertObject:section atIndex:idx];
+    [array insertObject:section atIndex:idx];
     _nextSectionID++;
   }];
 }
 
 /**
- * Update _elements based on the given change set.
- * After this method returns, _elements will be up-to-date with dataSource's index space.
- *
- * @param changeSet The change set to be processed
+ * Update the given dictionary based on the given change set.
  */
-- (void)_updateElementsWithChangeSet:(_ASHierarchyChangeSet *)changeSet
+- (void)_updateElements:(ASNodeContextTwoDimensionalMutableDictionary *)elements changeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
   
   __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   if (changeSet.includesReloadData) {
-    [_elements removeAllObjects];
+    [elements removeAllObjects];
     
     NSUInteger sectionCount = [self itemCountsFromDataSource].size();
     if (sectionCount > 0) {
       NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-      [self _insertElementsForSections:sectionIndexes environment:environment];
+      [self _insertElementsIntoDictionary:elements sections:sectionIndexes environment:environment];
     }
     // Return immediately because reloadData can't be used in conjuntion with other updates.
     return;
@@ -574,7 +572,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
     // FIXME: change.indexPaths is in descending order but ASDeleteElementsInMultidimensionalArrayAtIndexPaths() expects them to be in ascending order
     NSArray *sortedIndexPaths = [change.indexPaths sortedArrayUsingSelector:@selector(compare:)];
-    ASDeleteElementsInMultidimensionalArrayAtIndexPaths(_elements[ASDataControllerRowNodeKind], sortedIndexPaths);
+    ASDeleteElementsInMultidimensionalArrayAtIndexPaths(elements[ASDataControllerRowNodeKind], sortedIndexPaths);
     // Aggressively repopulate supplementary nodes (#1773 & #1629)
     [self _repopulateSupplementaryNodesForAllSectionsContainingIndexPaths:change.indexPaths
                                                               environment:environment];
@@ -585,12 +583,12 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     NSMutableArray<NSString *> *kinds = [NSMutableArray arrayWithObject:ASDataControllerRowNodeKind];
     [kinds addObjectsFromArray:[self supplementaryKindsInSections:sectionIndexes]];
     for (NSString *kind in kinds) {
-      [_elements[kind] removeObjectsAtIndexes:sectionIndexes];
+      [elements[kind] removeObjectsAtIndexes:sectionIndexes];
     }
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertElementsForSections:change.indexSet environment:environment];
+    [self _insertElementsIntoDictionary:elements sections:change.indexSet environment:environment];
   }
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
@@ -601,7 +599,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
 }
 
-- (void)_insertElementsForSections:(NSIndexSet *)originalSectionIndexes environment:(id<ASTraitEnvironment>)environment
+- (void)_insertElementsIntoDictionary:(ASNodeContextTwoDimensionalMutableDictionary *)elements sections:(NSIndexSet *)originalSectionIndexes environment:(id<ASTraitEnvironment>)environment
 {
   ASDisplayNodeAssertMainThread();
   
@@ -615,10 +613,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   for (NSString *kind in kinds) {
     NSIndexSet *sectionIndexes = originalSectionIndexes;
     // Step 1: Ensure _elements has enough space for new elements
-    NSMutableArray *nodeContextsOfKind = _elements[kind];
+    NSMutableArray *nodeContextsOfKind = elements[kind];
     if (nodeContextsOfKind == nil) {
       nodeContextsOfKind = [NSMutableArray array];
-      _elements[kind] = nodeContextsOfKind;
+      elements[kind] = nodeContextsOfKind;
       
       // TODO If this is a new kind, agressively populate elements for all sections including ones that are not inside the originalSectionIndexes.
       if (sectionIndexes.lastIndex > 0) {

@@ -11,15 +11,21 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASSectionContext;
 
+AS_SUBCLASSING_RESTRICTED
 @interface ASSection : NSObject
 
 @property (nonatomic, assign, readonly) NSInteger sectionID;
 @property (nonatomic, strong, nullable, readonly) id<ASSectionContext> context;
 
-- (nullable instancetype)init __unavailable;
-- (nullable instancetype)initWithSectionID:(NSInteger)sectionID context:(nullable id<ASSectionContext>)context NS_DESIGNATED_INITIALIZER;
+- (instancetype)init __unavailable;
+- (instancetype)initWithSectionID:(NSInteger)sectionID context:(nullable id<ASSectionContext>)context NS_DESIGNATED_INITIALIZER;
 
 @end
+
+NS_ASSUME_NONNULL_END

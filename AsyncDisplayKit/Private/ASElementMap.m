@@ -10,6 +10,9 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASDataController.h>
+#import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
+#import <AsyncDisplayKit/ASMultidimensionalArrayUtils.h>
+#import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
 
 @interface ASElementMap ()
 
@@ -21,9 +24,23 @@
 
 // ElementKind -> IndexPath -> Element
 @property (nonatomic, strong) NSDictionary<NSString *, NSDictionary<NSIndexPath *, ASCollectionElement *> *> *supplementaryElements;
+
 @end
 
 @implementation ASElementMap
+
++ (ASElementMap *)emptyElementMap __const
+{
+  static ASElementMap *emptyMap;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    emptyMap = [[ASElementMap alloc] init];
+    emptyMap->_elementToIndexPathMap = [NSMapTable mapTableWithKeyOptions:(NSMapTableStrongMemory | NSMapTableObjectPointerPersonality) valueOptions:NSMapTableStrongMemory];
+    emptyMap->_sectionsOfItems = @[];
+    emptyMap->_supplementaryElements = @{};
+  });
+  return emptyMap;
+}
 
 - (NSInteger)numberOfSections
 {
@@ -37,7 +54,7 @@
 
 - (NSArray<NSString *> *)supplementaryElementKinds
 {
-	return [_supplementaryElements allKeys];
+  return [_supplementaryElements allKeys] ?: @[];
 }
 
 - (nullable NSIndexPath *)indexPathForElement:(ASCollectionElement *)element
@@ -47,7 +64,7 @@
 
 - (nullable ASCollectionElement *)elementForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-	return _sectionsOfItems[indexPath.section][indexPath.item];
+  return ASGetElementInTwoDimensionalArray(_sectionsOfItems, indexPath);
 }
 
 - (nullable ASCollectionElement *)supplementaryElementOfKind:(NSString *)supplementaryElementKind atIndexPath:(NSIndexPath *)indexPath
@@ -99,39 +116,67 @@
 
 @implementation ASElementMap (Operations)
 
-- (instancetype)initFromDataSource:(id<ASDataControllerSource>)dataSource
+- (instancetype)initWithPreviousMap:(ASElementMap *)previousMap changeSet:(_ASHierarchyChangeSet *)changeSet dataController:(ASDataController *)dataController environment:(id<ASTraitEnvironment>)environment
 {
   if (self = [super init]) {
-    id fakeDataController = nil;
-    id<ASTraitEnvironment> environment = nil;
+    id<ASDataControllerSource> dataSource = dataController.dataSource;
 
     _elementToIndexPathMap = [NSMapTable mapTableWithKeyOptions:(NSMapTableStrongMemory | NSMapTableObjectPointerPersonality) valueOptions:NSMapTableStrongMemory];
+    NSMutableArray<NSMutableArray<ASCollectionElement *> *> *sections = ASMultidimensionalArrayDeepMutableCopy(previousMap.sectionsOfItems);
+    NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCollectionElement *> *> *mutableSupplementaries = [NSMutableDictionary dictionaryWithCapacity:previousMap.supplementaryElements.count];
+    [previousMap.supplementaryElements enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSDictionary<NSIndexPath *,ASCollectionElement *> * _Nonnull obj, BOOL * _Nonnull stop) {
+      mutableSupplementaries[key] = [obj mutableCopy];
+    }];
+
+    NSInteger newSectionCount = [dataSource numberOfSectionsInDataController:dataController];
+    NSIndexSet *sectionsToInsert;
+
+    // Delete sections
+    if (changeSet.includesReloadData) {
+      [sections removeAllObjects];
+      [mutableSupplementaries removeAllObjects];
+      sectionsToInsert = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, newSectionCount)];
+    } else {
+      sectionsToInsert = changeSet.insertedSections;
+      NSIndexSet *deletedSections = changeSet.deletedSections;
+      [sections removeObjectsAtIndexes:deletedSections];
+      [mutableSupplementaries enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, NSMutableDictionary<NSIndexPath *,ASCollectionElement *> * _Nonnull supps, BOOL * _Nonnull stop) {
+        [supps removeObjectsForKeys:[deletedSections as_filterIndexPathsBySection:supps]];
+      }];
+
+    }
+
+    // Insert sections
+    [sectionsToInsert enumerateIndexesWithOptions:NSEnumerationReverse usingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
+      [sections insertObject:[NSMutableArray array] atIndex:idx];
+    }];
+
+    // Insert elements
 
     // Get the items
-    NSInteger sectionCount = [dataSource numberOfSectionsInDataController:fakeDataController];
-    NSMutableArray<NSArray<ASCollectionElement *> *> *sections = [NSMutableArray arrayWithCapacity:sectionCount];
+    NSInteger sectionCount = [dataSource numberOfSectionsInDataController:dataController];
     for (NSInteger s = 0; s < sectionCount; s++) {
-      NSInteger itemCount = [dataSource dataController:fakeDataController rowsInSection:s];
+      NSInteger itemCount = [dataSource dataController:dataController rowsInSection:s];
       NSMutableArray<ASCollectionElement *> *items = [NSMutableArray arrayWithCapacity:itemCount];
       for (NSInteger i = 0; i < itemCount; i++) {
         NSIndexPath *indexPath = [NSIndexPath indexPathForItem:i inSection:s];
-        ASCollectionElement *element = [ASElementMap elementFromDataSource:dataSource ofKind:ASDataControllerRowNodeKind indexPath:indexPath environment:environment];
+        ASCollectionElement *element = [ASElementMap elementFromDataController:dataController ofKind:ASDataControllerRowNodeKind indexPath:indexPath environment:environment];
         items[i] = element;
         [_elementToIndexPathMap setObject:indexPath forKey:element];
       }
       sections[s] = [items copy];
     }
-    _sectionsOfItems = [sections copy];
+    _sectionsOfItems = [[NSArray alloc] initWithArray:sections copyItems:YES];
 
     // Get the supplementaries
     NSIndexSet *allSections = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-    NSArray<NSString *> *supplementaryKinds = [dataSource dataController:fakeDataController supplementaryNodeKindsInSections:allSections];
-    NSMutableDictionary<NSString *, NSDictionary<NSIndexPath *, ASCollectionElement *> *> *mutableSupplementaries = [NSMutableDictionary dictionaryWithCapacity:supplementaryKinds.count];
+    NSArray<NSString *> *supplementaryKinds = [dataSource dataController:dataController supplementaryNodeKindsInSections:allSections];
+
     for (NSString *kind in supplementaryKinds) {
       NSMutableDictionary<NSIndexPath *, ASCollectionElement *> *elementsOfKind = [NSMutableDictionary dictionary];
       NSArray *indexPaths = [ASElementMap indexPathsForSupplementaryElementOfKind:kind inDataSource:nil sectionCount:sectionCount];
       for (NSIndexPath *indexPath in indexPaths) {
-        ASCollectionElement *element = [ASElementMap elementFromDataSource:dataSource ofKind:kind indexPath:indexPath environment:environment];
+        ASCollectionElement *element = [ASElementMap elementFromDataController:dataController ofKind:kind indexPath:indexPath environment:environment];
         elementsOfKind[indexPath] = element;
         [_elementToIndexPathMap setObject:indexPath forKey:element];
       }
@@ -142,12 +187,23 @@
   return self;
 }
 
+- (instancetype)initFromDataSource:(id<ASDataControllerSource>)dataSource
+{
+  static _ASHierarchyChangeSet *emptyChangeset;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    emptyChangeset = [[_ASHierarchyChangeSet alloc] init];
+    [emptyChangeset reloadData];
+  });
+  return [self initWithPreviousMap:[ASElementMap emptyElementMap] changeSet:emptyChangeset dataSource:dataSource];
+}
+
 #pragma mark - Helpers
 
 /**
  * Get a new ASCollectionElement of the given kind and index path from the data source.
  */
-+ (ASCollectionElement *)elementFromDataSource:(id<ASDataControllerSource>)dataSource ofKind:(NSString *)kind indexPath:(NSIndexPath *)indexPath environment:(id<ASTraitEnvironment>)environment
++ (ASCollectionElement *)elementFromDataController:(ASDataController *)dataController ofKind:(NSString *)kind indexPath:(NSIndexPath *)indexPath environment:(id<ASTraitEnvironment>)environment
 {
   ASCollectionElement *element;
   if ([kind isEqualToString:ASDataControllerRowNodeKind]) {

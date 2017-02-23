@@ -29,7 +29,7 @@ extern NSMutableArray<NSMutableArray *> *ASTwoDimensionalArrayDeepMutableCopy(NS
  * Deep mutable copy of multidimensional array.  This is completely generalized and supports copying mixed-depth arrays,
  * where some subarrays might contain both elements and other subarrays. It will recursively do the multiple copy for each subarray.
  */
-extern NSObject<NSCopying> *ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> *obj) AS_WARN_UNUSED_RESULT;
+extern __kindof id<NSCopying> ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> *obj) AS_WARN_UNUSED_RESULT;
 
 /**
  * Insert the elements into the mutable multidimensional array at given index paths.

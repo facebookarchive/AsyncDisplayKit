@@ -92,4 +92,15 @@
   return result;
 }
 
+- (NSArray<NSIndexPath *> *)as_filterIndexPathsBySection:(id<NSFastEnumeration>)indexPaths
+{
+  NSMutableArray *result = [NSMutableArray array];
+  for (NSIndexPath *indexPath in indexPaths) {
+    if ([self containsIndex:indexPath.section]) {
+      [result addObject:indexPath];
+    }
+  }
+  return result;
+}
+
 @end

@@ -93,7 +93,7 @@ static BOOL ASElementExistsAtIndexPathForMultidimensionalArray(NSArray *array, N
 
 #pragma mark - Public Methods
 
-NSObject<NSCopying> *ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> *obj)
+id<NSCopying> ASMultidimensionalArrayDeepMutableCopy(NSObject<NSCopying> *obj)
 {
   if ([obj isKindOfClass:[NSArray class]]) {
     NSArray *arr = (NSArray *)obj;
