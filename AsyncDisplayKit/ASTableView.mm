@@ -1442,7 +1442,39 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   LOG(@"--- UITableView beginUpdates");
   [super beginUpdates];
   
-  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
+    NSArray<NSIndexPath *> *indexPaths = change.indexPaths;
+    UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
+    
+    LOG(@"UITableView reloadRows:%ld rows", indexPaths.count);
+    BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
+    ASPerformBlockWithoutAnimation(preventAnimation, ^{
+      if (self.test_enableSuperUpdateCallLogging) {
+        NSLog(@"-[super reloadRowsAtIndexPaths]: %@", indexPaths);
+      }
+      [super reloadRowsAtIndexPaths:indexPaths withRowAnimation:animationOptions];
+    });
+    
+    numberOfUpdates++;
+  }
+  
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
+    NSIndexSet *sectionIndexes = change.indexSet;
+    UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
+    
+    LOG(@"UITableView reloadSections:%@", sectionIndexes);
+    BOOL preventAnimation = (animationOptions == UITableViewRowAnimationNone);
+    ASPerformBlockWithoutAnimation(preventAnimation, ^{
+      if (self.test_enableSuperUpdateCallLogging) {
+        NSLog(@"-[super reloadSections]: %@", sectionIndexes);
+      }
+      [super reloadSections:sectionIndexes withRowAnimation:animationOptions];
+    });
+    
+    numberOfUpdates++;
+  }
+  
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeOriginalDelete]) {
     NSArray<NSIndexPath *> *indexPaths = change.indexPaths;
     UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
     
@@ -1458,7 +1490,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     numberOfUpdates++;
   }
   
-  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeOriginalDelete]) {
     NSIndexSet *sectionIndexes = change.indexSet;
     UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
     
@@ -1474,7 +1506,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     numberOfUpdates++;
   }
   
-  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeOriginalInsert]) {
     NSIndexSet *sectionIndexes = change.indexSet;
     UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
     
@@ -1490,7 +1522,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     numberOfUpdates++;
   }
   
-  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeOriginalInsert]) {
     NSArray<NSIndexPath *> *indexPaths = change.indexPaths;
     UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
     
