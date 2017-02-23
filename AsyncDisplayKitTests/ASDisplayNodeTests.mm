@@ -1125,7 +1125,7 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
   DeclareNodeNamed(c);
   DeclareNodeNamed(d);
 
-  for (ASDisplayNode *n in @[parent, a, b, c]) {
+  for (ASDisplayNode *n in @[parent, a, b, c, d]) {
     n.layerBacked = isLayerBacked;
   }
 
