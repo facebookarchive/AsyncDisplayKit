@@ -1729,22 +1729,32 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
       
       __block NSUInteger numberOfUpdates = 0;
       [self _superPerformBatchUpdates:^{
-        for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
+        for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
+          [super reloadItemsAtIndexPaths:change.indexPaths];
+          numberOfUpdates++;
+        }
+        
+        for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
+          [super reloadSections:change.indexSet];
+          numberOfUpdates++;
+        }
+        
+        for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeOriginalDelete]) {
           [super deleteItemsAtIndexPaths:change.indexPaths];
           numberOfUpdates++;
         }
         
-        for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
+        for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeOriginalDelete]) {
           [super deleteSections:change.indexSet];
           numberOfUpdates++;
         }
         
-        for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
+        for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeOriginalInsert]) {
           [super insertSections:change.indexSet];
           numberOfUpdates++;
         }
         
-        for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
+        for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeOriginalInsert]) {
           [super insertItemsAtIndexPaths:change.indexPaths];
           numberOfUpdates++;
         }

@@ -512,6 +512,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     return;
   }
   
+  // TODO if the change set includes solely section reloads that together are equivalent to reloadData (i.e reload the only section),
+  // do a reloadData here as an optimization.
+  
   if (changeSet.includesReloadData) {
     [_sections removeAllObjects];
     
@@ -558,6 +561,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   ASDisplayNodeAssertMainThread();
   
   __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  
+  // TODO if the change set includes solely section reloads that together are equivalent to reloadData (i.e reload the only section),
+  // do a reloadData here as an optimization.
   
   if (changeSet.includesReloadData) {
     [_elements removeAllObjects];
