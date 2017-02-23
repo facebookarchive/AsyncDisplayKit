@@ -2255,7 +2255,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
   }
 
   ASDisplayNodeAssert(_flags.layerBacked, @"We shouldn't get called back here if there is no layer");
-  return nil;
+  return (id)kCFNull;
 }
 
 #pragma mark - Error Handling
