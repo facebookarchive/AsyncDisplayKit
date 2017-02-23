@@ -33,13 +33,13 @@
 #define RETURN_IF_NO_DATASOURCE(val) if (_dataSource == nil) { return val; }
 #define ASSERT_ON_EDITING_QUEUE ASDisplayNodeAssertNotNil(dispatch_get_specific(&kASDataControllerEditingQueueKey), @"%@ must be called on the editing transaction queue.", NSStringFromSelector(_cmd))
 
-#define ASNodeContextTwoDimensionalMutableArray  NSMutableArray<NSMutableArray<ASCollectionElement *> *>
-#define ASNodeContextTwoDimensionalArray         NSArray<NSArray<ASCollectionElement *> *>
+#define ASCollectionElementTwoDimensionalMutableArray  NSMutableArray<NSMutableArray<ASCollectionElement *> *>
+#define ASCollectionElementTwoDimensionalArray         NSArray<NSArray<ASCollectionElement *> *>
 
 // Dictionary with each entry is a pair of "kind" key and two dimensional array of elements
-#define ASNodeContextTwoDimensionalDictionary         NSDictionary<NSString *, ASNodeContextTwoDimensionalArray *>
+#define ASCollectionElementTwoDimensionalDictionary         NSDictionary<NSString *, ASCollectionElementTwoDimensionalArray *>
 // Mutable dictionary with each entry is a pair of "kind" key and two dimensional array of elements
-#define ASNodeContextTwoDimensionalMutableDictionary  NSMutableDictionary<NSString *, ASNodeContextTwoDimensionalMutableArray *>
+#define ASCollectionElementTwoDimensionalMutableDictionary  NSMutableDictionary<NSString *, ASCollectionElementTwoDimensionalMutableArray *>
 
 const static NSUInteger kASDataControllerSizingCountPerProcessor = 5;
 const static char * kASDataControllerEditingQueueKey = "kASDataControllerEditingQueueKey";
@@ -58,8 +58,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 #endif
 
 @interface ASDataController () {
-  ASNodeContextTwoDimensionalMutableDictionary *_elements;       // Main thread only. These are in the dataSource's index space.
-  ASNodeContextTwoDimensionalDictionary *_completedElements;        // Main thread only. These are in the UIKit's index space.
+  ASCollectionElementTwoDimensionalMutableDictionary *_elements;       // Main thread only. These are in the dataSource's index space.
+  ASCollectionElementTwoDimensionalDictionary *_completedElements;        // Main thread only. These are in the UIKit's index space.
   
   NSInteger _nextSectionID;
   NSMutableArray<ASSection *> *_sections;
@@ -478,7 +478,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   // Prepare loadingElements to be used in editing queue. Deep copy is critical here,
   // or future edits to the sub-arrays will pollute state between _elements
   // and _completedElements on different threads.
-  ASNodeContextTwoDimensionalDictionary *loadingElements = [ASDataController deepImmutableCopyOfElementsDictionary:_elements];
+  ASCollectionElementTwoDimensionalDictionary *loadingElements = [ASDataController deepImmutableCopyOfElementsDictionary:_elements];
   
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     // Step 2: Layout **all** new elements without batching in background.
@@ -757,7 +757,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   return [self _indexPathForNode:cellNode inContexts:_completedElements];
 }
 
-- (NSIndexPath *)_indexPathForNode:(ASCellNode *)cellNode inContexts:(ASNodeContextTwoDimensionalDictionary *)elements
+- (NSIndexPath *)_indexPathForNode:(ASCellNode *)cellNode inContexts:(ASCollectionElementTwoDimensionalDictionary *)elements
 {
   ASDisplayNodeAssertMainThread();
   if (cellNode == nil) {
@@ -765,7 +765,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
 
   NSString *kind = cellNode.supplementaryElementKind ?: ASDataControllerRowNodeKind;
-  ASNodeContextTwoDimensionalArray *sections = elements[kind];
+  ASCollectionElementTwoDimensionalArray *sections = elements[kind];
 
   // Check if the cached index path is still correct.
   NSIndexPath *indexPath = cellNode.cachedIndexPath;
@@ -799,7 +799,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (NSArray *)completedNodes
 {
   ASDisplayNodeAssertMainThread();
-  ASNodeContextTwoDimensionalArray *sections = _completedElements[ASDataControllerRowNodeKind];
+  ASCollectionElementTwoDimensionalArray *sections = _completedElements[ASDataControllerRowNodeKind];
   NSMutableArray<NSMutableArray<ASCellNode *> *> *completedNodes = [NSMutableArray arrayWithCapacity:sections.count];
   for (NSArray<ASCollectionElement *> *section in sections) {
     NSMutableArray<ASCellNode *> *nodesInSection = [NSMutableArray arrayWithCapacity:section.count];
@@ -846,19 +846,19 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 #pragma mark - elements dictionary
 
 //TODO Move this to somewhere else?
-+ (ASNodeContextTwoDimensionalDictionary *)deepImmutableCopyOfElementsDictionary:(ASNodeContextTwoDimensionalDictionary *)originalDict
++ (ASCollectionElementTwoDimensionalDictionary *)deepImmutableCopyOfElementsDictionary:(ASCollectionElementTwoDimensionalDictionary *)originalDict
 {
-  ASNodeContextTwoDimensionalMutableDictionary *deepCopy = [NSMutableDictionary dictionaryWithCapacity:originalDict.count];
-  [originalDict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, ASNodeContextTwoDimensionalArray * _Nonnull obj, BOOL * _Nonnull stop) {
-    deepCopy[kind] = (ASNodeContextTwoDimensionalMutableArray *)ASTwoDimensionalArrayDeepMutableCopy(obj);
+  ASCollectionElementTwoDimensionalMutableDictionary *deepCopy = [NSMutableDictionary dictionaryWithCapacity:originalDict.count];
+  [originalDict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, ASCollectionElementTwoDimensionalArray * _Nonnull obj, BOOL * _Nonnull stop) {
+    deepCopy[kind] = (ASCollectionElementTwoDimensionalMutableArray *)ASTwoDimensionalArrayDeepMutableCopy(obj);
   }];
   return deepCopy;
 }
 
-+ (NSArray<ASCollectionElement *> *)unloadedElementsFromDictionary:(ASNodeContextTwoDimensionalDictionary *)dict
++ (NSArray<ASCollectionElement *> *)unloadedElementsFromDictionary:(ASCollectionElementTwoDimensionalDictionary *)dict
 {
   NSMutableArray<ASCollectionElement *> *unloadedContexts = [NSMutableArray array];
-  [dict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, ASNodeContextTwoDimensionalArray * _Nonnull allSections, BOOL * _Nonnull stop) {
+  [dict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, ASCollectionElementTwoDimensionalArray * _Nonnull allSections, BOOL * _Nonnull stop) {
     [allSections enumerateObjectsUsingBlock:^(NSArray<ASCollectionElement *> * _Nonnull section, NSUInteger idx, BOOL * _Nonnull stop) {
       [section enumerateObjectsUsingBlock:^(ASCollectionElement * _Nonnull context, NSUInteger idx, BOOL * _Nonnull stop) {
         ASCellNode *node = context.nodeIfAllocated;
