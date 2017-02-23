@@ -10,52 +10,27 @@
 #import "ASCellNode.h"
 #import "ASCollectionLayout.h"
 #import "ASCollectionElement.h"
+#import "ASElementMap.h"
 #import "ASLayout.h"
+#import "ASRectTable.h"
 
 @interface ASCollectionLayout ()
-@property (nonatomic, strong) NSDictionary<NSString *, NSArray<NSArray<ASCollectionElement *> *> *> *elements;
-@property (nonatomic, strong) NSMapTable <ASCellNode *, NSValue *> *nodeToRectTable;
-@property (nonatomic, strong) NSMapTable <ASCellNode *, NSIndexPath *> *nodeToIndexPathTable;
-@property (nonatomic, strong) NSMapTable <ASCellNode *, NSString *> *nodeToElementKindTable;
-@property (nonatomic, strong) NSCache <ASCellNode *, UICollectionViewLayoutAttributes *> *nodeToAttributesCache;
+@property (nonatomic, strong, readonly) ASElementMap *map;
+@property (nonatomic, strong) ASRectTable<ASCollectionElement *> *frameTable;
+@property (nonatomic, strong) NSCache <ASCollectionElement *, UICollectionViewLayoutAttributes *> *elementToAttributesCache;
 @property (nonatomic) CGSize contentSize;
 @end
 
 @implementation ASCollectionLayout
 
-- (instancetype)initWithLayout:(ASLayout *)layout elements:(NSDictionary<NSString *, NSArray<NSArray<ASCollectionElement *> *> *> *)elements
+- (instancetype)initWithMap:(ASElementMap *)map size:(CGSize)contentSize frames:(ASRectTable<ASCollectionElement *> *)frames
 {
   ASDisplayNodeAssertNotMainThread();
   if (self = [super init]) {
-    // Not a 100% deep copy, but sufficient for now.
-    _elements = [[NSDictionary alloc] initWithDictionary:elements copyItems:YES];
-    _nodeToRectTable = [NSMapTable mapTableWithKeyOptions:(NSMapTableObjectPointerPersonality | NSMapTableWeakMemory) valueOptions:NSMapTableStrongMemory];
-    _nodeToAttributesCache = [[NSCache alloc] init];
-    _nodeToIndexPathTable = [NSMapTable mapTableWithKeyOptions:(NSMapTableObjectPointerPersonality | NSMapTableWeakMemory) valueOptions:NSMapTableStrongMemory];
-    _nodeToElementKindTable = [NSMapTable mapTableWithKeyOptions:(NSMapTableObjectPointerPersonality | NSMapTableWeakMemory) valueOptions:NSMapTableStrongMemory];
-    
-    [elements enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull elementKind, NSArray<NSArray<ASCollectionElement *> *> * _Nonnull sections, BOOL * _Nonnull stop) {
-      NSInteger s = 0;
-      for (NSArray *section in sections) {
-        NSInteger i = 0;
-        for (ASCollectionElement *element in section) {
-          ASCellNode *node = element.nodeIfAllocated;
-          ASDisplayNodeAssertNotNil(node, @"Expected all nodes to be allocated before joining a layout.");
-          [_nodeToElementKindTable setObject:elementKind forKey:node];
-          [_nodeToIndexPathTable setObject:[NSIndexPath indexPathForItem:i inSection:s] forKey:node];
-        }
-        i++;
-      }
-      s++;
-    }];
-    layout = [layout filteredNodeLayoutTree];
-    for (ASLayout *sublayout in layout.sublayouts) {
-      ASCellNode *node = ASDynamicCast(sublayout.layoutElement, ASCellNode);
-      if (node != nil) {
-        [_nodeToRectTable setObject:[NSValue valueWithCGRect:sublayout.frame] forKey:node];
-      }
-    }
-    _contentSize = layout.size;
+    _map = [map copy];
+    _frameTable = [frames copy];
+    _elementToAttributesCache = [[NSCache alloc] init];
+    _contentSize = contentSize;
   }
   return self;
 }
@@ -64,11 +39,13 @@
 
 - (nullable NSArray<__kindof UICollectionViewLayoutAttributes *> *)layoutAttributesForElementsInRect:(CGRect)rect
 {
+  ASDisplayNodeAssertMainThread();
+
   NSMutableArray<UICollectionViewLayoutAttributes *> *attrs = [NSMutableArray array];
-  for (ASCellNode *node in _nodeToRectTable) {
-    CGRect frame = [self frameForNode:node];
+  for (ASCollectionElement *element in _frameTable) {
+    CGRect frame = [self frameForElement:element];
     if (CGRectIntersectsRect(rect, frame)) {
-      UICollectionViewLayoutAttributes *layoutAttributes = [self layoutAttributesForNode:node];
+      UICollectionViewLayoutAttributes *layoutAttributes = [self layoutAttributesForElement:element];
       [attrs addObject:layoutAttributes];
     }
   }
@@ -82,41 +59,47 @@
 
 - (nullable UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASCellNode *node = _elements[ASDataControllerRowNodeKind][indexPath.section][indexPath.item].nodeIfAllocated;
-  return [self layoutAttributesForNode:node];
+  ASDisplayNodeAssertMainThread();
+
+  ASCollectionElement *element = [_map elementForItemAtIndexPath:indexPath];
+  return [self layoutAttributesForElement:element];
 }
 
 - (nullable UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
-  ASCellNode *node = _elements[elementKind][indexPath.section][indexPath.item].nodeIfAllocated;
-  return [self layoutAttributesForNode:node];
+  ASDisplayNodeAssertMainThread();
+
+  ASCollectionElement *element = [_map supplementaryElementOfKind:elementKind atIndexPath:indexPath];
+  return [self layoutAttributesForElement:element];
 }
 
 #pragma mark - Private
 
-- (UICollectionViewLayoutAttributes *)layoutAttributesForNode:(ASCellNode *)node
+- (UICollectionViewLayoutAttributes *)layoutAttributesForElement:(ASCollectionElement *)element
 {
-  UICollectionViewLayoutAttributes *result = [_nodeToAttributesCache objectForKey:node];
+  ASDisplayNodeAssertMainThread();
+
+  UICollectionViewLayoutAttributes *result = [_elementToAttributesCache objectForKey:element];
   if (result != nil) {
     return result;
   }
   
-  NSString *elementKind = [_nodeToElementKindTable objectForKey:node];
-  NSIndexPath *indexPath = [_nodeToIndexPathTable objectForKey:node];
+  NSIndexPath *indexPath = [_map indexPathForElement:element];
+  NSString *elementKind = element.supplementaryElementKind;
   if ([elementKind isEqualToString:ASDataControllerRowNodeKind]) {
     result = [UICollectionViewLayoutAttributes layoutAttributesForCellWithIndexPath:indexPath];
   } else {
     result = [UICollectionViewLayoutAttributes layoutAttributesForSupplementaryViewOfKind:elementKind withIndexPath:indexPath];
   }
-  result.frame = [self frameForNode:node];
-  [_nodeToAttributesCache setObject:result forKey:node];
+  result.frame = [self frameForElement:element];
+  [_elementToAttributesCache setObject:result forKey:element];
   
   return nil;
 }
 
-- (CGRect)frameForNode:(ASCellNode *)node
+- (CGRect)frameForElement:(ASCollectionElement *)element
 {
-  return [_nodeToRectTable objectForKey:node].CGRectValue;
+  return [_frameTable rectForKey:element];
 }
 
 #pragma mark - NSCopying

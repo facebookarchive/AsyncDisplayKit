@@ -323,6 +323,10 @@
 		CC3B208C1C3F7A5400798563 /* ASWeakSet.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20881C3F7A5400798563 /* ASWeakSet.m */; };
 		CC3B208E1C3F7D0A00798563 /* ASWeakSetTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */; };
 		CC3B20901C3F892D00798563 /* ASBridgedPropertiesTests.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B208F1C3F892D00798563 /* ASBridgedPropertiesTests.mm */; };
+		CC4243DD1E5E746300FD6517 /* ASElementMap.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4243DB1E5E746300FD6517 /* ASElementMap.h */; };
+		CC4243DE1E5E746300FD6517 /* ASElementMap.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4243DC1E5E746300FD6517 /* ASElementMap.m */; };
+		CC4243E11E5E7CF400FD6517 /* ASRectTable.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4243DF1E5E7CF400FD6517 /* ASRectTable.h */; };
+		CC4243E21E5E7CF400FD6517 /* ASRectTable.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4243E01E5E7CF400FD6517 /* ASRectTable.m */; };
 		CC4981B31D1A02BE004E13CC /* ASTableViewThrashTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4981B21D1A02BE004E13CC /* ASTableViewThrashTests.m */; };
 		CC4C2A771D88E3BF0039ACAB /* ASTraceEvent.h in Headers */ = {isa = PBXBuildFile; fileRef = CC4C2A751D88E3BF0039ACAB /* ASTraceEvent.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		CC4C2A791D88E3BF0039ACAB /* ASTraceEvent.m in Sources */ = {isa = PBXBuildFile; fileRef = CC4C2A761D88E3BF0039ACAB /* ASTraceEvent.m */; };
@@ -709,6 +713,10 @@
 		CC3B20881C3F7A5400798563 /* ASWeakSet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASWeakSet.m; sourceTree = "<group>"; };
 		CC3B208D1C3F7D0A00798563 /* ASWeakSetTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASWeakSetTests.m; sourceTree = "<group>"; };
 		CC3B208F1C3F892D00798563 /* ASBridgedPropertiesTests.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; lineEnding = 0; path = ASBridgedPropertiesTests.mm; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
+		CC4243DB1E5E746300FD6517 /* ASElementMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASElementMap.h; sourceTree = "<group>"; };
+		CC4243DC1E5E746300FD6517 /* ASElementMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASElementMap.m; sourceTree = "<group>"; };
+		CC4243DF1E5E7CF400FD6517 /* ASRectTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRectTable.h; sourceTree = "<group>"; };
+		CC4243E01E5E7CF400FD6517 /* ASRectTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASRectTable.m; sourceTree = "<group>"; };
 		CC4981B21D1A02BE004E13CC /* ASTableViewThrashTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTableViewThrashTests.m; sourceTree = "<group>"; };
 		CC4981BA1D1C7F65004E13CC /* NSIndexSet+ASHelpers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSIndexSet+ASHelpers.h"; sourceTree = "<group>"; };
 		CC4981BB1D1C7F65004E13CC /* NSIndexSet+ASHelpers.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSIndexSet+ASHelpers.m"; sourceTree = "<group>"; };
@@ -1132,6 +1140,10 @@
 		058D0A01195D050800B7D73C /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				CC4243DF1E5E7CF400FD6517 /* ASRectTable.h */,
+				CC4243E01E5E7CF400FD6517 /* ASRectTable.m */,
+				CC4243DB1E5E746300FD6517 /* ASElementMap.h */,
+				CC4243DC1E5E746300FD6517 /* ASElementMap.m */,
 				CC2F65E81E5D50AB00DA57C9 /* ASCollectionLayout.h */,
 				CC2F65E91E5D50AB00DA57C9 /* ASCollectionLayout.m */,
 				CC2F65E41E5D389D00DA57C9 /* ASCollectionViewLayout.h */,
@@ -1422,6 +1434,7 @@
 				68FC85E31CE29B7E00EDD713 /* ASTabBarController.h in Headers */,
 				B35061FA1B010EFD0018CF92 /* ASControlNode+Subclasses.h in Headers */,
 				B35061F81B010EFD0018CF92 /* ASControlNode.h in Headers */,
+				CC4243DD1E5E746300FD6517 /* ASElementMap.h in Headers */,
 				B35062171B010EFD0018CF92 /* ASDataController.h in Headers */,
 				34EFC75B1B701BAF00AD841F /* ASDimension.h in Headers */,
 				68FC85EA1CE29C7D00EDD713 /* ASVisibilityProtocols.h in Headers */,
@@ -1503,6 +1516,7 @@
 				69708BA61D76386D005C3CF9 /* ASEqualityHashHelpers.h in Headers */,
 				E5711A2C1C840C81009619D4 /* ASCollectionElement.h in Headers */,
 				6947B0BE1E36B4E30007C478 /* ASStackUnpositionedLayout.h in Headers */,
+				CC4243E11E5E7CF400FD6517 /* ASRectTable.h in Headers */,
 				CC4C2A771D88E3BF0039ACAB /* ASTraceEvent.h in Headers */,
 				254C6B7B1BF94DF4003EC431 /* ASTextKitRenderer+Positioning.h in Headers */,
 				DE4843DC1C93EAC100A1F33B /* ASLayoutTransition.h in Headers */,
@@ -1808,6 +1822,7 @@
 			files = (
 				DEB8ED7C1DD003D300DBDE55 /* ASLayoutTransition.mm in Sources */,
 				9F98C0261DBE29E000476D92 /* ASControlTargetAction.m in Sources */,
+				CC4243E21E5E7CF400FD6517 /* ASRectTable.m in Sources */,
 				9C70F2091CDABA36007D6C76 /* ASViewController.mm in Sources */,
 				8BBBAB8D1CEBAF1E00107FC6 /* ASDefaultPlaybackButton.m in Sources */,
 				B30BF6541C59D889004FCD53 /* ASLayoutManager.m in Sources */,
@@ -1876,6 +1891,7 @@
 				B35062541B010EFD0018CF92 /* ASImageNode+CGExtras.m in Sources */,
 				6947B0C01E36B4E30007C478 /* ASStackUnpositionedLayout.mm in Sources */,
 				68355B401CB57A69001D4E68 /* ASImageContainerProtocolCategories.m in Sources */,
+				CC4243DE1E5E746300FD6517 /* ASElementMap.m in Sources */,
 				B35062031B010EFD0018CF92 /* ASImageNode.mm in Sources */,
 				254C6B821BF94F8A003EC431 /* ASTextKitComponents.mm in Sources */,
 				34EFC7601B701C8B00AD841F /* ASInsetLayoutSpec.mm in Sources */,

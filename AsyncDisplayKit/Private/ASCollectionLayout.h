@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class ASLayout, ASCollectionElement;
+@class ASLayout, ASCollectionElement, ASElementMap, ASRectTable<KeyType>;
 
 /**
  * An immutable object representing a snapshot of the state of a layout,
@@ -20,7 +20,9 @@ NS_ASSUME_NONNULL_BEGIN
 AS_SUBCLASSING_RESTRICTED
 @interface ASCollectionLayout : NSObject <NSCopying>
 
-- (instancetype)initWithLayout:(ASLayout *)layout elements:(NSDictionary<NSString *, NSArray<NSArray<ASCollectionElement *> *> *> *)elements;
+- (instancetype)initWithMap:(ASElementMap *)map
+                       size:(CGSize)contentSize
+                     frames:(ASRectTable<ASCollectionElement *> *)frames;
 
 #pragma mark - UICollectionViewLayout Methods
 

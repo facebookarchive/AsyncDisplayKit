@@ -88,8 +88,8 @@
     return atomic_load(&canceled);
   };
   
-  // TODO: Copy node contexts from data controller
-  NSDictionary<NSString *, NSArray<NSArray<ASCollectionElement *> *> *> *elements = nil;
+  // TODO: Copy element map from data controller
+  ASElementMap *map = nil;
   
   // We enter the group when we schedule the work.
   dispatch_group_enter(workGroup);
@@ -102,7 +102,7 @@
      getLayoutFromNode:node
      cancelled:canceledBlock
      completion:^(ASLayout *layout) {
-       ASCollectionLayout *collectionLayout = [[ASCollectionLayout alloc] initWithLayout:layout elements:elements];
+       ASCollectionLayout *collectionLayout = [[ASCollectionLayout alloc] initWithMap:map size:layout.size frames:nil];
        // We got our layout, but we're still off-main. Enqueue back to main. Not worth checking canceled till we're in there.
        [_mainSerialQueue performBlockOnMainThread:^{
          if (!canceledBlock()) {
