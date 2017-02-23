@@ -1098,33 +1098,34 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
 
 - (void)testReplaceSubnodeNoView
 {
-  [self checkReplaceSubnodeWithView:NO layerBacked:NO];
+  [self checkReplaceSubnodeLoaded:NO layerBacked:NO];
 }
 
 - (void)testReplaceSubnodeNoLayer
 {
-  [self checkReplaceSubnodeWithView:NO layerBacked:YES];
+  [self checkReplaceSubnodeLoaded:NO layerBacked:YES];
 }
 
 - (void)testReplaceSubnodeView
 {
-  [self checkReplaceSubnodeWithView:YES layerBacked:NO];
+  [self checkReplaceSubnodeLoaded:YES layerBacked:NO];
 }
 
 - (void)testReplaceSubnodeLayer
 {
-  [self checkReplaceSubnodeWithView:YES layerBacked:YES];
+  [self checkReplaceSubnodeLoaded:YES layerBacked:YES];
 }
 
 
-- (void)checkReplaceSubnodeWithView:(BOOL)loaded layerBacked:(BOOL)isLayerBacked
+- (void)checkReplaceSubnodeLoaded:(BOOL)loaded layerBacked:(BOOL)isLayerBacked
 {
   DeclareNodeNamed(parent);
   DeclareNodeNamed(a);
   DeclareNodeNamed(b);
   DeclareNodeNamed(c);
+  DeclareNodeNamed(d);
 
-  for (ASDisplayNode *n in @[parent, a, b, c]) {
+  for (ASDisplayNode *n in @[parent, a, b, c, d]) {
     n.layerBacked = isLayerBacked;
   }
 
@@ -1136,7 +1137,6 @@ static inline BOOL _CGPointEqualToPointWithEpsilon(CGPoint point1, CGPoint point
     [parent layer];
   }
 
-  DeclareNodeNamed(d);
   if (loaded) {
     XCTAssertFalse(d.nodeLoaded, @"Should not yet be loaded");
   }

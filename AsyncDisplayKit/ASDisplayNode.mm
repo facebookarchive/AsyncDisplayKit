@@ -2543,6 +2543,11 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     return;
   }
   
+  if (self.layerBacked && !subnode.layerBacked) {
+    ASDisplayNodeFailAssert(@"Cannot add a view-backed node as a subnode of a layer-backed node. Supernode: %@, subnode: %@", self, subnode);
+    return;
+  }
+
   __instanceLock__.lock();
     NSUInteger subnodesCount = _subnodes.count;
   __instanceLock__.unlock();
@@ -3169,7 +3174,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     ASDisplayNodeAssert(_flags.synchronous == NO, @"Node created using -initWithViewBlock:/-initWithLayerBlock: cannot be added to subtree of node with shouldRasterizeDescendants=YES. Node: %@", self);
   }
   
-  // Entered or exited contents rendering state.
+  // Entered or exited range managed state.
   if ((newState & ASHierarchyStateRangeManaged) != (oldState & ASHierarchyStateRangeManaged)) {
     if (newState & ASHierarchyStateRangeManaged) {
       [self enterInterfaceState:self.supernode.interfaceState];
