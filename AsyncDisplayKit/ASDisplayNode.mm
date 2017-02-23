@@ -2552,7 +2552,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   }
   
   if (self.layerBacked && !subnode.layerBacked) {
-    ASDisplayNodeFailAssert(@"Cannot to add a view-backed node as a subnode of a layer-backed node. Supernode: %@, subnode: %@", self, subnode);
+    ASDisplayNodeFailAssert(@"Cannot add a view-backed node as a subnode of a layer-backed node. Supernode: %@, subnode: %@", self, subnode);
     return;
   }
 
