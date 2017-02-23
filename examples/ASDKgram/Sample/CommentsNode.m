@@ -96,6 +96,7 @@
   for (NSUInteger i = 0; i < numLabelsToAdd; i++) {
     
     ASTextNode *commentLabel   = [[ASTextNode alloc] init];
+    commentLabel.layerBacked = YES;
     commentLabel.maximumNumberOfLines = 3;
     
     [_commentNodes addObject:commentLabel];
