@@ -481,13 +481,12 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   ASCollectionElementTwoDimensionalMutableDictionary *mutableElements = [ASDataController deepMutableCopyOfElementsDictionary:_pendingElements];
   NSMutableArray *mutableSections = [_pendingSections mutableCopy];
   
-  // Step 1: update _completedSections and _elements.
-  // After this step, those properties are up-to-date with dataSource's index space.
+  // Step 1: update the mutable copies to match the data source's state
   [self _updateSectionContexts:mutableSections changeSet:changeSet];
   //TODO If _elements is the same, use a fast path
   [self _updateElements:mutableElements changeSet:changeSet];
   
-  // Clone the new data
+  // Step 2: Clone the new data
   ASCollectionElementTwoDimensionalDictionary *newElements = [ASDataController deepImmutableCopyOfElementsDictionary:mutableElements];
   NSArray *newSections = [mutableSections copy];
 
@@ -496,8 +495,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   _pendingSections = newSections;
   
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
-    // Step 2: Layout **all** new elements without batching in background.
-    // This step doesn't change any internal state.
+    // Step 3: Layout **all** new elements without batching in background.
     NSArray<ASCollectionElement *> *unloadedElements = [ASDataController unloadedElementsFromDictionary:newElements];
     // TODO layout in batches, esp reloads
     [self batchLayoutNodesFromContexts:unloadedElements batchSize:unloadedElements.count batchCompletion:^(id, id) {
@@ -505,11 +503,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       [_mainSerialQueue performBlockOnMainThread:^{
         [_delegate dataController:self willUpdateWithChangeSet:changeSet];
         
-        // Because loadingElements is immutable, it can be safely assigned to _loadElements instead of deep copied.
+        // Step 4: Deploy the new data as "completed" and inform delegate
         _completedElements = newElements;
         _completedSections = newSections;
-        
-        // Step 3: Now that _completedElements is ready, call delegate and then UICollectionView/UITableView to update using the original change set.
+
         [_delegate dataController:self didUpdateWithChangeSet:changeSet];
       }];
     }];
