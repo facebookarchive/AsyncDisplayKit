@@ -940,7 +940,7 @@ ASLayoutElementFinalLayoutElementDefault
     
     // If a current layout transition is in progress there is no need to do a measurement and layout pass in here as
     // this is supposed to happen within the layout transition process
-    if ([self _isTransitionInProgress]) {
+    if (_transitionInProgress) {
       return;
     }
     
@@ -1495,7 +1495,7 @@ ASLayoutElementFinalLayoutElementDefault
 - (void)cancelLayoutTransition
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if ([self _isTransitionInProgress]) {
+  if (_transitionInProgress) {
     // Cancel transition in progress
     [self _finishOrCancelTransition];
       
