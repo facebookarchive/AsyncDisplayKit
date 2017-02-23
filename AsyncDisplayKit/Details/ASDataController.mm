@@ -58,11 +58,14 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 #endif
 
 @interface ASDataController () {
-  ASCollectionElementTwoDimensionalMutableDictionary *_elements;       // Main thread only. These are in the dataSource's index space.
+
+  ASCollectionElementTwoDimensionalDictionary *_pendingElements;        // Main thread only. These are in the data source's index space
+  NSArray<ASSection *> *_pendingSections;
+
   ASCollectionElementTwoDimensionalDictionary *_completedElements;        // Main thread only. These are in the UIKit's index space.
-  
+  NSArray<ASSection *> *_completedSections;
+
   NSInteger _nextSectionID;
-  NSMutableArray<ASSection *> *_sections;
   
   BOOL _itemCountsFromDataSourceAreValid;     // Main thread only.
   std::vector<NSInteger> _itemCountsFromDataSource;         // Main thread only.
@@ -107,10 +110,12 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   _eventLog = eventLog;
 #endif
   
-  _elements = [NSMutableDictionary dictionary];
+  _pendingElements = @{};
+  _pendingSections = @[];
+  _completedElements = @{};
+  _completedSections = @[];
   
   _nextSectionID = 0;
-  _sections = [NSMutableArray array];
   
   _mainSerialQueue = [[ASMainSerialQueue alloc] init];
   
@@ -276,8 +281,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  * @param originalIndexPaths The index paths belongs to sections whose supplementary nodes need to be repopulated.
  * @param environment The trait environment needed to initialize elements
  */
-- (void)_repopulateSupplementaryNodesForAllSectionsContainingIndexPaths:(NSArray<NSIndexPath *> *)originalIndexPaths
-                                                            environment:(id<ASTraitEnvironment>)environment
+- (void)_repopulateSupplementaryNodesIntoDictionary:(ASCollectionElementTwoDimensionalMutableDictionary *)elements
+                    forSectionsContainingIndexPaths:(NSArray<NSIndexPath *> *)originalIndexPaths
+                                        environment:(id<ASTraitEnvironment>)environment
 {
   ASDisplayNodeAssertMainThread();
   
@@ -292,11 +298,11 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     // That way we are sure we removed all the old supplementaries, even if that kind isn't present anymore.
     
     // Step 1: Remove all existing elements of this kind in these sections
-    [_elements[kind] enumerateObjectsAtIndexes:sectionIndexes options:0 usingBlock:^(NSMutableArray<ASCollectionElement *> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
+    [elements[kind] enumerateObjectsAtIndexes:sectionIndexes options:0 usingBlock:^(NSMutableArray<ASCollectionElement *> * _Nonnull obj, NSUInteger idx, BOOL * _Nonnull stop) {
       [obj removeAllObjects];
     }];
     // Step 2: populate new elements for all index paths in these sections
-    [self _insertElementsOfKind:kind forSections:sectionIndexes environment:environment];
+    [self _insertElementsIntoDictionary:elements kind:kind forSections:sectionIndexes environment:environment];
   }
 }
 
@@ -307,9 +313,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  * @param sections The sections that should be populated by new elements
  * @param environment The trait environment needed to initialize elements
  */
-- (void)_insertElementsOfKind:(NSString *)kind
-                  forSections:(NSIndexSet *)sections
-                  environment:(id<ASTraitEnvironment>)environment
+- (void)_insertElementsIntoDictionary:(ASCollectionElementTwoDimensionalMutableDictionary *)elements
+                                 kind:(NSString *)kind
+                          forSections:(NSIndexSet *)sections
+                          environment:(id<ASTraitEnvironment>)environment
 {
   ASDisplayNodeAssertMainThread();
   
@@ -318,7 +325,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   NSArray<NSIndexPath *> *indexPaths = [self _allIndexPathsForItemsOfKind:kind inSections:sections];
-  [self _insertElementsOfKind:kind atIndexPaths:indexPaths environment:environment];
+  [self _insertElementsIntoDictionary:elements kind:kind atIndexPaths:indexPaths environment:environment];
 }
 
 /**
@@ -328,9 +335,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  * @param indexPaths The index paths at which new elements should be populated
  * @param environment The trait environment needed to initialize elements
  */
-- (void)_insertElementsOfKind:(NSString *)kind
-                     atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-                      environment:(id<ASTraitEnvironment>)environment
+- (void)_insertElementsIntoDictionary:(ASCollectionElementTwoDimensionalMutableDictionary *)elements
+                                 kind:(NSString *)kind
+                         atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+                          environment:(id<ASTraitEnvironment>)environment
 {
   ASDisplayNodeAssertMainThread();
   
@@ -345,7 +353,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   LOG(@"Populating elements of kind: %@, for index paths: %@", kind, indexPaths);
-  NSMutableArray<ASCollectionElement *> *elements = [NSMutableArray arrayWithCapacity:indexPaths.count];
+  NSMutableArray<ASCollectionElement *> *array = [NSMutableArray arrayWithCapacity:indexPaths.count];
   for (NSIndexPath *indexPath in indexPaths) {
     ASCellNodeBlock nodeBlock;
     if (isRowKind) {
@@ -355,13 +363,13 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     }
     
     ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
-    [elements addObject:[[ASCollectionElement alloc] initWithNodeBlock:nodeBlock
-                                               supplementaryElementKind:isRowKind ? nil : kind
-                                                        constrainedSize:constrainedSize
-                                                            environment:environment]];
+    [array addObject:[[ASCollectionElement alloc] initWithNodeBlock:nodeBlock
+                                           supplementaryElementKind:isRowKind ? nil : kind
+                                                    constrainedSize:constrainedSize
+                                                        environment:environment]];
   }
   
-  ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(_elements[kind], indexPaths, elements);
+  ASInsertElementsIntoMultidimensionalArrayAtIndexPaths(elements[kind], indexPaths, array);
 }
 
 - (void)invalidateDataSourceItemCounts
@@ -468,22 +476,29 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       @throw e;
     }
   }
+
+  // Mutable copy of current data.
+  ASCollectionElementTwoDimensionalMutableDictionary *mutableElements = [ASDataController deepMutableCopyOfElementsDictionary:_pendingElements];
+  NSMutableArray *mutableSections = [_pendingSections mutableCopy];
   
-  // Step 1: update _sections and _elements.
+  // Step 1: update _completedSections and _elements.
   // After this step, those properties are up-to-date with dataSource's index space.
-  [self _updateSectionContextsWithChangeSet:changeSet];
+  [self _updateSectionContexts:mutableSections changeSet:changeSet];
   //TODO If _elements is the same, use a fast path
-  [self _updateElementsWithChangeSet:changeSet];
+  [self _updateElements:mutableElements changeSet:changeSet];
   
-  // Prepare loadingElements to be used in editing queue. Deep copy is critical here,
-  // or future edits to the sub-arrays will pollute state between _elements
-  // and _completedElements on different threads.
-  ASCollectionElementTwoDimensionalDictionary *loadingElements = [ASDataController deepImmutableCopyOfElementsDictionary:_elements];
+  // Clone the new data
+  ASCollectionElementTwoDimensionalDictionary *newElements = [ASDataController deepImmutableCopyOfElementsDictionary:mutableElements];
+  NSArray *newSections = [mutableSections copy];
+
+  // Save the pending values as ivars
+  _pendingElements = newElements;
+  _pendingSections = newSections;
   
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     // Step 2: Layout **all** new elements without batching in background.
     // This step doesn't change any internal state.
-    NSArray<ASCollectionElement *> *unloadedElements = [ASDataController unloadedElementsFromDictionary:loadingElements];
+    NSArray<ASCollectionElement *> *unloadedElements = [ASDataController unloadedElementsFromDictionary:newElements];
     // TODO layout in batches, esp reloads
     [self batchLayoutNodesFromContexts:unloadedElements batchSize:unloadedElements.count batchCompletion:^(id, id) {
       ASSERT_ON_EDITING_QUEUE;
@@ -491,7 +506,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
         [_delegate dataController:self willUpdateWithChangeSet:changeSet];
         
         // Because loadingElements is immutable, it can be safely assigned to _loadElements instead of deep copied.
-        _completedElements = loadingElements;
+        _completedElements = newElements;
+        _completedSections = newSections;
         
         // Step 3: Now that _completedElements is ready, call delegate and then UICollectionView/UITableView to update using the original change set.
         [_delegate dataController:self didUpdateWithChangeSet:changeSet];
@@ -501,10 +517,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 }
 
 /**
- * Update _sections based on the given change set.
- * After this method returns, _sections will be up-to-date with dataSource.
+ * Update sections based on the given change set.
  */
-- (void)_updateSectionContextsWithChangeSet:(_ASHierarchyChangeSet *)changeSet
+- (void)_updateSectionContexts:(NSMutableArray<ASSection *> *)sections changeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
   
@@ -513,25 +528,25 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   if (changeSet.includesReloadData) {
-    [_sections removeAllObjects];
+    [sections removeAllObjects];
     
     NSUInteger sectionCount = [self itemCountsFromDataSource].size();
     NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-    [self _insertSectionContextsForSections:sectionIndexes];
+    [self _insertSectionContextsIntoArray:sections indexes:sectionIndexes];
     // Return immediately because reloadData can't be used in conjuntion with other updates.
     return;
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
-    [_sections removeObjectsAtIndexes:change.indexSet];
+    [sections removeObjectsAtIndexes:change.indexSet];
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertSectionContextsForSections:change.indexSet];
+    [self _insertSectionContextsIntoArray:sections indexes:change.indexSet];
   }
 }
 
-- (void)_insertSectionContextsForSections:(NSIndexSet *)sectionIndexes
+- (void)_insertSectionContextsIntoArray:(NSMutableArray<ASSection *> *)sections indexes:(NSIndexSet *)sectionIndexes
 {
   ASDisplayNodeAssertMainThread();
   
@@ -542,30 +557,27 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   [sectionIndexes enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL * _Nonnull stop) {
     id<ASSectionContext> context = [_dataSource dataController:self contextForSection:idx];
     ASSection *section = [[ASSection alloc] initWithSectionID:_nextSectionID context:context];
-    [_sections insertObject:section atIndex:idx];
+    [sections insertObject:section atIndex:idx];
     _nextSectionID++;
   }];
 }
 
 /**
- * Update _elements based on the given change set.
- * After this method returns, _elements will be up-to-date with dataSource's index space.
- *
- * @param changeSet The change set to be processed
+ * Update elements based on the given change set.
  */
-- (void)_updateElementsWithChangeSet:(_ASHierarchyChangeSet *)changeSet
+- (void)_updateElements:(ASCollectionElementTwoDimensionalMutableDictionary *)elements changeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
   
   __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   if (changeSet.includesReloadData) {
-    [_elements removeAllObjects];
+    [elements removeAllObjects];
     
     NSUInteger sectionCount = [self itemCountsFromDataSource].size();
     if (sectionCount > 0) {
       NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-      [self _insertElementsForSections:sectionIndexes environment:environment];
+      [self _insertElementsIntoDictionary:elements sections:sectionIndexes environment:environment];
     }
     // Return immediately because reloadData can't be used in conjuntion with other updates.
     return;
@@ -574,9 +586,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
     // FIXME: change.indexPaths is in descending order but ASDeleteElementsInMultidimensionalArrayAtIndexPaths() expects them to be in ascending order
     NSArray *sortedIndexPaths = [change.indexPaths sortedArrayUsingSelector:@selector(compare:)];
-    ASDeleteElementsInMultidimensionalArrayAtIndexPaths(_elements[ASDataControllerRowNodeKind], sortedIndexPaths);
+    ASDeleteElementsInMultidimensionalArrayAtIndexPaths(elements[ASDataControllerRowNodeKind], sortedIndexPaths);
     // Aggressively repopulate supplementary nodes (#1773 & #1629)
-    [self _repopulateSupplementaryNodesForAllSectionsContainingIndexPaths:change.indexPaths
+    [self _repopulateSupplementaryNodesIntoDictionary:elements forSectionsContainingIndexPaths:change.indexPaths
                                                               environment:environment];
   }
 
@@ -585,23 +597,25 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     NSMutableArray<NSString *> *kinds = [NSMutableArray arrayWithObject:ASDataControllerRowNodeKind];
     [kinds addObjectsFromArray:[self supplementaryKindsInSections:sectionIndexes]];
     for (NSString *kind in kinds) {
-      [_elements[kind] removeObjectsAtIndexes:sectionIndexes];
+      [elements[kind] removeObjectsAtIndexes:sectionIndexes];
     }
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertElementsForSections:change.indexSet environment:environment];
+    [self _insertElementsIntoDictionary:elements sections:change.indexSet environment:environment];
   }
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertElementsOfKind:ASDataControllerRowNodeKind atIndexPaths:change.indexPaths environment:environment];
+    [self _insertElementsIntoDictionary:elements kind:ASDataControllerRowNodeKind atIndexPaths:change.indexPaths environment:environment];
     // Aggressively reload supplementary nodes (#1773 & #1629)
-    [self _repopulateSupplementaryNodesForAllSectionsContainingIndexPaths:change.indexPaths
+    [self _repopulateSupplementaryNodesIntoDictionary:elements forSectionsContainingIndexPaths:change.indexPaths
                                                               environment:environment];
   }
 }
 
-- (void)_insertElementsForSections:(NSIndexSet *)originalSectionIndexes environment:(id<ASTraitEnvironment>)environment
+- (void)_insertElementsIntoDictionary:(ASCollectionElementTwoDimensionalMutableDictionary *)elements
+                             sections:(NSIndexSet *)originalSectionIndexes
+                          environment:(id<ASTraitEnvironment>)environment
 {
   ASDisplayNodeAssertMainThread();
   
@@ -615,10 +629,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   for (NSString *kind in kinds) {
     NSIndexSet *sectionIndexes = originalSectionIndexes;
     // Step 1: Ensure _elements has enough space for new elements
-    NSMutableArray *nodeContextsOfKind = _elements[kind];
+    NSMutableArray *nodeContextsOfKind = elements[kind];
     if (nodeContextsOfKind == nil) {
       nodeContextsOfKind = [NSMutableArray array];
-      _elements[kind] = nodeContextsOfKind;
+      elements[kind] = nodeContextsOfKind;
       
       // TODO If this is a new kind, agressively populate elements for all sections including ones that are not inside the originalSectionIndexes.
       if (sectionIndexes.lastIndex > 0) {
@@ -631,7 +645,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     }
     [nodeContextsOfKind insertObjects:sectionArray atIndexes:sectionIndexes];
     // Step 2: Populate new elements for all sections
-    [self _insertElementsOfKind:kind forSections:sectionIndexes environment:environment];
+    [self _insertElementsIntoDictionary:elements kind:kind forSections:sectionIndexes environment:environment];
   }
 }
 
@@ -694,13 +708,13 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (NSUInteger)numberOfSections
 {
   ASDisplayNodeAssertMainThread();
-  return [_elements[ASDataControllerRowNodeKind] count];
+  return [_pendingElements[ASDataControllerRowNodeKind] count];
 }
 
 - (NSUInteger)numberOfRowsInSection:(NSUInteger)section
 {
   ASDisplayNodeAssertMainThread();
-  NSArray *contextSections = _elements[ASDataControllerRowNodeKind];
+  NSArray *contextSections = _pendingElements[ASDataControllerRowNodeKind];
   return (section < contextSections.count) ? [contextSections[section] count] : 0;
 }
 
@@ -724,7 +738,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     return nil;
   }
   
-  ASCollectionElement *context = ASGetElementInTwoDimensionalArray(_elements[ASDataControllerRowNodeKind],
+  ASCollectionElement *context = ASGetElementInTwoDimensionalArray(_pendingElements[ASDataControllerRowNodeKind],
                                                                     indexPath);
   // Note: Node may not be allocated and laid out yet (e.g node virtualization or same size optimization)
   // In that case, calling context.node here will force an allocation
@@ -748,7 +762,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
 {
   ASDisplayNodeAssertMainThread();
-  return [self _indexPathForNode:cellNode inContexts:_elements];
+  return [self _indexPathForNode:cellNode inContexts:_pendingElements];
 }
 
 - (NSIndexPath *)completedIndexPathForNode:(ASCellNode *)cellNode
@@ -813,14 +827,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   return completedNodes;
 }
 
-- (void)moveCompletedNodeAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
-{
-  ASDisplayNodeAssertMainThread();
-  // TODO Revisit this after native move support. Need to update **both**
-  // _elements and _completedElements through a proper threading tunnel.
-  ASMoveElementInTwoDimensionalArray(_elements[ASDataControllerRowNodeKind], indexPath, newIndexPath);
-}
-
 #pragma mark - External supplementary store and section context querying
 
 - (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -839,14 +845,22 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (id<ASSectionContext>)contextForSection:(NSInteger)section
 {
   ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssertTrue(section >= 0 && section < _sections.count);
-  return _sections[section].context;
+  return _pendingSections[section].context;
 }
 
 #pragma mark - elements dictionary
 
 //TODO Move this to somewhere else?
 + (ASCollectionElementTwoDimensionalDictionary *)deepImmutableCopyOfElementsDictionary:(ASCollectionElementTwoDimensionalDictionary *)originalDict
+{
+  NSMutableDictionary *deepCopy = [NSMutableDictionary dictionaryWithCapacity:originalDict.count];
+  [originalDict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, ASCollectionElementTwoDimensionalArray * _Nonnull obj, BOOL * _Nonnull stop) {
+    deepCopy[kind] = [[NSArray alloc] initWithArray:obj copyItems:YES];
+  }];
+  return deepCopy;
+}
+
++ (ASCollectionElementTwoDimensionalMutableDictionary *)deepMutableCopyOfElementsDictionary:(ASCollectionElementTwoDimensionalDictionary *)originalDict
 {
   ASCollectionElementTwoDimensionalMutableDictionary *deepCopy = [NSMutableDictionary dictionaryWithCapacity:originalDict.count];
   [originalDict enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, ASCollectionElementTwoDimensionalArray * _Nonnull obj, BOOL * _Nonnull stop) {

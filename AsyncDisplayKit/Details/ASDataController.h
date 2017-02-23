@@ -211,14 +211,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
 
 - (nullable id<ASSectionContext>)contextForSection:(NSInteger)section;
 
-/**
- * Immediately move this item. This is called by ASTableView when the user has finished an interactive
- * item move and the table view is requesting a model update.
- * 
- * This must be called on the main thread.
- */
-- (void)moveCompletedNodeAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
-
 @end
 
 NS_ASSUME_NONNULL_END
