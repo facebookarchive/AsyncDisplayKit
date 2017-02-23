@@ -2245,7 +2245,7 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
 
 #pragma mark <CALayerDelegate>
 
-// We are only the delegate for the layer when we are layer-backed, as UIView performs this funcition normally
+// We are only the delegate for the layer when we are layer-backed, as UIView performs this function normally
 - (id<CAAction>)actionForLayer:(CALayer *)layer forKey:(NSString *)event
 {
   if (event == kCAOnOrderIn) {
@@ -2254,8 +2254,8 @@ static const char *ASDisplayNodeDrawingPriorityKey = "ASDrawingPriority";
     [self __exitHierarchy];
   }
 
-  ASDisplayNodeAssert(_flags.layerBacked, @"We shouldn't get called back here if there is no layer");
-  return (id)kCFNull;
+  ASDisplayNodeAssert(_flags.layerBacked, @"We shouldn't get called back here unless we are layer-backed.");
+  return nil;
 }
 
 #pragma mark - Error Handling
