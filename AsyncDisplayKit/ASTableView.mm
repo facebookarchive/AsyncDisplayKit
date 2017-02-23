@@ -128,6 +128,10 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   NSIndexPath *_pendingVisibleIndexPath;
 
+  // When we update our data controller in response to an interactive move,
+  // we don't want to tell the table view about the change (it knows!)
+  BOOL _updatingInResponseToInteractiveMove;
+
   // The top cell node that was visible before the update.
   __weak ASCellNode *_contentOffsetAdjustmentTopVisibleNode;
   // The y-offset of the top visible row's origin before the update.
@@ -903,8 +907,18 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (_asyncDataSourceFlags.tableViewMoveRow) {
     [_asyncDataSource tableView:self moveRowAtIndexPath:sourceIndexPath toIndexPath:destinationIndexPath];
   }
+
   // Move node after informing data source in case they call nodeAtIndexPath:
-  [_dataController moveCompletedNodeAtIndexPath:sourceIndexPath toIndexPath:destinationIndexPath];
+  // Get up to date
+  [self waitUntilAllUpdatesAreCommitted];
+  // Set our flag to suppress informing super about the change.
+  _updatingInResponseToInteractiveMove = YES;
+  // Submit the move
+  [self moveRowAtIndexPath:sourceIndexPath toIndexPath:destinationIndexPath];
+  // Wait for it to finish – should be fast!
+  [self waitUntilAllUpdatesAreCommitted];
+  // Clear the flag
+  _updatingInResponseToInteractiveMove = NO;
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
@@ -1417,7 +1431,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)rangeController:(ASRangeController *)rangeController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
-  if (!self.asyncDataSource) {
+  if (!self.asyncDataSource || _updatingInResponseToInteractiveMove) {
     [changeSet executeCompletionHandlerWithFinished:NO];
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
