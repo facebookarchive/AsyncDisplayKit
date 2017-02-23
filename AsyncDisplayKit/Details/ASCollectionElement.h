@@ -1,5 +1,5 @@
 //
-//  ASIndexedNodeContext.h
+//  ASCollectionElement.h
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 2/28/16.
@@ -15,20 +15,15 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ASIndexedNodeContext : NSObject
+AS_SUBCLASSING_RESTRICTED
+@interface ASCollectionElement : NSObject
 
-/**
- * The index path at which this node was originally inserted. Don't rely on this
- * property too heavily – we should remove it in the future.
- */
-@property (nonatomic, readonly, strong) NSIndexPath *indexPath;
 //TODO change this to be a generic "kind" or "elementKind" that exposes `nil` for row kind
 @property (nonatomic, readonly, copy, nullable) NSString *supplementaryElementKind;
 @property (nonatomic, assign) ASSizeRange constrainedSize;
 @property (weak, nonatomic) id<ASTraitEnvironment> traitEnvironment;
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
-                        indexPath:(NSIndexPath *)indexPath
          supplementaryElementKind:(nullable NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
                       environment:(id<ASTraitEnvironment>)environment;
@@ -43,8 +38,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @return The node, if the node block has been run already.
  */
 @property (strong, readonly, nullable) ASCellNode *nodeIfAllocated;
-
-+ (NSArray<NSIndexPath *> *)indexPathsFromContexts:(NSArray<ASIndexedNodeContext *> *)contexts;
 
 @end
 
