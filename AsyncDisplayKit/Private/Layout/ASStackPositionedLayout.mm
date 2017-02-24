@@ -38,7 +38,6 @@ static CGFloat crossOffsetForItem(const ASStackLayoutSpecItem &item,
   }
 }
 
-//TODO assert if violation is infinite (max size is infinite)
 static void crossOffsetAndSpacingForEachLine(const std::size_t numOfLines,
                                              const CGFloat crossViolation,
                                              ASStackLayoutAlignContent alignContent,
@@ -122,24 +121,21 @@ static void stackOffsetAndSpacingForEachItem(const std::size_t numOfItems,
   }
 }
 
-static void positionedLineItems(const std::vector<ASStackLayoutSpecItem> items,
+static void positionItemsInLine(const ASStackUnpositionedLine &line,
                                 const ASStackLayoutSpecStyle &style,
-                                const CGFloat stackOffset,
-                                const CGFloat stackSpacing,
-                                const CGFloat crossOffset,
-                                const CGFloat crossSize,
-                                const CGFloat baseline)
+                                const CGPoint &startingPoint,
+                                const CGFloat stackSpacing)
 {
-  CGPoint p = directionPoint(style.direction, stackOffset, crossOffset);
+  CGPoint p = startingPoint;
   BOOL first = YES;
   
-  for (const auto &item : items) {
+  for (const auto &item : line.items) {
     p = p + directionPoint(style.direction, item.child.style.spacingBefore, 0);
     if (!first) {
       p = p + directionPoint(style.direction, style.spacing + stackSpacing, 0);
     }
     first = NO;
-    item.layout.position = p + directionPoint(style.direction, 0, crossOffsetForItem(item, style, crossSize, baseline));
+    item.layout.position = p + directionPoint(style.direction, 0, crossOffsetForItem(item, style, line.crossSize, line.baseline));
     
     p = p + directionPoint(style.direction, stackDimension(style.direction, item.layout.size) + item.child.style.spacingAfter, 0);
   }
@@ -155,36 +151,36 @@ ASStackPositionedLayout ASStackPositionedLayout::compute(const ASStackUnposition
   }
   
   const auto numOfLines = lines.size();
+  const auto direction = style.direction;
   const auto alignContent = style.alignContent;
   const auto justifyContent = style.justifyContent;
   const auto crossViolation = ASStackUnpositionedLayout::computeCrossViolation(layout.crossDimensionSum, style, sizeRange);
-  //TODO Use CGPoint instead?
   CGFloat crossOffset;
   CGFloat crossSpacing;
   crossOffsetAndSpacingForEachLine(numOfLines, crossViolation, alignContent, crossOffset, crossSpacing);
   
   std::vector<ASStackLayoutSpecItem> positionedItems;
-  CGFloat currentCrossOffset = crossOffset;
+  CGPoint p = directionPoint(direction, 0, crossOffset);
   BOOL first = YES;
   for (const auto &line : lines) {
+    if (!first) {
+      p = p + directionPoint(direction, 0, crossSpacing);
+    }
+    first = NO;
+    
     const auto &items = line.items;
     const auto stackViolation = ASStackUnpositionedLayout::computeStackViolation(line.stackDimensionSum, style, sizeRange);
-    
     CGFloat stackOffset;
     CGFloat stackSpacing;
     stackOffsetAndSpacingForEachItem(items.size(), stackViolation, justifyContent, stackOffset, stackSpacing);
     
-    if (!first) {
-      currentCrossOffset += crossSpacing;
-    }
-    first = NO;
-    
-    positionedLineItems(items, style, stackOffset, stackSpacing, currentCrossOffset, line.crossSize, line.baseline);
+    setStackValueToPoint(direction, stackOffset, p);
+    positionItemsInLine(line, style, p, stackSpacing);
     std::move(items.begin(), items.end(), std::back_inserter(positionedItems));
     
-    currentCrossOffset += line.crossSize;
+    p = p + directionPoint(direction, -stackOffset, line.crossSize);
   }
 
-  const CGSize finalSize = directionSize(style.direction, layout.stackDimensionSum, layout.crossDimensionSum);
+  const CGSize finalSize = directionSize(direction, layout.stackDimensionSum, layout.crossDimensionSum);
   return {std::move(positionedItems), ASSizeRangeClamp(sizeRange, finalSize)};
 }
