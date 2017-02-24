@@ -145,7 +145,7 @@ typedef NSDictionary<NSString *, NSDictionary<NSIndexPath *, ASCollectionElement
   return self;
 }
 
-// NSMutabeCopying conformance is declared in ASMutableElementMap.h, so that most consumers of ASElementMap don't bother with it.
+// NSMutableCopying conformance is declared in ASMutableElementMap.h, so that most consumers of ASElementMap don't bother with it.
 #pragma mark - NSMutableCopying
 
 - (id)mutableCopyWithZone:(NSZone *)zone

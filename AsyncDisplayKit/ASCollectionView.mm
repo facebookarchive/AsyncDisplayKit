@@ -606,11 +606,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   return [[self nodeForItemAtIndexPath:indexPath] calculatedSize];
 }
 
-- (ASElementMap *)elementMapForRangeController:(ASRangeController *)rangeController
-{
-  return _dataController.visibleMap;
-}
-
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   return [_dataController.visibleMap elementForItemAtIndexPath:indexPath].node;
@@ -627,8 +622,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   if (indexPath.item == NSNotFound) {
     return indexPath;
   } else {
-    id element = [_dataController.pendingMap elementForItemAtIndexPath:indexPath];
-    NSIndexPath *viewIndexPath = [_dataController.visibleMap indexPathForElement:element];
+    NSIndexPath *viewIndexPath = [_dataController.visibleMap convertIndexPath:indexPath fromMap:_dataController.pendingMap];
     if (viewIndexPath == nil && wait) {
       [self waitUntilAllUpdatesAreCommitted];
       return [self convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:NO];
@@ -1652,6 +1646,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
   BOOL isZeroSized = CGSizeEqualToSize(self.bounds.size, CGSizeZero);
   return isZeroSized ? @[] : [self indexPathsForVisibleItems];
+}
+
+- (ASElementMap *)elementMapForRangeController:(ASRangeController *)rangeController
+{
+  return _dataController.visibleMap;
 }
 
 - (ASScrollDirection)scrollDirectionForRangeController:(ASRangeController *)rangeController
