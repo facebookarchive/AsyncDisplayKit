@@ -514,7 +514,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   
     {
       ASDN::MutexLocker l(__instanceLock__);
-      if ([_URL isEqual:url]) {
+      if (ASObjectIsEqual(_URL, url)) {
         // The download we kicked off is correct, no need to do any more work.
         _downloadIdentifier = downloadIdentifier;
       } else {
