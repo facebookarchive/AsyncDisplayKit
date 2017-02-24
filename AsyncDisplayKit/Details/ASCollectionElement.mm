@@ -52,8 +52,8 @@
       ASDisplayNodeFailAssert(@"Node block returned nil node!");
       node = [[ASCellNode alloc] init];
     }
-    node.supplementaryElementKind = _supplementaryElementKind;
     node.owningNode = (ASDisplayNode *)_traitEnvironment;
+    node.collectionElement = self;
     ASTraitCollectionPropagateDown(node, [_traitEnvironment primitiveTraitCollection]);
     _node = node;
   }

@@ -14,6 +14,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class ASCollectionElement;
+
 @protocol ASCellNodeInteractionDelegate <NSObject>
 
 /**
@@ -58,10 +60,7 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, strong, nullable) UICollectionViewLayoutAttributes *layoutAttributes;
 
-/// readwrite variant of the readonly public property.
-@property (nonatomic, copy, nullable) NSString *supplementaryElementKind;
-
-@property (nonatomic, copy, nullable) NSIndexPath *cachedIndexPath;
+@property (weak, nullable) ASCollectionElement *collectionElement;
 
 @property (nonatomic, weak, nullable) ASDisplayNode *owningNode;
 

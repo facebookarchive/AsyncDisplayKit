@@ -25,4 +25,6 @@
 /// Returns all the section indexes contained in the index paths array.
 + (NSIndexSet *)as_sectionsFromIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
 
+- (NSArray<NSIndexPath *> *)as_filterIndexPathsBySection:(id<NSFastEnumeration>)indexPaths;
+
 @end
