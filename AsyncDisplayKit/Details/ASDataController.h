@@ -112,6 +112,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
  * will be updated asynchronously. The dataSource must be updated to reflect the changes before these methods has been called.
  * For each data updating, the corresponding methods in delegate will be called.
  */
+AS_SUBCLASSING_RESTRICTED
 @interface ASDataController : NSObject
 
 - (instancetype)initWithDataSource:(id<ASDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
