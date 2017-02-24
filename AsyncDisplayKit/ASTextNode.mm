@@ -477,7 +477,11 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
   
   // Draw text
-  [renderer drawInContext:context bounds:drawParameterBounds];
+  [renderer drawInContext:context bounds:drawParameterBounds completion:^{
+    if ([_delegate respondsToSelector:@selector(textNodeDidRender:)]) {
+      [_delegate textNodeDidRender:self];
+    }
+  }];
   
   CGContextRestoreGState(context);
 }

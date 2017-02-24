@@ -278,6 +278,13 @@ typedef NS_ENUM(NSUInteger, ASTextNodeHighlightStyle) {
  */
 - (BOOL)textNode:(ASTextNode *)textNode shouldLongPressLinkAttribute:(NSString *)attribute value:(id)value atPoint:(CGPoint)point;
 
+/**
+ @abstract Indicates to the delegate that the rendering has finished
+ @param textNode The text node containing the entity attribute.
+ @discussion User can access text node to check the rendering result
+ */
+- (void)textNodeDidRender:(ASTextNode *)textNode;
+
 @end
 
 @interface ASTextNode (Unavailable)
