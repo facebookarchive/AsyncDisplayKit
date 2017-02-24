@@ -19,10 +19,11 @@
 #import <vector>
 
 #define ASRunLoopQueueLoggingEnabled 0
+#define ASRunLoopQueueVerboseLoggingEnabled 0
 
 static void runLoopSourceCallback(void *info) {
   // No-op
-#if ASRunLoopQueueLoggingEnabled
+#if ASRunLoopQueueVerboseLoggingEnabled
   NSLog(@"<%@> - Called runLoopSourceCallback", info);
 #endif
 }
@@ -65,17 +66,18 @@ static void runLoopSourceCallback(void *info) {
     // 100ms timer.  No resources are wasted in between, as the thread sleeps, and each check is fast.
     // This time is fast enough for most use cases without excessive churn.
     CFRunLoopTimerRef timer = CFRunLoopTimerCreateWithHandler(NULL, -1, 0.1, 0, 0, ^(CFRunLoopTimerRef timer) {
+      weakSelf->_queueLock.lock();
+      if (weakSelf->_queue.size() == 0) {
+        weakSelf->_queueLock.unlock();
+        return;
+      }
+      // The scope below is entered while already locked. @autorelease is crucial here; see PR 2890.
       @autoreleasepool {
 #if ASRunLoopQueueLoggingEnabled
-        NSLog(@"ASDeallocQueue Processing: %d objects destroyed", weakSelf->_queue.size());
+        NSLog(@"ASDeallocQueue Processing: %lu objects destroyed", weakSelf->_queue.size());
 #endif
-        weakSelf->_queueLock.lock();
-        std::deque<id> currentQueue = weakSelf->_queue;
-        if (currentQueue.size() == 0) {
-          weakSelf->_queueLock.unlock();
-          return;
-        }
         // Sometimes we release 10,000 objects at a time.  Don't hold the lock while releasing.
+        std::deque<id> currentQueue = weakSelf->_queue;
         weakSelf->_queue = std::deque<id>();
         weakSelf->_queueLock.unlock();
         currentQueue.clear();
@@ -262,9 +264,17 @@ static void runLoopSourceCallback(void *info) {
   }
 
   // itemsToProcess will be empty if _queueConsumer == nil so no need to check again.
-  auto itemsEnd = itemsToProcess.cend();
-  for (auto iterator = itemsToProcess.begin(); iterator < itemsEnd; iterator++) {
-    _queueConsumer(*iterator, isQueueDrained && iterator == itemsEnd - 1);
+  if (itemsToProcess.empty() == false) {
+#if ASRunloopQueueLoggingEnabled
+    NSLog(@"<%@> - Starting processing of: %ld", self, itemsToProcess.size());
+#endif
+    auto itemsEnd = itemsToProcess.cend();
+    for (auto iterator = itemsToProcess.begin(); iterator < itemsEnd; iterator++) {
+      _queueConsumer(*iterator, isQueueDrained && iterator == itemsEnd - 1);
+#if ASRunloopQueueLoggingEnabled
+      NSLog(@"<%@> - Finished processing 1 item", self);
+#endif
+    }
   }
 
   // If the queue is not fully drained yet force another run loop to process next batch of items
