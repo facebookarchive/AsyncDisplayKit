@@ -60,18 +60,19 @@
   NSInteger arrayCount = array.count;
   
   // Allocate the diff map in the heap so we don't blow the stack for large arrays.
-  NSInteger (*lengths)[arrayCount+1] = NULL;
-  size_t lengthsSize = ((selfCount+1) * sizeof(*lengths));
-  // Would rather use initWithCapacity: to skip the zeroing, but TECHNICALLY
-  // `mutableBytes` is only guaranteed to be non-NULL if the data object has a non-zero length.
-  NS_VALID_UNTIL_END_OF_SCOPE NSMutableData *lengthsData = [[NSMutableData alloc] initWithLength:lengthsSize];
-  lengths = lengthsData.mutableBytes;
+  NSInteger **lengths = NULL;
+  lengths = (NSInteger **)malloc(sizeof(NSInteger*) * (selfCount+1));
   if (lengths == NULL) {
-    ASDisplayNodeFailAssert(@"Failed to allocate memory for diffing with size %tu", lengthsSize);
+    ASDisplayNodeFailAssert(@"Failed to allocate memory for diffing");
     return nil;
   }
   
   for (NSInteger i = 0; i <= selfCount; i++) {
+    lengths[i] = (NSInteger *)malloc(sizeof(NSInteger) * (arrayCount+1));
+    if (lengths[i] == NULL) {
+      ASDisplayNodeFailAssert(@"Failed to allocate memory for diffing");
+      return nil;
+    }
     id selfObj = i > 0 ? self[i-1] : nil;
     for (NSInteger j = 0; j <= arrayCount; j++) {
       if (i == 0 || j == 0) {
@@ -96,7 +97,11 @@
       j--;
     }
   }
-  
+
+  for (NSInteger i = 0; i <= selfCount; i++) {
+    free(lengths[i]);
+  }
+  free(lengths);
   return common;
 }
 

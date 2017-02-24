@@ -79,6 +79,7 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  *
  * @return The supplementary element kind, or @c nil if this node does not represent a supplementary element.
  */
+//TODO change this to be a generic "kind" or "elementKind" that exposes `nil` for row kind
 @property (nonatomic, copy, readonly, nullable) NSString *supplementaryElementKind;
 
 /*
@@ -168,6 +169,12 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
  */
 @property (nonatomic) UITableViewCellSelectionStyle selectionStyle;
+
+/* @abstract The view used as the background of the cell when it is selected.
+ * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
+ * ASCollectionView uses these properties when configuring UICollectionViewCells that host ASCellNodes.
+ */
+@property (nonatomic, strong, nullable) UIView *selectedBackgroundView;
 
 /* @abstract The accessory type view on the right side of the cell. Please take care of your ASLayoutSpec so that doesn't overlay the accessoryView
  * @default UITableViewCellAccessoryNone

@@ -232,8 +232,8 @@ NS_ASSUME_NONNULL_BEGIN
 /** @name Observing node state changes */
 
 /**
-  * Declare <ASInterfaceState> methods as requiring super calls (this can't be required in the protocol).
-  * For descriptions, see <ASInterfaceState> definition.
+  * Declare <ASInterfaceStateDelegate> methods as requiring super calls (this can't be required in the protocol).
+  * For descriptions, see <ASInterfaceStateDelegate> definition.
   */
 
 - (void)didEnterVisibleState ASDISPLAYNODE_REQUIRES_SUPER;

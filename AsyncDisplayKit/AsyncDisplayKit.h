@@ -88,7 +88,6 @@
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
 #import <AsyncDisplayKit/ASHighlightOverlayLayer.h>
-#import <AsyncDisplayKit/ASIndexPath.h>
 #import <AsyncDisplayKit/ASImageContainerProtocolCategories.h>
 #import <AsyncDisplayKit/ASLog.h>
 #import <AsyncDisplayKit/ASMutableAttributedStringBuilder.h>
@@ -107,6 +106,7 @@
 #import <AsyncDisplayKit/UIImage+ASConvenience.h>
 #import <AsyncDisplayKit/NSArray+Diffing.h>
 #import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
+#import <AsyncDisplayKit/UIResponder+AsyncDisplayKit.h>
 
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
 #import <AsyncDisplayKit/ASDisplayNode+Deprecated.h>

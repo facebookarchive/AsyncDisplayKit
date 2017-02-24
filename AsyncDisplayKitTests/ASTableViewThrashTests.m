@@ -263,7 +263,7 @@ static volatile int32_t ASThrashTestSectionNextID = 1;
 - (ASCellNode *)tableView:(ASTableView *)tableView nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   ASThrashTestNode *node = [[ASThrashTestNode alloc] init];
-  node.item = self.data[indexPath.section].items[indexPath.item];;
+  node.item = self.data[indexPath.section].items[indexPath.item];
   [self.allNodes addObject:node];
   return node;
 }

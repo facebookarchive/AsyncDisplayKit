@@ -90,9 +90,9 @@ static NSString * const kRate = @"rate";
 
 #pragma mark - Construction and Layout
 
-- (instancetype)init
+- (instancetype)initWithCache:(id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader
 {
-  if (!(self = [super init])) {
+  if (!(self = [super initWithCache:cache downloader:downloader])) {
     return nil;
   }
 

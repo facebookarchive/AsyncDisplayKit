@@ -16,6 +16,7 @@
 #import <AsyncDisplayKit/ASBaseDefines.h>
 #import <AsyncDisplayKit/ASDimension.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 #import <AsyncDisplayKit/ASLayoutElement.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -54,6 +55,12 @@ typedef void (^ASDisplayNodeContextModifier)(CGContextRef context);
  * ASDisplayNode layout spec block. This block can be used instead of implementing layoutSpecThatFits: in subclass
  */
 typedef ASLayoutSpec * _Nonnull(^ASLayoutSpecBlock)(__kindof ASDisplayNode * _Nonnull node, ASSizeRange constrainedSize);
+
+/**
+ * AsyncDisplayKit non-fatal error block. This block can be used for handling non-fatal errors. Useful for reporting
+ * errors that happens in production.
+ */
+typedef void (^ASDisplayNodeNonFatalErrorBlock)(__kindof NSError * _Nonnull error);
 
 /**
  * Interface state is available on ASDisplayNode and ASViewController, and
@@ -251,6 +258,16 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @see ASInterfaceState
  */
 @property (readonly) ASInterfaceState interfaceState;
+
+/**
+ * @abstract Class property that allows to set a block that can be called on non-fatal errors. This
+ * property can be useful for cases when Async Display Kit can recover from an abnormal behavior, but
+ * still gives the opportunity to use a reporting mechanism to catch occurrences in production. In
+ * development, Async Display Kit will assert instead of calling this block.
+ *
+ * @warning This method is not thread-safe.
+ */
+@property (nonatomic, class, copy) ASDisplayNodeNonFatalErrorBlock nonFatalErrorBlock;
 
 
 /** @name Managing dimensions */
@@ -558,7 +575,7 @@ extern NSInteger const ASDefaultDrawingPriority;
 /**
  * Convenience methods for debugging.
  */
-@interface ASDisplayNode (Debugging) <ASLayoutElementAsciiArtProtocol>
+@interface ASDisplayNode (Debugging) <ASLayoutElementAsciiArtProtocol, ASDebugNameProvider>
 
 /**
  * @abstract Return a description of the node hierarchy.

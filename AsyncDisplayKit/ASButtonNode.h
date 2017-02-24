@@ -66,19 +66,19 @@ typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
 /**
  *  Returns the styled title associated with the specified state.
  *
- *  @param state The state that uses the styled title. The possible values are described in ASControlState.
+ *  @param state The control state that uses the styled title.
  *
  *  @return The title for the specified state.
  */
-- (NSAttributedString * _Nullable)attributedTitleForState:(ASControlState)state AS_WARN_UNUSED_RESULT;
+- (nullable NSAttributedString *)attributedTitleForState:(UIControlState)state AS_WARN_UNUSED_RESULT;
 
 /**
  *  Sets the styled title to use for the specified state. This will reset styled title previously set with -setTitle:withFont:withColor:forState.
  *
  *  @param title The styled text string to use for the title.
- *  @param state The state that uses the specified title. The possible values are described in ASControlState.
+ *  @param state The control state that uses the specified title.
  */
-- (void)setAttributedTitle:(nullable NSAttributedString *)title forState:(ASControlState)state;
+- (void)setAttributedTitle:(nullable NSAttributedString *)title forState:(UIControlState)state;
 
 #if TARGET_OS_IOS
 /**
@@ -87,44 +87,44 @@ typedef NS_ENUM(NSInteger, ASButtonNodeImageAlignment) {
  *  @param title The styled text string to use for the title.
  *  @param font The font to use for the title.
  *  @param color The color to use for the title.
- *  @param state The state that uses the specified title. The possible values are described in ASControlState.
+ *  @param state The control state that uses the specified title.
  */
-- (void)setTitle:(NSString *)title withFont:(nullable UIFont *)font withColor:(nullable UIColor *)color forState:(ASControlState)state;
+- (void)setTitle:(NSString *)title withFont:(nullable UIFont *)font withColor:(nullable UIColor *)color forState:(UIControlState)state;
 #endif
 /**
  *  Returns the image used for a button state.
  *
- *  @param state The state that uses the image. Possible values are described in ASControlState.
+ *  @param state The control state that uses the image.
  *
  *  @return The image used for the specified state.
  */
-- (nullable UIImage *)imageForState:(ASControlState)state AS_WARN_UNUSED_RESULT;
+- (nullable UIImage *)imageForState:(UIControlState)state AS_WARN_UNUSED_RESULT;
 
 /**
  *  Sets the image to use for the specified state.
  *
  *  @param image The image to use for the specified state.
- *  @param state The state that uses the specified title. The values are described in ASControlState.
+ *  @param state The control state that uses the specified title.
  */
-- (void)setImage:(nullable UIImage *)image forState:(ASControlState)state;
+- (void)setImage:(nullable UIImage *)image forState:(UIControlState)state;
 
 /**
  *  Sets the background image to use for the specified state.
  *
  *  @param image The image to use for the specified state.
- *  @param state The state that uses the specified title. The values are described in ASControlState.
+ *  @param state The control state that uses the specified title.
  */
-- (void)setBackgroundImage:(nullable UIImage *)image forState:(ASControlState)state;
+- (void)setBackgroundImage:(nullable UIImage *)image forState:(UIControlState)state;
 
 
 /**
  *  Returns the background image used for a button state.
  *
- *  @param state The state that uses the image. Possible values are described in ASControlState.
+ *  @param state The control state that uses the image.
  *
  *  @return The background image used for the specified state.
  */
-- (nullable UIImage *)backgroundImageForState:(ASControlState)state AS_WARN_UNUSED_RESULT;
+- (nullable UIImage *)backgroundImageForState:(UIControlState)state AS_WARN_UNUSED_RESULT;
 
 @end
 

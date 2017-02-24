@@ -95,15 +95,6 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 
 - (instancetype)initWithOldData:(std::vector<NSInteger>)oldItemCounts NS_DESIGNATED_INITIALIZER;
 
-
-/**
- * The combined completion handler.
- *
- * @warning The completion block is discarded after reading because it may have captured
- *   significant resources that we would like to reclaim as soon as possible.
- */
-@property (nonatomic, copy, readonly, nullable) void(^completionHandler)(BOOL finished);
-
 /**
  * Append the given completion handler to the combined @c completionHandler.
  *
@@ -113,6 +104,14 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
  * @precondition The change set must not be completed.
  */
 - (void)addCompletionHandler:(nullable void(^)(BOOL finished))completion;
+
+/**
+ * Execute the combined completion handler.
+ *
+ * @warning The completion block is discarded after reading because it may have captured
+ *   significant resources that we would like to reclaim as soon as possible.
+ */
+- (void)executeCompletionHandlerWithFinished:(BOOL)finished;
 
 /// @precondition The change set must be completed.
 @property (nonatomic, strong, readonly) NSIndexSet *deletedSections;
@@ -128,6 +127,10 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 - (NSUInteger)newSectionForOldSection:(NSUInteger)oldSection;
 
 @property (nonatomic, readonly) BOOL completed;
+/// Whether or not changes should be animated.
+// TODO: if any update in this chagne set is non-animated, the whole update should be non-animated.
+@property (nonatomic, readwrite) BOOL animated;
+@property (nonatomic, readonly) BOOL includesReloadData;
 
 /// Call this once the change set has been constructed to prevent future modifications to the changeset. Calling this more than once is a programmer error.
 /// NOTE: Calling this method will cause the changeset to convert all reloads into delete/insert pairs.
@@ -139,6 +142,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 /// Returns all item indexes affected by changes of the given type in the given section.
 - (NSIndexSet *)indexesForItemChangesOfType:(_ASHierarchyChangeType)changeType inSection:(NSUInteger)section;
 
+- (void)reloadData;
 - (void)deleteSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)insertSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;
 - (void)reloadSections:(NSIndexSet *)sections animationOptions:(ASDataControllerAnimationOptions)options;

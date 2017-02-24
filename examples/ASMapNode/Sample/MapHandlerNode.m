@@ -65,18 +65,18 @@
                                                                              borderColor:[UIColor lightGrayColor]
                                                                              borderWidth:2.0];
   
-  [_updateRegionButton setBackgroundImage:backgroundImage forState:ASControlStateNormal];
-  [_updateRegionButton setBackgroundImage:backgroundHiglightedImage forState:ASControlStateHighlighted];
+  [_updateRegionButton setBackgroundImage:backgroundImage forState:UIControlStateNormal];
+  [_updateRegionButton setBackgroundImage:backgroundHiglightedImage forState:UIControlStateHighlighted];
   
-  [_liveMapToggleButton setBackgroundImage:backgroundImage forState:ASControlStateNormal];
-  [_liveMapToggleButton setBackgroundImage:backgroundHiglightedImage forState:ASControlStateHighlighted];
+  [_liveMapToggleButton setBackgroundImage:backgroundImage forState:UIControlStateNormal];
+  [_liveMapToggleButton setBackgroundImage:backgroundHiglightedImage forState:UIControlStateHighlighted];
   
   _updateRegionButton.contentEdgeInsets = UIEdgeInsetsMake(5, 5, 5, 5);
-  [_updateRegionButton setTitle:@"Update Region" withFont:nil withColor:[UIColor blueColor] forState:ASControlStateNormal];
+  [_updateRegionButton setTitle:@"Update Region" withFont:nil withColor:[UIColor blueColor] forState:UIControlStateNormal];
   
   [_updateRegionButton addTarget:self action:@selector(updateRegion) forControlEvents:ASControlNodeEventTouchUpInside];
   
-  [_liveMapToggleButton setTitle:[self liveMapStr] withFont:nil withColor:[UIColor blueColor] forState:ASControlStateNormal];
+  [_liveMapToggleButton setTitle:[self liveMapStr] withFont:nil withColor:[UIColor blueColor] forState:UIControlStateNormal];
   
   [_liveMapToggleButton addTarget:self action:@selector(toggleLiveMap) forControlEvents:ASControlNodeEventTouchUpInside];
  
@@ -214,8 +214,8 @@
 {
   _mapNode.liveMap = !_mapNode.liveMap;
   NSString * const liveMapStr = [self liveMapStr];
-  [_liveMapToggleButton setTitle:liveMapStr withFont:nil withColor:[UIColor blueColor] forState:ASControlStateNormal];
-  [_liveMapToggleButton setTitle:liveMapStr withFont:[UIFont systemFontOfSize:14] withColor:[UIColor blueColor] forState:ASControlStateHighlighted];
+  [_liveMapToggleButton setTitle:liveMapStr withFont:nil withColor:[UIColor blueColor] forState:UIControlStateNormal];
+  [_liveMapToggleButton setTitle:liveMapStr withFont:[UIFont systemFontOfSize:14] withColor:[UIColor blueColor] forState:UIControlStateHighlighted];
 }
 
 - (void)updateLocationTextWithMKCoordinateRegion:(MKCoordinateRegion)region

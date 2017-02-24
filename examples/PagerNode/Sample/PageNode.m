@@ -21,9 +21,9 @@
 
 @implementation PageNode
 
-- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
+- (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  return [ASLayout layoutWithLayoutElement:self size:constrainedSize.max];
+  return constrainedSize;
 }
 
 - (void)fetchData

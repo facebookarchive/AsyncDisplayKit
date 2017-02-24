@@ -39,6 +39,21 @@ ASDISPLAYNODE_INLINE BOOL AS_WARN_UNUSED_RESULT ASIsCGSizeValidForSize(CGSize si
   return (ASPointsValidForSize(size.width) && ASPointsValidForSize(size.height));
 }
 
+ASDISPLAYNODE_INLINE BOOL ASIsCGPositionPointsValidForLayout(CGFloat points)
+{
+  return ((isnormal(points) || points == 0.0) && points < (CGFLOAT_MAX / 2.0));
+}
+
+ASDISPLAYNODE_INLINE BOOL ASIsCGPositionValidForLayout(CGPoint point)
+{
+  return (ASIsCGPositionPointsValidForLayout(point.x) && ASIsCGPositionPointsValidForLayout(point.y));
+}
+
+ASDISPLAYNODE_INLINE BOOL ASIsCGRectValidForLayout(CGRect rect)
+{
+  return (ASIsCGPositionValidForLayout(rect.origin) && ASIsCGSizeValidForLayout(rect.size));
+}
+
 #pragma mark - ASDimension
 
 /**
@@ -191,6 +206,17 @@ ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT NSString *NSStringFromASLayoutSize(AS
           NSStringFromASDimension(size.height)];
 }
 
+#pragma mark - ASEdgeInsets
+
+typedef struct {
+  ASDimension top;
+  ASDimension left;
+  ASDimension bottom;
+  ASDimension right;
+} ASEdgeInsets;
+
+extern ASEdgeInsets const ASEdgeInsetsZero;
+
 #pragma mark - ASSizeRange
 
 /**
@@ -210,6 +236,15 @@ extern ASSizeRange const ASSizeRangeZero;
  * A size range from zero to infinity in both directions.
  */
 extern ASSizeRange const ASSizeRangeUnconstrained;
+
+/**
+ * Returns whether a size range has > 0.1 max width and max height.
+ */
+ASDISPLAYNODE_INLINE AS_WARN_UNUSED_RESULT BOOL ASSizeRangeHasSignificantArea(ASSizeRange sizeRange)
+{
+  static CGFloat const limit = 0.1;
+  return (sizeRange.max.width > limit && sizeRange.max.height > limit);
+}
 
 /**
  * Creates an ASSizeRange with provided min and max size.

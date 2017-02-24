@@ -17,8 +17,8 @@
 //  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //
 
-#import "AppDelegate.h"
+#import "PhotoFeedBaseController.h"
 
-@interface PhotoFeedViewController : UIViewController <PhotoFeedControllerProtocol>
+@interface PhotoFeedViewController : PhotoFeedBaseController
 
 @end

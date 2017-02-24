@@ -70,13 +70,15 @@ extern ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView *colle
 
 /**
  * A layout inspector for non-flow layouts that returns a constrained size to let the cells layout itself as
- * far as possible based on the scrollable direction of the collection view. It throws exceptions for delegate
- * methods that are related to supplementary node's management.
+ * far as possible based on the scrollable direction of the collection view.
+ * It doesn't support supplementary nodes and therefore doesn't implement delegate methods
+ * that are related to supplementary node's management.
+ *
+ * @warning This class is not meant to be subclassed and will be restricted in the future.
  */
 @interface ASCollectionViewLayoutInspector : NSObject <ASCollectionViewLayoutInspecting>
 
-- (instancetype)init NS_UNAVAILABLE;
-- (instancetype)initWithCollectionView:(ASCollectionView *)collectionView NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithCollectionView:(ASCollectionView *)collectionView ASDISPLAYNODE_DEPRECATED_MSG("Use -init instead.");
 
 @end
 

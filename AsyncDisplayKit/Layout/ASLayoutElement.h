@@ -77,7 +77,7 @@ ASDISPLAYNODE_EXTERN_C_END
 /**
  * @abstract Returns type of layoutElement
  */
-@property (nonatomic, assign, readonly) ASLayoutElementType layoutElementType;;
+@property (nonatomic, assign, readonly) ASLayoutElementType layoutElementType;
 
 /**
  * @abstract A size constraint that should apply to this ASLayoutElement.
@@ -88,11 +88,6 @@ ASDISPLAYNODE_EXTERN_C_END
  * @abstract Returns all children of an object which class conforms to the ASLayoutElement protocol
  */
 - (nullable NSArray<id<ASLayoutElement>> *)sublayoutElements;
-
-/**
- * @abstract Optional name that is printed by ascii art string and displayed in description.
- */
-@property (nullable, nonatomic, copy) NSString *debugName;
 
 #pragma mark - Calculate layout
 
@@ -161,6 +156,8 @@ ASDISPLAYNODE_EXTERN_C_END
 
 
 #pragma mark - Deprecated
+
+#define ASLayoutable ASLayoutElement
 
 /**
  * @abstract Calculate a layout based on given size range.
@@ -264,7 +261,6 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
  */
 @property (nonatomic, assign, readwrite) ASDimension maxWidth;
 
-
 #pragma mark - ASLayoutElementStyleSizeHelpers
 
 /**
@@ -329,7 +325,6 @@ extern NSString * const ASLayoutElementStyleLayoutPositionProperty;
 @property (nonatomic, assign, readwrite) ASLayoutSize maxLayoutSize;
 
 @end
-
 
 #pragma mark - ASLayoutElementStylability
 

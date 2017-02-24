@@ -9,8 +9,10 @@
 #if IG_LIST_KIT
 
 #import <IGListKit/IGListKit.h>
-#import <AsyncDisplayKit/AsyncDisplayKit.h>
-#import "ASCollectionInteropProtocols.h"
+#import <AsyncDisplayKit/ASCollectionView.h>
+#import <AsyncDisplayKit/ASCollectionNode.h>
+
+NS_ASSUME_NONNULL_BEGIN
 
 AS_SUBCLASSING_RESTRICTED
 @interface ASIGListAdapterBasedDataSource : NSObject <ASCollectionDataSourceInterop, ASCollectionDelegateInterop, ASCollectionDelegateFlowLayout>
@@ -20,3 +22,5 @@ AS_SUBCLASSING_RESTRICTED
 @end
 
 #endif
+
+NS_ASSUME_NONNULL_END

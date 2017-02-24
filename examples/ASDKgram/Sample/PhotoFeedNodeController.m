@@ -31,9 +31,7 @@
 
 @implementation PhotoFeedNodeController
 {
-  PhotoFeedModel          *_photoFeed;
-  ASTableNode             *_tableNode;
-  UIActivityIndicatorView *_activityIndicatorView;
+  ASTableNode *_tableNode;
 }
 
 #pragma mark - Lifecycle
@@ -51,7 +49,6 @@
     
     _tableNode.dataSource = self;
     _tableNode.delegate = self;
-    
   }
   
   return self;
@@ -63,112 +60,48 @@
 {
   [super loadView];
   
-  _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
-  
-  _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular imageSize:[self imageSizeForScreenWidth]];
-  [self refreshFeed];
-  
-  CGSize boundSize = self.view.bounds.size;
-
-  [_activityIndicatorView sizeToFit];
-  CGRect refreshRect = _activityIndicatorView.frame;
-  refreshRect.origin = CGPointMake((boundSize.width - _activityIndicatorView.frame.size.width) / 2.0,
-                                   (boundSize.height - _activityIndicatorView.frame.size.height) / 2.0);
-  _activityIndicatorView.frame = refreshRect;
-  
-  [self.view addSubview:_activityIndicatorView];
-  
-  self.view.backgroundColor = [UIColor whiteColor];
-  _tableNode.view.allowsSelection = NO;
-  _tableNode.view.separatorStyle = UITableViewCellSeparatorStyleNone;
   _tableNode.view.leadingScreensForBatching = AUTO_TAIL_LOADING_NUM_SCREENFULS;  // overriding default of 2.0
-}
-
-#pragma mark - helper methods
-
-- (void)refreshFeed
-{
-  [_activityIndicatorView startAnimating];
-  // small first batch
-  [_photoFeed refreshFeedWithCompletionBlock:^(NSArray *newPhotos){
-    
-    [_activityIndicatorView stopAnimating];
-    
-    [self insertNewRowsInTableNode:newPhotos];
-//    [self requestCommentsForPhotos:newPhotos];
-    
-    // immediately start second larger fetch
-    [self loadPageWithContext:nil];
-    
-  } numResultsToReturn:4];
 }
 
 - (void)loadPageWithContext:(ASBatchContext *)context
 {
-  [_photoFeed requestPageWithCompletionBlock:^(NSArray *newPhotos){
+  [self.photoFeed requestPageWithCompletionBlock:^(NSArray *newPhotos){
     
-    [self insertNewRowsInTableNode:newPhotos];
-//    [self requestCommentsForPhotos:newPhotos];
+    [self insertNewRows:newPhotos];
+    [self requestCommentsForPhotos:newPhotos];
     if (context) {
       [context completeBatchFetching:YES];
     }
   } numResultsToReturn:20];
 }
 
-//- (void)requestCommentsForPhotos:(NSArray *)newPhotos
-//{
-//  for (PhotoModel *photo in newPhotos) {
-//    [photo.commentFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
-//      
-//      NSInteger rowNum      = [_photoFeed indexOfPhotoModel:photo];
-//      NSIndexPath *cellPath = [NSIndexPath indexPathForRow:rowNum inSection:0];
-//      PhotoCellNode *cell   = (PhotoCellNode *)[_tableNode.view nodeForRowAtIndexPath:cellPath];
-//      
-//      if (cell) {
-//        [cell loadCommentsForPhoto:photo];
-//        [_tableNode.view beginUpdates];
-//        [_tableNode.view endUpdates];
-//      }
-//    }];
-//  }
-//}
+#pragma mark - Subclassing
 
-- (void)insertNewRowsInTableNode:(NSArray *)newPhotos
+- (UITableView *)tableView
 {
-  NSInteger section = 0;
-  NSMutableArray *indexPaths = [NSMutableArray array];
-  
-  NSUInteger newTotalNumberOfPhotos = [_photoFeed numberOfItemsInFeed];
-  for (NSUInteger row = newTotalNumberOfPhotos - newPhotos.count; row < newTotalNumberOfPhotos; row++) {
-    NSIndexPath *path = [NSIndexPath indexPathForRow:row inSection:section];
-    [indexPaths addObject:path];
-  }
-  
-  [_tableNode insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
+  return _tableNode.view;
 }
 
-- (UIStatusBarStyle)preferredStatusBarStyle
+- (void)loadPage
 {
-  return UIStatusBarStyleLightContent;
+  [self loadPageWithContext:nil];
 }
 
-- (CGSize)imageSizeForScreenWidth
+- (void)requestCommentsForPhotos:(NSArray *)newPhotos
 {
-  CGRect screenRect   = [[UIScreen mainScreen] bounds];
-  CGFloat screenScale = [[UIScreen mainScreen] scale];
-  return CGSizeMake(screenRect.size.width * screenScale, screenRect.size.width * screenScale);
+  // Do nothing (#1530).
 }
 
 #pragma mark - ASTableDataSource methods
 
 - (NSInteger)tableNode:(ASTableNode *)tableNode numberOfRowsInSection:(NSInteger)section
 {
-  return [_photoFeed numberOfItemsInFeed];
+  return [self.photoFeed numberOfItemsInFeed];
 }
 
 - (ASCellNodeBlock)tableNode:(ASTableNode *)tableNode nodeBlockForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  PhotoModel *photoModel = [_photoFeed objectAtIndex:indexPath.row];
+  PhotoModel *photoModel = [self.photoFeed objectAtIndex:indexPath.row];
   // this will be executed on a background thread - important to make sure it's thread safe
   ASCellNode *(^ASCellNodeBlock)() = ^ASCellNode *() {
     PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhotoObject:photoModel];
@@ -185,15 +118,6 @@
 {
   [context beginBatchFetching];
   [self loadPageWithContext:context];
-}
-
-#pragma mark - PhotoFeedViewControllerProtocol
-
-- (void)resetAllData
-{
-  [_photoFeed clearFeed];
-  [_tableNode reloadData];
-  [self refreshFeed];
 }
 
 @end

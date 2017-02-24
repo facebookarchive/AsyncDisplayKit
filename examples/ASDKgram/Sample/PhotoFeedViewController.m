@@ -30,9 +30,7 @@
 
 @implementation PhotoFeedViewController
 {
-  PhotoFeedModel          *_photoFeed;
-  UITableView             *_tableView;
-  UIActivityIndicatorView *_activityIndicatorView;
+  UITableView *_tableView;
 }
 
 #pragma mark - Lifecycle
@@ -49,8 +47,6 @@
     _tableView.autoresizingMask = UIViewAutoresizingFlexibleWidth;
     _tableView.delegate = self;
     _tableView.dataSource = self;
-    
-    _activityIndicatorView = [[UIActivityIndicatorView alloc] initWithActivityIndicatorStyle:UIActivityIndicatorViewStyleGray];
   }
   
   return self;
@@ -61,51 +57,22 @@
 {
   [super viewDidLoad];
   
-  _photoFeed = [[PhotoFeedModel alloc] initWithPhotoFeedModelType:PhotoFeedModelTypePopular imageSize:[self imageSizeForScreenWidth]];
-  [self refreshFeed];
-  
-  CGSize boundSize = self.view.bounds.size;
-  
   [self.view addSubview:_tableView];
-  
   _tableView.frame = self.view.bounds;
-  _tableView.allowsSelection = NO;
-  _tableView.separatorStyle  = UITableViewCellSeparatorStyleNone;
   [_tableView registerClass:[PhotoTableViewCell class] forCellReuseIdentifier:@"photoCell"];
-  
-  [self.view addSubview:_activityIndicatorView];
-  
-  [_activityIndicatorView sizeToFit];
-  CGRect refreshRect = _activityIndicatorView.frame;
-  refreshRect.origin = CGPointMake((boundSize.width - _activityIndicatorView.frame.size.width) / 2.0,
-                                   (boundSize.height - _activityIndicatorView.frame.size.height) / 2.0);
-  _activityIndicatorView.frame = refreshRect;
 }
 
-#pragma mark - helper methods
+#pragma mark - Subclassing
 
-- (void)refreshFeed
+- (UITableView *)tableView
 {
-  [_activityIndicatorView startAnimating];
-  
-  // small first batch
-  [_photoFeed refreshFeedWithCompletionBlock:^(NSArray *newPhotos){
-    
-    [_activityIndicatorView stopAnimating];
-    
-    [self insertNewRowsInTableView:newPhotos];
-    [self requestCommentsForPhotos:newPhotos];
-    
-    // immediately start second larger fetch
-    [self loadPage];
-    
-  } numResultsToReturn:4];
+  return _tableView;
 }
 
 - (void)loadPage
 {
-  [_photoFeed requestPageWithCompletionBlock:^(NSArray *newPhotos){
-    [self insertNewRowsInTableView:newPhotos];
+  [self.photoFeed requestPageWithCompletionBlock:^(NSArray *newPhotos){
+    [self insertNewRows:newPhotos];
     [self requestCommentsForPhotos:newPhotos];
   } numResultsToReturn:20];
 }
@@ -115,7 +82,7 @@
   for (PhotoModel *photo in newPhotos) {
     [photo.commentFeed refreshFeedWithCompletionBlock:^(NSArray *newComments) {
       
-      NSInteger rowNum         = [_photoFeed indexOfPhotoModel:photo];
+      NSInteger rowNum         = [self.photoFeed indexOfPhotoModel:photo];
       NSIndexPath *cellPath    = [NSIndexPath indexPathForRow:rowNum inSection:0];
       PhotoTableViewCell *cell = [_tableView cellForRowAtIndexPath:cellPath];
       
@@ -135,49 +102,24 @@
   }
 }
 
-- (void)insertNewRowsInTableView:(NSArray *)newPhotos
-{
-  NSInteger section = 0;
-  NSMutableArray *indexPaths = [NSMutableArray array];
-  
-  NSInteger newTotalNumberOfPhotos = [_photoFeed numberOfItemsInFeed];
-  for (NSInteger row = newTotalNumberOfPhotos - newPhotos.count; row < newTotalNumberOfPhotos; row++) {
-    NSIndexPath *path = [NSIndexPath indexPathForRow:row inSection:section];
-    [indexPaths addObject:path];
-  }
-  [_tableView insertRowsAtIndexPaths:indexPaths withRowAnimation:UITableViewRowAnimationNone];
-}
-
-- (UIStatusBarStyle)preferredStatusBarStyle
-{
-  return UIStatusBarStyleLightContent;
-}
-
-- (CGSize)imageSizeForScreenWidth
-{
-  CGRect screenRect   = [[UIScreen mainScreen] bounds];
-  CGFloat screenScale = [[UIScreen mainScreen] scale];
-  return CGSizeMake(screenRect.size.width * screenScale, screenRect.size.width * screenScale);
-}
-
 #pragma mark - UITableViewDataSource methods
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-  return [_photoFeed numberOfItemsInFeed];
+  return [self.photoFeed numberOfItemsInFeed];
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   PhotoTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"photoCell" forIndexPath:indexPath];
-  [cell updateCellWithPhotoObject:[_photoFeed objectAtIndex:indexPath.row]];
+  [cell updateCellWithPhotoObject:[self.photoFeed objectAtIndex:indexPath.row]];
   
   return cell;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(nonnull NSIndexPath *)indexPath
 {
-  PhotoModel *photo = [_photoFeed objectAtIndex:indexPath.row];
+  PhotoModel *photo = [self.photoFeed objectAtIndex:indexPath.row];
   return [PhotoTableViewCell heightForPhotoModel:photo withWidth:self.view.bounds.size.width];
 }
 
@@ -194,15 +136,6 @@
   if (screenfullsBeforeBottom < AUTO_TAIL_LOADING_NUM_SCREENFULS) {
     [self loadPage];
   }
-}
-
-#pragma mark - PhotoFeedViewControllerProtocol
-
-- (void)resetAllData
-{
-  [_photoFeed clearFeed];
-  [_tableView reloadData];
-  [self refreshFeed];
 }
 
 @end

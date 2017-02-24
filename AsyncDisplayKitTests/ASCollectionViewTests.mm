@@ -10,8 +10,8 @@
 
 #import <XCTest/XCTest.h>
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
-#import <AsyncDisplayKit/ASCollectionDataController.h>
 #import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
+#import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASSectionContext.h>
 #import <vector>
 #import <OCMock/OCMock.h>
@@ -161,7 +161,7 @@
 
 @interface ASCollectionView (InternalTesting)
 
-- (NSArray *)supplementaryNodeKindsInDataController:(ASCollectionDataController *)dataController sections:(nonnull NSIndexSet *)sections;
+- (NSArray<NSString *> *)dataController:(ASDataController *)dataController supplementaryNodeKindsInSections:(NSIndexSet *)sections;
 
 @end
 
@@ -216,7 +216,7 @@
   UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
   ASCollectionView *collectionView = [[ASCollectionView alloc] initWithFrame:CGRectZero collectionViewLayout:layout];
   [collectionView registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  XCTAssertEqualObjects([collectionView supplementaryNodeKindsInDataController:nil sections:[NSIndexSet indexSetWithIndex:0]], @[UICollectionElementKindSectionHeader]);
+  XCTAssertEqualObjects([collectionView dataController:nil supplementaryNodeKindsInSections:[NSIndexSet indexSetWithIndex:0]], @[UICollectionElementKindSectionHeader]);
 }
 
 - (void)testReloadIfNeeded
@@ -985,8 +985,10 @@
 
   [window makeKeyAndVisible];
   [view layoutIfNeeded];
-
+  
+  [cn waitUntilAllUpdatesAreCommitted];
   [self waitForExpectationsWithTimeout:60 handler:nil];
+  
   CGFloat contentHeight = cn.view.contentSize.height;
   CGFloat requiredContentHeight;
   CGFloat itemHeight = [cn.view layoutAttributesForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]].size.height;

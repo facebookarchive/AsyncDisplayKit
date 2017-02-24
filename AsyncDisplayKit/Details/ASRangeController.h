@@ -11,6 +11,7 @@
 #import <Foundation/Foundation.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASDataController.h>
+#import <AsyncDisplayKit/ASAbstractLayoutController.h>
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
 #import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
@@ -19,6 +20,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class _ASHierarchyChangeSet;
 @protocol ASRangeControllerDataSource;
 @protocol ASRangeControllerDelegate;
 @protocol ASLayoutController;
@@ -146,68 +148,18 @@ AS_SUBCLASSING_RESTRICTED
 @protocol ASRangeControllerDelegate <NSObject>
 
 /**
- * Begin updates.
+ * Called before updating with given change set.
  *
- * @param rangeController Sender.
+ * @param changeSet The change set that includes all updates
  */
-- (void)didBeginUpdatesInRangeController:(ASRangeController *)rangeController;
+- (void)rangeController:(ASRangeController *)rangeController willUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 /**
- * End updates.
+ * Called after updating with given change set.
  *
- * @param rangeController Sender.
- * @param animated NO if all animations are disabled. YES otherwise.
- * @param completion Completion block.
+ * @param changeSet The change set that includes all updates
  */
-- (void)rangeController:(ASRangeController * )rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion;
-
-/**
- * Called for nodes insertion.
- *
- * @param rangeController Sender.
- *
- * @param nodes Inserted nodes.
- *
- * @param indexPaths Index path of inserted nodes.
- *
- * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
- */
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- * Called for nodes deletion.
- *
- * @param rangeController Sender.
- *
- * @param nodes Deleted nodes.
- *
- * @param indexPaths Index path of deleted nodes.
- *
- * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
- */
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- * Called for section insertion.
- *
- * @param rangeController Sender.
- *
- * @param indexSet Index set of inserted sections.
- *
- * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
- */
-- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- * Called for section deletion.
- *
- * @param rangeController Sender.
- *
- * @param indexSet Index set of deleted sections.
- *
- * @param animationOptions Animation options. See ASDataControllerAnimationOptions.
- */
-- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)rangeController:(ASRangeController *)rangeController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 @end
 

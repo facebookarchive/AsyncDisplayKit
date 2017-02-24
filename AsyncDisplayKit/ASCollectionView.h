@@ -73,6 +73,20 @@ NS_ASSUME_NONNULL_BEGIN
 - (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath AS_WARN_UNUSED_RESULT;
 
 /**
+ * Similar to -indexPathForCell:.
+ *
+ * @param cellNode a cellNode in the collection view
+ *
+ * @return The index path for this cell node.
+ *
+ * @discussion This index path returned by this method is in the _view's_ index space
+ *    and should only be used with @c ASCollectionView directly. To get an index path suitable
+ *    for use with your data source and @c ASCollectionNode, call @c indexPathForNode: on the
+ *    collection node instead.
+ */
+- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT;
+
+/**
  * Similar to -supplementaryViewForElementKind:atIndexPath:
  *
  * @param elementKind The kind of supplementary node to locate.
@@ -111,6 +125,10 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL inverted;
 
+@end
+
+@interface ASCollectionView (Deprecated)
+
 /**
  * Forces the .contentInset to be UIEdgeInsetsZero.
  *
@@ -119,11 +137,7 @@ NS_ASSUME_NONNULL_BEGIN
  * automaticallyAdjustsScrollViewInsets, which may not be accessible.  ASPagerNode uses this to ensure
  * its flow layout behaves predictably and does not log undefined layout warnings.
  */
-@property (nonatomic) BOOL zeroContentInsets;
-
-@end
-
-@interface ASCollectionView (Deprecated)
+@property (nonatomic) BOOL zeroContentInsets ASDISPLAYNODE_DEPRECATED_MSG("Set automaticallyAdjustsScrollViewInsets=NO on your view controller instead.");
 
 /**
  * The object that acts as the asynchronous delegate of the collection view
@@ -390,20 +404,6 @@ NS_ASSUME_NONNULL_BEGIN
  * @return an array containing the nodes being displayed on screen.
  */
 - (NSArray<__kindof ASCellNode *> *)visibleNodes AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
-
-/**
- * Similar to -indexPathForCell:.
- *
- * @param cellNode a cellNode in the collection view
- *
- * @return The index path for this cell node.
- *
- * @discussion This index path returned by this method is in the _view's_ index space
- *    and should only be used with @c ASCollectionView directly. To get an index path suitable
- *    for use with your data source and @c ASCollectionNode, call @c indexPathForNode: on the
- *    collection node instead.
- */
-- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode AS_WARN_UNUSED_RESULT ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode method instead.");
 
 @end
 

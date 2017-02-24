@@ -183,7 +183,7 @@ static void computeCrossSizeAndBaseline(const std::vector<ASStackLayoutSpecItem>
   }
   
   // Step 3. The used cross-size of the flex line is the largest of the numbers found in the previous two steps and zero.
-  crossSize = MAX(maxStartToBaselineDistance + maxBaselineToEndDistance, maxItemCrossSize);;
+  crossSize = MAX(maxStartToBaselineDistance + maxBaselineToEndDistance, maxItemCrossSize);
   // Clamp the cross-size to be within the stack's min and max cross-size properties.
   crossSize = MIN(MAX(minCrossSize, crossSize), maxCrossSize);
   

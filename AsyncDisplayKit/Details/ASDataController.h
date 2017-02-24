@@ -13,7 +13,6 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBlockTypes.h>
 #import <AsyncDisplayKit/ASDimension.h>
-#import <AsyncDisplayKit/ASFlowLayoutController.h>
 #import <AsyncDisplayKit/ASEventLog.h>
 #ifdef __cplusplus
 #import <vector>
@@ -31,6 +30,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASDataController;
 @class _ASHierarchyChangeSet;
 @protocol ASTraitEnvironment;
+@protocol ASSectionContext;
 
 typedef NSUInteger ASDataControllerAnimationOptions;
 
@@ -64,6 +64,18 @@ extern NSString * const ASCollectionInvalidUpdateException;
  */
 - (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController;
 
+@optional
+
+- (NSArray<NSString *> *)dataController:(ASDataController *)dataController supplementaryNodeKindsInSections:(NSIndexSet *)sections;
+
+- (NSUInteger)dataController:(ASDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section;
+
+- (ASCellNodeBlock)dataController:(ASDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+- (nullable id<ASSectionContext>)dataController:(ASDataController *)dataController contextForSection:(NSInteger)section;
+
 @end
 
 @protocol ASDataControllerEnvironmentDelegate
@@ -77,31 +89,18 @@ extern NSString * const ASCollectionInvalidUpdateException;
 @protocol ASDataControllerDelegate <NSObject>
 
 /**
- Called for batch update.
+ * Called before updating with given change set.
+ *
+ * @param changeSet The change set that includes all updates
  */
-- (void)dataControllerBeginUpdates:(ASDataController *)dataController;
-- (void)dataControllerWillDeleteAllData:(ASDataController *)dataController;
-- (void)dataController:(ASDataController *)dataController endUpdatesAnimated:(BOOL)animated completion:(void (^ _Nullable)(BOOL))completion;
+- (void)dataController:(ASDataController *)dataController willUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 /**
- Called for insertion of elements.
+ * Called for change set updates.
+ *
+ * @param changeSet The change set that includes all updates
  */
-- (void)dataController:(ASDataController *)dataController didInsertNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for deletion of elements.
- */
-- (void)dataController:(ASDataController *)dataController didDeleteNodes:(NSArray<ASCellNode *> *)nodes atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for insertion of sections.
- */
-- (void)dataController:(ASDataController *)dataController didInsertSections:(NSArray<NSArray<ASCellNode *> *> *)sections atIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
-
-/**
- Called for deletion of sections.
- */
-- (void)dataController:(ASDataController *)dataController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
+- (void)dataController:(ASDataController *)dataController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 @end
 
@@ -112,7 +111,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
  * will be updated asynchronously. The dataSource must be updated to reflect the changes before these methods has been called.
  * For each data updating, the corresponding methods in delegate will be called.
  */
-@interface ASDataController : NSObject <ASFlowLayoutControllerDataSource>
+@interface ASDataController : NSObject
 
 - (instancetype)initWithDataSource:(id<ASDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
 
@@ -164,7 +163,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
 
 /** @name Data Updating */
 
-- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet animated:(BOOL)animated;
+- (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
 
 /**
  * Re-measures all loaded nodes in the backing store.
@@ -173,10 +172,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
  * (e.g. ASTableView or ASCollectionView after an orientation change).
  */
 - (void)relayoutAllNodes;
-
-- (void)reloadDataWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions completion:(void (^ _Nullable)())completion;
-
-- (void)reloadDataImmediatelyWithAnimationOptions:(ASDataControllerAnimationOptions)animationOptions;
 
 - (void)waitUntilAllUpdatesAreCommitted;
 
@@ -212,13 +207,9 @@ extern NSString * const ASCollectionInvalidUpdateException;
  */
 - (NSArray<NSArray <ASCellNode *> *> *)completedNodes;
 
-/**
- * Immediately move this item. This is called by ASTableView when the user has finished an interactive
- * item move and the table view is requesting a model update.
- * 
- * This must be called on the main thread.
- */
-- (void)moveCompletedNodeAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath;
+- (nullable ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+- (nullable id<ASSectionContext>)contextForSection:(NSInteger)section;
 
 @end
 

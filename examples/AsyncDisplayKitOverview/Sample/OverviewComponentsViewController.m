@@ -198,8 +198,8 @@ typedef ASLayoutSpec *(^OverviewDisplayNodeSizeThatFitsBlock)(ASSizeRange constr
     
     // Set title for button node with a given font or color. If you pass in nil for font or color the default system
     // font and black as color will be used
-    [buttonNode setTitle:@"Button Title Normal" withFont:nil withColor:[UIColor blueColor] forState:ASControlStateNormal];
-    [buttonNode setTitle:@"Button Title Highlighted" withFont:[UIFont systemFontOfSize:14] withColor:nil forState:ASControlStateHighlighted];
+    [buttonNode setTitle:@"Button Title Normal" withFont:nil withColor:[UIColor blueColor] forState:UIControlStateNormal];
+    [buttonNode setTitle:@"Button Title Highlighted" withFont:[UIFont systemFontOfSize:14] withColor:nil forState:UIControlStateHighlighted];
     [buttonNode addTarget:self action:@selector(buttonPressed:) forControlEvents:ASControlNodeEventTouchUpInside];
     
     parentNode = [self centeringParentNodeWithChild:buttonNode];

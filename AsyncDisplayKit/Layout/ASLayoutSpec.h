@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASLayoutElement.h>
 #import <AsyncDisplayKit/ASAsciiArtBoxCreator.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -24,11 +25,6 @@ NS_ASSUME_NONNULL_BEGIN
  * set to NO and any further mutations will cause an assert.
  */
 @property (nonatomic, assign) BOOL isMutable;
-
-/**
- * Parent of the layout spec
- */
-@property (nullable, nonatomic, weak) id<ASLayoutElement> parent;
 
 /**
  * First child within the children's array.
@@ -55,10 +51,6 @@ NS_ASSUME_NONNULL_BEGIN
  * setChild: and setChild:forIdentifier: methods to do something appropriate or to assert.
  */
 @property (nullable, strong, nonatomic) NSArray<id<ASLayoutElement>> *children;
-
-@property (nonatomic, assign) BOOL shouldVisualize;
-@property (nonatomic, assign) BOOL neverShouldVisualize;
-- (void)recursivelySetShouldVisualize:(BOOL)visualize;
 
 @end
 
@@ -96,7 +88,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface ASLayoutSpec (Debugging) <ASLayoutElementAsciiArtProtocol>
+@interface ASLayoutSpec (Debugging) <ASLayoutElementAsciiArtProtocol, ASDebugNameProvider>
 /**
  *  Used by other layout specs to create ascii art debug strings
  */

@@ -12,11 +12,13 @@
 
 #import <AsyncDisplayKit/ASPagerNode.h>
 #import <AsyncDisplayKit/ASDelegateProxy.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASPagerFlowLayout.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
+#import <AsyncDisplayKit/UIResponder+AsyncDisplayKit.h>
 
 @interface ASPagerNode () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionDelegateFlowLayout, ASDelegateProxyInterceptor>
 {
@@ -80,11 +82,6 @@
   cv.allowsSelection = NO;
   cv.showsVerticalScrollIndicator = NO;
   cv.showsHorizontalScrollIndicator = NO;
-  
-  // Zeroing contentInset is important, as UIKit will set the top inset for the navigation bar even though
-  // our view is only horizontally scrollable.  This causes UICollectionViewFlowLayout to log a warning.
-  // From here we cannot disable this directly (UIViewController's automaticallyAdjustsScrollViewInsets).
-  cv.zeroContentInsets = YES;
 
   ASRangeTuningParameters minimumRenderParams = { .leadingBufferScreenfuls = 0.0, .trailingBufferScreenfuls = 0.0 };
   ASRangeTuningParameters minimumPreloadParams = { .leadingBufferScreenfuls = 1.0, .trailingBufferScreenfuls = 1.0 };
@@ -209,6 +206,23 @@
 {
   [self setDataSource:nil];
   [self setDelegate:nil];
+}
+
+- (void)didEnterVisibleState
+{
+	[super didEnterVisibleState];
+
+	// Check that our view controller does not automatically set our content insets
+	// It would be better to have a -didEnterHierarchy hook to put this in, but
+	// such a hook doesn't currently exist, and in every use case I can imagine,
+	// the pager is not hosted inside a range-managed node.
+	if (_allowsAutomaticInsetsAdjustment == NO) {
+		UIViewController *vc = [self.view asdk_associatedViewController];
+		if (vc.automaticallyAdjustsScrollViewInsets) {
+			NSLog(@"AsyncDisplayKit: ASPagerNode is setting automaticallyAdjustsScrollViewInsets=NO on its owning view controller %@. This automatic behavior will be disabled in the future. Set allowsAutomaticInsetsAdjustment=YES on the pager node to suppress this behavior.", vc);
+			vc.automaticallyAdjustsScrollViewInsets = NO;
+		}
+	}
 }
 
 @end

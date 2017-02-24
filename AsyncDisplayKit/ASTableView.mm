@@ -25,10 +25,10 @@
 #import <AsyncDisplayKit/ASTableNode.h>
 #import <AsyncDisplayKit/ASRangeController.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASTableLayoutController.h>
 #import <AsyncDisplayKit/ASTableView+Undeprecated.h>
 #import <AsyncDisplayKit/ASBatchContext.h>
 
-static const ASSizeRange kInvalidSizeRange = {CGSizeZero, CGSizeZero};
 static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 //#define LOG(...) NSLog(__VA_ARGS__)
@@ -120,7 +120,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   ASTableViewProxy *_proxyDataSource;
   ASTableViewProxy *_proxyDelegate;
 
-  ASFlowLayoutController *_layoutController;
+  ASTableLayoutController *_layoutController;
 
   ASRangeController *_rangeController;
 
@@ -128,8 +128,14 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
   NSIndexPath *_pendingVisibleIndexPath;
 
-  NSIndexPath *_contentOffsetAdjustmentTopVisibleRow;
-  CGFloat _contentOffsetAdjustment;
+  // When we update our data controller in response to an interactive move,
+  // we don't want to tell the table view about the change (it knows!)
+  BOOL _updatingInResponseToInteractiveMove;
+
+  // The top cell node that was visible before the update.
+  __weak ASCellNode *_contentOffsetAdjustmentTopVisibleNode;
+  // The y-offset of the top visible row's origin before the update.
+  CGFloat _contentOffsetAdjustmentTopVisibleNodeOffset;
   
   CGPoint _deceleratingVelocity;
   
@@ -143,10 +149,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   CALayer *_retainedLayer;
 
   CGFloat _nodesConstrainedWidth;
-  BOOL _ignoreNodesConstrainedWidthChange;
   BOOL _queuedNodeHeightUpdate;
   BOOL _isDeallocating;
-  BOOL _performingBatchUpdates;
   NSMutableSet *_cellsForVisibilityUpdates;
 
   // See documentation on same property in ASCollectionView
@@ -250,7 +254,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)configureWithDataControllerClass:(Class)dataControllerClass eventLog:(ASEventLog *)eventLog
 {
-  _layoutController = [[ASFlowLayoutController alloc] initWithScrollOption:ASFlowLayoutDirectionVertical];
+  _layoutController = [[ASTableLayoutController alloc] initWithTableView:self];
   
   _rangeController = [[ASRangeController alloc] init];
   _rangeController.layoutController = _layoutController;
@@ -260,8 +264,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _dataController = [[dataControllerClass alloc] initWithDataSource:self eventLog:eventLog];
   _dataController.delegate = _rangeController;
   _dataController.environmentDelegate = self;
-  
-  _layoutController.dataSource = _dataController;
 
   _leadingScreensForBatching = 2.0;
   _batchContext = [[ASBatchContext alloc] init];
@@ -269,9 +271,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _automaticallyAdjustsContentOffset = NO;
   
   _nodesConstrainedWidth = self.bounds.size.width;
-  // If the initial size is 0, expect a size change very soon which is part of the initial configuration
-  // and should not trigger a relayout.
-  _ignoreNodesConstrainedWidthChange = (_nodesConstrainedWidth == 0);
   
   _proxyDelegate = [[ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
   super.delegate = (id<UITableViewDelegate>)_proxyDelegate;
@@ -470,10 +469,18 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  ASPerformBlockOnMainThread(^{
-    [super reloadData];
-  });
-  [_dataController reloadDataWithAnimationOptions:UITableViewRowAnimationNone completion:completion];
+  ASDisplayNodeAssertMainThread();
+  
+  void (^batchUpdatesCompletion)(BOOL);
+  if (completion) {
+    batchUpdatesCompletion = ^(BOOL) {
+      completion();
+    };
+  }
+  
+  [self beginUpdates];
+  [_changeSet reloadData];
+  [self endUpdatesWithCompletion:batchUpdatesCompletion];
 }
 
 - (void)reloadData
@@ -484,8 +491,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataImmediately
 {
   ASDisplayNodeAssertMainThread();
-  [_dataController reloadDataImmediatelyWithAnimationOptions:UITableViewRowAnimationNone];
-  [super reloadData];
+  [self reloadData];
+  [_dataController waitUntilAllUpdatesAreCommitted];
 }
 
 - (void)scrollToRowAtIndexPath:(NSIndexPath *)indexPath atScrollPosition:(UITableViewScrollPosition)scrollPosition animated:(BOOL)animated
@@ -656,11 +663,16 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)endUpdates
 {
-  // We capture the current state of whether animations are enabled if they don't provide us with one.
-  [self endUpdatesAnimated:[UIView areAnimationsEnabled] completion:nil];
+  [self endUpdatesWithCompletion:nil];
 }
 
-- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion;
+- (void)endUpdatesWithCompletion:(void (^)(BOOL completed))completion
+{
+  // We capture the current state of whether animations are enabled if they don't provide us with one.
+  [self endUpdatesAnimated:[UIView areAnimationsEnabled] completion:completion];
+}
+
+- (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL completed))completion
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssertNotNil(_changeSet, @"_changeSet must be available when batch update ends");
@@ -672,7 +684,8 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [_changeSet addCompletionHandler:completion];
 
   if (_batchUpdateCount == 0) {
-    [_dataController updateWithChangeSet:_changeSet animated:animated];
+    _changeSet.animated = animated;
+    [_dataController updateWithChangeSet:_changeSet];
     _changeSet = nil;
   } 
 }
@@ -691,19 +704,14 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)layoutSubviews
 {
+  // Remeasure all rows if our row width has changed.
   CGFloat constrainedWidth = self.bounds.size.width - [self sectionIndexWidth];
-  if (_nodesConstrainedWidth != constrainedWidth) {
+  if (constrainedWidth > 0 && _nodesConstrainedWidth != constrainedWidth) {
     _nodesConstrainedWidth = constrainedWidth;
 
-    // First width change occurs during initial configuration. An expensive relayout pass is unnecessary at that time
-    // and should be avoided, assuming that the initial data loading automatically runs shortly afterward.
-    if (_ignoreNodesConstrainedWidthChange) {
-      _ignoreNodesConstrainedWidthChange = NO;
-    } else {
-      [self beginUpdates];
-      [_dataController relayoutAllNodes];
-      [self endUpdatesAnimated:(ASDisplayNodeLayerHasAnimations(self.layer) == NO) completion:nil];
-    }
+    [self beginUpdates];
+    [_dataController relayoutAllNodes];
+    [self endUpdatesAnimated:(ASDisplayNodeLayerHasAnimations(self.layer) == NO) completion:nil];
   }
   
   // To ensure _nodesConstrainedWidth is up-to-date for every usage, this call to super must be done last
@@ -789,52 +797,40 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)beginAdjustingContentOffset
 {
-  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
-  _contentOffsetAdjustment = 0;
-  _contentOffsetAdjustmentTopVisibleRow = self.indexPathsForVisibleRows.firstObject;
-}
-
-- (void)endAdjustingContentOffset
-{
-  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
-  if (_contentOffsetAdjustment != 0) {
-    self.contentOffset = CGPointMake(0, self.contentOffset.y+_contentOffsetAdjustment);
-  }
-
-  _contentOffsetAdjustment = 0;
-  _contentOffsetAdjustmentTopVisibleRow = nil;
-}
-
-- (void)adjustContentOffsetWithNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths inserting:(BOOL)inserting {
-  // Maintain the users visible window when inserting or deleting cells by adjusting the content offset for nodes
-  // before the visible area. If in a begin/end updates block this will update _contentOffsetAdjustment, otherwise it will
-  // update self.contentOffset directly.
-
-  ASDisplayNodeAssert(_automaticallyAdjustsContentOffset, @"this method should only be called when _automaticallyAdjustsContentOffset == YES");
-
-  CGFloat dir = (inserting) ? +1 : -1;
-  CGFloat adjustment = 0;
-  NSIndexPath *top = _contentOffsetAdjustmentTopVisibleRow ? : self.indexPathsForVisibleRows.firstObject;
-
-  for (int index = 0; index < indexPaths.count; index++) {
-    NSIndexPath *indexPath = indexPaths[index];
-    if ([indexPath compare:top] <= 0) { // if this row is before or equal to the topmost visible row, make adjustments...
-      ASCellNode *cellNode = nodes[index];
-      adjustment += cellNode.calculatedSize.height * dir;
-      if (indexPath.section == top.section) {
-        top = [NSIndexPath indexPathForRow:top.row+dir inSection:top.section];
-      }
+  NSIndexPath *firstVisibleIndexPath = [self.indexPathsForVisibleRows sortedArrayUsingSelector:@selector(compare:)].firstObject;
+  if (firstVisibleIndexPath) {
+    ASCellNode *node = [self nodeForRowAtIndexPath:firstVisibleIndexPath];
+    if (node) {
+      _contentOffsetAdjustmentTopVisibleNode = node;
+      _contentOffsetAdjustmentTopVisibleNodeOffset = [self rectForRowAtIndexPath:firstVisibleIndexPath].origin.y - self.bounds.origin.y;
     }
   }
-
-  if (_contentOffsetAdjustmentTopVisibleRow) { // true of we are in a begin/end update block (see beginAdjustingContentOffset)
-    _contentOffsetAdjustmentTopVisibleRow = top;
-    _contentOffsetAdjustment += adjustment;
-  } else if (adjustment != 0) {
-    self.contentOffset = CGPointMake(0, self.contentOffset.y+adjustment);
-  }
 }
 
+- (void)endAdjustingContentOffsetAnimated:(BOOL)animated
+{
+  // We can't do this for animated updates.
+  if (animated) {
+    return;
+  }
+  
+  // We can't do this if we didn't have a top visible row before.
+  if (_contentOffsetAdjustmentTopVisibleNode == nil) {
+    return;
+  }
+  
+  NSIndexPath *newIndexPathForTopVisibleRow = [self indexPathForNode:_contentOffsetAdjustmentTopVisibleNode];
+  // We can't do this if our top visible row was deleted
+  if (newIndexPathForTopVisibleRow == nil) {
+    return;
+  }
+  
+  CGFloat newRowOriginYInSelf = [self rectForRowAtIndexPath:newIndexPathForTopVisibleRow].origin.y - self.bounds.origin.y;
+  CGPoint newContentOffset = self.contentOffset;
+  newContentOffset.y += (newRowOriginYInSelf - _contentOffsetAdjustmentTopVisibleNodeOffset);
+  self.contentOffset = newContentOffset;
+  _contentOffsetAdjustmentTopVisibleNode = nil;
+}
 
 #pragma mark - Intercepted selectors
 
@@ -864,6 +860,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [_rangeController configureContentView:cell.contentView forCellNode:node];
 
     cell.node = node;
+    cell.selectedBackgroundView = node.selectedBackgroundView;
   }
 
   return cell;
@@ -910,8 +907,18 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (_asyncDataSourceFlags.tableViewMoveRow) {
     [_asyncDataSource tableView:self moveRowAtIndexPath:sourceIndexPath toIndexPath:destinationIndexPath];
   }
+
   // Move node after informing data source in case they call nodeAtIndexPath:
-  [_dataController moveCompletedNodeAtIndexPath:sourceIndexPath toIndexPath:destinationIndexPath];
+  // Get up to date
+  [self waitUntilAllUpdatesAreCommitted];
+  // Set our flag to suppress informing super about the change.
+  _updatingInResponseToInteractiveMove = YES;
+  // Submit the move
+  [self moveRowAtIndexPath:sourceIndexPath toIndexPath:destinationIndexPath];
+  // Wait for it to finish – should be fast!
+  [self waitUntilAllUpdatesAreCommitted];
+  // Clear the flag
+  _updatingInResponseToInteractiveMove = NO;
 }
 
 - (void)tableView:(UITableView *)tableView willDisplayCell:(_ASTableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath
@@ -1409,145 +1416,152 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 #pragma mark - ASRangeControllerDelegate
 
-- (void)didBeginUpdatesInRangeController:(ASRangeController *)rangeController
+- (void)rangeController:(ASRangeController *)rangeController willUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
-  LOG(@"--- UITableView beginUpdates");
-
   if (!self.asyncDataSource) {
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
-
-  _performingBatchUpdates = YES;
-  [super beginUpdates];
-
-  if (_automaticallyAdjustsContentOffset) {
+  
+  if (_automaticallyAdjustsContentOffset && !changeSet.includesReloadData) {
     [self beginAdjustingContentOffset];
   }
 }
 
-- (void)rangeController:(ASRangeController *)rangeController didEndUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
+- (void)rangeController:(ASRangeController *)rangeController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
 {
   ASDisplayNodeAssertMainThread();
-  LOG(@"--- UITableView endUpdates");
-
-  if (!self.asyncDataSource) {
-    if (completion) {
-      completion(NO);
-    }
+  if (!self.asyncDataSource || _updatingInResponseToInteractiveMove) {
+    [changeSet executeCompletionHandlerWithFinished:NO];
     return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
   }
-
-  if (_automaticallyAdjustsContentOffset) {
-    [self endAdjustingContentOffset];
+  
+  if (changeSet.includesReloadData) {
+    LOG(@"UITableView reloadData");
+    ASPerformBlockWithoutAnimation(!changeSet.animated, ^{
+      if (self.test_enableSuperUpdateCallLogging) {
+        NSLog(@"-[super reloadData]");
+      }
+      [super reloadData];
+      // Flush any range changes that happened as part of submitting the reload.
+      [_rangeController updateIfNeeded];
+      [self _scheduleCheckForBatchFetchingForNumberOfChanges:1];
+      [changeSet executeCompletionHandlerWithFinished:YES];
+    });
+    return;
+  }
+  
+  NSUInteger numberOfUpdates = 0;
+  
+  LOG(@"--- UITableView beginUpdates");
+  [super beginUpdates];
+  
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
+    NSArray<NSIndexPath *> *indexPaths = change.indexPaths;
+    UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
+    
+    LOG(@"UITableView reloadRows:%ld rows", indexPaths.count);
+    BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
+    ASPerformBlockWithoutAnimation(preventAnimation, ^{
+      if (self.test_enableSuperUpdateCallLogging) {
+        NSLog(@"-[super reloadRowsAtIndexPaths]: %@", indexPaths);
+      }
+      [super reloadRowsAtIndexPaths:indexPaths withRowAnimation:animationOptions];
+    });
+    
+    numberOfUpdates++;
+  }
+  
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeReload]) {
+    NSIndexSet *sectionIndexes = change.indexSet;
+    UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
+    
+    LOG(@"UITableView reloadSections:%@", sectionIndexes);
+    BOOL preventAnimation = (animationOptions == UITableViewRowAnimationNone);
+    ASPerformBlockWithoutAnimation(preventAnimation, ^{
+      if (self.test_enableSuperUpdateCallLogging) {
+        NSLog(@"-[super reloadSections]: %@", sectionIndexes);
+      }
+      [super reloadSections:sectionIndexes withRowAnimation:animationOptions];
+    });
+    
+    numberOfUpdates++;
+  }
+  
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeOriginalDelete]) {
+    NSArray<NSIndexPath *> *indexPaths = change.indexPaths;
+    UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
+    
+    LOG(@"UITableView deleteRows:%ld rows", indexPaths.count);
+    BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
+    ASPerformBlockWithoutAnimation(preventAnimation, ^{
+      if (self.test_enableSuperUpdateCallLogging) {
+        NSLog(@"-[super deleteRowsAtIndexPaths]: %@", indexPaths);
+      }
+      [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:animationOptions];
+    });
+    
+    numberOfUpdates++;
+  }
+  
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeOriginalDelete]) {
+    NSIndexSet *sectionIndexes = change.indexSet;
+    UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
+    
+    LOG(@"UITableView deleteSections:%@", sectionIndexes);
+    BOOL preventAnimation = (animationOptions == UITableViewRowAnimationNone);
+    ASPerformBlockWithoutAnimation(preventAnimation, ^{
+      if (self.test_enableSuperUpdateCallLogging) {
+        NSLog(@"-[super deleteSections]: %@", sectionIndexes);
+      }
+      [super deleteSections:sectionIndexes withRowAnimation:animationOptions];
+    });
+    
+    numberOfUpdates++;
+  }
+  
+  for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeOriginalInsert]) {
+    NSIndexSet *sectionIndexes = change.indexSet;
+    UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
+    
+    LOG(@"UITableView insertSections:%@", sectionIndexes);
+    BOOL preventAnimation = (animationOptions == UITableViewRowAnimationNone);
+    ASPerformBlockWithoutAnimation(preventAnimation, ^{
+      if (self.test_enableSuperUpdateCallLogging) {
+        NSLog(@"-[super insertSections]: %@", sectionIndexes);
+      }
+      [super insertSections:sectionIndexes withRowAnimation:animationOptions];
+    });
+    
+    numberOfUpdates++;
+  }
+  
+  for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeOriginalInsert]) {
+    NSArray<NSIndexPath *> *indexPaths = change.indexPaths;
+    UITableViewRowAnimation animationOptions = (UITableViewRowAnimation)change.animationOptions;
+    
+    LOG(@"UITableView insertRows:%ld rows", indexPaths.count);
+    BOOL preventAnimation = (animationOptions == UITableViewRowAnimationNone);
+    ASPerformBlockWithoutAnimation(preventAnimation, ^{
+      if (self.test_enableSuperUpdateCallLogging) {
+        NSLog(@"-[super insertRowsAtIndexPaths]: %@", indexPaths);
+      }
+      [super insertRowsAtIndexPaths:indexPaths withRowAnimation:animationOptions];
+    });
+    
+    numberOfUpdates++;
   }
 
-  ASPerformBlockWithoutAnimation(!animated, ^{
+  LOG(@"--- UITableView endUpdates");
+  ASPerformBlockWithoutAnimation(!changeSet.animated, ^{
     [super endUpdates];
     [_rangeController updateIfNeeded];
+    [self _scheduleCheckForBatchFetchingForNumberOfChanges:numberOfUpdates];
   });
-
-  _performingBatchUpdates = NO;
-  if (completion) {
-    completion(YES);
-  }
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didInsertNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  LOG(@"UITableView insertRows:%ld rows", indexPaths.count);
-
-  if (!self.asyncDataSource) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-
-  BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
-  ASPerformBlockWithoutAnimation(preventAnimation, ^{
-    if (self.test_enableSuperUpdateCallLogging) {
-      NSLog(@"-[super insertRowsAtIndexPaths]: %@", indexPaths);
-    }
-    [super insertRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
-    if (!_performingBatchUpdates) {
-      [_rangeController updateIfNeeded];
-    }
-    [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
-  });
-
   if (_automaticallyAdjustsContentOffset) {
-    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:YES];
+    [self endAdjustingContentOffsetAnimated:changeSet.animated];
   }
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didDeleteNodes:(NSArray *)nodes atIndexPaths:(NSArray *)indexPaths withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  LOG(@"UITableView deleteRows:%ld rows", indexPaths.count);
-
-  if (!self.asyncDataSource) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-
-  BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
-  ASPerformBlockWithoutAnimation(preventAnimation, ^{
-    if (self.test_enableSuperUpdateCallLogging) {
-      NSLog(@"-[super deleteRowsAtIndexPaths]: %@", indexPaths);
-    }
-    [super deleteRowsAtIndexPaths:indexPaths withRowAnimation:(UITableViewRowAnimation)animationOptions];
-    if (!_performingBatchUpdates) {
-      [_rangeController updateIfNeeded];
-    }
-    [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexPaths.count];
-  });
-
-  if (_automaticallyAdjustsContentOffset) {
-    [self adjustContentOffsetWithNodes:nodes atIndexPaths:indexPaths inserting:NO];
-  }
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didInsertSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  LOG(@"UITableView insertSections:%@", indexSet);
-
-
-  if (!self.asyncDataSource) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-
-  BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
-  ASPerformBlockWithoutAnimation(preventAnimation, ^{
-    if (self.test_enableSuperUpdateCallLogging) {
-      NSLog(@"-[super insertSections]: %@", indexSet);
-    }
-    [super insertSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
-    if (!_performingBatchUpdates) {
-      [_rangeController updateIfNeeded];
-    }
-    [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
-  });
-}
-
-- (void)rangeController:(ASRangeController *)rangeController didDeleteSectionsAtIndexSet:(NSIndexSet *)indexSet withAnimationOptions:(ASDataControllerAnimationOptions)animationOptions
-{
-  ASDisplayNodeAssertMainThread();
-  LOG(@"UITableView deleteSections:%@", indexSet);
-
-  if (!self.asyncDataSource) {
-    return; // if the asyncDataSource has become invalid while we are processing, ignore this request to avoid crashes
-  }
-
-  BOOL preventAnimation = animationOptions == UITableViewRowAnimationNone;
-  ASPerformBlockWithoutAnimation(preventAnimation, ^{
-    if (self.test_enableSuperUpdateCallLogging) {
-      NSLog(@"-[super deleteSections]: %@", indexSet);
-    }
-    [super deleteSections:indexSet withRowAnimation:(UITableViewRowAnimation)animationOptions];
-    if (!_performingBatchUpdates) {
-      [_rangeController updateIfNeeded];
-    }
-    [self _scheduleCheckForBatchFetchingForNumberOfChanges:indexSet.count];
-  });
+  [changeSet executeCompletionHandlerWithFinished:YES];
 }
 
 #pragma mark - ASDataControllerDelegate
@@ -1614,7 +1628,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASSizeRange constrainedSize = kInvalidSizeRange;
+  ASSizeRange constrainedSize = ASSizeRangeZero;
   if (_asyncDelegateFlags.tableNodeConstrainedSizeForRow) {
     GET_TABLENODE_OR_RETURN(tableNode, constrainedSize);
     ASSizeRange delegateConstrainedSize = [_asyncDelegate tableNode:tableNode constrainedSizeForRowAtIndexPath:indexPath];

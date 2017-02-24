@@ -10,12 +10,14 @@
 
 #import <CoreFoundation/CFBase.h>
 
+#pragma once
+
 #ifndef kCFCoreFoundationVersionNumber_iOS_9_0
-#define kCFCoreFoundationVersionNumber_iOS_9_0 1240.10
+  #define kCFCoreFoundationVersionNumber_iOS_9_0 1240.10
 #endif
 
 #ifndef kCFCoreFoundationVersionNumber_iOS_10_0
-#define kCFCoreFoundationVersionNumber_iOS_10_0 1348.00
+  #define kCFCoreFoundationVersionNumber_iOS_10_0 1348.00
 #endif
 
 #define AS_AT_LEAST_IOS9   (kCFCoreFoundationVersionNumber >= kCFCoreFoundationVersionNumber_iOS_9_0)
@@ -23,6 +25,16 @@
 
 #define AS_TARGET_OS_OSX (!(TARGET_OS_IOS || TARGET_OS_TV || TARGET_OS_WATCH))
 #define AS_TARGET_OS_IOS TARGET_OS_IPHONE
+
+// If Yoga is available, make it available anywhere we use ASAvailability.
+// This reduces Yoga-specific code in other files.
+#ifndef YOGA_HEADER_PATH
+  #define YOGA_HEADER_PATH <Yoga/Yoga.h>
+#endif
+
+#ifndef YOGA
+  #define YOGA __has_include(YOGA_HEADER_PATH)
+#endif
 
 #if AS_TARGET_OS_OSX
 
@@ -64,6 +76,5 @@
   return self.sizeValue;
 }
 @end
-
 
 #endif
