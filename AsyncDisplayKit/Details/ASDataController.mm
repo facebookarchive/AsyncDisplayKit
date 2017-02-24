@@ -53,7 +53,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 @interface ASDataController () {
 
   ASElementMap *_pendingMap;
-  ASElementMap *_completedMap;
+  ASElementMap *_visibleMap;
 
   NSInteger _nextSectionID;
   
@@ -101,6 +101,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 #endif
 
   _pendingMap = [[ASElementMap alloc] init];
+
   
   _nextSectionID = 0;
   
@@ -484,7 +485,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
         [_delegate dataController:self willUpdateWithChangeSet:changeSet];
 
         // Step 4: Deploy the new data as "completed" and inform delegate
-        _completedMap = newMap;
+        _visibleMap = newMap;
 
         [_delegate dataController:self didUpdateWithChangeSet:changeSet];
       }];
@@ -605,11 +606,12 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     return;
   }
 
+  // Items
   [map insertEmptySectionsOfItemsAtIndexes:sectionIndexes];
-  NSMutableArray<NSString *> *kinds = [NSMutableArray arrayWithObject:ASDataControllerRowNodeKind];
-  [kinds addObjectsFromArray:[self supplementaryKindsInSections:sectionIndexes]];
+  [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind forSections:sectionIndexes environment:environment];
 
-  for (NSString *kind in kinds) {
+  // Supplementaries
+  for (NSString *kind in [self supplementaryKindsInSections:sectionIndexes]) {
     // Step 2: Populate new elements for all sections
     [self _insertElementsIntoMap:map kind:kind forSections:sectionIndexes environment:environment];
   }
@@ -639,7 +641,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (void)_relayoutAllNodes
 {
   ASDisplayNodeAssertMainThread();
-  [_completedMap enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
+  [_visibleMap enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
     NSString *kind = element.supplementaryElementKind ?: ASDataControllerRowNodeKind;
     ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
     if (ASSizeRangeHasSignificantArea(constrainedSize)) {
@@ -653,86 +655,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       }
     }
   }];
-}
-
-#pragma mark - Data Querying (External API)
-
-- (NSUInteger)numberOfSections
-{
-  ASDisplayNodeAssertMainThread();
-  return _pendingMap.sections.count;
-}
-
-- (NSUInteger)numberOfRowsInSection:(NSUInteger)section
-{
-  ASDisplayNodeAssertMainThread();
-  return [_pendingMap numberOfItemsInSection:section];
-}
-
-- (NSUInteger)completedNumberOfSections
-{
-  ASDisplayNodeAssertMainThread();
-  return _completedMap.sections.count;
-}
-
-- (NSUInteger)completedNumberOfRowsInSection:(NSUInteger)section
-{
-  ASDisplayNodeAssertMainThread();
-  return [_completedMap numberOfItemsInSection:section];
-}
-
-- (ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssertMainThread();
-  if (indexPath == nil) {
-    return nil;
-  }
-  return [_pendingMap elementForItemAtIndexPath:indexPath].node;
-}
-
-- (ASCellNode *)nodeAtCompletedIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssertMainThread();
-  if (indexPath == nil) {
-    return nil;
-  }
-  return [_completedMap elementForItemAtIndexPath:indexPath].node;
-}
-
-- (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
-{
-  ASDisplayNodeAssertMainThread();
-  return [_pendingMap indexPathForElement:cellNode.collectionElement];
-}
-
-- (NSIndexPath *)completedIndexPathForNode:(ASCellNode *)cellNode
-{
-  ASDisplayNodeAssertMainThread();
-  return [_completedMap indexPathForElement:cellNode.collectionElement];
-}
-
-/// Returns nodes that can be queried externally.
-- (NSArray *)completedNodes
-{
-  ASDisplayNodeAssertMainThread();
-  return _completedMap.itemNodes;
-}
-
-#pragma mark - External supplementary store and section context querying
-
-- (ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
-{
-  ASDisplayNodeAssertMainThread();
-  if (kind == nil || indexPath == nil) {
-    return nil;
-  }
-  return [_completedMap supplementaryElementOfKind:kind atIndexPath:indexPath].node;
-}
-
-- (id<ASSectionContext>)contextForSection:(NSInteger)section
-{
-  ASDisplayNodeAssertMainThread();
-  return _pendingMap.sections[section].context;
 }
 
 + (NSArray<ASCollectionElement *> *)unmeasuredElementsFromMap:(ASElementMap *)map

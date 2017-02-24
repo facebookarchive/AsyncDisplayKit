@@ -122,14 +122,12 @@ ASDISPLAYNODE_EXTERN_C_END
 \
   ASPrimitiveTraitCollection currentTraits = self.primitiveTraitCollection;\
   if (ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(currentTraits, oldTraits) == NO) {\
-    /* Must dispatch to main for self.view && [self.view.dataController completedNodes]*/\
+    /* Must dispatch to main for self.view && [self.view.dataController visibleMap]*/\
     ASPerformBlockOnMainThread(^{\
-      NSArray<NSArray <ASCellNode *> *> *completedNodes = [self.view.dataController completedNodes];\
-      for (NSArray *sectionArray in completedNodes) {\
-        for (ASCellNode *cellNode in sectionArray) {\
-          ASTraitCollectionPropagateDown(cellNode, currentTraits);\
-        }\
-      }\
+      ASElementMap *map = self.view.dataController.visibleMap; \
+      [map enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) { \
+         ASTraitCollectionPropagateDown(element.nodeIfAllocated, currentTraits); \
+      }]; \
     });\
   }\
 }\

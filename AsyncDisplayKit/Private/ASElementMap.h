@@ -11,19 +11,23 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class ASCollectionElement, ASCellNode, ASSection, _ASHierarchyChangeSet;
-@protocol ASDataControllerSource;
+@class ASCollectionElement, ASSection;
+@protocol ASSectionContext;
 
 AS_SUBCLASSING_RESTRICTED
 @interface ASElementMap : NSObject <NSCopying, NSMutableCopying>
 
-@property (nonatomic, strong, readonly) NSArray<ASSection *> *sections;
-
-@property (nonatomic, strong, readonly) NSArray<NSArray<ASCellNode *> *> *itemNodes;
+@property (readonly) NSInteger numberOfSections;
 
 - (NSInteger)numberOfItemsInSection:(NSInteger)section;
 
-@property (nonatomic, readonly) NSArray<NSString *> *supplementaryElementKinds;
+- (nullable id<ASSectionContext>)contextForSection:(NSInteger)section;
+
+@property (copy, readonly) NSArray<NSIndexPath *> *itemIndexPaths;
+
+@property (copy, readonly) NSArray<NSString *> *supplementaryElementKinds;
+
+- (NSIndexPath *)convertIndexPath:(NSIndexPath *)indexPath fromMap:(ASElementMap *)map;
 
 /**
  * O(1)

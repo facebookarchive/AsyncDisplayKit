@@ -134,9 +134,7 @@ AS_SUBCLASSING_RESTRICTED
  */
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController;
 
-- (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath;
-
-- (NSArray<NSArray <ASCellNode *> *> *)completedNodes;
+- (ASElementMap *)elementMapForRangeController:(ASRangeController *)rangeController;
 
 - (NSString *)nameForRangeControllerDataSource;
 

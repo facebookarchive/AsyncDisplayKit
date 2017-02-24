@@ -13,12 +13,14 @@
 #import <AsyncDisplayKit/ASBatchFetching.h>
 #import <AsyncDisplayKit/ASDelegateProxy.h>
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
+#import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASCollectionInternal.h>
 #import <AsyncDisplayKit/ASCollectionViewLayoutController.h>
 #import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
 #import <AsyncDisplayKit/ASRangeController.h>
@@ -604,14 +606,14 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   return [[self nodeForItemAtIndexPath:indexPath] calculatedSize];
 }
 
-- (NSArray<NSArray <ASCellNode *> *> *)completedNodes
+- (ASElementMap *)elementMapForRangeController:(ASRangeController *)rangeController
 {
-  return [_dataController completedNodes];
+  return _dataController.visibleMap;
 }
 
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [_dataController nodeAtCompletedIndexPath:indexPath];
+  return [_dataController.visibleMap elementForItemAtIndexPath:indexPath].node;
 }
 
 - (NSIndexPath *)convertIndexPathFromCollectionNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait
@@ -625,11 +627,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   if (indexPath.item == NSNotFound) {
     return indexPath;
   } else {
-    ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-    NSIndexPath *viewIndexPath = [self indexPathForNode:node];
+    id element = [_dataController.pendingMap elementForItemAtIndexPath:indexPath];
+    NSIndexPath *viewIndexPath = [_dataController.visibleMap indexPathForElement:element];
     if (viewIndexPath == nil && wait) {
       [self waitUntilAllUpdatesAreCommitted];
-      viewIndexPath = [self indexPathForNode:node];
+      return [self convertIndexPathFromCollectionNode:indexPath waitingIfNeeded:NO];
     }
     return viewIndexPath;
   }
@@ -671,8 +673,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   if (indexPath.item == NSNotFound) {
     return indexPath;
   } else {
-    ASCellNode *node = [self nodeForItemAtIndexPath:indexPath];
-    return [_dataController indexPathForNode:node];
+    return [_dataController.visibleMap convertIndexPath:indexPath fromMap:_dataController.pendingMap];
   }
 }
 
@@ -695,12 +696,12 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (ASCellNode *)supplementaryNodeForElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
-  return [_dataController supplementaryNodeOfKind:elementKind atIndexPath:indexPath];
+  return [_dataController.visibleMap supplementaryElementOfKind:elementKind atIndexPath:indexPath].node;
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
-  return [self validateIndexPath:[_dataController completedIndexPathForNode:cellNode]];
+  return [_dataController.visibleMap indexPathForElement:cellNode.collectionElement];
 }
 
 - (NSArray *)visibleNodes
@@ -835,7 +836,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 - (id<ASSectionContext>)contextForSection:(NSInteger)section
 {
   ASDisplayNodeAssertMainThread();
-  return [_dataController contextForSection:section];
+  return [_dataController.visibleMap contextForSection:section];
 }
 
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
@@ -883,12 +884,12 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     [self _scheduleCheckForBatchFetchingForNumberOfChanges:1];
     _superIsPendingDataLoad = NO;
   }
-  return [_dataController completedNumberOfSections];
+  return _dataController.visibleMap.numberOfSections;
 }
 
 - (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section
 {
-  return [_dataController completedNumberOfRowsInSection:section];
+  return [_dataController.visibleMap numberOfItemsInSection:section];
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -927,7 +928,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
   
   UICollectionReusableView *view = nil;
-  ASCellNode *node = [_dataController supplementaryNodeOfKind:kind atIndexPath:indexPath];
+  ASCellNode *node = [_dataController.visibleMap supplementaryElementOfKind:kind atIndexPath:indexPath].node;
 
   BOOL shouldDequeueExternally = _asyncDataSourceFlags.interopViewForSupplementaryElement && (_asyncDataSourceFlags.interopAlwaysDequeue || node.shouldUseUIKitCell);
   if (shouldDequeueExternally) {

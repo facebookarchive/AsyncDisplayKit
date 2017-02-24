@@ -10,6 +10,7 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASMultidimensionalArrayUtils.h>
+#import <AsyncDisplayKit/ASSection.h>
 #import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
 
 typedef NSMutableArray<NSMutableArray<ASCollectionElement *> *> ASMutableCollectionElementTwoDimensionalArray;
@@ -21,6 +22,8 @@ typedef NSDictionary<NSString *, NSDictionary<NSIndexPath *, ASCollectionElement
 typedef NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCollectionElement *> *> ASMutableSupplementaryElementDictionary;
 
 @interface ASElementMap ()
+
+@property (nonatomic, strong, readonly) NSArray<ASSection *> *sections;
 
 // Element -> IndexPath
 @property (nonatomic, strong, readonly) NSMapTable<ASCollectionElement *, NSIndexPath *> *elementToIndexPathMap;
@@ -71,6 +74,11 @@ typedef NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCol
   return self;
 }
 
+- (NSArray<NSIndexPath *> *)itemIndexPaths
+{
+  return ASIndexPathsForTwoDimensionalArray(_sectionsOfItems);
+}
+
 - (NSInteger)numberOfSections
 {
   return _sectionsOfItems.count;
@@ -79,6 +87,11 @@ typedef NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCol
 - (NSInteger)numberOfItemsInSection:(NSInteger)section
 {
   return _sectionsOfItems[section].count;
+}
+
+- (id<ASSectionContext>)contextForSection:(NSInteger)section
+{
+  return _sections[section].context;
 }
 
 - (NSArray<NSString *> *)supplementaryElementKinds
@@ -99,6 +112,12 @@ typedef NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCol
 - (nullable ASCollectionElement *)supplementaryElementOfKind:(NSString *)supplementaryElementKind atIndexPath:(NSIndexPath *)indexPath
 {
   return _supplementaryElements[supplementaryElementKind][indexPath];
+}
+
+- (NSIndexPath *)convertIndexPath:(NSIndexPath *)indexPath fromMap:(ASElementMap *)map
+{
+  id element = [map elementForItemAtIndexPath:indexPath];
+  return [self indexPathForElement:element];
 }
 
 - (void)enumerateUsingBlock:(void(^)(NSIndexPath *indexPath, ASCollectionElement *element, BOOL *stop))block

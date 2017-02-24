@@ -17,9 +17,11 @@
 #import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASBatchFetching.h>
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
+#import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASDelegateProxy.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASTableNode.h>
@@ -532,14 +534,14 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return (ASTableNode *)ASViewToDisplayNode(self);
 }
 
-- (NSArray<NSArray <ASCellNode *> *> *)completedNodes
+- (ASElementMap *)elementMapForRangeController:(ASRangeController *)rangeController
 {
-  return [_dataController completedNodes];
+  return _dataController.visibleMap;
 }
 
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [_dataController nodeAtCompletedIndexPath:indexPath];
+  return [_dataController.visibleMap elementForItemAtIndexPath:indexPath].node;
 }
 
 - (NSIndexPath *)convertIndexPathFromTableNode:(NSIndexPath *)indexPath waitingIfNeeded:(BOOL)wait
@@ -549,8 +551,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (indexPath.row == NSNotFound) {
     return indexPath;
   } else {
-    ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
-    return [self indexPathForNode:node waitingIfNeeded:wait];
+    NSIndexPath *viewIndexPath = [_dataController.visibleMap convertIndexPath:indexPath fromMap:_dataController.pendingMap];
+    if (viewIndexPath == nil) {
+      [self waitUntilAllUpdatesAreCommitted];
+      return [self convertIndexPathFromTableNode:indexPath waitingIfNeeded:NO];
+    }
+    return viewIndexPath;
   }
 }
 
@@ -565,8 +571,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   if (indexPath.row == NSNotFound) {
     return indexPath;
   } else {
-    ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-    return [_dataController indexPathForNode:node];
+    return [_dataController.pendingMap convertIndexPath:indexPath fromMap:_dataController.visibleMap];
   }
 }
 
@@ -623,12 +628,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return nil;
   }
 
-  NSIndexPath *indexPath = [_dataController completedIndexPathForNode:cellNode];
+  NSIndexPath *indexPath = [_dataController.visibleMap indexPathForElement:cellNode.collectionElement];
   indexPath = [self validateIndexPath:indexPath];
   if (indexPath == nil && wait) {
     [self waitUntilAllUpdatesAreCommitted];
-    indexPath = [_dataController completedIndexPathForNode:cellNode];
-    indexPath = [self validateIndexPath:indexPath];
+    return [self indexPathForNode:cellNode waitingIfNeeded:NO];
   }
   return indexPath;
 }
@@ -855,7 +859,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   _ASTableViewCell *cell = [self dequeueReusableCellWithIdentifier:kCellReuseIdentifier forIndexPath:indexPath];
   cell.delegate = self;
 
-  ASCellNode *node = [_dataController nodeAtCompletedIndexPath:indexPath];
+  ASCellNode *node = [_dataController.visibleMap elementForItemAtIndexPath:indexPath].node;
   if (node) {
     [_rangeController configureContentView:cell.contentView forCellNode:node];
 
@@ -868,7 +872,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASCellNode *node = [_dataController nodeAtIndexPath:indexPath];
+  ASCellNode *node = [_dataController.visibleMap elementForItemAtIndexPath:indexPath].node;
   CGFloat height = node.calculatedSize.height;
   
   /**
@@ -885,12 +889,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView
 {
-  return [_dataController completedNumberOfSections];
+  return _dataController.visibleMap.numberOfSections;
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
-  return [_dataController completedNumberOfRowsInSection:section];
+  return [_dataController.visibleMap numberOfItemsInSection:section];
 }
 
 - (BOOL)tableView:(UITableView *)tableView canMoveRowAtIndexPath:(NSIndexPath *)indexPath
@@ -1729,7 +1733,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)nodeSelectedStateDidChange:(ASCellNode *)node
 {
-  NSIndexPath *indexPath = [_dataController completedIndexPathForNode:node];
+  NSIndexPath *indexPath = [self indexPathForNode:node];
   if (indexPath) {
     if (node.isSelected) {
       [self selectRowAtIndexPath:indexPath animated:NO scrollPosition:UITableViewScrollPositionNone];
@@ -1741,7 +1745,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)nodeHighlightedStateDidChange:(ASCellNode *)node
 {
-  NSIndexPath *indexPath = [_dataController completedIndexPathForNode:node];
+  NSIndexPath *indexPath = [self indexPathForNode:node];
   if (indexPath) {
     [self cellForRowAtIndexPath:indexPath].highlighted = node.isHighlighted;
   }
@@ -1808,12 +1812,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return (indexPath.row == anchor.row+1); // assumes that indexes are valid
     
   } else if (indexPath.section > anchor.section && indexPath.row == 0) {
-    if (anchor.row != [_dataController completedNumberOfRowsInSection:anchor.section] -1) {
+    if (anchor.row != [self numberOfRowsInSection:anchor.section] -1) {
       return NO;  // anchor is not at the end of the section
     }
     
     NSInteger nextSection = anchor.section+1;
-    while([_dataController completedNumberOfRowsInSection:nextSection] == 0) {
+    while([self numberOfRowsInSection:nextSection] == 0) {
       ++nextSection;
     }
     
