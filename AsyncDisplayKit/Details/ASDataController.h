@@ -120,12 +120,12 @@ AS_SUBCLASSING_RESTRICTED
 /**
  * The map that is currently displayed. The "UIKit index space."
  */
-@property (nonatomic, strong, readonly) ASElementMap *visibleMap;
+@property (nonatomic, nullable, strong, readonly) ASElementMap *visibleMap;
 
 /**
  * The map that is currently being prepared for display. The "data source index space."
  */
-@property (nonatomic, strong, readonly) ASElementMap *pendingMap;
+@property (nonatomic, nullable, strong, readonly) ASElementMap *pendingMap;
 
 /**
  Data source for fetching data info.

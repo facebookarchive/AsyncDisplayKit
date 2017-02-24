@@ -24,17 +24,6 @@ AS_SUBCLASSING_RESTRICTED
 @interface ASElementMap : NSObject <NSCopying>
 
 /**
- * Create a new element map for this dataset. You probably don't need to use this – ASDataController is the only one who creates these.
- *
- * @param sections The array of ASSection objects.
- * @param items A 2D array of ASCollectionElements, for each item.
- * @param supplementaryElements A dictionary of gathered supplementary elements.
- */
-- (instancetype)initWithSections:(NSArray<ASSection *> *)sections
-                           items:(ASCollectionElementTwoDimensionalArray *)items
-           supplementaryElements:(ASSupplementaryElementDictionary *)supplementaryElements;
-
-/**
  * The number of sections (of items) in this map.
  */
 @property (readonly) NSInteger numberOfSections;
@@ -80,6 +69,17 @@ AS_SUBCLASSING_RESTRICTED
  * Enumerates all the elements in this map, and their index paths.
  */
 - (void)enumerateUsingBlock:(AS_NOESCAPE void(^)(NSIndexPath *indexPath, ASCollectionElement *element, BOOL *stop))block;
+
+/**
+ * Create a new element map for this dataset. You probably don't need to use this – ASDataController is the only one who creates these.
+ *
+ * @param sections The array of ASSection objects.
+ * @param items A 2D array of ASCollectionElements, for each item.
+ * @param supplementaryElements A dictionary of gathered supplementary elements.
+ */
+- (instancetype)initWithSections:(NSArray<ASSection *> *)sections
+                           items:(ASCollectionElementTwoDimensionalArray *)items
+           supplementaryElements:(ASSupplementaryElementDictionary *)supplementaryElements;
 
 @end
 

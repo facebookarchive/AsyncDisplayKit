@@ -24,6 +24,11 @@ typedef NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCol
   ASMutableCollectionElementTwoDimensionalArray *_sectionsOfItems;
 }
 
+- (instancetype)init
+{
+  return [self initWithSections:@[] items:@[] supplementaryElements:@{}];
+}
+
 - (instancetype)initWithSections:(NSArray<ASSection *> *)sections items:(ASCollectionElementTwoDimensionalArray *)items supplementaryElements:(ASSupplementaryElementDictionary *)supplementaryElements
 {
   if (self = [super init]) {

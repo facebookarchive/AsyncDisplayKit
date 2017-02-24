@@ -14,11 +14,6 @@
 #import <AsyncDisplayKit/ASSection.h>
 #import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
 
-typedef NSArray<NSArray<ASCollectionElement *> *> ASCollectionElementTwoDimensionalArray;
-
-// ElementKind -> IndexPath -> Element
-typedef NSDictionary<NSString *, NSDictionary<NSIndexPath *, ASCollectionElement *> *> ASSupplementaryElementDictionary;
-
 @interface ASElementMap ()
 
 @property (nonatomic, strong, readonly) NSArray<ASSection *> *sections;
