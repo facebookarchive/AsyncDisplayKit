@@ -7,6 +7,7 @@
 //
 
 #import "ASResponderChainEnumerator.h"
+#import <AsyncDisplayKit/ASAssert.h>
 
 @implementation ASResponderChainEnumerator {
   UIResponder *_currentResponder;
@@ -14,6 +15,7 @@
 
 - (instancetype)initWithResponder:(UIResponder *)responder
 {
+  ASDisplayNodeAssertMainThread();
   if (self = [super init]) {
     _currentResponder = responder;
   }
@@ -24,6 +26,7 @@
 
 - (id)nextObject
 {
+  ASDisplayNodeAssertMainThread();
   id result = [_currentResponder nextResponder];
   _currentResponder = result;
   return result;

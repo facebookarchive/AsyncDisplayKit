@@ -9,6 +9,7 @@
 //
 
 #import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASDisplayNode+Convenience.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
 #import <AsyncDisplayKit/ASControlNode.h>
