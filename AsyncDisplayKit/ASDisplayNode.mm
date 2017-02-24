@@ -46,7 +46,7 @@
  * and check ownership count of the mutex.
  */
 #if CHECK_LOCKING_SAFETY
-  #define ASDisplayNodeAssertLockUnownedByCurrentThread(lock) ASDisplayNodeAssertFalse(lock.ownedByCurrentThread());
+  #define ASDisplayNodeAssertLockUnownedByCurrentThread(lock) ASDisplayNodeAssertFalse(lock.ownedByCurrentThread())
 #else
   #define ASDisplayNodeAssertLockUnownedByCurrentThread(lock)
 #endif
@@ -924,29 +924,33 @@ ASLayoutElementFinalLayoutElementDefault
 - (void)__layout
 {
   ASDisplayNodeAssertMainThread();
-  ASDN::MutexLocker l(__instanceLock__);
-  CGRect bounds = _threadSafeBounds;
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
-  if (CGRectEqualToRect(bounds, CGRectZero)) {
-    // Performing layout on a zero-bounds view often results in frame calculations
-    // with negative sizes after applying margins, which will cause
-    // measureWithSizeRange: on subnodes to assert.
-    LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
-    return;
-  }
-  
-  // If a current layout transition is in progress there is no need to do a measurement and layout pass in here as
-  // this is supposed to happen within the layout transition process
-  if ([self _isTransitionInProgress]) {
-    return;
-  }
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    CGRect bounds = _threadSafeBounds;
     
-  // This method will confirm that the layout is up to date (and update if needed).
-  // Importantly, it will also APPLY the layout to all of our subnodes if (unless parent is transitioning).
-  [self _locked_measureNodeWithBoundsIfNecessary:bounds];
-  _pendingDisplayNodeLayout = nullptr;
-  
-  [self _locked_layoutPlaceholderIfNecessary];
+    if (CGRectEqualToRect(bounds, CGRectZero)) {
+      // Performing layout on a zero-bounds view often results in frame calculations
+      // with negative sizes after applying margins, which will cause
+      // measureWithSizeRange: on subnodes to assert.
+      LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
+      return;
+    }
+    
+    // If a current layout transition is in progress there is no need to do a measurement and layout pass in here as
+    // this is supposed to happen within the layout transition process
+    if (_transitionInProgress) {
+      return;
+    }
+    
+    // This method will confirm that the layout is up to date (and update if needed).
+    // Importantly, it will also APPLY the layout to all of our subnodes if (unless parent is transitioning).
+    [self _locked_measureNodeWithBoundsIfNecessary:bounds];
+    _pendingDisplayNodeLayout = nullptr;
+    
+    [self _locked_layoutPlaceholderIfNecessary];
+  }
   
   [self layout];
   [self layoutDidFinish];
@@ -1062,6 +1066,8 @@ ASLayoutElementFinalLayoutElementDefault
 - (void)layoutDidFinish
 {
   // Hook for subclasses
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
 }
 
 #pragma mark Calculation
@@ -1316,6 +1322,7 @@ ASLayoutElementFinalLayoutElementDefault
 - (void)layout
 {
   ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
 
   __instanceLock__.lock();
   if (_calculatedDisplayNodeLayout->isDirty()) {
@@ -1488,7 +1495,7 @@ ASLayoutElementFinalLayoutElementDefault
 - (void)cancelLayoutTransition
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if ([self _isTransitionInProgress]) {
+  if (_transitionInProgress) {
     // Cancel transition in progress
     [self _finishOrCancelTransition];
       
