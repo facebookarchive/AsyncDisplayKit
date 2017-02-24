@@ -18,6 +18,7 @@
 
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
+#import <AsyncDisplayKit/ASRectTable.h>
 
 CGPoint const CGPointNull = {NAN, NAN};
 
@@ -60,6 +61,8 @@ static inline NSString * descriptionIndents(NSUInteger indents)
  */
 @property (nonatomic, strong) NSMutableArray<id<ASLayoutElement>> *sublayoutLayoutElements;
 
+@property (nonatomic, strong, readonly) ASRectTable<id<ASLayoutElement>, id> *elementToRectTable;
+
 @end
 
 @implementation ASLayout
@@ -101,6 +104,12 @@ static inline NSString * descriptionIndents(NSUInteger indents)
     }
 
     _sublayouts = sublayouts != nil ? [sublayouts copy] : @[];
+
+    _elementToRectTable = [ASRectTable rectTableForWeakObjectPointers];
+    for (ASLayout *layout in sublayouts) {
+      [_elementToRectTable setRect:layout.frame forKey:layout.layoutElement];
+    }
+    
     _flattened = NO;
     _retainSublayoutLayoutElements = NO;
   }
@@ -219,6 +228,11 @@ static inline NSString * descriptionIndents(NSUInteger indents)
 - (ASLayoutElementType)type
 {
   return _layoutElementType;
+}
+
+- (CGRect)frameForElement:(id<ASLayoutElement>)layoutElement
+{
+  return [_elementToRectTable rectForKey:layoutElement];
 }
 
 - (CGRect)frame

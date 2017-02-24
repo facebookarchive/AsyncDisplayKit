@@ -71,6 +71,12 @@ ASDISPLAYNODE_EXTERN_C_END
 @property (nonatomic, copy, readonly) NSArray<ASLayout *> *sublayouts;
 
 /**
+ * The frame for the given element, or CGRectNull if 
+ * the element is not a direct descendent of this layout.
+ */
+- (CGRect)frameForElement:(id<ASLayoutElement>)layoutElement;
+
+/**
  * @abstract Returns a valid frame for the current layout computed with the size and position.
  * @discussion Clamps the layout's origin or position to 0 if any of the calculated values are infinite.
  */
