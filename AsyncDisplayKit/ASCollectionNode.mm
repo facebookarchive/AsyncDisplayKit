@@ -12,6 +12,8 @@
 
 #import <AsyncDisplayKit/ASCollectionNode.h>
 
+#import <AsyncDisplayKit/ASCollectionElement.h>
+#import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASCollectionInternal.h>
 #import <AsyncDisplayKit/ASCollectionViewLayoutFacilitatorProtocol.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
@@ -418,13 +420,13 @@
 - (NSInteger)numberOfItemsInSection:(NSInteger)section
 {
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController numberOfRowsInSection:section];
+  return [self.dataController.pendingMap numberOfItemsInSection:section];
 }
 
 - (NSInteger)numberOfSections
 {
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController numberOfSections];
+  return self.dataController.pendingMap.numberOfSections;
 }
 
 - (NSArray<__kindof ASCellNode *> *)visibleNodes
@@ -436,12 +438,12 @@
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController nodeAtIndexPath:indexPath];
+  return [self.dataController.pendingMap elementForItemAtIndexPath:indexPath].node;
 }
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
-  return [self.dataController indexPathForNode:cellNode];
+  return [self.dataController.pendingMap indexPathForElement:cellNode.collectionElement];
 }
 
 - (NSArray<NSIndexPath *> *)indexPathsForVisibleItems
@@ -484,7 +486,7 @@
 - (id<ASSectionContext>)contextForSection:(NSInteger)section
 {
   ASDisplayNodeAssertMainThread();
-  return [self.dataController contextForSection:section];
+  return [self.dataController.pendingMap contextForSection:section];
 }
 
 #pragma mark - Editing

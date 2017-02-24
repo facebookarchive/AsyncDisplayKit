@@ -11,6 +11,8 @@
 //
 
 #import <AsyncDisplayKit/ASTableNode.h>
+#import <AsyncDisplayKit/ASCollectionElement.h>
+#import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASTableViewInternal.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
@@ -438,14 +440,14 @@ ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 {
   ASDisplayNodeAssertMainThread();
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController numberOfRowsInSection:section];
+  return [self.dataController.pendingMap numberOfItemsInSection:section];
 }
 
 - (NSInteger)numberOfSections
 {
   ASDisplayNodeAssertMainThread();
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController numberOfSections];
+  return [self.dataController.pendingMap numberOfSections];
 }
 
 - (NSArray<__kindof ASCellNode *> *)visibleNodes
@@ -456,13 +458,13 @@ ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 
 - (NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode
 {
-  return [self.dataController indexPathForNode:cellNode];
+  return [self.dataController.pendingMap indexPathForElement:cellNode.collectionElement];
 }
 
 - (ASCellNode *)nodeForRowAtIndexPath:(NSIndexPath *)indexPath
 {
   [self reloadDataInitiallyIfNeeded];
-  return [self.dataController nodeAtIndexPath:indexPath];
+  return [self.dataController.pendingMap elementForItemAtIndexPath:indexPath].node;
 }
 
 - (CGRect)rectForRowAtIndexPath:(NSIndexPath *)indexPath

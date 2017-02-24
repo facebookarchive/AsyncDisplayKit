@@ -13,8 +13,10 @@
 #import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h> // Required for interfaceState and hierarchyState setter methods.
+#import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASMultidimensionalArrayUtils.h>
 #import <AsyncDisplayKit/ASWeakSet.h>
@@ -207,9 +209,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _updateCountThisFrame += 1;
 #endif
   
-  // allNodes is a 2D array: it contains arrays for each section, each containing nodes.
-  NSArray<NSArray *> *allNodes = [_dataSource completedNodes];
-  NSUInteger numberOfSections = [allNodes count];
+  ASElementMap *map = [_dataSource elementMapForRangeController:self];
 
   // TODO: Consider if we need to use this codepath, or can rely on something more similar to the data & display ranges
   // Example: ... = [_layoutController indexPathsForScrolling:scrollDirection rangeType:ASLayoutRangeTypeVisible];
@@ -237,10 +237,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if (_layoutControllerImplementsSetVisibleIndexPaths) {
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
-  
-  NSArray<ASDisplayNode *> *currentSectionNodes = nil;
-  NSInteger currentSectionIndex = -1; // Set to -1 so we don't match any indexPath.section on the first iteration.
-  NSUInteger numberOfNodesInSection = 0;
   
   NSSet<NSIndexPath *> *visibleIndexPaths = [NSSet setWithArray:visibleNodePaths];
   NSSet<NSIndexPath *> *displayIndexPaths = nil;
@@ -300,7 +296,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   _preserveCurrentRangeMode = NO;
   
   if (!_rangeIsValid) {
-    [allIndexPaths addObjectsFromArray:ASIndexPathsForTwoDimensionalArray(allNodes)];
+    [allIndexPaths addObjectsFromArray:map.itemIndexPaths];
   }
   
 #if ASRangeControllerLoggingEnabled
@@ -344,40 +340,26 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
         }
       }
     }
-    
-    NSInteger section = indexPath.section;
-    NSInteger row     = indexPath.row;
-    
-    if (section >= 0 && row >= 0 && section < numberOfSections) {
-      if (section != currentSectionIndex) {
-        // Often we'll be dealing with indexPaths in the same section, but the set isn't sorted and we may even bounce
-        // between the same ones.  Still, this saves dozens of method calls to access the inner array and count.
-        currentSectionNodes = allNodes[section];
-        numberOfNodesInSection = [currentSectionNodes count];
-        currentSectionIndex = section;
+
+    ASCellNode *node = [map elementForItemAtIndexPath:indexPath].nodeIfAllocated;
+    if (node != nil) {
+      ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
+      if (ASInterfaceStateIncludesVisible(interfaceState)) {
+        [newVisibleNodes addObject:node];
       }
-      
-      if (row < numberOfNodesInSection) {
-        ASDisplayNode *node = currentSectionNodes[row];
-        
-        ASDisplayNodeAssert(node.hierarchyState & ASHierarchyStateRangeManaged, @"All nodes reaching this point should be range-managed, or interfaceState may be incorrectly reset.");
-        if (ASInterfaceStateIncludesVisible(interfaceState)) {
-          [newVisibleNodes addObject:node];
-        }
-        // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
-        if (node.interfaceState != interfaceState) {
+      // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
+      if (node.interfaceState != interfaceState) {
 #if ASRangeControllerLoggingEnabled
-          [modifiedIndexPaths addObject:indexPath];
+        [modifiedIndexPaths addObject:indexPath];
 #endif
-          
-          BOOL nodeShouldScheduleDisplay = [node shouldScheduleDisplayWithNewInterfaceState:interfaceState];
-          [node recursivelySetInterfaceState:interfaceState];
-          
-          if (nodeShouldScheduleDisplay) {
-            [self registerForNodeDisplayNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
-            if (_didRegisterForNodeDisplayNotifications) {
-              _pendingDisplayNodesTimestamp = CACurrentMediaTime();
-            }
+
+        BOOL nodeShouldScheduleDisplay = [node shouldScheduleDisplayWithNewInterfaceState:interfaceState];
+        [node recursivelySetInterfaceState:interfaceState];
+
+        if (nodeShouldScheduleDisplay) {
+          [self registerForNodeDisplayNotificationsForInterfaceStateIfNeeded:selfInterfaceState];
+          if (_didRegisterForNodeDisplayNotifications) {
+            _pendingDisplayNodesTimestamp = CACurrentMediaTime();
           }
         }
       }
@@ -505,24 +487,22 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
 - (void)clearContents
 {
-  for (NSArray *section in [_dataSource completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      if (ASInterfaceStateIncludesDisplay(node.interfaceState)) {
-        [node exitInterfaceState:ASInterfaceStateDisplay];
-      }
+  [[_dataSource elementMapForRangeController:self] enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
+    ASCellNode *node = element.nodeIfAllocated;
+    if (ASInterfaceStateIncludesDisplay(node.interfaceState)) {
+      [node exitInterfaceState:ASInterfaceStateDisplay];
     }
-  }
+  }];
 }
 
 - (void)clearPreloadedData
 {
-  for (NSArray *section in [_dataSource completedNodes]) {
-    for (ASDisplayNode *node in section) {
-      if (ASInterfaceStateIncludesPreload(node.interfaceState)) {
-        [node exitInterfaceState:ASInterfaceStatePreload];
-      }
+  [[_dataSource elementMapForRangeController:self] enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
+    ASCellNode *node = element.nodeIfAllocated;
+    if (ASInterfaceStateIncludesPreload(node.interfaceState)) {
+      [node exitInterfaceState:ASInterfaceStatePreload];
     }
-  }
+  }];
 }
 
 #pragma mark - Class Methods (Application Notification Handlers)
@@ -625,7 +605,7 @@ static ASLayoutRangeMode __rangeModeForMemoryWarnings = ASLayoutRangeModeLowMemo
 {
   NSMutableString *description = [NSMutableString stringWithFormat:@"%@ %@", [super description], @" allPreviousIndexPaths:\n"];
   for (NSIndexPath *indexPath in indexPaths) {
-    ASDisplayNode *node = [_dataSource rangeController:self nodeAtIndexPath:indexPath];
+    ASDisplayNode *node = [[_dataSource elementMapForRangeController:self] elementForItemAtIndexPath:indexPath].nodeIfAllocated;
     ASInterfaceState interfaceState = node.interfaceState;
     BOOL inVisible = ASInterfaceStateIncludesVisible(interfaceState);
     BOOL inDisplay = ASInterfaceStateIncludesDisplay(interfaceState);

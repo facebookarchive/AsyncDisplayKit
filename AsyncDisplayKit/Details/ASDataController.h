@@ -28,6 +28,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class ASCellNode;
 @class ASDataController;
+@class ASElementMap;
 @class _ASHierarchyChangeSet;
 @protocol ASTraitEnvironment;
 @protocol ASSectionContext;
@@ -116,6 +117,16 @@ extern NSString * const ASCollectionInvalidUpdateException;
 - (instancetype)initWithDataSource:(id<ASDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
 
 /**
+ * The map that is currently displayed. The "UIKit index space."
+ */
+@property (nonatomic, strong, readonly) ASElementMap *visibleMap;
+
+/**
+ * The latest map fetched from the data source. May be more recent than @c visibleMap.
+ */
+@property (nonatomic, strong, readonly) ASElementMap *pendingMap;
+
+/**
  Data source for fetching data info.
  */
 @property (nonatomic, weak, readonly) id<ASDataControllerSource> dataSource;
@@ -174,42 +185,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
 - (void)relayoutAllNodes;
 
 - (void)waitUntilAllUpdatesAreCommitted;
-
-/** @name Data Querying */
-
-- (NSUInteger)numberOfSections;
-
-- (NSUInteger)numberOfRowsInSection:(NSUInteger)section;
-
-- (nullable ASCellNode *)nodeAtIndexPath:(NSIndexPath *)indexPath;
-
-- (NSUInteger)completedNumberOfSections;
-
-- (NSUInteger)completedNumberOfRowsInSection:(NSUInteger)section;
-
-- (nullable ASCellNode *)nodeAtCompletedIndexPath:(NSIndexPath *)indexPath;
-
-/**
- * @return The index path, in the data source's index space, for the given node.
- */
-- (nullable NSIndexPath *)indexPathForNode:(ASCellNode *)cellNode;
-
-/**
- * @return The index path, in UIKit's index space, for the given node.
- *
- * @discussion @c indexPathForNode: is returns an index path in the data source's index space.
- *   This method is useful for e.g. looking up the cell for a given node.
- */
-- (nullable NSIndexPath *)completedIndexPathForNode:(ASCellNode *)cellNode;
-
-/**
- * Direct access to the nodes that have completed calculation and layout
- */
-- (NSArray<NSArray <ASCellNode *> *> *)completedNodes;
-
-- (nullable ASCellNode *)supplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
-
-- (nullable id<ASSectionContext>)contextForSection:(NSInteger)section;
 
 @end
 

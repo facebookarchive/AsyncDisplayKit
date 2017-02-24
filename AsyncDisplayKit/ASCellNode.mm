@@ -14,6 +14,7 @@
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
+#import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASTableView+Undeprecated.h>
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
@@ -389,6 +390,12 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
 
   return result;
 }
+
+- (NSString *)supplementaryElementKind
+{
+  return self.collectionElement.supplementaryElementKind;
+}
+
 @end
 
 
