@@ -14,12 +14,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASCollectionElement, ASSection;
 @protocol ASSectionContext;
 
-// SectionIndex -> ItemIndex -> Element
-typedef NSArray<NSArray<ASCollectionElement *> *> ASCollectionElementTwoDimensionalArray;
-
-// ElementKind -> IndexPath -> Element
-typedef NSDictionary<NSString *, NSDictionary<NSIndexPath *, ASCollectionElement *> *> ASSupplementaryElementDictionary;
-
 AS_SUBCLASSING_RESTRICTED
 @interface ASElementMap : NSObject <NSCopying>
 
@@ -69,6 +63,16 @@ AS_SUBCLASSING_RESTRICTED
  * Enumerates all the elements in this map, and their index paths.
  */
 - (void)enumerateUsingBlock:(AS_NOESCAPE void(^)(NSIndexPath *indexPath, ASCollectionElement *element, BOOL *stop))block;
+
+
+#pragma mark - Initialization -- Only Useful to ASDataController
+
+
+// SectionIndex -> ItemIndex -> Element
+typedef NSArray<NSArray<ASCollectionElement *> *> ASCollectionElementTwoDimensionalArray;
+
+// ElementKind -> IndexPath -> Element
+typedef NSDictionary<NSString *, NSDictionary<NSIndexPath *, ASCollectionElement *> *> ASSupplementaryElementDictionary;
 
 /**
  * Create a new element map for this dataset. You probably don't need to use this – ASDataController is the only one who creates these.

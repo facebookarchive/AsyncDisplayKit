@@ -98,6 +98,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   _eventLog = eventLog;
 #endif
 
+  _visibleMap = _pendingMap = [[ASElementMap alloc] init];
   
   _nextSectionID = 0;
   
@@ -460,7 +461,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
 
   // Mutable copy of current data.
-  ASMutableElementMap *mutableMap = [_pendingMap mutableCopy] ?: [[ASMutableElementMap alloc] init];
+  ASMutableElementMap *mutableMap = [_pendingMap mutableCopy];
   
   // Step 1: update the mutable copies to match the data source's state
   [self _updateSectionContextsInMap:mutableMap changeSet:changeSet];
