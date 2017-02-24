@@ -14,8 +14,17 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASCollectionElement, ASSection;
 @protocol ASSectionContext;
 
+typedef NSArray<NSArray<ASCollectionElement *> *> ASCollectionElementTwoDimensionalArray;
+
+// ElementKind -> IndexPath -> Element
+typedef NSDictionary<NSString *, NSDictionary<NSIndexPath *, ASCollectionElement *> *> ASSupplementaryElementDictionary;
+
 AS_SUBCLASSING_RESTRICTED
 @interface ASElementMap : NSObject <NSCopying, NSMutableCopying>
+
+- (instancetype)initWithSections:(NSArray<ASSection *> *)sections
+                           items:(ASCollectionElementTwoDimensionalArray *)items
+           supplementaryElements:(ASSupplementaryElementDictionary *)supplementaryElements;
 
 @property (readonly) NSInteger numberOfSections;
 
@@ -45,32 +54,6 @@ AS_SUBCLASSING_RESTRICTED
 - (nullable ASCollectionElement *)supplementaryElementOfKind:(NSString *)supplementaryElementKind atIndexPath:(NSIndexPath *)indexPath;
 
 - (void)enumerateUsingBlock:(AS_NOESCAPE void(^)(NSIndexPath *indexPath, ASCollectionElement *element, BOOL *stop))block;
-
-@end
-
-/**
- * This mutable version will be removed in the future. It's only here now to keep the diff small
- * as we port data controller to use this.
- */
-AS_SUBCLASSING_RESTRICTED
-@interface ASMutableElementMap : NSObject <NSCopying>
-
-- (void)insertSection:(ASSection *)section atIndex:(NSInteger)index;
-
-- (void)removeAllSectionContexts;
-
-/// Only modifies the array of ASSection * objects
-- (void)removeSectionContextsAtIndexes:(NSIndexSet *)indexes;
-
-- (void)removeAllElements;
-
-- (void)removeItemsAtIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
-
-- (void)removeElementsOfKind:(NSString *)kind inSections:(NSIndexSet *)sections;
-
-- (void)insertEmptySectionsOfItemsAtIndexes:(NSIndexSet *)sections;
-
-- (void)insertElement:(ASCollectionElement *)element atIndexPath:(NSIndexPath *)indexPath;
 
 @end
 

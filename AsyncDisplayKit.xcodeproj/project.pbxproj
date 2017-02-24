@@ -315,6 +315,8 @@
 		CC0F886C1E4286FA00576FED /* ReferenceImages_64 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F88691E4286FA00576FED /* ReferenceImages_64 */; };
 		CC0F886D1E4286FA00576FED /* ReferenceImages_iOS_10 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */; };
 		CC11F97A1DB181180024D77B /* ASNetworkImageNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */; };
+		CC2F65EE1E5FFB1600DA57C9 /* ASMutableElementMap.h in Headers */ = {isa = PBXBuildFile; fileRef = CC2F65EC1E5FFB1600DA57C9 /* ASMutableElementMap.h */; };
+		CC2F65EF1E5FFB1600DA57C9 /* ASMutableElementMap.m in Sources */ = {isa = PBXBuildFile; fileRef = CC2F65ED1E5FFB1600DA57C9 /* ASMutableElementMap.m */; };
 		CC3B20841C3F76D600798563 /* ASPendingStateController.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20811C3F76D600798563 /* ASPendingStateController.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		CC3B20861C3F76D600798563 /* ASPendingStateController.mm in Sources */ = {isa = PBXBuildFile; fileRef = CC3B20821C3F76D600798563 /* ASPendingStateController.mm */; };
 		CC3B208A1C3F7A5400798563 /* ASWeakSet.h in Headers */ = {isa = PBXBuildFile; fileRef = CC3B20871C3F7A5400798563 /* ASWeakSet.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -699,6 +701,8 @@
 		CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ReferenceImages_iOS_10; sourceTree = "<group>"; };
 		CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASNetworkImageNodeTests.m; sourceTree = "<group>"; };
 		CC2E317F1DAC353700EEE891 /* ASCollectionView+Undeprecated.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASCollectionView+Undeprecated.h"; sourceTree = "<group>"; };
+		CC2F65EC1E5FFB1600DA57C9 /* ASMutableElementMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMutableElementMap.h; sourceTree = "<group>"; };
+		CC2F65ED1E5FFB1600DA57C9 /* ASMutableElementMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASMutableElementMap.m; sourceTree = "<group>"; };
 		CC3B20811C3F76D600798563 /* ASPendingStateController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASPendingStateController.h; sourceTree = "<group>"; };
 		CC3B20821C3F76D600798563 /* ASPendingStateController.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASPendingStateController.mm; sourceTree = "<group>"; };
 		CC3B20871C3F7A5400798563 /* ASWeakSet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASWeakSet.h; sourceTree = "<group>"; };
@@ -1128,6 +1132,8 @@
 		058D0A01195D050800B7D73C /* Private */ = {
 			isa = PBXGroup;
 			children = (
+				CC2F65EC1E5FFB1600DA57C9 /* ASMutableElementMap.h */,
+				CC2F65ED1E5FFB1600DA57C9 /* ASMutableElementMap.m */,
 				CC0349FF1E5FAF9700626263 /* ASElementMap.h */,
 				CC034A001E5FAF9700626263 /* ASElementMap.m */,
 				CC55A70F1E52A0F200594372 /* ASResponderChainEnumerator.h */,
@@ -1505,6 +1511,7 @@
 				9CDC18CD1B910E12004965E2 /* ASLayoutElementPrivate.h in Headers */,
 				B35062201B010EFD0018CF92 /* ASLayoutController.h in Headers */,
 				B35062211B010EFD0018CF92 /* ASLayoutRangeType.h in Headers */,
+				CC2F65EE1E5FFB1600DA57C9 /* ASMutableElementMap.h in Headers */,
 				34EFC76A1B701CE600AD841F /* ASLayoutSpec.h in Headers */,
 				B350625C1B010F070018CF92 /* ASLog.h in Headers */,
 				CC3B208A1C3F7A5400798563 /* ASWeakSet.h in Headers */,
@@ -1865,6 +1872,7 @@
 				B350621E1B010EFD0018CF92 /* ASHighlightOverlayLayer.mm in Sources */,
 				9CC606651D24DF9E006581A0 /* NSIndexSet+ASHelpers.m in Sources */,
 				CC0F885F1E4280B800576FED /* _ASCollectionViewCell.m in Sources */,
+				CC2F65EF1E5FFB1600DA57C9 /* ASMutableElementMap.m in Sources */,
 				B35062541B010EFD0018CF92 /* ASImageNode+CGExtras.m in Sources */,
 				6947B0C01E36B4E30007C478 /* ASStackUnpositionedLayout.mm in Sources */,
 				68355B401CB57A69001D4E68 /* ASImageContainerProtocolCategories.m in Sources */,

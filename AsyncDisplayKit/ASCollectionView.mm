@@ -1670,11 +1670,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   return ASInterfaceStateForDisplayNode(self.collectionNode, self.window);
 }
 
-- (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath
-{
-  return [self nodeForItemAtIndexPath:indexPath];
-}
-
 - (NSString *)nameForRangeControllerDataSource
 {
   return self.asyncDataSource ? NSStringFromClass([self.asyncDataSource class]) : NSStringFromClass([self class]);

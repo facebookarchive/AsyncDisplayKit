@@ -21,6 +21,7 @@
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASDispatch.h>
 #import <AsyncDisplayKit/ASElementMap.h>
+#import <AsyncDisplayKit/ASMutableElementMap.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
@@ -51,9 +52,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 #endif
 
 @interface ASDataController () {
-
-  ASElementMap *_pendingMap;
-  ASElementMap *_visibleMap;
 
   NSInteger _nextSectionID;
   
@@ -318,6 +316,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 /**
  * Inserts new elements of a certain kind at some index paths
  *
+ * @param map The map to insert the elements into.
  * @param kind The kind of the elements, e.g ASDataControllerRowNodeKind
  * @param indexPaths The index paths at which new elements should be populated
  * @param environment The trait environment needed to initialize elements

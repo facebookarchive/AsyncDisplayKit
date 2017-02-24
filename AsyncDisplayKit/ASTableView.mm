@@ -1397,11 +1397,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return self.scrollDirection;
 }
 
-- (ASDisplayNode *)rangeController:(ASRangeController *)rangeController nodeAtIndexPath:(NSIndexPath *)indexPath
-{
-  return [_dataController nodeAtIndexPath:indexPath];
-}
-
 - (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController
 {
   ASDisplayNodeAssertMainThread();
