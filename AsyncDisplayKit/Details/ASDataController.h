@@ -117,8 +117,14 @@ AS_SUBCLASSING_RESTRICTED
 
 - (instancetype)initWithDataSource:(id<ASDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
 
+/**
+ * The map that is currently displayed. The "UIKit index space."
+ */
 @property (nonatomic, strong, readonly) ASElementMap *visibleMap;
 
+/**
+ * The map that is currently being prepared for display. The "data source index space."
+ */
 @property (nonatomic, strong, readonly) ASElementMap *pendingMap;
 
 /**

@@ -42,4 +42,7 @@ AS_SUBCLASSING_RESTRICTED
 
 @end
 
+@interface ASElementMap (MutableCopying) <NSMutableCopying>
+@end
+
 NS_ASSUME_NONNULL_END

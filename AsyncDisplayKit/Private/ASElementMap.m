@@ -88,11 +88,6 @@ typedef NSDictionary<NSString *, NSDictionary<NSIndexPath *, ASCollectionElement
   return _sections[section].context;
 }
 
-- (NSArray<NSString *> *)supplementaryElementKinds
-{
-  return [_supplementaryElements allKeys] ?: @[];
-}
-
 - (nullable NSIndexPath *)indexPathForElement:(ASCollectionElement *)element
 {
   return [_elementToIndexPathMap objectForKey:element];
@@ -149,6 +144,9 @@ typedef NSDictionary<NSString *, NSDictionary<NSIndexPath *, ASCollectionElement
 {
   return self;
 }
+
+// NSMutabeCopying conformance is declared in ASMutableElementMap.h, so that most consumers of ASElementMap don't bother with it.
+#pragma mark - NSMutableCopying
 
 - (id)mutableCopyWithZone:(NSZone *)zone
 {
