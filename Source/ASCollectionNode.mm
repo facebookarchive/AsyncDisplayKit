@@ -26,6 +26,7 @@
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 #import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASRangeController.h>
 
 #pragma mark - _ASCollectionPendingState
 
@@ -44,7 +45,7 @@
 {
   self = [super init];
   if (self) {
-    _rangeMode = ASLayoutRangeModeCount;
+    _rangeMode = ASLayoutRangeModeUnspecified;
     _allowsSelection = YES;
     _allowsMultipleSelection = NO;
     _inverted = NO;
@@ -64,7 +65,7 @@
   self = [super init];
   if (self) {
     _tuningParameters = std::vector<std::vector<ASRangeTuningParameters>> (ASLayoutRangeModeCount, std::vector<ASRangeTuningParameters> (ASLayoutRangeTypeCount));
-    _rangeMode = ASLayoutRangeModeCount;
+    _rangeMode = ASLayoutRangeModeUnspecified;
   }
   return self;
 }
@@ -158,7 +159,7 @@
     view.allowsSelection         = pendingState.allowsSelection;
     view.allowsMultipleSelection = pendingState.allowsMultipleSelection;
 
-    if (pendingState.rangeMode != ASLayoutRangeModeCount) {
+    if (pendingState.rangeMode != ASLayoutRangeModeUnspecified) {
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
     }
   }

@@ -10,10 +10,8 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASControlNode.h>
 #import <AsyncDisplayKit/ASImageNode.h>
-#import <AsyncDisplayKit/ASRangeController.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -25,8 +23,7 @@ NS_ASSUME_NONNULL_BEGIN
  * as well as upscaling (such as providing a URL not suitable for a Retina device).  For dev purposes only.
  * @param enabled Specify YES to show the label on all ASImageNodes with non-1.0x source-to-bounds pixel ratio.
  */
-+ (void)setShouldShowImageScalingOverlay:(BOOL)show;
-+ (BOOL)shouldShowImageScalingOverlay;
+@property (class, nonatomic) BOOL shouldShowImageScalingOverlay;
 
 @end
 
@@ -41,33 +38,19 @@ NS_ASSUME_NONNULL_BEGIN
  * overlay rect, but can't be visualized).
  * @param enable Specify YES to make this debug feature enabled when messaging the ASControlNode class.
  */
-+ (void)setEnableHitTestDebug:(BOOL)enable;
-+ (BOOL)enableHitTestDebug;
+@property (class, nonatomic) BOOL enableHitTestDebug;
 
 @end
 
-@interface ASRangeController (Debugging)
+@interface ASDisplayNode (RangeDebugging)
 
 /**
- * Class method to enable a visualization overlay of the all ASRangeController's tuning parameters. For dev purposes only.
- * To use, message ASRangeController in the AppDelegate --> [ASRangeController setShouldShowRangeDebugOverlay:YES];
- * @param enable Specify YES to make this debug feature enabled when messaging the ASRangeController class.
+ * Enable a visualization overlay of the all table/collection tuning parameters. For dev purposes only.
+ * To use, set this in the AppDelegate --> ASDisplayNode.shouldShowRangeDebugOverlay = YES
  */
-+ (void)setShouldShowRangeDebugOverlay:(BOOL)show;
-+ (BOOL)shouldShowRangeDebugOverlay;
-
-+ (void)layoutDebugOverlayIfNeeded;
-
-- (void)addRangeControllerToRangeDebugOverlay;
-
-- (void)updateRangeController:(ASRangeController *)controller
-     withScrollableDirections:(ASScrollDirection)scrollableDirections
-              scrollDirection:(ASScrollDirection)direction
-                    rangeMode:(ASLayoutRangeMode)mode
-      displayTuningParameters:(ASRangeTuningParameters)displayTuningParameters
-      preloadTuningParameters:(ASRangeTuningParameters)preloadTuningParameters
-               interfaceState:(ASInterfaceState)interfaceState;
+@property (class, nonatomic) BOOL shouldShowRangeDebugOverlay;
 
 @end
+
 
 NS_ASSUME_NONNULL_END

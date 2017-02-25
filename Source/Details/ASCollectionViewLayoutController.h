@@ -14,6 +14,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class ASCollectionView;
 
+AS_SUBCLASSING_RESTRICTED
 @interface ASCollectionViewLayoutController : ASAbstractLayoutController
 
 - (instancetype)initWithCollectionView:(ASCollectionView *)collectionView;

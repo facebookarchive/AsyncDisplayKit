@@ -78,7 +78,7 @@
       <EnvironmentVariables>
          <EnvironmentVariable
             key = "FB_REFERENCE_IMAGE_DIR"
-            value = "$(SOURCE_ROOT)/$(PROJECT_NAME)Tests/ReferenceImages"
+            value = "$(SOURCE_ROOT)/Tests/ReferenceImages"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>

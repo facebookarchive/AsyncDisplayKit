@@ -22,6 +22,7 @@
 #import <AsyncDisplayKit/ASTableView+Undeprecated.h>
 #import <AsyncDisplayKit/ASThread.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASRangeController.h>
 
 #pragma mark - _ASTablePendingState
 
@@ -41,7 +42,7 @@
 {
   self = [super init];
   if (self) {
-    _rangeMode = ASLayoutRangeModeCount;
+    _rangeMode = ASLayoutRangeModeUnspecified;
     _allowsSelection = YES;
     _allowsSelectionDuringEditing = NO;
     _allowsMultipleSelection = NO;
@@ -126,7 +127,7 @@
     view.allowsSelectionDuringEditing = pendingState.allowsSelectionDuringEditing;
     view.allowsMultipleSelection = pendingState.allowsMultipleSelection;
     view.allowsMultipleSelectionDuringEditing = pendingState.allowsMultipleSelectionDuringEditing;
-    if (pendingState.rangeMode != ASLayoutRangeModeCount) {
+    if (pendingState.rangeMode != ASLayoutRangeModeUnspecified) {
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
     }
   }

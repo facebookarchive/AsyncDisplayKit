@@ -19,26 +19,26 @@ Pod::Spec.new do |spec|
 
   # Subspecs
   spec.subspec 'Core' do |core|
-    core.prefix_header_file = 'AsyncDisplayKit/AsyncDisplayKit-Prefix.pch'
+    core.prefix_header_file = 'Source/AsyncDisplayKit-Prefix.pch'
     core.public_header_files = [
-        'AsyncDisplayKit/*.h',
-        'AsyncDisplayKit/Details/**/*.h',
-        'AsyncDisplayKit/Layout/**/*.h',
-        'Base/*.h',
-        'AsyncDisplayKit/Debug/ASLayoutElementInspectorNode.h',
-        'AsyncDisplayKit/TextKit/ASTextNodeTypes.h',
-        'AsyncDisplayKit/TextKit/ASTextKitComponents.h'
+        'Source/*.h',
+        'Source/Details/**/*.h',
+        'Source/Layout/**/*.h',
+        'Source/Base/*.h',
+        'Source/Debug/AsyncDisplayKit+Debug.h',
+        'Source/TextKit/ASTextNodeTypes.h',
+        'Source/TextKit/ASTextKitComponents.h'
     ]
     
     core.source_files = [
-        'AsyncDisplayKit/**/*.{h,m,mm}',
+        'Source/**/*.{h,m,mm}',
         'Base/*.{h,m}',
       
         # Most TextKit components are not public because the C++ content
         # in the headers will cause build errors when using
         # `use_frameworks!` on 0.39.0 & Swift 2.1.
         # See https://github.com/facebook/AsyncDisplayKit/issues/1153
-        'AsyncDisplayKit/TextKit/*.h',
+        'Source/TextKit/*.h',
     ]
     core.xcconfig = { 'GCC_PRECOMPILE_PREFIX_HEADER' => 'YES' }
   end

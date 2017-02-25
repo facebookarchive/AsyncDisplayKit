@@ -241,7 +241,7 @@ static BOOL __enableHitTestDebug = NO;
 
 static BOOL __shouldShowRangeDebugOverlay = NO;
 
-@implementation ASRangeController (Debugging)
+@implementation ASDisplayNode (RangeDebugging)
 
 + (void)setShouldShowRangeDebugOverlay:(BOOL)show
 {
@@ -252,6 +252,10 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 {
   return __shouldShowRangeDebugOverlay;
 }
+
+@end
+
+@implementation ASRangeController (DebugInternal)
 
 + (void)layoutDebugOverlayIfNeeded
 {
@@ -306,7 +310,7 @@ static BOOL __shouldShowRangeDebugOverlay = NO;
 {
   static _ASRangeDebugOverlayView *__rangeDebugOverlay = nil;
   
-  if (!__rangeDebugOverlay && [ASRangeController shouldShowRangeDebugOverlay]) {
+  if (!__rangeDebugOverlay && ASDisplayNode.shouldShowRangeDebugOverlay) {
     __rangeDebugOverlay = [[self alloc] initWithFrame:CGRectZero];
     [[self keyWindow] addSubview:__rangeDebugOverlay];
   }
