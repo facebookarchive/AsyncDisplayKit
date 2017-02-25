@@ -26,6 +26,7 @@
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 #import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASWeakSet.h>
 
 #pragma mark - _ASCollectionPendingState
 
@@ -99,6 +100,10 @@
 @interface ASCollectionNode ()
 {
   ASDN::RecursiveMutex _environmentStateLock;
+  
+  // The cell nodes that expect trait collection updates from us.
+  // Protected by _environmentStateLock
+  ASWeakSet<ASCellNode *> *_nodesForTraitCollectionUpdates;
 }
 @property (nonatomic) _ASCollectionPendingState *pendingState;
 @end
@@ -135,6 +140,7 @@
   };
 
   if (self = [super initWithViewBlock:collectionViewBlock]) {
+    _nodesForTraitCollectionUpdates = [[ASWeakSet alloc] init];
     return self;
   }
   return nil;
@@ -597,9 +603,13 @@
   }
 }
 
+#pragma mark - ASRangeManagingNode
+
+ASRangeManagingNodeSetTraitCollectionForNodeAndRegisterUpdates(_environmentStateLock, _nodesForTraitCollectionUpdates);
+
 #pragma mark - ASPrimitiveTraitCollection
 
-ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
+ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock, _nodesForTraitCollectionUpdates)
 
 #pragma mark - Debugging (Private)
 

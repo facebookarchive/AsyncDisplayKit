@@ -22,6 +22,8 @@
 #import <AsyncDisplayKit/ASTableView+Undeprecated.h>
 #import <AsyncDisplayKit/ASThread.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASWeakSet.h>
+#import <AsyncDisplayKit/ASRangeManagingNode.h>
 
 #pragma mark - _ASTablePendingState
 
@@ -58,6 +60,10 @@
 @interface ASTableNode ()
 {
   ASDN::RecursiveMutex _environmentStateLock;
+  
+  // The cell nodes that expect trait collection updates from us.
+  // Protected by _environmentStateLock
+  ASWeakSet<ASCellNode *> *_nodesForTraitCollectionUpdates;
 }
 
 @property (nonatomic, strong) _ASTablePendingState *pendingState;
@@ -92,6 +98,7 @@
   };
 
   if (self = [super initWithViewBlock:tableViewBlock]) {
+    _nodesForTraitCollectionUpdates = [[ASWeakSet alloc] init];
     return self;
   }
   return nil;
@@ -355,9 +362,13 @@
   }
 }
 
+#pragma mark - ASRangeManagingNode
+
+ASRangeManagingNodeSetTraitCollectionForNodeAndRegisterUpdates(_environmentStateLock, _nodesForTraitCollectionUpdates);
+
 #pragma mark ASEnvironment
 
-ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
+ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock, _nodesForTraitCollectionUpdates)
 
 #pragma mark - Range Tuning
 

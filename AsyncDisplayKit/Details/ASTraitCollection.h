@@ -107,30 +107,18 @@ ASDISPLAYNODE_EXTERN_C_END
   [self setPrimitiveTraitCollection:traitCollection];\
 }\
 
-#define ASLayoutElementCollectionTableSetTraitCollection(lock) \
-- (void)setPrimitiveTraitCollection:(ASPrimitiveTraitCollection)traitCollection\
+#define ASLayoutElementCollectionTableSetTraitCollection(lock, cellNodes) \
+- (void)asyncTraitCollectionDidChange \
 {\
+  [super asyncTraitCollectionDidChange];\
   ASDN::MutexLocker l(lock);\
 \
-  ASPrimitiveTraitCollection oldTraits = self.primitiveTraitCollection;\
-  [super setPrimitiveTraitCollection:traitCollection];\
-\
-  /* Extra Trait Collection Handling */\
-\
-  /* If the node is not loaded  yet don't do anything as otherwise the access of the view will trigger a load*/\
-  if (!self.isNodeLoaded) { return; }\
-\
-  ASPrimitiveTraitCollection currentTraits = self.primitiveTraitCollection;\
-  if (ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(currentTraits, oldTraits) == NO) {\
-    /* Must dispatch to main for self.view && [self.view.dataController visibleMap]*/\
-    ASPerformBlockOnMainThread(^{\
-      ASElementMap *map = self.view.dataController.visibleMap; \
-      [map enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) { \
-         ASTraitCollectionPropagateDown(element.nodeIfAllocated, currentTraits); \
-      }]; \
-    });\
+  /* Pass traits down to all cell nodes even if they aren't yet measured. */\
+  ASPrimitiveTraitCollection traits = self.primitiveTraitCollection;\
+  for (ASCellNode *node in cellNodes) {\
+    ASTraitCollectionPropagateDown(node, traits); \
   }\
-}\
+}
 
 #pragma mark - ASTraitCollection
 

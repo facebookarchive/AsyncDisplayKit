@@ -15,6 +15,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 @class ASCollectionElement;
+@protocol ASRangeManagingNode;
 
 @protocol ASCellNodeInteractionDelegate <NSObject>
 
@@ -62,7 +63,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (weak, nullable) ASCollectionElement *collectionElement;
 
-@property (nonatomic, weak, nullable) ASDisplayNode *owningNode;
+/// Setting this immediately applies the trait collection from the owning node to this cell node.
+@property (nonatomic, weak, nullable) ASDisplayNode<ASRangeManagingNode> *owningNode;
 
 @property (nonatomic, assign) BOOL shouldUseUIKitCell;
 

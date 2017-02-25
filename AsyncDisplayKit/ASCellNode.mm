@@ -21,6 +21,7 @@
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 #import <AsyncDisplayKit/ASCollectionNode.h>
+#import <AsyncDisplayKit/ASRangeManagingNode.h>
 #import <AsyncDisplayKit/ASTableNode.h>
 
 #import <AsyncDisplayKit/ASViewController.h>
@@ -191,7 +192,7 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   }
 }
 
-- (void)setOwningNode:(ASDisplayNode *)owningNode
+- (void)setOwningNode:(ASDisplayNode<ASRangeManagingNode> *)owningNode
 {
   _owningNode = owningNode;
 
@@ -202,6 +203,8 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   } else if ([owningNode isKindOfClass:[ASCollectionNode class]]) {
     _owningNodeType.isCollectionNode = 1;
   }
+  
+  [owningNode setTraitCollectionForNodeAndRegisterForUpdates:self];
 }
 
 - (void)__setSelectedFromUIKit:(BOOL)selected;

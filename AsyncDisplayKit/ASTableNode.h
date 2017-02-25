@@ -14,6 +14,7 @@
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
 #import <AsyncDisplayKit/ASTableView.h>
+#import <AsyncDisplayKit/ASRangeManagingNode.h>
 
 
 NS_ASSUME_NONNULL_BEGIN
@@ -26,7 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
  * ASTableNode is a node based class that wraps an ASTableView. It can be used
  * as a subnode of another node, and provide room for many (great) features and improvements later on.
  */
-@interface ASTableNode : ASDisplayNode <ASRangeControllerUpdateRangeProtocol>
+@interface ASTableNode : ASDisplayNode <ASRangeControllerUpdateRangeProtocol, ASRangeManagingNode>
 
 - (instancetype)init; // UITableViewStylePlain
 - (instancetype)initWithStyle:(UITableViewStyle)style;

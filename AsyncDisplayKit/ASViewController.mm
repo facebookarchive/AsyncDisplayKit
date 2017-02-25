@@ -280,12 +280,7 @@ ASVisibilityDepthImplementation;
   ASPrimitiveTraitCollection oldTraitCollection = self.node.primitiveTraitCollection;
   
   if (ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(traitCollection, oldTraitCollection) == NO) {
-    self.node.primitiveTraitCollection = traitCollection;
-    
-    NSArray<id<ASLayoutElement>> *children = [self.node sublayoutElements];
-    for (id<ASLayoutElement> child in children) {
-      ASTraitCollectionPropagateDown(child, traitCollection);
-    }
+    ASTraitCollectionPropagateDown(self.node, traitCollection);
     
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
