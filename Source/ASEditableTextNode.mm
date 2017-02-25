@@ -432,7 +432,7 @@
     [_textKitComponents.textStorage setAttributedString:attributedStringToDisplay];
 
   // Calculated size depends on the seeded text.
-  [self setNeedsLayout];
+  [self invalidateCalculatedLayout];
 
   // Update if placeholder is shown.
   [self _updateDisplayingPlaceholder];
