@@ -190,6 +190,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     unsigned int collectionNodeNodeForItem:1;
     unsigned int collectionNodeNodeBlockForItem:1;
     unsigned int collectionNodeNodeForSupplementaryElement:1;
+    unsigned int collectionNodeNodeBlockForSupplementaryElement:1;
     unsigned int collectionNodeSupplementaryElementKindsInSection:1;
     unsigned int numberOfSectionsInCollectionNode:1;
     unsigned int collectionNodeNumberOfItemsInSection:1;
@@ -422,6 +423,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     _asyncDataSourceFlags.collectionNodeNumberOfItemsInSection = [_asyncDataSource respondsToSelector:@selector(collectionNode:numberOfItemsInSection:)];
     _asyncDataSourceFlags.collectionNodeContextForSection = [_asyncDataSource respondsToSelector:@selector(collectionNode:contextForSection:)];
     _asyncDataSourceFlags.collectionNodeNodeForSupplementaryElement = [_asyncDataSource respondsToSelector:@selector(collectionNode:nodeForSupplementaryElementOfKind:atIndexPath:)];
+    _asyncDataSourceFlags.collectionNodeNodeBlockForSupplementaryElement = [_asyncDataSource respondsToSelector:@selector(collectionNode:nodeBlockForSupplementaryElementOfKind:atIndexPath:)];
     _asyncDataSourceFlags.collectionNodeSupplementaryElementKindsInSection = [_asyncDataSource respondsToSelector:@selector(collectionNode:supplementaryElementKindsInSection:)];
 
     _asyncDataSourceFlags.interop = [_asyncDataSource conformsToProtocol:@protocol(ASCollectionDataSourceInterop)];
@@ -1555,25 +1557,35 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  //TODO _asyncDataSource to support supplementary node block and deprecate nodeForSupplementaryElementOfKind
-  ASCellNode *node = nil;
-  if (_asyncDataSourceFlags.collectionNodeNodeForSupplementaryElement) {
+  ASCellNodeBlock nodeBlock = nil;
+  if (_asyncDataSourceFlags.collectionNodeNodeBlockForSupplementaryElement) {
     GET_COLLECTIONNODE_OR_RETURN(collectionNode, ^{ return [[ASCellNode alloc] init]; });
-    node = [_asyncDataSource collectionNode:collectionNode nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+    nodeBlock = [_asyncDataSource collectionNode:collectionNode nodeBlockForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+    ASDisplayNodeAssert(nodeBlock != nil, @"A node block must be returned for supplementary element of kind '%@' at index path '%@'", kind, indexPath);
+  } else if (_asyncDataSourceFlags.collectionNodeNodeForSupplementaryElement) {
+    GET_COLLECTIONNODE_OR_RETURN(collectionNode, ^{ return [[ASCellNode alloc] init]; });
+    ASCellNode *node = [_asyncDataSource collectionNode:collectionNode nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+    ASDisplayNodeAssert(node != nil, @"A node must be returned for supplementary element of kind '%@' at index path '%@'", kind, indexPath);
+    nodeBlock = ^{ return node; };
   } else if (_asyncDataSourceFlags.collectionViewNodeForSupplementaryElement) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    node = [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+    ASCellNode *node = [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
+    ASDisplayNodeAssert(node != nil, @"A node must be returned for supplementary element of kind '%@' at index path '%@'", kind, indexPath);
+    nodeBlock = ^{ return node; };
 #pragma clang diagnostic pop
   }
 
-  if (node == nil && _asyncDataSourceFlags.interop) {
-    node = [[ASCellNode alloc] init];
-    node.shouldUseUIKitCell = YES;
+  if (nodeBlock == nil) {
+    BOOL useUIKitCell = _asyncDataSourceFlags.interop;
+    nodeBlock = ^{
+      ASCellNode *node = [[ASCellNode alloc] init];
+      node.shouldUseUIKitCell = useUIKitCell;
+      return node;
+    };
   }
-  
-  ASDisplayNodeAssert(node != nil, @"A node must be returned for supplementary element of kind '%@' at index path '%@'", kind, indexPath);
-  return ^{ return node; };
+
+  return nodeBlock;
 }
 
 - (NSArray<NSString *> *)dataController:(ASDataController *)dataController supplementaryNodeKindsInSections:(NSIndexSet *)sections

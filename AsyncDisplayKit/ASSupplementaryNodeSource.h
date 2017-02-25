@@ -16,14 +16,14 @@ NS_ASSUME_NONNULL_BEGIN
 @protocol ASSupplementaryNodeSource <NSObject>
 
 /**
- * A method to provide the node for the item at the given index.
+ * A method to provide the node-block for the supplementary element.
  *
  * @param elementKind The kind of supplementary element.
  * @param index The index of the item.
- * @return A node for the supplementary element.
+ * @return A node block for the supplementary element.
  * @see collectionNode:nodeForSupplementaryElementOfKind:atIndexPath:
  */
-- (ASCellNode *)nodeForSupplementaryElementOfKind:(NSString *)elementKind atIndex:(NSInteger)index;
+- (ASCellNodeBlock)nodeBlockForSupplementaryElementOfKind:(NSString *)elementKind atIndex:(NSInteger)index;
 
 @optional
 

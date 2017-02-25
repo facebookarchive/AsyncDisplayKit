@@ -481,6 +481,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (ASCellNode *)collectionNode:(ASCollectionNode *)collectionNode nodeForItemAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
+ * Asks the data source to provide a node-block to display for the given supplementary element in the collection view.
+ *
+ * @param collectionNode The sender.
+ * @param kind           The kind of supplementary element.
+ * @param indexPath      The index path of the supplementary element.
+ */
+- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+/**
  * Asks the data source to provide a node to display for the given supplementary element in the collection view.
  *
  * @param collectionNode The sender.

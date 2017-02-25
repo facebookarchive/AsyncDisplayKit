@@ -96,10 +96,12 @@ ASIGSectionControllerCellForIndexImplementation;
 
 #pragma mark - ASSupplementaryNodeSource
 
-- (ASCellNode *)nodeForSupplementaryElementOfKind:(NSString *)elementKind atIndex:(NSInteger)index
+- (ASCellNodeBlock)nodeBlockForSupplementaryElementOfKind:(NSString *)elementKind atIndex:(NSInteger)index
 {
   ASDisplayNodeAssert([elementKind isEqualToString:UICollectionElementKindSectionHeader], nil);
-  return [[FeedHeaderNode alloc] init];
+  return ^{
+    return [[FeedHeaderNode alloc] init];
+  };
 }
 
 - (ASSizeRange)sizeRangeForSupplementaryElementOfKind:(NSString *)elementKind atIndex:(NSInteger)index
