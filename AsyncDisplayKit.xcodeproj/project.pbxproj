@@ -303,6 +303,9 @@
 		C78F7E2B1BF7809800CDEAFC /* ASTableNode.h in Headers */ = {isa = PBXBuildFile; fileRef = B0F880581BEAEC7500D17647 /* ASTableNode.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC034A011E5FAF9700626263 /* ASElementMap.h in Headers */ = {isa = PBXBuildFile; fileRef = CC0349FF1E5FAF9700626263 /* ASElementMap.h */; };
 		CC034A021E5FAF9700626263 /* ASElementMap.m in Sources */ = {isa = PBXBuildFile; fileRef = CC034A001E5FAF9700626263 /* ASElementMap.m */; };
+		CC034A0D1E60C3D500626263 /* ASRectTable.h in Headers */ = {isa = PBXBuildFile; fileRef = CC034A0B1E60C3D500626263 /* ASRectTable.h */; };
+		CC034A0E1E60C3D500626263 /* ASRectTable.m in Sources */ = {isa = PBXBuildFile; fileRef = CC034A0C1E60C3D500626263 /* ASRectTable.m */; };
+		CC034A101E60C9BF00626263 /* ASRectTableTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC034A0F1E60C9BF00626263 /* ASRectTableTests.m */; };
 		CC051F1F1D7A286A006434CB /* ASCALayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC051F1E1D7A286A006434CB /* ASCALayerTests.m */; };
 		CC0AEEA41D66316E005D1C78 /* ASUICollectionViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC0AEEA31D66316E005D1C78 /* ASUICollectionViewTests.m */; };
 		CC0F885B1E42807F00576FED /* ASCollectionViewFlowLayoutInspector.m in Sources */ = {isa = PBXBuildFile; fileRef = CC0F88591E42807F00576FED /* ASCollectionViewFlowLayoutInspector.m */; };
@@ -690,6 +693,9 @@
 		BDC2D162BD55A807C1475DA5 /* Pods-AsyncDisplayKitTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.profile.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.profile.xcconfig"; sourceTree = "<group>"; };
 		CC0349FF1E5FAF9700626263 /* ASElementMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASElementMap.h; sourceTree = "<group>"; };
 		CC034A001E5FAF9700626263 /* ASElementMap.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASElementMap.m; sourceTree = "<group>"; };
+		CC034A0B1E60C3D500626263 /* ASRectTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRectTable.h; sourceTree = "<group>"; };
+		CC034A0C1E60C3D500626263 /* ASRectTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASRectTable.m; sourceTree = "<group>"; };
+		CC034A0F1E60C9BF00626263 /* ASRectTableTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASRectTableTests.m; sourceTree = "<group>"; };
 		CC051F1E1D7A286A006434CB /* ASCALayerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCALayerTests.m; sourceTree = "<group>"; };
 		CC0AEEA31D66316E005D1C78 /* ASUICollectionViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASUICollectionViewTests.m; sourceTree = "<group>"; };
 		CC0F88591E42807F00576FED /* ASCollectionViewFlowLayoutInspector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionViewFlowLayoutInspector.m; sourceTree = "<group>"; };
@@ -963,6 +969,7 @@
 		058D09C5195D04C000B7D73C /* Tests */ = {
 			isa = PBXGroup;
 			children = (
+				CC034A0F1E60C9BF00626263 /* ASRectTableTests.m */,
 				CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */,
 				CC051F1E1D7A286A006434CB /* ASCALayerTests.m */,
 				CC8B05D71D73979700F54286 /* ASTextNodePerformanceTests.m */,
@@ -1136,6 +1143,8 @@
 				CC2F65ED1E5FFB1600DA57C9 /* ASMutableElementMap.m */,
 				CC0349FF1E5FAF9700626263 /* ASElementMap.h */,
 				CC034A001E5FAF9700626263 /* ASElementMap.m */,
+				CC034A0B1E60C3D500626263 /* ASRectTable.h */,
+				CC034A0C1E60C3D500626263 /* ASRectTable.m */,
 				CC55A70F1E52A0F200594372 /* ASResponderChainEnumerator.h */,
 				CC55A7101E52A0F200594372 /* ASResponderChainEnumerator.m */,
 				6947B0BB1E36B4E30007C478 /* Layout */,
@@ -1411,6 +1420,7 @@
 				B35062591B010F070018CF92 /* ASBaseDefines.h in Headers */,
 				B35062131B010EFD0018CF92 /* ASBasicImageDownloader.h in Headers */,
 				B35062151B010EFD0018CF92 /* ASBatchContext.h in Headers */,
+				CC034A0D1E60C3D500626263 /* ASRectTable.h in Headers */,
 				B35061F31B010EFD0018CF92 /* ASCellNode.h in Headers */,
 				34EFC7631B701CBF00AD841F /* ASCenterLayoutSpec.h in Headers */,
 				CC55A7111E52A0F200594372 /* ASResponderChainEnumerator.h in Headers */,
@@ -1754,6 +1764,7 @@
 				9F06E5CD1B4CAF4200F015D8 /* ASCollectionViewTests.mm in Sources */,
 				2911485C1A77147A005D0878 /* ASControlNodeTests.m in Sources */,
 				CC3B208E1C3F7D0A00798563 /* ASWeakSetTests.m in Sources */,
+				CC034A101E60C9BF00626263 /* ASRectTableTests.m in Sources */,
 				F711994E1D20C21100568860 /* ASDisplayNodeExtrasTests.m in Sources */,
 				ACF6ED5D1B178DC700DA7C62 /* ASDimensionTests.mm in Sources */,
 				695BE2551DC1245C008E6EA5 /* ASWrapperSpecSnapshotTests.mm in Sources */,
@@ -1860,6 +1871,7 @@
 				B35062501B010EFD0018CF92 /* ASDisplayNode+DebugTiming.mm in Sources */,
 				DEC146B91C37A16A004A0EE7 /* ASCollectionInternal.m in Sources */,
 				254C6B891BF94F8A003EC431 /* ASTextKitRenderer+Positioning.mm in Sources */,
+				CC034A0E1E60C3D500626263 /* ASRectTable.m in Sources */,
 				68355B341CB579B9001D4E68 /* ASImageNode+AnimatedImage.mm in Sources */,
 				E5711A301C840C96009619D4 /* ASCollectionElement.mm in Sources */,
 				B35062511B010EFD0018CF92 /* ASDisplayNode+UIViewBridge.mm in Sources */,

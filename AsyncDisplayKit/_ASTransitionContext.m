@@ -54,22 +54,12 @@ NSString * const ASTransitionContextToLayoutKey = @"org.asyncdisplaykit.ASTransi
 
 - (CGRect)initialFrameForNode:(ASDisplayNode *)node
 {
-  for (ASDisplayNode *subnode in [_layoutDelegate currentSubnodesWithTransitionContext:self]) {
-    if (node == subnode) {
-      return node.frame;
-    }
-  }
-  return CGRectZero;
+  return [[self layoutForKey:ASTransitionContextFromLayoutKey] frameForElement:node];
 }
 
 - (CGRect)finalFrameForNode:(ASDisplayNode *)node
 {
-  for (ASLayout *layout in [self layoutForKey:ASTransitionContextToLayoutKey].sublayouts) {
-    if (layout.layoutElement == node) {
-      return [layout frame];
-    }
-  }
-  return CGRectZero;
+  return [[self layoutForKey:ASTransitionContextToLayoutKey] frameForElement:node];
 }
 
 - (NSArray<ASDisplayNode *> *)subnodesForKey:(NSString *)key

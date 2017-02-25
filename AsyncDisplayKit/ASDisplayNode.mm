@@ -1336,8 +1336,16 @@ ASLayoutElementFinalLayoutElementDefault
 
 - (void)_locked_layoutSublayouts
 {
-  for (ASLayout *subnodeLayout in _calculatedDisplayNodeLayout->layout.sublayouts) {
-    ((ASDisplayNode *)subnodeLayout.layoutElement).frame = subnodeLayout.frame;
+  ASLayout *layout = _calculatedDisplayNodeLayout->layout;
+  for (ASDisplayNode *node in _subnodes) {
+    CGRect frame = [layout frameForElement:node];
+    if (CGRectIsNull(frame)) {
+      // There is no frame for this node in our layout.
+      // This currently can happen if we get a CA layout pass
+      // while waiting for the client to run animateLayoutTransition:
+    } else {
+      node.frame = frame;
+    }
   }
 }
 
