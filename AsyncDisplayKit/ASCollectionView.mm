@@ -1558,31 +1558,31 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   ASCellNodeBlock nodeBlock = nil;
+  ASCellNode *node = nil;
   if (_asyncDataSourceFlags.collectionNodeNodeBlockForSupplementaryElement) {
     GET_COLLECTIONNODE_OR_RETURN(collectionNode, ^{ return [[ASCellNode alloc] init]; });
     nodeBlock = [_asyncDataSource collectionNode:collectionNode nodeBlockForSupplementaryElementOfKind:kind atIndexPath:indexPath];
-    ASDisplayNodeAssert(nodeBlock != nil, @"A node block must be returned for supplementary element of kind '%@' at index path '%@'", kind, indexPath);
   } else if (_asyncDataSourceFlags.collectionNodeNodeForSupplementaryElement) {
     GET_COLLECTIONNODE_OR_RETURN(collectionNode, ^{ return [[ASCellNode alloc] init]; });
-    ASCellNode *node = [_asyncDataSource collectionNode:collectionNode nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
-    ASDisplayNodeAssert(node != nil, @"A node must be returned for supplementary element of kind '%@' at index path '%@'", kind, indexPath);
-    nodeBlock = ^{ return node; };
+    node = [_asyncDataSource collectionNode:collectionNode nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
   } else if (_asyncDataSourceFlags.collectionViewNodeForSupplementaryElement) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-    ASCellNode *node = [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
-    ASDisplayNodeAssert(node != nil, @"A node must be returned for supplementary element of kind '%@' at index path '%@'", kind, indexPath);
-    nodeBlock = ^{ return node; };
+    node = [_asyncDataSource collectionView:self nodeForSupplementaryElementOfKind:kind atIndexPath:indexPath];
 #pragma clang diagnostic pop
   }
 
   if (nodeBlock == nil) {
-    BOOL useUIKitCell = _asyncDataSourceFlags.interop;
-    nodeBlock = ^{
-      ASCellNode *node = [[ASCellNode alloc] init];
-      node.shouldUseUIKitCell = useUIKitCell;
-      return node;
-    };
+    if (node) {
+      nodeBlock = ^{ return node; };
+    } else {
+      BOOL useUIKitCell = _asyncDataSourceFlags.interop;
+      nodeBlock = ^{
+        ASCellNode *node = [[ASCellNode alloc] init];
+        node.shouldUseUIKitCell = useUIKitCell;
+        return node;
+      };
+    }
   }
 
   return nodeBlock;
