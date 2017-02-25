@@ -27,17 +27,13 @@
 }
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
-         supplementaryElementKind:(nullable NSString *)supplementaryElementKind
-                  constrainedSize:(ASSizeRange)constrainedSize
-                      environment:(id<ASTraitEnvironment>)environment
+                             kind:(NSString *)kind
 {
   NSAssert(nodeBlock != nil, @"Node block must not be nil");
   self = [super init];
   if (self) {
     _nodeBlock = nodeBlock;
-    _supplementaryElementKind = [supplementaryElementKind copy];
-    _constrainedSize = constrainedSize;
-    _traitEnvironment = environment;
+    _kind = [kind copy];
   }
   return self;
 }
@@ -52,9 +48,7 @@
       ASDisplayNodeFailAssert(@"Node block returned nil node!");
       node = [[ASCellNode alloc] init];
     }
-    node.owningNode = (ASDisplayNode *)_traitEnvironment;
     node.collectionElement = self;
-    ASTraitCollectionPropagateDown(node, [_traitEnvironment primitiveTraitCollection]);
     _node = node;
   }
   return _node;

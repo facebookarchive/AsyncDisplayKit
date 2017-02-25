@@ -475,11 +475,11 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [_delegate rangeController:self willUpdateWithChangeSet:changeSet];
 }
 
-- (void)dataController:(ASDataController *)dataController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
+- (void)dataController:(ASDataController *)dataController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet insertedElements:(nonnull NSArray *)insertedElements
 {
   ASDisplayNodeAssertMainThread();
   _rangeIsValid = NO;
-  [_delegate rangeController:self didUpdateWithChangeSet:changeSet];
+  [_delegate rangeController:self didUpdateWithChangeSet:changeSet insertedElements:insertedElements];
 }
 
 #pragma mark - Memory Management

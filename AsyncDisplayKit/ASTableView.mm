@@ -1613,12 +1613,15 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   return ^{
     __typeof__(self) strongSelf = weakSelf;
     ASCellNode *node = (block != nil ? block() : [[ASCellNode alloc] init]);
+    ASTableNode *tableNode = strongSelf.tableNode;
+    node.owningNode = tableNode;
+    ASTraitCollectionPropagateDown(node, tableNode.primitiveTraitCollection);
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
     if (node.interactionDelegate == nil) {
       node.interactionDelegate = strongSelf;
     }
     if (_inverted) {
-        node.transform = CATransform3DMakeScale(1, -1, 1) ;
+      node.transform = CATransform3DMakeScale(1, -1, 1) ;
     }
     return node;
   };

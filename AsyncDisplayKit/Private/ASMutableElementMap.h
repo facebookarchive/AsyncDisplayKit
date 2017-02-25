@@ -42,6 +42,9 @@ AS_SUBCLASSING_RESTRICTED
 
 - (void)insertElement:(ASCollectionElement *)element atIndexPath:(NSIndexPath *)indexPath;
 
+/// All the elements that were inserted into this map since creation.
+@property (nonatomic, copy, readonly) NSArray<ASCollectionElement *> *insertedElements;
+
 @end
 
 @interface ASElementMap (MutableCopying) <NSMutableCopying>

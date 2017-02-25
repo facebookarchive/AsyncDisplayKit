@@ -1500,6 +1500,9 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   return ^{
     __typeof__(self) strongSelf = weakSelf;
     ASCellNode *node = (block != nil ? block() : [[ASCellNode alloc] init]);
+    ASCollectionNode *collectionNode = strongSelf.collectionNode;
+    node.owningNode = collectionNode;
+    ASTraitCollectionPropagateDown(node, collectionNode.primitiveTraitCollection);
     [node enterHierarchyState:ASHierarchyStateRangeManaged];
     if (node.interactionDelegate == nil) {
       node.interactionDelegate = strongSelf;

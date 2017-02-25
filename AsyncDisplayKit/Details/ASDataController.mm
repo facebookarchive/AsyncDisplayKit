@@ -134,7 +134,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 
 #pragma mark - Cell Layout
 
-- (void)batchLayoutNodesFromContexts:(NSArray<ASCollectionElement *> *)elements batchSize:(NSInteger)batchSize batchCompletion:(ASDataControllerCompletionBlock)batchCompletionHandler
+- (void)batchLayoutNodesForElements:(NSArray<ASCollectionElement *> *)elements
+                         sizeRanges:(NSMapTable<ASCollectionElement *, NSValue *> *)sizeRanges
+                          batchSize:(NSInteger)batchSize
+                    batchCompletion:(ASDataControllerCompletionBlock)batchCompletionHandler
 {
   ASSERT_ON_EDITING_QUEUE;
 #if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
@@ -157,7 +160,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   for (NSUInteger i = 0; i < count; i += batchSize) {
     NSRange batchedRange = NSMakeRange(i, MIN(count - i, batchSize));
     NSArray<ASCollectionElement *> *batchedContexts = [elements subarrayWithRange:batchedRange];
-    NSArray<ASCellNode *> *nodes = [self _layoutNodesFromContexts:batchedContexts];
+    NSArray<ASCellNode *> *nodes = [self _layoutNodesFromElements:batchedContexts sizeRanges:sizeRanges];
     batchCompletionHandler(batchedContexts, nodes);
   }
   
@@ -176,7 +179,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   node.frame = frame;
 }
 
-- (NSArray<ASCellNode *> *)_layoutNodesFromContexts:(NSArray<ASCollectionElement *> *)elements
+// I know it's a little silly to pass elements array separate from map table but trust me it makes sense for now.
+- (NSArray<ASCellNode *> *)_layoutNodesFromElements:(NSArray<ASCollectionElement *> *)elements
+                                         sizeRanges:(NSMapTable<ASCollectionElement *, NSValue *> *)sizeRanges
 {
   ASSERT_ON_EDITING_QUEUE;
   
@@ -200,7 +205,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     }
 
     // Layout the node if the size range is valid.
-    ASSizeRange sizeRange = context.constrainedSize;
+    ASSizeRange sizeRange;
+    [[sizeRanges objectForKey:context] getValue:&sizeRange];
     if (ASSizeRangeHasSignificantArea(sizeRange)) {
       [self _layoutNode:node withConstrainedSize:sizeRange];
     }
@@ -268,7 +274,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  */
 - (void)_repopulateSupplementaryNodesIntoMap:(ASMutableElementMap *)map
              forSectionsContainingIndexPaths:(NSArray<NSIndexPath *> *)originalIndexPaths
-                                 environment:(id<ASTraitEnvironment>)environment
 {
   ASDisplayNodeAssertMainThread();
   
@@ -286,7 +291,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     [map removeElementsOfKind:kind inSections:sectionIndexes];
     
     // Step 2: populate new elements for all index paths in these sections
-    [self _insertElementsIntoMap:map kind:kind forSections:sectionIndexes environment:environment];
+    [self _insertElementsIntoMap:map kind:kind forSections:sectionIndexes];
   }
 }
 
@@ -300,7 +305,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (void)_insertElementsIntoMap:(ASMutableElementMap *)map
                           kind:(NSString *)kind
                    forSections:(NSIndexSet *)sections
-                   environment:(id<ASTraitEnvironment>)environment
 {
   ASDisplayNodeAssertMainThread();
   
@@ -309,7 +313,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   NSArray<NSIndexPath *> *indexPaths = [self _allIndexPathsForItemsOfKind:kind inSections:sections];
-  [self _insertElementsIntoMap:map kind:kind atIndexPaths:indexPaths environment:environment];
+  [self _insertElementsIntoMap:map kind:kind atIndexPaths:indexPaths];
 }
 
 /**
@@ -323,7 +327,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (void)_insertElementsIntoMap:(ASMutableElementMap *)map
                           kind:(NSString *)kind
                   atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-                   environment:(id<ASTraitEnvironment>)environment
 {
   ASDisplayNodeAssertMainThread();
   
@@ -345,12 +348,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     } else {
       nodeBlock = [_dataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
     }
-    
-    ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
-    ASCollectionElement *element = [[ASCollectionElement alloc] initWithNodeBlock:nodeBlock
-                                           supplementaryElementKind:isRowKind ? nil : kind
-                                                    constrainedSize:constrainedSize
-                                                        environment:environment];
+
+    ASCollectionElement *element = [[ASCollectionElement alloc] initWithNodeBlock:nodeBlock kind:kind];
     [map insertElement:element atIndexPath:indexPath];
   }
 }
@@ -467,6 +466,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   [self _updateSectionContextsInMap:mutableMap changeSet:changeSet];
   //TODO If _elements is the same, use a fast path
   [self _updateElementsInMap:mutableMap changeSet:changeSet];
+
+  NSArray *insertedElements = mutableMap.insertedElements;
   
   // Step 2: Clone the new data
   ASElementMap *newMap = [mutableMap copy];
@@ -475,9 +476,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     // Step 3: Layout **all** new elements without batching in background.
-    NSArray<ASCollectionElement *> *unmeasuredElements = [ASDataController unmeasuredElementsFromMap:newMap];
     // TODO layout in batches, esp reloads
-    [self batchLayoutNodesFromContexts:unmeasuredElements batchSize:unmeasuredElements.count batchCompletion:^(id, id) {
+    [self batchLayoutNodesForElements:newElements sizeRanges:sizeRanges batchSize:newElements.count batchCompletion:^(id, id) {
       ASSERT_ON_EDITING_QUEUE;
       [_mainSerialQueue performBlockOnMainThread:^{
         [_delegate dataController:self willUpdateWithChangeSet:changeSet];
@@ -640,11 +640,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 {
   ASDisplayNodeAssertMainThread();
   [_visibleMap enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
-    NSString *kind = element.supplementaryElementKind ?: ASDataControllerRowNodeKind;
-    ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+    ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:element.kind atIndexPath:indexPath];
     if (ASSizeRangeHasSignificantArea(constrainedSize)) {
-      element.constrainedSize = constrainedSize;
-
       // Node may not be allocated yet (e.g node virtualization or same size optimization)
       // Call context.nodeIfAllocated here to avoid immature node allocation and layout
       ASCellNode *node = element.nodeIfAllocated;

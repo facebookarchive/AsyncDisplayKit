@@ -157,7 +157,7 @@ AS_SUBCLASSING_RESTRICTED
  *
  * @param changeSet The change set that includes all updates
  */
-- (void)rangeController:(ASRangeController *)rangeController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
+- (void)rangeController:(ASRangeController *)rangeController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet insertedElements:(NSArray<ASCollectionElement *> *)insertedElements;
 
 @end
 

@@ -21,6 +21,7 @@ typedef NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCol
 @implementation ASMutableElementMap {
   ASMutableSupplementaryElementDictionary *_supplementaryElements;
   NSMutableArray<ASSection *> *_sections;
+  NSMutableArray<ASCollectionElement *> *_insertedElements;
   ASMutableCollectionElementTwoDimensionalArray *_sectionsOfItems;
 }
 
@@ -28,6 +29,7 @@ typedef NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCol
 {
   if (self = [super init]) {
     _sections = [sections mutableCopy];
+    _insertedElements = [NSMutableArray array];
     _sectionsOfItems = (id)ASTwoDimensionalArrayDeepMutableCopy(items);
     _supplementaryElements = [ASMutableElementMap deepMutableCopyOfElementsDictionary:supplementaryElements];
   }
@@ -86,6 +88,7 @@ typedef NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCol
 
 - (void)insertElement:(ASCollectionElement *)element atIndexPath:(NSIndexPath *)indexPath
 {
+  [_insertedElements addObject:element];
   NSString *kind = element.supplementaryElementKind;
   if (kind == nil) {
     [_sectionsOfItems[indexPath.section] insertObject:element atIndex:indexPath.item];

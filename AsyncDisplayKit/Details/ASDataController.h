@@ -79,10 +79,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
 
 @end
 
-@protocol ASDataControllerEnvironmentDelegate
-- (id<ASTraitEnvironment>)dataControllerEnvironment;
-@end
-
 /**
  Delegate for notify the data updating of data controller.
  These methods will be invoked from main thread right now, but it may be moved to background thread in the future.
@@ -101,7 +97,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
  *
  * @param changeSet The change set that includes all updates
  */
-- (void)dataController:(ASDataController *)dataController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
+- (void)dataController:(ASDataController *)dataController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet insertedElements:(NSArray<ASCollectionElement *> *)insertedElements;
 
 @end
 
@@ -114,7 +110,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
  */
 @interface ASDataController : NSObject
 
-- (instancetype)initWithDataSource:(id<ASDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithNode:(ASDisplayNode *)node dataSource:(id<ASDataControllerSource>)dataSource eventLog:(nullable ASEventLog *)eventLog NS_DESIGNATED_INITIALIZER;
 
 /**
  * The map that is currently displayed. The "UIKit index space."
