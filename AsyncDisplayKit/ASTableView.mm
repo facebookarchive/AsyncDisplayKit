@@ -117,7 +117,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (instancetype)_initWithTableView:(ASTableView *)tableView;
 @end
 
-@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate>
+@interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView>
 {
   ASTableViewProxy *_proxyDataSource;
   ASTableViewProxy *_proxyDelegate;
@@ -265,7 +265,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   
   _dataController = [[dataControllerClass alloc] initWithDataSource:self eventLog:eventLog];
   _dataController.delegate = _rangeController;
-  _dataController.environmentDelegate = self;
 
   _leadingScreensForBatching = 2.0;
   _batchContext = [[ASBatchContext alloc] init];
@@ -1609,6 +1608,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 
   // Wrap the node block
+  __weak ASTableNode *weakTableNode = self.tableNode;
   __weak __typeof__(self) weakSelf = self;
   return ^{
     __typeof__(self) strongSelf = weakSelf;
@@ -1620,6 +1620,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     if (_inverted) {
         node.transform = CATransform3DMakeScale(1, -1, 1) ;
     }
+    node.owningNode = weakTableNode;
     return node;
   };
   return block;

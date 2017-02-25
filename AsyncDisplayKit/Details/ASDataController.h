@@ -30,7 +30,6 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASDataController;
 @class ASElementMap;
 @class _ASHierarchyChangeSet;
-@protocol ASTraitEnvironment;
 @protocol ASSectionContext;
 
 typedef NSUInteger ASDataControllerAnimationOptions;
@@ -77,10 +76,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
 
 - (nullable id<ASSectionContext>)dataController:(ASDataController *)dataController contextForSection:(NSInteger)section;
 
-@end
-
-@protocol ASDataControllerEnvironmentDelegate
-- (id<ASTraitEnvironment>)dataControllerEnvironment;
 @end
 
 /**
@@ -140,11 +135,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
  Delegate to notify when data is updated.
  */
 @property (nonatomic, weak) id<ASDataControllerDelegate> delegate;
-
-/**
- *
- */
-@property (nonatomic, weak) id<ASDataControllerEnvironmentDelegate> environmentDelegate;
 
 #ifdef __cplusplus
 /**

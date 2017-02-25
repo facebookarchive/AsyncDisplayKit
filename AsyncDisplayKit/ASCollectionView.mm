@@ -70,7 +70,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 #pragma mark -
 #pragma mark ASCollectionView.
 
-@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate, ASCALayerExtendedDelegate, UICollectionViewDelegateFlowLayout> {
+@interface ASCollectionView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASCALayerExtendedDelegate, UICollectionViewDelegateFlowLayout> {
   ASCollectionViewProxy *_proxyDataSource;
   ASCollectionViewProxy *_proxyDelegate;
   
@@ -261,7 +261,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   
   _dataController = [[ASDataController alloc] initWithDataSource:self eventLog:eventLog];
   _dataController.delegate = _rangeController;
-  _dataController.environmentDelegate = self;
   
   _batchContext = [[ASBatchContext alloc] init];
   
@@ -1509,6 +1508,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     if (_inverted) {
       node.transform = CATransform3DMakeScale(1, -1, 1) ;
     }
+    node.owningNode = strongSelf.collectionNode;
     return node;
   };
   return block;
@@ -1548,11 +1548,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
 }
 
-- (id<ASTraitEnvironment>)dataControllerEnvironment
-{
-  return self.collectionNode;
-}
-
 #pragma mark - ASDataControllerSource optional methods
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -1585,7 +1580,12 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     };
   }
 
-  return nodeBlock;
+  __weak ASCollectionNode *weakCollectionNode = self.collectionNode;
+  return ^{
+    ASCellNode *node = nodeBlock() ?: [[ASCellNode alloc] init];
+    node.owningNode = weakCollectionNode;
+    return node;
+  };
 }
 
 - (NSArray<NSString *> *)dataController:(ASDataController *)dataController supplementaryNodeKindsInSections:(NSIndexSet *)sections

@@ -21,12 +21,10 @@ AS_SUBCLASSING_RESTRICTED
 //TODO change this to be a generic "kind" or "elementKind" that exposes `nil` for row kind
 @property (nonatomic, readonly, copy, nullable) NSString *supplementaryElementKind;
 @property (nonatomic, assign) ASSizeRange constrainedSize;
-@property (weak, nonatomic) id<ASTraitEnvironment> traitEnvironment;
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
          supplementaryElementKind:(nullable NSString *)supplementaryElementKind
-                  constrainedSize:(ASSizeRange)constrainedSize
-                      environment:(id<ASTraitEnvironment>)environment;
+                  constrainedSize:(ASSizeRange)constrainedSize;
 
 /**
  * @return The node, running the node block if necessary. The node block will be discarded
