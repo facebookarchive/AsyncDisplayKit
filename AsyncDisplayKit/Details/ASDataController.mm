@@ -27,22 +27,21 @@
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
 
+#import <PINOperation/PINOperation.h>
+
 //#define LOG(...) NSLog(__VA_ARGS__)
 #define LOG(...)
-
-#define AS_MEASURE_AVOIDED_DATACONTROLLER_WORK 0
 
 #define RETURN_IF_NO_DATASOURCE(val) if (_dataSource == nil) { return val; }
 #define ASSERT_ON_EDITING_QUEUE ASDisplayNodeAssertNotNil(dispatch_get_specific(&kASDataControllerEditingQueueKey), @"%@ must be called on the editing transaction queue.", NSStringFromSelector(_cmd))
 
-const static NSUInteger kASDataControllerSizingCountPerProcessor = 5;
 const static char * kASDataControllerEditingQueueKey = "kASDataControllerEditingQueueKey";
 const static char * kASDataControllerEditingQueueContext = "kASDataControllerEditingQueueContext";
 
 NSString * const ASDataControllerRowNodeKind = @"_ASDataControllerRowNodeKind";
 NSString * const ASCollectionInvalidUpdateException = @"ASCollectionInvalidUpdateException";
 
-typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *elements, NSArray<ASCellNode *> *nodes);
+typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *elements);
 
 #if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
 @interface ASDataController (AvoidedWorkMeasuring)
@@ -120,54 +119,12 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   return [self initWithDataSource:fakeDataSource eventLog:eventLog];
 }
 
-+ (NSUInteger)parallelProcessorCount
-{
-  static NSUInteger parallelProcessorCount;
-
-  static dispatch_once_t onceToken;
-  dispatch_once(&onceToken, ^{
-    parallelProcessorCount = [[NSProcessInfo processInfo] activeProcessorCount];
-  });
-
-  return parallelProcessorCount;
-}
-
 #pragma mark - Cell Layout
-
-- (void)batchLayoutNodesFromContexts:(NSArray<ASCollectionElement *> *)elements batchSize:(NSInteger)batchSize batchCompletion:(ASDataControllerCompletionBlock)batchCompletionHandler
-{
-  ASSERT_ON_EDITING_QUEUE;
-#if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
-    [ASDataController _expectToInsertNodes:elements.count];
-#endif
-  
-  if (elements.count == 0 || _dataSource == nil) {
-    batchCompletionHandler(@[], @[]);
-    return;
-  }
-
-  ASProfilingSignpostStart(2, _dataSource);
-  
-  if (batchSize == 0) {
-    batchSize = [[ASDataController class] parallelProcessorCount] * kASDataControllerSizingCountPerProcessor;
-  }
-  NSUInteger count = elements.count;
-  
-  // Processing in batches
-  for (NSUInteger i = 0; i < count; i += batchSize) {
-    NSRange batchedRange = NSMakeRange(i, MIN(count - i, batchSize));
-    NSArray<ASCollectionElement *> *batchedContexts = [elements subarrayWithRange:batchedRange];
-    NSArray<ASCellNode *> *nodes = [self _layoutNodesFromContexts:batchedContexts];
-    batchCompletionHandler(batchedContexts, nodes);
-  }
-  
-  ASProfilingSignpostEnd(2, _dataSource);
-}
 
 /**
  * Measure and layout the given node with the constrained size range.
  */
-- (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
++ (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
 {
   ASDisplayNodeAssert(ASSizeRangeHasSignificantArea(constrainedSize), @"Attempt to layout cell node with invalid size range %@", NSStringFromASSizeRange(constrainedSize));
 
@@ -176,53 +133,38 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   node.frame = frame;
 }
 
-- (NSArray<ASCellNode *> *)_layoutNodesFromContexts:(NSArray<ASCollectionElement *> *)elements
++ (void)_layoutNodesForElements:(NSArray<ASCollectionElement *> *)elements dataSource:(__weak id<ASDataControllerSource>)dataSource
 {
   ASSERT_ON_EDITING_QUEUE;
-  
-  NSUInteger nodeCount = elements.count;
-  if (!nodeCount || _dataSource == nil) {
-    return @[];
-  }
 
-  __strong ASCellNode **allocatedNodeBuffer = (__strong ASCellNode **)calloc(nodeCount, sizeof(ASCellNode *));
-
-  dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
-  ASDispatchApply(nodeCount, queue, 0, ^(size_t i) {
-    RETURN_IF_NO_DATASOURCE();
-
-    // Allocate the node.
-    ASCollectionElement *context = elements[i];
-    ASCellNode *node = context.node;
-    if (node == nil) {
-      ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
-      node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
-    }
-
-    // Layout the node if the size range is valid.
-    ASSizeRange sizeRange = context.constrainedSize;
-    if (ASSizeRangeHasSignificantArea(sizeRange)) {
-      [self _layoutNode:node withConstrainedSize:sizeRange];
-    }
-
-#if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
-    [ASDataController _didLayoutNode];
-#endif
-    allocatedNodeBuffer[i] = node;
+  static PINOperationQueue *parallelQueue;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    NSInteger parallelCount = 2 * NSProcessInfo.processInfo.activeProcessorCount;
+    parallelQueue = [[PINOperationQueue alloc] initWithMaxConcurrentOperations:parallelCount];
   });
 
-  BOOL canceled = _dataSource == nil;
+  PINOperationGroup *group = [PINOperationGroup asyncOperationGroupWithQueue:parallelQueue];
+  for (ASCollectionElement *element in elements) {
+    [group addOperation:^{
+      if (dataSource == nil) {
+        return;
+      }
 
-  // Create nodes array
-  NSArray *nodes = canceled ? nil : [NSArray arrayWithObjects:allocatedNodeBuffer count:nodeCount];
-  
-  // Nil out buffer indexes to allow arc to free the stored cells.
-  for (int i = 0; i < nodeCount; i++) {
-    allocatedNodeBuffer[i] = nil;
+      // Allocate the node.
+      ASCellNode *node = element.node;
+
+      // Layout the node if the size range is valid.
+      ASSizeRange sizeRange = element.constrainedSize;
+      if (ASSizeRangeHasSignificantArea(sizeRange)) {
+        [ASDataController _layoutNode:node withConstrainedSize:sizeRange];
+      }
+    }];
   }
-  free(allocatedNodeBuffer);
-
-  return nodes;
+  ASProfilingSignpostStart(2, dataSource);
+  [group start];
+  [group waitUntilComplete];
+  ASProfilingSignpostEnd(2, dataSource);
 }
 
 #pragma mark - Data Source Access (Calling _dataSource)
@@ -477,16 +419,14 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     // Step 3: Layout **all** new elements without batching in background.
     NSArray<ASCollectionElement *> *unmeasuredElements = [ASDataController unmeasuredElementsFromMap:newMap];
     // TODO layout in batches, esp reloads
-    [self batchLayoutNodesFromContexts:unmeasuredElements batchSize:unmeasuredElements.count batchCompletion:^(id, id) {
-      ASSERT_ON_EDITING_QUEUE;
-      [_mainSerialQueue performBlockOnMainThread:^{
-        [_delegate dataController:self willUpdateWithChangeSet:changeSet];
+    [ASDataController _layoutNodesForElements:unmeasuredElements dataSource:_dataSource];
+    [_mainSerialQueue performBlockOnMainThread:^{
+      [_delegate dataController:self willUpdateWithChangeSet:changeSet];
 
-        // Step 4: Deploy the new data as "completed" and inform delegate
-        _visibleMap = newMap;
+      // Step 4: Deploy the new data as "completed" and inform delegate
+      _visibleMap = newMap;
 
-        [_delegate dataController:self didUpdateWithChangeSet:changeSet];
-      }];
+      [_delegate dataController:self didUpdateWithChangeSet:changeSet];
     }];
   });
 }
@@ -649,7 +589,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       // Call context.nodeIfAllocated here to avoid immature node allocation and layout
       ASCellNode *node = element.nodeIfAllocated;
       if (node) {
-        [self _layoutNode:node withConstrainedSize:constrainedSize];
+        [ASDataController _layoutNode:node withConstrainedSize:constrainedSize];
       }
     }
   }];
@@ -667,27 +607,3 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 }
 
 @end
-
-#if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
-
-static volatile int64_t _totalExpectedItems = 0;
-static volatile int64_t _totalMeasuredNodes = 0;
-
-@implementation ASDataController (WorkMeasuring)
-
-+ (void)_didLayoutNode
-{
-    int64_t measured = OSAtomicIncrement64(&_totalMeasuredNodes);
-    int64_t expected = _totalExpectedItems;
-    if (measured % 20 == 0 || measured == expected) {
-        NSLog(@"Data controller avoided work (underestimated): %lld / %lld", measured, expected);
-    }
-}
-
-+ (void)_expectToInsertNodes:(NSUInteger)count
-{
-    OSAtomicAdd64((int64_t)count, &_totalExpectedItems);
-}
-
-@end
-#endif

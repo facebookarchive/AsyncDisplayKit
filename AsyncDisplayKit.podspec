@@ -19,6 +19,7 @@ Pod::Spec.new do |spec|
 
   # Subspecs
   spec.subspec 'Core' do |core|
+    core.dependency 'PINOperation', '1.0.3'
     core.prefix_header_file = 'AsyncDisplayKit/AsyncDisplayKit-Prefix.pch'
     core.public_header_files = [
         'AsyncDisplayKit/*.h',

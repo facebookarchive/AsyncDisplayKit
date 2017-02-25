@@ -34,3 +34,4 @@ playground.xcworkspace
 /.buckconfig.local
 /.buckd
 
+Carthage/Checkouts

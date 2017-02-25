@@ -1,0 +1,4 @@
+github "pinterest/PINOperation" "1.0.3"
+git "https://chromium.googlesource.com/webm/libwebp" "v0.5.1"
+github "pinterest/PINCache" "3.0.1-beta.4"
+github "pinterest/PINRemoteImage" "a5ac670cac32ceebbd9b5d4aa6841dcef013bc70"
