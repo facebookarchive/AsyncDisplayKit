@@ -18,6 +18,7 @@
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h> // Required for interfaceState and hierarchyState setter methods.
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASLayoutController.h>
 #import <AsyncDisplayKit/ASMultidimensionalArrayUtils.h>
 #import <AsyncDisplayKit/ASWeakSet.h>
 
@@ -34,10 +35,8 @@
 {
   BOOL _rangeIsValid;
   BOOL _needsRangeUpdate;
-  BOOL _layoutControllerImplementsSetVisibleIndexPaths;
-  BOOL _layoutControllerImplementsSetViewportSize;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
-  ASWeakSet<ASCellNode *> *_visibleNodes;
+  NSSet<ASCellNode *> *_visibleNodes;
   ASLayoutRangeMode _currentRangeMode;
   BOOL _preserveCurrentRangeMode;
   BOOL _didRegisterForNodeDisplayNotifications;
@@ -165,8 +164,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 - (void)setLayoutController:(id<ASLayoutController>)layoutController
 {
   _layoutController = layoutController;
-  _layoutControllerImplementsSetVisibleIndexPaths = [layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)];
-  _layoutControllerImplementsSetViewportSize = [layoutController respondsToSelector:@selector(setViewportSize:)];
   if (layoutController && _dataSource) {
     [self updateIfNeeded];
   }
@@ -188,7 +185,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 // NOTE: There is a minor risk here, if a node is transferred from one range controller
 // to another before the first rc updates and clears the node out of this set. It's a pretty
 // wild scenario that I doubt happens in practice.
-- (void)_setVisibleNodes:(ASWeakSet *)newVisibleNodes
+- (void)_setVisibleNodes:(NSSet *)newVisibleNodes
 {
   for (ASCellNode *node in _visibleNodes) {
     if (![newVisibleNodes containsObject:node] && node.isVisible) {
@@ -211,40 +208,13 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   ASElementMap *map = [_dataSource elementMapForRangeController:self];
 
-  // TODO: Consider if we need to use this codepath, or can rely on something more similar to the data & display ranges
-  // Example: ... = [_layoutController indexPathsForScrolling:scrollDirection rangeType:ASLayoutRangeTypeVisible];
-  NSArray<NSIndexPath *> *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
-  ASWeakSet *newVisibleNodes = [[ASWeakSet alloc] init];
-
-  if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
-    [self _setVisibleNodes:newVisibleNodes];
-    return; // don't do anything for this update, but leave _rangeIsValid == NO to make sure we update it later
-  }
-  ASProfilingSignpostStart(1, self);
-
   // Get the scroll direction. Default to using the previous one, if they're not scrolling.
   ASScrollDirection scrollDirection = [_dataSource scrollDirectionForRangeController:self];
   if (scrollDirection == ASScrollDirectionNone) {
     scrollDirection = _previousScrollDirection;
   }
   _previousScrollDirection = scrollDirection;
-
-  if (_layoutControllerImplementsSetViewportSize) {
-    [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
-  }
   
-  // the layout controller needs to know what the current visible indices are to calculate range offsets
-  if (_layoutControllerImplementsSetVisibleIndexPaths) {
-    [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
-  }
-  
-  NSSet<NSIndexPath *> *visibleIndexPaths = [NSSet setWithArray:visibleNodePaths];
-  NSSet<NSIndexPath *> *displayIndexPaths = nil;
-  NSSet<NSIndexPath *> *preloadIndexPaths = nil;
-  
-  // Prioritize the order in which we visit each.  Visible nodes should be updated first so they are enqueued on
-  // the network or display queues before preloading (offscreen) nodes are enqueued.
-  NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
   ASInterfaceState selfInterfaceState = [self interfaceState];
   ASLayoutRangeMode rangeMode = _currentRangeMode;
@@ -253,30 +223,26 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   if ((!_preserveCurrentRangeMode && ASInterfaceStateIncludesVisible(selfInterfaceState)) || [[self class] isFirstRangeUpdateForRangeMode:rangeMode]) {
     rangeMode = [ASRangeController rangeModeForInterfaceState:selfInterfaceState currentRangeMode:_currentRangeMode];
   }
-
-  ASRangeTuningParameters parametersPreload = [_layoutController tuningParametersForRangeMode:rangeMode
-                                                                                      rangeType:ASLayoutRangeTypePreload];
-  if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersPreload, ASRangeTuningParametersZero)) {
-    preloadIndexPaths = visibleIndexPaths;
-  } else {
-    preloadIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection
-                                                          rangeMode:rangeMode
-                                                          rangeType:ASLayoutRangeTypePreload];
-  }
   
-  ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeMode:rangeMode
-                                                                                    rangeType:ASLayoutRangeTypeDisplay];
-  if (rangeMode == ASLayoutRangeModeLowMemory) {
-    displayIndexPaths = [NSSet set];
-  } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, ASRangeTuningParametersZero)) {
-    displayIndexPaths = visibleIndexPaths;
-  } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, parametersPreload)) {
-    displayIndexPaths = preloadIndexPaths;
-  } else {
-    displayIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection
-                                                        rangeMode:rangeMode
-                                                        rangeType:ASLayoutRangeTypeDisplay];
+  NSSet<NSIndexPath *> *visibleIndexPaths = nil;
+  NSSet<NSIndexPath *> *displayIndexPaths = nil;
+  NSSet<NSIndexPath *> *preloadIndexPaths = nil;
+  [_layoutController indexPathsForScrolling:scrollDirection
+                                  rangeMode:rangeMode
+                          visibleIndexPaths:&visibleIndexPaths
+                          displayIndexPaths:&displayIndexPaths
+                          preloadIndexPaths:&preloadIndexPaths];
+  NSMutableSet<ASCellNode *> *newVisibleNodes = [NSMutableSet set];
+
+  if (visibleIndexPaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
+    [self _setVisibleNodes:newVisibleNodes];
+    return; // don't do anything for this update, but leave _rangeIsValid == NO to make sure we update it later
   }
+  ASProfilingSignpostStart(1, self);
+  
+  // Prioritize the order in which we visit each.  Visible nodes should be updated first so they are enqueued on
+  // the network or display queues before preloading (offscreen) nodes are enqueued.
+  NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
   // Typically the preloadIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
   // Because allIndexPaths is an NSMutableOrderedSet, this adds the non-duplicate items /after/ the existing items.
@@ -382,8 +348,8 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
        withScrollableDirections:scrollableDirections
                 scrollDirection:scrollDirection
                       rangeMode:rangeMode
-        displayTuningParameters:parametersDisplay
-        preloadTuningParameters:parametersPreload
+        displayTuningParameters:[_layoutController tuningParametersForRangeMode:_currentRangeMode rangeType:ASLayoutRangeTypeDisplay]
+        preloadTuningParameters:[_layoutController tuningParametersForRangeMode:_currentRangeMode rangeType:ASLayoutRangeTypePreload]
                  interfaceState:selfInterfaceState];
   }
   

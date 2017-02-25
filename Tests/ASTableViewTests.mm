@@ -754,9 +754,10 @@
   XCTAssertEqual(node.view.numberOfSections, NumberOfSections);
   ASXCTAssertEqualRects(CGRectMake(0, 32, 375, 44), [node rectForRowAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], @"This text requires very specific geometry. The rect for the first row should match up.");
 
-  __unused XCTestExpectation *e = [self expectationWithDescription:@"Did a bunch of rounds of updates."];
+  XCTestExpectation *e = [self expectationWithDescription:@"Did a bunch of rounds of updates."];
   NSInteger totalCount = 20;
   __block NSInteger count = 0;
+  __block BOOL testFinished = NO;
   dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
   dispatch_source_set_timer(timer, DISPATCH_TIME_NOW, 0.2 * NSEC_PER_SEC, 0.01 * NSEC_PER_SEC);
   dispatch_source_set_event_handler(timer, ^{
@@ -764,15 +765,24 @@
       [node reloadSections:[NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, NumberOfSections)] withRowAnimation:UITableViewRowAnimationNone];
     } completion:^(BOOL finished) {
       if (++count == totalCount) {
+        NSLog(@"Canceling timer.");
         dispatch_cancel(timer);
         dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(2 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+          NSLog(@"Fulfilling expectation.");
           [e fulfill];
         });
       }
     }];
   });
+  NSLog(@"Resuming timer.");
   dispatch_resume(timer);
-  [self waitForExpectationsWithTimeout:60 handler:nil];
+  @try {
+    [self waitForExpectationsWithTimeout:60 handler:nil];
+  } @finally {
+    dispatch_cancel(timer);
+  }
+  testFinished = YES;
+  NSLog(@"Finishing test.");
 }
 
 - (void)testThatInvalidUpdateExceptionReasonContainsDataSourceClassName

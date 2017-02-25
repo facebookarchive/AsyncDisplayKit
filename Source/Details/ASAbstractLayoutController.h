@@ -15,10 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
-FOUNDATION_EXPORT ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferHorizontal(ASScrollDirection scrollDirection, ASRangeTuningParameters rangeTuningParameters);
-
-FOUNDATION_EXPORT ASDirectionalScreenfulBuffer ASDirectionalScreenfulBufferVertical(ASScrollDirection scrollDirection, ASRangeTuningParameters rangeTuningParameters);
-
 FOUNDATION_EXPORT CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTuningParameters tuningParameters, ASScrollDirection scrollableDirections, ASScrollDirection scrollDirection);
 
 ASDISPLAYNODE_EXTERN_C_END
@@ -29,7 +25,11 @@ ASDISPLAYNODE_EXTERN_C_END
 
 @interface ASAbstractLayoutController (Unavailable)
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType __unavailable;
+- (void)indexPathsForScrolling:(ASScrollDirection)scrollDirection
+                     rangeMode:(ASLayoutRangeMode)rangeMode
+             visibleIndexPaths:(out NSSet<NSIndexPath *> * _Nullable * _Nonnull)visibleIndexPaths
+             displayIndexPaths:(out NSSet<NSIndexPath *> * _Nullable * _Nonnull)displayIndexPaths
+             preloadIndexPaths:(out NSSet<NSIndexPath *> * _Nullable * _Nonnull)preloadIndexPaths __unavailable;
 
 @end
 
