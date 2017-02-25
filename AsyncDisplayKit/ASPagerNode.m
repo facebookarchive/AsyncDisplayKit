@@ -225,4 +225,12 @@
 	}
 }
 
+- (void)asyncTraitCollectionDidChange
+{
+  [super asyncTraitCollectionDidChange];
+  if (self.isNodeLoaded) {
+    [self.view.collectionViewLayout invalidateLayout];
+  }
+}
+
 @end
