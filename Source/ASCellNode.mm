@@ -18,7 +18,9 @@
 #import <AsyncDisplayKit/ASTableView+Undeprecated.h>
 #import <AsyncDisplayKit/_ASDisplayView.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 #import <AsyncDisplayKit/ASCollectionNode.h>
 #import <AsyncDisplayKit/ASTableNode.h>
@@ -118,13 +120,18 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   _viewControllerNode.frame = self.bounds;
 }
 
-- (void)_locked_displayNodeDidInvalidateSizeNewSize:(CGSize)newSize
+- (void)__setNeedsLayout
 {
-  CGSize oldSize = self.bounds.size;
-  [super _locked_displayNodeDidInvalidateSizeNewSize:newSize];
-  if (CGSizeEqualToSize(oldSize, newSize) == NO) {
-    [self didRelayoutFromOldSize:oldSize toNewSize:newSize];
-  }
+  // This is a HACK to adjust the cell height in case the height changes due to a setNeedsLayout call
+  CGSize oldSize = self.calculatedSize;
+  [super __setNeedsLayout];
+  
+  //Adding this lock because lock used to be held when this method was called. Not sure if it's necessary for
+  //didRelayoutFromOldSize:toNewSize:
+  ASDN::MutexLocker l(__instanceLock__);
+  [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
+
+
 }
 
 - (void)transitionLayoutWithAnimation:(BOOL)animated

@@ -225,7 +225,7 @@ struct ASImageNodeDrawParameters {
   if (!ASObjectIsEqual(_image, image)) {
     _image = image;
     
-    [self setNeedsLayout];
+    [self invalidateCalculatedLayout];
     if (image) {
       [self setNeedsDisplay];
       
