@@ -15,6 +15,8 @@ typedef struct {
   CGFloat spacing;
   ASStackLayoutJustifyContent justifyContent;
   ASStackLayoutAlignItems alignItems;
+  ASStackLayoutFlexWrap flexWrap;
+  ASStackLayoutAlignContent alignContent;
 } ASStackLayoutSpecStyle;
 
 inline CGFloat stackDimension(const ASStackLayoutDirection direction, const CGSize size)
@@ -40,6 +42,10 @@ inline CGPoint directionPoint(const ASStackLayoutDirection direction, const CGFl
 inline CGSize directionSize(const ASStackLayoutDirection direction, const CGFloat stack, const CGFloat cross)
 {
   return (direction == ASStackLayoutDirectionVertical) ? CGSizeMake(cross, stack) : CGSizeMake(stack, cross);
+}
+
+inline void setStackValueToPoint(const ASStackLayoutDirection direction, const CGFloat stack, CGPoint &point) {
+  (direction == ASStackLayoutDirectionVertical) ? (point.y = stack) : (point.x = stack);
 }
 
 inline ASSizeRange directionSizeRange(const ASStackLayoutDirection direction,

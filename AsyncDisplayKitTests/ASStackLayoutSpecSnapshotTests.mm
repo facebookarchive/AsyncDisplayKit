@@ -22,15 +22,6 @@
 
 @implementation ASStackLayoutSpecSnapshotTests
 
-#pragma mark - XCTestCase
-
-- (void)setUp
-{
-  [super setUp];
-  
-  self.recordMode = NO;
-}
-
 #pragma mark - Utility methods
 
 static NSArray<ASDisplayNode *> *defaultSubnodes()
@@ -110,6 +101,8 @@ static NSArray<ASTextNode*> *defaultTextNodes()
    spacing:style.spacing
    justifyContent:style.justifyContent
    alignItems:style.alignItems
+   flexWrap:style.flexWrap
+   alignContent:style.alignContent
    children:children];
 
   [self testStackLayoutSpec:stackLayoutSpec sizeRange:sizeRange subnodes:subnodes identifier:identifier];
@@ -162,6 +155,28 @@ static NSArray<ASTextNode*> *defaultTextNodes()
   [self testLayoutSpec:layoutSpec sizeRange:sizeRange subnodes:newSubnodes identifier:identifier];
 }
 
+- (void)testStackLayoutSpecWithAlignContent:(ASStackLayoutAlignContent)alignContent
+                                  sizeRange:(ASSizeRange)sizeRange
+                                 identifier:(NSString *)identifier
+{
+  ASStackLayoutSpecStyle style = {
+    .direction = ASStackLayoutDirectionHorizontal,
+    .flexWrap = ASStackLayoutFlexWrapWrap,
+    .alignContent = alignContent,
+  };
+  
+  CGSize subnodeSize = {50, 50};
+  NSArray<ASDisplayNode *> *subnodes = @[
+                                         ASDisplayNodeWithBackgroundColor([UIColor redColor], subnodeSize),
+                                         ASDisplayNodeWithBackgroundColor([UIColor yellowColor], subnodeSize),
+                                         ASDisplayNodeWithBackgroundColor([UIColor blueColor], subnodeSize),
+                                         ASDisplayNodeWithBackgroundColor([UIColor magentaColor], subnodeSize),
+                                         ASDisplayNodeWithBackgroundColor([UIColor greenColor], subnodeSize),
+                                         ASDisplayNodeWithBackgroundColor([UIColor cyanColor], subnodeSize),
+                                         ];
+  
+  [self testStackLayoutSpecWithStyle:style sizeRange:sizeRange subnodes:subnodes identifier:identifier];
+}
 
 #pragma mark -
 
@@ -1165,6 +1180,79 @@ static NSArray<ASTextNode*> *defaultTextNodes()
   
   static ASSizeRange kSize = ASSizeRangeMake(CGSizeMake(300, 0), CGSizeMake(300, CGFLOAT_MAX));
   [self testStackLayoutSpec:stackLayoutSpec sizeRange:kSize subnodes:children identifier:nil];
+}
+
+#pragma mark - Content alignment tests
+
+- (void)testAlignContentUnderflow
+{
+  // 3 lines, each line has 2 items, each item has a size of {50, 50}
+  // width is 110px. It's 10px bigger than the required width of each line (110px vs 100px) to test that items are still correctly collected into lines
+  static ASSizeRange kSize = {{110, 300}, {110, 300}};
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentStart sizeRange:kSize identifier:@"alignContentStart"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentCenter sizeRange:kSize identifier:@"alignContentCenter"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentEnd sizeRange:kSize identifier:@"alignContentEnd"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentSpaceBetween sizeRange:kSize identifier:@"alignContentSpaceBetween"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentSpaceAround sizeRange:kSize identifier:@"alignContentSpaceAround"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentStretch sizeRange:kSize identifier:@"alignContentStretch"];
+}
+
+- (void)testAlignContentOverflow
+{
+  // 6 lines, each line has 1 item, each item has a size of {50, 50}
+  // width is 40px. It's 10px smaller than the width of each item (40px vs 50px) to test that items are still correctly collected into lines
+  static ASSizeRange kSize = {{40, 260}, {40, 260}};
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentStart sizeRange:kSize identifier:@"alignContentStart"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentCenter sizeRange:kSize identifier:@"alignContentCenter"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentEnd sizeRange:kSize identifier:@"alignContentEnd"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentSpaceBetween sizeRange:kSize identifier:@"alignContentSpaceBetween"];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentSpaceAround sizeRange:kSize identifier:@"alignContentSpaceAround"];
+}
+
+- (void)testAlignContentWithUnconstrainedCrossSize
+{
+  // 3 lines, each line has 2 items, each item has a size of {50, 50}
+  // width is 110px. It's 10px bigger than the required width of each line (110px vs 100px) to test that items are still correctly collected into lines
+  // height is unconstrained. It causes no cross size violation and the end results are all similar to ASStackLayoutAlignContentStart.
+  static ASSizeRange kSize = {{110, 0}, {110, CGFLOAT_MAX}};
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentStart sizeRange:kSize identifier:nil];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentCenter sizeRange:kSize identifier:nil];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentEnd sizeRange:kSize identifier:nil];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentSpaceBetween sizeRange:kSize identifier:nil];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentSpaceAround sizeRange:kSize identifier:nil];
+  [self testStackLayoutSpecWithAlignContent:ASStackLayoutAlignContentStretch sizeRange:kSize identifier:nil];
+}
+
+- (void)testAlignContentStretchAndOtherAlignments
+{
+  ASStackLayoutSpecStyle style = {
+    .direction = ASStackLayoutDirectionHorizontal,
+    .flexWrap = ASStackLayoutFlexWrapWrap,
+    .alignContent = ASStackLayoutAlignContentStretch,
+    .alignItems = ASStackLayoutAlignItemsStart,
+  };
+  
+  CGSize subnodeSize = {50, 50};
+  NSArray<ASDisplayNode *> *subnodes = @[
+                                         // 1st line
+                                         ASDisplayNodeWithBackgroundColor([UIColor redColor], subnodeSize),
+                                         ASDisplayNodeWithBackgroundColor([UIColor yellowColor], subnodeSize),
+                                         // 2nd line
+                                         ASDisplayNodeWithBackgroundColor([UIColor blueColor], subnodeSize),
+                                         ASDisplayNodeWithBackgroundColor([UIColor magentaColor], subnodeSize),
+                                         // 3rd line
+                                         ASDisplayNodeWithBackgroundColor([UIColor greenColor], subnodeSize),
+                                         ASDisplayNodeWithBackgroundColor([UIColor cyanColor], subnodeSize),
+                                         ];
+  
+  subnodes[1].style.alignSelf = ASStackLayoutAlignSelfStart;
+  subnodes[3].style.alignSelf = ASStackLayoutAlignSelfCenter;
+  subnodes[5].style.alignSelf = ASStackLayoutAlignSelfEnd;
+  
+  // 3 lines, each line has 2 items, each item has a size of {50, 50}
+  // width is 110px. It's 10px bigger than the required width of each line (110px vs 100px) to test that items are still correctly collected into lines
+  static ASSizeRange kSize = {{110, 300}, {110, 300}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
 }
 
 @end

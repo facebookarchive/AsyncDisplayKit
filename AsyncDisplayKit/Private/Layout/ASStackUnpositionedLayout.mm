@@ -16,6 +16,8 @@
 #import <AsyncDisplayKit/ASLayoutSpecUtilities.h>
 #import <AsyncDisplayKit/ASLayoutElementStylePrivate.h>
 
+CGFloat const kViolationEpsilon = 0.01;
+
 static CGFloat resolveCrossDimensionMaxForStretchChild(const ASStackLayoutSpecStyle &style,
                                                        const ASStackLayoutSpecChild &child,
                                                        const CGFloat stackMax,
@@ -65,8 +67,76 @@ static ASLayout *crossChildLayout(const ASStackLayoutSpecChild &child,
   return layout ? : [ASLayout layoutWithLayoutElement:child.element size:{0, 0}];
 }
 
-/** The threshold that determines if a violation has actually occurred. */
-static const CGFloat kViolationEpsilon = 0.01;
+/**
+ Computes the consumed cross dimension length for the given vector of lines and stacking style.
+ 
+          Cross Dimension
+          +--------------------->
+          +--------+ +--------+ +--------+ +---------+
+ Vertical |Vertical| |Vertical| |Vertical| |Vertical |
+ Stack    | Line 1 | | Line 2 | | Line 3 | | Line 4  |
+          |        | |        | |        | |         |
+          +--------+ +--------+ +--------+ +---------+
+                      crossDimensionSum
+          |------------------------------------------|
+
+ @param lines unpositioned lines
+ */
+static CGFloat computeLinesCrossDimensionSum(const std::vector<ASStackUnpositionedLine> &lines)
+{
+  return std::accumulate(lines.begin(), lines.end(), 0.0,
+                         [&](CGFloat x, const ASStackUnpositionedLine &l) {
+                           return x + l.crossSize;
+                         });
+}
+
+
+/**
+ Computes the violation by comparing a cross dimension sum with the overall allowable size range for the stack.
+ 
+ Violation is the distance you would have to add to the unbounded cross-direction length of the stack spec's
+ lines in order to bring the stack within its allowed sizeRange.  The diagram below shows 3 vertical stacks, each contains 3-5 vertical lines,
+ with the different types of violation.
+ 
+          Cross Dimension
+          +--------------------->
+                                              cross size range
+                                              |------------|
+          +--------+ +--------+ +--------+ +---------+  -  -  -  -  -  -  -  -
+ Vertical |Vertical| |Vertical| |Vertical| |Vertical |     |                 ^
+ Stack 1  | Line 1 | | Line 2 | | Line 3 | | Line 4  | (zero violation)      | stack size range
+          |        | |        | |        | |  |      |     |                 v
+          +--------+ +--------+ +--------+ +---------+  -  -  -  -  -  -  -  -
+                                              |            |
+          +--------+ +--------+ +--------+  -  -  -  -  -  -  -  -  -  -  -  -
+ Vertical |        | |        | |        |    |            |                 ^
+ Stack 2  |        | |        | |        |<--> (positive violation)          | stack size range
+          |        | |        | |        |    |            |                 v
+          +--------+ +--------+ +--------+  -  -  -  -  -  -  -  -  -  -  -  -
+                                              |            |<------> (negative violation)
+          +--------+ +--------+ +--------+ +---------+ +-----------+  -  -   -
+ Vertical |        | |        | |        | |  |      | |   |       |         ^
+ Stack 3  |        | |        | |        | |         | |           |         |  stack size range
+          |        | |        | |        | |  |      | |   |       |         v
+          +--------+ +--------+ +--------+ +---------+ +-----------+  -  -   -
+ 
+ @param crossDimensionSum the consumed length of the lines in the stack along the cross dimension
+ @param style layout style to be applied to all children
+ @param sizeRange the range of allowable sizes for the stack layout spec
+ */
+CGFloat ASStackUnpositionedLayout::computeCrossViolation(const CGFloat crossDimensionSum,
+                                                         const ASStackLayoutSpecStyle &style,
+                                                         const ASSizeRange &sizeRange)
+{
+  const CGFloat minCrossDimension = crossDimension(style.direction, sizeRange.min);
+  const CGFloat maxCrossDimension = crossDimension(style.direction, sizeRange.max);
+  if (crossDimensionSum < minCrossDimension) {
+    return minCrossDimension - crossDimensionSum;
+  } else if (crossDimensionSum > maxCrossDimension) {
+    return maxCrossDimension - crossDimensionSum;
+  }
+  return 0;
+}
 
 /**
  Stretches children to lay out along the cross axis according to the alignment stretch settings of the children
@@ -97,13 +167,13 @@ static const CGFloat kViolationEpsilon = 0.01;
                                                                        |
                  +--------------------------------------------------+  + crossMax
 
- @param items pre-computed child layouts; modified in-place as needed
+ @param items pre-computed items; modified in-place as needed
  @param style the layout style of the overall stack layout
  */
-static void stretchChildrenAlongCrossDimension(std::vector<ASStackLayoutSpecItem> &items,
-                                               const ASStackLayoutSpecStyle &style,
-                                               const CGSize parentSize,
-                                               const CGFloat crossSize)
+static void stretchItemsAlongCrossDimension(std::vector<ASStackLayoutSpecItem> &items,
+                                            const ASStackLayoutSpecStyle &style,
+                                            const CGSize parentSize,
+                                            const CGFloat crossSize)
 {
   for (auto &item : items) {
     const ASStackLayoutAlignItems alignItems = alignment(item.child.style.alignSelf, style.alignItems);
@@ -122,6 +192,33 @@ static void stretchChildrenAlongCrossDimension(std::vector<ASStackLayoutSpecItem
   }
 }
 
+/**
+ * Stretch lines and their items according to alignContent, alignItems and alignSelf.
+ * https://www.w3.org/TR/css-flexbox-1/#algo-line-stretch
+ * https://www.w3.org/TR/css-flexbox-1/#algo-stretch
+ */
+static void stretchLinesAlongCrossDimension(std::vector<ASStackUnpositionedLine> &lines,
+                                            const ASStackLayoutSpecStyle &style,
+                                            const ASSizeRange &sizeRange,
+                                            const CGSize parentSize)
+{
+  ASDisplayNodeCAssertFalse(lines.empty());
+  const std::size_t numOfLines = lines.size();
+  const CGFloat violation = ASStackUnpositionedLayout::computeCrossViolation(computeLinesCrossDimensionSum(lines), style, sizeRange);
+  // Don't stretch if the stack is single line, because the line's cross size was clamped against the stack's constrained size.
+  const BOOL shouldStretchLines = (numOfLines > 1
+                                   && style.alignContent == ASStackLayoutAlignContentStretch
+                                   && violation > kViolationEpsilon);
+  
+  CGFloat extraCrossSizePerLine = violation / numOfLines;
+  for (auto &line : lines) {
+    if (shouldStretchLines) {
+      line.crossSize += extraCrossSizePerLine;
+    }
+    
+    stretchItemsAlongCrossDimension(line.items, style, parentSize, line.crossSize);
+  }
+}
 
 static BOOL itemIsBaselineAligned(const ASStackLayoutSpecStyle &style,
                                   const ASStackLayoutSpecItem &l)
@@ -131,20 +228,20 @@ static BOOL itemIsBaselineAligned(const ASStackLayoutSpecStyle &style,
 }
 
 CGFloat ASStackUnpositionedLayout::baselineForItem(const ASStackLayoutSpecStyle &style,
-                                                   const ASStackLayoutSpecItem &l)
+                                                   const ASStackLayoutSpecItem &item)
 {
-  switch (alignment(l.child.style.alignSelf, style.alignItems)) {
+  switch (alignment(item.child.style.alignSelf, style.alignItems)) {
     case ASStackLayoutAlignItemsBaselineFirst:
-      return l.child.style.ascender;
+      return item.child.style.ascender;
     case ASStackLayoutAlignItemsBaselineLast:
-      return crossDimension(style.direction, l.layout.size) + l.child.style.descender;
+      return crossDimension(style.direction, item.layout.size) + item.child.style.descender;
     default:
       return 0;
   }
 }
 
 /**
- * Finds cross dimension size and baseline of the stack.
+ * Computes cross size and baseline of each line.
  * https://www.w3.org/TR/css-flexbox-1/#algo-cross-line
  *
  * @param items All items to lay out
@@ -153,41 +250,64 @@ CGFloat ASStackUnpositionedLayout::baselineForItem(const ASStackLayoutSpecStyle 
  * @param crossSize result of the cross size
  * @param baseline result of the stack baseline
  */
-static void computeCrossSizeAndBaseline(const std::vector<ASStackLayoutSpecItem> &items,
-                                        const ASStackLayoutSpecStyle &style,
-                                        const ASSizeRange &sizeRange,
-                                        CGFloat &crossSize,
-                                        CGFloat &baseline)
+static void computeLinesCrossSizeAndBaseline(std::vector<ASStackUnpositionedLine> &lines,
+                                             const ASStackLayoutSpecStyle &style,
+                                             const ASSizeRange &sizeRange)
 {
+  ASDisplayNodeCAssertFalse(lines.empty());
+  const BOOL isSingleLine = (lines.size() == 1);
+  
   const auto minCrossSize = crossDimension(style.direction, sizeRange.min);
   const auto maxCrossSize = crossDimension(style.direction, sizeRange.max);
+  const BOOL definiteCrossSize = (minCrossSize == maxCrossSize);
   
-  // Step 1. Collect all the flex items whose align-self is baseline. Find the largest of the distances
-  // between each item’s baseline and its hypothetical outer cross-start edge (aka. its ascender value),
-  // and the largest of the distances between each item’s baseline and its hypothetical outer cross-end edge
-  // (aka. the opposite of its descender value, because a negative descender means the item extends below its baseline),
-  // and sum these two values.
-  //
-  // Step 2. Find the maximum cross dimension size among child layouts.
-  CGFloat maxStartToBaselineDistance = 0;
-  CGFloat maxBaselineToEndDistance = 0;
-  CGFloat maxItemCrossSize = 0;
-  for (const auto &item : items) {
-    if (itemIsBaselineAligned(style, item)) {
-      CGFloat baseline = ASStackUnpositionedLayout::baselineForItem(style, item);
-      maxStartToBaselineDistance = MAX(maxStartToBaselineDistance, baseline);
-      maxBaselineToEndDistance = MAX(maxBaselineToEndDistance, crossDimension(style.direction, item.layout.size) - baseline);
-    } else {
-      maxItemCrossSize = MAX(maxItemCrossSize, crossDimension(style.direction, item.layout.size));
+  // If the stack is single-line and has a definite cross size, the cross size of the line is the stack's definite cross size.
+  if (isSingleLine && definiteCrossSize) {
+    auto &line = lines[0];
+    line.crossSize = minCrossSize;
+    
+    // We still need to determine the line's baseline
+    //TODO unit test
+    for (const auto &item : line.items) {
+      if (itemIsBaselineAligned(style, item)) {
+        CGFloat baseline = ASStackUnpositionedLayout::baselineForItem(style, item);
+        line.baseline = MAX(line.baseline, baseline);
+      }
     }
+    
+    return;
   }
   
-  // Step 3. The used cross-size of the flex line is the largest of the numbers found in the previous two steps and zero.
-  crossSize = MAX(maxStartToBaselineDistance + maxBaselineToEndDistance, maxItemCrossSize);
-  // Clamp the cross-size to be within the stack's min and max cross-size properties.
-  crossSize = MIN(MAX(minCrossSize, crossSize), maxCrossSize);
-  
-  baseline = maxStartToBaselineDistance;
+  for (auto &line : lines) {
+    const auto &items = line.items;
+    CGFloat maxStartToBaselineDistance = 0;
+    CGFloat maxBaselineToEndDistance = 0;
+    CGFloat maxItemCrossSize = 0;
+    
+    for (const auto &item : items) {
+      if (itemIsBaselineAligned(style, item)) {
+        // Step 1. Collect all the items whose align-self is baseline. Find the largest of the distances
+        // between each item’s baseline and its hypothetical outer cross-start edge (aka. its baseline value),
+        // and the largest of the distances between each item’s baseline and its hypothetical outer cross-end edge,
+        // and sum these two values.
+        CGFloat baseline = ASStackUnpositionedLayout::baselineForItem(style, item);
+        maxStartToBaselineDistance = MAX(maxStartToBaselineDistance, baseline);
+        maxBaselineToEndDistance = MAX(maxBaselineToEndDistance, crossDimension(style.direction, item.layout.size) - baseline);
+      } else {
+        // Step 2. Among all the items not collected by the previous step, find the largest outer hypothetical cross size.
+        maxItemCrossSize = MAX(maxItemCrossSize, crossDimension(style.direction, item.layout.size));
+      }
+    }
+    
+    // Step 3. The used cross-size of the flex line is the largest of the numbers found in the previous two steps and zero.
+    line.crossSize = MAX(maxStartToBaselineDistance + maxBaselineToEndDistance, maxItemCrossSize);
+    if (isSingleLine) {
+      // If the stack is single-line, then clamp the line’s cross-size to be within the stack's min and max cross-size properties.
+      line.crossSize = MIN(MAX(minCrossSize, line.crossSize), maxCrossSize);
+    }
+    
+    line.baseline = maxStartToBaselineDistance;
+  }
 }
 
 /**
@@ -314,8 +434,8 @@ static void layoutFlexibleChildrenAtZeroSize(std::vector<ASStackLayoutSpecItem> 
  @param items unpositioned layouts for items
  @param style the layout style of the overall stack layout
  */
-static CGFloat computeStackDimensionSum(const std::vector<ASStackLayoutSpecItem> &items,
-                                        const ASStackLayoutSpecStyle &style)
+static CGFloat computeItemsStackDimensionSum(const std::vector<ASStackLayoutSpecItem> &items,
+                                             const ASStackLayoutSpecStyle &style)
 {
   // Sum up the childrens' spacing
   const CGFloat childSpacingSum = std::accumulate(items.begin(), items.end(),
@@ -333,6 +453,7 @@ static CGFloat computeStackDimensionSum(const std::vector<ASStackLayoutSpecItem>
   return childStackDimensionSum;
 }
 
+//TODO move this up near computeCrossViolation and make both methods share the same code path, to make sure they share the same concept of "negative" and "positive" violations.
 /**
  Computes the violation by comparing a stack dimension sum with the overall allowable size range for the stack.
 
@@ -364,9 +485,9 @@ static CGFloat computeStackDimensionSum(const std::vector<ASStackLayoutSpecItem>
  @param style layout style to be applied to all children
  @param sizeRange the range of allowable sizes for the stack layout spec
  */
-static CGFloat computeViolation(const CGFloat stackDimensionSum,
-                                const ASStackLayoutSpecStyle &style,
-                                const ASSizeRange &sizeRange)
+CGFloat ASStackUnpositionedLayout::computeStackViolation(const CGFloat stackDimensionSum,
+                                                         const ASStackLayoutSpecStyle &style,
+                                                         const ASSizeRange &sizeRange)
 {
   const CGFloat minStackDimension = stackDimension(style.direction, sizeRange.min);
   const CGFloat maxStackDimension = stackDimension(style.direction, sizeRange.max);
@@ -394,65 +515,106 @@ ASDISPLAYNODE_INLINE BOOL useOptimizedFlexing(const std::vector<ASStackLayoutSpe
 
 /**
  Flexes children in the stack axis to resolve a min or max stack size violation. First, determines which children are
- flexible (see computeViolation and isFlexibleInViolationDirection). Then computes how much to flex each flexible child
+ flexible (see computeStackViolation and isFlexibleInViolationDirection). Then computes how much to flex each flexible child
  and performs re-layout. Note that there may still be a non-zero violation even after flexing.
 
  The actual CSS flexbox spec describes an iterative looping algorithm here, which may be adopted in t5837937:
  http://www.w3.org/TR/css3-flexbox/#resolve-flexible-lengths
 
- @param items Reference to unpositioned items from the original, unconstrained layout pass; modified in-place
+ @param lines reference to unpositioned lines and items from the original, unconstrained layout pass; modified in-place
  @param style layout style to be applied to all children
  @param sizeRange the range of allowable sizes for the stack layout component
  @param parentSize Size of the stack layout component. May be undefined in either or both directions.
  */
-static void flexChildrenAlongStackDimension(std::vector<ASStackLayoutSpecItem> &items,
-                                            const ASStackLayoutSpecStyle &style,
-                                            const ASSizeRange &sizeRange,
-                                            const CGSize parentSize,
-                                            const BOOL useOptimizedFlexing)
+static void flexLinesAlongStackDimension(std::vector<ASStackUnpositionedLine> &lines,
+                                         const ASStackLayoutSpecStyle &style,
+                                         const ASSizeRange &sizeRange,
+                                         const CGSize parentSize,
+                                         const BOOL useOptimizedFlexing)
 {
-  const CGFloat violation = computeViolation(computeStackDimensionSum(items, style), style, sizeRange);
-  std::function<CGFloat(const ASStackLayoutSpecItem &)> flexFactor = flexFactorInViolationDirection(violation);
-  // The flex factor sum is needed to determine if flexing is necessary.
-  // This value is also needed if the violation is positive and flexible children need to grow, so keep it around.
-  const CGFloat flexFactorSum = std::accumulate(items.begin(), items.end(), 0.0, [&](CGFloat x, const ASStackLayoutSpecItem &item) {
-    return x + flexFactor(item);
-  });
-  // If no children are able to flex then there is nothing left to do. Bail.
-  if (flexFactorSum == 0) {
-    // If optimized flexing was used then we have to clean up the unsized children and lay them out at zero size.
-    if (useOptimizedFlexing) {
-      layoutFlexibleChildrenAtZeroSize(items, style, sizeRange, parentSize);
+  for (auto &line : lines) {
+    auto &items = line.items;
+    const CGFloat violation = ASStackUnpositionedLayout::computeStackViolation(computeItemsStackDimensionSum(items, style), style, sizeRange);
+    std::function<CGFloat(const ASStackLayoutSpecItem &)> flexFactor = flexFactorInViolationDirection(violation);
+    // The flex factor sum is needed to determine if flexing is necessary.
+    // This value is also needed if the violation is positive and flexible children need to grow, so keep it around.
+    const CGFloat flexFactorSum = std::accumulate(items.begin(), items.end(), 0.0, [&](CGFloat x, const ASStackLayoutSpecItem &item) {
+      return x + flexFactor(item);
+    });
+    // If no children are able to flex then there is nothing left to do. Bail.
+    if (flexFactorSum == 0) {
+      // If optimized flexing was used then we have to clean up the unsized children and lay them out at zero size.
+      if (useOptimizedFlexing) {
+        layoutFlexibleChildrenAtZeroSize(items, style, sizeRange, parentSize);
+      }
+      return;
     }
-    return;
+    std::function<CGFloat(const ASStackLayoutSpecItem &)> flexAdjustment = flexAdjustmentInViolationDirection(items,
+                                                                                                              style,
+                                                                                                              violation,
+                                                                                                              flexFactorSum);
+    
+    // Compute any remaining violation to the first flexible child.
+    const CGFloat remainingViolation = std::accumulate(items.begin(), items.end(), violation, [&](CGFloat x, const ASStackLayoutSpecItem &item) {
+      return x - flexAdjustment(item);
+    });
+    BOOL isFirstFlex = YES;
+    for (ASStackLayoutSpecItem &item : items) {
+      const CGFloat currentFlexAdjustment = flexAdjustment(item);
+      // Children are consider inflexible if they do not need to make a flex adjustment.
+      if (currentFlexAdjustment != 0) {
+        const CGFloat originalStackSize = stackDimension(style.direction, item.layout.size);
+        // Only apply the remaining violation for the first flexible child that has a flex grow factor.
+        const CGFloat flexedStackSize = originalStackSize + currentFlexAdjustment + (isFirstFlex && item.child.style.flexGrow > 0 ? remainingViolation : 0);
+        item.layout = crossChildLayout(item.child,
+                                       style,
+                                       MAX(flexedStackSize, 0),
+                                       MAX(flexedStackSize, 0),
+                                       crossDimension(style.direction, sizeRange.min),
+                                       crossDimension(style.direction, sizeRange.max),
+                                       parentSize);
+        isFirstFlex = NO;
+      }
+    }
   }
-  std::function<CGFloat(const ASStackLayoutSpecItem &)> flexAdjustment = flexAdjustmentInViolationDirection(items,
-                                                                                                            style,
-                                                                                                            violation,
-                                                                                                            flexFactorSum);
+}
 
-  // Compute any remaining violation to the first flexible child.
-  const CGFloat remainingViolation = std::accumulate(items.begin(), items.end(), violation, [&](CGFloat x, const ASStackLayoutSpecItem &item) {
-    return x - flexAdjustment(item);
-  });
-  BOOL isFirstFlex = YES;
-  for (ASStackLayoutSpecItem &item : items) {
-    const CGFloat currentFlexAdjustment = flexAdjustment(item);
-    // Children are consider inflexible if they do not need to make a flex adjustment.
-    if (currentFlexAdjustment != 0) {
-      const CGFloat originalStackSize = stackDimension(style.direction, item.layout.size);
-      // Only apply the remaining violation for the first flexible child that has a flex grow factor.
-      const CGFloat flexedStackSize = originalStackSize + currentFlexAdjustment + (isFirstFlex && item.child.style.flexGrow > 0 ? remainingViolation : 0);
-      item.layout = crossChildLayout(item.child,
-                                     style,
-                                     MAX(flexedStackSize, 0),
-                                     MAX(flexedStackSize, 0),
-                                     crossDimension(style.direction, sizeRange.min),
-                                     crossDimension(style.direction, sizeRange.max),
-                                     parentSize);
-      isFirstFlex = NO;
-    }
+/**
+ https://www.w3.org/TR/css-flexbox-1/#algo-line-break
+ */
+static std::vector<ASStackUnpositionedLine> collectChildrenIntoLines(const std::vector<ASStackLayoutSpecItem> &items,
+                                                                     const ASStackLayoutSpecStyle &style,
+                                                                     const ASSizeRange &sizeRange)
+{
+  //TODO if infinite max stack size, fast path
+  if (style.flexWrap == ASStackLayoutFlexWrapNoWrap) {
+    return std::vector<ASStackUnpositionedLine> (1, {.items = std::move(items)});
   }
+  
+  std::vector<ASStackUnpositionedLine> lines;
+  std::vector<ASStackLayoutSpecItem> lineItems;
+  CGFloat lineStackDimensionSum = 0;
+
+  for(auto it = items.begin(); it != items.end(); ++it) {
+    const auto &item = *it;
+    const CGFloat itemStackDimension = stackDimension(style.direction, item.layout.size);
+    const BOOL negativeViolationIfAddItem = (ASStackUnpositionedLayout::computeStackViolation(lineStackDimensionSum + itemStackDimension, style, sizeRange) < 0);
+    const BOOL breakCurrentLine = negativeViolationIfAddItem && !lineItems.empty();
+    
+    if (breakCurrentLine) {
+      lines.push_back({.items = std::vector<ASStackLayoutSpecItem> (lineItems)});
+      lineItems.clear();
+      lineStackDimensionSum = 0;
+    }
+    
+    lineItems.push_back(std::move(item));
+    lineStackDimensionSum += itemStackDimension;
+  }
+  
+  // Handle last line
+  lines.push_back({.items = std::vector<ASStackLayoutSpecItem> (lineItems)});
+  
+  return lines;
 }
 
 /**
@@ -507,25 +669,34 @@ ASStackUnpositionedLayout ASStackUnpositionedLayout::compute(const std::vector<A
   // the stack dimension.  This allows us to compute the "intrinsic" size of each child and find the available violation
   // which determines whether we must grow or shrink the flexible children.
   std::vector<ASStackLayoutSpecItem> items = layoutChildrenAlongUnconstrainedStackDimension(children,
-                                                                                               style,
-                                                                                               sizeRange,
-                                                                                               parentSize,
-                                                                                               optimizedFlexing);
+                                                                                            style,
+                                                                                            sizeRange,
+                                                                                            parentSize,
+                                                                                            optimizedFlexing);
   
-  // Resolve the flexible lengths (https://www.w3.org/TR/css-flexbox-1/#algo-flex)
-  // Determine the hypothetical cross size of each item (https://www.w3.org/TR/css-flexbox-1/#algo-cross-item)
-  flexChildrenAlongStackDimension(items, style, sizeRange, parentSize, optimizedFlexing);
+  // Collect items into lines (https://www.w3.org/TR/css-flexbox-1/#algo-line-break)
+  std::vector<ASStackUnpositionedLine> lines = collectChildrenIntoLines(items, style, sizeRange);
   
-  // Step 4. Cross Size Determination (https://www.w3.org/TR/css-flexbox-1/#cross-sizing)
-  //
-  // Calculate the cross size of the stack (https://www.w3.org/TR/css-flexbox-1/#algo-cross-line)
-  CGFloat crossSize;
-  CGFloat baseline;
-  computeCrossSizeAndBaseline(items, style, sizeRange, crossSize, baseline);
+  // Resolve the flexible lengths (https://www.w3.org/TR/css-flexbox-1/#resolve-flexible-lengths)
+  flexLinesAlongStackDimension(lines, style, sizeRange, parentSize, optimizedFlexing);
+  
+  // Calculate the cross size of each flex line (https://www.w3.org/TR/css-flexbox-1/#algo-cross-line)
+  computeLinesCrossSizeAndBaseline(lines, style, sizeRange);
+  
+  // Handle 'align-content: stretch' (https://www.w3.org/TR/css-flexbox-1/#algo-line-stretch)
   // Determine the used cross size of each item (https://www.w3.org/TR/css-flexbox-1/#algo-stretch)
-  // If the flex item has stretch alignment, redo layout
-  stretchChildrenAlongCrossDimension(items, style, parentSize, crossSize);
+  stretchLinesAlongCrossDimension(lines, style, sizeRange, parentSize);
   
-  const CGFloat stackDimensionSum = computeStackDimensionSum(items, style);
-  return {std::move(items), stackDimensionSum, computeViolation(stackDimensionSum, style, sizeRange), crossSize, baseline};
+  // Compute stack dimension sum of each line and the whole stack
+  CGFloat layoutStackDimensionSum = 0;
+  for (auto &line : lines) {
+    line.stackDimensionSum = computeItemsStackDimensionSum(line.items, style);
+    // layoutStackDimensionSum is the max stackDimensionSum among all lines
+    layoutStackDimensionSum = MAX(line.stackDimensionSum, layoutStackDimensionSum);
+  }
+  // Compute cross dimension sum of the stack.
+  // This should be done before `lines` are moved to a new ASStackUnpositionedLayout struct (i.e `std::move(lines)`)
+  CGFloat layoutCrossDimensionSum = computeLinesCrossDimensionSum(lines);
+  
+  return {.lines = std::move(lines), .stackDimensionSum = layoutStackDimensionSum, .crossDimensionSum = layoutCrossDimensionSum};
 }

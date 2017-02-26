@@ -86,6 +86,22 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutAlignSelf) {
   ASStackLayoutAlignSelfStretch,
 };
 
+// TODO documentation
+typedef NS_ENUM(NSUInteger, ASStackLayoutFlexWrap) {
+  ASStackLayoutFlexWrapNoWrap,
+  ASStackLayoutFlexWrapWrap,
+};
+
+// TODO documentation
+typedef NS_ENUM(NSUInteger, ASStackLayoutAlignContent) {
+  ASStackLayoutAlignContentStart,
+  ASStackLayoutAlignContentCenter,
+  ASStackLayoutAlignContentEnd,
+  ASStackLayoutAlignContentSpaceBetween,
+  ASStackLayoutAlignContentSpaceAround,
+  ASStackLayoutAlignContentStretch,
+};
+
 /** Orientation of children along horizontal axis */
 typedef NS_ENUM(NSUInteger, ASHorizontalAlignment) {
   /** No alignment specified. Default value */
