@@ -40,8 +40,13 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   BOOL _imageWasSetExternally;
   CGFloat _currentImageQuality;
   CGFloat _renderedImageQuality;
+
   BOOL _shouldRenderProgressImages;
 
+  BOOL _hasStretchableDefaultImage;
+  BOOL _needsToApplyPendingContentMode;
+  UIViewContentMode _pendingContentModeState;
+  
   struct {
     unsigned int delegateDidStartFetchingData:1;
     unsigned int delegateDidFailWithError:1;
@@ -128,6 +133,17 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)_setImage:(UIImage *)image
 {
+  // when the defaultImage is stretchable, the layer's contentsGravity is set to kCAGravityResize
+  // this will ensure the contentMode is properly set when the final image is loaded
+  if (_hasStretchableDefaultImage) {
+    if (!_needsToApplyPendingContentMode && ASObjectIsEqual(image, _defaultImage)) {
+      _pendingContentModeState = self.contentMode;
+      _needsToApplyPendingContentMode = YES;
+    } else if (_needsToApplyPendingContentMode && !ASObjectIsEqual(image, _defaultImage)) {
+      _needsToApplyPendingContentMode = NO;
+      self.contentMode = _pendingContentModeState;
+    }
+  }
   super.image = image;
 }
 
@@ -183,7 +199,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     return;
   }
   _defaultImage = defaultImage;
-
+  _hasStretchableDefaultImage = !UIEdgeInsetsEqualToEdgeInsets(defaultImage.capInsets, UIEdgeInsetsZero);
+  
   if (!_imageLoaded) {
     BOOL hasURL = _URL == nil;
     /* We want to maintain the order that currentImageQuality is set regardless of the calling thread,
@@ -200,6 +217,23 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 {
   ASDN::MutexLocker l(__instanceLock__);
   return _defaultImage;
+}
+
+- (void)setAnimatedImage:(id<ASAnimatedImageProtocol>)animatedImage
+{
+  if (_needsToApplyPendingContentMode) {
+    _needsToApplyPendingContentMode = NO;
+    self.contentMode = _pendingContentModeState;
+  }
+  [super setAnimatedImage:animatedImage];
+}
+
+- (void)setContentMode:(UIViewContentMode)contentMode
+{
+  if (_needsToApplyPendingContentMode) {
+    _pendingContentModeState = contentMode;
+  }
+  [super setContentMode:contentMode];
 }
 
 - (void)setCurrentImageQuality:(CGFloat)currentImageQuality
