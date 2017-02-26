@@ -17,8 +17,7 @@
   ASDisplayNodeAssertMainThread();
   node.layoutAttributes = _layoutAttributes;
   _node = node;
-  self.backgroundColor = node.backgroundColor;
-  self.clipsToBounds = node.clipsToBounds;
+  
   [node __setSelectedFromUIKit:self.selected];
   [node __setHighlightedFromUIKit:self.highlighted];
 }
