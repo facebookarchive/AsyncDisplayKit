@@ -263,8 +263,11 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 /**
  * Agressively repopulates supplementary nodes of all kinds for sections that contains some given index paths.
  *
+ * @param map The element map into which to apply the change.
  * @param indexPaths The index paths belongs to sections whose supplementary nodes need to be repopulated.
+ * @param changeSet The changeset that triggered this repopulation.
  * @param environment The trait environment needed to initialize elements
+ * @param indexPathsAreNew YES if index paths are "after the update," NO otherwise.
  */
 - (void)_repopulateSupplementaryNodesIntoMap:(ASMutableElementMap *)map
              forSectionsContainingIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
