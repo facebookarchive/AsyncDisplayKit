@@ -60,11 +60,6 @@ extern NSString *const ASPhotosURLScheme;
  */
 @property (nonatomic, readonly) NSURL *url;
 
-/**
- @return `YES` if `object` is an equivalent image request, `NO` otherwise.
- */
-- (BOOL)isEqual:(id)object;
-
 @end
 
 NS_ASSUME_NONNULL_END
