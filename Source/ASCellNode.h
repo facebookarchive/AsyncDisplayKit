@@ -182,10 +182,10 @@ typedef NS_ENUM(NSUInteger, ASCellNodeVisibilityEvent) {
  */
 @property (nonatomic) UITableViewCellAccessoryType accessoryType;
 
-/* @abstract The seperator inset of the cell seperator line
+/* @abstract The inset of the cell separator line
  * ASTableView uses these properties when configuring UITableViewCells that host ASCellNodes.
  */
-@property (nonatomic) UIEdgeInsets seperatorInset;
+@property (nonatomic) UIEdgeInsets separatorInset;
 
 @end
 
