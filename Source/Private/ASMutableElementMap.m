@@ -72,8 +72,8 @@ typedef NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCol
     [_sectionsOfItems removeObjectsAtIndexes:sections];
   } else {
     // Supplementaries
-    NSMutableDictionary *supsForKind = _supplementaryElements[kind];
-    [supsForKind removeObjectsForKeys:[sections as_filterIndexPathsBySection:supsForKind]];
+    NSMutableDictionary *supplementariesForKind = _supplementaryElements[kind];
+    [supplementariesForKind removeObjectsForKeys:[sections as_filterIndexPathsBySection:supplementariesForKind]];
   }
 }
 
@@ -90,7 +90,12 @@ typedef NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCol
   if (kind == nil) {
     [_sectionsOfItems[indexPath.section] insertObject:element atIndex:indexPath.item];
   } else {
-    _supplementaryElements[kind][indexPath] = element;
+    NSMutableDictionary *supplementariesForKind = _supplementaryElements[kind];
+    if (supplementariesForKind == nil) {
+      supplementariesForKind = [NSMutableDictionary dictionary];
+      _supplementaryElements[kind] = supplementariesForKind;
+    }
+    supplementariesForKind[indexPath] = element;
   }
 }
 

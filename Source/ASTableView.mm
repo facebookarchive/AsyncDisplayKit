@@ -548,7 +548,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   // If this is a section index path, we don't currently have a method
   // to do a mapping.
-  if (indexPath.row == NSNotFound) {
+  if (indexPath == nil || indexPath.row == NSNotFound) {
     return indexPath;
   } else {
     NSIndexPath *viewIndexPath = [_dataController.visibleMap convertIndexPath:indexPath fromMap:_dataController.pendingMap];

@@ -226,6 +226,7 @@ NSArray *ASIndexPathsForMultidimensionalArray(NSArray *multidimensionalArray)
 
 id ASGetElementInTwoDimensionalArray(NSArray *array, NSIndexPath *indexPath)
 {
+  ASDisplayNodeCAssertNotNil(indexPath, @"Expected non-nil index path");
   ASDisplayNodeCAssert(indexPath.length == 2, @"Expected index path of length 2. Index path: %@", indexPath);
   NSInteger section = indexPath.section;
   if (array.count <= section) {
