@@ -53,11 +53,11 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateVideoPlayerNodeDidRecoverFromStall:1;
   } _delegateFlags;
   
+  // Immutable properties
   NSURL *_url;
   AVAsset *_asset;
   AVVideoComposition *_videoComposition;
   AVAudioMix *_audioMix;
-  
   ASVideoNode *_videoNode;
 
   NSArray *_neededDefaultControls;
@@ -211,17 +211,16 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 - (void)didEnterPreloadState
 {
   [super didEnterPreloadState];
-  {
-    ASDN::MutexLocker l(__instanceLock__);
-    if (_asset != _videoNode.asset) {
-      _videoNode.asset = _asset;
-    }
-    if (_videoComposition != _videoNode.videoComposition) {
-      _videoNode.videoComposition = _videoComposition;
-    }
-    if (_audioMix != _videoNode.audioMix) {
-      _videoNode.audioMix = _audioMix;
-    }
+  
+  // Don't need to grab instance lock here because all of these properties are immutable.
+  if (_asset != _videoNode.asset) {
+    _videoNode.asset = _asset;
+  }
+  if (_videoComposition != _videoNode.videoComposition) {
+    _videoNode.videoComposition = _videoComposition;
+  }
+  if (_audioMix != _videoNode.audioMix) {
+    _videoNode.audioMix = _audioMix;
   }
 }
 
