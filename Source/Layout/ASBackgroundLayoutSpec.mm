@@ -33,9 +33,7 @@ static NSUInteger const kBackgroundChildIndex = 1;
   if (!(self = [super init])) {
     return nil;
   }
-  
-  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
-  [self setChild:child atIndex:kForegroundChildIndex];
+  self.child = child;
   self.background = background;
   return self;
 }
@@ -49,7 +47,7 @@ static NSUInteger const kBackgroundChildIndex = 1;
                      restrictedToSize:(ASLayoutElementSize)size
                  relativeToParentSize:(CGSize)parentSize
 {
-  ASLayout *contentsLayout = [[super childAtIndex:kForegroundChildIndex] layoutThatFits:constrainedSize parentSize:parentSize];
+  ASLayout *contentsLayout = [self.child layoutThatFits:constrainedSize parentSize:parentSize];
 
   NSMutableArray *sublayouts = [NSMutableArray arrayWithCapacity:2];
   if (self.background) {
@@ -66,6 +64,17 @@ static NSUInteger const kBackgroundChildIndex = 1;
 }
 
 #pragma mark - Background
+
+- (void)setChild:(id<ASLayoutElement>)child
+{
+  ASDisplayNodeAssertNotNil(child, @"Child cannot be nil");
+  [super setChild:child atIndex:kForegroundChildIndex];
+}
+
+- (id<ASLayoutElement>)child
+{
+  return [super childAtIndex:kForegroundChildIndex];
+}
 
 - (void)setBackground:(id<ASLayoutElement>)background
 {
