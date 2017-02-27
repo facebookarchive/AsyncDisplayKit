@@ -1031,7 +1031,7 @@
     r;
   });
   CGFloat expectedHeight = cn.bounds.size.height * 3;
-  XCTAssertEqualWithAccuracy(CGRectGetHeight(preloadBounds), expectedHeight, 100);
+  XCTAssertEqualWithAccuracy(CGRectGetHeight(preloadBounds), expectedHeight, expectedHeight * 0.1);
   XCTAssertEqual([[cn valueForKeyPath:@"rangeController.currentRangeMode"] integerValue], ASLayoutRangeModeMinimum, @"Expected range mode to be minimum before scrolling begins.");
 }
 

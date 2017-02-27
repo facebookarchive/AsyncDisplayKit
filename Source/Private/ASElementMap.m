@@ -54,8 +54,8 @@
       }
       s++;
     }
-    for (NSDictionary *supsOfKind in [_supplementaryElements objectEnumerator]) {
-      [supsOfKind enumerateKeysAndObjectsUsingBlock:^(NSIndexPath *_Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
+    for (NSDictionary *supplementariesForKind in [_supplementaryElements objectEnumerator]) {
+      [supplementariesForKind enumerateKeysAndObjectsUsingBlock:^(NSIndexPath *_Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
         [_elementToIndexPathMap setObject:indexPath forKey:element];
       }];
     }
@@ -90,7 +90,7 @@
 
 - (nullable ASCollectionElement *)elementForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return ASGetElementInTwoDimensionalArray(_sectionsOfItems, indexPath);
+  return (indexPath != nil) ? ASGetElementInTwoDimensionalArray(_sectionsOfItems, indexPath) : nil;
 }
 
 - (nullable ASCollectionElement *)supplementaryElementOfKind:(NSString *)supplementaryElementKind atIndexPath:(NSIndexPath *)indexPath
