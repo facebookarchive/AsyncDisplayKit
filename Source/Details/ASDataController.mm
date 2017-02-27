@@ -617,6 +617,28 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 
 #pragma mark - Relayout
 
+- (void)relayoutNodes:(id<NSFastEnumeration>)nodes nodesSizeChanged:(NSMutableArray **)nodesSizesChanged
+{
+  NSParameterAssert(*nodesSizesChanged);
+  
+  ASDisplayNodeAssertMainThread();
+  if (!_initialReloadDataHasBeenCalled) {
+    return;
+  }
+  
+  for (ASCellNode *node in nodes) {
+    NSString *kind = node.collectionElement.supplementaryElementKind ?: ASDataControllerRowNodeKind;
+    NSIndexPath *indexPath = [_pendingMap indexPathForElement:node.collectionElement];
+    ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+    
+    CGSize oldSize = node.bounds.size;
+    [self _layoutNode:node withConstrainedSize:constrainedSize];
+    if (! CGSizeEqualToSize(node.frame.size, oldSize)) {
+      [*nodesSizesChanged addObject:node];
+    }
+  }
+}
+
 - (void)relayoutAllNodes
 {
   ASDisplayNodeAssertMainThread();

@@ -25,6 +25,7 @@
 
 #import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 
 #pragma mark -
 #pragma mark ASCellNode
@@ -120,10 +121,14 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
 
 - (void)_locked_displayNodeDidInvalidateSizeNewSize:(CGSize)newSize
 {
-  CGSize oldSize = self.bounds.size;
-  [super _locked_displayNodeDidInvalidateSizeNewSize:newSize];
-  if (CGSizeEqualToSize(oldSize, newSize) == NO) {
-    [self didRelayoutFromOldSize:oldSize toNewSize:newSize];
+  if ([_interactionDelegate respondsToSelector:@selector(nodeDidGetNeedsLayout:)]) {
+    [_interactionDelegate nodeDidGetNeedsLayout:self];
+  } else {
+    CGSize oldSize = self.bounds.size;
+    [super _locked_displayNodeDidInvalidateSizeNewSize:newSize];
+    if (CGSizeEqualToSize(oldSize, newSize) == NO) {
+      [self didRelayoutFromOldSize:oldSize toNewSize:newSize];
+    }
   }
 }
 

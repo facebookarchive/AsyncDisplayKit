@@ -39,6 +39,14 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)nodeSelectedStateDidChange:(ASCellNode *)node;
 - (void)nodeHighlightedStateDidChange:(ASCellNode *)node;
 
+@optional
+/**
+ * Notifies the delegate that a specified cell node got a setNeedsLayout call due to a size change
+ *
+ * @param node A node informing the delegate about the relayout.
+ */
+- (void)nodeDidGetNeedsLayout:(ASCellNode *)node;
+
 @end
 
 @interface ASCellNode ()

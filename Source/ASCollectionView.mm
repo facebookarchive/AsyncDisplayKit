@@ -80,6 +80,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   id<ASCollectionViewLayoutInspecting> _defaultLayoutInspector;
   __weak id<ASCollectionViewLayoutInspecting> _layoutInspector;
   NSMutableSet *_cellsForVisibilityUpdates;
+  NSMutableSet *_cellsForLayoutUpdates;
   id<ASCollectionViewLayoutFacilitatorProtocol> _layoutFacilitator;
   
   NSUInteger _superBatchUpdateCount;
@@ -280,6 +281,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   _registeredSupplementaryKinds = [NSMutableSet set];
   
   _cellsForVisibilityUpdates = [NSMutableSet set];
+  _cellsForLayoutUpdates = [NSMutableSet set];
   self.backgroundColor = [UIColor whiteColor];
   
   [self registerClass:[_ASCollectionViewCell class] forCellWithReuseIdentifier:kReuseIdentifier];
@@ -1346,6 +1348,12 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (void)layoutSubviews
 {
+  if (_cellsForLayoutUpdates) {
+    NSMutableArray<ASCellNode *> *nodesSizesChanged = [NSMutableArray array];
+    [_dataController relayoutNodes:_cellsForLayoutUpdates nodesSizeChanged:&nodesSizesChanged];
+    [self nodesDidRelayout:nodesSizesChanged];
+  }
+
   // Flush any pending invalidation action if needed.
   ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
   _nextLayoutInvalidationStyle = ASCollectionViewInvalidationStyleNone;
@@ -1799,6 +1807,12 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
 }
 
+- (void)nodeDidGetNeedsLayout:(ASCellNode *)node
+{
+  [_cellsForLayoutUpdates addObject:node];
+  [self setNeedsLayout];
+}
+
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();
@@ -1807,35 +1821,53 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     return;
   }
   
-  NSIndexPath *uikitIndexPath = [self indexPathForNode:node];
-  if (uikitIndexPath == nil) {
+  [self nodesDidRelayout:@[node]];
+}
+
+- (void)nodesDidRelayout:(NSArray<ASCellNode *> *)nodes
+{
+  ASDisplayNodeAssertMainThread();
+  
+  if (nodes.count == 0) {
     return;
   }
 
-  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:@[ uikitIndexPath ] batched:NO];
-  
-  ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
-  if (invalidationStyle == ASCollectionViewInvalidationStyleNone) {
-    [self setNeedsLayout];
-    invalidationStyle = ASCollectionViewInvalidationStyleWithAnimation;
-  }
-
-  // If we think we're going to animate, check if this node will prevent it.
-  if (invalidationStyle == ASCollectionViewInvalidationStyleWithAnimation) {
-    // TODO: Incorporate `shouldAnimateSizeChanges` into ASEnvironmentState for performance benefit.
-    static dispatch_once_t onceToken;
-    static BOOL (^shouldNotAnimateBlock)(ASDisplayNode *);
-    dispatch_once(&onceToken, ^{
-      shouldNotAnimateBlock = ^BOOL(ASDisplayNode * _Nonnull node) {
-        return (node.shouldAnimateSizeChanges == NO);
-      };
-    });
-    if (ASDisplayNodeFindFirstNode(node, shouldNotAnimateBlock) != nil) {
-      // One single non-animated node causes the whole layout update to be non-animated
-      invalidationStyle = ASCollectionViewInvalidationStyleWithoutAnimation;
+  NSMutableArray<NSIndexPath *> *uikitIndexPaths = [NSMutableArray arrayWithCapacity:nodes.count];
+  for (ASCellNode *node in nodes) {
+    NSIndexPath *uikitIndexPath = [self indexPathForNode:node];
+    if (uikitIndexPath != nil) {
+      [uikitIndexPaths addObject:uikitIndexPath];
     }
   }
   
+  [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:uikitIndexPaths batched:NO];
+  
+  ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
+  for (ASCellNode *node in nodes) {
+    if (invalidationStyle == ASCollectionViewInvalidationStyleNone) {
+      // We nodesDidRelayout also while we are in layoutSubviews. This should be no problem as CA will ignore this
+      // call while be in a layout pass
+      [self setNeedsLayout];
+      invalidationStyle = ASCollectionViewInvalidationStyleWithAnimation;
+    }
+    
+    // If we think we're going to animate, check if this node will prevent it.
+    if (invalidationStyle == ASCollectionViewInvalidationStyleWithAnimation) {
+      // TODO: Incorporate `shouldAnimateSizeChanges` into ASEnvironmentState for performance benefit.
+      static dispatch_once_t onceToken;
+      static BOOL (^shouldNotAnimateBlock)(ASDisplayNode *);
+      dispatch_once(&onceToken, ^{
+        shouldNotAnimateBlock = ^BOOL(ASDisplayNode * _Nonnull node) {
+          return (node.shouldAnimateSizeChanges == NO);
+        };
+      });
+      if (ASDisplayNodeFindFirstNode(node, shouldNotAnimateBlock) != nil) {
+        // One single non-animated node causes the whole layout update to be non-animated
+        invalidationStyle = ASCollectionViewInvalidationStyleWithoutAnimation;
+        break;
+      }
+    }
+  }
   _nextLayoutInvalidationStyle = invalidationStyle;
 }
 
