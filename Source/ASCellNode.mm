@@ -121,15 +121,7 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
 
 - (void)_locked_displayNodeDidInvalidateSizeNewSize:(CGSize)newSize
 {
-  if ([_interactionDelegate respondsToSelector:@selector(nodeDidGetNeedsLayout:)]) {
-    [_interactionDelegate nodeDidGetNeedsLayout:self];
-  } else {
-    CGSize oldSize = self.bounds.size;
-    [super _locked_displayNodeDidInvalidateSizeNewSize:newSize];
-    if (CGSizeEqualToSize(oldSize, newSize) == NO) {
-      [self didRelayoutFromOldSize:oldSize toNewSize:newSize];
-    }
-  }
+  [_interactionDelegate nodeDidGetNeedsLayout:self];
 }
 
 - (void)transitionLayoutWithAnimation:(BOOL)animated

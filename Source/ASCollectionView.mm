@@ -1348,7 +1348,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (void)layoutSubviews
 {
-  if (_cellsForLayoutUpdates) {
+  if (_cellsForLayoutUpdates.count > 0) {
     NSMutableArray<ASCellNode *> *nodesSizesChanged = [NSMutableArray array];
     [_dataController relayoutNodes:_cellsForLayoutUpdates nodesSizeChanged:&nodesSizesChanged];
     [self nodesDidRelayout:nodesSizesChanged];
@@ -1820,7 +1820,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   if (!sizeChanged) {
     return;
   }
-  
   [self nodesDidRelayout:@[node]];
 }
 
