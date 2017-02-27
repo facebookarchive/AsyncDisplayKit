@@ -27,11 +27,13 @@
 
 - (CGSize)sizeForItemAtIndex:(NSInteger)index
 {
-  ASDisplayNodeFailAssert(@"Did not expect %@ to be called.", NSStringFromSelector(_cmd));
-  return CGSizeMake(100, 10);
+  return [ASIGListSectionControllerMethods sizeForItemAtIndex:index];
 }
 
-ASIGSectionControllerCellForIndexImplementation
+- (__kindof UICollectionViewCell *)cellForItemAtIndex:(NSInteger)index
+{
+  return [ASIGListSectionControllerMethods cellForItemAtIndex:index sectionController:self];
+}
 
 - (void)didUpdateToObject:(id)object
 {

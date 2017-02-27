@@ -305,6 +305,8 @@
 		CC034A0D1E60C3D500626263 /* ASRectTable.h in Headers */ = {isa = PBXBuildFile; fileRef = CC034A0B1E60C3D500626263 /* ASRectTable.h */; };
 		CC034A0E1E60C3D500626263 /* ASRectTable.m in Sources */ = {isa = PBXBuildFile; fileRef = CC034A0C1E60C3D500626263 /* ASRectTable.m */; };
 		CC034A101E60C9BF00626263 /* ASRectTableTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC034A0F1E60C9BF00626263 /* ASRectTableTests.m */; };
+		CC034A131E649F1300626263 /* AsyncDisplayKit+IGListKitMethods.h in Headers */ = {isa = PBXBuildFile; fileRef = CC034A111E649F1300626263 /* AsyncDisplayKit+IGListKitMethods.h */; };
+		CC034A141E649F1300626263 /* AsyncDisplayKit+IGListKitMethods.m in Sources */ = {isa = PBXBuildFile; fileRef = CC034A121E649F1300626263 /* AsyncDisplayKit+IGListKitMethods.m */; };
 		CC051F1F1D7A286A006434CB /* ASCALayerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC051F1E1D7A286A006434CB /* ASCALayerTests.m */; };
 		CC0AEEA41D66316E005D1C78 /* ASUICollectionViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC0AEEA31D66316E005D1C78 /* ASUICollectionViewTests.m */; };
 		CC0F885B1E42807F00576FED /* ASCollectionViewFlowLayoutInspector.m in Sources */ = {isa = PBXBuildFile; fileRef = CC0F88591E42807F00576FED /* ASCollectionViewFlowLayoutInspector.m */; };
@@ -693,6 +695,8 @@
 		CC034A0B1E60C3D500626263 /* ASRectTable.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASRectTable.h; sourceTree = "<group>"; };
 		CC034A0C1E60C3D500626263 /* ASRectTable.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASRectTable.m; sourceTree = "<group>"; };
 		CC034A0F1E60C9BF00626263 /* ASRectTableTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASRectTableTests.m; sourceTree = "<group>"; };
+		CC034A111E649F1300626263 /* AsyncDisplayKit+IGListKitMethods.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "AsyncDisplayKit+IGListKitMethods.h"; sourceTree = "<group>"; };
+		CC034A121E649F1300626263 /* AsyncDisplayKit+IGListKitMethods.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "AsyncDisplayKit+IGListKitMethods.m"; sourceTree = "<group>"; };
 		CC051F1E1D7A286A006434CB /* ASCALayerTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCALayerTests.m; sourceTree = "<group>"; };
 		CC0AEEA31D66316E005D1C78 /* ASUICollectionViewTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASUICollectionViewTests.m; sourceTree = "<group>"; };
 		CC0F88591E42807F00576FED /* ASCollectionViewFlowLayoutInspector.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionViewFlowLayoutInspector.m; sourceTree = "<group>"; };
@@ -740,7 +744,6 @@
 		CCE04B201E313EB9006AEBBB /* IGListAdapter+AsyncDisplayKit.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "IGListAdapter+AsyncDisplayKit.h"; sourceTree = "<group>"; };
 		CCE04B211E313EB9006AEBBB /* IGListAdapter+AsyncDisplayKit.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "IGListAdapter+AsyncDisplayKit.m"; sourceTree = "<group>"; };
 		CCE04B2B1E314A32006AEBBB /* ASSupplementaryNodeSource.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASSupplementaryNodeSource.h; sourceTree = "<group>"; };
-		CCF92DCC1E3155180019E9C6 /* ASIGListKitMethodImplementations.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASIGListKitMethodImplementations.h; sourceTree = "<group>"; };
 		D3779BCFF841AD3EB56537ED /* Pods-AsyncDisplayKitTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-AsyncDisplayKitTests.release.xcconfig"; path = "Pods/Target Support Files/Pods-AsyncDisplayKitTests/Pods-AsyncDisplayKitTests.release.xcconfig"; sourceTree = "<group>"; };
 		D785F6601A74327E00291744 /* ASScrollNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASScrollNode.h; sourceTree = "<group>"; };
 		D785F6611A74327E00291744 /* ASScrollNode.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASScrollNode.mm; sourceTree = "<group>"; };
@@ -1350,7 +1353,8 @@
 		CCF92DCE1E315FC50019E9C6 /* IGListKit Support */ = {
 			isa = PBXGroup;
 			children = (
-				CCF92DCC1E3155180019E9C6 /* ASIGListKitMethodImplementations.h */,
+				CC034A111E649F1300626263 /* AsyncDisplayKit+IGListKitMethods.h */,
+				CC034A121E649F1300626263 /* AsyncDisplayKit+IGListKitMethods.m */,
 				CCE04B201E313EB9006AEBBB /* IGListAdapter+AsyncDisplayKit.h */,
 				CCE04B211E313EB9006AEBBB /* IGListAdapter+AsyncDisplayKit.m */,
 			);
@@ -1490,6 +1494,7 @@
 				DEC146B71C37A16A004A0EE7 /* ASCollectionInternal.h in Headers */,
 				68B8A4E21CBDB958007E4543 /* ASWeakProxy.h in Headers */,
 				9F98C0271DBE29FC00476D92 /* ASControlTargetAction.h in Headers */,
+				CC034A131E649F1300626263 /* AsyncDisplayKit+IGListKitMethods.h in Headers */,
 				690ED5961E36D118000627C0 /* ASControlNode+tvOS.h in Headers */,
 				695943401D70815300B0EE1F /* ASDisplayNodeLayout.h in Headers */,
 				0442850E1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */,
@@ -1921,6 +1926,7 @@
 				B350620E1B010EFD0018CF92 /* ASTextNode.mm in Sources */,
 				6959433F1D70815300B0EE1F /* ASDisplayNodeLayout.mm in Sources */,
 				68355B3E1CB57A60001D4E68 /* ASPINRemoteImageDownloader.m in Sources */,
+				CC034A141E649F1300626263 /* AsyncDisplayKit+IGListKitMethods.m in Sources */,
 				509E68661B3AEDD7009B9150 /* CoreGraphics+ASConvenience.m in Sources */,
 				254C6B871BF94F8A003EC431 /* ASTextKitEntityAttribute.m in Sources */,
 				34566CB31BC1213700715E6B /* ASPhotosFrameworkImageRequest.m in Sources */,
