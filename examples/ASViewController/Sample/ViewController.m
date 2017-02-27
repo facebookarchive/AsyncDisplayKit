@@ -66,7 +66,9 @@
 {
     [super viewWillAppear:animated];
     
-    [self.node deselectRowAtIndexPath:self.node.indexPathForSelectedRow animated:YES];
+    if ( self.node.indexPathsForSelectedRows.count > 0 ) {
+        [self.node deselectRowAtIndexPath:self.node.indexPathForSelectedRow animated:YES];
+    }
 }
 
 
