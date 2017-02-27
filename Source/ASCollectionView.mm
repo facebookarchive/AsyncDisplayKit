@@ -1799,6 +1799,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
 }
 
+- (ASSizeRange)constrainedSizeForNode:(ASCellNode *)node
+{
+  return [self dataController:self.dataController constrainedSizeForNodeAtIndexPath:[self indexPathForNode:node]];
+}
+
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();

@@ -25,6 +25,8 @@
 
 #import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASLayout.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 
 #pragma mark -
 #pragma mark ASCellNode
@@ -116,6 +118,21 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   [super layoutDidFinish];
 
   _viewControllerNode.frame = self.bounds;
+}
+
+- (void)__setNeedsLayout
+{
+  CGSize oldSize = self.calculatedSize;
+  
+  // Hack to handle calling set needs layout on the cell node to animate
+  [super __setNeedsLayout];
+  
+  ASSizeRange constrainedSize = [_interactionDelegate constrainedSizeForNode:self];
+  ASLayout *layout = [self layoutThatFits:constrainedSize];
+  if (! CGSizeEqualToSize(layout.size, oldSize)) {
+    self.cachedLayout = layout;
+    [self didRelayoutFromOldSize:oldSize toNewSize:layout.size];
+  }
 }
 
 - (void)_locked_displayNodeDidInvalidateSizeNewSize:(CGSize)newSize

@@ -293,7 +293,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   _primitiveTraitCollection = ASPrimitiveTraitCollectionMakeDefault();
   
   _calculatedDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>();
-  //_pendingDisplayNodeLayout = nullptr;
+  _pendingDisplayNodeLayout = nullptr;
   
   _defaultLayoutTransitionDuration = 0.2;
   _defaultLayoutTransitionDelay = 0.0;
@@ -876,16 +876,16 @@ ASLayoutElementFinalLayoutElementDefault
   if ([self _isLayoutTransitionInvalid]) {
     return [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
   }
-
+//
   if (_calculatedDisplayNodeLayout->isValidForConstrainedSizeParentSize(constrainedSize, parentSize)) {
     ASDisplayNodeAssertNotNil(_calculatedDisplayNodeLayout->layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _calculatedDisplayNodeLayout->layout should not be nil! %@", self);
     // Our calculated layout is suitable for this constrainedSize, so keep using it and
     // invalidate any pending layout that has been generated in the past.
-    //_pendingDisplayNodeLayout = nullptr;
+    _pendingDisplayNodeLayout = nullptr;
     return _calculatedDisplayNodeLayout->layout ?: [ASLayout layoutWithLayoutElement:self size:{0, 0}];
   }
   
-  ASLayout *layout = [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
+  return [self calculateLayoutThatFits:constrainedSize restrictedToSize:self.style.size relativeToParentSize:parentSize];
   
   // Create a pending display node layout for the layout pass
 //  _pendingDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>(
@@ -894,17 +894,48 @@ ASLayoutElementFinalLayoutElementDefault
 //    parentSize
 //  );
   
-  ASDisplayNodeAssertNotNil(layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _pendingDisplayNodeLayout->layout should not be nil! %@", self);
-  return layout ?: [ASLayout layoutWithLayoutElement:self size:{0, 0}];
+  //ASDisplayNodeAssertNotNil(layout, @"-[ASDisplayNode layoutThatFits:parentSize:] _pendingDisplayNodeLayout->layout should not be nil! %@", self);
+  //return layout ?: [ASLayout layoutWithLayoutElement:self size:{0, 0}];
+}
+
+- (void)setCachedLayout:(ASLayout *)cachedLayout
+{
+  _pendingDisplayNodeLayout = std::make_shared<ASDisplayNodeLayout>(
+    cachedLayout,
+    cachedLayout.constrainedSize,
+    cachedLayout.parentSize
+  );
+}
+
+- (ASLayout *)cachedLayout
+{
+  return _pendingDisplayNodeLayout->layout;
 }
 
 #pragma mark Layout Pass
 
 - (void)__setNeedsLayout
 {
-  ASDN::MutexLocker l(__instanceLock__);
+    ASDisplayNodeAssertThreadAffinity(self);
   
+  __instanceLock__.lock();
+
+  // Mark the node for layout in the next layout pass
   [self invalidateCalculatedLayout];
+  
+  // Escalate to the root; entire tree must allow adjustments so the layout fits the new child.
+  // Much of the layout will be re-used as cached (e.g. other items in an unconstrained stack)
+  ASDisplayNode *supernode = _supernode;
+  if (supernode) {
+    // Threading model requires that we unlock before calling a method on our parent.
+    __instanceLock__.unlock();
+    [supernode setNeedsLayout];
+    return;
+  }
+  
+  // We are at the root node in this case
+  
+  __instanceLock__.unlock();
 }
 
 - (void)invalidateCalculatedLayout
@@ -914,10 +945,9 @@ ASLayoutElementFinalLayoutElementDefault
   // This will cause the next layout pass to compute a new layout instead of returning
   // the cached layout in case the constrained or parent size did not change
   _calculatedDisplayNodeLayout->invalidate();
-//  if (_pendingDisplayNodeLayout != nullptr) {
-//    _pendingDisplayNodeLayout->invalidate();
-//  }
-  _cachedLayout = nil;
+  if (_pendingDisplayNodeLayout != nullptr) {
+    _pendingDisplayNodeLayout->invalidate();
+  }
 
 #if YOGA
   [self invalidateCalculatedYogaLayout];
@@ -950,7 +980,7 @@ ASLayoutElementFinalLayoutElementDefault
     // This method will confirm that the layout is up to date (and update if needed).
     // Importantly, it will also APPLY the layout to all of our subnodes if (unless parent is transitioning).
     [self _locked_measureNodeWithBoundsIfNecessary:bounds];
-    //_pendingDisplayNodeLayout = nullptr;
+    _pendingDisplayNodeLayout = nullptr;
     
     [self _locked_layoutPlaceholderIfNecessary];
   }
@@ -969,8 +999,9 @@ ASLayoutElementFinalLayoutElementDefault
   }
   
   CGSize boundsSizeForLayout = ASCeilSizeValues(bounds.size);
-  
-  if (_cachedLayout != nil) {
+
+  if (_calculatedDisplayNodeLayout->isDirty() == NO &&
+    CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, boundsSizeForLayout)) {
     return;
   }
 
@@ -995,10 +1026,14 @@ ASLayoutElementFinalLayoutElementDefault
     ASLayoutElementSetCurrentContext(context);
     didCreateNewContext = YES;
   }
-  
-  ASSizeRange constrainedSize = ASSizeRangeMake(boundsSizeForLayout);
-  ASLayout *layout = [self layoutThatFits:constrainedSize];
-  _cachedLayout = layout;
+    
+//  
+//  ASSizeRange constrainedSize = _cachedLayout.constrainedSize;
+//  ASLayout *layout = _cachedLayout;
+//  if (layout == nil) {
+//    constrainedSize = ASSizeRangeMake(self.bounds.size);
+//    layout = [self layoutThatFits:constrainedSize];
+//  }
   
   
 //  // Figure out previous and pending layouts for layout transition
@@ -1035,7 +1070,13 @@ ASLayoutElementFinalLayoutElementDefault
 //    [self setNeedsLayoutFromAbove];
 //  }
 
-  auto nextLayout = std::make_shared<ASDisplayNodeLayout>(layout, constrainedSize, boundsSizeForLayout);
+  ASLayout *layout = nil;
+  if (_pendingDisplayNodeLayout != nullptr) {
+    layout = _pendingDisplayNodeLayout->layout;
+  } else {
+    layout = [self layoutThatFits:ASSizeRangeMake(boundsSizeForLayout)];
+  }
+  auto nextLayout = std::make_shared<ASDisplayNodeLayout>(layout, layout.constrainedSize, layout.parentSize);
   // Prepare to transition to nextLayout
   ASDisplayNodeAssertNotNil(nextLayout->layout, @"nextLayout->layout should not be nil! %@", self);
   _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
@@ -1257,24 +1298,18 @@ ASLayoutElementFinalLayoutElementDefault
 - (CGSize)calculatedSize
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if (_cachedLayout) {
-    return _cachedLayout.size;
+  if (_pendingDisplayNodeLayout != nullptr) {
+    return _pendingDisplayNodeLayout->layout.size;
   }
-//  if (_pendingDisplayNodeLayout != nullptr) {
-//    return _pendingDisplayNodeLayout->layout.size;
-//  }
   return _calculatedDisplayNodeLayout->layout.size;
 }
 
 - (ASSizeRange)constrainedSizeForCalculatedLayout
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if (_cachedLayout) {
-    return _cachedLayout.constrainedSize;
+  if (_pendingDisplayNodeLayout != nullptr) {
+    return _pendingDisplayNodeLayout->constrainedSize;
   }
-//  if (_pendingDisplayNodeLayout != nullptr) {
-//    return _pendingDisplayNodeLayout->constrainedSize;
-//  }
   return _calculatedDisplayNodeLayout->constrainedSize;
 }
 
@@ -1359,7 +1394,7 @@ ASLayoutElementFinalLayoutElementDefault
 
 - (void)_locked_layoutSublayouts
 {
-  ASLayout *layout = _cachedLayout;
+  ASLayout *layout = _calculatedDisplayNodeLayout->layout;
   
   for (ASDisplayNode *node in _subnodes) {
     CGRect frame = [layout frameForElement:node];
@@ -1373,7 +1408,7 @@ ASLayoutElementFinalLayoutElementDefault
   }
   
   for (ASLayout *sublayout in layout.sublayouts) {
-    ((ASDisplayNode *)sublayout.layoutElement)->_cachedLayout = sublayout;
+    ((ASDisplayNode *)sublayout.layoutElement).cachedLayout = sublayout;
   }
 }
 
@@ -1399,7 +1434,7 @@ ASLayoutElementFinalLayoutElementDefault
 {
   ASDisplayNodeAssertMainThread();
 
-  ASSizeRange oldConstrainedSize = _cachedLayout.constrainedSize;
+  ASSizeRange oldConstrainedSize = _calculatedDisplayNodeLayout->constrainedSize;
   [self setNeedsLayout];
   
   [self transitionLayoutWithSizeRange:oldConstrainedSize

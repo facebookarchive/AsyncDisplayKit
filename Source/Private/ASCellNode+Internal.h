@@ -18,6 +18,8 @@ NS_ASSUME_NONNULL_BEGIN
 
 @protocol ASCellNodeInteractionDelegate <NSObject>
 
+- (ASSizeRange)constrainedSizeForNode:(ASCellNode *)node;
+
 /**
  * Notifies the delegate that the specified cell node has done a relayout.
  * The notification is done on main thread.

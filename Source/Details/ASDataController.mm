@@ -172,7 +172,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   ASDisplayNodeAssert(ASSizeRangeHasSignificantArea(constrainedSize), @"Attempt to layout cell node with invalid size range %@", NSStringFromASSizeRange(constrainedSize));
 
   CGRect frame = CGRectZero;
-  frame.size = [node layoutThatFits:constrainedSize].size;
+  ASLayout *layout = [node layoutThatFits:constrainedSize];
+  node.cachedLayout = layout;
+    
+  frame.size = layout.size;
   node.frame = frame;
 }
 
