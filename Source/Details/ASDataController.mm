@@ -263,30 +263,37 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 /**
  * Agressively repopulates supplementary nodes of all kinds for sections that contains some given index paths.
  *
- * @param originalIndexPaths The index paths belongs to sections whose supplementary nodes need to be repopulated.
+ * @param indexPaths The index paths belongs to sections whose supplementary nodes need to be repopulated.
  * @param environment The trait environment needed to initialize elements
  */
 - (void)_repopulateSupplementaryNodesIntoMap:(ASMutableElementMap *)map
-             forSectionsContainingIndexPaths:(NSArray<NSIndexPath *> *)originalIndexPaths
+             forSectionsContainingIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
+                                   changeSet:(_ASHierarchyChangeSet *)changeSet
                                  environment:(id<ASTraitEnvironment>)environment
+                            indexPathsAreNew:(BOOL)indexPathsAreNew
 {
   ASDisplayNodeAssertMainThread();
-  
-  if (originalIndexPaths.count ==  0) {
+
+  if (indexPaths.count ==  0) {
     return;
   }
-  
-  // Get all the sections that need to be repopulated
-  NSIndexSet *sectionIndexes = [NSIndexSet as_sectionsFromIndexPaths:originalIndexPaths];
-  for (NSString *kind in [self supplementaryKindsInSections:sectionIndexes]) {
-    // TODO: Would it make more sense to do _elements enumerateKeysAndObjectsUsingBlock: for this removal step?
-    // That way we are sure we removed all the old supplementaries, even if that kind isn't present anymore.
-    
-    // Step 1: Remove all existing elements of this kind in these sections
-    [map removeElementsOfKind:kind inSections:sectionIndexes];
-    
-    // Step 2: populate new elements for all index paths in these sections
-    [self _insertElementsIntoMap:map kind:kind forSections:sectionIndexes environment:environment];
+
+  // Remove all old supplementaries from these sections
+  NSIndexSet *oldSections = [NSIndexSet as_sectionsFromIndexPaths:indexPaths];
+  [map removeSupplementaryElementsInSections:oldSections];
+
+  // Add in new ones with the new kinds.
+  NSIndexSet *newSections;
+  if (indexPathsAreNew) {
+    newSections = oldSections;
+  } else {
+    newSections = [oldSections as_indexesByMapping:^NSUInteger(NSUInteger oldSection) {
+      return [changeSet newSectionForOldSection:oldSection];
+    }];
+  }
+
+  for (NSString *kind in [self supplementaryKindsInSections:newSections]) {
+    [self _insertElementsIntoMap:map kind:kind forSections:newSections environment:environment];
   }
 }
 
@@ -566,20 +573,18 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeDelete]) {
-    // FIXME: change.indexPaths is in descending order but ASDeleteElementsInMultidimensionalArrayAtIndexPaths() expects them to be in ascending order
     [map removeItemsAtIndexPaths:change.indexPaths];
     // Aggressively repopulate supplementary nodes (#1773 & #1629)
     [self _repopulateSupplementaryNodesIntoMap:map forSectionsContainingIndexPaths:change.indexPaths
-                                                              environment:environment];
+                                     changeSet:changeSet
+                                   environment:environment
+                              indexPathsAreNew:NO];
   }
 
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
     NSIndexSet *sectionIndexes = change.indexSet;
-    NSMutableArray<NSString *> *kinds = [NSMutableArray arrayWithObject:ASDataControllerRowNodeKind];
-    [kinds addObjectsFromArray:[self supplementaryKindsInSections:sectionIndexes]];
-    for (NSString *kind in kinds) {
-      [map removeElementsOfKind:kind inSections:sectionIndexes];
-    }
+    [map removeSupplementaryElementsInSections:sectionIndexes];
+    [map removeSectionsOfItems:sectionIndexes];
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
@@ -590,7 +595,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind atIndexPaths:change.indexPaths environment:environment];
     // Aggressively reload supplementary nodes (#1773 & #1629)
     [self _repopulateSupplementaryNodesIntoMap:map forSectionsContainingIndexPaths:change.indexPaths
-                                                              environment:environment];
+                                     changeSet:changeSet
+                                   environment:environment
+                              indexPathsAreNew:YES];
   }
 }
 
