@@ -220,7 +220,7 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
  * @discussion The size of a root node is determined by each subnode. Calling invalidateSize will let the root node know
  * that the intrinsic size of the receiver node is no longer valid and a resizing of the root node needs to happen.
  */
-- (void)setNeedsLayoutFromAbove;
+//- (void)setNeedsLayoutFromAbove;
 
 /**
  * @abstract Subclass hook for nodes that are acting as root nodes. This method is called if one of the subnodes

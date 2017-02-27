@@ -272,6 +272,8 @@ extern NSInteger const ASDefaultDrawingPriority;
 
 /** @name Managing dimensions */
 
+@property (nonatomic, strong) ASLayout *cachedLayout;
+
 /**
  * @abstract Asks the node to return a layout based on given size range.
  *

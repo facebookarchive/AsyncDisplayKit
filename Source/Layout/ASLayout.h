@@ -53,6 +53,9 @@ ASDISPLAYNODE_EXTERN_C_END
  */
 @property (nonatomic, assign, readonly) ASLayoutElementType type;
 
+@property (nonatomic, assign, readwrite) ASSizeRange constrainedSize;
+@property (nonatomic, assign, readwrite) CGSize parentSize;
+
 /**
  * Size of the current layout
  */

@@ -1713,7 +1713,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     // Also, in many cases, some nodes may not need to be re-measured at all, such as when user enters and then immediately leaves editing mode.
     // To avoid premature optimization and making such assumption, as well as to keep ASTableView simple, re-measurement is strictly done on main.
     CGSize oldSize = node.bounds.size;
-    const CGSize calculatedSize = [node layoutThatFits:constrainedSize].size;
+    ASLayout *layout = [node layoutThatFits:constrainedSize];
+    const CGSize calculatedSize = layout.size;
+    node.cachedLayout = layout;
     node.frame = { .size = calculatedSize };
 
     // If the node height changed, trigger a height requery.
