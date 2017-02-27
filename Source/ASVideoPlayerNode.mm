@@ -72,7 +72,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   ASStackLayoutSpec *_controlFlexGrowSpacerSpec;
   ASDisplayNode *_spinnerNode;
 
-  BOOL _loadAssetWhenNodeBecomesVisible;
   BOOL _isSeeking;
   CMTime _duration;
 
@@ -114,7 +113,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   
   _url = url;
   _asset = [AVAsset assetWithURL:_url];
-  _loadAssetWhenNodeBecomesVisible = YES;
   
   [self _init];
   
@@ -128,7 +126,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 
   _asset = asset;
-  _loadAssetWhenNodeBecomesVisible = YES;
 
   [self _init];
 
@@ -144,7 +141,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _asset = asset;
   _videoComposition = videoComposition;
   _audioMix = audioMix;
-  _loadAssetWhenNodeBecomesVisible = YES;
 
   [self _init];
 
@@ -159,7 +155,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   _url = url;
   _asset = [AVAsset assetWithURL:_url];
-  _loadAssetWhenNodeBecomesVisible = loadAssetWhenNodeBecomesVisible;
 
   [self _init];
 
@@ -173,7 +168,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 
   _asset = asset;
-  _loadAssetWhenNodeBecomesVisible = loadAssetWhenNodeBecomesVisible;
 
   [self _init];
 
@@ -189,7 +183,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _asset = asset;
   _videoComposition = videoComposition;
   _audioMix = audioMix;
-  _loadAssetWhenNodeBecomesVisible = loadAssetWhenNodeBecomesVisible;
 
   [self _init];
 
@@ -203,11 +196,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
   _videoNode = [[ASVideoNode alloc] init];
   _videoNode.delegate = self;
-  if (_loadAssetWhenNodeBecomesVisible == NO) {
-    _videoNode.asset = _asset;
-    _videoNode.videoComposition = _videoComposition;
-    _videoNode.audioMix = _audioMix;
-  }
   [self addSubnode:_videoNode];
 }
 
@@ -220,13 +208,11 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
-- (void)didEnterVisibleState
+- (void)didEnterPreloadState
 {
-  [super didEnterVisibleState];
-  
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_loadAssetWhenNodeBecomesVisible) {
+  [super didEnterPreloadState];
+  {
+    ASDN::MutexLocker l(__instanceLock__);
     if (_asset != _videoNode.asset) {
       _videoNode.asset = _asset;
     }
