@@ -70,7 +70,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   }
   
   _rangeIsValid = YES;
-  _currentRangeMode = ASLayoutRangeModeInvalid;
+  _currentRangeMode = ASLayoutRangeModeUnspecified;
   _preserveCurrentRangeMode = NO;
   _previousScrollDirection = ASScrollDirectionDown | ASScrollDirectionRight;
   
@@ -81,7 +81,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [_displayLink addToRunLoop:[NSRunLoop mainRunLoop] forMode:NSRunLoopCommonModes];
 #endif
   
-  if ([ASRangeController shouldShowRangeDebugOverlay]) {
+  if (ASDisplayNode.shouldShowRangeDebugOverlay) {
     [self addRangeControllerToRangeDebugOverlay];
   }
   
@@ -103,7 +103,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 + (BOOL)isFirstRangeUpdateForRangeMode:(ASLayoutRangeMode)rangeMode
 {
-  return (rangeMode == ASLayoutRangeModeInvalid);
+  return (rangeMode == ASLayoutRangeModeUnspecified);
 }
 
 + (ASLayoutRangeMode)rangeModeForInterfaceState:(ASInterfaceState)interfaceState
@@ -369,7 +369,7 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   [self _setVisibleNodes:newVisibleNodes];
   
   // TODO: This code is for debugging only, but would be great to clean up with a delegate method implementation.
-  if ([ASRangeController shouldShowRangeDebugOverlay]) {
+  if (ASDisplayNode.shouldShowRangeDebugOverlay) {
     ASScrollDirection scrollableDirections = ASScrollDirectionUp | ASScrollDirectionDown;
     if ([_dataSource isKindOfClass:NSClassFromString(@"ASCollectionView")]) {
 #pragma clang diagnostic push

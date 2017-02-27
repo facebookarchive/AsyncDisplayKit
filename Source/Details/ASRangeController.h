@@ -169,14 +169,30 @@ AS_SUBCLASSING_RESTRICTED
  *
  * Logic for the automatic range mode:
  * 1. If there are no visible node paths available nothing is to be done and no range update will happen
- * 2. The initial range update if the range controller is visible always will be ASLayoutRangeModeCount
- *    (ASLayoutRangeModeMinimum) as it's the initial fetch
+ * 2. The initial range update if the range controller is visible always will be
+ *    ASLayoutRangeModeMinimum as it's the initial fetch
  * 3. The range mode set explicitly via updateCurrentRangeWithMode: will last at least one range update. After that it
  the range controller will use the explicit set range mode until it becomes visible and a new range update was
  triggered or a new range mode via updateCurrentRangeWithMode: is set
  * 4. If range mode is not explicitly set the range mode is variying based if the range controller is visible or not
  */
 - (void)updateCurrentRangeWithMode:(ASLayoutRangeMode)rangeMode;
+
+@end
+
+@interface ASRangeController (DebugInternal)
+
++ (void)layoutDebugOverlayIfNeeded;
+
+- (void)addRangeControllerToRangeDebugOverlay;
+
+- (void)updateRangeController:(ASRangeController *)controller
+     withScrollableDirections:(ASScrollDirection)scrollableDirections
+              scrollDirection:(ASScrollDirection)direction
+                    rangeMode:(ASLayoutRangeMode)mode
+      displayTuningParameters:(ASRangeTuningParameters)displayTuningParameters
+      preloadTuningParameters:(ASRangeTuningParameters)preloadTuningParameters
+               interfaceState:(ASInterfaceState)interfaceState;
 
 @end
 

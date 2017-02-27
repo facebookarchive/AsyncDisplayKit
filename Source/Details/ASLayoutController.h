@@ -20,11 +20,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
-typedef struct {
-  CGFloat leadingBufferScreenfuls;
-  CGFloat trailingBufferScreenfuls;
-} ASRangeTuningParameters;
-
 struct ASDirectionalScreenfulBuffer {
   CGFloat positiveDirection; // Positive relative to iOS Core Animation layer coordinate space.
   CGFloat negativeDirection;
