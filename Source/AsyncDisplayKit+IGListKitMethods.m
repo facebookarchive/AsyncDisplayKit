@@ -36,16 +36,6 @@
   return [sectionController.collectionContext dequeueReusableSupplementaryViewOfKind:elementKind forSectionController:sectionController class:[UICollectionReusableView class] atIndex:index];
 }
 
-/**
- * The implementation of sizeForSupplementaryViewOfKind that connects
- * IGSupplementaryViewSource to AsyncDisplayKit. Add this into the .m file
- * for your `ASIGListSupplementaryViewSource` and implement the ASDK-specific
- * method `nodeForSupplementaryElementOfKind:` to provide your node which should
- * size itself. You can set `node.style.preferredSize` if you want to fix the size.
- *
- * @param sectionController The section controller this supplementary source is
- * working on behalf of. For example, `self` or `self.sectionController`.
- */
 + (CGSize)sizeForSupplementaryViewOfKind:(NSString *)elementKind atIndex:(NSInteger)index
 {
   ASDisplayNodeFailAssert(@"Did not expect %@ to be called.", NSStringFromSelector(_cmd));
