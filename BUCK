@@ -43,7 +43,7 @@ def asyncdisplaykit_library(
   apple_library(
     name = name,
     prefix_header = 'Source/AsyncDisplayKit-Prefix.pch',
-    header_path_prefix = 'Source',
+    header_path_prefix = 'AsyncDisplayKit',
     exported_headers = ASYNCDISPLAYKIT_EXPORTED_HEADERS,
     headers = ASYNCDISPLAYKIT_PRIVATE_HEADERS,
     srcs = glob([
@@ -58,8 +58,6 @@ def asyncdisplaykit_library(
       'Photos',
       '-weak_framework',
       'MapKit',
-      '-weak_framework',
-      'AssetsLibrary',
     ],
     deps = deps,
     frameworks = [
@@ -72,6 +70,9 @@ def asyncdisplaykit_library(
       '$SDKROOT/System/Library/Frameworks/CoreGraphics.framework',
       '$SDKROOT/System/Library/Frameworks/CoreLocation.framework',
       '$SDKROOT/System/Library/Frameworks/AVFoundation.framework',
+
+      # TODO somehow AssetsLibrary can't be weak_framework
+      '$SDKROOT/System/Library/Frameworks/AssetsLibrary.framework',
     ] + additional_frameworks,
     visibility = ['PUBLIC'],
   )
@@ -100,12 +101,6 @@ for name in ['AsyncDisplayKit', 'AsyncDisplayKit-PINRemoteImage']:
 # Test Host
 # TODO: Split to smaller BUCK files and parse in parallel
 #####################################
-apple_resource(
-  name = 'TestHostResources',
-  files = ['Default-568h@2x.png'],
-  dirs = [],
-)
-
 apple_bundle(
   name = 'TestHost',
   binary = ':TestHostBinary',
@@ -120,14 +115,10 @@ apple_bundle(
 apple_binary(
   name = 'TestHostBinary',
   headers = glob(['Tests/TestHost/*.h']),
-  srcs = glob([
-    'Tests/TestHost/*.m',
-    'Tests/TestHost/*.mm',
-  ]),
+  srcs = glob(['Tests/TestHost/*.m']),
   lang_preprocessor_flags = COMMON_LANG_PREPROCESSOR_FLAGS,
   linker_flags = COMMON_LINKER_FLAGS,
   deps = [
-    ':TestHostResources',
     ':AsyncDisplayKit-Core',
   ],
   frameworks = [
@@ -158,10 +149,9 @@ apple_test(
     'PRODUCT_BUNDLE_IDENTIFIER': 'com.facebook.AsyncDisplayKitTests',
   },
   prefix_header = 'Tests/AsyncDisplayKitTests-Prefix.pch',
+  header_path_prefix = 'AsyncDisplayKit',
   # Expose all ASDK headers to tests
-  headers = ASYNCDISPLAYKIT_EXPORTED_HEADERS + ASYNCDISPLAYKIT_PRIVATE_HEADERS + glob([
-    'Tests/*.h',
-  ]),
+  headers = ASYNCDISPLAYKIT_EXPORTED_HEADERS + ASYNCDISPLAYKIT_PRIVATE_HEADERS + glob(['Tests/*.h']),
   srcs = glob([
       'Tests/*.m',
       'Tests/*.mm'
@@ -172,6 +162,7 @@ apple_test(
   snapshot_reference_images_path='Tests/ReferenceImages',
   preprocessor_flags = COMMON_PREPROCESSOR_FLAGS + [
     '-Wno-implicit-function-declaration',
+    '-Wno-deprecated-declarations',
   ],
   lang_preprocessor_flags = COMMON_LANG_PREPROCESSOR_FLAGS,
   linker_flags = COMMON_LINKER_FLAGS,

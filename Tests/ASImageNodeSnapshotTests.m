@@ -17,6 +17,13 @@
 
 @implementation ASImageNodeSnapshotTests
 
+- (void)setUp
+{
+  [super setUp];
+  
+  self.recordMode = NO;
+}
+
 - (UIImage *)testImage
 {
   NSString *path = [[NSBundle bundleForClass:[self class]] pathForResource:@"logo-square"

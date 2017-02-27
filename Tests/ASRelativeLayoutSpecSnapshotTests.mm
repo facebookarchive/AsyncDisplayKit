@@ -23,14 +23,6 @@ static const ASSizeRange kSize = {{100, 120}, {320, 160}};
 
 #pragma mark - XCTestCase
 
-- (void)setUp
-{
-  [super setUp];
-  
-  self.recordMode = NO;
-}
-
-
 - (void)testWithOptions
 {
   [self testAllVerticalPositionsForHorizontalPosition:ASRelativeLayoutSpecPositionStart];

@@ -17,13 +17,6 @@
 
 @implementation ASWrapperSpecSnapshotTests
 
-- (void)setUp
-{
-  [super setUp];
- 
-  self.recordMode = NO;
-}
-
 - (void)testWrapperSpecWithOneElementShouldSizeToElement
 {
   ASDisplayNode *child = ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50});

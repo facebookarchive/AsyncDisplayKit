@@ -313,7 +313,6 @@
 		CC0F88601E4280B800576FED /* _ASCollectionViewCell.h in Headers */ = {isa = PBXBuildFile; fileRef = CC0F885E1E4280B800576FED /* _ASCollectionViewCell.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		CC0F88621E4281E200576FED /* ASSectionController.h in Headers */ = {isa = PBXBuildFile; fileRef = CCE04B1E1E313EA7006AEBBB /* ASSectionController.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		CC0F88631E4281E700576FED /* ASSupplementaryNodeSource.h in Headers */ = {isa = PBXBuildFile; fileRef = CCE04B2B1E314A32006AEBBB /* ASSupplementaryNodeSource.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		CC0F886B1E4286FA00576FED /* ReferenceImages_32 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F88681E4286FA00576FED /* ReferenceImages_32 */; };
 		CC0F886C1E4286FA00576FED /* ReferenceImages_64 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F88691E4286FA00576FED /* ReferenceImages_64 */; };
 		CC0F886D1E4286FA00576FED /* ReferenceImages_iOS_10 in Resources */ = {isa = PBXBuildFile; fileRef = CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */; };
 		CC11F97A1DB181180024D77B /* ASNetworkImageNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */; };
@@ -700,7 +699,6 @@
 		CC0F885A1E42807F00576FED /* ASCollectionViewFlowLayoutInspector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionViewFlowLayoutInspector.h; sourceTree = "<group>"; };
 		CC0F885D1E4280B800576FED /* _ASCollectionViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = _ASCollectionViewCell.m; sourceTree = "<group>"; };
 		CC0F885E1E4280B800576FED /* _ASCollectionViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = _ASCollectionViewCell.h; sourceTree = "<group>"; };
-		CC0F88681E4286FA00576FED /* ReferenceImages_32 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ReferenceImages_32; sourceTree = "<group>"; };
 		CC0F88691E4286FA00576FED /* ReferenceImages_64 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ReferenceImages_64; sourceTree = "<group>"; };
 		CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ReferenceImages_iOS_10; sourceTree = "<group>"; };
 		CC11F9791DB181180024D77B /* ASNetworkImageNodeTests.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASNetworkImageNodeTests.m; sourceTree = "<group>"; };
@@ -1036,7 +1034,6 @@
 		058D09C6195D04C000B7D73C /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				CC0F88681E4286FA00576FED /* ReferenceImages_32 */,
 				CC0F88691E4286FA00576FED /* ReferenceImages_64 */,
 				CC0F886A1E4286FA00576FED /* ReferenceImages_iOS_10 */,
 				058D09C7195D04C000B7D73C /* AsyncDisplayKitTests-Info.plist */,
@@ -1671,7 +1668,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CC0F886B1E4286FA00576FED /* ReferenceImages_32 in Resources */,
 				CC0F886C1E4286FA00576FED /* ReferenceImages_64 in Resources */,
 				CC0F886D1E4286FA00576FED /* ReferenceImages_iOS_10 in Resources */,
 				052EE06B1A15A0D8002C6279 /* TestResources in Resources */,
