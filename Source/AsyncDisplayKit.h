@@ -40,7 +40,7 @@
 #import <AsyncDisplayKit/ASSupplementaryNodeSource.h>
 #if IG_LIST_KIT
 #import <AsyncDisplayKit/IGListAdapter+AsyncDisplayKit.h>
-#import <AsyncDisplayKit/ASIGListKitMethodImplementations.h>
+#import <AsyncDisplayKit/AsyncDisplayKit+IGListKitMethods.h>
 #endif
 
 #import <AsyncDisplayKit/ASScrollNode.h>
