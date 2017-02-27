@@ -21,16 +21,11 @@ NSOrderedSet *ASSnapshotTestCaseDefaultSuffixes(void)
   // or on iOS 10 (text rasterization).  If the test folders find any image that exactly matches,
   // they pass; if an image is not present at all, or it fails, it moves on to check the others.
   // This means the order doesn't matter besides reducing logging / performance.
-  [suffixesSet addObject:@"_32"];
-  [suffixesSet addObject:@"_64"];
   if (AS_AT_LEAST_IOS10) {
     [suffixesSet addObject:@"_iOS_10"];
   }
-#if __LP64__
-  return [suffixesSet reversedOrderedSet];
-#else
+  [suffixesSet addObject:@"_64"];
   return [suffixesSet copy];
-#endif
 }
 
 @implementation ASSnapshotTestCase
