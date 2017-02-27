@@ -36,9 +36,15 @@
   [self setItems:_photoFeed.photos animated:NO completion:nil];
 }
 
+- (__kindof UICollectionViewCell *)cellForItemAtIndex:(NSInteger)index
+{
+  return [ASIGListSectionControllerMethods cellForItemAtIndex:index sectionController:self];
+}
 
-ASIGSectionControllerSizeForItemImplementation;
-ASIGSectionControllerCellForIndexImplementation;
+- (CGSize)sizeForItemAtIndex:(NSInteger)index
+{
+  return [ASIGListSectionControllerMethods sizeForItemAtIndex:index];
+}
 
 - (void)didSelectItemAtIndex:(NSInteger)index
 {
@@ -120,7 +126,14 @@ ASIGSectionControllerCellForIndexImplementation;
   return @[ UICollectionElementKindSectionHeader ];
 }
 
-ASIGSupplementarySourceViewForSupplementaryElementImplementation(self);
-ASIGSupplementarySourceSizeForSupplementaryElementImplementation;
+- (__kindof UICollectionReusableView *)viewForSupplementaryElementOfKind:(NSString *)elementKind atIndex:(NSInteger)index
+{
+  return [ASIGListSupplementaryViewSourceMethods viewForSupplementaryElementOfKind:elementKind atIndex:index sectionController:self];
+}
+
+- (CGSize)sizeForSupplementaryViewOfKind:(NSString *)elementKind atIndex:(NSInteger)index
+{
+  return [ASIGListSupplementaryViewSourceMethods sizeForSupplementaryViewOfKind:elementKind atIndex:index];
+}
 
 @end
