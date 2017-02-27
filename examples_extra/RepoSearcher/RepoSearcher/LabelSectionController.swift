@@ -34,12 +34,11 @@ final class LabelSectionController: IGListSectionController, IGListSectionType, 
     
     //ASDK Replacement
     func sizeForItem(at index: Int) -> CGSize {
-        assert(true, "Did not expect to be called.")
-        return ASIGSectionControllerSizeForItemImplementation()
+        return ASIGListSectionControllerMethods.sizeForItem(at: index)
     }
     
     func cellForItem(at index: Int) -> UICollectionViewCell {
-        return ASIGSectionControllerCellForIndexImplementation(index: index)
+        return ASIGListSectionControllerMethods.cellForItem(at: index, sectionController: self)
     }
 }
 
