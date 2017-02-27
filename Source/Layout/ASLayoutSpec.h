@@ -34,10 +34,10 @@ NS_ASSUME_NONNULL_BEGIN
  * only require a single child.
  *
  * For layout specs that require a known number of children (ASBackgroundLayoutSpec, for example)
- * a subclass should use this method to set the "primary" child. It can then use setChild:forIdentifier:
+ * a subclass should use this method to set the "primary" child. It can then use setChild:atIndex:
  * to set any other required children. Ideally a subclass would hide this from the user, and use the
- * setChild:forIdentifier: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
- * property that behind the scenes is calling setChild:forIdentifier:.
+ * setChild:atIndex: internally. For example, ASBackgroundLayoutSpec exposes a "background"
+ * property that behind the scenes is calling setChild:atIndex:.
  */
 @property (nullable, strong, nonatomic) id<ASLayoutElement> child;
 
