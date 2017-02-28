@@ -36,6 +36,8 @@ ASDISPLAYNODE_EXTERN_C_END
 
 - (NSSet<NSIndexPath *> *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
+- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet * _Nullable * _Nullable)displaySet preloadSet:(NSSet * _Nullable * _Nullable)preloadSet;
+
 @optional
 
 - (void)setVisibleNodeIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;

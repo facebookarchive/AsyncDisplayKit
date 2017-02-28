@@ -238,14 +238,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
   }
   
-  NSSet<NSIndexPath *> *visibleIndexPaths = [NSSet setWithArray:visibleNodePaths];
-  NSSet<NSIndexPath *> *displayIndexPaths = nil;
-  NSSet<NSIndexPath *> *preloadIndexPaths = nil;
-  
-  // Prioritize the order in which we visit each.  Visible nodes should be updated first so they are enqueued on
-  // the network or display queues before preloading (offscreen) nodes are enqueued.
-  NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
-  
   ASInterfaceState selfInterfaceState = [self interfaceState];
   ASLayoutRangeMode rangeMode = _currentRangeMode;
   // If the range mode is explicitly set via updateCurrentRangeWithMode: it will last in that mode until the
@@ -255,28 +247,49 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   }
 
   ASRangeTuningParameters parametersPreload = [_layoutController tuningParametersForRangeMode:rangeMode
-                                                                                      rangeType:ASLayoutRangeTypePreload];
-  if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersPreload, ASRangeTuningParametersZero)) {
-    preloadIndexPaths = visibleIndexPaths;
-  } else {
-    preloadIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection
-                                                          rangeMode:rangeMode
-                                                          rangeType:ASLayoutRangeTypePreload];
-  }
-  
+                                                                                    rangeType:ASLayoutRangeTypePreload];
   ASRangeTuningParameters parametersDisplay = [_layoutController tuningParametersForRangeMode:rangeMode
                                                                                     rangeType:ASLayoutRangeTypeDisplay];
-  if (rangeMode == ASLayoutRangeModeLowMemory) {
-    displayIndexPaths = [NSSet set];
-  } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, ASRangeTuningParametersZero)) {
-    displayIndexPaths = visibleIndexPaths;
-  } else if (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, parametersPreload)) {
-    displayIndexPaths = preloadIndexPaths;
+
+  // Preload can express the ultra-low-memory state with 0, 0 returned for its tuningParameters above, and will match Visible.
+  // However, in this rangeMode, Display is not supposed to contain *any* paths -- not even the visible bounds. TuningParameters can't express this.
+  BOOL emptyDisplayRange = (rangeMode == ASLayoutRangeModeLowMemory);
+  BOOL equalDisplayPreload = ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, parametersPreload);
+  BOOL equalDisplayVisible = (ASRangeTuningParametersEqualToRangeTuningParameters(parametersDisplay, ASRangeTuningParametersZero)
+                              && emptyDisplayRange == NO);
+
+  // Check if both Display and Preload are unique. If they are, we load them with a single fetch from the layout controller for performance.
+  BOOL optimizedLoadingOfBothRanges = (equalDisplayPreload == NO && equalDisplayVisible == NO && emptyDisplayRange == NO);
+
+  NSSet<NSIndexPath *> *visibleIndexPaths = [NSSet setWithArray:visibleNodePaths];
+  NSSet<NSIndexPath *> *displayIndexPaths = nil;
+  NSSet<NSIndexPath *> *preloadIndexPaths = nil;
+  
+  if (optimizedLoadingOfBothRanges) {
+    [_layoutController allIndexPathsForScrolling:scrollDirection rangeMode:rangeMode displaySet:&displayIndexPaths preloadSet:&preloadIndexPaths];
   } else {
-    displayIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection
-                                                        rangeMode:rangeMode
-                                                        rangeType:ASLayoutRangeTypeDisplay];
+    if (emptyDisplayRange == YES) {
+      displayIndexPaths = [NSSet set];
+    } if (equalDisplayVisible == YES) {
+      displayIndexPaths = visibleIndexPaths;
+    } else {
+      // Calculating only the Display range means the Preload range is either the same as Display or Visible.
+      displayIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypeDisplay];
+    }
+    
+    BOOL equalPreloadVisible = ASRangeTuningParametersEqualToRangeTuningParameters(parametersPreload, ASRangeTuningParametersZero);
+    if (equalDisplayPreload == YES) {
+      preloadIndexPaths = displayIndexPaths;
+    } else if (equalPreloadVisible == YES) {
+      preloadIndexPaths = visibleIndexPaths;
+    } else {
+      preloadIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypePreload];
+    }
   }
+
+  // Prioritize the order in which we visit each.  Visible nodes should be updated first so they are enqueued on
+  // the network or display queues before preloading (offscreen) nodes are enqueued.
+  NSMutableOrderedSet<NSIndexPath *> *allIndexPaths = [[NSMutableOrderedSet alloc] initWithSet:visibleIndexPaths];
   
   // Typically the preloadIndexPaths will be the largest, and be a superset of the others, though it may be disjoint.
   // Because allIndexPaths is an NSMutableOrderedSet, this adds the non-duplicate items /after/ the existing items.
