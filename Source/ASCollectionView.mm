@@ -1353,6 +1353,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     [_dataController relayoutNodes:_cellsForLayoutUpdates nodesSizeChanged:nodesSizesChanged];
     [self nodesDidRelayout:nodesSizesChanged];
   }
+  [_cellsForLayoutUpdates removeAllObjects];
 
   // Flush any pending invalidation action if needed.
   ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
