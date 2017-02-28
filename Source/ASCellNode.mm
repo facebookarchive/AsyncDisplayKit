@@ -25,6 +25,7 @@
 
 #import <AsyncDisplayKit/ASViewController.h>
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
+#import <AsyncDisplayKit/ASDisplayNodeInternal.h>
 
 #pragma mark -
 #pragma mark ASCellNode
@@ -117,12 +118,10 @@
   _viewControllerNode.frame = self.bounds;
 }
 
-- (void)_locked_displayNodeDidInvalidateSizeNewSize:(CGSize)newSize
+- (void)_locked_rootNodeDidInvalidateSize
 {
-  CGSize oldSize = self.bounds.size;
-  [super _locked_displayNodeDidInvalidateSizeNewSize:newSize];
-  if (CGSizeEqualToSize(oldSize, newSize) == NO) {
-    [self didRelayoutFromOldSize:oldSize toNewSize:newSize];
+  if (_interactionDelegate != nil) {
+    [_interactionDelegate nodeDidInvalidateSize:self];
   }
 }
 

@@ -31,6 +31,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged;
 
+/**
+ * Notifies the delegate that a specified cell node invalidates it's size what could result into a size change.
+ *
+ * @param node A node informing the delegate about the relayout.
+ */
+- (void)nodeDidInvalidateSize:(ASCellNode *)node;
+
 /*
  * Methods to be called whenever the selection or highlight state changes
  * on ASCellNode. UIKit internally stores these values to update reusable cells.

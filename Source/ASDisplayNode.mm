@@ -1274,6 +1274,16 @@ ASLayoutElementFinalLayoutElementDefault
     return;
   }
   
+  // Let the root node method know that the size was invalidated
+  [self _locked_rootNodeDidInvalidateSize];
+  
+  __instanceLock__.unlock();
+}
+
+- (void)_locked_rootNodeDidInvalidateSize
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  
   // We are the root node and need to re-flow the layout; at least one child needs a new size.
   CGSize boundsSizeForLayout = ASCeilSizeValues(self.bounds.size);
 
@@ -1293,8 +1303,6 @@ ASLayoutElementFinalLayoutElementDefault
     // If so, inform our container we need an update (e.g Table, Collection, ViewController, etc).
     [self _locked_displayNodeDidInvalidateSizeNewSize:layout.size];
   }
-  
-  __instanceLock__.unlock();
 }
 
 - (void)_locked_displayNodeDidInvalidateSizeNewSize:(CGSize)size

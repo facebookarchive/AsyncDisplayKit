@@ -162,6 +162,9 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   BOOL _queuedNodeHeightUpdate;
   BOOL _isDeallocating;
   NSMutableSet *_cellsForVisibilityUpdates;
+  
+  BOOL _remeasuringCellNodes;
+  NSMutableSet *_cellsForLayoutUpdates;
 
   // See documentation on same property in ASCollectionView
   BOOL _hasEverCheckedForBatchFetchingDueToUpdate;
@@ -302,6 +305,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return nil;
   }
   _cellsForVisibilityUpdates = [NSMutableSet set];
+  _cellsForLayoutUpdates = [NSMutableSet set];
   if (!dataControllerClass) {
     dataControllerClass = [[self class] dataControllerClass];
   }
@@ -717,6 +721,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)layoutSubviews
 {
   // Remeasure all rows if our row width has changed.
+  _remeasuringCellNodes = YES;
   CGFloat constrainedWidth = self.bounds.size.width - [self sectionIndexWidth];
   if (constrainedWidth > 0 && _nodesConstrainedWidth != constrainedWidth) {
     _nodesConstrainedWidth = constrainedWidth;
@@ -724,8 +729,18 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     [self beginUpdates];
     [_dataController relayoutAllNodes];
     [self endUpdatesAnimated:(ASDisplayNodeLayerHasAnimations(self.layer) == NO) completion:nil];
+  } else {
+    if (_cellsForLayoutUpdates.count > 0) {
+      NSMutableArray *nodesSizesChanged = [NSMutableArray array];
+      [_dataController relayoutNodes:_cellsForLayoutUpdates nodesSizeChanged:nodesSizesChanged];
+      if (nodesSizesChanged.count > 0) {
+        [self requeryNodeHeights];
+      }
+    }
   }
-  
+  [_cellsForLayoutUpdates removeAllObjects];
+  _remeasuringCellNodes = NO;
+
   // To ensure _nodesConstrainedWidth is up-to-date for every usage, this call to super must be done last
   [super layoutSubviews];
   [_rangeController updateIfNeeded];
@@ -1753,11 +1768,17 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
+- (void)nodeDidInvalidateSize:(ASCellNode *)node
+{
+  [_cellsForLayoutUpdates addObject:node];
+  [self setNeedsLayout];
+}
+
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
 {
   ASDisplayNodeAssertMainThread();
 
-  if (!sizeChanged || _queuedNodeHeightUpdate) {
+  if (!sizeChanged || _queuedNodeHeightUpdate || _remeasuringCellNodes) {
     return;
   }
 

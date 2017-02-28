@@ -184,6 +184,13 @@ extern NSString * const ASCollectionInvalidUpdateException;
  */
 - (void)relayoutAllNodes;
 
+/**
+ * Re-measures given noades in the backing store.
+ *
+ * @discussion Used to respond to setNeedsLayout calls in ASCellNode
+ */
+- (void)relayoutNodes:(id<NSFastEnumeration>)nodes nodesSizeChanged:(NSMutableArray * _Nonnull)nodesSizesChanged;
+
 - (void)waitUntilAllUpdatesAreCommitted;
 
 @end
