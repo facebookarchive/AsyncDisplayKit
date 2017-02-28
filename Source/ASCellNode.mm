@@ -48,7 +48,6 @@
 
 @implementation ASCellNode
 @synthesize interactionDelegate = _interactionDelegate;
-static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +initialize.
 
 - (instancetype)init
 {
@@ -315,20 +314,25 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
   [self handleVisibilityChange:NO];
 }
 
-+ (void)initialize
++ (BOOL)requestsVisibilityNotifications
 {
-  [super initialize];
-  if (ASSubclassOverridesSelector([ASCellNode class], self, @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:))) {
-    if (__cellClassesForVisibilityNotifications == nil) {
-      __cellClassesForVisibilityNotifications = [NSMutableSet set];
-    }
-    [__cellClassesForVisibilityNotifications addObject:self];
+  static NSCache<Class, NSNumber *> *cache;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    cache = [[NSCache alloc] init];
+  });
+  NSNumber *result = [cache objectForKey:self];
+  if (result == nil) {
+    BOOL overrides = ASSubclassOverridesSelector([ASCellNode class], self, @selector(cellNodeVisibilityEvent:inScrollView:withCellFrame:));
+    result = overrides ? (NSNumber *)kCFBooleanTrue : (NSNumber *)kCFBooleanFalse;
+    [cache setObject:result forKey:self];
   }
+  return (result == kCFBooleanTrue);
 }
 
 - (void)handleVisibilityChange:(BOOL)isVisible
 {
-  if ([__cellClassesForVisibilityNotifications containsObject:[self class]] == NO) {
+  if ([self.class requestsVisibilityNotifications] == NO) {
     return; // The work below is expensive, and only valuable for subclasses watching visibility events.
   }
   
