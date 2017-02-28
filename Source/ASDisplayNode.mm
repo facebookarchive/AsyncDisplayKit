@@ -1905,7 +1905,6 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 - (CGFloat)contentsScaleForDisplay
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
 
   return _contentsScaleForDisplay;
@@ -1913,7 +1912,6 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 - (void)setContentsScaleForDisplay:(CGFloat)contentsScaleForDisplay
 {
-  ASDisplayNodeAssertThreadAffinity(self);
   ASDN::MutexLocker l(__instanceLock__);
 
   if (_contentsScaleForDisplay == contentsScaleForDisplay)
