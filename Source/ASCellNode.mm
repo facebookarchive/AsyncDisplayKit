@@ -125,47 +125,10 @@
   }
 }
 
-- (void)transitionLayoutWithAnimation:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(void(^)())completion
-{
-  CGSize oldSize = self.calculatedSize;
-  [super transitionLayoutWithAnimation:animated
-                    shouldMeasureAsync:shouldMeasureAsync
-                 measurementCompletion:^{
-                   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
-                   if (completion) {
-                     completion();
-                   }
-                 }
-   ];
-}
-
-- (void)transitionLayoutWithSizeRange:(ASSizeRange)constrainedSize
-                             animated:(BOOL)animated
-                   shouldMeasureAsync:(BOOL)shouldMeasureAsync
-                measurementCompletion:(void(^)())completion
-{
-  CGSize oldSize = self.calculatedSize;
-  [super transitionLayoutWithSizeRange:constrainedSize
-                              animated:animated
-                    shouldMeasureAsync:shouldMeasureAsync
-                 measurementCompletion:^{
-                   [self didRelayoutFromOldSize:oldSize toNewSize:self.calculatedSize];
-                   if (completion) {
-                     completion();
-                   }
-                 }
-   ];
-}
-
-- (void)didRelayoutFromOldSize:(CGSize)oldSize toNewSize:(CGSize)newSize
+- (void)_layoutTransitionMeasurementDidFinish
 {
   if (_interactionDelegate != nil) {
-    ASPerformBlockOnMainThread(^{
-      BOOL sizeChanged = !CGSizeEqualToSize(oldSize, newSize);
-      [_interactionDelegate nodeDidRelayout:self sizeChanged:sizeChanged];
-    });
+    [_interactionDelegate nodeDidInvalidateSize:self];
   }
 }
 

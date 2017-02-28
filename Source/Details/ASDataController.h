@@ -29,6 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @class ASCellNode;
 @class ASDataController;
 @class ASElementMap;
+@class ASCollectionElement;
 @class _ASHierarchyChangeSet;
 @protocol ASTraitEnvironment;
 @protocol ASSectionContext;
@@ -64,6 +65,11 @@ extern NSString * const ASCollectionInvalidUpdateException;
  Fetch the number of sections.
  */
 - (NSUInteger)numberOfSectionsInDataController:(ASDataController *)dataController;
+
+/**
+ Returns if the collection element size matches a given size
+ */
+- (BOOL)dataController:(ASDataController *)dataController presentedSizeForElement:(ASCollectionElement *)element matchesSize:(CGSize)size;
 
 @optional
 

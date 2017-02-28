@@ -215,18 +215,16 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
 - (BOOL)shouldScheduleDisplayWithNewInterfaceState:(ASInterfaceState)newInterfaceState;
 
 /**
- * @abstract Informs the root node that the intrinsic size of the receiver is no longer valid.
- *
- * @discussion The size of a root node is determined by each subnode. Calling invalidateSize will let the root node know
- * that the intrinsic size of the receiver node is no longer valid and a resizing of the root node needs to happen.
- */
-- (void)setNeedsLayoutFromAbove;
-
-/**
  * @abstract Subclass hook for nodes that are acting as root nodes. This method is called if one of the subnodes
  * size is invalidated and may need to result in a different size as the current calculated size.
  */
 - (void)_locked_rootNodeDidInvalidateSize;
+
+/**
+ * @abstract Subclass hook for nodes that are acting as root nodes. This method is called after measurement
+ * finished in a layout transition but before the measurement completion handler is called
+ */
+- (void)_layoutTransitionMeasurementDidFinish;
 
 @end
 

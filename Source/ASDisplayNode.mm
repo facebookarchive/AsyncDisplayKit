@@ -1266,6 +1266,12 @@ ASLayoutElementFinalLayoutElementDefault
   return _calculatedDisplayNodeLayout->constrainedSize;
 }
 
+/**
+ * @abstract Informs the root node that the intrinsic size of the receiver is no longer valid.
+ *
+ * @discussion The size of a root node is determined by each subnode. Calling invalidateSize will let the root node know
+ * that the intrinsic size of the receiver node is no longer valid and a resizing of the root node needs to happen.
+ */
 - (void)setNeedsLayoutFromAbove
 {
   ASDisplayNodeAssertThreadAffinity(self);
@@ -1487,6 +1493,8 @@ ASLayoutElementFinalLayoutElementDefault
       });
       
       // Measurement pass completion
+      // Give the subclass a change to hook into before calling the completion block
+      [self _layoutTransitionMeasurementDidFinish];
       if (completion) {
         completion();
       }
@@ -1558,6 +1566,11 @@ ASLayoutElementFinalLayoutElementDefault
   _transitionInProgress = YES;
   _transitionID = OSAtomicAdd32(1, &_transitionID);
   return _transitionID;
+}
+
+- (void)_layoutTransitionMeasurementDidFinish
+{
+  // No-Op in ASDisplayNode
 }
 
 - (void)_finishOrCancelTransition
