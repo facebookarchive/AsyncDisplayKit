@@ -326,7 +326,7 @@
     result = overrides ? (NSNumber *)kCFBooleanTrue : (NSNumber *)kCFBooleanFalse;
     [cache setObject:result forKey:self];
   }
-  return (result == kCFBooleanTrue);
+  return (result == (NSNumber *)kCFBooleanTrue);
 }
 
 - (void)handleVisibilityChange:(BOOL)isVisible
