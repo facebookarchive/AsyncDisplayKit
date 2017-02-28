@@ -63,18 +63,19 @@ typedef NSMutableDictionary<NSString *, NSMutableDictionary<NSIndexPath *, ASCol
 - (void)removeAllElements
 {
   [_sectionsOfItems removeAllObjects];
+  [_supplementaryElements removeAllObjects];
 }
 
-- (void)removeElementsOfKind:(NSString *)kind inSections:(NSIndexSet *)sections
+- (void)removeSectionsOfItems:(NSIndexSet *)itemSections
 {
-  if ([kind isEqualToString:ASDataControllerRowNodeKind]) {
-    // Items
-    [_sectionsOfItems removeObjectsAtIndexes:sections];
-  } else {
-    // Supplementaries
-    NSMutableDictionary *supplementariesForKind = _supplementaryElements[kind];
+  [_sectionsOfItems removeObjectsAtIndexes:itemSections];
+}
+
+- (void)removeSupplementaryElementsInSections:(NSIndexSet *)sections
+{
+  [_supplementaryElements enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull key, NSMutableDictionary<NSIndexPath *,ASCollectionElement *> * _Nonnull supplementariesForKind, BOOL * _Nonnull stop) {
     [supplementariesForKind removeObjectsForKeys:[sections as_filterIndexPathsBySection:supplementariesForKind]];
-  }
+  }];
 }
 
 - (void)insertEmptySectionsOfItemsAtIndexes:(NSIndexSet *)sections
