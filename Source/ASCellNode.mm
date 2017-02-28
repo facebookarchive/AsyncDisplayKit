@@ -121,7 +121,9 @@ static NSMutableSet *__cellClassesForVisibilityNotifications = nil; // See +init
 
 - (void)_locked_rootNodeDidInvalidateSize
 {
-  [_interactionDelegate nodeDidGetNeedsLayout:self];
+  if (_interactionDelegate != nil) {
+    [_interactionDelegate nodeDidGetNeedsLayout:self];
+  }
 }
 
 - (void)transitionLayoutWithAnimation:(BOOL)animated
