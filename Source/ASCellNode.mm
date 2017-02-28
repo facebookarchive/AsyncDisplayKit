@@ -316,7 +316,7 @@
 
 + (BOOL)requestsVisibilityNotifications
 {
-  static NSCache<Class, id> *cache;
+  static NSCache<Class, NSNumber *> *cache;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     cache = [[NSCache alloc] init];
