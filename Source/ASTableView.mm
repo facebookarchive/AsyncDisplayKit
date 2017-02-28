@@ -732,7 +732,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   } else {
     if (_cellsForLayoutUpdates.count > 0) {
       NSMutableArray *nodesSizesChanged = [NSMutableArray array];
-      [_dataController relayoutNodes:_cellsForLayoutUpdates nodesSizeChanged:&nodesSizesChanged];
+      [_dataController relayoutNodes:_cellsForLayoutUpdates nodesSizeChanged:nodesSizesChanged];
       if (nodesSizesChanged.count > 0) {
         [self requeryNodeHeights];
       }
@@ -1768,7 +1768,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   }
 }
 
-- (void)nodeDidGetNeedsLayout:(ASCellNode *)node
+- (void)nodeDidInvalidateSize:(ASCellNode *)node
 {
   [_cellsForLayoutUpdates addObject:node];
   [self setNeedsLayout];

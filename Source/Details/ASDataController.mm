@@ -617,9 +617,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 
 #pragma mark - Relayout
 
-- (void)relayoutNodes:(id<NSFastEnumeration>)nodes nodesSizeChanged:(NSMutableArray **)nodesSizesChanged
+- (void)relayoutNodes:(id<NSFastEnumeration>)nodes nodesSizeChanged:(NSMutableArray *)nodesSizesChanged
 {
-  NSParameterAssert(*nodesSizesChanged);
+  NSParameterAssert(nodesSizesChanged);
   
   ASDisplayNodeAssertMainThread();
   if (!_initialReloadDataHasBeenCalled) {
@@ -634,7 +634,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     CGSize oldSize = node.bounds.size;
     [self _layoutNode:node withConstrainedSize:constrainedSize];
     if (! CGSizeEqualToSize(node.frame.size, oldSize)) {
-      [*nodesSizesChanged addObject:node];
+      [nodesSizesChanged addObject:node];
     }
   }
 }

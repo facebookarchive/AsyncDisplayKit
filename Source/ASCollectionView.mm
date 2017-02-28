@@ -1350,7 +1350,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 {
   if (_cellsForLayoutUpdates.count > 0) {
     NSMutableArray<ASCellNode *> *nodesSizesChanged = [NSMutableArray array];
-    [_dataController relayoutNodes:_cellsForLayoutUpdates nodesSizeChanged:&nodesSizesChanged];
+    [_dataController relayoutNodes:_cellsForLayoutUpdates nodesSizeChanged:nodesSizesChanged];
     [self nodesDidRelayout:nodesSizesChanged];
   }
 
@@ -1807,7 +1807,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
 }
 
-- (void)nodeDidGetNeedsLayout:(ASCellNode *)node
+- (void)nodeDidInvalidateSize:(ASCellNode *)node
 {
   [_cellsForLayoutUpdates addObject:node];
   [self setNeedsLayout];
