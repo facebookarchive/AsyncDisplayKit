@@ -25,8 +25,6 @@ AS_SUBCLASSING_RESTRICTED
 
 - (instancetype)initWithTableView:(UITableView *)tableView;
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
-
 @end
 
 NS_ASSUME_NONNULL_END

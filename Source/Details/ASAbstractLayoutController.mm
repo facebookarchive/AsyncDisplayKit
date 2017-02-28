@@ -165,7 +165,6 @@ extern CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTu
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
-  ASDisplayNodeAssert(rangeType != ASLayoutRangeTypeVisible, @"Cannot set tuning parameters for visible range.");
   ASDisplayNodeAssert(rangeMode < _tuningParameters.size() && rangeType < _tuningParameters[rangeMode].size(), @"Setting a range that is OOB for the configured tuning parameters");
   _tuningParameters[rangeMode][rangeType] = tuningParameters;
 }

@@ -33,7 +33,7 @@ typedef NS_ENUM(NSInteger, ASLayoutRangeMode) {
    * Thus, fewer views/layers are created and less data is fetched, saving system resources.
    * Range controller can automatically switch to full mode when conditions change.
    */
-  ASLayoutRangeModeMinimum,
+  ASLayoutRangeModeMinimum = 0,
     
   /**
    * Normal/Full mode that a range controller uses to provide the best experience for end users.
@@ -62,9 +62,8 @@ typedef NS_ENUM(NSInteger, ASLayoutRangeMode) {
 static NSInteger const ASLayoutRangeModeCount = 4;
 
 typedef NS_ENUM(NSInteger, ASLayoutRangeType) {
-  ASLayoutRangeTypeVisible,
   ASLayoutRangeTypeDisplay,
   ASLayoutRangeTypePreload
 };
 
-static NSInteger const ASLayoutRangeTypeCount = 3;
+static NSInteger const ASLayoutRangeTypeCount = 2;

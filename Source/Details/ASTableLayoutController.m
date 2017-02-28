@@ -37,18 +37,14 @@
 {
   ASDisplayNodeAssert(!CGRectIsEmpty(_tableView.bounds), @"Should not talk to layout controller if table bounds is empty.");
   
+  *outVisible = [self visibleIndexPaths];
   *outDisplay = [self indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypeDisplay];
-  *outVisible = [self indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypeVisible];
   *outPreload = [self indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypePreload];
 }
 
 - (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
 {
   ASDisplayNodeAssertMainThread();
-
-  if (rangeType == ASLayoutRangeTypeVisible) {
-    return [self visibleIndexPaths];
-  }
   
   CGRect visibleRect = self.tableView.bounds;
   ASRangeTuningParameters params = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
