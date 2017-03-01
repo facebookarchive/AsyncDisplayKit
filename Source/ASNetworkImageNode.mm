@@ -439,7 +439,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   if (clearAndReattempt) {
     // In this case another thread changed the _downloadIdentifierForProgressBlock before we finished registering
     // the new progress block for newDownloadIDForProgressBlock ID. Let's clear it now and reattempt to register
-    [_downloader setProgressImageBlock:nil callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:newDownloadIDForProgressBlock];
+    if (newDownloadIDForProgressBlock) {
+      [_downloader setProgressImageBlock:nil callbackQueue:dispatch_get_main_queue() withDownloadIdentifier:newDownloadIDForProgressBlock];
+    }
     [self _updateProgressImageBlockOnDownloaderIfNeeded];
   }
 }
