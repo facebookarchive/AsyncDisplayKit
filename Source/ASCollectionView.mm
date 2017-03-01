@@ -892,7 +892,13 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [[self nodeForItemAtIndexPath:indexPath] calculatedSize];
+  ASCellNode *cell = [self nodeForItemAtIndexPath:indexPath];
+  if (cell.shouldUseUIKitCell) {
+    if ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)]) {
+      return [(id)_asyncDelegate collectionView:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
+    }
+  }
+  return cell.calculatedSize;
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)layout referenceSizeForHeaderInSection:(NSInteger)section
