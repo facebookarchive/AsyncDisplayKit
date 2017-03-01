@@ -499,12 +499,22 @@
 
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
-  [self.view performBatchAnimated:animated updates:updates completion:completion];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view performBatchAnimated:animated updates:updates completion:completion];
+  } else {
+    if (updates) {
+      updates();
+    }
+    if (completion) {
+      completion(YES);
+    }
+  }
 }
 
 - (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
-  [self.view performBatchUpdates:updates completion:completion];
+  [self performBatchAnimated:YES updates:updates completion:completion];
 }
 
 - (void)waitUntilAllUpdatesAreCommitted
@@ -514,12 +524,15 @@
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  [self.view reloadDataWithCompletion:completion];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view reloadDataWithCompletion:completion];
+  }
 }
 
 - (void)reloadData
 {
-  [self.view reloadData];
+  [self reloadDataWithCompletion:nil];
 }
 
 - (void)relayoutItems
@@ -534,7 +547,10 @@
 
 - (void)beginUpdates
 {
-  [self.view beginUpdates];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view beginUpdates];
+  }
 }
 
 - (void)endUpdatesAnimated:(BOOL)animated
@@ -544,47 +560,74 @@
 
 - (void)endUpdatesAnimated:(BOOL)animated completion:(void (^)(BOOL))completion
 {
-  [self.view endUpdatesAnimated:animated completion:completion];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view endUpdatesAnimated:animated completion:completion];
+  }
 }
 
 - (void)insertSections:(NSIndexSet *)sections
 {
-  [self.view insertSections:sections];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view insertSections:sections];
+  }
 }
 
 - (void)deleteSections:(NSIndexSet *)sections
 {
-  [self.view deleteSections:sections];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view deleteSections:sections];
+  }
 }
 
 - (void)reloadSections:(NSIndexSet *)sections
 {
-  [self.view reloadSections:sections];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view reloadSections:sections];
+  }
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
-  [self.view moveSection:section toSection:newSection];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view moveSection:section toSection:newSection];
+  }
 }
 
 - (void)insertItemsAtIndexPaths:(NSArray *)indexPaths
 {
-  [self.view insertItemsAtIndexPaths:indexPaths];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view insertItemsAtIndexPaths:indexPaths];
+  }
 }
 
 - (void)deleteItemsAtIndexPaths:(NSArray *)indexPaths
 {
-  [self.view deleteItemsAtIndexPaths:indexPaths];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view deleteItemsAtIndexPaths:indexPaths];
+  }
 }
 
 - (void)reloadItemsAtIndexPaths:(NSArray *)indexPaths
 {
-  [self.view reloadItemsAtIndexPaths:indexPaths];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view reloadItemsAtIndexPaths:indexPaths];
+  }
 }
 
 - (void)moveItemAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
-  [self.view moveItemAtIndexPath:indexPath toIndexPath:newIndexPath];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view moveItemAtIndexPath:indexPath toIndexPath:newIndexPath];
+  }
 }
 
 #pragma mark - ASRangeControllerUpdateRangeProtocol

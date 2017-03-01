@@ -545,7 +545,14 @@ ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
-  [self.view reloadDataWithCompletion:completion];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view reloadDataWithCompletion:completion];
+  } else {
+    if (completion) {
+      completion();
+    }
+  }
 }
 
 - (void)reloadData
@@ -560,11 +567,19 @@ ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 
 - (void)performBatchAnimated:(BOOL)animated updates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
-  [self.view beginUpdates];
-  if (updates) {
-    updates();
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    ASTableView *tableView = self.view;
+    [tableView beginUpdates];
+    if (updates) {
+      updates();
+    }
+    [tableView endUpdatesAnimated:animated completion:completion];
+  } else {
+    if (updates) {
+      updates();
+    }
   }
-  [self.view endUpdatesAnimated:animated completion:completion];
 }
 
 - (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
@@ -574,42 +589,66 @@ ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
 
 - (void)insertSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [self.view insertSections:sections withRowAnimation:animation];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view insertSections:sections withRowAnimation:animation];
+  }
 }
 
 - (void)deleteSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [self.view deleteSections:sections withRowAnimation:animation];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view deleteSections:sections withRowAnimation:animation];
+  }
 }
 
 - (void)reloadSections:(NSIndexSet *)sections withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [self.view reloadSections:sections withRowAnimation:animation];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view reloadSections:sections withRowAnimation:animation];
+  }
 }
 
 - (void)moveSection:(NSInteger)section toSection:(NSInteger)newSection
 {
-  [self.view moveSection:section toSection:newSection];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view moveSection:section toSection:newSection];
+  }
 }
 
 - (void)insertRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [self.view insertRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view insertRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+  }
 }
 
 - (void)deleteRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [self.view deleteRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view deleteRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+  }
 }
 
 - (void)reloadRowsAtIndexPaths:(NSArray *)indexPaths withRowAnimation:(UITableViewRowAnimation)animation
 {
-  [self.view reloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view reloadRowsAtIndexPaths:indexPaths withRowAnimation:animation];
+  }
 }
 
 - (void)moveRowAtIndexPath:(NSIndexPath *)indexPath toIndexPath:(NSIndexPath *)newIndexPath
 {
-  [self.view moveRowAtIndexPath:indexPath toIndexPath:newIndexPath];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view moveRowAtIndexPath:indexPath toIndexPath:newIndexPath];
+  }
 }
 
 - (void)waitUntilAllUpdatesAreCommitted
