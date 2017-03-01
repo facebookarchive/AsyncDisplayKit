@@ -110,13 +110,13 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @abstract Delegate method invoked when player playback time is updated.
  * @param videoNode The video node.
- * @param second current playback time in seconds.
+ * @param timeInterval current playback time in seconds.
  */
 - (void)videoNode:(ASVideoNode *)videoNode didPlayToTimeInterval:(NSTimeInterval)timeInterval;
 /**
  * @abstract Delegate method invoked when the video player stalls.
  * @param videoNode The video node that has experienced the stall
- * @param second Current playback time when the stall happens
+ * @param timeInterval Current playback time when the stall happens
  */
 - (void)videoNode:(ASVideoNode *)videoNode didStallAtTimeInterval:(NSTimeInterval)timeInterval;
 /**

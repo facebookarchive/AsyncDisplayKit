@@ -752,7 +752,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
  * @param shouldMeasureAsync Measure the layout asynchronously.
- * @param measurementCompletion Optional completion block called only if a new layout is calculated.
+ * @param completion Optional completion block called only if a new layout is calculated.
  * It is called on main, right after the measurement and before -animateLayoutTransition:.
  *
  * @discussion If the passed constrainedSize is the the same as the node's current constrained size, this method is noop. If passed YES to shouldMeasureAsync it's guaranteed that measurement is happening on a background thread, otherwise measaurement will happen on the thread that the method was called on. The measurementCompletion callback is always called on the main thread right after the measurement and before -animateLayoutTransition:.
@@ -773,7 +773,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  *
  * @param animated Animation is optional, but will still proceed through your `animateLayoutTransition` implementation with `isAnimated == NO`.
  * @param shouldMeasureAsync Measure the layout asynchronously.
- * @param measurementCompletion Optional completion block called only if a new layout is calculated.
+ * @param completion Optional completion block called only if a new layout is calculated.
  *
  * @see animateLayoutTransition:
  *

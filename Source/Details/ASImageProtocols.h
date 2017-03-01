@@ -30,7 +30,6 @@ typedef void(^ASImageCacherCompletion)(id <ASImageContainerProtocol> _Nullable i
  @param URL The URL of the image to retrieve from the cache.
  @param callbackQueue The queue to call `completion` on.
  @param completion The block to be called when the cache has either hit or missed.
- @param imageFromCache The image that was retrieved from the cache, if the image could be retrieved; nil otherwise.
  @discussion If `URL` is nil, `completion` will be invoked immediately with a nil image. This method should not block
  the calling thread as it is likely to be called from the main thread.
  */
@@ -51,7 +50,7 @@ typedef void(^ASImageCacherCompletion)(id <ASImageContainerProtocol> _Nullable i
  the calling thread to fetch the image from a fast memory cache. It is OK to return nil from this method and instead
  support only cachedImageWithURL:callbackQueue:completion: however, synchronous rendering will not be possible.
  */
-- (nullable id <ASImageContainerProtocol>)synchronouslyFetchedCachedImageWithURL:(NSURL *)URL;
+- (nullable id <ASImageContainerProtocol>)synchronouslyFetchedCachedImageWithURL:(nullable NSURL *)URL;
 
 /**
  @abstract Called during clearPreloadedData. Allows the cache to optionally trim items.
@@ -144,8 +143,7 @@ withDownloadIdentifier:(id)downloadIdentifier;
 @optional
 
 /**
- @abstract Should be called when the objects cover image is ready.
- @param coverImageReadyCallback a block which receives the cover image.
+ @abstract A block which receives the cover image. Should be called when the objects cover image is ready.
  */
 @property (nonatomic, strong, readwrite) void (^coverImageReadyCallback)(UIImage *coverImage);
 

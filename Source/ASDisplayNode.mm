@@ -466,8 +466,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
  * up through ASDisplayNode, that we expect may need to be deallocated on main.
  * 
  * This method caches its results.
+ *
+ * Result is of type NSValue<[Ivar]>
  */
-+ (NSValue/*<[Ivar]>*/ * _Nonnull)_ivarsThatMayNeedMainDeallocation
++ (NSValue * _Nonnull)_ivarsThatMayNeedMainDeallocation
 {
   static NSCache<Class, NSValue *> *ivarsCache;
   static dispatch_once_t onceToken;
