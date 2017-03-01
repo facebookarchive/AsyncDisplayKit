@@ -27,9 +27,10 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 
 @class ASCellNode;
+@class ASCollectionElement;
 @class ASDataController;
 @class ASElementMap;
-@class ASCollectionElement;
+@class ASLayout;
 @class _ASHierarchyChangeSet;
 @protocol ASTraitEnvironment;
 @protocol ASSectionContext;
@@ -52,11 +53,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
- The constrained size range for layout.
- */
-- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
-
-/**
  Fetch the number of rows in specific section.
  */
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section;
@@ -73,12 +69,20 @@ extern NSString * const ASCollectionInvalidUpdateException;
 
 @optional
 
+/**
+ The constrained size range for layout. Called only if collection layout delegate is not provided.
+ */
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+
 - (NSArray<NSString *> *)dataController:(ASDataController *)dataController supplementaryNodeKindsInSections:(NSIndexSet *)sections;
 
 - (NSUInteger)dataController:(ASDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section;
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
+/**
+ The constrained size range for layout. Called only if a collection layout calculator is not provided.
+ */
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
 - (nullable id<ASSectionContext>)dataController:(ASDataController *)dataController contextForSection:(NSInteger)section;
@@ -193,7 +197,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
 - (void)relayoutAllNodes;
 
 /**
- * Re-measures given noades in the backing store.
+ * Re-measures given nodes in the backing store.
  *
  * @discussion Used to respond to setNeedsLayout calls in ASCellNode
  */

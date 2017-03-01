@@ -11,10 +11,12 @@
 //
 
 #import <AsyncDisplayKit/ASCollectionNode.h>
+#import <AsyncDisplayKit/ASCollectionNode+FrameworkPrivate.h>
 
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASCollectionInternal.h>
+#import <AsyncDisplayKit/ASCollectionLayout.h>
 #import <AsyncDisplayKit/ASCollectionViewLayoutFacilitatorProtocol.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
@@ -33,6 +35,7 @@
 @interface _ASCollectionPendingState : NSObject
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
+@property (strong, nonatomic) UICollectionViewLayout *collectionViewLayout;
 @property (nonatomic, assign) ASLayoutRangeMode rangeMode;
 @property (nonatomic, assign) BOOL allowsSelection; // default is YES
 @property (nonatomic, assign) BOOL allowsMultipleSelection; // default is NO
@@ -97,7 +100,7 @@
 
 #pragma mark - ASCollectionNode
 
-@interface ASCollectionNode ()
+@interface ASCollectionNode () <ASCollectionLayoutDataSource>
 {
   ASDN::RecursiveMutex _environmentStateLock;
   Class _collectionViewClass;
@@ -141,6 +144,7 @@
       __typeof__(self) strongSelf = weakSelf;
       return [[[strongSelf collectionViewClass] alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
     }];
+    [self configureNewCollectionViewLayout:layout];
   }
   return self;
 }
@@ -162,9 +166,13 @@
     view.inverted                = pendingState.inverted;
     view.allowsSelection         = pendingState.allowsSelection;
     view.allowsMultipleSelection = pendingState.allowsMultipleSelection;
-
+    
     if (pendingState.rangeMode != ASLayoutRangeModeUnspecified) {
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
+    }
+    
+    if (pendingState.collectionViewLayout != nil) {
+      view.collectionViewLayout = pendingState.collectionViewLayout;
     }
   }
 }
@@ -337,6 +345,26 @@
     return _pendingState.allowsMultipleSelection;
   } else {
     return self.view.allowsMultipleSelection;
+  }
+}
+
+- (void)setCollectionViewLayout:(UICollectionViewLayout *)layout
+{
+  if ([self pendingState]) {
+    _pendingState.collectionViewLayout = layout;
+    [self configureNewCollectionViewLayout:layout];
+  } else {
+    self.view.collectionViewLayout = layout;
+    // Don't call -configureNewCollectionViewLayout: as the view will call on us.
+  }
+}
+
+- (UICollectionViewLayout *)collectionViewLayout
+{
+  if ([self pendingState]) {
+    return _pendingState.collectionViewLayout;
+  } else {
+    return self.view.collectionViewLayout;
   }
 }
 
@@ -660,6 +688,26 @@ ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
   [result addObject:@{ @"dataSource" : ASObjectDescriptionMakeTiny(self.dataSource) }];
   [result addObject:@{ @"delegate" : ASObjectDescriptionMakeTiny(self.delegate) }];
   return result;
+}
+
+#pragma mark - ASCollectionLayoutDataSource
+
+- (ASElementMap *)elementMapForCollectionLayout:(ASCollectionLayout *)collectionLayout
+{
+  ASDisplayNodeAssertMainThread();
+  // TODO Own the data controller when view is not yet loaded
+  return self.dataController.visibleMap;
+}
+
+#pragma mark - Framework private methods
+
+- (void)configureNewCollectionViewLayout:(UICollectionViewLayout *)layout
+{
+  if ([layout isKindOfClass:[ASCollectionLayout class]]) {
+    ASCollectionLayout *collectionLayout = (ASCollectionLayout *)layout;
+    collectionLayout.dataSource = self;
+    collectionLayout.collectionNode = self;
+  }
 }
 
 @end

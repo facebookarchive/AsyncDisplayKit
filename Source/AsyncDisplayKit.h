@@ -38,6 +38,9 @@
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASSectionContext.h>
 
+#import <AsyncDisplayKit/ASCollectionLayout.h>
+#import <AsyncDisplayKit/ASCollectionFlowLayout.h>
+
 #import <AsyncDisplayKit/ASSectionController.h>
 #import <AsyncDisplayKit/ASSupplementaryNodeSource.h>
 

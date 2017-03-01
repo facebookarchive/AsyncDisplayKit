@@ -284,7 +284,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   
   _proxyDataSource = [[ASTableViewProxy alloc] initWithTarget:nil interceptor:self];
   super.dataSource = (id<UITableViewDataSource>)_proxyDataSource;
-
+  
   [self registerClass:_ASTableViewCell.class forCellReuseIdentifier:kCellReuseIdentifier];
 }
 
@@ -1555,7 +1555,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [changeSet executeCompletionHandlerWithFinished:YES];
 }
 
-#pragma mark - ASDataControllerDelegate
+#pragma mark - ASDataControllerSource
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath {
   ASCellNodeBlock block = nil;

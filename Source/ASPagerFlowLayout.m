@@ -20,6 +20,7 @@
 
 @end
 
+//TODO make this an ASCollectionViewLayout
 @implementation ASPagerFlowLayout
 
 - (ASCollectionView *)asCollectionView

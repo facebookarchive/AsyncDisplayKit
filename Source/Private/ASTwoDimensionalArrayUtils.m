@@ -76,6 +76,18 @@ NSArray *ASIndexPathsForTwoDimensionalArray(NSArray <NSArray *>* twoDimensionalA
   return result;
 }
 
+NSArray *ASElementsInTwoDimensionalArray(NSArray <NSArray *>* twoDimensionalArray)
+{
+  NSMutableArray *result = [NSMutableArray array];
+  for (NSArray *subarray in twoDimensionalArray) {
+    ASDisplayNodeCAssert([subarray isKindOfClass:[NSArray class]], @"This function expects NSArray<NSArray *> *");
+    for (id element in subarray) {
+      [result addObject:element];
+    }
+  }
+  return result;
+}
+
 id ASGetElementInTwoDimensionalArray(NSArray *array, NSIndexPath *indexPath)
 {
   ASDisplayNodeCAssertNotNil(indexPath, @"Expected non-nil index path");
