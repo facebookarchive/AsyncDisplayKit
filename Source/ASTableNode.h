@@ -463,7 +463,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Similar to -tableView:cellForRowAtIndexPath:.
  *
- * @param tableNode The sender.
+ * @param tableView The sender.
  *
  * @param indexPath The index path of the requested node.
  *
@@ -552,7 +552,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Receive a message that the tableView is near the end of its data set and more data should be fetched if necessary.
  *
- * @param tableView The sender.
+ * @param tableNode The sender.
  * @param context A context object that must be notified when the batch fetch is completed.
  *
  * @discussion You must eventually call -completeBatchFetching: with an argument of YES in order to receive future
@@ -566,7 +566,7 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Tell the tableView if batch fetching should begin.
  *
- * @param tableView The sender.
+ * @param tableNode The sender.
  *
  * @discussion Use this method to conditionally fetch batches. Example use cases are: limiting the total number of
  * objects that can be fetched or no network connection.

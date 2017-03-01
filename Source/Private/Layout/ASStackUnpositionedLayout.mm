@@ -244,11 +244,9 @@ CGFloat ASStackUnpositionedLayout::baselineForItem(const ASStackLayoutSpecStyle 
  * Computes cross size and baseline of each line.
  * https://www.w3.org/TR/css-flexbox-1/#algo-cross-line
  *
- * @param items All items to lay out
+ * @param lines All items to lay out
  * @param style the layout style of the overall stack layout
  * @param sizeRange the range of allowable sizes for the stack layout component
- * @param crossSize result of the cross size
- * @param baseline result of the stack baseline
  */
 static void computeLinesCrossSizeAndBaseline(std::vector<ASStackUnpositionedLine> &lines,
                                              const ASStackLayoutSpecStyle &style,
