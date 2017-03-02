@@ -13,6 +13,7 @@
 #import <AsyncDisplayKit/ASPagerFlowLayout.h>
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASCollectionView.h>
+#import <AsyncDisplayKit/ASCollectionNode.h>
 
 @interface ASPagerFlowLayout () {
   __weak ASCellNode *_currentCellNode;
@@ -41,7 +42,7 @@
   // Don't mess around if the user is interacting with the page node. Although if just a rotation happened we should
   // try to use the current index path to not end up setting the target content offset to something in between pages
   if (!self.collectionView.decelerating && !self.collectionView.tracking) {
-    NSIndexPath *indexPath = [self.asCollectionView indexPathForNode:_currentCellNode];
+    NSIndexPath *indexPath = [self.asCollectionView.collectionNode indexPathForNode:_currentCellNode];
     if (indexPath) {
       return [self _targetContentOffsetForItemAtIndexPath:indexPath proposedContentOffset:proposedContentOffset];
     }
