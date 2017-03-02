@@ -587,10 +587,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     view = [[_viewClass alloc] init];
   }
   
-  // Update flags related to special handling of UIImageView layers. More details on the flags
-  if (_flags.synchronous && ([_viewClass isSubclassOfClass:[UIImageView class]] || [_viewClass isSubclassOfClass:[UIActivityIndicatorView class]])) {
-    _flags.canClearContentsOfLayer = NO;
-    _flags.canCallSetNeedsDisplayOfLayer = NO;
+  // Special handling of wrapping UIKit components
+  if (_flags.synchronous) {
+    // UIImageView layers. More details on the flags
+    if ([_viewClass isSubclassOfClass:[UIImageView class]]) {
+      _flags.canClearContentsOfLayer = NO;
+      _flags.canCallSetNeedsDisplayOfLayer = NO;
+    }
+      
+    // UIActivityIndicator
+    if ([_viewClass isSubclassOfClass:[UIActivityIndicatorView class]]) {
+      self.opaque = NO;
+    }
   }
 
   return view;
