@@ -18,30 +18,17 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class ASCellNode;
 
-ASDISPLAYNODE_EXTERN_C_BEGIN
-
-struct ASDirectionalScreenfulBuffer {
-  CGFloat positiveDirection; // Positive relative to iOS Core Animation layer coordinate space.
-  CGFloat negativeDirection;
-};
-typedef struct ASDirectionalScreenfulBuffer ASDirectionalScreenfulBuffer;
-
-ASDISPLAYNODE_EXTERN_C_END
-
 @protocol ASLayoutController <NSObject>
 
 - (void)setTuningParameters:(ASRangeTuningParameters)tuningParameters forRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
 - (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
-- (NSSet<NSIndexPath *> *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
-
-@optional
-
-- (void)setVisibleNodeIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
-
-- (void)setViewportSize:(CGSize)viewportSize;
-- (CGSize)viewportSize;
+- (void)indexPathsForScrolling:(ASScrollDirection)scrollDirection
+                     rangeMode:(ASLayoutRangeMode)rangeMode
+             visibleIndexPaths:(out NSSet<NSIndexPath *> * _Nullable * _Nonnull)visibleIndexPaths
+             displayIndexPaths:(out NSSet<NSIndexPath *> * _Nullable * _Nonnull)displayIndexPaths
+             preloadIndexPaths:(out NSSet<NSIndexPath *> * _Nullable * _Nonnull)preloadIndexPaths;
 
 @end
 

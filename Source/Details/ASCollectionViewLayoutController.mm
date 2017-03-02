@@ -27,9 +27,7 @@ typedef struct ASRangeGeometry ASRangeGeometry;
 
 @interface ASCollectionViewLayoutController ()
 {
-  @package
   ASCollectionView * __weak _collectionView;
-  UICollectionViewLayout * __strong _collectionViewLayout;
 }
 @end
 
@@ -42,45 +40,48 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   }
   
   _collectionView = collectionView;
-  _collectionViewLayout = [collectionView collectionViewLayout];
   return self;
 }
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+- (void)indexPathsForScrolling:(ASScrollDirection)scrollDirection
+                     rangeMode:(ASLayoutRangeMode)rangeMode
+             visibleIndexPaths:(out NSSet<NSIndexPath *> *__autoreleasing  _Nullable *)outVisible
+             displayIndexPaths:(out NSSet<NSIndexPath *> *__autoreleasing  _Nullable *)outDisplay
+             preloadIndexPaths:(out NSSet<NSIndexPath *> *__autoreleasing  _Nullable *)outPreload
 {
-  ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
-  CGRect rangeBounds = [self rangeBoundsWithScrollDirection:scrollDirection rangeTuningParameters:tuningParameters];
-  return [self indexPathsForItemsWithinRangeBounds:rangeBounds];
-}
-
-- (NSSet *)indexPathsForItemsWithinRangeBounds:(CGRect)rangeBounds
-{
-  NSArray *layoutAttributes = [_collectionViewLayout layoutAttributesForElementsInRect:rangeBounds];
-  NSMutableSet *indexPathSet = [NSMutableSet setWithCapacity:layoutAttributes.count];
+  CGRect visibleRect = _collectionView.bounds;
+  CGRect preloadRect = CGRectExpandToRangeWithScrollableDirections(visibleRect, [self tuningParametersForRangeMode:rangeMode rangeType:ASLayoutRangeTypePreload], ASScrollDirectionVerticalDirections, scrollDirection);
+  CGRect displayRect = CGRectExpandToRangeWithScrollableDirections(visibleRect, [self tuningParametersForRangeMode:rangeMode rangeType:ASLayoutRangeTypeDisplay], ASScrollDirectionVerticalDirections, scrollDirection);
+  ASDisplayNodeAssert(CGRectContainsRect(displayRect, visibleRect), @"Display rect should contain visible rect.");
+  ASDisplayNodeAssert(CGRectContainsRect(preloadRect, displayRect), @"Preload rect should contain display rect.");
   
-  for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
-    //ASDisplayNodeAssert(![indexPathSet containsObject:la.indexPath], @"Shouldn't already contain indexPath");
-
-    // Manually filter out elements that don't intersect the range bounds.
-    // If a layout returns elements outside the requested rect this can be a huge problem.
-    // For instance in a paging flow, you may only want to preload 3 pages (one center, one on each side)
-    // but if flow layout includes the 4th page (which it does! as of iOS 9&10), you will preload a 4th
-    // page as well.
-    if (CATransform3DIsIdentity(la.transform3D) && CGRectIntersectsRect(la.frame, rangeBounds) == NO) {
-      continue;
+  /**
+   * To get this quickly, we ask our layout to get the preload index paths, and
+   * we filter that set down to get the display index paths, and filter that set down
+   * to get the visible index paths.
+   */
+  NSArray<UICollectionViewLayoutAttributes *> *rawAttributes = [_collectionView.collectionViewLayout layoutAttributesForElementsInRect:preloadRect];
+  
+  NSMutableSet *preloadIndexPaths = [NSMutableSet set];
+  NSMutableSet *visibleIndexPaths = [NSMutableSet set];
+  NSMutableSet *displayIndexPaths = [NSMutableSet set];
+  for (UICollectionViewLayoutAttributes *attr in rawAttributes) {
+    CGRect frame = attr.frame;
+    NSIndexPath *indexPath = attr.indexPath;
+    if (CGRectIntersectsRect(frame, preloadRect)) {
+      [preloadIndexPaths addObject:indexPath];
+      if (CGRectIntersectsRect(displayRect, frame)) {
+        [displayIndexPaths addObject:indexPath];
+        if (CGRectIntersectsRect(visibleRect, frame)) {
+          [visibleIndexPaths addObject:indexPath];
+        }
+      }
     }
-    [indexPathSet addObject:la.indexPath];
   }
-
-  return indexPathSet;
-}
-
-- (CGRect)rangeBoundsWithScrollDirection:(ASScrollDirection)scrollDirection
-                   rangeTuningParameters:(ASRangeTuningParameters)tuningParameters
-{
-  CGRect rect = _collectionView.bounds;
   
-  return CGRectExpandToRangeWithScrollableDirections(rect, tuningParameters, [_collectionView scrollableDirections], scrollDirection);
+  *outPreload = preloadIndexPaths;
+  *outVisible = visibleIndexPaths;
+  *outDisplay = displayIndexPaths;
 }
 
 @end

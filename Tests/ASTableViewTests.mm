@@ -754,7 +754,7 @@
   XCTAssertEqual(node.view.numberOfSections, NumberOfSections);
   ASXCTAssertEqualRects(CGRectMake(0, 32, 375, 44), [node rectForRowAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]], @"This text requires very specific geometry. The rect for the first row should match up.");
 
-  __unused XCTestExpectation *e = [self expectationWithDescription:@"Did a bunch of rounds of updates."];
+  XCTestExpectation *e = [self expectationWithDescription:@"Did a bunch of rounds of updates."];
   NSInteger totalCount = 20;
   __block NSInteger count = 0;
   dispatch_source_t timer = dispatch_source_create(DISPATCH_SOURCE_TYPE_TIMER, 0, 0, dispatch_get_main_queue());
@@ -772,7 +772,12 @@
     }];
   });
   dispatch_resume(timer);
-  [self waitForExpectationsWithTimeout:60 handler:nil];
+  // Even if an exception is thrown, we need to cancel the timer so we don't pollute other test methods
+  @try {
+    [self waitForExpectationsWithTimeout:60 handler:nil];
+  } @finally {
+    dispatch_cancel(timer);
+  }
 }
 
 - (void)testThatInvalidUpdateExceptionReasonContainsDataSourceClassName

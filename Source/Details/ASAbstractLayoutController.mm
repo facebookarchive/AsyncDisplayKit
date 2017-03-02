@@ -14,6 +14,11 @@
 
 #include <vector>
 
+typedef struct {
+  CGFloat positiveDirection; // Positive relative to iOS Core Animation layer coordinate space.
+  CGFloat negativeDirection;
+} ASDirectionalScreenfulBuffer;
+
 extern ASRangeTuningParameters const ASRangeTuningParametersZero = {};
 
 extern BOOL ASRangeTuningParametersEqualToRangeTuningParameters(ASRangeTuningParameters lhs, ASRangeTuningParameters rhs)
@@ -85,7 +90,6 @@ extern CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTu
 
 @interface ASAbstractLayoutController () {
   std::vector<std::vector<ASRangeTuningParameters>> _tuningParameters;
-  CGSize _viewportSize;
 }
 @end
 
@@ -167,20 +171,14 @@ extern CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTu
 
 #pragma mark - Abstract Index Path Range Support
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+- (void)indexPathsForScrolling:(ASScrollDirection)scrollDirection
+                     rangeMode:(ASLayoutRangeMode)rangeMode
+             visibleIndexPaths:(out NSSet<NSIndexPath *> *__autoreleasing  _Nullable *)outVisible
+             displayIndexPaths:(out NSSet<NSIndexPath *> *__autoreleasing  _Nullable *)outDisplay
+             preloadIndexPaths:(out NSSet<NSIndexPath *> *__autoreleasing  _Nullable *)outPreload
 {
   ASDisplayNodeAssertNotSupported();
-  return nil;
-}
-
-- (void)setViewportSize:(CGSize)viewportSize
-{
-  _viewportSize = viewportSize;
-}
-
-- (CGSize)viewportSize
-{
-  return _viewportSize;
+  return;
 }
 
 @end

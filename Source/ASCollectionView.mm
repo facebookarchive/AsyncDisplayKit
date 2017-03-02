@@ -1661,20 +1661,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 #pragma mark - ASRangeControllerDataSource
 
-- (ASRangeController *)rangeController
-{
-  return _rangeController;
-}
-
-- (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
-{
-  ASDisplayNodeAssertMainThread();
-  // Calling -indexPathsForVisibleItems will trigger UIKit to call reloadData if it never has, which can result
-  // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
-  BOOL isZeroSized = CGSizeEqualToSize(self.bounds.size, CGSizeZero);
-  return isZeroSized ? @[] : [self indexPathsForVisibleItems];
-}
-
 - (ASElementMap *)elementMapForRangeController:(ASRangeController *)rangeController
 {
   return _dataController.visibleMap;
@@ -1683,12 +1669,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 - (ASScrollDirection)scrollDirectionForRangeController:(ASRangeController *)rangeController
 {
   return self.scrollDirection;
-}
-
-- (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController
-{
-  ASDisplayNodeAssertMainThread();
-  return self.bounds.size;
 }
 
 - (ASInterfaceState)interfaceStateForRangeController:(ASRangeController *)rangeController
