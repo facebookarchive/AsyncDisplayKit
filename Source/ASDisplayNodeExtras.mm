@@ -251,13 +251,19 @@ static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *possible
 
 extern UIWindow * _Nullable ASFindWindowOfLayer(CALayer *layer)
 {
+  UIView *view = ASFindClosestViewOfLayer(layer);
+  if (UIWindow *window = ASDynamicCast(view, UIWindow)) {
+    return window;
+  } else {
+    return view.window;
+  }
+}
+
+extern UIView * _Nullable ASFindClosestViewOfLayer(CALayer *layer)
+{
   while (layer != nil) {
     if (UIView *view = ASDynamicCast(layer.delegate, UIView)) {
-      if ([view isKindOfClass:[UIWindow class]]) {
-        return (UIWindow *)view;
-      } else {
-        return view.window;
-      }
+      return view;
     }
     layer = layer.superlayer;
   }
