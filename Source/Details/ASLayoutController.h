@@ -40,9 +40,6 @@ ASDISPLAYNODE_EXTERN_C_END
 
 @optional
 
-- (void)setVisibleNodeIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
-
-
 @end
 
 NS_ASSUME_NONNULL_END
