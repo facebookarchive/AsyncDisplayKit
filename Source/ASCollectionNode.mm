@@ -514,7 +514,7 @@
 
 - (void)performBatchUpdates:(void (^)())updates completion:(void (^)(BOOL))completion
 {
-  [self performBatchAnimated:YES updates:updates completion:completion];
+  [self performBatchAnimated:UIView.areAnimationsEnabled updates:updates completion:completion];
 }
 
 - (void)waitUntilAllUpdatesAreCommitted
