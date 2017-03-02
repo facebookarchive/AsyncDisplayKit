@@ -40,8 +40,6 @@ ASDISPLAYNODE_EXTERN_C_END
 
 @optional
 
-- (void)setVisibleNodeIndexPaths:(NSArray<NSIndexPath *> *)indexPaths;
-
 - (void)setViewportSize:(CGSize)viewportSize;
 - (CGSize)viewportSize;
 
