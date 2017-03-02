@@ -121,13 +121,6 @@ AS_SUBCLASSING_RESTRICTED
 /**
  * @param rangeController Sender.
  *
- * @return the receiver's viewport size (i.e., the screen space occupied by the visible range).
- */
-- (CGSize)viewportSizeForRangeController:(ASRangeController *)rangeController;
-
-/**
- * @param rangeController Sender.
- *
  * @return the ASInterfaceState of the node that this controller is powering.  This allows nested range controllers
  * to collaborate with one another, as an outer controller may set bits in .interfaceState such as Visible.
  * If this controller is an orthogonally scrolling element, it waits until it is visible to preload outside the viewport.
