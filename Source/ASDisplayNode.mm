@@ -596,7 +596,8 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
       
     // UIActivityIndicator
-    if ([_viewClass isSubclassOfClass:[UIActivityIndicatorView class]]) {
+    if ([_viewClass isSubclassOfClass:[UIActivityIndicatorView class]]
+        || [_viewClass isSubclassOfClass:[UIVisualEffectView class]]) {
       self.opaque = NO;
     }
   }
