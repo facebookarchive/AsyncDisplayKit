@@ -25,7 +25,7 @@
   }
 
   // Get the closest view.
-  UIView *view = ASFindViewOfLayer(self.layer);
+  UIView *view = ASFindClosestViewOfLayer(self.layer);
   // Travel up the responder chain to find a view controller.
   for (UIResponder *responder in [view asdk_responderChainEnumerator]) {
     UIViewController *vc = ASDynamicCast(responder, UIViewController);

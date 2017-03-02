@@ -251,7 +251,7 @@ static inline BOOL _ASDisplayNodeIsAncestorOfDisplayNode(ASDisplayNode *possible
 
 extern UIWindow * _Nullable ASFindWindowOfLayer(CALayer *layer)
 {
-  UIView *view = ASFindViewOfLayer(layer);
+  UIView *view = ASFindClosestViewOfLayer(layer);
   if (UIWindow *window = ASDynamicCast(view, UIWindow)) {
     return window;
   } else {
@@ -259,7 +259,7 @@ extern UIWindow * _Nullable ASFindWindowOfLayer(CALayer *layer)
   }
 }
 
-extern UIView * _Nullable ASFindViewOfLayer(CALayer *layer)
+extern UIView * _Nullable ASFindClosestViewOfLayer(CALayer *layer)
 {
   while (layer != nil) {
     if (UIView *view = ASDynamicCast(layer.delegate, UIView)) {

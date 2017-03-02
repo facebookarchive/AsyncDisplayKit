@@ -17,7 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * @abstract Returns the view controller nearest to this node in the view hierarchy.
  *
- * @warning This property may only be accessed on the main thread.
+ * @warning This property may only be accessed on the main thread. This property may
+ *   be @c nil until the node's view is actually hosted in the view hierarchy.
  */
 @property (nonatomic, nullable, readonly) __kindof UIViewController *closestViewController;
 

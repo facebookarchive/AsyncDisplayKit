@@ -133,7 +133,7 @@ extern UIWindow * _Nullable ASFindWindowOfLayer(CALayer *layer) AS_WARN_UNUSED_R
 /**
  * Given a layer, find the closest view it lives in, if any.
  */
-extern UIView * _Nullable ASFindViewOfLayer(CALayer *layer) AS_WARN_UNUSED_RESULT;
+extern UIView * _Nullable ASFindClosestViewOfLayer(CALayer *layer) AS_WARN_UNUSED_RESULT;
 
 /**
  * Given two nodes, finds their most immediate common parent.  Used for geometry conversion methods.
