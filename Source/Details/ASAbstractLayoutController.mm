@@ -95,6 +95,7 @@ extern CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTu
   if (!(self = [super init])) {
     return nil;
   }
+  ASDisplayNodeAssert(self.class != [ASAbstractLayoutController class], @"Should never create instances of abstract class ASAbstractLayoutController.");
   
   _tuningParameters = std::vector<std::vector<ASRangeTuningParameters>> (ASLayoutRangeModeCount, std::vector<ASRangeTuningParameters> (ASLayoutRangeTypeCount));
   
@@ -170,6 +171,11 @@ extern CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTu
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
+}
+
+- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet *__autoreleasing  _Nullable *)displaySet preloadSet:(NSSet *__autoreleasing  _Nullable *)preloadSet
+{
+  ASDisplayNodeAssertNotSupported();
 }
 
 @end
