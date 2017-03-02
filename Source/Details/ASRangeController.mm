@@ -34,8 +34,6 @@
 {
   BOOL _rangeIsValid;
   BOOL _needsRangeUpdate;
-  BOOL _layoutControllerImplementsSetVisibleIndexPaths;
-  BOOL _layoutControllerImplementsSetViewportSize;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
   ASWeakSet<ASCellNode *> *_visibleNodes;
   ASLayoutRangeMode _currentRangeMode;
@@ -165,8 +163,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 - (void)setLayoutController:(id<ASLayoutController>)layoutController
 {
   _layoutController = layoutController;
-  _layoutControllerImplementsSetVisibleIndexPaths = [layoutController respondsToSelector:@selector(setVisibleNodeIndexPaths:)];
-  _layoutControllerImplementsSetViewportSize = [layoutController respondsToSelector:@selector(setViewportSize:)];
   if (layoutController && _dataSource) {
     [self updateIfNeeded];
   }
@@ -211,15 +207,8 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   
   ASElementMap *map = [_dataSource elementMapForRangeController:self];
 
-  // TODO: Consider if we need to use this codepath, or can rely on something more similar to the data & display ranges
-  // Example: ... = [_layoutController indexPathsForScrolling:scrollDirection rangeType:ASLayoutRangeTypeVisible];
-  NSArray<NSIndexPath *> *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
   ASWeakSet *newVisibleNodes = [[ASWeakSet alloc] init];
 
-  if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
-    [self _setVisibleNodes:newVisibleNodes];
-    return; // don't do anything for this update, but leave _rangeIsValid == NO to make sure we update it later
-  }
   ASProfilingSignpostStart(1, self);
 
   // Get the scroll direction. Default to using the previous one, if they're not scrolling.
@@ -228,15 +217,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     scrollDirection = _previousScrollDirection;
   }
   _previousScrollDirection = scrollDirection;
-
-  if (_layoutControllerImplementsSetViewportSize) {
-    [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
-  }
-  
-  // the layout controller needs to know what the current visible indices are to calculate range offsets
-  if (_layoutControllerImplementsSetVisibleIndexPaths) {
-    [_layoutController setVisibleNodeIndexPaths:visibleNodePaths];
-  }
   
   ASInterfaceState selfInterfaceState = [self interfaceState];
   ASLayoutRangeMode rangeMode = _currentRangeMode;
@@ -261,13 +241,14 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   // Check if both Display and Preload are unique. If they are, we load them with a single fetch from the layout controller for performance.
   BOOL optimizedLoadingOfBothRanges = (equalDisplayPreload == NO && equalDisplayVisible == NO && emptyDisplayRange == NO);
 
-  NSSet<NSIndexPath *> *visibleIndexPaths = [NSSet setWithArray:visibleNodePaths];
+  NSSet<NSIndexPath *> *visibleIndexPaths = nil;
   NSSet<NSIndexPath *> *displayIndexPaths = nil;
   NSSet<NSIndexPath *> *preloadIndexPaths = nil;
   
   if (optimizedLoadingOfBothRanges) {
-    [_layoutController allIndexPathsForScrolling:scrollDirection rangeMode:rangeMode displaySet:&displayIndexPaths preloadSet:&preloadIndexPaths];
+    [_layoutController allIndexPathsForScrolling:scrollDirection rangeMode:rangeMode visibleSet:&visibleIndexPaths displaySet:&displayIndexPaths preloadSet:&preloadIndexPaths];
   } else {
+    visibleIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypeVisible];
     if (emptyDisplayRange == YES) {
       displayIndexPaths = [NSSet set];
     } if (equalDisplayVisible == YES) {

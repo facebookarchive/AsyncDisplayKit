@@ -53,22 +53,26 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   return [self indexPathsForItemsWithinRangeBounds:rangeBounds];
 }
 
-- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet **)displaySet preloadSet:(NSSet **)preloadSet
+- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode visibleSet:(NSSet<NSIndexPath *> *__autoreleasing  _Nullable *)visibleSet displaySet:(NSSet<NSIndexPath *> *__autoreleasing  _Nullable *)displaySet preloadSet:(NSSet<NSIndexPath *> *__autoreleasing  _Nullable *)preloadSet
 {
-  if (displaySet == NULL || preloadSet == NULL) {
+  if (displaySet == NULL || preloadSet == NULL || visibleSet == NULL) {
     return;
   }
   
+  CGRect visibleBounds = _collectionView.bounds;
   ASRangeTuningParameters displayParams = [self tuningParametersForRangeMode:rangeMode rangeType:ASLayoutRangeTypeDisplay];
   ASRangeTuningParameters preloadParams = [self tuningParametersForRangeMode:rangeMode rangeType:ASLayoutRangeTypePreload];
   CGRect displayBounds = [self rangeBoundsWithScrollDirection:scrollDirection rangeTuningParameters:displayParams];
   CGRect preloadBounds = [self rangeBoundsWithScrollDirection:scrollDirection rangeTuningParameters:preloadParams];
   
-  CGRect unionBounds = CGRectUnion(displayBounds, preloadBounds);
+  CGRect unionBounds = CGRectUnion(CGRectUnion(displayBounds, preloadBounds), visibleBounds);
+  
   NSArray *layoutAttributes = [_collectionViewLayout layoutAttributesForElementsInRect:unionBounds];
 
-  NSMutableSet *display = [NSMutableSet setWithCapacity:layoutAttributes.count];
-  NSMutableSet *preload = [NSMutableSet setWithCapacity:layoutAttributes.count];
+  NSInteger count = layoutAttributes.count;
+  NSMutableSet *display = [NSMutableSet setWithCapacity:count];
+  NSMutableSet *preload = [NSMutableSet setWithCapacity:count];
+  NSMutableSet *visible = [NSMutableSet setWithCapacity:count];
 
   for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
     // Manually filter out elements that don't intersect the range bounds.
@@ -77,7 +81,8 @@ typedef struct ASRangeGeometry ASRangeGeometry;
     CGRect frame = la.frame;
     BOOL intersectsDisplay = CGRectIntersectsRect(displayBounds, frame);
     BOOL intersectsPreload = CGRectIntersectsRect(preloadBounds, frame);
-    if (intersectsDisplay == NO && intersectsPreload == NO && CATransform3DIsIdentity(la.transform3D) == YES) {
+    BOOL intersectsVisible = CGRectIntersectsRect(visibleBounds, frame);
+    if (intersectsDisplay == NO && intersectsPreload == NO && intersectsVisible == NO && CATransform3DIsIdentity(la.transform3D) == YES) {
       // Questionable why the element would be included here, but it doesn't belong.
       continue;
     }
@@ -90,10 +95,14 @@ typedef struct ASRangeGeometry ASRangeGeometry;
     if (intersectsPreload) {
       [preload addObject:indexPath];
     }
+    if (intersectsVisible) {
+      [visible addObject:indexPath];
+    }
   }
 
   *displaySet = display;
   *preloadSet = preload;
+  *visibleSet = visible;
   return;
 }
 

@@ -651,15 +651,12 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (NSArray<ASCellNode *> *)visibleNodes
 {
-  NSArray *indexPaths = [self visibleNodeIndexPathsForRangeController:_rangeController];
+  NSArray *indexPaths = [self indexPathsForVisibleRows];
   
   NSMutableArray<ASCellNode *> *visibleNodes = [NSMutableArray array];
   for (NSIndexPath *indexPath in indexPaths) {
     ASCellNode *node = [self nodeForRowAtIndexPath:indexPath];
-    if (node) {
-      // It is possible for UITableView to return indexPaths before the node is completed.
-      [visibleNodes addObject:node];
-    }
+    [visibleNodes addObject:node];
   }
   
   return visibleNodes;
@@ -1366,54 +1363,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return _rangeController;
 }
 
-- (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
-{
-  ASDisplayNodeAssertMainThread();
-  
-  CGRect bounds = self.bounds;
-  // Calling indexPathsForVisibleRows will trigger UIKit to call reloadData if it never has, which can result
-  // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
-  if (CGRectIsEmpty(bounds)) {
-    return @[];
-  }
-
-  NSMutableArray *visibleIndexPaths = [self.indexPathsForVisibleRows mutableCopy];
-
-  [visibleIndexPaths sortUsingSelector:@selector(compare:)];
-
-  // In some cases (grouped-style tables with particular geometry) indexPathsForVisibleRows will return extra index paths.
-  // This is a very serious issue because we rely on the fact that any node that is marked Visible is hosted inside of a cell,
-  // or else we may not mark it invisible before the node is released. See testIssue2252.
-  // Calling indexPathForCell: and cellForRowAtIndexPath: are both pretty expensive – this is the quickest approach we have.
-  // It would be possible to cache this NSPredicate as an ivar, but that would require unsafeifying self and calling @c bounds
-  // for each item. Since the performance cost is pretty small, prefer simplicity.
-  if (self.style == UITableViewStyleGrouped && visibleIndexPaths.count != self.visibleCells.count) {
-    [visibleIndexPaths filterUsingPredicate:[NSPredicate predicateWithBlock:^BOOL(NSIndexPath *indexPath, NSDictionary<NSString *,id> * _Nullable bindings) {
-      return CGRectIntersectsRect(bounds, [self rectForRowAtIndexPath:indexPath]);
-    }]];
-  }
-
-  NSIndexPath *pendingVisibleIndexPath = _pendingVisibleIndexPath;
-  if (pendingVisibleIndexPath == nil) {
-    return visibleIndexPaths;
-  }
-
-  BOOL isPendingIndexPathVisible = (NSNotFound != [visibleIndexPaths indexOfObject:pendingVisibleIndexPath inSortedRange:NSMakeRange(0, visibleIndexPaths.count) options:kNilOptions usingComparator:^(id  _Nonnull obj1, id  _Nonnull obj2) {
-    return [obj1 compare:obj2];
-  }]);
-  
-  if (isPendingIndexPathVisible) {
-    _pendingVisibleIndexPath = nil; // once it has shown up in visibleIndexPaths, we can stop tracking it
-  } else if ([self isIndexPath:visibleIndexPaths.firstObject immediateSuccessorOfIndexPath:pendingVisibleIndexPath]) {
-    [visibleIndexPaths insertObject:pendingVisibleIndexPath atIndex:0];
-  } else if ([self isIndexPath:pendingVisibleIndexPath immediateSuccessorOfIndexPath:visibleIndexPaths.lastObject]) {
-    [visibleIndexPaths addObject:pendingVisibleIndexPath];
-  } else {
-    _pendingVisibleIndexPath = nil; // not contiguous, ignore.
-  }
-  return visibleIndexPaths;
-}
-
 - (ASScrollDirection)scrollDirectionForRangeController:(ASRangeController *)rangeController
 {
   return self.scrollDirection;
@@ -1823,31 +1772,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     }
   }
   return 0;
-}
-
-/// @note This should be a UIKit index path.
-- (BOOL)isIndexPath:(NSIndexPath *)indexPath immediateSuccessorOfIndexPath:(NSIndexPath *)anchor
-{
-  if (!anchor || !indexPath) {
-    return NO;
-  }
-  if (indexPath.section == anchor.section) {
-    return (indexPath.row == anchor.row+1); // assumes that indexes are valid
-    
-  } else if (indexPath.section > anchor.section && indexPath.row == 0) {
-    if (anchor.row != [self numberOfRowsInSection:anchor.section] -1) {
-      return NO;  // anchor is not at the end of the section
-    }
-    
-    NSInteger nextSection = anchor.section+1;
-    while([self numberOfRowsInSection:nextSection] == 0) {
-      ++nextSection;
-    }
-    
-    return indexPath.section == nextSection;
-  }
-  
-  return NO;
 }
 
 #pragma mark - _ASDisplayView behavior substitutions
