@@ -34,7 +34,6 @@
 {
   BOOL _rangeIsValid;
   BOOL _needsRangeUpdate;
-  BOOL _layoutControllerImplementsSetViewportSize;
   NSSet<NSIndexPath *> *_allPreviousIndexPaths;
   ASWeakSet<ASCellNode *> *_visibleNodes;
   ASLayoutRangeMode _currentRangeMode;
@@ -164,7 +163,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 - (void)setLayoutController:(id<ASLayoutController>)layoutController
 {
   _layoutController = layoutController;
-  _layoutControllerImplementsSetViewportSize = [layoutController respondsToSelector:@selector(setViewportSize:)];
   if (layoutController && _dataSource) {
     [self updateIfNeeded];
   }
@@ -226,10 +224,6 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
     scrollDirection = _previousScrollDirection;
   }
   _previousScrollDirection = scrollDirection;
-
-  if (_layoutControllerImplementsSetViewportSize) {
-    [_layoutController setViewportSize:[_dataSource viewportSizeForRangeController:self]];
-  }
   
   ASInterfaceState selfInterfaceState = [self interfaceState];
   ASLayoutRangeMode rangeMode = _currentRangeMode;

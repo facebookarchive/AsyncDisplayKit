@@ -40,9 +40,6 @@ ASDISPLAYNODE_EXTERN_C_END
 
 @optional
 
-- (void)setViewportSize:(CGSize)viewportSize;
-- (CGSize)viewportSize;
-
 @end
 
 NS_ASSUME_NONNULL_END
