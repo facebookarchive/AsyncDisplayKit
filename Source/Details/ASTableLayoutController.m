@@ -48,7 +48,7 @@
     return [NSSet set];
   }
 
-  CGSize viewportSize = [self viewportSize];
+  CGSize viewportSize = _tableView.bounds.size;
 
   ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
 

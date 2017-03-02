@@ -85,7 +85,6 @@ extern CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTu
 
 @interface ASAbstractLayoutController () {
   std::vector<std::vector<ASRangeTuningParameters>> _tuningParameters;
-  CGSize _viewportSize;
 }
 @end
 
@@ -171,16 +170,6 @@ extern CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTu
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
-}
-
-- (void)setViewportSize:(CGSize)viewportSize
-{
-  _viewportSize = viewportSize;
-}
-
-- (CGSize)viewportSize
-{
-  return _viewportSize;
 }
 
 @end
