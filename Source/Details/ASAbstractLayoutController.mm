@@ -173,4 +173,9 @@ extern CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTu
   return nil;
 }
 
+- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet *__autoreleasing  _Nullable *)displaySet preloadSet:(NSSet *__autoreleasing  _Nullable *)preloadSet
+{
+  ASDisplayNodeAssertNotSupported();
+}
+
 @end
