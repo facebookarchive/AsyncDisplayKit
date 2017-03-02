@@ -64,6 +64,17 @@
   return indexPaths;
 }
 
+- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet **)displaySet preloadSet:(NSSet **)preloadSet
+{
+  if (displaySet == NULL || preloadSet == NULL) {
+    return;
+  }
+
+  *displaySet = [self indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypeDisplay];
+  *preloadSet = [self indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypePreload];
+  return;
+}
+
 #pragma mark - Utility
 
 - (NSIndexPath *)findIndexPathAtDistance:(CGFloat)distance fromIndexPath:(NSIndexPath *)start

@@ -53,6 +53,50 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   return [self indexPathsForItemsWithinRangeBounds:rangeBounds];
 }
 
+- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet **)displaySet preloadSet:(NSSet **)preloadSet
+{
+  if (displaySet == NULL || preloadSet == NULL) {
+    return;
+  }
+  
+  ASRangeTuningParameters displayParams = [self tuningParametersForRangeMode:rangeMode rangeType:ASLayoutRangeTypeDisplay];
+  ASRangeTuningParameters preloadParams = [self tuningParametersForRangeMode:rangeMode rangeType:ASLayoutRangeTypePreload];
+  CGRect displayBounds = [self rangeBoundsWithScrollDirection:scrollDirection rangeTuningParameters:displayParams];
+  CGRect preloadBounds = [self rangeBoundsWithScrollDirection:scrollDirection rangeTuningParameters:preloadParams];
+  
+  CGRect unionBounds = CGRectUnion(displayBounds, preloadBounds);
+  NSArray *layoutAttributes = [_collectionViewLayout layoutAttributesForElementsInRect:unionBounds];
+
+  NSMutableSet *display = [NSMutableSet setWithCapacity:layoutAttributes.count];
+  NSMutableSet *preload = [NSMutableSet setWithCapacity:layoutAttributes.count];
+
+  for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
+    // Manually filter out elements that don't intersect the range bounds.
+    // See comment in indexPathsForItemsWithinRangeBounds:
+    // This is re-implemented here so that the iteration over layoutAttributes can be done once to check both ranges.
+    CGRect frame = la.frame;
+    BOOL intersectsDisplay = CGRectIntersectsRect(displayBounds, frame);
+    BOOL intersectsPreload = CGRectIntersectsRect(preloadBounds, frame);
+    if (intersectsDisplay == NO && intersectsPreload == NO && CATransform3DIsIdentity(la.transform3D) == YES) {
+      // Questionable why the element would be included here, but it doesn't belong.
+      continue;
+    }
+    
+    // Avoid excessive retains and releases, as well as property calls. We know the indexPath is kept alive by la.
+    __unsafe_unretained NSIndexPath *indexPath = la.indexPath;
+    if (intersectsDisplay) {
+      [display addObject:indexPath];
+    }
+    if (intersectsPreload) {
+      [preload addObject:indexPath];
+    }
+  }
+
+  *displaySet = display;
+  *preloadSet = preload;
+  return;
+}
+
 - (NSSet *)indexPathsForItemsWithinRangeBounds:(CGRect)rangeBounds
 {
   NSArray *layoutAttributes = [_collectionViewLayout layoutAttributesForElementsInRect:rangeBounds];
