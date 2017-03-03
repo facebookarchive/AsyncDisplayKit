@@ -316,12 +316,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (instancetype)initWithViewClass:(Class)viewClass
 {
-  if (!(self = [super init]))
+  if (!(self = [self init]))
     return nil;
 
   ASDisplayNodeAssert([viewClass isSubclassOfClass:[UIView class]], @"should initialize with a subclass of UIView");
 
-  [self _initializeInstance];
   _viewClass = viewClass;
   _flags.synchronous = ![viewClass isSubclassOfClass:[_ASDisplayView class]];
 
@@ -330,12 +329,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (instancetype)initWithLayerClass:(Class)layerClass
 {
-  if (!(self = [super init]))
+  if (!(self = [self init]))
     return nil;
 
   ASDisplayNodeAssert([layerClass isSubclassOfClass:[CALayer class]], @"should initialize with a subclass of CALayer");
 
-  [self _initializeInstance];
   _layerClass = layerClass;
   _flags.synchronous = ![layerClass isSubclassOfClass:[_ASDisplayLayer class]];
   _flags.layerBacked = YES;

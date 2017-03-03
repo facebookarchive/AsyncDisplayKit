@@ -64,7 +64,7 @@
 
 - (instancetype)init
 {
-  return [super initWithViewBlock:^UIView *{ return [[ASScrollView alloc] init]; }];
+  return [super initWithViewBlock:^UIView *{ return [[ASScrollView alloc] init]; } didLoadBlock:nil];
 }
 
 - (ASLayout *)calculateLayoutThatFits:(ASSizeRange)constrainedSize
