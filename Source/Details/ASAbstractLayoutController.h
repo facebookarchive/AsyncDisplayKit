@@ -29,9 +29,9 @@ ASDISPLAYNODE_EXTERN_C_END
 
 @interface ASAbstractLayoutController (Unavailable)
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType __unavailable;
+- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType NS_UNAVAILABLE;
 
-- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet * _Nullable * _Nullable)displaySet preloadSet:(NSSet * _Nullable * _Nullable)preloadSet __unavailable;
+- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet * _Nullable * _Nullable)displaySet preloadSet:(NSSet * _Nullable * _Nullable)preloadSet NS_UNAVAILABLE;
 
 @end
 

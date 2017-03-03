@@ -143,10 +143,4 @@ NS_ASSUME_NONNULL_BEGIN
 
 @end
 
-@interface ASVideoNode (Unavailable)
-
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock __unavailable;
-
-@end
-
 NS_ASSUME_NONNULL_END

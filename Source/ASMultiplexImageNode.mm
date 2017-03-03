@@ -149,7 +149,8 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 @implementation ASMultiplexImageNode
 
-#pragma mark - Getting Started / Tearing Down
+#pragma mark - Lifecycle
+
 - (instancetype)initWithCache:(id<ASImageCacheProtocol>)cache downloader:(id<ASImageDownloaderProtocol>)downloader
 {
   if (!(self = [super init]))
@@ -177,6 +178,18 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 #else
   return [self initWithCache:nil downloader:[ASBasicImageDownloader sharedImageDownloader]];
 #endif
+}
+
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock
+{
+  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [self init];
+}
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock
+{
+  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
+  return [self init];
 }
 
 - (void)dealloc

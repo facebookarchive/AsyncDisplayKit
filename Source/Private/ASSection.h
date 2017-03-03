@@ -19,7 +19,7 @@
 @property (nonatomic, assign, readonly) NSInteger sectionID;
 @property (nonatomic, strong, nullable, readonly) id<ASSectionContext> context;
 
-- (nullable instancetype)init __unavailable;
+- (nullable instancetype)init NS_UNAVAILABLE;
 - (nullable instancetype)initWithSectionID:(NSInteger)sectionID context:(nullable id<ASSectionContext>)context NS_DESIGNATED_INITIALIZER;
 
 @end

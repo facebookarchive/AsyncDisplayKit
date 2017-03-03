@@ -93,7 +93,7 @@ AS_SUBCLASSING_RESTRICTED
 
 @interface ASLayoutTransition (Unavailable)
 
-- (instancetype)init __unavailable;
+- (instancetype)init NS_UNAVAILABLE;
 
 @end
 

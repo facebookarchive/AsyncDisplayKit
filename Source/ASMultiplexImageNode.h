@@ -134,6 +134,15 @@ typedef NS_ENUM(NSUInteger, ASMultiplexImageNodeErrorCode) {
 #endif
 @end
 
+#pragma mark - 
+
+@interface ASMultiplexImageNode (Unavailable)
+
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock NS_UNAVAILABLE;
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock NS_UNAVAILABLE;
+
+@end
+
 
 #pragma mark -
 /**
