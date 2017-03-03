@@ -968,7 +968,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
   if (_ASCollectionViewCell *asCell = ASDynamicCast(cell, _ASCollectionViewCell)) {
     asCell.node = node;
-    asCell.selectedBackgroundView = node.selectedBackgroundView;
     [_rangeController configureContentView:cell.contentView forCellNode:node];
   }
   
@@ -990,6 +989,10 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   
   ASCellNode *cellNode = [cell node];
   cellNode.scrollView = collectionView;
+
+  // Update the selected background view in collectionView:willDisplayCell:forItemAtIndexPath: otherwise it could be to
+  // early e.g. if the selectedBackgroundView was set in didLoad()
+  cell.selectedBackgroundView = cellNode.selectedBackgroundView;
   
   // Under iOS 10+, cells may be removed/re-added to the collection view without
   // receiving prepareForReuse/applyLayoutAttributes, as an optimization for e.g.
