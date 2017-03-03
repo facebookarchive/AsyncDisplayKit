@@ -125,7 +125,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @return An ASDisplayNode instance whose view will be a subclass that enables asynchronous rendering, and passes 
  * through -layout and touch handling methods.
  */
-- (instancetype)init NS_DESIGNATED_INITIALIZER;
+- (instancetype)init;
 
 
 /**
@@ -147,7 +147,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @return An ASDisplayNode instance that loads its view with the given block that is guaranteed to run on the main
  * queue. The view will render synchronously and -layout and touch handling methods on the node will not be called.
  */
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
 
 /**
  * @abstract Alternative initializer with a block to create the backing layer.
@@ -168,7 +168,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @return An ASDisplayNode instance that loads its layer with the given block that is guaranteed to run on the main
  * queue. The layer will render synchronously and -layout and touch handling methods on the node will not be called.
  */
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
 
 /**
  * @abstract Add a block of work to be performed on the main thread when the node's view or layer is loaded. Thread safe.

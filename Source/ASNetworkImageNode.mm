@@ -102,18 +102,6 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 #endif
 }
 
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock
-{
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
-  return [self init];
-}
-
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock
-{
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
-  return [self init];
-}
-
 - (void)dealloc
 {
   [self _cancelImageDownload];

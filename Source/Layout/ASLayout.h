@@ -144,7 +144,7 @@ ASDISPLAYNODE_EXTERN_C_END
 
 @interface ASLayout (Unavailable)
 
-- (instancetype)init NS_UNAVAILABLE;
+- (instancetype)init __unavailable;
 
 @end
 

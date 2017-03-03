@@ -21,6 +21,8 @@ NS_ASSUME_NONNULL_BEGIN
 AS_SUBCLASSING_RESTRICTED
 @interface ASMutableElementMap : NSObject <NSCopying>
 
+- (instancetype)init __unavailable;
+
 - (instancetype)initWithSections:(NSArray<ASSection *> *)sections items:(ASCollectionElementTwoDimensionalArray *)items supplementaryElements:(ASSupplementaryElementDictionary *)supplementaryElements;
 
 - (void)insertSection:(ASSection *)section atIndex:(NSInteger)index;
@@ -45,12 +47,6 @@ AS_SUBCLASSING_RESTRICTED
 @end
 
 @interface ASElementMap (MutableCopying) <NSMutableCopying>
-@end
-
-@interface ASMutableElementMap (Unavailable)
-
-- (instancetype)init NS_UNAVAILABLE;
-
 @end
 
 NS_ASSUME_NONNULL_END
