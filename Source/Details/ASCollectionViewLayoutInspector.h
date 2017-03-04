@@ -43,6 +43,16 @@ extern ASSizeRange NodeConstrainedSizeForScrollDirection(ASCollectionView *colle
 - (NSUInteger)collectionView:(ASCollectionView *)collectionView supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section;
 
 /**
+ * TODO
+ */
+- (void)collectionView:(ASCollectionView *)collectionView didInvalidateSizeOfItemAtIndexPath:(NSIndexPath *)indexPath;
+
+/**
+ * TODO
+ */
+- (void)collectionView:(ASCollectionView *)collectionView didInvalidateSizeOfSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
+
+/**
  * Allow the inspector to respond to delegate changes.
  *
  * @discussion A great time to update perform selector caches!

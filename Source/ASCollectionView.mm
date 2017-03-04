@@ -33,6 +33,7 @@
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 #import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
 #import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
+#import <AsyncDisplayKit/ASLayout.h>
 
 /**
  * A macro to get self.collectionNode and assign it to a local variable, or return
@@ -96,8 +97,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   CGPoint _deceleratingVelocity;
 
   BOOL _zeroContentInsets;
-  
-  ASCollectionViewInvalidationStyle _nextLayoutInvalidationStyle;
   
   /**
    * Our layer, retained. Under iOS < 9, when collection views are removed from the hierarchy,
@@ -211,6 +210,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     unsigned int supplementaryNodesOfKindInSection:1;
     unsigned int didChangeCollectionViewDataSource:1;
     unsigned int didChangeCollectionViewDelegate:1;
+    unsigned int didInvalidateSizeForItem:1;
+    unsigned int didInvalidateSizeForSupplementary:1;
   } _layoutInspectorFlags;
 }
 
@@ -563,6 +564,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   _layoutInspectorFlags.supplementaryNodesOfKindInSection = [_layoutInspector respondsToSelector:@selector(collectionView:supplementaryNodesOfKind:inSection:)];
   _layoutInspectorFlags.didChangeCollectionViewDataSource = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDataSource:)];
   _layoutInspectorFlags.didChangeCollectionViewDelegate = [_layoutInspector respondsToSelector:@selector(didChangeCollectionViewDelegate:)];
+  _layoutInspectorFlags.didInvalidateSizeForItem = [_layoutInspector respondsToSelector:@selector(collectionView:didInvalidateSizeOfItemAtIndexPath:)];
+  _layoutInspectorFlags.didInvalidateSizeForSupplementary = [_layoutInspector respondsToSelector:@selector(collectionView:didInvalidateSizeOfSupplementaryNodeOfKind:atIndexPath:)];
 
   if (_layoutInspectorFlags.didChangeCollectionViewDataSource) {
     [_layoutInspector didChangeCollectionViewDataSource:self.asyncDataSource];
@@ -895,7 +898,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
       return [(id)_asyncDelegate collectionView:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
     }
   }
-  return cell.calculatedSize;
+  return [cell layoutThatFits:[self dataController:_dataController constrainedSizeForNodeAtIndexPath:indexPath]].size;
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)layout referenceSizeForHeaderInSection:(NSInteger)section
@@ -1351,29 +1354,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (void)layoutSubviews
 {
-  if (_cellsForLayoutUpdates.count > 0) {
-    NSMutableArray<ASCellNode *> *nodesSizesChanged = [NSMutableArray array];
-    [_dataController relayoutNodes:_cellsForLayoutUpdates nodesSizeChanged:nodesSizesChanged];
-    [self nodesDidRelayout:nodesSizesChanged];
-  }
-  [_cellsForLayoutUpdates removeAllObjects];
-
-  // Flush any pending invalidation action if needed.
-  ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
-  _nextLayoutInvalidationStyle = ASCollectionViewInvalidationStyleNone;
-  switch (invalidationStyle) {
-    case ASCollectionViewInvalidationStyleWithAnimation:
-      if (0 == _superBatchUpdateCount) {
-        [self _superPerformBatchUpdates:^{ } completion:nil];
-      }
-      break;
-    case ASCollectionViewInvalidationStyleWithoutAnimation:
-      [self.collectionViewLayout invalidateLayout];
-      break;
-    default:
-      break;
-  }
-  
   // To ensure _maxSizeForNodesConstrainedSize is up-to-date for every usage, this call to super must be done last
   [super layoutSubviews];
     
@@ -1816,8 +1796,38 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (void)nodeDidInvalidateSize:(ASCellNode *)node
 {
-  [_cellsForLayoutUpdates addObject:node];
-  [self setNeedsLayout];
+  BOOL nodePreventsAnimation = ASDisplayNodeFindFirstNode(node, ^BOOL(ASDisplayNode * _Nonnull node) {
+    return (node.shouldAnimateSizeChanges == NO);
+  });
+
+  dispatch_block_t updateBlock = ^{
+    // If they don't respond to the appropriate size invalidation call,
+    // just invalidate layout on them.
+    BOOL shouldInvalidateLayout = YES;
+    ASCollectionElement *element = node.collectionElement;
+    NSIndexPath *indexPath = [_dataController.visibleMap indexPathForElement:element];
+    if (element.supplementaryElementKind != nil) {
+      if (_layoutInspectorFlags.didInvalidateSizeForSupplementary) {
+        [_layoutInspector collectionView:self didInvalidateSizeOfSupplementaryNodeOfKind:element.supplementaryElementKind atIndexPath:indexPath];
+        shouldInvalidateLayout = NO;
+      }
+    } else {
+      if (_layoutInspectorFlags.didInvalidateSizeForItem) {
+        [_layoutInspector collectionView:self didInvalidateSizeOfItemAtIndexPath:indexPath];
+        shouldInvalidateLayout = NO;
+      }
+    }
+
+    if (shouldInvalidateLayout) {
+      [self.collectionViewLayout invalidateLayout];
+    }
+  };
+
+  if (nodePreventsAnimation) {
+    updateBlock();
+  } else {
+    [UIView animateWithDuration:0.3 animations:updateBlock];
+  }
 }
 
 - (void)nodeDidRelayout:(ASCellNode *)node sizeChanged:(BOOL)sizeChanged
@@ -1847,34 +1857,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
   
   [_layoutFacilitator collectionViewWillEditCellsAtIndexPaths:uikitIndexPaths batched:NO];
-  
-  ASCollectionViewInvalidationStyle invalidationStyle = _nextLayoutInvalidationStyle;
-  for (ASCellNode *node in nodes) {
-    if (invalidationStyle == ASCollectionViewInvalidationStyleNone) {
-      // We nodesDidRelayout also while we are in layoutSubviews. This should be no problem as CA will ignore this
-      // call while be in a layout pass
-      [self setNeedsLayout];
-      invalidationStyle = ASCollectionViewInvalidationStyleWithAnimation;
-    }
-    
-    // If we think we're going to animate, check if this node will prevent it.
-    if (invalidationStyle == ASCollectionViewInvalidationStyleWithAnimation) {
-      // TODO: Incorporate `shouldAnimateSizeChanges` into ASEnvironmentState for performance benefit.
-      static dispatch_once_t onceToken;
-      static BOOL (^shouldNotAnimateBlock)(ASDisplayNode *);
-      dispatch_once(&onceToken, ^{
-        shouldNotAnimateBlock = ^BOOL(ASDisplayNode * _Nonnull node) {
-          return (node.shouldAnimateSizeChanges == NO);
-        };
-      });
-      if (ASDisplayNodeFindFirstNode(node, shouldNotAnimateBlock) != nil) {
-        // One single non-animated node causes the whole layout update to be non-animated
-        invalidationStyle = ASCollectionViewInvalidationStyleWithoutAnimation;
-        break;
-      }
-    }
-  }
-  _nextLayoutInvalidationStyle = invalidationStyle;
 }
 
 #pragma mark - _ASDisplayView behavior substitutions
@@ -1923,32 +1905,32 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
  */
 - (void)layer:(CALayer *)layer didChangeBoundsWithOldValue:(CGRect)oldBounds newValue:(CGRect)newBounds
 {
-  if (self.collectionViewLayout == nil) {
-    return;
-  }
-  CGSize lastUsedSize = _lastBoundsSizeUsedForMeasuringNodes;
-  if (CGSizeEqualToSize(lastUsedSize, newBounds.size)) {
-    return;
-  }
-  _lastBoundsSizeUsedForMeasuringNodes = newBounds.size;
-
-  // Laying out all nodes is expensive.
-  // We only need to do this if the bounds changed in the non-scrollable direction.
-  // If, for example, a vertical flow layout has its height changed due to a status bar
-  // appearance update, we do not need to relayout all nodes.
-  // For a more permanent fix to the unsafety mentioned above, see https://github.com/facebook/AsyncDisplayKit/pull/2182
-  ASScrollDirection scrollDirection = self.scrollableDirections;
-  BOOL fixedVertically = (ASScrollDirectionContainsVerticalDirection(scrollDirection) == NO);
-  BOOL fixedHorizontally = (ASScrollDirectionContainsHorizontalDirection(scrollDirection) == NO);
-
-  BOOL changedInNonScrollingDirection = (fixedHorizontally && newBounds.size.width != lastUsedSize.width) || (fixedVertically && newBounds.size.height != lastUsedSize.height);
-
-  if (changedInNonScrollingDirection) {
-    [_dataController relayoutAllNodes];
-    [_dataController waitUntilAllUpdatesAreCommitted];
-    // We need to ensure the size requery is done before we update our layout.
-    [self.collectionViewLayout invalidateLayout];
-  }
+//  if (self.collectionViewLayout == nil) {
+//    return;
+//  }
+//  CGSize lastUsedSize = _lastBoundsSizeUsedForMeasuringNodes;
+//  if (CGSizeEqualToSize(lastUsedSize, newBounds.size)) {
+//    return;
+//  }
+//  _lastBoundsSizeUsedForMeasuringNodes = newBounds.size;
+//
+//  // Laying out all nodes is expensive.
+//  // We only need to do this if the bounds changed in the non-scrollable direction.
+//  // If, for example, a vertical flow layout has its height changed due to a status bar
+//  // appearance update, we do not need to relayout all nodes.
+//  // For a more permanent fix to the unsafety mentioned above, see https://github.com/facebook/AsyncDisplayKit/pull/2182
+//  ASScrollDirection scrollDirection = self.scrollableDirections;
+//  BOOL fixedVertically = (ASScrollDirectionContainsVerticalDirection(scrollDirection) == NO);
+//  BOOL fixedHorizontally = (ASScrollDirectionContainsHorizontalDirection(scrollDirection) == NO);
+//
+//  BOOL changedInNonScrollingDirection = (fixedHorizontally && newBounds.size.width != lastUsedSize.width) || (fixedVertically && newBounds.size.height != lastUsedSize.height);
+//
+//  if (changedInNonScrollingDirection) {
+//    [_dataController relayoutAllNodes];
+//    [_dataController waitUntilAllUpdatesAreCommitted];
+//    // We need to ensure the size requery is done before we update our layout.
+//    [self.collectionViewLayout invalidateLayout];
+//  }
 }
 
 #pragma mark - UICollectionView dead-end intercepts
