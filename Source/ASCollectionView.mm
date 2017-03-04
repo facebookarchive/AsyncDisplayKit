@@ -628,7 +628,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   ASDisplayNodeAssertMainThread();
 
   ASCollectionElement *e = [_dataController.visibleMap elementForItemAtIndexPath:indexPath];
-  return [self calculatedSizeForElement:e];
+  return [self sizeForElement:e];
 }
 
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
