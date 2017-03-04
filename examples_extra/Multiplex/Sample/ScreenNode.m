@@ -124,10 +124,10 @@
 #pragma mark -
 #pragma mark ASImageDownloaderProtocol.
 
-- (id)downloadImageWithURL:(NSURL *)URL
-             callbackQueue:(dispatch_queue_t)callbackQueue
-     downloadProgressBlock:(void (^)(CGFloat progress))downloadProgressBlock
-                completion:(void (^)(CGImageRef image, NSError *error))completion
+- (nullable id)downloadImageWithURL:(NSURL *)URL
+                      callbackQueue:(dispatch_queue_t)callbackQueue
+                   downloadProgress:(nullable ASImageDownloaderProgress)downloadProgressBlock
+                         completion:(ASImageDownloaderCompletion)completion
 {
   // if no callback queue is supplied, run on the main thread
   if (callbackQueue == nil) {
@@ -146,7 +146,7 @@
       }
       
       if (completion) {
-        completion([[UIImage imageWithData:data] CGImage], connectionError);
+        completion([UIImage imageWithData:data], connectionError, nil);
       }
     });
   };
