@@ -670,7 +670,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (void)_relayoutAllNodes
 {
   ASDisplayNodeAssertMainThread();
-  [_visibleMap enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
+  for (ASCollectionElement *element in _visibleMap) {
+    NSIndexPath *indexPath = [_visibleMap indexPathForElement:element];
     NSString *kind = element.supplementaryElementKind ?: ASDataControllerRowNodeKind;
     ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
     if (ASSizeRangeHasSignificantArea(constrainedSize)) {
@@ -683,17 +684,17 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
         [self _layoutNode:node withConstrainedSize:constrainedSize];
       }
     }
-  }];
+  }
 }
 
 + (NSArray<ASCollectionElement *> *)unmeasuredElementsFromMap:(ASElementMap *)map
 {
   NSMutableArray<ASCollectionElement *> *unloadedContexts = [NSMutableArray array];
-  [map enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
+  for (ASCollectionElement *element in map) {
     if (element.nodeIfAllocated.calculatedLayout == nil) {
       [unloadedContexts addObject:element];
     }
-  }];
+  }
   return unloadedContexts;
 }
 

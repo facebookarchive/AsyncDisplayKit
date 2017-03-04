@@ -487,22 +487,22 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 // Skip the many method calls of the recursive operation if the top level cell node already has the right interfaceState.
 - (void)clearContents
 {
-  [[_dataSource elementMapForRangeController:self] enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
+  for (ASCollectionElement *element in [_dataSource elementMapForRangeController:self]) {
     ASCellNode *node = element.nodeIfAllocated;
     if (ASInterfaceStateIncludesDisplay(node.interfaceState)) {
       [node exitInterfaceState:ASInterfaceStateDisplay];
     }
-  }];
+  }
 }
 
 - (void)clearPreloadedData
 {
-  [[_dataSource elementMapForRangeController:self] enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
+  for (ASCollectionElement *element in [_dataSource elementMapForRangeController:self]) {
     ASCellNode *node = element.nodeIfAllocated;
     if (ASInterfaceStateIncludesPreload(node.interfaceState)) {
       [node exitInterfaceState:ASInterfaceStatePreload];
     }
-  }];
+  }
 }
 
 #pragma mark - Class Methods (Application Notification Handlers)
