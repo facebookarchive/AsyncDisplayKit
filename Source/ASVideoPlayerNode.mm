@@ -22,7 +22,7 @@
 
 static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
-@interface ASVideoPlayerNode() <ASVideoNodeDelegate>
+@interface ASVideoPlayerNode() <ASVideoNodeDelegate, ASVideoPlayerNodeDelegate>
 {
   __weak id<ASVideoPlayerNodeDelegate> _delegate;
 
@@ -53,11 +53,13 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateVideoPlayerNodeDidRecoverFromStall:1;
   } _delegateFlags;
   
-  NSURL *_url;
-  AVAsset *_asset;
-  AVVideoComposition *_videoComposition;
-  AVAudioMix *_audioMix;
+  // The asset passed in the initializer will be assigned as pending asset. As soon as the first
+  // preload state happened all further asset handling is made by using the asset of the backing
+  // video node
+  AVAsset *_pendingAsset;
   
+  // The backing video node. Ideally this is the source of truth and the video player node should
+  // not handle anything related to asset management
   ASVideoNode *_videoNode;
 
   NSArray *_neededDefaultControls;
@@ -72,7 +74,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   ASStackLayoutSpec *_controlFlexGrowSpacerSpec;
   ASDisplayNode *_spinnerNode;
 
-  BOOL _loadAssetWhenNodeBecomesVisible;
   BOOL _isSeeking;
   CMTime _duration;
 
@@ -95,121 +96,127 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 @dynamic placeholderImageURL;
 
+#pragma mark - Lifecycle
+
 - (instancetype)init
 {
   if (!(self = [super init])) {
     return nil;
   }
 
-  [self _init];
+  [self _initControlsAndVideoNode];
 
-  return self;
-}
-
-- (instancetype)initWithUrl:(NSURL*)url
-{
-  if (!(self = [super init])) {
-    return nil;
-  }
-  
-  _url = url;
-  _asset = [AVAsset assetWithURL:_url];
-  _loadAssetWhenNodeBecomesVisible = YES;
-  
-  [self _init];
-  
   return self;
 }
 
 - (instancetype)initWithAsset:(AVAsset *)asset
 {
-  if (!(self = [super init])) {
+  if (!(self = [self init])) {
     return nil;
   }
+  
+  _pendingAsset = asset;
+  
+  return self;
+}
 
-  _asset = asset;
-  _loadAssetWhenNodeBecomesVisible = YES;
+- (instancetype)initWithURL:(NSURL *)URL
+{
+  return [self initWithAsset:[AVAsset assetWithURL:URL]];
+}
 
-  [self _init];
+- (instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix
+{
+  if (!(self = [self initWithAsset:asset])) {
+    return nil;
+  }
+  
+  _videoNode.videoComposition = videoComposition;
+  _videoNode.audioMix = audioMix;
 
   return self;
 }
 
--(instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix
+- (void)_initControlsAndVideoNode
 {
-  if (!(self = [super init])) {
-    return nil;
-  }
+  _defaultControlsColor = [UIColor whiteColor];
+  _cachedControls = [[NSMutableDictionary alloc] init];
+  
+  _videoNode = [[ASVideoNode alloc] init];
+  _videoNode.delegate = self;
+  [self addSubnode:_videoNode];
+}
 
-  _asset = asset;
-  _videoComposition = videoComposition;
-  _audioMix = audioMix;
-  _loadAssetWhenNodeBecomesVisible = YES;
+#pragma mark Deprecated
 
-  [self _init];
-
-  return self;
+- (instancetype)initWithUrl:(NSURL *)url
+{
+  return [self initWithURL:url];
 }
 
 - (instancetype)initWithUrl:(NSURL *)url loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible
 {
-  if (!(self = [super init])) {
-    return nil;
-  }
-
-  _url = url;
-  _asset = [AVAsset assetWithURL:_url];
-  _loadAssetWhenNodeBecomesVisible = loadAssetWhenNodeBecomesVisible;
-
-  [self _init];
-
-  return self;
+  return [self initWithURL:url];
 }
 
 - (instancetype)initWithAsset:(AVAsset *)asset loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible
 {
-  if (!(self = [super init])) {
-    return nil;
-  }
-
-  _asset = asset;
-  _loadAssetWhenNodeBecomesVisible = loadAssetWhenNodeBecomesVisible;
-
-  [self _init];
-
-  return self;
+  return [self initWithAsset:asset];
 }
 
--(instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible
+- (instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible
 {
-  if (!(self = [super init])) {
-    return nil;
-  }
-
-  _asset = asset;
-  _videoComposition = videoComposition;
-  _audioMix = audioMix;
-  _loadAssetWhenNodeBecomesVisible = loadAssetWhenNodeBecomesVisible;
-
-  [self _init];
-
-  return self;
+  return [self initWithAsset:asset videoComposition:videoComposition audioMix:audioMix];
 }
 
-- (void)_init
+#pragma mark - Setter / Getter
+
+- (void)setAssetURL:(NSURL *)assetURL
 {
-  _defaultControlsColor = [UIColor whiteColor];
-  _cachedControls = [[NSMutableDictionary alloc] init];
-
-  _videoNode = [[ASVideoNode alloc] init];
-  _videoNode.delegate = self;
-  if (_loadAssetWhenNodeBecomesVisible == NO) {
-    _videoNode.asset = _asset;
-    _videoNode.videoComposition = _videoComposition;
-    _videoNode.audioMix = _audioMix;
-  }
-  [self addSubnode:_videoNode];
+  // Call setter to 
+  self.asset = [AVAsset assetWithURL:assetURL];
 }
+
+- (NSURL *)assetURL
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  if ([_pendingAsset isKindOfClass:AVURLAsset.class]) {
+    return ((AVURLAsset *)_pendingAsset).URL;
+  } else {
+    return _videoNode.assetURL;
+  }
+}
+
+- (void)setAsset:(AVAsset *)asset
+{
+  ASDisplayNodeAssertMainThread();
+
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  // Clean out pending asset
+  _pendingAsset = nil;
+  
+  // Set asset based on interface state
+  if ((ASInterfaceStateIncludesPreload(self.interfaceState))) {
+   _videoNode.asset = asset;
+  } else {
+    _pendingAsset = asset;
+  }
+}
+
+- (AVAsset *)asset
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  if (_pendingAsset != nil) {
+    return _pendingAsset;
+  } else {
+    return _videoNode.asset;
+  }
+}
+
+#pragma mark - ASDisplayNode
 
 - (void)didLoad
 {
@@ -220,38 +227,23 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
-- (void)didEnterVisibleState
+- (void)didEnterPreloadState
 {
-  [super didEnterVisibleState];
+  [super didEnterPreloadState];
   
   ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_loadAssetWhenNodeBecomesVisible) {
-    if (_asset != _videoNode.asset) {
-      _videoNode.asset = _asset;
-    }
-    if (_videoComposition != _videoNode.videoComposition) {
-      _videoNode.videoComposition = _videoComposition;
-    }
-    if (_audioMix != _videoNode.audioMix) {
-      _videoNode.audioMix = _audioMix;
-    }
-  }
-}
 
-- (NSArray *)createDefaultControlElementArray
-{
-  if (_delegateFlags.delegateNeededDefaultControls) {
-    return [_delegate videoPlayerNodeNeededDefaultControls:self];
+  // If we enter preload state we apply the pending asset to load to the video node so it can start and fetch the asset
+  if (_pendingAsset != nil && _videoNode.asset != _pendingAsset) {
+    _videoNode.asset = _pendingAsset;
+      
+    // Clear the pending asset in here to let be the video node the definitive source for the asset
+    _pendingAsset = nil;
   }
-
-  return @[ @(ASVideoPlayerNodeControlTypePlaybackButton),
-            @(ASVideoPlayerNodeControlTypeElapsedText),
-            @(ASVideoPlayerNodeControlTypeScrubber),
-            @(ASVideoPlayerNodeControlTypeDurationText) ];
 }
 
 #pragma mark - UI
+
 - (void)createControls
 {
   ASDN::MutexLocker l(__instanceLock__);
@@ -311,6 +303,18 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     ASDN::MutexLocker l(__instanceLock__);
     [self setNeedsLayout];
   });
+}
+
+- (NSArray *)createDefaultControlElementArray
+{
+  if (_delegateFlags.delegateNeededDefaultControls) {
+    return [_delegate videoPlayerNodeNeededDefaultControls:self];
+  }
+
+  return @[ @(ASVideoPlayerNodeControlTypePlaybackButton),
+            @(ASVideoPlayerNodeControlTypeElapsedText),
+            @(ASVideoPlayerNodeControlTypeScrubber),
+            @(ASVideoPlayerNodeControlTypeDurationText) ];
 }
 
 - (void)removeControls
