@@ -104,35 +104,6 @@
   return [self indexPathForElement:element];
 }
 
-- (void)enumerateUsingBlock:(void(^)(NSIndexPath *indexPath, ASCollectionElement *element, BOOL *stop))block
-{
-  __block BOOL stop = NO;
-
-  // Do items first
-  for (NSArray *section in _sectionsOfItems) {
-    for (ASCollectionElement *element in section) {
-      NSIndexPath *indexPath = [self indexPathForElement:element];
-      block(indexPath, element, &stop);
-      if (stop) {
-        return;
-      }
-    }
-  }
-
-  // Then supplementaries
-  [_supplementaryElements enumerateKeysAndObjectsUsingBlock:^(NSString * _Nonnull kind, NSDictionary<NSIndexPath *,ASCollectionElement *> * _Nonnull elementsOfKind, BOOL * _Nonnull stop0) {
-    [elementsOfKind enumerateKeysAndObjectsUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop1) {
-      block(indexPath, element, &stop);
-      if (stop) {
-        *stop1 = YES;
-      }
-    }];
-    if (stop) {
-      *stop0 = YES;
-    }
-  }];
-}
-
 #pragma mark - NSCopying
 
 - (id)copyWithZone:(NSZone *)zone
@@ -146,6 +117,13 @@
 - (id)mutableCopyWithZone:(NSZone *)zone
 {
   return [[ASMutableElementMap alloc] initWithSections:_sections items:_sectionsOfItems supplementaryElements:_supplementaryElements];
+}
+
+#pragma mark - NSFastEnumeration
+
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id  _Nullable __unsafe_unretained [])buffer count:(NSUInteger)len
+{
+  return [_elementToIndexPathMap countByEnumeratingWithState:state objects:buffer count:len];
 }
 
 @end
