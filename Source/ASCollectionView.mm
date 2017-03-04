@@ -33,6 +33,7 @@
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 #import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
 #import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
+#import <AsyncDisplayKit/ASLayout.h>
 
 /**
  * A macro to get self.collectionNode and assign it to a local variable, or return
@@ -606,9 +607,24 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   return _zeroContentInsets;
 }
 
+/// Uses latest size range from data source and -layoutThatFits:.
+- (CGSize)sizeForElement:(ASCollectionElement *)element
+{
+  NSString *supplementaryKind = element.supplementaryElementKind;
+  NSIndexPath *indexPath = [_dataController.visibleMap indexPathForElement:element];
+  ASSizeRange sizeRange;
+  if (supplementaryKind == nil) {
+    sizeRange = [self dataController:_dataController constrainedSizeForNodeAtIndexPath:indexPath];
+  } else {
+    sizeRange = [self dataController:_dataController constrainedSizeForSupplementaryNodeOfKind:supplementaryKind atIndexPath:indexPath];
+  }
+  return [element.node layoutThatFits:sizeRange].size;
+}
+
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [[self nodeForItemAtIndexPath:indexPath] calculatedSize];
+  ASCollectionElement *e = [_dataController.visibleMap elementForItemAtIndexPath:indexPath];
+  return [self calculatedSizeForElement:e];
 }
 
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -899,31 +915,36 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
       return [(id)_asyncDelegate collectionView:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
     }
   }
-  return cell.calculatedSize;
+  ASCollectionElement *e = [_dataController.visibleMap elementForItemAtIndexPath:indexPath];
+  return [self sizeForElement:e];
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)layout referenceSizeForHeaderInSection:(NSInteger)section
 {
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:section];
   ASCellNode *cell = [self supplementaryNodeForElementKind:UICollectionElementKindSectionHeader
-                                               atIndexPath:[NSIndexPath indexPathForItem:0 inSection:section]];
+                                               atIndexPath:indexPath];
   if (cell.shouldUseUIKitCell && _asyncDelegateFlags.interop) {
     if ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)]) {
       return [(id)_asyncDelegate collectionView:collectionView layout:layout referenceSizeForHeaderInSection:section];
     }
   }
-  return cell.calculatedSize;
+  ASCollectionElement *e = [_dataController.visibleMap supplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:indexPath];
+  return [self sizeForElement:e];
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)layout referenceSizeForFooterInSection:(NSInteger)section
 {
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:section];
   ASCellNode *cell = [self supplementaryNodeForElementKind:UICollectionElementKindSectionFooter
-                                               atIndexPath:[NSIndexPath indexPathForItem:0 inSection:section]];
+                                               atIndexPath:indexPath];
   if (cell.shouldUseUIKitCell && _asyncDelegateFlags.interop) {
     if ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)]) {
       return [(id)_asyncDelegate collectionView:collectionView layout:layout referenceSizeForFooterInSection:section];
     }
   }
-  return cell.calculatedSize;
+  ASCollectionElement *e = [_dataController.visibleMap supplementaryElementOfKind:UICollectionElementKindSectionFooter atIndexPath:indexPath];
+  return [self sizeForElement:e];
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -1918,6 +1939,15 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 #pragma mark ASCALayerExtendedDelegate
 
 /**
+ * TODO: This code was added when we used @c calculatedSize as the size for 
+ * items (e.g. collectionView:layout:sizeForItemAtIndexPath:) and so it
+ * was critical that we remeasured all nodes at this time.
+ *
+ * The assumption was that cv-bounds-size-change -> constrained-size-change, so
+ * this was the time when we get new constrained sizes for all items and remeasure
+ * them. However, the constrained sizes for items can be invalidated for many other
+ * reasons, hence why we never reuse the old constrained size anymore.
+ *
  * UICollectionView inadvertently triggers a -prepareLayout call to its layout object
  * between [super setFrame:] and [self layoutSubviews] during size changes. So we need
  * to get in there and re-measure our nodes before that -prepareLayout call.
