@@ -610,6 +610,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 /// Uses latest size range from data source and -layoutThatFits:.
 - (CGSize)sizeForElement:(ASCollectionElement *)element
 {
+  ASDisplayNodeAssertMainThread();
+
   NSString *supplementaryKind = element.supplementaryElementKind;
   NSIndexPath *indexPath = [_dataController.visibleMap indexPathForElement:element];
   ASSizeRange sizeRange;
@@ -623,6 +625,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
+  ASDisplayNodeAssertMainThread();
+
   ASCollectionElement *e = [_dataController.visibleMap elementForItemAtIndexPath:indexPath];
   return [self calculatedSizeForElement:e];
 }
@@ -909,6 +913,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
+  ASDisplayNodeAssertMainThread();
   ASCellNode *cell = [self nodeForItemAtIndexPath:indexPath];
   if (cell.shouldUseUIKitCell) {
     if ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)]) {
@@ -921,6 +926,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)layout referenceSizeForHeaderInSection:(NSInteger)section
 {
+  ASDisplayNodeAssertMainThread();
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:section];
   ASCellNode *cell = [self supplementaryNodeForElementKind:UICollectionElementKindSectionHeader
                                                atIndexPath:indexPath];
@@ -935,6 +941,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)layout referenceSizeForFooterInSection:(NSInteger)section
 {
+  ASDisplayNodeAssertMainThread();
   NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:section];
   ASCellNode *cell = [self supplementaryNodeForElementKind:UICollectionElementKindSectionFooter
                                                atIndexPath:indexPath];
