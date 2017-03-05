@@ -118,7 +118,7 @@
 
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
 {
-  return [self initWithFrame:CGRectZero collectionViewLayout:layout];
+  return [self initWithFrame:CGRectZero collectionViewLayout:layout layoutFacilitator:nil];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
@@ -135,7 +135,7 @@
     return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
   };
 
-  if (self = [super initWithViewBlock:collectionViewBlock]) {
+  if (self = [super initWithViewBlock:collectionViewBlock didLoadBlock:nil]) {
     return self;
   }
   return nil;
