@@ -16,7 +16,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class ASCellNode;
+@class ASCollectionElement, ASElementMap;
 
 ASDISPLAYNODE_EXTERN_C_BEGIN
 
@@ -34,9 +34,9 @@ ASDISPLAYNODE_EXTERN_C_END
 
 - (ASRangeTuningParameters)tuningParametersForRangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
 
-- (NSSet<NSIndexPath *> *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType;
+- (NSSet<ASCollectionElement *> *)elementsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType map:(ASElementMap *)map;
 
-- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet * _Nullable * _Nullable)displaySet preloadSet:(NSSet * _Nullable * _Nullable)preloadSet;
+- (void)allElementsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet<ASCollectionElement *> * _Nullable * _Nullable)displaySet preloadSet:(NSSet<ASCollectionElement *> * _Nullable * _Nullable)preloadSet map:(ASElementMap *)map;
 
 @optional
 

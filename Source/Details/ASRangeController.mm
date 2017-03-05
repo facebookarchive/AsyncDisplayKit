@@ -209,10 +209,10 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
   // TODO: Consider if we need to use this codepath, or can rely on something more similar to the data & display ranges
   // Example: ... = [_layoutController indexPathsForScrolling:scrollDirection rangeType:ASLayoutRangeTypeVisible];
-  NSArray<NSIndexPath *> *visibleNodePaths = [_dataSource visibleNodeIndexPathsForRangeController:self];
+  NSSet<ASCollectionElement *> *visibleElements = [NSSet setWithArray:[_dataSource visibleElementsForRangeController:self]];
   ASWeakSet *newVisibleNodes = [[ASWeakSet alloc] init];
 
-  if (visibleNodePaths.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
+  if (visibleElements.count == 0) { // if we don't have any visibleNodes currently (scrolled before or after content)...
     [self _setVisibleNodes:newVisibleNodes];
     return; // don't do anything for this update, but leave _rangeIsValid == NO to make sure we update it later
   }
@@ -248,31 +248,35 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   // Check if both Display and Preload are unique. If they are, we load them with a single fetch from the layout controller for performance.
   BOOL optimizedLoadingOfBothRanges = (equalDisplayPreload == NO && equalDisplayVisible == NO && emptyDisplayRange == NO);
 
-  NSSet<NSIndexPath *> *visibleIndexPaths = [NSSet setWithArray:visibleNodePaths];
-  NSSet<NSIndexPath *> *displayIndexPaths = nil;
-  NSSet<NSIndexPath *> *preloadIndexPaths = nil;
+  NSSet<ASCollectionElement *> *displayElements = nil;
+  NSSet<ASCollectionElement *> *preloadElements = nil;
   
   if (optimizedLoadingOfBothRanges) {
-    [_layoutController allIndexPathsForScrolling:scrollDirection rangeMode:rangeMode displaySet:&displayIndexPaths preloadSet:&preloadIndexPaths];
+    [_layoutController allElementsForScrolling:scrollDirection rangeMode:rangeMode displaySet:&displayElements preloadSet:&preloadElements map:map];
   } else {
     if (emptyDisplayRange == YES) {
-      displayIndexPaths = [NSSet set];
+      displayElements = [NSSet set];
     } if (equalDisplayVisible == YES) {
-      displayIndexPaths = visibleIndexPaths;
+      displayElements = visibleElements;
     } else {
       // Calculating only the Display range means the Preload range is either the same as Display or Visible.
-      displayIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypeDisplay];
+      displayElements = [_layoutController elementsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypeDisplay map:map];
     }
     
     BOOL equalPreloadVisible = ASRangeTuningParametersEqualToRangeTuningParameters(parametersPreload, ASRangeTuningParametersZero);
     if (equalDisplayPreload == YES) {
-      preloadIndexPaths = displayIndexPaths;
+      preloadElements = displayElements;
     } else if (equalPreloadVisible == YES) {
-      preloadIndexPaths = visibleIndexPaths;
+      preloadElements = visibleElements;
     } else {
-      preloadIndexPaths = [_layoutController indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypePreload];
+      preloadElements = [_layoutController elementsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypePreload map:map];
     }
   }
+  
+  // For now we are only interested in items. Filter-map out from element to item-index-path.
+  NSSet<NSIndexPath *> *visibleIndexPaths = ASSetByFlatMapping(visibleElements, ASCollectionElement *element, [map indexPathForElementIfItem:element]);
+  NSSet<NSIndexPath *> *displayIndexPaths = ASSetByFlatMapping(displayElements, ASCollectionElement *element, [map indexPathForElementIfItem:element]);
+  NSSet<NSIndexPath *> *preloadIndexPaths = ASSetByFlatMapping(preloadElements, ASCollectionElement *element, [map indexPathForElementIfItem:element]);
 
   // Prioritize the order in which we visit each.  Visible nodes should be updated first so they are enqueued on
   // the network or display queues before preloading (offscreen) nodes are enqueued.

@@ -73,6 +73,11 @@
   return _sectionsOfItems.count;
 }
 
+- (NSArray<NSString *> *)supplementaryElementKinds
+{
+  return _supplementaryElements.allKeys;
+}
+
 - (NSInteger)numberOfItemsInSection:(NSInteger)section
 {
   return _sectionsOfItems[section].count;
@@ -88,6 +93,15 @@
   return [_elementToIndexPathMap objectForKey:element];
 }
 
+- (nullable NSIndexPath *)indexPathForElementIfItem:(ASCollectionElement *)element
+{
+  if (element.supplementaryElementKind == nil) {
+    return [self indexPathForElement:element];
+  } else {
+    return nil;
+  }
+}
+
 - (nullable ASCollectionElement *)elementForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   return (indexPath != nil) ? ASGetElementInTwoDimensionalArray(_sectionsOfItems, indexPath) : nil;
@@ -96,6 +110,21 @@
 - (nullable ASCollectionElement *)supplementaryElementOfKind:(NSString *)supplementaryElementKind atIndexPath:(NSIndexPath *)indexPath
 {
   return _supplementaryElements[supplementaryElementKind][indexPath];
+}
+
+- (ASCollectionElement *)elementForLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
+{
+  switch (layoutAttributes.representedElementCategory) {
+    case UICollectionElementCategoryCell:
+      // Cell
+      return [self elementForItemAtIndexPath:layoutAttributes.indexPath];
+    case UICollectionElementCategorySupplementaryView:
+      // Supplementary element.
+      return [self supplementaryElementOfKind:layoutAttributes.representedElementKind atIndexPath:layoutAttributes.indexPath];
+    case UICollectionElementCategoryDecorationView:
+      // No support for decoration views.
+      return nil;
+  }
 }
 
 - (NSIndexPath *)convertIndexPath:(NSIndexPath *)indexPath fromMap:(ASElementMap *)map
