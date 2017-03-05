@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) BOOL controlsDisabled;
 
-@property (nonatomic, assign, readonly) BOOL loadAssetWhenNodeBecomesVisible;
+@property (nonatomic, assign, readonly) BOOL loadAssetWhenNodeBecomesVisible ASDISPLAYNODE_DEPRECATED_MSG("Asset is always loaded when this node enters preload state. This flag does nothing.");
 
 #pragma mark - ASVideoNode property proxy
 /**
