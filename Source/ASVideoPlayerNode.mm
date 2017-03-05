@@ -173,47 +173,53 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)setAssetURL:(NSURL *)assetURL
 {
-  // Call setter to 
+  ASDisplayNodeAssertMainThread();
+  
   self.asset = [AVAsset assetWithURL:assetURL];
 }
 
 - (NSURL *)assetURL
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if ([_pendingAsset isKindOfClass:AVURLAsset.class]) {
-    return ((AVURLAsset *)_pendingAsset).URL;
-  } else {
-    return _videoNode.assetURL;
+  NSURL *url = nil;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if ([_pendingAsset isKindOfClass:AVURLAsset.class]) {
+      url = ((AVURLAsset *)_pendingAsset).URL;
+    }
   }
+  
+  return url ?: _videoNode.assetURL;
 }
 
 - (void)setAsset:(AVAsset *)asset
 {
   ASDisplayNodeAssertMainThread();
 
-  ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
   
   // Clean out pending asset
   _pendingAsset = nil;
   
   // Set asset based on interface state
   if ((ASInterfaceStateIncludesPreload(self.interfaceState))) {
-   _videoNode.asset = asset;
-  } else {
-    _pendingAsset = asset;
+    // Don't hold the lock while accessing the subnode
+    __instanceLock__.unlock();
+    _videoNode.asset = asset;
+    return;
   }
+  
+  _pendingAsset = asset;
+  __instanceLock__.unlock();
 }
 
 - (AVAsset *)asset
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_pendingAsset != nil) {
-    return _pendingAsset;
-  } else {
-    return _videoNode.asset;
+  AVAsset *asset = nil;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    asset = _pendingAsset;
   }
+  return asset ?: _videoNode.asset;
 }
 
 #pragma mark - ASDisplayNode
@@ -231,14 +237,16 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 {
   [super didEnterPreloadState];
   
-  ASDN::MutexLocker l(__instanceLock__);
+  AVAsset *pendingAsset = nil;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    pendingAsset = _pendingAsset;
+    _pendingAsset = nil;
+  }
 
   // If we enter preload state we apply the pending asset to load to the video node so it can start and fetch the asset
-  if (_pendingAsset != nil && _videoNode.asset != _pendingAsset) {
-    _videoNode.asset = _pendingAsset;
-      
-    // Clear the pending asset in here to let be the video node the definitive source for the asset
-    _pendingAsset = nil;
+  if (pendingAsset != nil && _videoNode.asset != pendingAsset) {
+    _videoNode.asset = pendingAsset;
   }
 }
 
