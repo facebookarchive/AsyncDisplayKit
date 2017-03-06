@@ -11,7 +11,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@class ASCollectionElement, ASSection;
+@class ASCollectionElement, ASSection, UICollectionViewLayoutAttributes;
 @protocol ASSectionContext;
 
 /**
@@ -26,6 +26,11 @@ AS_SUBCLASSING_RESTRICTED
  * The number of sections (of items) in this map.
  */
 @property (readonly) NSInteger numberOfSections;
+
+/**
+ * The kinds of supplementary elements present in this map. O(1)
+ */
+@property (copy, readonly) NSArray<NSString *> *supplementaryElementKinds;
 
 /**
  * Returns number of items in the given section. O(1)
@@ -55,6 +60,11 @@ AS_SUBCLASSING_RESTRICTED
 - (nullable NSIndexPath *)indexPathForElement:(ASCollectionElement *)element;
 
 /**
+ * Returns the index path for the given element, if it represents a cell. O(1)
+ */
+- (nullable NSIndexPath *)indexPathForElementIfCell:(ASCollectionElement *)element;
+
+/**
  * Returns the item-element at the given index path. O(1)
  */
 - (nullable ASCollectionElement *)elementForItemAtIndexPath:(NSIndexPath *)indexPath;
@@ -64,6 +74,13 @@ AS_SUBCLASSING_RESTRICTED
  */
 - (nullable ASCollectionElement *)supplementaryElementOfKind:(NSString *)supplementaryElementKind atIndexPath:(NSIndexPath *)indexPath;
 
+/**
+ * Returns the element that corresponds to the given layout attributes, if any.
+ *
+ * NOTE: This method only regards the category, kind, and index path of the attributes object. Elements do not
+ * have any concept of size/position.
+ */
+- (nullable ASCollectionElement *)elementForLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes;
 
 #pragma mark - Initialization -- Only Useful to ASDataController
 

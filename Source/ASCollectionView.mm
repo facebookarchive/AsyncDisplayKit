@@ -1679,13 +1679,51 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   return _rangeController;
 }
 
-- (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
+/// The UIKit version of this method is only available on iOS >= 9
+- (NSArray<NSIndexPath *> *)asdk_indexPathsForVisibleSupplementaryElementsOfKind:(NSString *)kind
 {
-  ASDisplayNodeAssertMainThread();
-  // Calling -indexPathsForVisibleItems will trigger UIKit to call reloadData if it never has, which can result
-  // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
-  BOOL isZeroSized = CGSizeEqualToSize(self.bounds.size, CGSizeZero);
-  return isZeroSized ? @[] : [self indexPathsForVisibleItems];
+  if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_9_0) {
+    return [self indexPathsForVisibleSupplementaryElementsOfKind:kind];
+  }
+
+  // iOS 8 workaround
+  // We cannot use willDisplaySupplementaryView/didEndDisplayingSupplementaryView
+  // because those methods send index paths for _deleted items_ (invalid index paths)
+  [self layoutIfNeeded];
+  NSArray<UICollectionViewLayoutAttributes *> *visibleAttributes = [self.collectionViewLayout layoutAttributesForElementsInRect:self.bounds];
+  NSMutableArray *result = [NSMutableArray array];
+  for (UICollectionViewLayoutAttributes *attributes in visibleAttributes) {
+    if (attributes.representedElementCategory == UICollectionElementCategorySupplementaryView
+        && [attributes.representedElementKind isEqualToString:kind]) {
+      [result addObject:attributes.indexPath];
+    }
+  }
+  return result;
+}
+
+- (NSArray<ASCollectionElement *> *)visibleElementsForRangeController:(ASRangeController *)rangeController
+{
+  if (CGRectIsEmpty(self.bounds)) {
+    return @[];
+  }
+
+  ASElementMap *map = _dataController.visibleMap;
+  NSMutableArray<ASCollectionElement *> *result = [NSMutableArray array];
+
+  // Visible items
+  for (NSIndexPath *indexPath in self.indexPathsForVisibleItems) {
+    ASCollectionElement *element = [map elementForItemAtIndexPath:indexPath];
+    [result addObject:element];
+  }
+
+  // Visible supplementary elements
+  for (NSString *kind in map.supplementaryElementKinds) {
+    for (NSIndexPath *indexPath in [self asdk_indexPathsForVisibleSupplementaryElementsOfKind:kind]) {
+      ASCollectionElement *element = [map supplementaryElementOfKind:kind atIndexPath:indexPath];
+      [result addObject:element];
+    }
+  }
+  return result;
 }
 
 - (ASElementMap *)elementMapForRangeController:(ASRangeController *)rangeController

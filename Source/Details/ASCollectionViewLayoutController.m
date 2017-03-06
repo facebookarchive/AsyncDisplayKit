@@ -12,6 +12,7 @@
 
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASCollectionView.h>
+#import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
 #import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
 
@@ -46,14 +47,14 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   return self;
 }
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+- (NSSet<ASCollectionElement *> *)elementsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType map:(ASElementMap *)map
 {
   ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
   CGRect rangeBounds = [self rangeBoundsWithScrollDirection:scrollDirection rangeTuningParameters:tuningParameters];
-  return [self indexPathsForItemsWithinRangeBounds:rangeBounds];
+  return [self elementsWithinRangeBounds:rangeBounds map:map];
 }
 
-- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet **)displaySet preloadSet:(NSSet **)preloadSet
+- (void)allElementsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet<ASCollectionElement *> *__autoreleasing  _Nullable *)displaySet preloadSet:(NSSet<ASCollectionElement *> *__autoreleasing  _Nullable *)preloadSet map:(ASElementMap *)map
 {
   if (displaySet == NULL || preloadSet == NULL) {
     return;
@@ -67,12 +68,12 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   CGRect unionBounds = CGRectUnion(displayBounds, preloadBounds);
   NSArray *layoutAttributes = [_collectionViewLayout layoutAttributesForElementsInRect:unionBounds];
 
-  NSMutableSet *display = [NSMutableSet setWithCapacity:layoutAttributes.count];
-  NSMutableSet *preload = [NSMutableSet setWithCapacity:layoutAttributes.count];
+  NSMutableSet<ASCollectionElement *> *display = [NSMutableSet setWithCapacity:layoutAttributes.count];
+  NSMutableSet<ASCollectionElement *> *preload = [NSMutableSet setWithCapacity:layoutAttributes.count];
 
   for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
     // Manually filter out elements that don't intersect the range bounds.
-    // See comment in indexPathsForItemsWithinRangeBounds:
+    // See comment in elementsForItemsWithinRangeBounds:
     // This is re-implemented here so that the iteration over layoutAttributes can be done once to check both ranges.
     CGRect frame = la.frame;
     BOOL intersectsDisplay = CGRectIntersectsRect(displayBounds, frame);
@@ -82,13 +83,13 @@ typedef struct ASRangeGeometry ASRangeGeometry;
       continue;
     }
     
-    // Avoid excessive retains and releases, as well as property calls. We know the indexPath is kept alive by la.
-    __unsafe_unretained NSIndexPath *indexPath = la.indexPath;
+    // Avoid excessive retains and releases, as well as property calls. We know the element is kept alive by map.
+    __unsafe_unretained ASCollectionElement *e = [map elementForLayoutAttributes:la];
     if (intersectsDisplay) {
-      [display addObject:indexPath];
+      [display addObject:e];
     }
     if (intersectsPreload) {
-      [preload addObject:indexPath];
+      [preload addObject:e];
     }
   }
 
@@ -97,14 +98,12 @@ typedef struct ASRangeGeometry ASRangeGeometry;
   return;
 }
 
-- (NSSet *)indexPathsForItemsWithinRangeBounds:(CGRect)rangeBounds
+- (NSSet<ASCollectionElement *> *)elementsWithinRangeBounds:(CGRect)rangeBounds map:(ASElementMap *)map
 {
   NSArray *layoutAttributes = [_collectionViewLayout layoutAttributesForElementsInRect:rangeBounds];
-  NSMutableSet *indexPathSet = [NSMutableSet setWithCapacity:layoutAttributes.count];
+  NSMutableSet<ASCollectionElement *> *elementSet = [NSMutableSet setWithCapacity:layoutAttributes.count];
   
   for (UICollectionViewLayoutAttributes *la in layoutAttributes) {
-    //ASDisplayNodeAssert(![indexPathSet containsObject:la.indexPath], @"Shouldn't already contain indexPath");
-
     // Manually filter out elements that don't intersect the range bounds.
     // If a layout returns elements outside the requested rect this can be a huge problem.
     // For instance in a paging flow, you may only want to preload 3 pages (one center, one on each side)
@@ -113,10 +112,10 @@ typedef struct ASRangeGeometry ASRangeGeometry;
     if (CATransform3DIsIdentity(la.transform3D) && CGRectIntersectsRect(la.frame, rangeBounds) == NO) {
       continue;
     }
-    [indexPathSet addObject:la.indexPath];
+    [elementSet addObject:[map elementForLayoutAttributes:la]];
   }
 
-  return indexPathSet;
+  return elementSet;
 }
 
 - (CGRect)rangeBoundsWithScrollDirection:(ASScrollDirection)scrollDirection
