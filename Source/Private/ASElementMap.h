@@ -60,9 +60,9 @@ AS_SUBCLASSING_RESTRICTED
 - (nullable NSIndexPath *)indexPathForElement:(ASCollectionElement *)element;
 
 /**
- * Returns the index path for the given element, if it represents an item. O(1)
+ * Returns the index path for the given element, if it represents a cell. O(1)
  */
-- (nullable NSIndexPath *)indexPathForElementIfItem:(ASCollectionElement *)element;
+- (nullable NSIndexPath *)indexPathForElementIfCell:(ASCollectionElement *)element;
 
 /**
  * Returns the item-element at the given index path. O(1)
