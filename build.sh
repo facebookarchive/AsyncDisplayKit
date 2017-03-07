@@ -69,7 +69,7 @@ if type xcpretty-travis-formatter &> /dev/null; then
     FORMATTER="-s"
 fi
 
-if [ "$MODE" = "tests" ]; then
+if [ "$MODE" = "tests" -o "$MODE" = "all" ]; then
     echo "Building & testing AsyncDisplayKit."
     pod install
     set -o pipefail && xcodebuild \
@@ -78,8 +78,7 @@ if [ "$MODE" = "tests" ]; then
         -sdk "$SDK" \
         -destination "$PLATFORM" \
         build-for-testing test | xcpretty $FORMATTER
-    trap - EXIT
-    exit 0
+    success="1"
 fi
 
 if [ "$MODE" = "tests_listkit" ]; then
@@ -91,11 +90,10 @@ if [ "$MODE" = "tests_listkit" ]; then
         -sdk "$SDK" \
         -destination "$PLATFORM" \
         build-for-testing test | xcpretty $FORMATTER
-    trap - EXIT
-    exit 0
+    success="1"
 fi
 
-if [ "$MODE" = "examples" ]; then
+if [ "$MODE" = "examples" -o "$MODE" = "all" ]; then
     echo "Verifying that all AsyncDisplayKit examples compile."
     #Update cocoapods repo
     pod repo update master
@@ -105,8 +103,7 @@ if [ "$MODE" = "examples" ]; then
 
         build_example $example
     done
-    trap - EXIT
-    exit 0
+    success="1"
 fi
 
 if [ "$MODE" = "examples-pt1" ]; then
@@ -119,8 +116,7 @@ if [ "$MODE" = "examples-pt1" ]; then
 
         build_example $example
     done
-    trap - EXIT
-    exit 0
+    success="1"
 fi
 
 if [ "$MODE" = "examples-pt2" ]; then
@@ -133,8 +129,7 @@ if [ "$MODE" = "examples-pt2" ]; then
 
         build_example $example
     done
-    trap - EXIT
-    exit 0
+    success="1"
 fi
 
 if [ "$MODE" = "examples-pt3" ]; then
@@ -147,8 +142,7 @@ if [ "$MODE" = "examples-pt3" ]; then
 
         build_example $example
     done
-    trap - EXIT
-    exit 0
+    success="1"
 fi
 
 if [ "$MODE" = "examples-extra" ]; then
@@ -161,8 +155,7 @@ if [ "$MODE" = "examples-extra" ]; then
 
         build_example $example
     done
-    trap - EXIT
-    exit 0
+    success="1"
 fi
 
 # Support building a specific example: sh build.sh example examples/ASDKLayoutTransition
@@ -172,11 +165,10 @@ if [ "$MODE" = "example" ]; then
     pod repo update master
 
     build_example $2
-    trap - EXIT
-    exit 0
+    success="1"
 fi
 
-if [ "$MODE" = "life-without-cocoapods" ]; then
+if [ "$MODE" = "life-without-cocoapods" -o "$MODE" = "all" ]; then
     echo "Verifying that AsyncDisplayKit functions as a static library."
 
     set -o pipefail && xcodebuild \
@@ -185,11 +177,10 @@ if [ "$MODE" = "life-without-cocoapods" ]; then
         -sdk "$SDK" \
         -destination "$PLATFORM" \
         build | xcpretty $FORMATTER
-    trap - EXIT
-    exit 0
+    success="1"
 fi
 
-if [ "$MODE" = "framework" ]; then
+if [ "$MODE" = "framework" -o "$MODE" = "all" ]; then
     echo "Verifying that AsyncDisplayKit functions as a dynamic framework (for Swift/Carthage users)."
 
     set -o pipefail && xcodebuild \
@@ -198,22 +189,25 @@ if [ "$MODE" = "framework" ]; then
         -sdk "$SDK" \
         -destination "$PLATFORM" \
         build | xcpretty $FORMATTER
-    trap - EXIT
-    exit 0
+    success="1"
 fi
 
-if [ "$MODE" = "cocoapods-lint" ]; then
+if [ "$MODE" = "cocoapods-lint" -o "$MODE" = "all" ]; then
     echo "Verifying that podspec lints."
 
     set -o pipefail && pod env && pod lib lint
-    trap - EXIT
-    exit 0
+    success="1"
 fi
 
-if [ "$MODE" = "carthage" ]; then
+if [ "$MODE" = "carthage" -o "$MODE" = "all" ]; then
     echo "Verifying carthage works."
     
     set -o pipefail && carthage update && carthage build --no-skip-current
+fi
+
+if [ "$success" = "1" ]; then 
+  trap - EXIT
+  exit 0
 fi
 
 echo "Unrecognised mode '$MODE'."
