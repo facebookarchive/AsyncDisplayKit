@@ -1678,16 +1678,12 @@ ASLayoutElementFinalLayoutElementDefault
   if (layoutTransition == nil || self.automaticallyManagesSubnodes == NO) {
     return;
   }
-
-  // Trampoline to the main thread if necessary
-  if (ASDisplayNodeThreadIsMain() || layoutTransition.isSynchronous == NO) {
-    [layoutTransition commitTransition];
-  } else {
-    // Subnode insertions and removals need to happen always on the main thread if at least one subnode is already loaded
-    ASPerformBlockOnMainThread(^{
-      [layoutTransition commitTransition];
-    });
-  }
+    
+  // Removal and insertions of subnodes needs always happening on the maint thread. Therefore we have to
+  // trampoline in this case
+  ASPerformBlockOnMainThread(^{
+     [layoutTransition commitTransition];
+  });
 }
 
 - (void)_pendingLayoutTransitionDidComplete
