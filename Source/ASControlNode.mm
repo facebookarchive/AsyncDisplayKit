@@ -265,13 +265,14 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
 }
 
 #pragma mark - Action Messages
+
 - (void)addTarget:(id)target action:(SEL)action forControlEvents:(ASControlNodeEvent)controlEventMask
 {
   NSParameterAssert(action);
   NSParameterAssert(controlEventMask != 0);
-  // This assertion would likely be helpful to users who aren't familiar with the implications of layer-backing.
-  // However, it would represent an API change (in debug) as it did not used to assert.
-  // ASDisplayNodeAssert(!self.isLayerBacked, @"ASControlNode is layer backed, will never be able to call target in target:action: pair.");
+  
+  // ASControlNode cannot be layer backed if adding a target
+  ASDisplayNodeAssert(!self.isLayerBacked, @"ASControlNode is layer backed, will never be able to call target in target:action: pair.");
   
   ASDN::MutexLocker l(_controlLock);
 
