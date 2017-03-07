@@ -215,12 +215,6 @@ __unused static NSString * _Nonnull NSStringFromASHierarchyState(ASHierarchyStat
 - (BOOL)shouldScheduleDisplayWithNewInterfaceState:(ASInterfaceState)newInterfaceState;
 
 /**
- * @abstract Subclass hook for nodes that are acting as root nodes. This method is called if one of the subnodes
- * size is invalidated and may need to result in a different size as the current calculated size.
- */
-//- (void)_locked_rootNodeDidInvalidateSize;
-
-/**
  * @abstract Subclass hook for nodes that are acting as root nodes. This method is called after measurement
  * finished in a layout transition but before the measurement completion handler is called
  */

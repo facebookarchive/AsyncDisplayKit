@@ -122,6 +122,8 @@
 
 - (void)__setNeedsLayout
 {
+  [self invalidateCalculatedLayout];
+    
   if (_interactionDelegate != nil) {
     [_interactionDelegate nodeDidInvalidateSize:self];
   }

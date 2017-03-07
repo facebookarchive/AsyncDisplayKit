@@ -1043,19 +1043,11 @@ ASLayoutElementFinalLayoutElementDefault
   if ([self _isLayoutTransitionInvalid]) {
     return;
   }
-
-  BOOL hasDirtyLayout = NO;
-  CGSize calculatedLayoutSize = CGSizeZero;
-  {
-    ASDN::MutexLocker l(__instanceLock__);
-    hasDirtyLayout = _calculatedDisplayNodeLayout->isDirty();
-    calculatedLayoutSize = _calculatedDisplayNodeLayout->layout.size;
-  }
-
   
   // If no measure pass happened or the bounds changed between layout passes we manually trigger a measurement pass
   // for the node using a size range equal to whatever bounds were provided to the node
-  if (hasDirtyLayout || CGSizeEqualToSize(calculatedLayoutSize, bounds.size) == NO) {
+  if (_calculatedDisplayNodeLayout->isDirty()
+      || CGSizeEqualToSize(_calculatedDisplayNodeLayout->layout.size, bounds.size) == NO) {
     if (CGRectEqualToRect(bounds, CGRectZero)) {
       LOG(@"Warning: No size given for node before node was trying to layout itself: %@. Please provide a frame for the node.", self);
     } else {
