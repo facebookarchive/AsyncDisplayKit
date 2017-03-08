@@ -363,10 +363,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
   
   [_dataController waitUntilAllUpdatesAreCommitted];
-  
-  // reloadData of UICollectionView doesn't requery its data source but defers until the next layout pass.
-  // A forced layout pass is neccessary here to make sure everything is ready after this method returns.
-  [self layoutIfNeeded];
 }
 
 - (void)setDataSource:(id<UICollectionViewDataSource>)dataSource
