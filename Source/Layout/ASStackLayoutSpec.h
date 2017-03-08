@@ -59,10 +59,13 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) ASStackLayoutJustifyContent justifyContent;
 /** Orientation of children along cross axis. Defaults to ASStackLayoutAlignItemsStretch */
 @property (nonatomic, assign) ASStackLayoutAlignItems alignItems;
-//TODO documentation. Defaults to ASStackLayoutFlexWrapNoWrap
+/** Whether children are stacked into a single or multiple lines. Defaults to single line (ASStackLayoutFlexWrapNoWrap) */
 @property (nonatomic, assign) ASStackLayoutFlexWrap flexWrap;
-//TODO documentation. Defaults to ASStackLayoutAlignContentStart
+/** Orientation of lines along cross axis if there are multiple lines. Defaults to ASStackLayoutAlignContentStart */
 @property (nonatomic, assign) ASStackLayoutAlignContent alignContent;
+
+/** Whether this stack can dispatch to other threads, regardless of which thread it's running on */
+@property (nonatomic, assign, getter=isConcurrent) BOOL concurrent;
 
 - (instancetype)init;
 
@@ -84,8 +87,9 @@ NS_ASSUME_NONNULL_BEGIN
  @param spacing The spacing between the children
  @param justifyContent If no children are flexible, this describes how to fill any extra space
  @param alignItems Orientation of the children along the cross axis
+ @param flexWrap Whether children are stacked into a single or multiple lines
+ @param alignContent Orientation of lines along cross axis if there are multiple lines
  @param children ASLayoutElement children to be positioned.
- TODO documentation flex wrap and align content
  */
 + (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)direction
                                      spacing:(CGFloat)spacing
