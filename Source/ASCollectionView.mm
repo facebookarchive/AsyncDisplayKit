@@ -607,6 +607,9 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 - (CGSize)sizeForElement:(ASCollectionElement *)element
 {
   ASDisplayNodeAssertMainThread();
+  if (element == nil) {
+    return CGSizeZero;
+  }
 
   NSString *supplementaryKind = element.supplementaryElementKind;
   NSIndexPath *indexPath = [_dataController.visibleMap indexPathForElement:element];
