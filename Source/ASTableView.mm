@@ -562,7 +562,7 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
     return indexPath;
   } else {
     NSIndexPath *viewIndexPath = [_dataController.visibleMap convertIndexPath:indexPath fromMap:_dataController.pendingMap];
-    if (viewIndexPath == nil) {
+    if (viewIndexPath == nil && wait) {
       [self waitUntilAllUpdatesAreCommitted];
       return [self convertIndexPathFromTableNode:indexPath waitingIfNeeded:NO];
     }
