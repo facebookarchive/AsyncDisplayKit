@@ -1059,7 +1059,7 @@ static NSArray<ASTextNode*> *defaultTextNodes()
     ASDisplayNodeWithBackgroundColor([UIColor yellowColor], CGSizeZero),
   ];
   
-  subnodes[1].style.flexShrink = 0;
+  subnodes[0].style.flexShrink = 0;
   subnodes[1].style.flexShrink = 1;
   
   // In this scenario a width of 40 results in a negative violation of 10.
