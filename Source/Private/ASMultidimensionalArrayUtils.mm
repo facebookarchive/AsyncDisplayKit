@@ -209,7 +209,8 @@ NSArray *ASIndexPathsForTwoDimensionalArray(NSArray <NSArray *>* twoDimensionalA
   NSUInteger section = 0;
   for (NSArray *subarray in twoDimensionalArray) {
     ASDisplayNodeCAssert([subarray isKindOfClass:[NSArray class]], @"This function expects NSArray<NSArray *> *");
-    for (NSUInteger item = 0; item < subarray.count; item++) {
+    NSInteger itemCount = subarray.count;
+    for (NSUInteger item = 0; item < itemCount; item++) {
       [result addObject:[NSIndexPath indexPathForItem:item inSection:section]];
     }
     section++;
