@@ -81,11 +81,19 @@
 
 - (NSInteger)numberOfItemsInSection:(NSInteger)section
 {
+  if (![self sectionIndexIsValid:section assert:YES]) {
+    return 0;
+  }
+
   return _sectionsOfItems[section].count;
 }
 
 - (id<ASSectionContext>)contextForSection:(NSInteger)section
 {
+  if (![self sectionIndexIsValid:section assert:NO]) {
+    return nil;
+  }
+
   return _sections[section].context;
 }
 
@@ -105,7 +113,12 @@
 
 - (nullable ASCollectionElement *)elementForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  return (indexPath != nil) ? ASGetElementInTwoDimensionalArray(_sectionsOfItems, indexPath) : nil;
+  NSInteger section, item;
+  if (![self itemIndexPathIsValid:indexPath assert:NO item:&item section:&section]) {
+    return nil;
+  }
+
+  return _sectionsOfItems[section][item];
 }
 
 - (nullable ASCollectionElement *)supplementaryElementOfKind:(NSString *)supplementaryElementKind atIndexPath:(NSIndexPath *)indexPath
@@ -169,6 +182,53 @@
   [result addObject:@{ @"items" : _sectionsOfItems }];
   [result addObject:@{ @"supplementaryElements" : _supplementaryElements }];
   return result;
+}
+
+#pragma mark - Internal
+
+/**
+ * Fails assert + return NO if section is out of bounds.
+ */
+- (BOOL)sectionIndexIsValid:(NSInteger)section assert:(BOOL)assert
+{
+  NSInteger sectionCount = _sectionsOfItems.count;
+  if (section >= sectionCount) {
+    if (assert) {
+      ASDisplayNodeFailAssert(@"Invalid section index %zd when there are only %zd sections!", section, sectionCount);
+    }
+    return NO;
+  } else {
+    return YES;
+  }
+}
+
+/**
+ * If indexPath is nil, just returns NO.
+ * If indexPath is invalid, fails assertion and returns NO.
+ * Otherwise returns YES and sets the item & section.
+ */
+- (BOOL)itemIndexPathIsValid:(NSIndexPath *)indexPath assert:(BOOL)assert item:(out NSInteger *)outItem section:(out NSInteger *)outSection
+{
+  if (indexPath == nil) {
+    return NO;
+  }
+
+  NSInteger section = indexPath.section;
+  if (![self sectionIndexIsValid:section assert:assert]) {
+    return NO;
+  }
+
+  NSInteger itemCount = _sectionsOfItems[section].count;
+  NSInteger item = indexPath.item;
+  if (item >= itemCount) {
+    if (assert) {
+      ASDisplayNodeFailAssert(@"Invalid item index %zd in section %zd which only has %zd items!", item, section, itemCount);
+    }
+    return NO;
+  }
+  *outItem = item;
+  *outSection = section;
+  return YES;
 }
 
 @end
