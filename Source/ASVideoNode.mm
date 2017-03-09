@@ -238,7 +238,10 @@ static NSString * const kRate = @"rate";
 
 - (CGSize)calculateSizeThatFits:(CGSize)constrainedSize
 {
-  ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
+  ASDisplayNode *playerNode = _playerNode;
+  __instanceLock__.unlock();
+
   CGSize calculatedSize = constrainedSize;
   
   // Prevent crashes through if infinite width or height
@@ -247,9 +250,9 @@ static NSString * const kRate = @"rate";
     calculatedSize = CGSizeZero;
   }
   
-  if (_playerNode) {
-    _playerNode.style.preferredSize = calculatedSize;
-    [_playerNode layoutThatFits:ASSizeRangeMake(CGSizeZero, calculatedSize)];
+  if (playerNode != nil) {
+    playerNode.style.preferredSize = calculatedSize;
+    [playerNode layoutThatFits:ASSizeRangeMake(CGSizeZero, calculatedSize)];
   }
   
   return calculatedSize;
@@ -298,9 +301,12 @@ static NSString * const kRate = @"rate";
 
 - (void)setVideoPlaceholderImage:(UIImage *)image
 {
-  ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
+  NSString *gravity = _gravity;
+  __instanceLock__.unlock();
+  
   if (image != nil) {
-    self.contentMode = ASContentModeFromVideoGravity(_gravity);
+    self.contentMode = ASContentModeFromVideoGravity(gravity);
   }
   self.image = image;
 }
@@ -428,12 +434,19 @@ static NSString * const kRate = @"rate";
 {
   [super didEnterVisibleState];
   
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_shouldBePlaying || _shouldAutoplay) {
-    if (_player != nil && CMTIME_IS_VALID(_lastPlaybackTime)) {
-      [_player seekToTime:_lastPlaybackTime];
+  BOOL shouldPlay = NO;
+
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if (_shouldBePlaying || _shouldAutoplay) {
+      if (_player != nil && CMTIME_IS_VALID(_lastPlaybackTime)) {
+        [_player seekToTime:_lastPlaybackTime];
+      }
+      shouldPlay = YES;
     }
+  }
+  
+  if (shouldPlay) {
     [self play];
   }
 }
@@ -765,9 +778,11 @@ static NSString * const kRate = @"rate";
 
 - (void)setPlayerNode:(ASDisplayNode *)playerNode
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  _playerNode = playerNode;
-    
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    _playerNode = playerNode;
+  }
+  
   [self setNeedsLayout];
 }
 

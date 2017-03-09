@@ -305,11 +305,16 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)setTextContainerInset:(UIEdgeInsets)textContainerInset
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  BOOL needsUpdate = !UIEdgeInsetsEqualToEdgeInsets(textContainerInset, _textContainerInset);
+  BOOL needsUpdate = NO;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    BOOL needsUpdate = !UIEdgeInsetsEqualToEdgeInsets(textContainerInset, _textContainerInset);
+    if (needsUpdate) {
+      _textContainerInset = textContainerInset;
+    }
+  }
+
   if (needsUpdate) {
-    _textContainerInset = textContainerInset;
     [self setNeedsLayout];
   }
 }
@@ -421,13 +426,16 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)setExclusionPaths:(NSArray *)exclusionPaths
 {
-  ASDN::MutexLocker l(__instanceLock__);
+  {
+    ASDN::MutexLocker l(__instanceLock__);
   
-  if (ASObjectIsEqual(exclusionPaths, _exclusionPaths)) {
-    return;
+    if (ASObjectIsEqual(exclusionPaths, _exclusionPaths)) {
+      return;
+    }
+    
+    _exclusionPaths = [exclusionPaths copy];
   }
   
-  _exclusionPaths = [exclusionPaths copy];
   [self setNeedsLayout];
   [self setNeedsDisplay];
 }
@@ -1046,14 +1054,19 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
 
 - (void)setShadowColor:(CGColorRef)shadowColor
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
+  __instanceLock__.lock();
+
   if (_shadowColor != shadowColor && CGColorEqualToColor(shadowColor, _shadowColor) == NO) {
     CGColorRelease(_shadowColor);
     _shadowColor = CGColorRetain(shadowColor);
     _cachedShadowUIColor = [UIColor colorWithCGColor:shadowColor];
+    __instanceLock__.unlock();
+    
     [self setNeedsDisplay];
+    return;
   }
+
+  __instanceLock__.unlock();
 }
 
 - (CGSize)shadowOffset
@@ -1065,12 +1078,16 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
 
 - (void)setShadowOffset:(CGSize)shadowOffset
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (!CGSizeEqualToSize(_shadowOffset, shadowOffset)) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (CGSizeEqualToSize(_shadowOffset, shadowOffset)) {
+      return;
+    }
     _shadowOffset = shadowOffset;
-    [self setNeedsDisplay];
   }
+
+  [self setNeedsDisplay];
 }
 
 - (CGFloat)shadowOpacity
@@ -1082,12 +1099,17 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
 
 - (void)setShadowOpacity:(CGFloat)shadowOpacity
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_shadowOpacity != shadowOpacity) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (_shadowOpacity == shadowOpacity) {
+      return;
+    }
+    
     _shadowOpacity = shadowOpacity;
-    [self setNeedsDisplay];
   }
+  
+  [self setNeedsDisplay];
 }
 
 - (CGFloat)shadowRadius
@@ -1099,12 +1121,17 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
 
 - (void)setShadowRadius:(CGFloat)shadowRadius
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_shadowRadius != shadowRadius) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (_shadowRadius == shadowRadius) {
+      return;
+    }
+    
     _shadowRadius = shadowRadius;
-    [self setNeedsDisplay];
   }
+  
+  [self setNeedsDisplay];
 }
 
 - (UIEdgeInsets)shadowPadding
@@ -1133,36 +1160,47 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 - (void)setTruncationAttributedText:(NSAttributedString *)truncationAttributedText
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (ASObjectIsEqual(_truncationAttributedText, truncationAttributedText)) {
-    return;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (ASObjectIsEqual(_truncationAttributedText, truncationAttributedText)) {
+      return;
+    }
+
+    _truncationAttributedText = [truncationAttributedText copy];
   }
 
-  _truncationAttributedText = [truncationAttributedText copy];
   [self _invalidateTruncationText];
 }
 
 - (void)setAdditionalTruncationMessage:(NSAttributedString *)additionalTruncationMessage
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (ASObjectIsEqual(_additionalTruncationMessage, additionalTruncationMessage)) {
-    return;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (ASObjectIsEqual(_additionalTruncationMessage, additionalTruncationMessage)) {
+      return;
+    }
+
+    _additionalTruncationMessage = [additionalTruncationMessage copy];
   }
 
-  _additionalTruncationMessage = [additionalTruncationMessage copy];
   [self _invalidateTruncationText];
 }
 
 - (void)setTruncationMode:(NSLineBreakMode)truncationMode
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_truncationMode != truncationMode) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (_truncationMode == truncationMode) {
+      return;
+    }
+
     _truncationMode = truncationMode;
-    [self setNeedsDisplay];
   }
+  
+  [self setNeedsDisplay];
 }
 
 - (BOOL)isTruncated
@@ -1175,21 +1213,31 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 - (void)setPointSizeScaleFactors:(NSArray *)pointSizeScaleFactors
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if ([_pointSizeScaleFactors isEqualToArray:pointSizeScaleFactors] == NO) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if ([_pointSizeScaleFactors isEqualToArray:pointSizeScaleFactors]) {
+      return;
+    }
+    
     _pointSizeScaleFactors = pointSizeScaleFactors;
-    [self setNeedsDisplay];
-  }}
+  }
+
+  [self setNeedsDisplay];
+}
 
 - (void)setMaximumNumberOfLines:(NSUInteger)maximumNumberOfLines
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_maximumNumberOfLines != maximumNumberOfLines) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (_maximumNumberOfLines == maximumNumberOfLines) {
+      return;
+    }
+
     _maximumNumberOfLines = maximumNumberOfLines;
-    [self setNeedsDisplay];
   }
+  
+  [self setNeedsDisplay];
 }
 
 - (NSUInteger)lineCount
