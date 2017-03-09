@@ -116,7 +116,7 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
   
   // If a control node is exit the hierarchy and is tracking we have to cancel it
   if (self.tracking) {
-    [self _cancelTrackingForControlEvents:ASControlNodeEventTouchCancel withEvent:nil];
+    [self _cancelTrackingWithEvent:nil];
   }
 }
 
@@ -138,13 +138,10 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
     return;
   }
 
-  ASControlNodeEvent controlEventMask = 0;
-
   // If we get more than one touch down on us, cancel.
   // Additionally, if we're already tracking a touch, a second touch beginning is cause for cancellation.
   if (touches.count > 1 || self.tracking) {
-    controlEventMask |= ASControlNodeEventTouchCancel;
-    [self _cancelTrackingForControlEvents:controlEventMask withEvent:event];
+    [self _cancelTrackingWithEvent:event];
   } else {
     // Otherwise, begin tracking.
     self.tracking = YES;
@@ -154,8 +151,7 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
     self.highlighted = YES;
 
     // Send the appropriate touch-down control event depending on how many times we've been tapped.
-    controlEventMask |= (theTouch.tapCount == 1) ? ASControlNodeEventTouchDown : ASControlNodeEventTouchDownRepeat;
-
+    ASControlNodeEvent controlEventMask = (theTouch.tapCount == 1) ? ASControlNodeEventTouchDown : ASControlNodeEventTouchDownRepeat;
     [self sendActionsForControlEvents:controlEventMask withEvent:event];
   }
 }
@@ -199,7 +195,7 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
   }
 
   // Note that we've cancelled tracking.
-  [self _cancelTrackingForControlEvents:ASControlNodeEventTouchCancel withEvent:event];
+  [self _cancelTrackingWithEvent:event];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
@@ -238,7 +234,7 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
                           withEvent:event];
 }
 
-- (void)_cancelTrackingForControlEvents:(ASControlNodeEvent)controlEventMask withEvent:(UIEvent *)event
+- (void)_cancelTrackingWithEvent:(UIEvent *)event
 {
   // We're no longer tracking and there is no touch to be inside.
   self.tracking = NO;
@@ -246,7 +242,7 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
   self.highlighted = NO;
   
   // Send the cancel event.
-  [self sendActionsForControlEvents:controlEventMask withEvent:event];
+  [self sendActionsForControlEvents:ASControlNodeEventTouchCancel withEvent:event];
 }
 
 #pragma clang diagnostic pop
