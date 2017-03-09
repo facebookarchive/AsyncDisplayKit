@@ -372,6 +372,10 @@ static std::function<CGFloat(const ASStackLayoutSpecItem &)> flexShrinkAdjustmen
     return x + scaledFlexShrinkFactor(item, style, flexFactorSum);
   });
   return [style, scaledFlexShrinkFactorSum, violation, flexFactorSum](const ASStackLayoutSpecItem &item) {
+    if (scaledFlexShrinkFactorSum == 0.0) {
+      return 0.0;
+    }
+    
     const CGFloat scaledFlexShrinkFactorRatio = scaledFlexShrinkFactor(item, style, flexFactorSum) / scaledFlexShrinkFactorSum;
     // The item should shrink proportionally to the scaled flex shrink factor ratio computed above.
     // Unlike the flex grow adjustment the flex shrink adjustment needs to take the size of each item into account.
@@ -563,45 +567,48 @@ static void flexLinesAlongStackDimension(std::vector<ASStackUnpositionedLine> &l
     const CGFloat violation = ASStackUnpositionedLayout::computeStackViolation(computeItemsStackDimensionSum(items, style), style, sizeRange);
     std::function<CGFloat(const ASStackLayoutSpecItem &)> flexFactor = flexFactorInViolationDirection(violation);
     // The flex factor sum is needed to determine if flexing is necessary.
-    // This value is also needed if the violation is positive and flexible children need to grow, so keep it around.
+    // This value is also needed if the violation is positive and flexible items need to grow, so keep it around.
     const CGFloat flexFactorSum = std::accumulate(items.begin(), items.end(), 0.0, [&](CGFloat x, const ASStackLayoutSpecItem &item) {
       return x + flexFactor(item);
     });
-    // If no children are able to flex then there is nothing left to do. Bail.
+    
+    // If no items are able to flex then there is nothing left to do with this line. Bail.
     if (flexFactorSum == 0) {
-      // If optimized flexing was used then we have to clean up the unsized children and lay them out at zero size.
+      // If optimized flexing was used then we have to clean up the unsized items and lay them out at zero size.
       if (useOptimizedFlexing) {
         layoutFlexibleChildrenAtZeroSize(items, style, concurrent, sizeRange, parentSize);
       }
-      return;
+      continue;
     }
+    
     std::function<CGFloat(const ASStackLayoutSpecItem &)> flexAdjustment = flexAdjustmentInViolationDirection(items,
                                                                                                               style,
                                                                                                               violation,
                                                                                                               flexFactorSum);
-    
-    // Compute any remaining violation to the first flexible child.
+    // Compute any remaining violation to the first flexible item.
     const CGFloat remainingViolation = std::accumulate(items.begin(), items.end(), violation, [&](CGFloat x, const ASStackLayoutSpecItem &item) {
       return x - flexAdjustment(item);
     });
     
     size_t firstFlexItem = -1;
     for(size_t i = 0; i < items.size(); i++) {
-      // Children are consider inflexible if they do not need to make a flex adjustment.
+      // Items are consider inflexible if they do not need to make a flex adjustment.
       if (flexAdjustment(items[i]) != 0) {
         firstFlexItem = i;
         break;
       }
     }
-    ASDisplayNodeCAssert(firstFlexItem != -1, @"At this point there must be at least 1 flexible item");
+    if (firstFlexItem == -1) {
+      continue;
+    }
     
     dispatchApplyIfNeeded(items.size(), concurrent, ^(size_t i) {
       auto &item = items[i];
       const CGFloat currentFlexAdjustment = flexAdjustment(item);
-      // Children are consider inflexible if they do not need to make a flex adjustment.
+      // Items are consider inflexible if they do not need to make a flex adjustment.
       if (currentFlexAdjustment != 0) {
         const CGFloat originalStackSize = stackDimension(style.direction, item.layout.size);
-        // Only apply the remaining violation for the first flexible child that has a flex grow factor.
+        // Only apply the remaining violation for the first flexible item that has a flex grow factor.
         const CGFloat flexedStackSize = originalStackSize + currentFlexAdjustment + (i == firstFlexItem && item.child.style.flexGrow > 0 ? remainingViolation : 0);
         item.layout = crossChildLayout(item.child,
                                        style,
