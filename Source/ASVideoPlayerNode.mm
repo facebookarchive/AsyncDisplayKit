@@ -214,11 +214,10 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (AVAsset *)asset
 {
-  AVAsset *asset = nil;
-  {
-    ASDN::MutexLocker l(__instanceLock__);
-    asset = _pendingAsset;
-  }
+  __instanceLock__.lock();
+  AVAsset *asset = _pendingAsset;
+  __instanceLock__.unlock();
+
   return asset ?: _videoNode.asset;
 }
 
@@ -254,61 +253,62 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 - (void)createControls
 {
-  ASDN::MutexLocker l(__instanceLock__);
+  {
+    ASDN::MutexLocker l(__instanceLock__);
 
-  if (_controlsDisabled) {
-    return;
-  }
-
-  if (_neededDefaultControls == nil) {
-    _neededDefaultControls = [self createDefaultControlElementArray];
-  }
-
-  if (_cachedControls == nil) {
-    _cachedControls = [[NSMutableDictionary alloc] init];
-  }
-
-  for (id object in _neededDefaultControls) {
-    ASVideoPlayerNodeControlType type = (ASVideoPlayerNodeControlType)[object integerValue];
-    switch (type) {
-      case ASVideoPlayerNodeControlTypePlaybackButton:
-        [self createPlaybackButton];
-        break;
-      case ASVideoPlayerNodeControlTypeElapsedText:
-        [self createElapsedTextField];
-        break;
-      case ASVideoPlayerNodeControlTypeDurationText:
-        [self createDurationTextField];
-        break;
-      case ASVideoPlayerNodeControlTypeScrubber:
-        [self createScrubber];
-        break;
-      case ASVideoPlayerNodeControlTypeFullScreenButton:
-        [self createFullScreenButton];
-        break;
-      case ASVideoPlayerNodeControlTypeFlexGrowSpacer:
-        [self createControlFlexGrowSpacer];
-        break;
-      default:
-        break;
+    if (_controlsDisabled) {
+      return;
     }
-  }
 
-  if (_delegateFlags.delegateCustomControls && _delegateFlags.delegateLayoutSpecForControls) {
-    NSDictionary *customControls = [_delegate videoPlayerNodeCustomControls:self];
-    for (id key in customControls) {
-      id node = customControls[key];
-      if (![node isKindOfClass:[ASDisplayNode class]]) {
-        continue;
+    if (_neededDefaultControls == nil) {
+      _neededDefaultControls = [self createDefaultControlElementArray];
+    }
+
+    if (_cachedControls == nil) {
+      _cachedControls = [[NSMutableDictionary alloc] init];
+    }
+
+    for (id object in _neededDefaultControls) {
+      ASVideoPlayerNodeControlType type = (ASVideoPlayerNodeControlType)[object integerValue];
+      switch (type) {
+        case ASVideoPlayerNodeControlTypePlaybackButton:
+          [self _locked_createPlaybackButton];
+          break;
+        case ASVideoPlayerNodeControlTypeElapsedText:
+          [self _locked_createElapsedTextField];
+          break;
+        case ASVideoPlayerNodeControlTypeDurationText:
+          [self _locked_createDurationTextField];
+          break;
+        case ASVideoPlayerNodeControlTypeScrubber:
+          [self _locked_createScrubber];
+          break;
+        case ASVideoPlayerNodeControlTypeFullScreenButton:
+          [self _locked_createFullScreenButton];
+          break;
+        case ASVideoPlayerNodeControlTypeFlexGrowSpacer:
+          [self _locked_createControlFlexGrowSpacer];
+          break;
+        default:
+          break;
       }
+    }
 
-      [self addSubnode:node];
-      [_cachedControls setObject:node forKey:key];
+    if (_delegateFlags.delegateCustomControls && _delegateFlags.delegateLayoutSpecForControls) {
+      NSDictionary *customControls = [_delegate videoPlayerNodeCustomControls:self];
+      for (id key in customControls) {
+        id node = customControls[key];
+        if (![node isKindOfClass:[ASDisplayNode class]]) {
+          continue;
+        }
+
+        [self addSubnode:node];
+        [_cachedControls setObject:node forKey:key];
+      }
     }
   }
 
   ASPerformBlockOnMainThread(^{
-    ASDN::MutexLocker l(__instanceLock__);
     [self setNeedsLayout];
   });
 }
@@ -345,7 +345,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _scrubberNode = nil;
 }
 
-- (void)createPlaybackButton
+- (void)_locked_createPlaybackButton
 {
   if (_playbackButtonNode == nil) {
     _playbackButtonNode = [[ASDefaultPlaybackButton alloc] init];
@@ -368,7 +368,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_playbackButtonNode];
 }
 
-- (void)createFullScreenButton
+- (void)_locked_createFullScreenButton
 {
   if (_fullScreenButtonNode == nil) {
     _fullScreenButtonNode = [[ASButtonNode alloc] init];
@@ -385,7 +385,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_fullScreenButtonNode];
 }
 
-- (void)createElapsedTextField
+- (void)_locked_createElapsedTextField
 {
   if (_elapsedTextNode == nil) {
     _elapsedTextNode = [[ASTextNode alloc] init];
@@ -398,7 +398,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_elapsedTextNode];
 }
 
-- (void)createDurationTextField
+- (void)_locked_createDurationTextField
 {
   if (_durationTextNode == nil) {
     _durationTextNode = [[ASTextNode alloc] init];
@@ -412,7 +412,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_durationTextNode];
 }
 
-- (void)createScrubber
+- (void)_locked_createScrubber
 {
   if (_scrubberNode == nil) {
     __weak __typeof__(self) weakSelf = self;
@@ -456,7 +456,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_scrubberNode];
 }
 
-- (void)createControlFlexGrowSpacer
+- (void)_locked_createControlFlexGrowSpacer
 {
   if (_controlFlexGrowSpacerSpec == nil) {
     _controlFlexGrowSpacerSpec = [[ASStackLayoutSpec alloc] init];
