@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASControlNode.h>
 #import <AsyncDisplayKit/ASControlNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASImageNode.h>
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
@@ -246,6 +247,18 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
 }
 
 #pragma clang diagnostic pop
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+  ASDisplayNodeAssertMainThread();
+
+  // If not enabled we should not care about receving touches
+  if (! self.enabled) {
+    return nil;
+  }
+
+  return [super hitTest:point withEvent:event];
+}
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
