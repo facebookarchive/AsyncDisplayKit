@@ -560,11 +560,10 @@ static ASDN::Mutex cacheLock;
 - (void)clearContents
 {
   [super clearContents];
-  
-  {
-    ASDN::MutexLocker l(__instanceLock__);
+    
+  __instanceLock__.lock();
     _weakCacheEntry = nil;  // release contents from the cache.
-  }
+  __instanceLock__.unlock();
 }
 
 #pragma mark - Cropping
@@ -591,7 +590,7 @@ static ASDN::Mutex cacheLock;
   _cropEnabled = cropEnabled;
   _cropDisplayBounds = cropBounds;
   
-  UIImage *image = self.image;
+  UIImage *image = _image;
   __instanceLock__.unlock();
 
   // If we have an image to display, display it, respecting our recrop flag.

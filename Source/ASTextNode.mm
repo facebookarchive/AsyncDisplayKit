@@ -1253,7 +1253,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
 {
   ASDN::MutexLocker l(__instanceLock__);
   
-  _composedTruncationText = [self _prepareTruncationStringForDrawing:[self _composedTruncationText]];
+  _composedTruncationText = [self _locked_prepareTruncationStringForDrawing:[self _locked_composedTruncationText]];
 }
 
 - (void)_invalidateTruncationText
@@ -1289,10 +1289,8 @@ static NSAttributedString *DefaultTruncationAttributedString()
  * additional truncation message and a truncation attributed string, they will
  * be properly composed.
  */
-- (NSAttributedString *)_composedTruncationText
+- (NSAttributedString *)_locked_composedTruncationText
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
   //If we have neither return the default
   if (!_additionalTruncationMessage && !_truncationAttributedText) {
     return _composedTruncationText;
@@ -1319,10 +1317,8 @@ static NSAttributedString *DefaultTruncationAttributedString()
  * - Adds whole-string attributes so the truncation message matches the styling
  * of the body text
  */
-- (NSAttributedString *)_prepareTruncationStringForDrawing:(NSAttributedString *)truncationString
+- (NSAttributedString *)_locked_prepareTruncationStringForDrawing:(NSAttributedString *)truncationString
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
   truncationString = ASCleanseAttributedStringOfCoreTextAttributes(truncationString);
   NSMutableAttributedString *truncationMutableString = [truncationString mutableCopy];
   // Grab the attributes from the full string

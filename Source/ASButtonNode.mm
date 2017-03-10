@@ -172,6 +172,7 @@
   if ((_imageNode != nil || newImage != nil) && newImage != self.imageNode.image) {
     _imageNode.image = newImage;
     __instanceLock__.unlock();
+
     [self setNeedsLayout];
     return;
   }
@@ -196,11 +197,13 @@
     newTitle = _normalAttributedTitle;
   }
 
-  if ((_titleNode != nil || newTitle.length > 0) && [self.titleNode.attributedText isEqualToAttributedString:newTitle] == NO) {
-    _titleNode.attributedText = newTitle;
+  ASTextNode *titleNode = _titleNode;
+  
+  if ((titleNode != nil || newTitle.length > 0) && [titleNode.attributedText isEqualToAttributedString:newTitle] == NO) {
+    titleNode.attributedText = newTitle;
     __instanceLock__.unlock();
     
-    self.accessibilityLabel = _titleNode.accessibilityLabel;
+    self.accessibilityLabel = titleNode.accessibilityLabel;
     [self setNeedsLayout];
     return;
   }
@@ -333,8 +336,7 @@
     NSForegroundColorAttributeName : color ? : [UIColor blackColor]
   };
     
-  NSAttributedString *string = [[NSAttributedString alloc] initWithString:title
-                                                               attributes:attributes];
+  NSAttributedString *string = [[NSAttributedString alloc] initWithString:title attributes:attributes];
   [self setAttributedTitle:string forState:state];
 }
 #endif

@@ -434,17 +434,15 @@ static NSString * const kRate = @"rate";
 {
   [super didEnterVisibleState];
   
+  __instanceLock__.lock();
   BOOL shouldPlay = NO;
-
-  {
-    ASDN::MutexLocker l(__instanceLock__);
-    if (_shouldBePlaying || _shouldAutoplay) {
-      if (_player != nil && CMTIME_IS_VALID(_lastPlaybackTime)) {
-        [_player seekToTime:_lastPlaybackTime];
-      }
-      shouldPlay = YES;
+  if (_shouldBePlaying || _shouldAutoplay) {
+    if (_player != nil && CMTIME_IS_VALID(_lastPlaybackTime)) {
+      [_player seekToTime:_lastPlaybackTime];
     }
+    shouldPlay = YES;
   }
+  __instanceLock__.unlock();
   
   if (shouldPlay) {
     [self play];
@@ -778,11 +776,10 @@ static NSString * const kRate = @"rate";
 
 - (void)setPlayerNode:(ASDisplayNode *)playerNode
 {
-  {
-    ASDN::MutexLocker l(__instanceLock__);
-    _playerNode = playerNode;
-  }
-  
+  __instanceLock__.lock();
+  _playerNode = playerNode;
+  __instanceLock__.unlock();
+
   [self setNeedsLayout];
 }
 

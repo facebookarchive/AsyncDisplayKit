@@ -272,22 +272,22 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
       ASVideoPlayerNodeControlType type = (ASVideoPlayerNodeControlType)[object integerValue];
       switch (type) {
         case ASVideoPlayerNodeControlTypePlaybackButton:
-          [self createPlaybackButton];
+          [self _locked_createPlaybackButton];
           break;
         case ASVideoPlayerNodeControlTypeElapsedText:
-          [self createElapsedTextField];
+          [self _locked_createElapsedTextField];
           break;
         case ASVideoPlayerNodeControlTypeDurationText:
-          [self createDurationTextField];
+          [self _locked_createDurationTextField];
           break;
         case ASVideoPlayerNodeControlTypeScrubber:
-          [self createScrubber];
+          [self _locked_createScrubber];
           break;
         case ASVideoPlayerNodeControlTypeFullScreenButton:
-          [self createFullScreenButton];
+          [self _locked_createFullScreenButton];
           break;
         case ASVideoPlayerNodeControlTypeFlexGrowSpacer:
-          [self createControlFlexGrowSpacer];
+          [self _locked_createControlFlexGrowSpacer];
           break;
         default:
           break;
@@ -345,7 +345,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _scrubberNode = nil;
 }
 
-- (void)createPlaybackButton
+- (void)_locked_createPlaybackButton
 {
   if (_playbackButtonNode == nil) {
     _playbackButtonNode = [[ASDefaultPlaybackButton alloc] init];
@@ -368,7 +368,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_playbackButtonNode];
 }
 
-- (void)createFullScreenButton
+- (void)_locked_createFullScreenButton
 {
   if (_fullScreenButtonNode == nil) {
     _fullScreenButtonNode = [[ASButtonNode alloc] init];
@@ -385,7 +385,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_fullScreenButtonNode];
 }
 
-- (void)createElapsedTextField
+- (void)_locked_createElapsedTextField
 {
   if (_elapsedTextNode == nil) {
     _elapsedTextNode = [[ASTextNode alloc] init];
@@ -398,7 +398,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_elapsedTextNode];
 }
 
-- (void)createDurationTextField
+- (void)_locked_createDurationTextField
 {
   if (_durationTextNode == nil) {
     _durationTextNode = [[ASTextNode alloc] init];
@@ -412,7 +412,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_durationTextNode];
 }
 
-- (void)createScrubber
+- (void)_locked_createScrubber
 {
   if (_scrubberNode == nil) {
     __weak __typeof__(self) weakSelf = self;
@@ -456,7 +456,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_scrubberNode];
 }
 
-- (void)createControlFlexGrowSpacer
+- (void)_locked_createControlFlexGrowSpacer
 {
   if (_controlFlexGrowSpacerSpec == nil) {
     _controlFlexGrowSpacerSpec = [[ASStackLayoutSpec alloc] init];
