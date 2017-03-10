@@ -13,8 +13,9 @@
 #import <AsyncDisplayKit/ASMutableElementMap.h>
 #import <AsyncDisplayKit/ASSection.h>
 #import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
+#import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 
-@interface ASElementMap ()
+@interface ASElementMap () <ASDescriptionProvider>
 
 @property (nonatomic, strong, readonly) NSArray<ASSection *> *sections;
 
@@ -166,6 +167,21 @@
 - (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState *)state objects:(id  _Nullable __unsafe_unretained [])buffer count:(NSUInteger)len
 {
   return [_elementToIndexPathMap countByEnumeratingWithState:state objects:buffer count:len];
+}
+
+#pragma mark - ASDescriptionProvider
+
+- (NSString *)description
+{
+  return ASObjectDescriptionMake(self, [self propertiesForDescription]);
+}
+
+- (NSMutableArray<NSDictionary *> *)propertiesForDescription
+{
+  NSMutableArray *result = [NSMutableArray array];
+  [result addObject:@{ @"items" : _sectionsOfItems }];
+  [result addObject:@{ @"supplementaryElements" : _supplementaryElements }];
+  return result;
 }
 
 #pragma mark - Internal

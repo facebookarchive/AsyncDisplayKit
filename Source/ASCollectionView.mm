@@ -1740,14 +1740,22 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   // Visible items
   for (NSIndexPath *indexPath in self.indexPathsForVisibleItems) {
     ASCollectionElement *element = [map elementForItemAtIndexPath:indexPath];
-    [result addObject:element];
+    if (element != nil) {
+      [result addObject:element];
+    } else {
+      ASDisplayNodeFailAssert(@"Couldn't find 'visible' item at index path %@ in map %@", indexPath, map);
+    }
   }
 
   // Visible supplementary elements
   for (NSString *kind in map.supplementaryElementKinds) {
     for (NSIndexPath *indexPath in [self asdk_indexPathsForVisibleSupplementaryElementsOfKind:kind]) {
       ASCollectionElement *element = [map supplementaryElementOfKind:kind atIndexPath:indexPath];
-      [result addObject:element];
+      if (element != nil) {
+        [result addObject:element];
+      } else {
+        ASDisplayNodeFailAssert(@"Couldn't find 'visible' supplementary element of kind %@ at index path %@ in map %@", kind, indexPath, map);
+      }
     }
   }
   return result;
