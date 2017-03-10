@@ -15,7 +15,7 @@
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASMainSerialQueue.h>
-#import <AsyncDisplayKit/ASMultidimensionalArrayUtils.h>
+#import <AsyncDisplayKit/ASTwoDimensionalArrayUtils.h>
 #import <AsyncDisplayKit/ASSection.h>
 #import <AsyncDisplayKit/ASThread.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>

@@ -11,8 +11,8 @@
 		044284FF1BAA3BD600D16268 /* UICollectionViewLayout+ASConvenience.h in Headers */ = {isa = PBXBuildFile; fileRef = 205F0E0D1B371875007741D0 /* UICollectionViewLayout+ASConvenience.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		044285081BAA63FE00D16268 /* ASBatchFetching.h in Headers */ = {isa = PBXBuildFile; fileRef = 044285051BAA63FE00D16268 /* ASBatchFetching.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		0442850A1BAA63FE00D16268 /* ASBatchFetching.m in Sources */ = {isa = PBXBuildFile; fileRef = 044285061BAA63FE00D16268 /* ASBatchFetching.m */; };
-		0442850E1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
-		044285101BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */ = {isa = PBXBuildFile; fileRef = 0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */; };
+		0442850E1BAA64EC00D16268 /* ASTwoDimensionalArrayUtils.h in Headers */ = {isa = PBXBuildFile; fileRef = 0442850B1BAA64EC00D16268 /* ASTwoDimensionalArrayUtils.h */; settings = {ATTRIBUTES = (Private, ); }; };
+		044285101BAA64EC00D16268 /* ASTwoDimensionalArrayUtils.m in Sources */ = {isa = PBXBuildFile; fileRef = 0442850C1BAA64EC00D16268 /* ASTwoDimensionalArrayUtils.m */; };
 		052EE0661A159FEF002C6279 /* ASMultiplexImageNodeTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 052EE0651A159FEF002C6279 /* ASMultiplexImageNodeTests.m */; };
 		052EE06B1A15A0D8002C6279 /* TestResources in Resources */ = {isa = PBXBuildFile; fileRef = 052EE06A1A15A0D8002C6279 /* TestResources */; };
 		056D21551ABCEF50001107EF /* ASImageNodeSnapshotTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 056D21541ABCEF50001107EF /* ASImageNodeSnapshotTests.m */; };
@@ -390,8 +390,8 @@
 		044285011BAA3CC700D16268 /* module.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = module.modulemap; sourceTree = "<group>"; };
 		044285051BAA63FE00D16268 /* ASBatchFetching.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASBatchFetching.h; sourceTree = "<group>"; };
 		044285061BAA63FE00D16268 /* ASBatchFetching.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASBatchFetching.m; sourceTree = "<group>"; };
-		0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMultidimensionalArrayUtils.h; sourceTree = "<group>"; };
-		0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASMultidimensionalArrayUtils.mm; sourceTree = "<group>"; };
+		0442850B1BAA64EC00D16268 /* ASTwoDimensionalArrayUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASTwoDimensionalArrayUtils.h; sourceTree = "<group>"; };
+		0442850C1BAA64EC00D16268 /* ASTwoDimensionalArrayUtils.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASTwoDimensionalArrayUtils.m; sourceTree = "<group>"; };
 		0516FA3A1A15563400B4EBED /* ASAvailability.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASAvailability.h; sourceTree = "<group>"; };
 		0516FA3B1A15563400B4EBED /* ASLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLog.h; sourceTree = "<group>"; };
 		0516FA3E1A1563D200B4EBED /* ASMultiplexImageNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASMultiplexImageNode.h; sourceTree = "<group>"; };
@@ -1192,8 +1192,8 @@
 				ACF6ED441B17847A00DA7C62 /* ASInternalHelpers.m */,
 				E52405B41C8FEF16004DC8E7 /* ASLayoutTransition.h */,
 				E52405B21C8FEF03004DC8E7 /* ASLayoutTransition.mm */,
-				0442850B1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h */,
-				0442850C1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm */,
+				0442850B1BAA64EC00D16268 /* ASTwoDimensionalArrayUtils.h */,
+				0442850C1BAA64EC00D16268 /* ASTwoDimensionalArrayUtils.m */,
 				CC3B20811C3F76D600798563 /* ASPendingStateController.h */,
 				CC3B20821C3F76D600798563 /* ASPendingStateController.mm */,
 				CC512B841DAC45C60054848E /* ASTableView+Undeprecated.h */,
@@ -1504,7 +1504,7 @@
 				CC034A131E649F1300626263 /* AsyncDisplayKit+IGListKitMethods.h in Headers */,
 				690ED5961E36D118000627C0 /* ASControlNode+tvOS.h in Headers */,
 				695943401D70815300B0EE1F /* ASDisplayNodeLayout.h in Headers */,
-				0442850E1BAA64EC00D16268 /* ASMultidimensionalArrayUtils.h in Headers */,
+				0442850E1BAA64EC00D16268 /* ASTwoDimensionalArrayUtils.h in Headers */,
 				DE8BEAC21C2DF3FC00D57C12 /* ASDelegateProxy.h in Headers */,
 				B350623E1B010EFD0018CF92 /* _ASAsyncTransactionContainer+Private.h in Headers */,
 				AC6145411D8AFAE8003D62A2 /* ASSection.h in Headers */,
@@ -1906,7 +1906,7 @@
 				B35062251B010EFD0018CF92 /* ASMutableAttributedStringBuilder.m in Sources */,
 				B35062071B010EFD0018CF92 /* ASNetworkImageNode.mm in Sources */,
 				34EFC76D1B701CF100AD841F /* ASOverlayLayoutSpec.mm in Sources */,
-				044285101BAA64EC00D16268 /* ASMultidimensionalArrayUtils.mm in Sources */,
+				044285101BAA64EC00D16268 /* ASTwoDimensionalArrayUtils.m in Sources */,
 				B35062271B010EFD0018CF92 /* ASRangeController.mm in Sources */,
 				0442850A1BAA63FE00D16268 /* ASBatchFetching.m in Sources */,
 				68FC85E61CE29B9400EDD713 /* ASNavigationController.m in Sources */,

@@ -9,7 +9,7 @@
 #import "ASElementMap.h"
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
-#import <AsyncDisplayKit/ASMultidimensionalArrayUtils.h>
+#import <AsyncDisplayKit/ASTwoDimensionalArrayUtils.h>
 #import <AsyncDisplayKit/ASMutableElementMap.h>
 #import <AsyncDisplayKit/ASSection.h>
 #import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
