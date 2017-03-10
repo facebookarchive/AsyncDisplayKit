@@ -398,11 +398,12 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 #if AS_TEXTNODE_RECORD_ATTRIBUTED_STRINGS
 	  [ASTextNode _registerAttributedText:_attributedText];
 #endif
-    // Sync the truncation string with attributes from the updated _attributedString
-    // Without this, the size calculation of the text with truncation applied will
-    // not take into account the attributes of attributedText in the last line
-    [self _updateComposedTruncationText];
   }
+    
+  // Sync the truncation string with attributes from the updated _attributedString
+  // Without this, the size calculation of the text with truncation applied will
+  // not take into account the attributes of attributedText in the last line
+  [self _updateComposedTruncationText];
   
   NSUInteger length = attributedText.length;
   if (length > 0) {
