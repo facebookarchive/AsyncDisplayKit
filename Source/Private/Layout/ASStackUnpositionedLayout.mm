@@ -373,7 +373,7 @@ static std::function<CGFloat(const ASStackLayoutSpecItem &)> flexShrinkAdjustmen
   });
   return [style, scaledFlexShrinkFactorSum, violation, flexFactorSum](const ASStackLayoutSpecItem &item) {
     if (scaledFlexShrinkFactorSum == 0.0) {
-      return 0.0;
+      return (CGFloat)0.0;
     }
     
     const CGFloat scaledFlexShrinkFactorRatio = scaledFlexShrinkFactor(item, style, flexFactorSum) / scaledFlexShrinkFactorSum;
