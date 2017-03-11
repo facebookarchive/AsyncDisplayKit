@@ -197,7 +197,7 @@
     newTitle = _normalAttributedTitle;
   }
 
-  // _titleNode is lazily created by its setter, so calling the setter is essential here.
+  // Calling self.titleNode is essential here because _titleNode is lazily created by the getter.
   if ((_titleNode != nil || newTitle.length > 0) && [self.titleNode.attributedText isEqualToAttributedString:newTitle] == NO) {
     _titleNode.attributedText = newTitle;
     __instanceLock__.unlock();
