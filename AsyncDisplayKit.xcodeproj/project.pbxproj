@@ -133,6 +133,7 @@
 		690ED5981E36D118000627C0 /* ASControlNode+tvOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 690ED5931E36D118000627C0 /* ASControlNode+tvOS.m */; };
 		690ED5991E36D118000627C0 /* ASImageNode+tvOS.h in Headers */ = {isa = PBXBuildFile; fileRef = 690ED5941E36D118000627C0 /* ASImageNode+tvOS.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		690ED59B1E36D118000627C0 /* ASImageNode+tvOS.m in Sources */ = {isa = PBXBuildFile; fileRef = 690ED5951E36D118000627C0 /* ASImageNode+tvOS.m */; };
+		692510141E74FB44003F2DD0 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 692510131E74FB44003F2DD0 /* Default-568h@2x.png */; };
 		692BE8D71E36B65B00C86D87 /* ASLayoutSpecPrivate.h in Headers */ = {isa = PBXBuildFile; fileRef = 692BE8D61E36B65B00C86D87 /* ASLayoutSpecPrivate.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		6947B0BE1E36B4E30007C478 /* ASStackUnpositionedLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = 6947B0BC1E36B4E30007C478 /* ASStackUnpositionedLayout.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		6947B0C01E36B4E30007C478 /* ASStackUnpositionedLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = 6947B0BD1E36B4E30007C478 /* ASStackUnpositionedLayout.mm */; };
@@ -568,6 +569,7 @@
 		690ED5931E36D118000627C0 /* ASControlNode+tvOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ASControlNode+tvOS.m"; sourceTree = "<group>"; };
 		690ED5941E36D118000627C0 /* ASImageNode+tvOS.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "ASImageNode+tvOS.h"; sourceTree = "<group>"; };
 		690ED5951E36D118000627C0 /* ASImageNode+tvOS.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "ASImageNode+tvOS.m"; sourceTree = "<group>"; };
+		692510131E74FB44003F2DD0 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "Default-568h@2x.png"; sourceTree = "<group>"; };
 		692BE8D61E36B65B00C86D87 /* ASLayoutSpecPrivate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASLayoutSpecPrivate.h; sourceTree = "<group>"; };
 		6947B0BC1E36B4E30007C478 /* ASStackUnpositionedLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASStackUnpositionedLayout.h; sourceTree = "<group>"; };
 		6947B0BD1E36B4E30007C478 /* ASStackUnpositionedLayout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASStackUnpositionedLayout.mm; sourceTree = "<group>"; };
@@ -825,6 +827,7 @@
 		057D02C11AC0A66700C7AC3C /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				692510131E74FB44003F2DD0 /* Default-568h@2x.png */,
 				057D02C21AC0A66700C7AC3C /* Info.plist */,
 				057D02C31AC0A66700C7AC3C /* main.m */,
 			);
@@ -1673,6 +1676,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				692510141E74FB44003F2DD0 /* Default-568h@2x.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
