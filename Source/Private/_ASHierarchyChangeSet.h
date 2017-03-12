@@ -27,6 +27,13 @@ typedef NS_ENUM(NSInteger, _ASHierarchyChangeType) {
   _ASHierarchyChangeTypeReload,
   
   /**
+   * A move change, as submitted by the user. Before a change set is
+   * completed, these changes are submitted to delete-insert pairs
+   * separately.
+   */
+  _ASHierarchyChangeTypeMove,
+  
+  /**
    * A change that was either an original delete, or the first 
    * part of a decomposed reload.
    */
@@ -89,6 +96,14 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
  * with type .Insert or .Delete. Calling this on changes of other types is an error.
  */
 - (_ASHierarchyItemChange *)changeByFinalizingType;
+@end
+
+/**
+ * Subclass to handle move
+ */
+@interface _ASHierarchyMoveItemChange : _ASHierarchyItemChange
+@property (nonatomic, strong, readonly) NSIndexPath *fromIndexPath;
+@property (nonatomic, strong, readonly) NSIndexPath *toIndexPath;
 @end
 
 @interface _ASHierarchyChangeSet : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider>

@@ -1831,6 +1831,17 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
       
       __block NSUInteger numberOfUpdates = 0;
       [self _superPerformBatchUpdates:^{
+        
+        // Use native moveItem instead of Delete-Insert
+        NSMutableArray *fromIndexPaths = [NSMutableArray array];
+        NSMutableArray *toIndexPaths = [NSMutableArray array];
+        for (_ASHierarchyMoveItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeMove]) {
+          [super moveItemAtIndexPath:change.fromIndexPath toIndexPath:change.toIndexPath];
+          [fromIndexPaths addObject:change.fromIndexPath];
+          [toIndexPaths addObject:change.toIndexPath];
+          numberOfUpdates++;
+        }
+        
         for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeReload]) {
           [super reloadItemsAtIndexPaths:change.indexPaths];
           numberOfUpdates++;
@@ -1842,7 +1853,14 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
         }
         
         for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeOriginalDelete]) {
-          [super deleteItemsAtIndexPaths:change.indexPaths];
+          NSMutableArray *actualIndexPaths = [NSMutableArray array];
+          for (NSIndexPath *indexPath in change.indexPaths) {
+            if (![fromIndexPaths containsObject:indexPath]) {
+              [actualIndexPaths addObject:indexPath];
+            }
+          }
+          
+          [super deleteItemsAtIndexPaths:actualIndexPaths];
           numberOfUpdates++;
         }
         
@@ -1857,7 +1875,14 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
         }
         
         for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeOriginalInsert]) {
-          [super insertItemsAtIndexPaths:change.indexPaths];
+          NSMutableArray *actualIndexPaths = [NSMutableArray array];
+          for (NSIndexPath *indexPath in change.indexPaths) {
+            if (![toIndexPaths containsObject:indexPath]) {
+              [actualIndexPaths addObject:indexPath];
+            }
+          }
+          
+          [super insertItemsAtIndexPaths:actualIndexPaths];
           numberOfUpdates++;
         }
       } completion:^(BOOL finished){
