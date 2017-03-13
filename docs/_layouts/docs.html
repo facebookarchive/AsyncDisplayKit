@@ -1,0 +1,39 @@
+---
+sectionid: docs
+---
+
+{% include header.html %}
+
+<div class="container container-margin">
+	
+	<div class="sidebar">
+		{% include nav_docs.html %}
+	</div>
+	
+	<div class="content">
+		<h1>
+	      {{ page.title }}
+	    </h1>
+	    <p>{{ page.description }}</p>
+	
+	    {{ content }}
+	    
+	    <p><a class="edit-page-link btn" href="https://github.com/AsyncDisplayKit/Documentation/tree/master/docs/{{ page.relative_path }}" target="_blank">Edit on GitHub</a></p>
+
+	
+	    <div class="docs-prevnext">
+	      {% if page.prevPage %}
+	        <a href="/docs/{{ page.prevPage }}">&larr; Prev</a>
+	      {% endif %}
+	      {% if page.nextPage %}
+	        <a class="right" href="/docs/{{ page.nextPage }}">Next &rarr;</a>
+	      {% endif %}
+	    </div>
+	
+	    <a id="_"></a>
+	</div>
+	
+	<div style="clear:both;"></div>
+</div>
+
+{% include footer.html %}

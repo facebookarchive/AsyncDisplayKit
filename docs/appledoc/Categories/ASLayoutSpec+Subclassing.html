@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASLayoutSpec(Subclassing) Category Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/childAtIndex:">- childAtIndex:</option>
+		
+		<option value="//api/name/layoutElementToAddFromLayoutElement:">- layoutElementToAddFromLayoutElement:</option>
+		
+		<option value="//api/name/setChild:atIndex:">- setChild:atIndex:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASLayoutSpec(Subclassing) Category Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Declared in</th>
+	<td>ASLayoutSpec+Subclasses.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/layoutElementToAddFromLayoutElement:" title="layoutElementToAddFromLayoutElement:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutElementToAddFromLayoutElement:">&ndash;&nbsp;layoutElementToAddFromLayoutElement:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Helper method for finalLayoutElement support</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (id&lt;ASLayoutElement&gt;)layoutElementToAddFromLayoutElement:(id&lt;ASLayoutElement&gt;)<em>child</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> If you are getting recursion crashes here after implementing finalLayoutElement, make sure
+that you are setting isFinalLayoutElement flag to YES. This must be one BEFORE adding a child
+to the new ASLayoutElement.</p>
+
+<p>For example:
+- (id<a href="../Protocols/ASLayoutElement.html">ASLayoutElement</a>)finalLayoutElement
+{
+ASInsetLayoutSpec *insetSpec = [[ASInsetLayoutSpec alloc] init];
+insetSpec.insets = UIEdgeInsetsMake(10,10,10,10);
+insetSpec.isFinalLayoutElement = YES;
+[insetSpec setChild:self];
+return insetSpec;
+}</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutSpec+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/setChild:atIndex:" title="setChild:atIndex:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setChild:atIndex:">&ndash;&nbsp;setChild:atIndex:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Adds a child with the given identifier to this layout spec.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setChild:(id&lt;ASLayoutElement&gt;)<em>child</em> atIndex:(NSUInteger)<em>index</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>child</code></th>
+						<td><p>A child to be added.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>index</code></th>
+						<td><p>An index associated with the child.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Every ASLayoutSpec must act on at least one child. The ASLayoutSpec base class takes the
+responsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec,
+only require a single child.</p>
+
+<p>For layout specs that require a known number of children (ASBackgroundLayoutSpec, for example)
+a subclass can use the setChild method to set the &ldquo;primary&rdquo; child. It should then use this method
+to set any other required children. Ideally a subclass would hide this from the user, and use the
+setChild:forIndex: internally. For example, ASBackgroundLayoutSpec exposes a backgroundChild
+property that behind the scenes is calling setChild:forIndex:.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutSpec+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/childAtIndex:" title="childAtIndex:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/childAtIndex:">&ndash;&nbsp;childAtIndex:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns the child added to this layout spec using the given index.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable id&lt;ASLayoutElement&gt;)childAtIndex:(NSUInteger)<em>index</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>index</code></th>
+						<td><p>An identifier associated with the the child.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutSpec+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

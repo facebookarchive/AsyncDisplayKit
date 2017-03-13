@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASStackLayoutJustifyContent Constants Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+
+	
+
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASStackLayoutJustifyContent Constants Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Declared in</th>
+	<td>ASStackLayoutDefines.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+
+					
+
+                    
+                    <h3 class="subsubtitle method-title">ASStackLayoutJustifyContent</h3>
+                    
+					
+					<div class="section section-overview">
+                        <p>If no children are flexible, how should this spec justify its children in the available space?</p>
+					</div>
+					
+					
+                    <div class="section">
+                        <!-- display enum values -->
+                        
+                        <h4 class="method-subtitle">Definition</h4>
+                        <code>typedef NS_ENUM(NSUInteger, ASStackLayoutJustifyContent ) {<br>
+                            
+                            &nbsp;&nbsp; <a href="">ASStackLayoutJustifyContentStart</a>,<br>
+                            
+                            &nbsp;&nbsp; <a href="">ASStackLayoutJustifyContentCenter</a>,<br>
+                            
+                            &nbsp;&nbsp; <a href="">ASStackLayoutJustifyContentEnd</a>,<br>
+                            
+                            &nbsp;&nbsp; <a href="">ASStackLayoutJustifyContentSpaceBetween</a>,<br>
+                            
+                            &nbsp;&nbsp; <a href="">ASStackLayoutJustifyContentSpaceAround</a>,<br>
+                            
+                            };</code>
+                    
+                    </div>
+                    
+                    <div class="section section-methods">
+                        <h4 class="method-subtitle">Constants</h4>
+                        <dl class="termdef">
+                            
+                            <dt><a name="" title="ASStackLayoutJustifyContentStart"></a><code>ASStackLayoutJustifyContentStart</code></dt>
+<dd>
+
+
+<p>   On overflow, children overflow out of this spec&rsquo;s bounds on the right/bottom side.
+   On underflow, children are left/top-aligned within this spec&rsquo;s bounds.</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASStackLayoutDefines.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASStackLayoutJustifyContentCenter"></a><code>ASStackLayoutJustifyContentCenter</code></dt>
+<dd>
+
+
+<p>   On overflow, children are centered and overflow on both sides.
+   On underflow, children are centered within this spec&rsquo;s bounds in the stacking direction.</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASStackLayoutDefines.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASStackLayoutJustifyContentEnd"></a><code>ASStackLayoutJustifyContentEnd</code></dt>
+<dd>
+
+
+<p>   On overflow, children overflow out of this spec&rsquo;s bounds on the left/top side.
+   On underflow, children are right/bottom-aligned within this spec&rsquo;s bounds.</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASStackLayoutDefines.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASStackLayoutJustifyContentSpaceBetween"></a><code>ASStackLayoutJustifyContentSpaceBetween</code></dt>
+<dd>
+
+
+<p>   On overflow or if the stack has only 1 child, this value is identical to ASStackLayoutJustifyContentStart.
+   Otherwise, the starting edge of the first child is at the starting edge of the stack,
+   the ending edge of the last child is at the ending edge of the stack, and the remaining children
+   are distributed so that the spacing between any two adjacent ones is the same.
+   If there is a remaining space after spacing division, it is combined with the last spacing (i.e the one between the last 2 children).</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASStackLayoutDefines.h</code>.
+	</p>
+	
+</dd>
+                            
+                            <dt><a name="" title="ASStackLayoutJustifyContentSpaceAround"></a><code>ASStackLayoutJustifyContentSpaceAround</code></dt>
+<dd>
+
+
+<p>   On overflow or if the stack has only 1 child, this value is identical to ASStackLayoutJustifyContentCenter.
+   Otherwise, children are distributed such that the spacing between any two adjacent ones is the same,
+   and the spacing between the first/last child and the stack edges is half the size of the spacing between children.
+   If there is a remaining space after spacing division, it is combined with the last spacing (i.e the one between the last child and the stack ending edge).</p>
+
+
+
+
+
+    
+	<p>
+		Declared In <code class="declared-in-ref">ASStackLayoutDefines.h</code>.
+	</p>
+	
+</dd>
+                            
+                        </dl>
+                    </div>
+                    
+
+                    
+                    
+
+                    
+
+                    
+                    <div class="method-subsection declared-in-section">
+                        <h4 class="method-subtitle">Declared In</h4>
+                        <p><code class="declared-in-ref">ASStackLayoutDefines.h</code></p>
+                    </div>
+                    
+                    
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

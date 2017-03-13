@@ -1,0 +1,24 @@
+---
+url: http://asyncdisplaykit.org
+name: AsyncDisplayKit
+relative_permalinks: false
+markdown: kramdown
+timezone: America/Los_Angeles
+google_analytics: UA-87502907-1
+
+safe: true
+lsi: false
+highlighter: rouge
+
+defaults:
+  -
+    scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: post
+      is_post: true
+
+collections:
+  docs:
+    output: true

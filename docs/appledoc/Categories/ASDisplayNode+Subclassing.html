@@ -1,0 +1,2562 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASDisplayNode(Subclassing) Category Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/calculatedLayout">calculatedLayout</option>
+		
+		<option value="//api/name/contentsScaleForDisplay">contentsScaleForDisplay</option>
+		
+		<option value="//api/name/inHierarchy">inHierarchy</option>
+		
+	</optgroup>
+	
+
+	
+	<optgroup label="Class Methods">
+		
+		<option value="//api/name/displayWithParameters:isCancelled:">+ displayWithParameters:isCancelled:</option>
+		
+		<option value="//api/name/drawRect:withParameters:isCancelled:isRasterizing:">+ drawRect:withParameters:isCancelled:isRasterizing:</option>
+		
+	</optgroup>
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/asyncTraitCollectionDidChange">- asyncTraitCollectionDidChange</option>
+		
+		<option value="//api/name/calculateLayoutThatFits:">- calculateLayoutThatFits:</option>
+		
+		<option value="//api/name/calculateLayoutThatFits:restrictedToSize:relativeToParentSize:">- calculateLayoutThatFits:restrictedToSize:relativeToParentSize:</option>
+		
+		<option value="//api/name/calculateSizeThatFits:">- calculateSizeThatFits:</option>
+		
+		<option value="//api/name/calculatedLayoutDidChange">- calculatedLayoutDidChange</option>
+		
+		<option value="//api/name/clearContents">- clearContents</option>
+		
+		<option value="//api/name/clearFetchedData">- clearFetchedData</option>
+		
+		<option value="//api/name/descriptionForRecursiveDescription">- descriptionForRecursiveDescription</option>
+		
+		<option value="//api/name/didEnterDisplayState">- didEnterDisplayState</option>
+		
+		<option value="//api/name/didEnterPreloadState">- didEnterPreloadState</option>
+		
+		<option value="//api/name/didEnterVisibleState">- didEnterVisibleState</option>
+		
+		<option value="//api/name/didExitDisplayState">- didExitDisplayState</option>
+		
+		<option value="//api/name/didExitHierarchy">- didExitHierarchy</option>
+		
+		<option value="//api/name/didExitPreloadState">- didExitPreloadState</option>
+		
+		<option value="//api/name/didExitVisibleState">- didExitVisibleState</option>
+		
+		<option value="//api/name/didLoad">- didLoad</option>
+		
+		<option value="//api/name/displayDidFinish">- displayDidFinish</option>
+		
+		<option value="//api/name/displayWillStart">- displayWillStart</option>
+		
+		<option value="//api/name/drawParametersForAsyncLayer:">- drawParametersForAsyncLayer:</option>
+		
+		<option value="//api/name/fetchData">- fetchData</option>
+		
+		<option value="//api/name/gestureRecognizerShouldBegin:">- gestureRecognizerShouldBegin:</option>
+		
+		<option value="//api/name/hitTest:withEvent:">- hitTest:withEvent:</option>
+		
+		<option value="//api/name/interfaceStateDidChange:fromState:">- interfaceStateDidChange:fromState:</option>
+		
+		<option value="//api/name/invalidateCalculatedLayout">- invalidateCalculatedLayout</option>
+		
+		<option value="//api/name/layout">- layout</option>
+		
+		<option value="//api/name/layoutDidFinish">- layoutDidFinish</option>
+		
+		<option value="//api/name/layoutSpecThatFits:">- layoutSpecThatFits:</option>
+		
+		<option value="//api/name/placeholderImage">- placeholderImage</option>
+		
+		<option value="//api/name/recursivelySetNeedsDisplayAtScale:">- recursivelySetNeedsDisplayAtScale:</option>
+		
+		<option value="//api/name/setNeedsDisplayAtScale:">- setNeedsDisplayAtScale:</option>
+		
+		<option value="//api/name/subnodeDisplayDidFinish:">- subnodeDisplayDidFinish:</option>
+		
+		<option value="//api/name/subnodeDisplayWillStart:">- subnodeDisplayWillStart:</option>
+		
+		<option value="//api/name/touchesBegan:withEvent:">- touchesBegan:withEvent:</option>
+		
+		<option value="//api/name/touchesCancelled:withEvent:">- touchesCancelled:withEvent:</option>
+		
+		<option value="//api/name/touchesEnded:withEvent:">- touchesEnded:withEvent:</option>
+		
+		<option value="//api/name/touchesMoved:withEvent:">- touchesMoved:withEvent:</option>
+		
+		<option value="//api/name/willEnterHierarchy">- willEnterHierarchy</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASDisplayNode(Subclassing) Category Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Declared in</th>
+	<td>ASDisplayNode+Subclasses.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>The subclass header <em>ASDisplayNode+Subclasses</em> defines the following methods that either must or can be overriden by
+subclasses of ASDisplayNode.</p>
+
+<p>These methods should never be called directly by other classes.</p>
+
+<h2>Drawing</h2>
+
+<p>Implement one of +displayWithParameters:isCancelled: or +drawRect:withParameters:isCancelled: to provide
+drawing for your node.</p>
+
+<p>Use -drawParametersForAsyncLayer: to copy any properties that are involved in drawing into an immutable object for
+use on the display queue. The display and drawRect implementations <em>MUST</em> be thread-safe, as they can be called on
+the displayQueue (asynchronously) or the main thread (synchronously/displayImmediately).</p>
+
+<p>Class methods that require passing in copies of the values are used to minimize the need for locking around instance
+variable access, and the possibility of the asynchronous display pass grabbing an inconsistent state across multiple
+variables.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						<a title="Properties" name="task_Properties"></a>
+						<h2 class="task-title">Properties</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/calculatedLayout" title="calculatedLayout"></a>
+	<h3 class="method-title"><code><a href="#//api/name/calculatedLayout">&nbsp;&nbsp;calculatedLayout</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Return the calculated layout.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, readonly, assign) ASLayout *calculatedLayout</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>Layout that wraps calculated size returned by -calculateSizeThatFits: (in manual layout mode),
+or layout already calculated from layout spec returned by -layoutSpecThatFits: (in automatic layout mode).</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>For node subclasses that implement manual layout (e.g., they have a custom -layout method),
+calculatedLayout may be accessed on subnodes to retrieved cached information about their size.
+This allows -layout to be very fast, saving time on the main thread.
+Note: .calculatedLayout will only be set for nodes that have had -measure: called on them.
+For manual layout, make sure you call -measure: in your implementation of -calculateSizeThatFits:.</p>
+
+<p>For node subclasses that use automatic layout (e.g., they implement -layoutSpecThatFits:),
+it is typically not necessary to use .calculatedLayout at any point.  For these nodes,
+the ASLayoutSpec implementation will automatically call -measureWithSizeRange: on all of the subnodes,
+and the ASDisplayNode base class implementation of -layout will automatically make use of .calculatedLayout on the subnodes.</p><div class="warning"><p><strong>Warning:</strong> Subclasses must not override this; it returns the last cached layout and is never expensive.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="View Lifecycle" name="task_View Lifecycle"></a>
+						<h2 class="task-title">View Lifecycle</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/didLoad" title="didLoad"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didLoad">&ndash;&nbsp;didLoad</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called on the main thread immediately after self.view is created.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didLoad</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This is the best time to add gesture recognizers to the view.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Layout" name="task_Layout"></a>
+						<h2 class="task-title">Layout</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/layout" title="layout"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layout">&ndash;&nbsp;layout</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called on the main thread by the view&rsquo;s -layoutSubviews.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)layout</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses override this method to layout all subnodes or subviews.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/layoutDidFinish" title="layoutDidFinish"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutDidFinish">&ndash;&nbsp;layoutDidFinish</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called on the main thread by the view&rsquo;s -layoutSubviews, after -layout.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)layoutDidFinish</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Gives a chance for subclasses to perform actions after the subclass and superclass have finished laying
+out.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/calculatedLayoutDidChange" title="calculatedLayoutDidChange"></a>
+	<h3 class="method-title"><code><a href="#//api/name/calculatedLayoutDidChange">&ndash;&nbsp;calculatedLayoutDidChange</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called on a background thread if !isNodeLoaded - called on the main thread if isNodeLoaded.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)calculatedLayoutDidChange</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>When the .calculatedLayout property is set to a new ASLayout (directly from -calculateLayoutThatFits: or
+calculated via use of -layoutSpecThatFits:), subclasses may inspect it here.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Layout calculation" name="task_Layout calculation"></a>
+						<h2 class="task-title">Layout calculation</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/calculateLayoutThatFits:" title="calculateLayoutThatFits:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/calculateLayoutThatFits:">&ndash;&nbsp;calculateLayoutThatFits:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Calculate a layout based on given size range.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)<em>constrainedSize</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>constrainedSize</code></th>
+						<td><p>The minimum and maximum sizes the receiver should fit in.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method is called on a non-main thread. The default implementation calls either -layoutSpecThatFits:
+or -calculateSizeThatFits:, whichever method is overriden. Subclasses rarely need to override this method,
+override -layoutSpecThatFits: or -calculateSizeThatFits: instead.</p><div class="note"><p><strong>Note:</strong> This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/calculateLayoutThatFits:restrictedToSize:relativeToParentSize:" title="calculateLayoutThatFits:restrictedToSize:relativeToParentSize:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/calculateLayoutThatFits:restrictedToSize:relativeToParentSize:">&ndash;&nbsp;calculateLayoutThatFits:restrictedToSize:relativeToParentSize:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>ASDisplayNode&rsquo;s implementation of -layoutThatFits:parentSize: calls this method to resolve the node&rsquo;s size
+against parentSize, intersect it with constrainedSize, and call -calculateLayoutThatFits: with the result.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)<em>constrainedSize</em> restrictedToSize:(ASLayoutElementSize)<em>size</em> relativeToParentSize:(CGSize)<em>parentSize</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>In certain advanced cases, you may want to customize this logic. Overriding this method allows you to receive all
+three parameters and do the computation yourself.</p><div class="warning"><p><strong>Warning:</strong> Overriding this method should be done VERY rarely.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/calculateSizeThatFits:" title="calculateSizeThatFits:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/calculateSizeThatFits:">&ndash;&nbsp;calculateSizeThatFits:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Return the calculated size.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (CGSize)calculateSizeThatFits:(CGSize)<em>constrainedSize</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>constrainedSize</code></th>
+						<td><p>The maximum size the receiver should fit in.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses that override should expect this method to be called on a non-main thread. The returned size
+is wrapped in an ASLayout and cached for quick access during -layout. Other expensive work that needs to
+be done before display can be performed here, and using ivars to cache any valuable intermediate results is
+encouraged.</p><div class="note"><p><strong>Note:</strong> Subclasses that override are committed to manual layout. Therefore, -layout: must be overriden to layout all subnodes or subviews.</p></div><div class="note"><p><strong>Note:</strong> This method should not be called directly outside of ASDisplayNode; use -layoutThatFits: or layoutThatFits:parentSize: instead.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/layoutSpecThatFits:" title="layoutSpecThatFits:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutSpecThatFits:">&ndash;&nbsp;layoutSpecThatFits:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Return a layout spec that describes the layout of the receiver and its children.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)<em>constrainedSize</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>constrainedSize</code></th>
+						<td><p>The minimum and maximum sizes the receiver should fit in.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses that override should expect this method to be called on a non-main thread. The returned layout spec
+is used to calculate an ASLayout and cached by ASDisplayNode for quick access during -layout. Other expensive work that needs to
+be done before display can be performed here, and using ivars to cache any valuable intermediate results is
+encouraged.</p><div class="note"><p><strong>Note:</strong> This method should not be called directly outside of ASDisplayNode; use -measure: or -calculatedLayout instead.</p></div><div class="warning"><p><strong>Warning:</strong> Subclasses that implement -layoutSpecThatFits: must not use .layoutSpecBlock. Doing so will trigger an
+exception. A future version of the framework may support using both, calling them serially, with the .layoutSpecBlock
+superseding any values set by the method override.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/invalidateCalculatedLayout" title="invalidateCalculatedLayout"></a>
+	<h3 class="method-title"><code><a href="#//api/name/invalidateCalculatedLayout">&ndash;&nbsp;invalidateCalculatedLayout</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Invalidate previously measured and cached layout.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)invalidateCalculatedLayout</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses should call this method to invalidate the previously measured and cached layout for the display
+node, when the contents of the node change in such a way as to require measuring it again.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Drawing" name="task_Drawing"></a>
+						<h2 class="task-title">Drawing</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/drawRect:withParameters:isCancelled:isRasterizing:" title="drawRect:withParameters:isCancelled:isRasterizing:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/drawRect:withParameters:isCancelled:isRasterizing:">+&nbsp;drawRect:withParameters:isCancelled:isRasterizing:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>@summary Delegate method to draw layer contents into a CGBitmapContext. The current UIGraphics context will be set
+to an appropriate context.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>+ (void)drawRect:(CGRect)<em>bounds</em> withParameters:(nullable id&lt;NSObject&gt;)<em>parameters</em> isCancelled:(asdisplaynode_iscancelled_block_t)<em>isCancelledBlock</em> isRasterizing:(BOOL)<em>isRasterizing</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>bounds</code></th>
+						<td><p>Region to draw in.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>parameters</code></th>
+						<td><p>An object describing all of the properties you need to draw. Return this from
+-drawParametersForAsyncLayer:</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>isCancelledBlock</code></th>
+						<td><p>Execute this block to check whether the current drawing operation has been cancelled to avoid
+unnecessary work. A return value of YES means cancel drawing and return.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>isRasterizing</code></th>
+						<td><p>YES if the layer is being rasterized into another layer, in which case drawRect: probably wants
+to avoid doing things like filling its bounds with a zero-alpha color to clear the backing store.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="note"><p><strong>Note:</strong> Called on the display queue and/or main queue (MUST BE THREAD SAFE)</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/displayWithParameters:isCancelled:" title="displayWithParameters:isCancelled:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/displayWithParameters:isCancelled:">+&nbsp;displayWithParameters:isCancelled:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>@summary Delegate override to provide new layer contents as a UIImage.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>+ (nullable UIImage *)displayWithParameters:(nullable id&lt;NSObject&gt;)<em>parameters</em> isCancelled:(asdisplaynode_iscancelled_block_t)<em>isCancelledBlock</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>parameters</code></th>
+						<td><p>An object describing all of the properties you need to draw. Return this from
+-drawParametersForAsyncLayer:</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>isCancelledBlock</code></th>
+						<td><p>Execute this block to check whether the current drawing operation has been cancelled to avoid
+unnecessary work. A return value of YES means cancel drawing and return.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A UIImage with contents that are ready to display on the main thread. Make sure that the image is already
+decoded before returning it here.</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="note"><p><strong>Note:</strong> Called on the display queue and/or main queue (MUST BE THREAD SAFE)</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/drawParametersForAsyncLayer:" title="drawParametersForAsyncLayer:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/drawParametersForAsyncLayer:">&ndash;&nbsp;drawParametersForAsyncLayer:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Delegate override for drawParameters</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable id&lt;NSObject&gt;)drawParametersForAsyncLayer:(_ASDisplayLayer *)<em>layer</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>layer</code></th>
+						<td><p>The layer that will be drawn into.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="note"><p><strong>Note:</strong> Called on the main thread only</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/displayWillStart" title="displayWillStart"></a>
+	<h3 class="method-title"><code><a href="#//api/name/displayWillStart">&ndash;&nbsp;displayWillStart</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates that the receiver is about to display.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)displayWillStart</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may override this method to be notified when display (asynchronous or synchronous) is
+about to begin.</p><div class="note"><p><strong>Note:</strong> Called on the main thread only</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/displayDidFinish" title="displayDidFinish"></a>
+	<h3 class="method-title"><code><a href="#//api/name/displayDidFinish">&ndash;&nbsp;displayDidFinish</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates that the receiver has finished displaying.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)displayDidFinish</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may override this method to be notified when display (asynchronous or synchronous) has
+completed.</p><div class="note"><p><strong>Note:</strong> Called on the main thread only</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Observing node-related changes" name="task_Observing node-related changes"></a>
+						<h2 class="task-title">Observing node-related changes</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/interfaceStateDidChange:fromState:" title="interfaceStateDidChange:fromState:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/interfaceStateDidChange:fromState:">&ndash;&nbsp;interfaceStateDidChange:fromState:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called whenever any bit in the ASInterfaceState bitfield is changed.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)interfaceStateDidChange:(ASInterfaceState)<em>newState</em> fromState:(ASInterfaceState)<em>oldState</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may use this to monitor when they become visible, should free cached data, and much more.</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection see-also-section">
+				<h4 class="method-subtitle">See Also</h4>
+				<ul>
+					
+					<li><code><p><a href="../Constants/ASInterfaceState.html">ASInterfaceState</a></p></code></li>
+					
+				</ul>
+			</div>
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/didEnterVisibleState" title="didEnterVisibleState"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didEnterVisibleState">&ndash;&nbsp;didEnterVisibleState</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called whenever the node becomes visible.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didEnterVisibleState</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may use this to monitor when they become visible.</p><div class="note"><p><strong>Note:</strong> This method is guaranteed to be called on main.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/didExitVisibleState" title="didExitVisibleState"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didExitVisibleState">&ndash;&nbsp;didExitVisibleState</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called whenever the node is no longer visible.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didExitVisibleState</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may use this to monitor when they are no longer visible.</p><div class="note"><p><strong>Note:</strong> This method is guaranteed to be called on main.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/didEnterDisplayState" title="didEnterDisplayState"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didEnterDisplayState">&ndash;&nbsp;didEnterDisplayState</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called whenever the the node has entered the display state.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didEnterDisplayState</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may use this to monitor when a node should be rendering its content.</p><div class="note"><p><strong>Note:</strong> This method is guaranteed to be called on main.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/didExitDisplayState" title="didExitDisplayState"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didExitDisplayState">&ndash;&nbsp;didExitDisplayState</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called whenever the the node has exited the display state.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didExitDisplayState</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may use this to monitor when a node should no longer be rendering its content.</p><div class="note"><p><strong>Note:</strong> This method is guaranteed to be called on main.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/didEnterPreloadState" title="didEnterPreloadState"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didEnterPreloadState">&ndash;&nbsp;didEnterPreloadState</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called whenever the the node has entered the preload state.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didEnterPreloadState</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may use this to monitor data for a node should be preloaded, either from a local or remote source.</p><div class="note"><p><strong>Note:</strong> This method is guaranteed to be called on main.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/didExitPreloadState" title="didExitPreloadState"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didExitPreloadState">&ndash;&nbsp;didExitPreloadState</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called whenever the the node has exited the preload state.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didExitPreloadState</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may use this to monitor whether preloading data for a node should be canceled.</p><div class="note"><p><strong>Note:</strong> This method is guaranteed to be called on main.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/willEnterHierarchy" title="willEnterHierarchy"></a>
+	<h3 class="method-title"><code><a href="#//api/name/willEnterHierarchy">&ndash;&nbsp;willEnterHierarchy</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called just before the view is added to a window.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)willEnterHierarchy</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/didExitHierarchy" title="didExitHierarchy"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didExitHierarchy">&ndash;&nbsp;didExitHierarchy</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called after the view is removed from the window.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didExitHierarchy</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/inHierarchy" title="inHierarchy"></a>
+	<h3 class="method-title"><code><a href="#//api/name/inHierarchy">&nbsp;&nbsp;inHierarchy</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Whether the view or layer of this display node is currently in a window</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign, getter=isInHierarchy) BOOL inHierarchy</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/fetchData" title="fetchData"></a>
+	<h3 class="method-title"><code><a href="#//api/name/fetchData">&ndash;&nbsp;fetchData</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates that the node should fetch any external data, such as images.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)fetchData</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may override this method to be notified when they should begin to fetch data. Fetching
+should be done asynchronously. The node is also responsible for managing the memory of any data.
+The data may be remote and accessed via the network, but could also be a local database query.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/clearFetchedData" title="clearFetchedData"></a>
+	<h3 class="method-title"><code><a href="#//api/name/clearFetchedData">&ndash;&nbsp;clearFetchedData</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Provides an opportunity to clear any fetched data (e.g. remote / network or database-queried) on the current node.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)clearFetchedData</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This will not clear data recursively for all subnodes. Either call -recursivelyClearFetchedData or
+selectively clear fetched data.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/clearContents" title="clearContents"></a>
+	<h3 class="method-title"><code><a href="#//api/name/clearContents">&ndash;&nbsp;clearContents</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers
+on the current node.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)clearContents</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Called by -recursivelyClearContents. Base class implements self.contents = nil, clearing any backing
+store, for asynchronous regeneration when needed.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/subnodeDisplayWillStart:" title="subnodeDisplayWillStart:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/subnodeDisplayWillStart:">&ndash;&nbsp;subnodeDisplayWillStart:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates that the receiver is about to display its subnodes. This method is not called if there are no
+subnodes present.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)subnodeDisplayWillStart:(ASDisplayNode *)<em>subnode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>subnode</code></th>
+						<td><p>The subnode of which display is about to begin.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may override this method to be notified when subnode display (asynchronous or synchronous) is
+about to begin.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/subnodeDisplayDidFinish:" title="subnodeDisplayDidFinish:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/subnodeDisplayDidFinish:">&ndash;&nbsp;subnodeDisplayDidFinish:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates that the receiver is finished displaying its subnodes. This method is not called if there are
+no subnodes present.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)subnodeDisplayDidFinish:(ASDisplayNode *)<em>subnode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>subnode</code></th>
+						<td><p>The subnode of which display is about to completed.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may override this method to be notified when subnode display (asynchronous or synchronous) has
+completed.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/setNeedsDisplayAtScale:" title="setNeedsDisplayAtScale:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setNeedsDisplayAtScale:">&ndash;&nbsp;setNeedsDisplayAtScale:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Marks the receiver&rsquo;s bounds as needing to be redrawn, with a scale value.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setNeedsDisplayAtScale:(CGFloat)<em>contentsScale</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>contentsScale</code></th>
+						<td><p>The scale at which the receiver should be drawn.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses should override this if they don&rsquo;t want their contentsScale changed.</p><div class="note"><p><strong>Note:</strong> This changes an internal property.
+-setNeedsDisplay is also available to trigger display without changing contentsScaleForDisplay.</p></div>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection see-also-section">
+				<h4 class="method-subtitle">See Also</h4>
+				<ul>
+					
+					<li><code><p>-setNeedsDisplay, <a href="#//api/name/contentsScaleForDisplay">@property contentsScaleForDisplay</a></p></code></li>
+					
+				</ul>
+			</div>
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/recursivelySetNeedsDisplayAtScale:" title="recursivelySetNeedsDisplayAtScale:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/recursivelySetNeedsDisplayAtScale:">&ndash;&nbsp;recursivelySetNeedsDisplayAtScale:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Recursively calls setNeedsDisplayAtScale: on subnodes.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)recursivelySetNeedsDisplayAtScale:(CGFloat)<em>contentsScale</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>contentsScale</code></th>
+						<td><p>The scale at which the receiver&rsquo;s subnode hierarchy should be drawn.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses may override this if they require modifying the scale set on their child nodes.</p><div class="note"><p><strong>Note:</strong> Only the node tree is walked, not the view or layer trees.</p></div>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection see-also-section">
+				<h4 class="method-subtitle">See Also</h4>
+				<ul>
+					
+					<li><code><p><a href="#//api/name/setNeedsDisplayAtScale:">- setNeedsDisplayAtScale:</a></p></code></li>
+					
+					<li><code><p><a href="#//api/name/contentsScaleForDisplay">@property contentsScaleForDisplay</a></p></code></li>
+					
+				</ul>
+			</div>
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/contentsScaleForDisplay" title="contentsScaleForDisplay"></a>
+	<h3 class="method-title"><code><a href="#//api/name/contentsScaleForDisplay">&nbsp;&nbsp;contentsScaleForDisplay</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The scale factor to apply to the rendering.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, readonly) CGFloat contentsScaleForDisplay</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Use setNeedsDisplayAtScale: to set a value and then after display, the display node will set the layer&rsquo;s
+contentsScale. This is to prevent jumps when re-rasterizing at a different contentsScale.
+Read this property if you need to know the future contentsScale of your layer, eg in drawParameters.</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection see-also-section">
+				<h4 class="method-subtitle">See Also</h4>
+				<ul>
+					
+					<li><code><p><a href="#//api/name/setNeedsDisplayAtScale:">- setNeedsDisplayAtScale:</a></p></code></li>
+					
+				</ul>
+			</div>
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Touch handling" name="task_Touch handling"></a>
+						<h2 class="task-title">Touch handling</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/touchesBegan:withEvent:" title="touchesBegan:withEvent:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/touchesBegan:withEvent:">&ndash;&nbsp;touchesBegan:withEvent:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Tells the node when touches began in its view.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)touchesBegan:(NSSet&lt;UITouch*&gt; *)<em>touches</em> withEvent:(nullable UIEvent *)<em>event</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>touches</code></th>
+						<td><p>A set of UITouch instances.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>event</code></th>
+						<td><p>A UIEvent associated with the touch.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/touchesMoved:withEvent:" title="touchesMoved:withEvent:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/touchesMoved:withEvent:">&ndash;&nbsp;touchesMoved:withEvent:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Tells the node when touches moved in its view.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)touchesMoved:(NSSet&lt;UITouch*&gt; *)<em>touches</em> withEvent:(nullable UIEvent *)<em>event</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>touches</code></th>
+						<td><p>A set of UITouch instances.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>event</code></th>
+						<td><p>A UIEvent associated with the touch.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/touchesEnded:withEvent:" title="touchesEnded:withEvent:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/touchesEnded:withEvent:">&ndash;&nbsp;touchesEnded:withEvent:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Tells the node when touches ended in its view.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)touchesEnded:(NSSet&lt;UITouch*&gt; *)<em>touches</em> withEvent:(nullable UIEvent *)<em>event</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>touches</code></th>
+						<td><p>A set of UITouch instances.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>event</code></th>
+						<td><p>A UIEvent associated with the touch.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/touchesCancelled:withEvent:" title="touchesCancelled:withEvent:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/touchesCancelled:withEvent:">&ndash;&nbsp;touchesCancelled:withEvent:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Tells the node when touches was cancelled in its view.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)touchesCancelled:(nullable NSSet&lt;UITouch*&gt; *)<em>touches</em> withEvent:(nullable UIEvent *)<em>event</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>touches</code></th>
+						<td><p>A set of UITouch instances.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>event</code></th>
+						<td><p>A UIEvent associated with the touch.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Managing Gesture Recognizers" name="task_Managing Gesture Recognizers"></a>
+						<h2 class="task-title">Managing Gesture Recognizers</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/gestureRecognizerShouldBegin:" title="gestureRecognizerShouldBegin:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/gestureRecognizerShouldBegin:">&ndash;&nbsp;gestureRecognizerShouldBegin:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Asks the node if a gesture recognizer should continue tracking touches.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)<em>gestureRecognizer</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>gestureRecognizer</code></th>
+						<td><p>A gesture recognizer trying to recognize a gesture.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Hit Testing" name="task_Hit Testing"></a>
+						<h2 class="task-title">Hit Testing</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/hitTest:withEvent:" title="hitTest:withEvent:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/hitTest:withEvent:">&ndash;&nbsp;hitTest:withEvent:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns the view that contains the point.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable UIView *)hitTest:(CGPoint)<em>point</em> withEvent:(nullable UIEvent *)<em>event</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>point</code></th>
+						<td><p>A point specified in the node&rsquo;s local coordinate system (bounds).</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>event</code></th>
+						<td><p>The event that warranted a call to this method.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>Returns a UIView, not ASDisplayNode, for two reasons:
+1) allows sending events to plain UIViews that don&rsquo;t have attached nodes,
+2) hitTest: is never called before the views are created.</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Override to make this node respond differently to touches: (e.g. hide touches from subviews, send all
+touches to certain subviews (hit area maximizing), etc.)</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Placeholders" name="task_Placeholders"></a>
+						<h2 class="task-title">Placeholders</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/placeholderImage" title="placeholderImage"></a>
+	<h3 class="method-title"><code><a href="#//api/name/placeholderImage">&ndash;&nbsp;placeholderImage</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Optionally provide an image to serve as the placeholder for the backing store while the contents are being
+displayed.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable UIImage *)placeholderImage</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="note"><p><strong>Note:</strong> Called on the display queue and/or main queue (MUST BE THREAD SAFE)</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+
+						<a title="Description" name="task_Description"></a>
+						<h2 class="task-title">Description</h2>
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/descriptionForRecursiveDescription" title="descriptionForRecursiveDescription"></a>
+	<h3 class="method-title"><code><a href="#//api/name/descriptionForRecursiveDescription">&ndash;&nbsp;descriptionForRecursiveDescription</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Return a description of the node</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (NSString *)descriptionForRecursiveDescription</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The function that gets called for each display node in -recursiveDescription</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/asyncTraitCollectionDidChange" title="asyncTraitCollectionDidChange"></a>
+	<h3 class="method-title"><code><a href="#//api/name/asyncTraitCollectionDidChange">&ndash;&nbsp;asyncTraitCollectionDidChange</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called when the node&rsquo;s ASTraitCollection changes</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)asyncTraitCollectionDidChange</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Subclasses can override this method to react to a trait collection change.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode+Subclasses.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

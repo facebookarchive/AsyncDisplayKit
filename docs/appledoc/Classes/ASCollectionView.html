@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASCollectionView Class Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/asyncDataSource">asyncDataSource</option>
+		
+		<option value="//api/name/asyncDelegate">asyncDelegate</option>
+		
+		<option value="//api/name/collectionNode">collectionNode</option>
+		
+		<option value="//api/name/layoutInspector">layoutInspector</option>
+		
+		<option value="//api/name/leadingScreensForBatching">leadingScreensForBatching</option>
+		
+		<option value="//api/name/scrollDirection">scrollDirection</option>
+		
+		<option value="//api/name/scrollableDirections">scrollableDirections</option>
+		
+		<option value="//api/name/zeroContentInsets">zeroContentInsets</option>
+		
+	</optgroup>
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/contextForSection:">- contextForSection:</option>
+		
+		<option value="//api/name/nodeForItemAtIndexPath:">- nodeForItemAtIndexPath:</option>
+		
+		<option value="//api/name/supplementaryNodeForElementKind:atIndexPath:">- supplementaryNodeForElementKind:atIndexPath:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASCollectionView Class Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Inherits from</th>
+	<td>UICollectionView</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASCollectionView.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>Asynchronous UICollectionView with Intelligent Preloading capabilities.</p><p>ASCollectionView is a true subclass of UICollectionView, meaning it is pointer-compatible
+with code that currently uses UICollectionView.</p>
+
+<p>The main difference is that asyncDataSource expects -nodeForItemAtIndexPath, an ASCellNode, and
+the sizeForItemAtIndexPath: method is eliminated (as are the performance problems caused by it).
+This is made possible because ASCellNodes can calculate their own size, and preload ahead of time.</p><div class="note"><p><strong>Note:</strong> ASCollectionNode is strongly recommended over ASCollectionView.  This class exists for adoption convenience.</p></div>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/asyncDelegate" title="asyncDelegate"></a>
+	<h3 class="method-title"><code><a href="#//api/name/asyncDelegate">&nbsp;&nbsp;asyncDelegate</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The object that acts as the asynchronous delegate of the collection view</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, weak) id&lt;ASCollectionDelegate&gt; asyncDelegate</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The delegate must adopt the ASCollectionDelegate protocol. The collection view maintains a weak reference to the delegate object.</p>
+
+<p>The delegate object is responsible for providing size constraints for nodes and indicating whether batch fetching should begin.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/asyncDataSource" title="asyncDataSource"></a>
+	<h3 class="method-title"><code><a href="#//api/name/asyncDataSource">&nbsp;&nbsp;asyncDataSource</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The object that acts as the asynchronous data source of the collection view</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, weak) id&lt;ASCollectionDataSource&gt; asyncDataSource</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The datasource must adopt the ASCollectionDataSource protocol. The collection view maintains a weak reference to the datasource object.</p>
+
+<p>The datasource object is responsible for providing nodes or node creation blocks to the collection view.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/collectionNode" title="collectionNode"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionNode">&nbsp;&nbsp;collectionNode</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns the corresponding ASCollectionNode</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, weak, readonly) ASCollectionNode *collectionNode</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>collectionNode The corresponding ASCollectionNode, if one exists.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/leadingScreensForBatching" title="leadingScreensForBatching"></a>
+	<h3 class="method-title"><code><a href="#//api/name/leadingScreensForBatching">&nbsp;&nbsp;leadingScreensForBatching</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The number of screens left to scroll before the delegate -collectionView:beginBatchFetchingWithContext: is called.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) CGFloat leadingScreensForBatching</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to two screenfuls.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/layoutInspector" title="layoutInspector"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutInspector">&nbsp;&nbsp;layoutInspector</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Optional introspection object for the collection view&rsquo;s layout.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, weak) id&lt;ASCollectionViewLayoutInspecting&gt; layoutInspector</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Since supplementary and decoration views are controlled by the collection view&rsquo;s layout, this object
+is used as a bridge to provide information to the internal data controller about the existence of these views and
+their associated index paths. For collection views using <code>UICollectionViewFlowLayout</code>, a default inspector
+implementation <code>ASCollectionViewFlowLayoutInspector</code> is created and set on this property by default. Custom
+collection view layout subclasses will need to provide their own implementation of an inspector object for their
+supplementary views to be compatible with <code>ASCollectionView</code>&rsquo;s supplementary node support.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/nodeForItemAtIndexPath:" title="nodeForItemAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/nodeForItemAtIndexPath:">&ndash;&nbsp;nodeForItemAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Retrieves the node for the item at the given index path.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the requested node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>The node at the given index path, or @c nil if no item exists at the specified path.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/supplementaryNodeForElementKind:atIndexPath:" title="supplementaryNodeForElementKind:atIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/supplementaryNodeForElementKind:atIndexPath:">&ndash;&nbsp;supplementaryNodeForElementKind:atIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Similar to -supplementaryViewForElementKind:atIndexPath:</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable ASCellNode *)supplementaryNodeForElementKind:(NSString *)<em>elementKind</em> atIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>elementKind</code></th>
+						<td><p>The kind of supplementary node to locate.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the requested supplementary node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>The specified supplementary node or @c nil.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/contextForSection:" title="contextForSection:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/contextForSection:">&ndash;&nbsp;contextForSection:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Retrieves the context object for the given section, as provided by the data source in
+the @c collectionNode:contextForSection: method. This method must be called on the main thread.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable id&lt;ASSectionContext&gt;)contextForSection:(NSInteger)<em>section</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>section</code></th>
+						<td><p>The section to get the context for.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>The context object, or @c nil if no context was provided.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/scrollDirection" title="scrollDirection"></a>
+	<h3 class="method-title"><code><a href="#//api/name/scrollDirection">&nbsp;&nbsp;scrollDirection</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Determines collection view&rsquo;s current scroll direction. Supports 2-axis collection views.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly) ASScrollDirection scrollDirection</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>a bitmask of ASScrollDirection values.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/scrollableDirections" title="scrollableDirections"></a>
+	<h3 class="method-title"><code><a href="#//api/name/scrollableDirections">&nbsp;&nbsp;scrollableDirections</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Determines collection view&rsquo;s scrollable directions.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly) ASScrollDirection scrollableDirections</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>a bitmask of ASScrollDirection values.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/zeroContentInsets" title="zeroContentInsets"></a>
+	<h3 class="method-title"><code><a href="#//api/name/zeroContentInsets">&nbsp;&nbsp;zeroContentInsets</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Forces the .contentInset to be UIEdgeInsetsZero.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic) BOOL zeroContentInsets</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>By default, UIKit sets the top inset to the navigation bar height, even for horizontally
+scrolling views.  This can only be disabled by setting a property on the containing UIViewController,
+automaticallyAdjustsScrollViewInsets, which may not be accessible.  ASPagerNode uses this to ensure
+its flow layout behaves predictably and does not log undefined layout warnings.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionView.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+/* Media queries */
+@media (min-width: 600px) {
+	header {
+		display: block;
+	}
+
+	header ul {
+	}
+
+	header nav ul {
+		display: inline-block;
+		float: right;
+		margin: 0 auto;
+	}
+
+	#logo {
+		float: left;
+	}
+	
+	.container .sidebar {
+		width: 19%;
+		float: left;
+	}
+
+	.container .content {
+		width: 75%;
+		float: right;
+	}
+
+}
+
+@media (min-width: 950px) {
+	.container {
+		width: 900px;
+	}
+	
+	.container .sidebar {
+		width: 19%;
+		float: left;
+	}
+
+	.container .content {
+		width: 75%;
+		float: right;
+	}
+}

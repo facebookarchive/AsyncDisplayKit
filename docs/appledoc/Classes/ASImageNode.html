@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASImageNode Class Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/cropEnabled">cropEnabled</option>
+		
+		<option value="//api/name/cropRect">cropRect</option>
+		
+		<option value="//api/name/forceUpscaling">forceUpscaling</option>
+		
+		<option value="//api/name/forcedSize">forcedSize</option>
+		
+		<option value="//api/name/image">image</option>
+		
+		<option value="//api/name/imageModificationBlock">imageModificationBlock</option>
+		
+		<option value="//api/name/isDefaultFocusAppearance">isDefaultFocusAppearance</option>
+		
+		<option value="//api/name/placeholderColor">placeholderColor</option>
+		
+	</optgroup>
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/setCropEnabled:recropImmediately:inBounds:">- setCropEnabled:recropImmediately:inBounds:</option>
+		
+		<option value="//api/name/setNeedsDisplayWithCompletion:">- setNeedsDisplayWithCompletion:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASImageNode Class Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Inherits from</th>
+	<td><a href="../Classes/ASControlNode.html">ASControlNode</a> : <a href="../Classes/ASDisplayNode.html">ASDisplayNode</a> : ASDealloc2MainObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASImageNode.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>Supports cropping, tinting, and arbitrary image modification blocks.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/image" title="image"></a>
+	<h3 class="method-title"><code><a href="#//api/name/image">&nbsp;&nbsp;image</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The image to display.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, strong) UIImage *image</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The node will efficiently display stretchable images by using
+the layer&rsquo;s contentsCenter property.  Non-stretchable images work too, of
+course.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/placeholderColor" title="placeholderColor"></a>
+	<h3 class="method-title"><code><a href="#//api/name/placeholderColor">&nbsp;&nbsp;placeholderColor</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The placeholder color.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, strong) UIColor *placeholderColor</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/cropEnabled" title="cropEnabled"></a>
+	<h3 class="method-title"><code><a href="#//api/name/cropEnabled">&nbsp;&nbsp;cropEnabled</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates whether efficient cropping of the receiver is enabled.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, getter=isCropEnabled) BOOL cropEnabled</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to YES. See -setCropEnabled:recropImmediately:inBounds: for more
+information.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/forceUpscaling" title="forceUpscaling"></a>
+	<h3 class="method-title"><code><a href="#//api/name/forceUpscaling">&nbsp;&nbsp;forceUpscaling</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates that efficient downsizing of backing store should <em>not</em> be enabled.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL forceUpscaling</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to NO. @see ASCroppedImageBackingSizeAndDrawRectInBounds for more
+information.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/forcedSize" title="forcedSize"></a>
+	<h3 class="method-title"><code><a href="#//api/name/forcedSize">&nbsp;&nbsp;forcedSize</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Forces image to be rendered at forcedSize.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) CGSize forcedSize</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to CGSizeZero to indicate that the forcedSize should not be used.
+Setting forcedSize to non-CGSizeZero will force the backing of the layer contents to
+be forcedSize (automatically adjusted for contentsSize).</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/setCropEnabled:recropImmediately:inBounds:" title="setCropEnabled:recropImmediately:inBounds:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setCropEnabled:recropImmediately:inBounds:">&ndash;&nbsp;setCropEnabled:recropImmediately:inBounds:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Enables or disables efficient cropping.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setCropEnabled:(BOOL)<em>cropEnabled</em> recropImmediately:(BOOL)<em>recropImmediately</em> inBounds:(CGRect)<em>cropBounds</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>cropEnabled</code></th>
+						<td><p>YES to efficiently crop the receiver&rsquo;s contents such that
+contents outside of its bounds are not included; NO otherwise.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>recropImmediately</code></th>
+						<td><p>If the receiver has an image, YES to redisplay the
+receiver immediately; NO otherwise.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>cropBounds</code></th>
+						<td><p>The bounds into which the receiver will be cropped. Useful
+if bounds are to change in response to cropping (but have not yet done so).</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Efficient cropping is only performed when the receiver&rsquo;s view&rsquo;s
+contentMode is UIViewContentModeScaleAspectFill. By default, cropping is
+enabled. The crop alignment may be controlled via cropAlignmentFactor.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/cropRect" title="cropRect"></a>
+	<h3 class="method-title"><code><a href="#//api/name/cropRect">&nbsp;&nbsp;cropRect</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A value that controls how the receiver&rsquo;s efficient cropping is aligned.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readwrite, assign) CGRect cropRect</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This value defines a rectangle that is to be featured by the
+receiver. The rectangle is specified as a &ldquo;unit rectangle,&rdquo; using
+fractions of the source image&rsquo;s width and height, e.g. CGRectMake(0.5, 0,
+0.5, 1.0) will feature the full right half a photo. If the cropRect is
+empty, the content mode of the receiver will be used to determine its
+dimensions, and only the cropRect&rsquo;s origin will be used for positioning. The
+default value of this property is CGRectMake(0.5, 0.5, 0.0, 0.0).</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/imageModificationBlock" title="imageModificationBlock"></a>
+	<h3 class="method-title"><code><a href="#//api/name/imageModificationBlock">&nbsp;&nbsp;imageModificationBlock</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>An optional block which can perform drawing operations on image
+during the display phase.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, readwrite, copy) asimagenode_modification_block_t imageModificationBlock</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Can be used to add image effects (such as rounding, adding
+borders, or other pattern overlays) without extraneous display calls.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/setNeedsDisplayWithCompletion:" title="setNeedsDisplayWithCompletion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setNeedsDisplayWithCompletion:">&ndash;&nbsp;setNeedsDisplayWithCompletion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Marks the receiver as needing display and performs a block after
+display has finished.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setNeedsDisplayWithCompletion:(nullable void ( ^ ) ( BOOL canceled ))<em>displayCompletionBlock</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>displayCompletionBlock</code></th>
+						<td><p>The block to be performed after display has
+finished.  Its <code>canceled</code> property will be YES if display was prevented or
+canceled (via displaySuspended); NO otherwise.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>displayCompletionBlock will be performed on the main-thread. If
+<code>displaySuspended</code> is YES, <code>displayCompletionBlock</code> is will be
+performed immediately and <code>YES</code> will be passed for <code>canceled</code>.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/isDefaultFocusAppearance" title="isDefaultFocusAppearance"></a>
+	<h3 class="method-title"><code><a href="#//api/name/isDefaultFocusAppearance">&nbsp;&nbsp;isDefaultFocusAppearance</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A bool to track if the current appearance of the node
+is the default focus appearance.
+Exposed here so the category methods can set it.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL isDefaultFocusAppearance</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASImageNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

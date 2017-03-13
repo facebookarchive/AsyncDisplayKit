@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASCellNode Class Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/highlighted">highlighted</option>
+		
+		<option value="//api/name/indexPath">indexPath</option>
+		
+		<option value="//api/name/neverShowPlaceholders">neverShowPlaceholders</option>
+		
+		<option value="//api/name/owningNode">owningNode</option>
+		
+		<option value="//api/name/selected">selected</option>
+		
+	</optgroup>
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/applyLayoutAttributes:">- applyLayoutAttributes:</option>
+		
+		<option value="//api/name/cellNodeVisibilityEvent:inScrollView:withCellFrame:">- cellNodeVisibilityEvent:inScrollView:withCellFrame:</option>
+		
+		<option value="//api/name/initWithViewControllerBlock:didLoadBlock:">- initWithViewControllerBlock:didLoadBlock:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASCellNode Class Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Inherits from</th>
+	<td><a href="../Classes/ASDisplayNode.html">ASDisplayNode</a> : ASDealloc2MainObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASCellNode.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<ul>
+<li><p>Generic cell node.  Subclass this instead of <code>ASDisplayNode</code> to use with <code>ASTableView</code> and <code>ASCollectionView</code>.</p></li>
+<li><p>@note When a cell node is contained inside a collection view (or table view),</p></li>
+<li>calling <code>-setNeedsLayout</code> will also notify the collection on the main thread</li>
+<li>so that the collection can update its item layout if the cell&rsquo;s size changed.</li>
+</ul>
+
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/neverShowPlaceholders" title="neverShowPlaceholders"></a>
+	<h3 class="method-title"><code><a href="#//api/name/neverShowPlaceholders">&nbsp;&nbsp;neverShowPlaceholders</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>When enabled, ensures that the cell is completely displayed before allowed onscreen.</p>
+
+<p>@default NO</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL neverShowPlaceholders</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Normally, ASCellNodes are preloaded and have finished display before they are onscreen.
+However, if the Table or Collection&rsquo;s rangeTuningParameters are set to small values (or 0),
+or if the user is scrolling rapidly on a slow device, it is possible for a cell&rsquo;s display to
+be incomplete when it becomes visible.</p>
+
+<p>In this case, normally placeholder states are shown and scrolling continues uninterrupted.
+The finished, drawn content is then shown as soon as it is ready.</p>
+
+<p>With this property set to YES, the main thread will be blocked until display is complete for
+the cell.  This is more similar to UIKit, and in fact makes AsyncDisplayKit scrolling visually
+indistinguishable from UIKit&rsquo;s, except being faster.</p>
+
+<p>Using this option does not eliminate all of the performance advantages of AsyncDisplayKit.
+Normally, a cell has been preloading and is almost done when it reaches the screen, so the
+blocking time is very short.  If the rangeTuningParameters are set to 0, still this option
+outperforms UIKit: while the main thread is waiting, subnode display executes concurrently.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCellNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/selected" title="selected"></a>
+	<h3 class="method-title"><code><a href="#//api/name/selected">&nbsp;&nbsp;selected</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A Boolean value that is synchronized with the underlying collection or tableView cell property.
+Setting this value is equivalent to calling selectItem / deselectItem on the collection or table.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, getter=isSelected) BOOL selected</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCellNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/highlighted" title="highlighted"></a>
+	<h3 class="method-title"><code><a href="#//api/name/highlighted">&nbsp;&nbsp;highlighted</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A Boolean value that is synchronized with the underlying collection or tableView cell property.
+Setting this value is equivalent to calling highlightItem / unHighlightItem on the collection or table.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, getter=isHighlighted) BOOL highlighted</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCellNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/indexPath" title="indexPath"></a>
+	<h3 class="method-title"><code><a href="#//api/name/indexPath">&nbsp;&nbsp;indexPath</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The current index path of this cell node, or @c nil if this node is
+not a valid item inside a table node or collection node.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, nullable) NSIndexPath *indexPath</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="note"><p><strong>Note:</strong> This property must be accessed on the main thread.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCellNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/owningNode" title="owningNode"></a>
+	<h3 class="method-title"><code><a href="#//api/name/owningNode">&nbsp;&nbsp;owningNode</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The owning node (ASCollectionNode/ASTableNode) of this cell node, or @c nil if this node is
+not a valid item inside a table node or collection node or if those nodes are nil.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (weak, nonatomic, readonly, nullable) ASDisplayNode *owningNode</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCellNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/applyLayoutAttributes:" title="applyLayoutAttributes:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/applyLayoutAttributes:">&ndash;&nbsp;applyLayoutAttributes:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called by the system when ASCellNode is used with an ASCollectionNode.  It will not be called by ASTableNode.
+When the UICollectionViewLayout object returns a new UICollectionViewLayoutAttributes object, the corresponding ASCellNode will be updated.
+See UICollectionViewCell&rsquo;s applyLayoutAttributes: for a full description.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)<em>layoutAttributes</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCellNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/initWithViewControllerBlock:didLoadBlock:" title="initWithViewControllerBlock:didLoadBlock:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/initWithViewControllerBlock:didLoadBlock:">&ndash;&nbsp;initWithViewControllerBlock:didLoadBlock:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Initializes a cell with a given view controller block.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (instancetype)initWithViewControllerBlock:(ASDisplayNodeViewControllerBlock)<em>viewControllerBlock</em> didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)<em>didLoadBlock</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>viewControllerBlock</code></th>
+						<td><p>The block that will be used to create the backing view controller.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>didLoadBlock</code></th>
+						<td><p>The block that will be called after the view controller&rsquo;s view is loaded.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>An ASCellNode created using the root view of the view controller provided by the viewControllerBlock.
+The view controller&rsquo;s root view is resized to match the calculated size produced during layout.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCellNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/cellNodeVisibilityEvent:inScrollView:withCellFrame:" title="cellNodeVisibilityEvent:inScrollView:withCellFrame:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/cellNodeVisibilityEvent:inScrollView:withCellFrame:">&ndash;&nbsp;cellNodeVisibilityEvent:inScrollView:withCellFrame:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Notifies the cell node of certain visibility events, such as changing visible rect.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)cellNodeVisibilityEvent:(ASCellNodeVisibilityEvent)<em>event</em> inScrollView:(nullable UIScrollView *)<em>scrollView</em> withCellFrame:(CGRect)<em>cellFrame</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> In cases where an ASCellNode is used as a plain node – i.e. not returned from the
+nodeBlockForItemAtIndexPath/nodeForItemAtIndexPath data source methods – this method will
+deliver only the <code>Visible</code> and <code>Invisible</code> events, <code>scrollView</code> will be nil, and
+<code>cellFrame</code> will be the zero rect.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCellNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

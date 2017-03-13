@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASDisplayNode(LayoutTransitioning) Category Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/defaultLayoutTransitionDelay">defaultLayoutTransitionDelay</option>
+		
+		<option value="//api/name/defaultLayoutTransitionDuration">defaultLayoutTransitionDuration</option>
+		
+		<option value="//api/name/defaultLayoutTransitionOptions">defaultLayoutTransitionOptions</option>
+		
+	</optgroup>
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/animateLayoutTransition:">- animateLayoutTransition:</option>
+		
+		<option value="//api/name/cancelLayoutTransition">- cancelLayoutTransition</option>
+		
+		<option value="//api/name/didCompleteLayoutTransition:">- didCompleteLayoutTransition:</option>
+		
+		<option value="//api/name/transitionLayoutWithAnimation:shouldMeasureAsync:measurementCompletion:">- transitionLayoutWithAnimation:shouldMeasureAsync:measurementCompletion:</option>
+		
+		<option value="//api/name/transitionLayoutWithSizeRange:animated:shouldMeasureAsync:measurementCompletion:">- transitionLayoutWithSizeRange:animated:shouldMeasureAsync:measurementCompletion:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASDisplayNode(LayoutTransitioning) Category Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Declared in</th>
+	<td>ASDisplayNode.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/defaultLayoutTransitionDuration" title="defaultLayoutTransitionDuration"></a>
+	<h3 class="method-title"><code><a href="#//api/name/defaultLayoutTransitionDuration">&nbsp;&nbsp;defaultLayoutTransitionDuration</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The amount of time it takes to complete the default transition animation. Default is 0.2.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) NSTimeInterval defaultLayoutTransitionDuration</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/defaultLayoutTransitionDelay" title="defaultLayoutTransitionDelay"></a>
+	<h3 class="method-title"><code><a href="#//api/name/defaultLayoutTransitionDelay">&nbsp;&nbsp;defaultLayoutTransitionDelay</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The amount of time (measured in seconds) to wait before beginning the default transition animation.
+Default is 0.0.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) NSTimeInterval defaultLayoutTransitionDelay</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/defaultLayoutTransitionOptions" title="defaultLayoutTransitionOptions"></a>
+	<h3 class="method-title"><code><a href="#//api/name/defaultLayoutTransitionOptions">&nbsp;&nbsp;defaultLayoutTransitionOptions</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A mask of options indicating how you want to perform the default transition animations.
+For a list of valid constants, see UIViewAnimationOptions.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) UIViewAnimationOptions defaultLayoutTransitionOptions</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/animateLayoutTransition:" title="animateLayoutTransition:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/animateLayoutTransition:">&ndash;&nbsp;animateLayoutTransition:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)animateLayoutTransition:(nonnull id&lt;ASContextTransitioning&gt;)<em>context</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>A place to perform your animation. New nodes have been inserted here. You can also use this time to re-order the hierarchy.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/didCompleteLayoutTransition:" title="didCompleteLayoutTransition:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didCompleteLayoutTransition:">&ndash;&nbsp;didCompleteLayoutTransition:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A place to clean up your nodes after the transition</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didCompleteLayoutTransition:(nonnull id&lt;ASContextTransitioning&gt;)<em>context</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>A place to clean up your nodes after the transition</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/transitionLayoutWithSizeRange:animated:shouldMeasureAsync:measurementCompletion:" title="transitionLayoutWithSizeRange:animated:shouldMeasureAsync:measurementCompletion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/transitionLayoutWithSizeRange:animated:shouldMeasureAsync:measurementCompletion:">&ndash;&nbsp;transitionLayoutWithSizeRange:animated:shouldMeasureAsync:measurementCompletion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Transitions the current layout with a new constrained size. Must be called on main thread.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)transitionLayoutWithSizeRange:(ASSizeRange)<em>constrainedSize</em> animated:(BOOL)<em>animated</em> shouldMeasureAsync:(BOOL)<em>shouldMeasureAsync</em> measurementCompletion:(nullable void ( ^ ) ( ))<em>completion</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animated</code></th>
+						<td><p>Animation is optional, but will still proceed through your <code>animateLayoutTransition</code> implementation with <code>isAnimated == NO</code>.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>shouldMeasureAsync</code></th>
+						<td><p>Measure the layout asynchronously.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>measurementCompletion</code></th>
+						<td><p>Optional completion block called only if a new layout is calculated.
+It is called on main, right after the measurement and before -animateLayoutTransition:.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>If the passed constrainedSize is the the same as the node&rsquo;s current constrained size, this method is noop. If passed YES to shouldMeasureAsync it&rsquo;s guaranteed that measurement is happening on a background thread, otherwise measaurement will happen on the thread that the method was called on. The measurementCompletion callback is always called on the main thread right after the measurement and before -animateLayoutTransition:.</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection see-also-section">
+				<h4 class="method-subtitle">See Also</h4>
+				<ul>
+					
+					<li><code><p><a href="#//api/name/animateLayoutTransition:">- animateLayoutTransition:</a></p></code></li>
+					
+				</ul>
+			</div>
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/transitionLayoutWithAnimation:shouldMeasureAsync:measurementCompletion:" title="transitionLayoutWithAnimation:shouldMeasureAsync:measurementCompletion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/transitionLayoutWithAnimation:shouldMeasureAsync:measurementCompletion:">&ndash;&nbsp;transitionLayoutWithAnimation:shouldMeasureAsync:measurementCompletion:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Invalidates the current layout and begins a relayout of the node with the current <code>constrainedSize</code>. Must be called on main thread.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)transitionLayoutWithAnimation:(BOOL)<em>animated</em> shouldMeasureAsync:(BOOL)<em>shouldMeasureAsync</em> measurementCompletion:(nullable void ( ^ ) ( ))<em>completion</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animated</code></th>
+						<td><p>Animation is optional, but will still proceed through your <code>animateLayoutTransition</code> implementation with <code>isAnimated == NO</code>.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>shouldMeasureAsync</code></th>
+						<td><p>Measure the layout asynchronously.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>measurementCompletion</code></th>
+						<td><p>Optional completion block called only if a new layout is calculated.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>It is called right after the measurement and before -animateLayoutTransition:.</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection see-also-section">
+				<h4 class="method-subtitle">See Also</h4>
+				<ul>
+					
+					<li><code><p><a href="#//api/name/animateLayoutTransition:">- animateLayoutTransition:</a></p></code></li>
+					
+				</ul>
+			</div>
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/cancelLayoutTransition" title="cancelLayoutTransition"></a>
+	<h3 class="method-title"><code><a href="#//api/name/cancelLayoutTransition">&ndash;&nbsp;cancelLayoutTransition</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Cancels all performing layout transitions. Can be called on any thread.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)cancelLayoutTransition</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASDisplayNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

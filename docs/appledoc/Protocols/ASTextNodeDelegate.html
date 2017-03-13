@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASTextNodeDelegate Protocol Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/textNode:longPressedLinkAttribute:value:atPoint:textRange:">- textNode:longPressedLinkAttribute:value:atPoint:textRange:</option>
+		
+		<option value="//api/name/textNode:shouldHighlightLinkAttribute:value:atPoint:">- textNode:shouldHighlightLinkAttribute:value:atPoint:</option>
+		
+		<option value="//api/name/textNode:shouldLongPressLinkAttribute:value:atPoint:">- textNode:shouldLongPressLinkAttribute:value:atPoint:</option>
+		
+		<option value="//api/name/textNode:tappedLinkAttribute:value:atPoint:textRange:">- textNode:tappedLinkAttribute:value:atPoint:textRange:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASTextNodeDelegate Protocol Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Conforms to</th>
+	<td>NSObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASTextNode.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/textNode:tappedLinkAttribute:value:atPoint:textRange:" title="textNode:tappedLinkAttribute:value:atPoint:textRange:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/textNode:tappedLinkAttribute:value:atPoint:textRange:">&ndash;&nbsp;textNode:tappedLinkAttribute:value:atPoint:textRange:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates to the delegate that a link was tapped within a text node.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)textNode:(ASTextNode *)<em>textNode</em> tappedLinkAttribute:(NSString *)<em>attribute</em> value:(id)<em>value</em> atPoint:(CGPoint)<em>point</em> textRange:(NSRange)<em>textRange</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>textNode</code></th>
+						<td><p>The ASTextNode containing the link that was tapped.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>attribute</code></th>
+						<td><p>The attribute that was tapped. Will not be nil.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>value</code></th>
+						<td><p>The value of the tapped attribute.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>point</code></th>
+						<td><p>The point within textNode, in textNode&rsquo;s coordinate system, that was tapped.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>textRange</code></th>
+						<td><p>The range of highlighted text.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/textNode:longPressedLinkAttribute:value:atPoint:textRange:" title="textNode:longPressedLinkAttribute:value:atPoint:textRange:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/textNode:longPressedLinkAttribute:value:atPoint:textRange:">&ndash;&nbsp;textNode:longPressedLinkAttribute:value:atPoint:textRange:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates to the delegate that a link was tapped within a text node.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)textNode:(ASTextNode *)<em>textNode</em> longPressedLinkAttribute:(NSString *)<em>attribute</em> value:(id)<em>value</em> atPoint:(CGPoint)<em>point</em> textRange:(NSRange)<em>textRange</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>textNode</code></th>
+						<td><p>The ASTextNode containing the link that was tapped.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>attribute</code></th>
+						<td><p>The attribute that was tapped. Will not be nil.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>value</code></th>
+						<td><p>The value of the tapped attribute.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>point</code></th>
+						<td><p>The point within textNode, in textNode&rsquo;s coordinate system, that was tapped.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>textRange</code></th>
+						<td><p>The range of highlighted text.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>In addition to implementing this method, the delegate must be set on the text
+             node before it is loaded (the recognizer is created in -didLoad)</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/textNode:shouldHighlightLinkAttribute:value:atPoint:" title="textNode:shouldHighlightLinkAttribute:value:atPoint:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/textNode:shouldHighlightLinkAttribute:value:atPoint:">&ndash;&nbsp;textNode:shouldHighlightLinkAttribute:value:atPoint:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates to the text node if an attribute should be considered a link.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (BOOL)textNode:(ASTextNode *)<em>textNode</em> shouldHighlightLinkAttribute:(NSString *)<em>attribute</em> value:(id)<em>value</em> atPoint:(CGPoint)<em>point</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>textNode</code></th>
+						<td><p>The text node containing the entity attribute.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>attribute</code></th>
+						<td><p>The attribute that was tapped. Will not be nil.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>value</code></th>
+						<td><p>The value of the tapped attribute.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>point</code></th>
+						<td><p>The point within textNode, in textNode&rsquo;s coordinate system, that was touched to trigger a highlight.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>YES if the entity attribute should be a link, NO otherwise.</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>If not implemented, the default value is YES.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/textNode:shouldLongPressLinkAttribute:value:atPoint:" title="textNode:shouldLongPressLinkAttribute:value:atPoint:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/textNode:shouldLongPressLinkAttribute:value:atPoint:">&ndash;&nbsp;textNode:shouldLongPressLinkAttribute:value:atPoint:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates to the text node if an attribute is a valid long-press target</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (BOOL)textNode:(ASTextNode *)<em>textNode</em> shouldLongPressLinkAttribute:(NSString *)<em>attribute</em> value:(id)<em>value</em> atPoint:(CGPoint)<em>point</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>textNode</code></th>
+						<td><p>The text node containing the entity attribute.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>attribute</code></th>
+						<td><p>The attribute that was tapped. Will not be nil.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>value</code></th>
+						<td><p>The value of the tapped attribute.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>point</code></th>
+						<td><p>The point within textNode, in textNode&rsquo;s coordinate system, that was long-pressed.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>YES if the entity attribute should be treated as a long-press target, NO otherwise.</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>If not implemented, the default value is NO.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>
