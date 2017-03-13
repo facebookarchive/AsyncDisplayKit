@@ -122,6 +122,8 @@
 {
   if (_interactionDelegate != nil) {
     [_interactionDelegate nodeDidInvalidateSize:self];
+  } else {
+    [super _locked_rootNodeDidInvalidateSize];
   }
 }
 
@@ -129,6 +131,8 @@
 {
   if (_interactionDelegate != nil) {
     [_interactionDelegate nodeDidInvalidateSize:self];
+  } else {
+    [super _layoutTransitionMeasurementDidFinish];
   }
 }
 
