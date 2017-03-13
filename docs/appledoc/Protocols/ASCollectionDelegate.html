@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASCollectionDelegate Protocol Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/collectionNode:constrainedSizeForItemAtIndexPath:">- collectionNode:constrainedSizeForItemAtIndexPath:</option>
+		
+		<option value="//api/name/collectionNode:willBeginBatchFetchWithContext:">- collectionNode:willBeginBatchFetchWithContext:</option>
+		
+		<option value="//api/name/collectionView:constrainedSizeForNodeAtIndexPath:">- collectionView:constrainedSizeForNodeAtIndexPath:</option>
+		
+		<option value="//api/name/collectionView:didEndDisplayingNode:forItemAtIndexPath:">- collectionView:didEndDisplayingNode:forItemAtIndexPath:</option>
+		
+		<option value="//api/name/collectionView:willDisplayNode:forItemAtIndexPath:">- collectionView:willDisplayNode:forItemAtIndexPath:</option>
+		
+		<option value="//api/name/collectionView:willDisplayNodeForItemAtIndexPath:">- collectionView:willDisplayNodeForItemAtIndexPath:</option>
+		
+		<option value="//api/name/shouldBatchFetchForCollectionNode:">- shouldBatchFetchForCollectionNode:</option>
+		
+		<option value="//api/name/shouldBatchFetchForCollectionView:">- shouldBatchFetchForCollectionView:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASCollectionDelegate Protocol Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Conforms to</th>
+	<td><a href="../Protocols/ASCommonCollectionDelegate.html">ASCommonCollectionDelegate</a><br />NSObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASCollectionNode.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>This is a node-based UICollectionViewDelegate.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/collectionNode:constrainedSizeForItemAtIndexPath:" title="collectionNode:constrainedSizeForItemAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionNode:constrainedSizeForItemAtIndexPath:">&ndash;&nbsp;collectionNode:constrainedSizeForItemAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Provides the constrained size range for measuring the given item.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASSizeRange)collectionNode:(ASCollectionNode *)<em>collectionNode</em> constrainedSizeForItemAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionNode</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the item.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A constrained size range for layout for the item at this index path.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/collectionNode:willBeginBatchFetchWithContext:" title="collectionNode:willBeginBatchFetchWithContext:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionNode:willBeginBatchFetchWithContext:">&ndash;&nbsp;collectionNode:willBeginBatchFetchWithContext:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Receive a message that the collection node is near the end of its data set and more data should be fetched if
+necessary.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)collectionNode:(ASCollectionNode *)<em>collectionNode</em> willBeginBatchFetchWithContext:(ASBatchContext *)<em>context</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionNode</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>context</code></th>
+						<td><p>A context object that must be notified when the batch fetch is completed.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>You must eventually call -completeBatchFetching: with an argument of YES in order to receive future
+notifications to do batch fetches. This method is called on a background queue.</p>
+
+<p>ASCollectionNode currently only supports batch events for tail loads. If you require a head load, consider
+implementing a UIRefreshControl.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/shouldBatchFetchForCollectionNode:" title="shouldBatchFetchForCollectionNode:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/shouldBatchFetchForCollectionNode:">&ndash;&nbsp;shouldBatchFetchForCollectionNode:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Tell the collection node if batch fetching should begin.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (BOOL)shouldBatchFetchForCollectionNode:(ASCollectionNode *)<em>collectionNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionNode</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Use this method to conditionally fetch batches. Example use cases are: limiting the total number of
+objects that can be fetched or no network connection.</p>
+
+<p>If not implemented, the collection node assumes that it should notify its asyncDelegate when batch fetching
+should occur.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/collectionView:constrainedSizeForNodeAtIndexPath:" title="collectionView:constrainedSizeForNodeAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionView:constrainedSizeForNodeAtIndexPath:">&ndash;&nbsp;collectionView:constrainedSizeForNodeAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Provides the constrained size range for measuring the node at the index path.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASSizeRange)collectionView:(ASCollectionView *)<em>collectionView</em> constrainedSizeForNodeAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A constrained size range for layout the node at this index path.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/collectionView:willDisplayNode:forItemAtIndexPath:" title="collectionView:willDisplayNode:forItemAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionView:willDisplayNode:forItemAtIndexPath:">&ndash;&nbsp;collectionView:willDisplayNode:forItemAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Informs the delegate that the collection view will add the given node
+at the given index path to the view hierarchy.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)collectionView:(ASCollectionView *)<em>collectionView</em> willDisplayNode:(ASCellNode *)<em>node</em> forItemAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>node</code></th>
+						<td><p>The node that will be displayed.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the item that will be displayed.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> AsyncDisplayKit processes collection view edits asynchronously. The index path
+passed into this method may not correspond to the same item in your data source
+if your data source has been updated since the last edit was processed.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/collectionView:didEndDisplayingNode:forItemAtIndexPath:" title="collectionView:didEndDisplayingNode:forItemAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionView:didEndDisplayingNode:forItemAtIndexPath:">&ndash;&nbsp;collectionView:didEndDisplayingNode:forItemAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Informs the delegate that the collection view did remove the provided node from the view hierarchy.
+This may be caused by the node scrolling out of view, or by deleting the item
+or its containing section with @c deleteItemsAtIndexPaths: or @c deleteSections: .</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)collectionView:(ASCollectionView *)<em>collectionView</em> didEndDisplayingNode:(ASCellNode *)<em>node</em> forItemAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>node</code></th>
+						<td><p>The node which was removed from the view hierarchy.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path at which the node was located before it was removed.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> AsyncDisplayKit processes collection view edits asynchronously. The index path
+passed into this method may not correspond to the same item in your data source
+if your data source has been updated since the last edit was processed.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/shouldBatchFetchForCollectionView:" title="shouldBatchFetchForCollectionView:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/shouldBatchFetchForCollectionView:">&ndash;&nbsp;shouldBatchFetchForCollectionView:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Tell the collectionView if batch fetching should begin.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (BOOL)shouldBatchFetchForCollectionView:(ASCollectionView *)<em>collectionView</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Use this method to conditionally fetch batches. Example use cases are: limiting the total number of
+objects that can be fetched or no network connection.</p>
+
+<p>If not implemented, the collectionView assumes that it should notify its asyncDelegate when batch fetching
+should occur.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/collectionView:willDisplayNodeForItemAtIndexPath:" title="collectionView:willDisplayNodeForItemAtIndexPath:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/collectionView:willDisplayNodeForItemAtIndexPath:">&ndash;&nbsp;collectionView:willDisplayNodeForItemAtIndexPath:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Informs the delegate that the collection view will add the node
+at the given index path to the view hierarchy.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)collectionView:(ASCollectionView *)<em>collectionView</em> willDisplayNodeForItemAtIndexPath:(NSIndexPath *)<em>indexPath</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>collectionView</code></th>
+						<td><p>The sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPath</code></th>
+						<td><p>The index path of the item that will be displayed.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> AsyncDisplayKit processes collection view edits asynchronously. The index path
+passed into this method may not correspond to the same item in your data source
+if your data source has been updated since the last edit was processed.</p>
+
+<p>This method is deprecated. Use @c collectionView:willDisplayNode:forItemAtIndexPath: instead.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASCollectionNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

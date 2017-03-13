@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASTextNode Class Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/additionalTruncationMessage">additionalTruncationMessage</option>
+		
+		<option value="//api/name/attributedText">attributedText</option>
+		
+		<option value="//api/name/delegate">delegate</option>
+		
+		<option value="//api/name/exclusionPaths">exclusionPaths</option>
+		
+		<option value="//api/name/highlightRange">highlightRange</option>
+		
+		<option value="//api/name/highlightStyle">highlightStyle</option>
+		
+		<option value="//api/name/lineCount">lineCount</option>
+		
+		<option value="//api/name/linkAttributeNames">linkAttributeNames</option>
+		
+		<option value="//api/name/longPressCancelsTouches">longPressCancelsTouches</option>
+		
+		<option value="//api/name/maximumNumberOfLines">maximumNumberOfLines</option>
+		
+		<option value="//api/name/passthroughNonlinkTouches">passthroughNonlinkTouches</option>
+		
+		<option value="//api/name/placeholderColor">placeholderColor</option>
+		
+		<option value="//api/name/placeholderEnabled">placeholderEnabled</option>
+		
+		<option value="//api/name/placeholderInsets">placeholderInsets</option>
+		
+		<option value="//api/name/shadowPadding">shadowPadding</option>
+		
+		<option value="//api/name/truncated">truncated</option>
+		
+		<option value="//api/name/truncationAttributedText">truncationAttributedText</option>
+		
+		<option value="//api/name/truncationMode">truncationMode</option>
+		
+	</optgroup>
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/frameForTextRange:">- frameForTextRange:</option>
+		
+		<option value="//api/name/highlightRectsForTextRange:">- highlightRectsForTextRange:</option>
+		
+		<option value="//api/name/linkAttributeValueAtPoint:attributeName:range:">- linkAttributeValueAtPoint:attributeName:range:</option>
+		
+		<option value="//api/name/rectsForTextRange:">- rectsForTextRange:</option>
+		
+		<option value="//api/name/setHighlightRange:animated:">- setHighlightRange:animated:</option>
+		
+		<option value="//api/name/trailingRect">- trailingRect</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASTextNode Class Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Inherits from</th>
+	<td><a href="../Classes/ASControlNode.html">ASControlNode</a> : <a href="../Classes/ASDisplayNode.html">ASDisplayNode</a> : ASDealloc2MainObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASTextNode.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>Backed by TextKit.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/attributedText" title="attributedText"></a>
+	<h3 class="method-title"><code><a href="#//api/name/attributedText">&nbsp;&nbsp;attributedText</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The styled text displayed by the node.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, copy) NSAttributedString *attributedText</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to nil, no text is shown.
+For inline image attachments, add an attribute of key NSAttachmentAttributeName, with a value of an NSTextAttachment.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/truncationAttributedText" title="truncationAttributedText"></a>
+	<h3 class="method-title"><code><a href="#//api/name/truncationAttributedText">&nbsp;&nbsp;truncationAttributedText</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The attributedText to use when the text must be truncated.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, copy) NSAttributedString *truncationAttributedText</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to a localized ellipsis character.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/additionalTruncationMessage" title="additionalTruncationMessage"></a>
+	<h3 class="method-title"><code><a href="#//api/name/additionalTruncationMessage">&nbsp;&nbsp;additionalTruncationMessage</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>@summary The second attributed string appended for truncation.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, copy) NSAttributedString *additionalTruncationMessage</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This string will be highlighted on touches.
+@default nil</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/truncationMode" title="truncationMode"></a>
+	<h3 class="method-title"><code><a href="#//api/name/truncationMode">&nbsp;&nbsp;truncationMode</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Determines how the text is truncated to fit within the receiver&rsquo;s maximum size.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) NSLineBreakMode truncationMode</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to NSLineBreakByWordWrapping.</p><div class="note"><p><strong>Note:</strong> Setting a truncationMode in attributedString will override the truncation mode set here.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/truncated" title="truncated"></a>
+	<h3 class="method-title"><code><a href="#//api/name/truncated">&nbsp;&nbsp;truncated</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>If the text node is truncated. Text must have been sized first.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign, getter=isTruncated) BOOL truncated</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/maximumNumberOfLines" title="maximumNumberOfLines"></a>
+	<h3 class="method-title"><code><a href="#//api/name/maximumNumberOfLines">&nbsp;&nbsp;maximumNumberOfLines</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The maximum number of lines to render of the text before truncation.
+@default 0 (No limit)</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) NSUInteger maximumNumberOfLines</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/lineCount" title="lineCount"></a>
+	<h3 class="method-title"><code><a href="#//api/name/lineCount">&nbsp;&nbsp;lineCount</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The number of lines in the text. Text must have been sized first.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign) NSUInteger lineCount</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/exclusionPaths" title="exclusionPaths"></a>
+	<h3 class="method-title"><code><a href="#//api/name/exclusionPaths">&nbsp;&nbsp;exclusionPaths</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>An array of path objects representing the regions where text should not be displayed.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, strong) NSArray&lt;UIBezierPath*&gt; *exclusionPaths</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The default value of this property is an empty array. You can
+assign an array of UIBezierPath objects to exclude text from one or more regions in
+the text node&rsquo;s bounds. You can use this property to have text wrap around images,
+shapes or other text like a fancy magazine.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/placeholderEnabled" title="placeholderEnabled"></a>
+	<h3 class="method-title"><code><a href="#//api/name/placeholderEnabled">&nbsp;&nbsp;placeholderEnabled</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>ASTextNode has a special placeholder behavior when placeholderEnabled is YES.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL placeholderEnabled</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Defaults to NO.  When YES, it draws rectangles for each line of text,
+following the true shape of the text&rsquo;s wrapping.  This visually mirrors the overall
+shape and weight of paragraphs, making the appearance of the finished text less jarring.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/placeholderColor" title="placeholderColor"></a>
+	<h3 class="method-title"><code><a href="#//api/name/placeholderColor">&nbsp;&nbsp;placeholderColor</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The placeholder color.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, strong) UIColor *placeholderColor</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/placeholderInsets" title="placeholderInsets"></a>
+	<h3 class="method-title"><code><a href="#//api/name/placeholderInsets">&nbsp;&nbsp;placeholderInsets</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Inset each line of the placeholder.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) UIEdgeInsets placeholderInsets</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/shadowPadding" title="shadowPadding"></a>
+	<h3 class="method-title"><code><a href="#//api/name/shadowPadding">&nbsp;&nbsp;shadowPadding</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The number of pixels used for shadow padding on each side of the receiver.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, readonly, assign) UIEdgeInsets shadowPadding</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Each inset will be less than or equal to zero, so that applying
+UIEdgeInsetsRect(boundingRectForText, shadowPadding)
+will return a CGRect large enough to fit both the text and the appropriate shadow padding.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/rectsForTextRange:" title="rectsForTextRange:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/rectsForTextRange:">&ndash;&nbsp;rectsForTextRange:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns an array of rects bounding the characters in a given text range.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (NSArray&lt;NSValue*&gt; *)rectsForTextRange:(NSRange)<em>textRange</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>textRange</code></th>
+						<td><p>A range of text. Must be valid for the receiver&rsquo;s string.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Use this method to detect all the different rectangles a given range of text occupies.
+The rects returned are not guaranteed to be contiguous (for example, if the given text range spans
+a line break, the rects returned will be on opposite sides and different lines). The rects returned
+are in the coordinate system of the receiver.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/highlightRectsForTextRange:" title="highlightRectsForTextRange:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/highlightRectsForTextRange:">&ndash;&nbsp;highlightRectsForTextRange:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns an array of rects used for highlighting the characters in a given text range.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (NSArray&lt;NSValue*&gt; *)highlightRectsForTextRange:(NSRange)<em>textRange</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>textRange</code></th>
+						<td><p>A range of text. Must be valid for the receiver&rsquo;s string.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Use this method to detect all the different rectangles the highlights of a given range of text occupies.
+The rects returned are not guaranteed to be contiguous (for example, if the given text range spans
+a line break, the rects returned will be on opposite sides and different lines). The rects returned
+are in the coordinate system of the receiver. This method is useful for visual coordination with a
+highlighted range of text.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/frameForTextRange:" title="frameForTextRange:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/frameForTextRange:">&ndash;&nbsp;frameForTextRange:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns a bounding rect for the given text range.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (CGRect)frameForTextRange:(NSRange)<em>textRange</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>textRange</code></th>
+						<td><p>A range of text. Must be valid for the receiver&rsquo;s string.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The height of the frame returned is that of the receiver&rsquo;s line-height; adjustment for
+cap-height and descenders is not performed. This method raises an exception if textRange is not
+a valid substring range of the receiver&rsquo;s string.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/trailingRect" title="trailingRect"></a>
+	<h3 class="method-title"><code><a href="#//api/name/trailingRect">&ndash;&nbsp;trailingRect</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns the trailing rectangle of space in the receiver, after the final character.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (CGRect)trailingRect</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Use this method to detect which portion of the receiver is not occupied by characters.
+The rect returned is in the coordinate system of the receiver.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/linkAttributeNames" title="linkAttributeNames"></a>
+	<h3 class="method-title"><code><a href="#//api/name/linkAttributeNames">&nbsp;&nbsp;linkAttributeNames</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The set of attribute names to consider links.  Defaults to NSLinkAttributeName.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, copy) NSArray&lt;NSString*&gt; *linkAttributeNames</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/linkAttributeValueAtPoint:attributeName:range:" title="linkAttributeValueAtPoint:attributeName:range:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/linkAttributeValueAtPoint:attributeName:range:">&ndash;&nbsp;linkAttributeValueAtPoint:attributeName:range:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates whether the receiver has an entity at a given point.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nullable id)linkAttributeValueAtPoint:(CGPoint)<em>point</em> attributeName:(out NSString *_Nullable *_Nullable)<em>attributeNameOut</em> range:(out NSRange *_Nullable)<em>rangeOut</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>point</code></th>
+						<td><p>The point, in the receiver&rsquo;s coordinate system.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>attributeNameOut</code></th>
+						<td><p>The name of the attribute at the point. Can be NULL.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeOut</code></th>
+						<td><p>The ultimate range of the found text. Can be NULL.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>YES if an entity exists at <code>point</code>; NO otherwise.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/highlightStyle" title="highlightStyle"></a>
+	<h3 class="method-title"><code><a href="#//api/name/highlightStyle">&nbsp;&nbsp;highlightStyle</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The style to use when highlighting text.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASTextNodeHighlightStyle highlightStyle</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/highlightRange" title="highlightRange"></a>
+	<h3 class="method-title"><code><a href="#//api/name/highlightRange">&nbsp;&nbsp;highlightRange</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The range of text highlighted by the receiver. Changes to this property are not animated by default.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) NSRange highlightRange</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/setHighlightRange:animated:" title="setHighlightRange:animated:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/setHighlightRange:animated:">&ndash;&nbsp;setHighlightRange:animated:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Set the range of text to highlight, with optional animation.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)setHighlightRange:(NSRange)<em>highlightRange</em> animated:(BOOL)<em>animated</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>highlightRange</code></th>
+						<td><p>The range of text to highlight.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animated</code></th>
+						<td><p>Whether the text should be highlighted with an animation.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/delegate" title="delegate"></a>
+	<h3 class="method-title"><code><a href="#//api/name/delegate">&nbsp;&nbsp;delegate</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Responds to actions from links in the text node.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, weak) id&lt;ASTextNodeDelegate&gt; delegate</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The delegate must be set before the node is loaded, and implement
+             textNode:longPressedLinkAttribute:value:atPoint:textRange: in order for
+             the long press gesture recognizer to be installed.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/longPressCancelsTouches" title="longPressCancelsTouches"></a>
+	<h3 class="method-title"><code><a href="#//api/name/longPressCancelsTouches">&nbsp;&nbsp;longPressCancelsTouches</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>If YES and a long press is recognized, touches are cancelled. Default is NO</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL longPressCancelsTouches</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/passthroughNonlinkTouches" title="passthroughNonlinkTouches"></a>
+	<h3 class="method-title"><code><a href="#//api/name/passthroughNonlinkTouches">&nbsp;&nbsp;passthroughNonlinkTouches</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>if YES will not intercept touches for non-link areas of the text. Default is NO.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL passthroughNonlinkTouches</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

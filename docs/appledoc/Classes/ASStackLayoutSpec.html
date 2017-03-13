@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASStackLayoutSpec Class Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/alignItems">alignItems</option>
+		
+		<option value="//api/name/baselineRelativeArrangement">baselineRelativeArrangement</option>
+		
+		<option value="//api/name/direction">direction</option>
+		
+		<option value="//api/name/horizontalAlignment">horizontalAlignment</option>
+		
+		<option value="//api/name/justifyContent">justifyContent</option>
+		
+		<option value="//api/name/spacing">spacing</option>
+		
+		<option value="//api/name/verticalAlignment">verticalAlignment</option>
+		
+	</optgroup>
+	
+
+	
+	<optgroup label="Class Methods">
+		
+		<option value="//api/name/horizontalStackLayoutSpec">+ horizontalStackLayoutSpec</option>
+		
+		<option value="//api/name/stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:">+ stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:</option>
+		
+		<option value="//api/name/verticalStackLayoutSpec">+ verticalStackLayoutSpec</option>
+		
+	</optgroup>
+	
+
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASStackLayoutSpec Class Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Inherits from</th>
+	<td><a href="../Classes/ASLayoutSpec.html">ASLayoutSpec</a> : NSObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASStackLayoutSpec.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>A simple layout spec that stacks a list of children vertically or horizontally.</p>
+
+<ul>
+<li>All children are initially laid out with the an infinite available size in the stacking direction.</li>
+<li>In the other direction, this spec&rsquo;s constraint is passed.</li>
+<li>The children&rsquo;s sizes are summed in the stacking direction.
+
+<ul>
+<li>If this sum is less than this spec&rsquo;s minimum size in stacking direction, children with flexGrow are flexed.</li>
+<li>If it is greater than this spec&rsquo;s maximum size in the stacking direction, children with flexShrink are flexed.</li>
+<li>If, even after flexing, the sum is still greater than this spec&rsquo;s maximum size in the stacking direction,
+justifyContent determines how children are laid out.</li>
+</ul>
+</li>
+</ul>
+
+
+<p>For example:</p>
+
+<ul>
+<li>Suppose stacking direction is Vertical, min-width=100, max-width=300, min-height=200, max-height=500.</li>
+<li>All children are laid out with min-width=100, max-width=300, min-height=0, max-height=INFINITY.</li>
+<li>If the sum of the childrens' heights is less than 200, children with flexGrow are flexed larger.</li>
+<li>If the sum of the childrens' heights is greater than 500, children with flexShrink are flexed smaller.
+ Each child is shrunk by <code>((sum of heights) - 500)/(number of flexShrink-able children)</code>.</li>
+<li>If the sum of the childrens' heights is greater than 500 even after flexShrink-able children are flexed,
+ justifyContent determines how children are laid out.</li>
+</ul>
+
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/direction" title="direction"></a>
+	<h3 class="method-title"><code><a href="#//api/name/direction">&nbsp;&nbsp;direction</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Specifies the direction children are stacked in. If horizontalAlignment and verticalAlignment were set,
+they will be resolved again, causing justifyContent and alignItems to be updated accordingly</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASStackLayoutDirection direction</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/spacing" title="spacing"></a>
+	<h3 class="method-title"><code><a href="#//api/name/spacing">&nbsp;&nbsp;spacing</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The amount of space between each child.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) CGFloat spacing</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/horizontalAlignment" title="horizontalAlignment"></a>
+	<h3 class="method-title"><code><a href="#//api/name/horizontalAlignment">&nbsp;&nbsp;horizontalAlignment</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Specifies how children are aligned horizontally. Depends on the stack direction, setting the alignment causes either
+justifyContent or alignItems to be updated. The alignment will remain valid after future direction changes.
+Thus, it is preferred to those properties</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASHorizontalAlignment horizontalAlignment</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/verticalAlignment" title="verticalAlignment"></a>
+	<h3 class="method-title"><code><a href="#//api/name/verticalAlignment">&nbsp;&nbsp;verticalAlignment</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Specifies how children are aligned vertically. Depends on the stack direction, setting the alignment causes either
+justifyContent or alignItems to be updated. The alignment will remain valid after future direction changes.
+Thus, it is preferred to those properties</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASVerticalAlignment verticalAlignment</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/justifyContent" title="justifyContent"></a>
+	<h3 class="method-title"><code><a href="#//api/name/justifyContent">&nbsp;&nbsp;justifyContent</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The amount of space between each child.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASStackLayoutJustifyContent justifyContent</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/alignItems" title="alignItems"></a>
+	<h3 class="method-title"><code><a href="#//api/name/alignItems">&nbsp;&nbsp;alignItems</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Orientation of children along cross axis</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) ASStackLayoutAlignItems alignItems</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/baselineRelativeArrangement" title="baselineRelativeArrangement"></a>
+	<h3 class="method-title"><code><a href="#//api/name/baselineRelativeArrangement">&nbsp;&nbsp;baselineRelativeArrangement</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>If YES the vertical spacing between two views is measured from the last baseline of the top view to the top of the bottom view</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign) BOOL baselineRelativeArrangement</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:" title="stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:">+&nbsp;stackLayoutSpecWithDirection:spacing:justifyContent:alignItems:children:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>The direction of the stack view (horizontal or vertical)</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>+ (instancetype)stackLayoutSpecWithDirection:(ASStackLayoutDirection)<em>direction</em> spacing:(CGFloat)<em>spacing</em> justifyContent:(ASStackLayoutJustifyContent)<em>justifyContent</em> alignItems:(ASStackLayoutAlignItems)<em>alignItems</em> children:(NSArray&lt;id&lt;ASLayoutElement&gt; &gt; *)<em>children</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>direction</code></th>
+						<td><p>The direction of the stack view (horizontal or vertical)</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>spacing</code></th>
+						<td><p>The spacing between the children</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>justifyContent</code></th>
+						<td><p>If no children are flexible, this describes how to fill any extra space</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>alignItems</code></th>
+						<td><p>Orientation of the children along the cross axis</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>children</code></th>
+						<td><p>ASLayoutElement children to be positioned.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/verticalStackLayoutSpec" title="verticalStackLayoutSpec"></a>
+	<h3 class="method-title"><code><a href="#//api/name/verticalStackLayoutSpec">+&nbsp;verticalStackLayoutSpec</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A stack layout spec with direction of ASStackLayoutDirectionVertical</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>+ (instancetype)verticalStackLayoutSpec</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A stack layout spec with direction of ASStackLayoutDirectionVertical</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/horizontalStackLayoutSpec" title="horizontalStackLayoutSpec"></a>
+	<h3 class="method-title"><code><a href="#//api/name/horizontalStackLayoutSpec">+&nbsp;horizontalStackLayoutSpec</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A stack layout spec with direction of ASStackLayoutDirectionHorizontal</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>+ (instancetype)horizontalStackLayoutSpec</code></div>
+
+		    
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>A stack layout spec with direction of ASStackLayoutDirectionHorizontal</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASStackLayoutSpec.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

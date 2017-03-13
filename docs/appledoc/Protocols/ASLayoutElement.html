@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASLayoutElement Protocol Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+	<optgroup label="Properties">
+		
+		<option value="//api/name/canLayoutAsynchronous">canLayoutAsynchronous</option>
+		
+		<option value="//api/name/debugName">debugName</option>
+		
+		<option value="//api/name/layoutElementType">layoutElementType</option>
+		
+		<option value="//api/name/style">style</option>
+		
+	</optgroup>
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/calculateLayoutThatFits:">- calculateLayoutThatFits:</option>
+		
+		<option value="//api/name/calculateLayoutThatFits:restrictedToSize:relativeToParentSize:">- calculateLayoutThatFits:restrictedToSize:relativeToParentSize:</option>
+		
+		<option value="//api/name/layoutThatFits:">- layoutThatFits:</option>
+		
+		<option value="//api/name/layoutThatFits:parentSize:">- layoutThatFits:parentSize:</option>
+		
+		<option value="//api/name/measureWithSizeRange:">- measureWithSizeRange:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASLayoutElement Protocol Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Conforms to</th>
+	<td>ASEnvironment<br />ASLayoutElementExtensibility<br /><a href="../Protocols/ASLayoutElementPrivate.html">ASLayoutElementPrivate</a><br />ASLayoutElementStylability<br />NSFastEnumeration</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASLayoutElement.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>The ASLayoutElement protocol declares a method for measuring the layout of an object. A layout
+is defined by an ASLayout return value, and must specify 1) the size (but not position) of the
+layoutElement object, and 2) the size and position of all of its immediate child objects. The tree
+recursion is driven by parents requesting layouts from their children in order to determine their
+size, followed by the parents setting the position of the children once the size is known</p>
+
+<p>The protocol also implements a &ldquo;family&rdquo; of LayoutElement protocols. These protocols contain layout
+options that can be used for specific layout specs. For example, ASStackLayoutSpec has options
+defining how a layoutElement should shrink or grow based upon available space.</p>
+
+<p>These layout options are all stored in an ASLayoutOptions class (that is defined in ASLayoutElementPrivate).
+Generally you needn&rsquo;t worry about the layout options class, as the layoutElement protocols allow all direct
+access to the options via convenience properties. If you are creating custom layout spec, then you can
+extend the backing layout options class to accommodate any new layout options.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/layoutElementType" title="layoutElementType"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutElementType">&nbsp;&nbsp;layoutElementType</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns type of layoutElement</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, readonly) ASLayoutElementType layoutElementType</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutElement.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/canLayoutAsynchronous" title="canLayoutAsynchronous"></a>
+	<h3 class="method-title"><code><a href="#//api/name/canLayoutAsynchronous">&nbsp;&nbsp;canLayoutAsynchronous</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Returns if the layoutElement can be used to layout in an asynchronous way on a background thread.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, readonly) BOOL canLayoutAsynchronous</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutElement.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/style" title="style"></a>
+	<h3 class="method-title"><code><a href="#//api/name/style">&nbsp;&nbsp;style</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>A size constraint that should apply to this ASLayoutElement.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nonatomic, assign, readonly) ASLayoutElementStyle *style</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutElement.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/debugName" title="debugName"></a>
+	<h3 class="method-title"><code><a href="#//api/name/debugName">&nbsp;&nbsp;debugName</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Optional name that is printed by ascii art string and displayed in description.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>@property (nullable, nonatomic, copy) NSString *debugName</code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutElement.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/layoutThatFits:" title="layoutThatFits:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutThatFits:">&ndash;&nbsp;layoutThatFits:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Asks the node to return a layout based on given size range.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASLayout *)layoutThatFits:(ASSizeRange)<em>constrainedSize</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>constrainedSize</code></th>
+						<td><p>The minimum and maximum sizes the receiver should fit in.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Though this method does not set the bounds of the view, it does have side effects&ndash;caching both the
+constraint and the result.</p><div class="warning"><p><strong>Warning:</strong> Subclasses must not override this; it caches results from -calculateLayoutThatFits:.  Calling this method may
+be expensive if result is not cached.</p></div>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection see-also-section">
+				<h4 class="method-subtitle">See Also</h4>
+				<ul>
+					
+					<li><code><p><a href="../Categories/ASDisplayNode+Subclassing.html#//api/name/calculateLayoutThatFits:">[ASDisplayNode(Subclassing) calculateLayoutThatFits:]</a></p></code></li>
+					
+				</ul>
+			</div>
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutElement.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/layoutThatFits:parentSize:" title="layoutThatFits:parentSize:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/layoutThatFits:parentSize:">&ndash;&nbsp;layoutThatFits:parentSize:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Call this on children layoutElements to compute their layouts within your implementation of -calculateLayoutThatFits:.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASLayout *)layoutThatFits:(ASSizeRange)<em>constrainedSize</em> parentSize:(CGSize)<em>parentSize</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>constrainedSize</code></th>
+						<td><p>Specifies a minimum and maximum size. The receiver must choose a size that is in this range.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>parentSize</code></th>
+						<td><p>The parent node&rsquo;s size. If the parent component does not have a final size in a given dimension,
+then it should be passed as ASLayoutElementParentDimensionUndefined (for example, if the parent&rsquo;s width
+depends on the child&rsquo;s size).</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>An ASLayout instance defining the layout of the receiver (and its children, if the box layout model is used).</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> You may not override this method. Override -calculateLayoutThatFits: instead.</p></div><div class="warning"><p><strong>Warning:</strong> In almost all cases, prefer the use of ASCalculateLayout in ASLayout</p></div><p>Though this method does not set the bounds of the view, it does have side effects&ndash;caching both the
+constraint and the result.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutElement.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/calculateLayoutThatFits:" title="calculateLayoutThatFits:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/calculateLayoutThatFits:">&ndash;&nbsp;calculateLayoutThatFits:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Override this method to compute your layoutElement&rsquo;s layout.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)<em>constrainedSize</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>constrainedSize</code></th>
+						<td><p>A min and max size. This is computed as described in the description. The ASLayout you
+return MUST have a size between these two sizes.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>Why do you need to override -calculateLayoutThatFits: instead of -layoutThatFits:parentSize:?
+The base implementation of -layoutThatFits:parentSize: does the following for you:
+1. First, it uses the parentSize parameter to resolve the nodes&rsquo;s size (the one assigned to the size property).
+2. Then, it intersects the resolved size with the constrainedSize parameter. If the two don&rsquo;t intersect,
+constrainedSize wins. This allows a component to always override its childrens' sizes when computing its layout.
+(The analogy for UIView: you might return a certain size from -sizeThatFits:, but a parent view can always override
+that size and set your frame to any size.)
+3. It caches it result for reuse</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutElement.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/calculateLayoutThatFits:restrictedToSize:relativeToParentSize:" title="calculateLayoutThatFits:restrictedToSize:relativeToParentSize:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/calculateLayoutThatFits:restrictedToSize:relativeToParentSize:">&ndash;&nbsp;calculateLayoutThatFits:restrictedToSize:relativeToParentSize:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>In certain advanced cases, you may want to override this method. Overriding this method allows you to receive the
+layoutElement&rsquo;s size, parentSize, and constrained size. With these values you could calculate the final constrained size
+and call -calculateLayoutThatFits: with the result.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (ASLayout *)calculateLayoutThatFits:(ASSizeRange)<em>constrainedSize</em> restrictedToSize:(ASLayoutElementSize)<em>size</em> relativeToParentSize:(CGSize)<em>parentSize</em></code></div>
+
+		    
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<div class="warning"><p><strong>Warning:</strong> Overriding this method should be done VERY rarely.</p></div>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutElement.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/measureWithSizeRange:" title="measureWithSizeRange:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/measureWithSizeRange:">&ndash;&nbsp;measureWithSizeRange:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Calculate a layout based on given size range. (<b class="deprecated">Deprecated:</b><span class="deprecated"> Deprecated in version 2.0: Use layoutThatFits: or layoutThatFits:parentSize: if used in
+ASLayoutSpec subclasses</span>)</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (nonnull ASLayout *)measureWithSizeRange:(ASSizeRange)<em>constrainedSize</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>constrainedSize</code></th>
+						<td><p>The minimum and maximum sizes the receiver should fit in.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>An ASLayout instance defining the layout of the receiver and its children.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASLayoutElement.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

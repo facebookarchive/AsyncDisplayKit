@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASEditableTextNodeDelegate Protocol Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/editableTextNode:shouldChangeTextInRange:replacementText:">- editableTextNode:shouldChangeTextInRange:replacementText:</option>
+		
+		<option value="//api/name/editableTextNodeDidBeginEditing:">- editableTextNodeDidBeginEditing:</option>
+		
+		<option value="//api/name/editableTextNodeDidChangeSelection:fromSelectedRange:toSelectedRange:dueToEditing:">- editableTextNodeDidChangeSelection:fromSelectedRange:toSelectedRange:dueToEditing:</option>
+		
+		<option value="//api/name/editableTextNodeDidFinishEditing:">- editableTextNodeDidFinishEditing:</option>
+		
+		<option value="//api/name/editableTextNodeDidUpdateText:">- editableTextNodeDidUpdateText:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASEditableTextNodeDelegate Protocol Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Conforms to</th>
+	<td>NSObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASEditableTextNode.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>The methods declared by the ASEditableTextNodeDelegate protocol allow the adopting delegate to
+respond to notifications such as began and finished editing, selection changed and text updated;
+and manage whether a specified text should be replaced.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/editableTextNodeDidBeginEditing:" title="editableTextNodeDidBeginEditing:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/editableTextNodeDidBeginEditing:">&ndash;&nbsp;editableTextNodeDidBeginEditing:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates to the delegate that the text node began editing.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)editableTextNodeDidBeginEditing:(ASEditableTextNode *)<em>editableTextNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>editableTextNode</code></th>
+						<td><p>An editable text node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The invocation of this method coincides with the keyboard animating to become visible.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASEditableTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/editableTextNode:shouldChangeTextInRange:replacementText:" title="editableTextNode:shouldChangeTextInRange:replacementText:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/editableTextNode:shouldChangeTextInRange:replacementText:">&ndash;&nbsp;editableTextNode:shouldChangeTextInRange:replacementText:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Asks the delegate whether the specified text should be replaced in the editable text node.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (BOOL)editableTextNode:(ASEditableTextNode *)<em>editableTextNode</em> shouldChangeTextInRange:(NSRange)<em>range</em> replacementText:(NSString *)<em>text</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>editableTextNode</code></th>
+						<td><p>An editable text node.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>range</code></th>
+						<td><p>The current selection range. If the length of the range is 0, range reflects the current insertion point. If the user presses the Delete key, the length of the range is 1 and an empty string object replaces that single character.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>text</code></th>
+						<td><p>The text to insert.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+			<div class="method-subsection return">
+				<h4 class="method-subtitle parameter-title">Return Value</h4>
+				<p>The text node calls this method whenever the user types a new character or deletes an existing character. Implementation of this method is optional &ndash; the default implementation returns YES.</p>
+			</div>
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>YES if the old text should be replaced by the new text; NO if the replacement operation should be aborted.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASEditableTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/editableTextNodeDidChangeSelection:fromSelectedRange:toSelectedRange:dueToEditing:" title="editableTextNodeDidChangeSelection:fromSelectedRange:toSelectedRange:dueToEditing:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/editableTextNodeDidChangeSelection:fromSelectedRange:toSelectedRange:dueToEditing:">&ndash;&nbsp;editableTextNodeDidChangeSelection:fromSelectedRange:toSelectedRange:dueToEditing:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates to the delegate that the text node&rsquo;s selection has changed.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)editableTextNodeDidChangeSelection:(ASEditableTextNode *)<em>editableTextNode</em> fromSelectedRange:(NSRange)<em>fromSelectedRange</em> toSelectedRange:(NSRange)<em>toSelectedRange</em> dueToEditing:(BOOL)<em>dueToEditing</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>editableTextNode</code></th>
+						<td><p>An editable text node.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>fromSelectedRange</code></th>
+						<td><p>The previously selected range.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>toSelectedRange</code></th>
+						<td><p>The current selected range. Equivalent to the <selectedRange> property.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>dueToEditing</code></th>
+						<td><p>YES if the selection change was due to editing; NO otherwise.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>You can access the selection of the receiver via <selectedRange>.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASEditableTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/editableTextNodeDidUpdateText:" title="editableTextNodeDidUpdateText:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/editableTextNodeDidUpdateText:">&ndash;&nbsp;editableTextNodeDidUpdateText:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates to the delegate that the text node&rsquo;s text was updated.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)editableTextNodeDidUpdateText:(ASEditableTextNode *)<em>editableTextNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>editableTextNode</code></th>
+						<td><p>An editable text node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>This method is called each time the user updated the text node&rsquo;s text. It is not called for programmatic changes made to the text via the <attributedText> property.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASEditableTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/editableTextNodeDidFinishEditing:" title="editableTextNodeDidFinishEditing:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/editableTextNodeDidFinishEditing:">&ndash;&nbsp;editableTextNodeDidFinishEditing:</a></code>
+</h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Indicates to the delegate that teh text node has finished editing.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)editableTextNodeDidFinishEditing:(ASEditableTextNode *)<em>editableTextNode</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>editableTextNode</code></th>
+						<td><p>An editable text node.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection discussion-section">
+				<h4 class="method-subtitle">Discussion</h4>
+				<p>The invocation of this method coincides with the keyboard animating to become hidden.</p>
+			</div>
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASEditableTextNode.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>

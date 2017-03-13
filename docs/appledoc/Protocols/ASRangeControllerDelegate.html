@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+
+	<title>ASRangeControllerDelegate Protocol Reference</title>
+
+	<link rel="stylesheet" href="../css/style.css">
+	<meta name="viewport" content="initial-scale=1, maximum-scale=1.4">
+	<meta name="generator" content="appledoc 2.2.1 (build 1334)">
+</head>
+<body class="appledoc">
+	<header>
+		<div class="container" class="hide-in-xcode">
+			
+			<h1 id="library-title">
+				<a href="../index.html">  </a>
+			</h1>
+
+			<p id="developer-home">
+				<a href="../index.html">AsyncDisplayKit</a>
+			</p>
+			
+		</div>
+	</header>
+
+	<aside>
+		<div class="container">
+			<nav>
+				<ul id="header-buttons" role="toolbar">
+					<li><a href="../index.html">Index</a></li>
+<li><a href="../hierarchy.html">Hierarchy</a></li>
+
+					<li id="on-this-page" role="navigation">
+						<label>
+							On This Page
+
+							<div class="chevron">
+								<div class="chevy chevron-left"></div>
+								<div class="chevy chevron-right"></div>
+							</div>
+
+							<select id="jump-to">
+	<option value="top">Jump To&#133;</option>
+	
+	<option value="overview">Overview</option>
+	
+
+	
+	
+	<option value="tasks">Tasks</option>
+	
+	
+
+	
+	
+
+	
+
+	
+	<optgroup label="Instance Methods">
+		
+		<option value="//api/name/didBeginUpdatesInRangeController:">- didBeginUpdatesInRangeController:</option>
+		
+		<option value="//api/name/didCompleteUpdatesInRangeController:">- didCompleteUpdatesInRangeController:</option>
+		
+		<option value="//api/name/rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:">- rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:</option>
+		
+		<option value="//api/name/rangeController:didDeleteSectionsAtIndexSet:withAnimationOptions:">- rangeController:didDeleteSectionsAtIndexSet:withAnimationOptions:</option>
+		
+		<option value="//api/name/rangeController:didEndUpdatesAnimated:completion:">- rangeController:didEndUpdatesAnimated:completion:</option>
+		
+		<option value="//api/name/rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:">- rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:</option>
+		
+		<option value="//api/name/rangeController:didInsertSectionsAtIndexSet:withAnimationOptions:">- rangeController:didInsertSectionsAtIndexSet:withAnimationOptions:</option>
+		
+	</optgroup>
+	
+	
+</select>
+						</label>
+					</li>
+				</ul>
+			</nav>
+		</div>
+	</aside>
+
+	<article>
+		<div id="overview_contents" class="container">
+			<div id="content">
+				<main role="main">
+					<h1 class="title">ASRangeControllerDelegate Protocol Reference</h1>
+
+					
+					<div class="section section-specification"><table cellspacing="0"><tbody>
+						<tr>
+	<th>Conforms to</th>
+	<td>NSObject</td>
+</tr><tr>
+	<th>Declared in</th>
+	<td>ASRangeController.h</td>
+</tr>
+						</tbody></table></div>
+					
+
+                    
+					
+					<div class="section section-overview">
+						<a title="Overview" name="overview"></a>
+						<h2 class="subtitle subtitle-overview">Overview</h2>
+						<p>Delegate for ASRangeController.</p>
+					</div>
+					
+					
+
+					
+					
+					<div class="section section-tasks">
+						<a title="Tasks" name="tasks"></a>
+						
+
+						
+						
+
+						<div class="task-list">
+							<div class="section-method">
+	<a name="//api/name/didBeginUpdatesInRangeController:" title="didBeginUpdatesInRangeController:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didBeginUpdatesInRangeController:">&ndash;&nbsp;didBeginUpdatesInRangeController:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Begin updates.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didBeginUpdatesInRangeController:(ASRangeController *)<em>rangeController</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeController</code></th>
+						<td><p>Sender.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASRangeController.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/rangeController:didEndUpdatesAnimated:completion:" title="rangeController:didEndUpdatesAnimated:completion:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/rangeController:didEndUpdatesAnimated:completion:">&ndash;&nbsp;rangeController:didEndUpdatesAnimated:completion:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>End updates.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didEndUpdatesAnimated:(BOOL)<em>animated</em> completion:(void ( ^ ) ( BOOL ))<em>completion</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeController</code></th>
+						<td><p>Sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animated</code></th>
+						<td><p>NO if all animations are disabled. YES otherwise.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>completion</code></th>
+						<td><p>Completion block.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASRangeController.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/didCompleteUpdatesInRangeController:" title="didCompleteUpdatesInRangeController:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/didCompleteUpdatesInRangeController:">&ndash;&nbsp;didCompleteUpdatesInRangeController:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Completed updates to cell node addition and removal.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)didCompleteUpdatesInRangeController:(ASRangeController *)<em>rangeController</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeController</code></th>
+						<td><p>Sender.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASRangeController.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:" title="rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:">&ndash;&nbsp;rangeController:didInsertNodes:atIndexPaths:withAnimationOptions:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called for nodes insertion.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didInsertNodes:(NSArray&lt;ASCellNode*&gt; *)<em>nodes</em> atIndexPaths:(NSArray&lt;NSIndexPath*&gt; *)<em>indexPaths</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeController</code></th>
+						<td><p>Sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>nodes</code></th>
+						<td><p>Inserted nodes.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPaths</code></th>
+						<td><p>Index path of inserted nodes.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animationOptions</code></th>
+						<td><p>Animation options. See ASDataControllerAnimationOptions.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASRangeController.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:" title="rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:">&ndash;&nbsp;rangeController:didDeleteNodes:atIndexPaths:withAnimationOptions:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called for nodes deletion.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didDeleteNodes:(NSArray&lt;ASCellNode*&gt; *)<em>nodes</em> atIndexPaths:(NSArray&lt;NSIndexPath*&gt; *)<em>indexPaths</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeController</code></th>
+						<td><p>Sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>nodes</code></th>
+						<td><p>Deleted nodes.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexPaths</code></th>
+						<td><p>Index path of deleted nodes.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animationOptions</code></th>
+						<td><p>Animation options. See ASDataControllerAnimationOptions.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASRangeController.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/rangeController:didInsertSectionsAtIndexSet:withAnimationOptions:" title="rangeController:didInsertSectionsAtIndexSet:withAnimationOptions:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/rangeController:didInsertSectionsAtIndexSet:withAnimationOptions:">&ndash;&nbsp;rangeController:didInsertSectionsAtIndexSet:withAnimationOptions:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called for section insertion.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didInsertSectionsAtIndexSet:(NSIndexSet *)<em>indexSet</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeController</code></th>
+						<td><p>Sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexSet</code></th>
+						<td><p>Index set of inserted sections.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animationOptions</code></th>
+						<td><p>Animation options. See ASDataControllerAnimationOptions.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASRangeController.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div><div class="section-method">
+	<a name="//api/name/rangeController:didDeleteSectionsAtIndexSet:withAnimationOptions:" title="rangeController:didDeleteSectionsAtIndexSet:withAnimationOptions:"></a>
+	<h3 class="method-title"><code><a href="#//api/name/rangeController:didDeleteSectionsAtIndexSet:withAnimationOptions:">&ndash;&nbsp;rangeController:didDeleteSectionsAtIndexSet:withAnimationOptions:</a></code>
+<span class="task-item-suffix">required method</span></h3>
+
+	<div class="method-info">
+		<div class="pointy-thing"></div>
+
+		<div class="method-info-container">
+			
+			
+			<div class="method-subsection brief-description">
+				<p>Called for section deletion.</p>
+			</div>
+			
+		    
+
+			<div class="method-subsection method-declaration"><code>- (void)rangeController:(ASRangeController *)<em>rangeController</em> didDeleteSectionsAtIndexSet:(NSIndexSet *)<em>indexSet</em> withAnimationOptions:(ASDataControllerAnimationOptions)<em>animationOptions</em></code></div>
+
+		    
+			
+			<div class="method-subsection arguments-section parameters">
+				<h4 class="method-subtitle parameter-title">Parameters</h4>
+				<table class="argument-def parameter-def">
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>rangeController</code></th>
+						<td><p>Sender.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>indexSet</code></th>
+						<td><p>Index set of deleted sections.</p></td>
+					</tr>
+				
+					<tr>
+						<th scope="row" class="argument-name"><code>animationOptions</code></th>
+						<td><p>Animation options. See ASDataControllerAnimationOptions.</p></td>
+					</tr>
+				
+				</table>
+			</div>
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+
+			
+			<div class="method-subsection declared-in-section">
+				<h4 class="method-subtitle">Declared In</h4>
+				<p><code class="declared-in-ref">ASRangeController.h</code></p>
+			</div>
+			
+			
+		</div>
+	</div>
+</div>
+						</div>
+						
+					</div>
+					
+					
+
+                    
+                    
+          
+				</main>
+
+				<footer>
+					<div class="footer-copyright">
+						
+						<p class="copyright">Copyright &copy; 2016 AsyncDisplayKit. All rights reserved. Updated: 2016-11-05</p>
+						
+						
+						<p class="generator">Generated by <a href="http://appledoc.gentlebytes.com">appledoc 2.2.1 (build 1334)</a>.</p>
+						
+					</div>
+				</footer>
+			</div>
+		</div>
+	</article>
+
+	<script src="../js/script.js"></script>
+</body>
+</html>
