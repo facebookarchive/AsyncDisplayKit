@@ -729,31 +729,30 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (UIView *)view
 {
-  // TODO: locking: Should this be locked?
+  ASDisplayNodeAssertMainThread();
   
-  ASDisplayNodeAssert(!_flags.layerBacked, @"Call to -view undefined on layer-backed nodes");
-  if (_flags.layerBacked) {
+  ASDisplayNodeAssert(!self.layerBacked, @"Call to -view undefined on layer-backed nodes");
+  if (self.layerBacked) {
     return nil;
   }
 
-  if (!_view) {
-    ASDisplayNodeAssertMainThread();
+  // We don't need locking in this case as accessing the view should always happening on the main thread
+  if (_view == nil) {
     [self _loadViewOrLayerIsLayerBacked:NO];
   }
+
   return _view;
 }
 
 - (CALayer *)layer
 {
-  // TODO: locking: Should this be locked?
+  ASDisplayNodeAssertMainThread();
 
-  if (!_layer) {
-    ASDisplayNodeAssertMainThread();
-
-    if (!_flags.layerBacked) {
+  // We don't need locking in this case as accessing the view should always happening on the main thread
+  if (_layer == nil) {
+    if (!self.layerBacked) {
       return self.view.layer;
     }
-
     [self _loadViewOrLayerIsLayerBacked:YES];
   }
 
