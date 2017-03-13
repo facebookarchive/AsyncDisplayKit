@@ -668,7 +668,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     }
     _layer.asyncdisplaykit_node = self;
 
-    self.asyncLayer.asyncDelegate = self;
+    self._locked_asyncLayer.asyncDelegate = self;
   }
 
   {
@@ -735,6 +735,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   if (_flags.layerBacked) {
     return nil;
   }
+
   if (!_view) {
     ASDisplayNodeAssertMainThread();
     [self _loadViewOrLayerIsLayerBacked:NO];
@@ -752,8 +753,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     if (!_flags.layerBacked) {
       return self.view.layer;
     }
+
     [self _loadViewOrLayerIsLayerBacked:YES];
   }
+
   return _layer;
 }
 
@@ -761,6 +764,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (_ASDisplayLayer *)asyncLayer
 {
   ASDN::MutexLocker l(__instanceLock__);
+  return [self _locked_asyncLayer];
+}
+
+- (_ASDisplayLayer *)_locked_asyncLayer
+{
   return [_layer isKindOfClass:[_ASDisplayLayer class]] ? (_ASDisplayLayer *)_layer : nil;
 }
 
@@ -1304,16 +1312,16 @@ ASLayoutElementFinalLayoutElementDefault
   if (supernode) {
     // Threading model requires that we unlock before calling a method on our parent.
     [supernode _setNeedsLayoutFromAbove];
-    return;
+  } else {
+    // Let the root node method know that the size was invalidated
+    [self _rootNodeDidInvalidateSize];
   }
-  
-  // Let the root node method know that the size was invalidated
-  [self _rootNodeDidInvalidateSize];
 }
 
 - (void)_rootNodeDidInvalidateSize
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   __instanceLock__.lock();
   
@@ -1343,6 +1351,7 @@ ASLayoutElementFinalLayoutElementDefault
 - (void)displayNodeDidInvalidateSizeNewSize:(CGSize)size
 {
   ASDisplayNodeAssertThreadAffinity(self);
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   // The default implementation of display node changes the size of itself to the new size
   CGRect oldBounds = self.bounds;
@@ -1768,11 +1777,11 @@ ASLayoutElementFinalLayoutElementDefault
  */
 - (void)transitionContext:(_ASTransitionContext *)context didComplete:(BOOL)didComplete
 {
+  ASDisplayNodeAssertMainThread();
+
   [self didCompleteLayoutTransition:context];
   
-  __instanceLock__.lock();
   _pendingLayoutTransitionContext = nil;
-  __instanceLock__.unlock();
 
   [self _pendingLayoutTransitionDidComplete];
 }
@@ -1895,7 +1904,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
   _flags.displaysAsynchronously = displaysAsynchronously;
 
-  self.asyncLayer.displaysAsynchronously = displaysAsynchronously;
+  self._locked_asyncLayer.displaysAsynchronously = displaysAsynchronously;
 }
 
 - (BOOL)shouldRasterizeDescendants
@@ -1981,14 +1990,13 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(!_flags.synchronous, @"this method is designed for asynchronous mode only");
 
-  [[self asyncLayer] displayImmediately];
+  [self.asyncLayer displayImmediately];
 }
 
 - (void)recursivelyDisplayImmediately
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  for (ASDisplayNode *child in _subnodes) {
+  NSArray *subnodes = self.subnodes;
+  for (ASDisplayNode *child in subnodes) {
     [child recursivelyDisplayImmediately];
   }
   [self displayImmediately];
@@ -2046,8 +2054,8 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 - (void)_pendingNodeWillDisplay:(ASDisplayNode *)node
 {
   ASDisplayNodeAssertMainThread();
-  ASDN::MutexLocker l(__instanceLock__);
 
+  // No lock needed as _pendingDisplayNodes is main thread only
   if (!_pendingDisplayNodes) {
     _pendingDisplayNodes = [[ASWeakSet alloc] init];
   }
@@ -2061,16 +2069,15 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 {
   ASDisplayNodeAssertMainThread();
 
-  __instanceLock__.lock();
+  // No lock for _pendingDisplayNodes needed as it's main thread only
   [_pendingDisplayNodes removeObject:node];
 
   if (_pendingDisplayNodes.isEmpty) {
     
-    __instanceLock__.unlock();
     [self hierarchyDisplayDidFinish];
     BOOL placeholderShouldPersist = [self placeholderShouldPersist];
+
     __instanceLock__.lock();
-    
     if (_placeholderLayer.superlayer && !placeholderShouldPersist) {
       void (^cleanupBlock)() = ^{
         [_placeholderLayer removeFromSuperlayer];
@@ -2086,8 +2093,8 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
         cleanupBlock();
       }
     }
+    __instanceLock__.unlock();
   }
-  __instanceLock__.unlock();
 }
 
 - (void)hierarchyDisplayDidFinish
@@ -2181,11 +2188,15 @@ void recursivelyTriggerDisplayForLayer(CALayer *layer, BOOL shouldBlock)
 
 - (void)setNeedsDisplayAtScale:(CGFloat)contentsScale
 {
-  if (contentsScale == self.contentsScaleForDisplay) {
-    return;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if (contentsScale == _contentsScaleForDisplay) {
+      return;
+    }
+    
+    _contentsScaleForDisplay = contentsScale;
   }
-  
-  self.contentsScaleForDisplay = contentsScale;
+
   [self setNeedsDisplay];
 }
 
@@ -2249,7 +2260,7 @@ static void _recursivelySetDisplaySuspended(ASDisplayNode *node, CALayer *layer,
 
   _flags.displaySuspended = flag;
 
-  self.asyncLayer.displaySuspended = flag;
+  self._locked_asyncLayer.displaySuspended = flag;
   
   ASDisplayNode *supernode = _supernode;
   __instanceLock__.unlock();
@@ -2742,16 +2753,12 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   // Because the view and layer can only be created and destroyed on Main, that is also the only thread
   // where the view and layer can change. We can avoid locking.
 
-  // If we can use view API, do. Due to an apple bug, -insertSubview:atIndex: actually wants a LAYER index, which we pass in
-  __instanceLock__.lock();
-  UIView *view = _view;
-  CALayer *layer = _layer;
-  __instanceLock__.unlock();
-
+  // If we can use view API, do. Due to an apple bug, -insertSubview:atIndex: actually wants a LAYER index,
+  // which we pass in.
   if (canUseViewAPI(self, subnode)) {
-    [view insertSubview:subnode.view atIndex:idx];
+    [_view insertSubview:subnode.view atIndex:idx];
   } else {
-    [layer insertSublayer:subnode.layer atIndex:(unsigned int)idx];
+    [_layer insertSublayer:subnode.layer atIndex:(unsigned int)idx];
   }
 }
 
@@ -2788,9 +2795,9 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (void)_addSubnodeViewsAndLayers
 {
-  __instanceLock__.lock();
-  NSArray *subnodes = [_subnodes copy];
-  __instanceLock__.unlock();
+  ASDisplayNodeAssertMainThread();
+  
+  NSArray *subnodes = self.subnodes;
   for (ASDisplayNode *node in subnodes) {
     [self _addSubnodeSubviewOrSublayer:node];
   }
@@ -2798,12 +2805,11 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (void)_addSubnodeSubviewOrSublayer:(ASDisplayNode *)subnode
 {
+  ASDisplayNodeAssertMainThread();
+  
   // Due to a bug in Apple's framework we have to use the layer index to insert a subview
   // so just use th ecount of the sublayers to add the subnode
-  __instanceLock__.lock();
-  NSInteger idx = _layer.sublayers.count;
-  __instanceLock__.unlock();
-  
+  NSInteger idx = _layer.sublayers.count; // No locking is needed as it's main thread only
   [self _insertSubnodeSubviewOrSublayer:subnode atIndex:idx];
 }
 
@@ -3250,7 +3256,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     _flags.isExitingHierarchy = YES;
     _flags.isInHierarchy = NO;
 
-    [self.asyncLayer cancelAsyncDisplay];
+    [self._locked_asyncLayer cancelAsyncDisplay];
 
     // Don't call -didExitHierarchy while holding __instanceLock__.
     // This method and subsequent ones (i.e -interfaceState and didExit(.*)State)
@@ -3716,11 +3722,9 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   // This method is only implemented on UIView on iOS 6+.
   ASDisplayNodeAssertMainThread();
   
-  __instanceLock__.lock();
+  // No locking needed as it's main thread only
   UIView *view = _view;
-  __instanceLock__.unlock();
-
-  if (!view) {
+  if (view == nil) {
     return YES;
   }
 
@@ -3773,17 +3777,15 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   [self applyPendingViewState];
   
   __instanceLock__.lock();
-  BOOL displaySuspended = _flags.displaySuspended;
-  BOOL displaysAsynchronously = _flags.displaysAsynchronously;
+  
+  if (_flags.displaySuspended) {
+    self._locked_asyncLayer.displaySuspended = YES;
+  }
+  if (!_flags.displaysAsynchronously) {
+    self._locked_asyncLayer.displaysAsynchronously = NO;
+  }
+  
   __instanceLock__.unlock();
-
-  // TODO: move this into real pending state
-  if (displaySuspended) {
-    self.asyncLayer.displaySuspended = YES;
-  }
-  if (!displaysAsynchronously) {
-    self.asyncLayer.displaysAsynchronously = NO;
-  }
 }
 
 - (void)applyPendingViewState
@@ -4004,12 +4006,17 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 
 - (void)setPrimitiveTraitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
-  ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
   if (ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(traitCollection, _primitiveTraitCollection) == NO) {
     _primitiveTraitCollection = traitCollection;
     ASDisplayNodeLogEvent(self, @"asyncTraitCollectionDidChange: %@", NSStringFromASPrimitiveTraitCollection(traitCollection));
+    __instanceLock__.unlock();
+    
     [self asyncTraitCollectionDidChange];
+    return;
   }
+  
+  __instanceLock__.unlock();
 }
 
 - (ASTraitCollection *)asyncTraitCollection
