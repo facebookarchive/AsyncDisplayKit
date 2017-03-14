@@ -34,11 +34,15 @@
 
 - (NSObject *)drawParameters
 {
-  if (_flags.implementsDrawParameters) {
-    return [self drawParametersForAsyncLayer:self.asyncLayer];
-  }
+  __instanceLock__.lock();
+  BOOL implementsDrawParameters = _flags.implementsDrawParameters;
+  __instanceLock__.unlock();
 
-  return nil;
+  if (implementsDrawParameters) {
+    return [self drawParametersForAsyncLayer:self.asyncLayer];
+  } else {
+    return nil;
+  }
 }
 
 - (void)_recursivelyRasterizeSelfAndSublayersWithIsCancelledBlock:(asdisplaynode_iscancelled_block_t)isCancelledBlock displayBlocks:(NSMutableArray *)displayBlocks
@@ -47,8 +51,10 @@
   if (self.isHidden || self.alpha <= 0.0) {
     return;
   }
-    
+  
+  __instanceLock__.lock();
   BOOL rasterizingFromAscendent = (_hierarchyState & ASHierarchyStateRasterized);
+  __instanceLock__.unlock();
 
   // if super node is rasterizing descendants, subnodes will not have had layout calls because they don't have layers
   if (rasterizingFromAscendent) {
@@ -170,11 +176,11 @@
   BOOL opaque = self.opaque;
   CGRect bounds = self.bounds;
   CGFloat contentsScaleForDisplay = _contentsScaleForDisplay;
+    
+  __instanceLock__.unlock();
 
   // Capture drawParameters from delegate on main thread, if this node is displaying itself rather than recursively rasterizing.
   id drawParameters = (shouldBeginRasterizing == NO ? [self drawParameters] : nil);
-
-  __instanceLock__.unlock();
   
   // Only the -display methods should be called if we can't size the graphics buffer to use.
   if (CGRectIsEmpty(bounds) && (shouldBeginRasterizing || shouldCreateGraphicsContext)) {
@@ -224,11 +230,21 @@
 
       CGContextRef currentContext = UIGraphicsGetCurrentContext();
       UIImage *image = nil;
+        
+      ASDisplayNodeContextModifier willDisplayNodeContentWithRenderingContext = nil;
+      ASDisplayNodeContextModifier didDisplayNodeContentWithRenderingContext = nil;
+      if (currentContext) {
+        __instanceLock__.lock();
+        willDisplayNodeContentWithRenderingContext = _willDisplayNodeContentWithRenderingContext;
+        didDisplayNodeContentWithRenderingContext = _didDisplayNodeContentWithRenderingContext;
+        __instanceLock__.unlock();
+      }
+        
 
       // For -display methods, we don't have a context, and thus will not call the _willDisplayNodeContentWithRenderingContext or
       // _didDisplayNodeContentWithRenderingContext blocks. It's up to the implementation of -display... to do what it needs.
-      if (currentContext && _willDisplayNodeContentWithRenderingContext) {
-        _willDisplayNodeContentWithRenderingContext(currentContext);
+      if (willDisplayNodeContentWithRenderingContext != nil) {
+        willDisplayNodeContentWithRenderingContext(currentContext);
       }
       
       // Decide if we use a class or instance method to draw or display.
@@ -242,8 +258,8 @@
              isCancelled:isCancelledBlock isRasterizing:rasterizing];
       }
       
-      if (currentContext && _didDisplayNodeContentWithRenderingContext) {
-        _didDisplayNodeContentWithRenderingContext(currentContext);
+      if (didDisplayNodeContentWithRenderingContext != nil) {
+        didDisplayNodeContentWithRenderingContext(currentContext);
       }
       
       if (shouldCreateGraphicsContext) {
@@ -263,12 +279,17 @@
 - (void)displayAsyncLayer:(_ASDisplayLayer *)asyncLayer asynchronously:(BOOL)asynchronously
 {
   ASDisplayNodeAssertMainThread();
-
-  ASDN::MutexLocker l(__instanceLock__);
-
+  
+  __instanceLock__.lock();
+  
   if (_hierarchyState & ASHierarchyStateRasterized) {
+    __instanceLock__.unlock();
     return;
   }
+  
+  CALayer *layer = _layer;
+  
+  __instanceLock__.unlock();
 
   // for async display, capture the current displaySentinel value to bail early when the job is executed if another is
   // enqueued
@@ -306,10 +327,10 @@
       UIImage *image = (UIImage *)value;
       BOOL stretchable = (NO == UIEdgeInsetsEqualToEdgeInsets(image.capInsets, UIEdgeInsetsZero));
       if (stretchable) {
-        ASDisplayNodeSetupLayerContentsWithResizableImage(_layer, image);
+        ASDisplayNodeSetupLayerContentsWithResizableImage(layer, image);
       } else {
-        _layer.contentsScale = self.contentsScale;
-        _layer.contents = (id)image.CGImage;
+        layer.contentsScale = self.contentsScale;
+        layer.contents = (id)image.CGImage;
       }
       [self didDisplayAsyncLayer:self.asyncLayer];
     }
@@ -323,7 +344,7 @@
     // while synchronizing the final application of the results to the layer's contents property (completionBlock).
     
     // First, look to see if we are expected to join a parent's transaction container.
-    CALayer *containerLayer = _layer.asyncdisplaykit_parentTransactionContainer ? : _layer;
+    CALayer *containerLayer = layer.asyncdisplaykit_parentTransactionContainer ? : layer;
     
     // In the case that a transaction does not yet exist (such as for an individual node outside of a container),
     // this call will allocate the transaction and add it to _ASAsyncTransactionGroup.

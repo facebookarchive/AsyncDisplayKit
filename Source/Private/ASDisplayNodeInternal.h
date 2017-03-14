@@ -200,9 +200,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 /// Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
 
-// Swizzle to extend the builtin functionality with custom logic
-- (BOOL)__shouldLoadViewOrLayer;
-
 /**
  * Invoked before a call to setNeedsLayout to the underlying view
  */
@@ -217,11 +214,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  * Called from [CALayer layoutSublayers:]. Executes the layout pass for the node
  */
 - (void)__layout;
-
-/*
- * Internal method to set the supernode
- */
-- (void)__setSupernode:(nullable ASDisplayNode *)supernode;
 
 /**
  * Internal method to add / replace / insert subnode and remove from supernode without checking if
@@ -241,7 +233,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)__decrementVisibilityNotificationsDisabled;
 
 /// Helper method to summarize whether or not the node run through the display process
-- (BOOL)__implementsDisplay;
+- (BOOL)_implementsDisplay;
 
 /// Display the node's view/layer immediately on the current thread, bypassing the background thread rendering. Will be deprecated.
 - (void)displayImmediately;
