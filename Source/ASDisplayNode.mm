@@ -3098,7 +3098,6 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   [self _removeFromSupernode];
 }
 
-// NOTE: You must not called this method while holding the receiver's instance lock. This may cause deadlocks.
 - (void)_removeFromSupernode
 {
   ASDisplayNodeAssertThreadAffinity(self);
@@ -3110,11 +3109,36 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     __weak CALayer *layer = _layer;
   __instanceLock__.unlock();
 
+  [self _removeFromSupernode:supernode view:view layer:layer];
+}
+
+- (void)_removeFromSupernodeIfEqualTo:(ASDisplayNode *)supernode
+{
+  ASDisplayNodeAssertThreadAffinity(self);
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+  
+  __instanceLock__.lock();
+
+    // Only remove if supernode is still the expected supernode
+    if (!ASObjectIsEqual(_supernode, supernode)) {
+      __instanceLock__.unlock();
+      return;
+    }
+  
+    __weak UIView *view = _view;
+    __weak CALayer *layer = _layer;
+  __instanceLock__.unlock();
+  
+  [self _removeFromSupernode:supernode view:view layer:layer];
+}
+
+- (void)_removeFromSupernode:(ASDisplayNode *)supernode view:(UIView *)view layer:(CALayer *)layer
+{
   // Clear supernode's reference to us before removing the view from the hierarchy, as _ASDisplayView
   // will trigger us to clear our _supernode pointer in willMoveToSuperview:nil.
   // This may result in removing the last strong reference, triggering deallocation after this method.
   [supernode _removeSubnode:self];
-
+  
   if (view != nil) {
     [view removeFromSuperview];
   } else if (layer != nil) {
