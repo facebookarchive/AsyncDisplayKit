@@ -729,15 +729,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (UIView *)view
 {
-  ASDisplayNodeAssertMainThread();
-  
-  ASDisplayNodeAssert(!self.layerBacked, @"Call to -view undefined on layer-backed nodes");
-  if (self.layerBacked) {
+  ASDisplayNodeAssert(!_flags.layerBacked, @"Call to -view undefined on layer-backed nodes");
+  if (_flags.layerBacked) {
     return nil;
   }
 
-  // We don't need locking in this case as accessing the view should always happening on the main thread
   if (_view == nil) {
+    ASDisplayNodeAssertMainThread();
     [self _loadViewOrLayerIsLayerBacked:NO];
   }
 
@@ -746,13 +744,13 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (CALayer *)layer
 {
-  ASDisplayNodeAssertMainThread();
-
-  // We don't need locking in this case as accessing the view should always happening on the main thread
   if (_layer == nil) {
-    if (!self.layerBacked) {
+    ASDisplayNodeAssertMainThread();
+    
+    if (!_flags.layerBacked) {
       return self.view.layer;
     }
+    
     [self _loadViewOrLayerIsLayerBacked:YES];
   }
 
@@ -1994,8 +1992,7 @@ NSString * const ASRenderingEngineDidDisplayNodesScheduledBeforeTimestamp = @"AS
 
 - (void)recursivelyDisplayImmediately
 {
-  NSArray *subnodes = self.subnodes;
-  for (ASDisplayNode *child in subnodes) {
+  for (ASDisplayNode *child in self.subnodes) {
     [child recursivelyDisplayImmediately];
   }
   [self displayImmediately];
@@ -2636,7 +2633,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
       // which has some nice carry-over machinery to handle cases where we are removed from a hierarchy
       // and then added into it again shortly after.
       __instanceLock__.lock();
-      BOOL isInHierarchy = _flags .isInHierarchy;
+      BOOL isInHierarchy = _flags.isInHierarchy;
       __instanceLock__.unlock();
       
       if (parentWasOrIsRasterized && isInHierarchy) {
@@ -2796,8 +2793,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 {
   ASDisplayNodeAssertMainThread();
   
-  NSArray *subnodes = self.subnodes;
-  for (ASDisplayNode *node in subnodes) {
+  for (ASDisplayNode *node in self.subnodes) {
     [self _addSubnodeSubviewOrSublayer:node];
   }
 }
@@ -2807,7 +2803,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   ASDisplayNodeAssertMainThread();
   
   // Due to a bug in Apple's framework we have to use the layer index to insert a subview
-  // so just use th ecount of the sublayers to add the subnode
+  // so just use the count of the sublayers to add the subnode
   NSInteger idx = _layer.sublayers.count; // No locking is needed as it's main thread only
   [self _insertSubnodeSubviewOrSublayer:subnode atIndex:idx];
 }
