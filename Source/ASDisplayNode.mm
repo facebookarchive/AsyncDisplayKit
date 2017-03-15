@@ -575,6 +575,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (BOOL)_locked_shouldLoadViewOrLayer
 {
+  if (_flags.isDeallocating) {
+    return NO;
+  }
+
   return !(_hierarchyState & ASHierarchyStateRasterized);
 }
 
@@ -635,21 +639,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (void)_locked_loadViewOrLayerIsLayerBacked:(BOOL)isLayerBacked
 {
-  ASDisplayNodeAssertMainThread();
-  
-  if (_flags.isDeallocating) {
-    return;
-  }
-
-  if (![self _locked_shouldLoadViewOrLayer]) {
-    return;
-  }
-
   if (isLayerBacked) {
     TIME_SCOPED(_debugTimeToCreateView);
     _layer = [self _locked_layerToLoad];
     static int ASLayerDelegateAssociationKey;
-
+    
     /**
      * CALayer's .delegate property is documented to be weak, but the implementation is actually assign.
      * Because our layer may survive longer than the node (e.g. if someone else retains it, or if the node
@@ -666,35 +660,15 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
     _layer = _view.layer;
   }
   _layer.asyncdisplaykit_node = self;
-
+  
   self._locked_asyncLayer.asyncDelegate = self;
-  
-  {
-    TIME_SCOPED(_debugTimeToApplyPendingState);
-    [self _locked_applyPendingStateToViewOrLayer];
-  }
-  
-  {
-    // The following methods should not be called with a lock
-    ASDN::MutexUnlocker u(__instanceLock__);
-    {
-      // No need for the lock as accessing the subviews or layers are always happening on main
-      TIME_SCOPED(_debugTimeToAddSubnodeViews);
-      [self _addSubnodeViewsAndLayers];
-    }
-    
-    {
-      // A subclass hook should never be called with a lock
-      TIME_SCOPED(_debugTimeForDidLoad);
-      [self _didLoad];
-    }
-  }
 }
 
 - (void)_didLoad
 {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeLogEvent(self, @"didLoad");
+  TIME_SCOPED(_debugTimeForDidLoad);
   
   [self didLoad];
   
@@ -739,12 +713,44 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   ASDN::MutexLocker l(__instanceLock__);
 
   ASDisplayNodeAssert(!_flags.layerBacked, @"Call to -view undefined on layer-backed nodes");
-  if (_flags.layerBacked) {
+  BOOL isLayerBacked = _flags.layerBacked;
+  if (isLayerBacked) {
     return nil;
   }
 
-  if (_view == nil) {
-    [self _locked_loadViewOrLayerIsLayerBacked:NO];
+  if (_view != nil) {
+    return _view;
+  }
+
+  if (![self _locked_shouldLoadViewOrLayer]) {
+    return _view;
+  }
+  
+  // Loading a view needs to happen on the maint thread
+  ASDisplayNodeAssertMainThread();
+  [self _locked_loadViewOrLayerIsLayerBacked:isLayerBacked];
+  
+  // FIXME: Ideally we'd call this as soon as the node receives -setNeedsLayout
+  // but automatic subnode management would require us to modify the node tree
+  // in the background on a loaded node, which isn't currently supported.
+  if (_pendingViewState.hasSetNeedsLayout) {
+    // Need to unlock before calling setNeedsLayout to avoid deadlocks.
+    // MutexUnlocker will re-lock at the end of scope.
+    ASDN::MutexUnlocker u(__instanceLock__);
+    [self __setNeedsLayout];
+  }
+  
+  [self _locked_applyPendingStateToViewOrLayer];
+  
+  {
+    // The following methods should not be called with a lock
+    ASDN::MutexUnlocker u(__instanceLock__);
+
+    // No need for the lock as accessing the subviews or layers are always happening on main
+    [self _addSubnodeViewsAndLayers];
+    
+    // A subclass hook should never be called with a lock
+    [self _didLoad];
   }
 
   return _view;
@@ -753,14 +759,46 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (CALayer *)layer
 {
   ASDN::MutexLocker l(__instanceLock__);
-  if (_layer == nil) {
-    if (!_flags.layerBacked) {
-      // No need for the lock and call the view explicitly in case it needs to be loaded first
-      ASDN::MutexUnlocker u(__instanceLock__);
-      return self.view.layer;
-    }
+  if (_layer != nil) {
+    return _layer;
+  }
+  
+  BOOL isLayerBacked = _flags.layerBacked;
+  if (!isLayerBacked) {
+    // No need for the lock and call the view explicitly in case it needs to be loaded first
+    ASDN::MutexUnlocker u(__instanceLock__);
+    return self.view.layer;
+  }
+  
+  if (![self _locked_shouldLoadViewOrLayer]) {
+    return _layer;
+  }
+  
+  // Loading a view needs to happen on the maint thread
+  ASDisplayNodeAssertMainThread();
+  [self _locked_loadViewOrLayerIsLayerBacked:isLayerBacked];
+  
+  // FIXME: Ideally we'd call this as soon as the node receives -setNeedsLayout
+  // but automatic subnode management would require us to modify the node tree
+  // in the background on a loaded node, which isn't currently supported.
+  if (_pendingViewState.hasSetNeedsLayout) {
+    // Need to unlock before calling setNeedsLayout to avoid deadlocks.
+    // MutexUnlocker will re-lock at the end of scope.
+    ASDN::MutexUnlocker u(__instanceLock__);
+    [self __setNeedsLayout];
+  }
+  
+  [self _locked_applyPendingStateToViewOrLayer];
+  
+  {
+    // The following methods should not be called with a lock
+    ASDN::MutexUnlocker u(__instanceLock__);
+
+    // No need for the lock as accessing the subviews or layers are always happening on main
+    [self _addSubnodeViewsAndLayers];
     
-    [self _locked_loadViewOrLayerIsLayerBacked:YES];
+    // A subclass hook should never be called with a lock
+    [self _didLoad];
   }
 
   return _layer;
@@ -2802,6 +2840,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 {
   ASDisplayNodeAssertMainThread();
   
+  TIME_SCOPED(_debugTimeToAddSubnodeViews);
+  
   for (ASDisplayNode *node in self.subnodes) {
     [self _addSubnodeSubviewOrSublayer:node];
   }
@@ -3775,9 +3815,10 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(self.nodeLoaded, @"must have a view or layer");
 
+  TIME_SCOPED(_debugTimeToApplyPendingState);
+  
   // If no view/layer properties were set before the view/layer were created, _pendingViewState will be nil and the default values
   // for the view/layer are still valid.
-
   [self _locked_applyPendingViewState];
   
   if (_flags.displaySuspended) {
@@ -3791,14 +3832,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (void)applyPendingViewState
 {
   ASDisplayNodeAssertMainThread();
+  
   ASDN::MutexLocker l(__instanceLock__);
-  [self _locked_applyPendingViewState];
-}
-
-- (void)_locked_applyPendingViewState
-{
-  ASDisplayNodeAssertMainThread();
-
   // FIXME: Ideally we'd call this as soon as the node receives -setNeedsLayout
   // but automatic subnode management would require us to modify the node tree
   // in the background on a loaded node, which isn't currently supported.
@@ -3808,8 +3843,15 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     ASDN::MutexUnlocker u(__instanceLock__);
     [self __setNeedsLayout];
   }
+  
+  [self _locked_applyPendingViewState];
+}
 
-  if (self.layerBacked) {
+- (void)_locked_applyPendingViewState
+{
+  ASDisplayNodeAssertMainThread();
+
+  if (_flags.layerBacked) {
     [_pendingViewState applyToLayer:self.layer];
   } else {
     BOOL specialPropertiesHandling = ASDisplayNodeNeedsSpecialPropertiesHandlingForFlags(_flags);
