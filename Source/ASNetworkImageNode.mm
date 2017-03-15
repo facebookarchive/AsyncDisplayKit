@@ -450,7 +450,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 {
   [self _cancelImageDownload];
   [self _clearImage];
-  if (_cacheFlags.cacheSupportsClearing) {
+  if (_cacheFlags.cacheSupportsClearing && _URL != nil) {
     [_cache clearFetchedImageFromCacheWithURL:_URL];
   }
 }
@@ -527,7 +527,9 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     }
     
     if (cancelAndReattempt) {
-      [_downloader cancelImageDownloadForIdentifier:downloadIdentifier];
+      if (downloadIdentifier != nil) {
+        [_downloader cancelImageDownloadForIdentifier:downloadIdentifier];
+      }
       [self _downloadImageWithCompletion:finished];
       return;
     }

@@ -203,7 +203,10 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
   [self _setDownloadIdentifier:nil];
   
   if (_cacheSupportsClearing && self.loadedImageIdentifier != nil) {
-    [_cache clearFetchedImageFromCacheWithURL:[_dataSource multiplexImageNode:self URLForImageIdentifier:self.loadedImageIdentifier]];
+    NSURL *URL = [_dataSource multiplexImageNode:self URLForImageIdentifier:self.loadedImageIdentifier];
+    if (URL != nil) {
+      [_cache clearFetchedImageFromCacheWithURL:URL];
+    }
   }
 
   // setting this to nil makes the node fetch images the next time its display starts
