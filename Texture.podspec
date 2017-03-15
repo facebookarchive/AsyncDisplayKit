@@ -7,6 +7,7 @@ Pod::Spec.new do |spec|
   spec.summary      = 'Smooth asynchronous user interfaces for iOS apps.'
   spec.source       = { :git => 'https://github.com/TextureGroup/Texture.git', :tag => spec.version.to_s }
   spec.module_name  = 'AsyncDisplayKit'
+  spec.header_dir   = 'AsyncDisplayKit'
 
   spec.documentation_url = 'http://asyncdisplaykit.org/appledoc/'
 
