@@ -3921,10 +3921,13 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   }
   
   if (_view != nil) {
+    [result addObject:@{ @"alpha" : @(_view.alpha) }];
     [result addObject:@{ @"frame" : [NSValue valueWithCGRect:_view.frame] }];
   } else if (_layer != nil) {
+    [result addObject:@{ @"alpha" : @(_layer.opacity) }];
     [result addObject:@{ @"frame" : [NSValue valueWithCGRect:_layer.frame] }];
   } else if (_pendingViewState != nil) {
+    [result addObject:@{ @"alpha" : @(_pendingViewState.alpha) }];
     [result addObject:@{ @"frame" : [NSValue valueWithCGRect:_pendingViewState.frame] }];
   }
   
@@ -3949,6 +3952,11 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   } else if (_layerBlock != nil) {
     [result addObject:@{ @"layerBlock" : _layerBlock }];
   }
+
+#if TIME_DISPLAYNODE_OPS
+  NSString *creationTypeString = [NSString stringWithFormat:@"cr8:%.2lfms dl:%.2lfms ap:%.2lfms ad:%.2lfms",  1000 * _debugTimeToCreateView, 1000 * _debugTimeForDidLoad, 1000 * _debugTimeToApplyPendingState, 1000 * _debugTimeToAddSubnodeViews];
+  [result addObject:@{ @"creationTypeString" : creationTypeString }];
+#endif
   
   return result;
 }
@@ -4089,16 +4097,6 @@ ASLayoutElementStyleExtensibilityForwarding
 
 @implementation ASDisplayNode (Debugging)
 
-- (NSString *)descriptionForRecursiveDescription
-{
-  NSString *creationTypeString = nil;
-#if TIME_DISPLAYNODE_OPS
-  creationTypeString = [NSString stringWithFormat:@"cr8:%.2lfms dl:%.2lfms ap:%.2lfms ad:%.2lfms",  1000 * _debugTimeToCreateView, 1000 * _debugTimeForDidLoad, 1000 * _debugTimeToApplyPendingState, 1000 * _debugTimeToAddSubnodeViews];
-#endif
-
-  return [NSString stringWithFormat:@"<%@ alpha:%.2f isLayerBacked:%d frame:%@ %@>", self.description, self.alpha, self.isLayerBacked, NSStringFromCGRect(self.frame), creationTypeString];
-}
-
 - (NSString *)displayNodeRecursiveDescription
 {
   return [self _recursiveDescriptionHelperWithIndent:@""];
@@ -4106,7 +4104,7 @@ ASLayoutElementStyleExtensibilityForwarding
 
 - (NSString *)_recursiveDescriptionHelperWithIndent:(NSString *)indent
 {
-  NSMutableString *subtree = [[[indent stringByAppendingString: self.descriptionForRecursiveDescription] stringByAppendingString:@"\n"] mutableCopy];
+  NSMutableString *subtree = [[[indent stringByAppendingString:self.debugDescription] stringByAppendingString:@"\n"] mutableCopy];
   for (ASDisplayNode *n in self.subnodes) {
     [subtree appendString:[n _recursiveDescriptionHelperWithIndent:[indent stringByAppendingString:@" | "]]];
   }
