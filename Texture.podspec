@@ -1,11 +1,12 @@
 Pod::Spec.new do |spec|
-  spec.name         = 'AsyncDisplayKit'
+  spec.name         = 'Texture'
   spec.version      = '2.2'
   spec.license      =  { :type => 'BSD' }
   spec.homepage     = 'http://asyncdisplaykit.org'
-  spec.authors      = { 'Scott Goodson' => 'scottgoodson@gmail.com' }
+  spec.authors      = { 'Huy Nguyen' => 'huy@pinterest.com', 'Garrett Moon' => 'garrett@excitedpixel.com', 'Scott Goodson' => 'scottgoodson@gmail.com', 'Michael Schneider' => 'schneider@pinterest.com', 'Adlai Hollar' => 'adlai@pinterest.com' }
   spec.summary      = 'Smooth asynchronous user interfaces for iOS apps.'
-  spec.source       = { :git => 'https://github.com/facebook/AsyncDisplayKit.git', :tag => spec.version.to_s }
+  spec.source       = { :git => 'https://github.com/TextureGroup/Texture.git', :tag => spec.version.to_s }
+  spec.module_name  = 'AsyncDisplayKit'
 
   spec.documentation_url = 'http://asyncdisplaykit.org/appledoc/'
 
@@ -45,18 +46,18 @@ Pod::Spec.new do |spec|
   spec.subspec 'PINRemoteImage' do |pin|
       pin.dependency 'PINRemoteImage/iOS', '= 3.0.0-beta.9'
       pin.dependency 'PINRemoteImage/PINCache'
-      pin.dependency 'AsyncDisplayKit/Core'
+      pin.dependency 'Texture/Core'
   end
 
   spec.subspec 'IGListKit' do |igl|
       igl.dependency 'IGListKit', '2.1.0'
-      igl.dependency 'AsyncDisplayKit/Core'
+      igl.dependency 'Texture/Core'
   end
   
   spec.subspec 'Yoga' do |yoga|
       yoga.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) YOGA=1' }
       yoga.dependency 'Yoga', '1.0.2'
-      yoga.dependency 'AsyncDisplayKit/Core'
+      yoga.dependency 'Texture/Core'
   end
 
   # Include optional PINRemoteImage module
