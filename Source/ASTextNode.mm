@@ -305,14 +305,12 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)setTextContainerInset:(UIEdgeInsets)textContainerInset
 {
-  BOOL needsUpdate = NO;
-  {
-    ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
     BOOL needsUpdate = !UIEdgeInsetsEqualToEdgeInsets(textContainerInset, _textContainerInset);
     if (needsUpdate) {
       _textContainerInset = textContainerInset;
     }
-  }
+  __instanceLock__.unlock();
 
   if (needsUpdate) {
     [self setNeedsLayout];
