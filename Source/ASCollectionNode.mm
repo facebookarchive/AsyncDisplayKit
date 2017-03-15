@@ -519,7 +519,10 @@
 
 - (void)waitUntilAllUpdatesAreCommitted
 {
-  [self.view waitUntilAllUpdatesAreCommitted];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view waitUntilAllUpdatesAreCommitted];
+  }
 }
 
 - (void)reloadDataWithCompletion:(void (^)())completion
