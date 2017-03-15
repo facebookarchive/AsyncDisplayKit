@@ -244,10 +244,6 @@ static ASPINRemoteImageDownloader *sharedDownloader = nil;
 
 - (void)cancelImageDownloadForIdentifier:(id)downloadIdentifier
 {
-  if (!downloadIdentifier) {
-    return;
-  }
-
   ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
   [[self sharedPINRemoteImageManager] cancelTaskWithUUID:downloadIdentifier];
 }
