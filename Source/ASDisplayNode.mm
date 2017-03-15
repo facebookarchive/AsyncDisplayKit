@@ -575,11 +575,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (BOOL)_locked_shouldLoadViewOrLayer
 {
-  if (_flags.isDeallocating) {
-    return NO;
-  }
-
-  return !(_hierarchyState & ASHierarchyStateRasterized);
+  return !_flags.isDeallocating && !(_hierarchyState & ASHierarchyStateRasterized);
 }
 
 - (UIView *)_locked_viewToLoad
@@ -667,6 +663,7 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 - (void)_didLoad
 {
   ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   ASDisplayNodeLogEvent(self, @"didLoad");
   TIME_SCOPED(_debugTimeForDidLoad);
   
@@ -723,10 +720,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
 
   if (![self _locked_shouldLoadViewOrLayer]) {
-    return _view;
+    return nil;
   }
   
-  // Loading a view needs to happen on the maint thread
+  // Loading a view needs to happen on the main thread
   ASDisplayNodeAssertMainThread();
   [self _locked_loadViewOrLayerIsLayerBacked:isLayerBacked];
   
@@ -771,10 +768,10 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
   }
   
   if (![self _locked_shouldLoadViewOrLayer]) {
-    return _layer;
+    return nil;
   }
   
-  // Loading a view needs to happen on the maint thread
+  // Loading a layer needs to happen on the main thread
   ASDisplayNodeAssertMainThread();
   [self _locked_loadViewOrLayerIsLayerBacked:isLayerBacked];
   
@@ -3832,6 +3829,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
 - (void)applyPendingViewState
 {
   ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   ASDN::MutexLocker l(__instanceLock__);
   // FIXME: Ideally we'd call this as soon as the node receives -setNeedsLayout
