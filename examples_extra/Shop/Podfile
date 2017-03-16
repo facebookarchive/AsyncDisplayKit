@@ -7,7 +7,7 @@ target 'Shop' do
 
   # Pods for Shop
 
-pod 'AsyncDisplayKit'
+pod 'Texture'
 
   target 'ShopTests' do
     inherit! :search_paths

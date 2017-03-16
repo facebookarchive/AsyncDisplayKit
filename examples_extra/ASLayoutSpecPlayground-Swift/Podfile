@@ -2,5 +2,5 @@ source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 use_frameworks!
 target 'Sample' do
-	pod 'AsyncDisplayKit', :path => '../..'
+	pod 'Texture', :path => '../..'
 end
