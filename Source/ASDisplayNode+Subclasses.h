@@ -352,7 +352,7 @@ NS_ASSUME_NONNULL_BEGIN
  * Called after this node is added as a subnode to another node or removed from its current supernode.
  *
  * @discussion  Subclasses may override this method to be notified after their supernode has changed.
- *              Not that the value of the `supernode` property references the new supernode when this method is called.
+ *              Note that the value of the `supernode` property references the new supernode when this method is called.
  */
 - (void)didMoveToSupernode;
 
