@@ -338,6 +338,25 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, readonly, assign, getter=isInHierarchy) BOOL inHierarchy;
 
 /**
+ * Called before this node is added as a subnode to another node or removed from its current supernode.
+ *
+ * @discussion  Subclasses may override this method to be notified before their supernode changes.
+ *              Note that the value of the `supernode` property references the old supernode when this method is called.
+ *
+ * @parameter newSupernode  The node this node is added to as a subnode or nil, if this node is removed
+ *                          from its current supernode.
+ */
+- (void)willMoveToSupernode:(ASDisplayNode * _Nullable)newSupernode;
+
+/**
+ * Called after this node is added as a subnode to another node or removed from its current supernode.
+ *
+ * @discussion  Subclasses may override this method to be notified after their supernode has changed.
+ *              Not that the value of the `supernode` property references the new supernode when this method is called.
+ */
+- (void)didMoveToSupernode;
+
+/**
  * Provides an opportunity to clear backing store and other memory-intensive intermediates, such as text layout managers
  * on the current node.
  *
