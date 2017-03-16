@@ -9,8 +9,10 @@
 //
 
 #import "LayoutExampleNodes.h"
+
+#import <AsyncDisplayKit/UIImage+ASConvenience.h>
+
 #import "Utilities.h"
-#import "UIImage+ASConvenience.h"
 
 @interface HeaderWithRightAndLeftItems ()
 @property (nonatomic, strong) ASTextNode *usernameNode;
