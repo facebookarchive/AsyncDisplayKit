@@ -3,6 +3,6 @@ target 'ASDKgram-Swift' do
 
     use_frameworks!
 
-    pod 'AsyncDisplayKit', '>= 2.0'
+    pod 'Texture', '>= 2.0'
 
 end

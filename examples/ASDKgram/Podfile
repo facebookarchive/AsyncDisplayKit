@@ -1,6 +1,6 @@
 source 'https://github.com/CocoaPods/Specs.git'
 platform :ios, '8.0'
 target 'Sample' do
-	pod 'AsyncDisplayKit/IGListKit', :path => '../..'
-	pod 'AsyncDisplayKit/PINRemoteImage', :path => '../..'
+	pod 'Texture/IGListKit', :path => '../..'
+	pod 'Texture/PINRemoteImage', :path => '../..'
 end

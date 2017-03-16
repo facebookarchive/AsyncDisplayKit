@@ -6,5 +6,5 @@ target 'RepoSearcher' do
   use_frameworks!
 
   # Pods for RepoSearcher
-  pod 'AsyncDisplayKit/IGListKit', :path => '../..'
+  pod 'Texture/IGListKit', :path => '../..'
 end
