@@ -23,7 +23,6 @@
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 #import <AsyncDisplayKit/ASCenterLayoutSpec.h>
 
-static CGFloat kFixedHeight = 75.0f;
 static CGFloat kTextPadding = 10.0f;
 
 @interface BlurbNode () <ASTextNodeDelegate>
