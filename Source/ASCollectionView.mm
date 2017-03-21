@@ -141,6 +141,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
    */
   NSInteger _batchUpdateCount;
   
+  BOOL _initialReloadDataHasBeenCalled;
+  
   struct {
     unsigned int scrollViewDidScroll:1;
     unsigned int scrollViewWillBeginDragging:1;
@@ -316,6 +318,13 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssertMainThread();
+  
+  if (! _initialReloadDataHasBeenCalled) {
+    // If this is the first reload, forward to super immediately to prevent it from triggering more "initial" loads while our data controller is working.
+    _initialReloadDataHasBeenCalled = YES;
+    _superIsPendingDataLoad = YES;
+    [super reloadData];
+  }
   
   void (^batchUpdatesCompletion)(BOOL);
   if (completion) {
