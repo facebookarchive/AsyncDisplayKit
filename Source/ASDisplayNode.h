@@ -125,7 +125,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @return An ASDisplayNode instance whose view will be a subclass that enables asynchronous rendering, and passes 
  * through -layout and touch handling methods.
  */
-- (instancetype)init;
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 
 /**
@@ -182,6 +182,28 @@ extern NSInteger const ASDefaultDrawingPriority;
  *    that has `shouldRasterizeDescendants=YES`, and is unloaded, this block will not be called if it is loaded again.
  */
 - (void)onDidLoad:(ASDisplayNodeDidLoadBlock)body;
+
+/**
+ * Set the block that should be used to load this node's view.
+ *
+ * @param viewBlock The block that creates a view for this node.
+ *
+ * @precondition The node is not yet loaded.
+ *
+ * @note You will usually NOT call this. See the limitations documented in @c initWithViewBlock:
+ */
+- (void)setViewBlock:(ASDisplayNodeViewBlock)viewBlock;
+
+/**
+ * Set the block that should be used to load this node's layer.
+ *
+ * @param viewBlock The block that creates a layer for this node.
+ *
+ * @precondition The node is not yet loaded.
+ *
+ * @note You will usually NOT call this. See the limitations documented in @c initWithLayerBlock:
+ */
+- (void)setLayerBlock:(ASDisplayNodeLayerBlock)layerBlock;
 
 /** 
  * @abstract Returns whether the node is synchronous.

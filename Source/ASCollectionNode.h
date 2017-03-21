@@ -29,6 +29,8 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @interface ASCollectionNode : ASDisplayNode <ASRangeControllerUpdateRangeProtocol>
 
+- (instancetype)init NS_UNAVAILABLE;
+
 /**
  * Initializes an ASCollectionNode
  *

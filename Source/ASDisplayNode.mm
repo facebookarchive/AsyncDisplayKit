@@ -316,12 +316,11 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (instancetype)initWithViewClass:(Class)viewClass
 {
-  if (!(self = [super init]))
+  if (!(self = [self init]))
     return nil;
 
   ASDisplayNodeAssert([viewClass isSubclassOfClass:[UIView class]], @"should initialize with a subclass of UIView");
 
-  [self _initializeInstance];
   _viewClass = viewClass;
   _flags.synchronous = ![viewClass isSubclassOfClass:[_ASDisplayView class]];
 
@@ -330,13 +329,12 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (instancetype)initWithLayerClass:(Class)layerClass
 {
-  if (!(self = [super init])) {
+  if (!(self = [self init])) {
     return nil;
   }
 
   ASDisplayNodeAssert([layerClass isSubclassOfClass:[CALayer class]], @"should initialize with a subclass of CALayer");
 
-  [self _initializeInstance];
   _layerClass = layerClass;
   _flags.synchronous = ![layerClass isSubclassOfClass:[_ASDisplayLayer class]];
   _flags.layerBacked = YES;
@@ -346,26 +344,18 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock
 {
-  return [self _initWithViewBlock:viewBlock didLoadBlock:nil];
-}
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
-{
-  return [self _initWithViewBlock:viewBlock didLoadBlock:didLoadBlock];
+  return [self initWithViewBlock:viewBlock didLoadBlock:nil];
 }
 
-- (instancetype)_initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
-  if (!(self = [super init])) {
+  if (!(self = [self init])) {
     return nil;
   }
-  
-  ASDisplayNodeAssertNotNil(viewBlock, @"should initialize with a valid block that returns a UIView");
-  
-  [self _initializeInstance];
-  _viewBlock = viewBlock;
-  _flags.synchronous = YES;
+
+  [self setViewBlock:viewBlock];
   if (didLoadBlock != nil) {
-    _onDidLoadBlocks = [NSMutableArray arrayWithObject:didLoadBlock];
+    [self onDidLoad:didLoadBlock];
   }
   
   return self;
@@ -373,31 +363,40 @@ static ASDisplayNodeMethodOverrides GetASDisplayNodeMethodOverrides(Class c)
 
 - (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock
 {
-  return [self _initWithLayerBlock:layerBlock didLoadBlock:nil];
+  return [self initWithLayerBlock:layerBlock didLoadBlock:nil];
 }
 
 - (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
 {
-  return [self _initWithLayerBlock:layerBlock didLoadBlock:didLoadBlock];
-}
-
-- (instancetype)_initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(ASDisplayNodeDidLoadBlock)didLoadBlock
-{
-  if (!(self = [super init])) {
+  if (!(self = [self init])) {
     return nil;
   }
   
-  ASDisplayNodeAssertNotNil(layerBlock, @"should initialize with a valid block that returns a CALayer");
-  
-  [self _initializeInstance];
-  _layerBlock = layerBlock;
-  _flags.synchronous = YES;
-  _flags.layerBacked = YES;
+  [self setLayerBlock:layerBlock];
   if (didLoadBlock != nil) {
-    _onDidLoadBlocks = [NSMutableArray arrayWithObject:didLoadBlock];
+    [self onDidLoad:didLoadBlock];
   }
   
   return self;
+}
+
+- (void)setViewBlock:(ASDisplayNodeViewBlock)viewBlock
+{
+  ASDisplayNodeAssertFalse(self.nodeLoaded);
+  ASDisplayNodeAssertNotNil(viewBlock, @"should initialize with a valid block that returns a UIView");
+
+  _viewBlock = viewBlock;
+  _flags.synchronous = YES;
+}
+
+- (void)setLayerBlock:(ASDisplayNodeLayerBlock)layerBlock
+{
+  ASDisplayNodeAssertFalse(self.nodeLoaded);
+  ASDisplayNodeAssertNotNil(layerBlock, @"should initialize with a valid block that returns a CALayer");
+
+  _layerBlock = layerBlock;
+  _flags.synchronous = YES;
+  _flags.layerBacked = YES;
 }
 
 - (void)onDidLoad:(ASDisplayNodeDidLoadBlock)body

@@ -123,14 +123,6 @@
   }
 }
 
-- (instancetype)init
-{
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
-  UICollectionViewLayout *nilLayout = nil;
-  self = [self initWithCollectionViewLayout:nilLayout]; // Will throw an exception for lacking a UICV Layout.
-  return nil;
-}
-
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
 {
   return [self initWithFrame:CGRectZero collectionViewLayout:layout layoutFacilitator:nil];
@@ -143,17 +135,15 @@
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
-  __weak __typeof__(self) weakSelf = self;
-  ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    // Variable will be unused if event logging is off.
-    __unused __typeof__(self) strongSelf = weakSelf;
-    return [[[strongSelf collectionViewClass] alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
-  };
-
-  if (self = [super initWithViewBlock:collectionViewBlock didLoadBlock:nil]) {
-    return self;
+  if (self = [super init]) {
+    __weak __typeof__(self) weakSelf = self;
+    [self setViewBlock:^{
+      // Variable will be unused if event logging is off.
+      __unused __typeof__(self) strongSelf = weakSelf;
+      return [[[strongSelf collectionViewClass] alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
+    }];
   }
-  return nil;
+  return self;
 }
 
 #pragma mark ASDisplayNode
