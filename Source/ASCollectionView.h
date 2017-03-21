@@ -45,7 +45,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @return collectionNode The corresponding ASCollectionNode, if one exists.
  */
-@property (nonatomic, weak, readonly, nullable) ASCollectionNode *collectionNode;
+@property (nonatomic, weak, readonly) ASCollectionNode *collectionNode;
 
 /**
  * The number of screens left to scroll before the delegate -collectionView:beginBatchFetchingWithContext: is called.

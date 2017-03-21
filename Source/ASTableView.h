@@ -36,7 +36,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASTableView : UITableView
 
 /// The corresponding table node, or nil if one does not exist.
-@property (nonatomic, weak, readonly, nullable) ASTableNode *tableNode;
+@property (nonatomic, weak, readonly) ASTableNode *tableNode;
 
 /**
  * Retrieves the node for the row at the given index path.

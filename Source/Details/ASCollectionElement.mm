@@ -30,7 +30,7 @@
          supplementaryElementKind:(NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
                        owningNode:(ASDisplayNode *)owningNode
-         primitiveTraitCollection:(ASPrimitiveTraitCollection)primitiveTraitCollection
+                  traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   NSAssert(nodeBlock != nil, @"Node block must not be nil");
   self = [super init];
@@ -39,7 +39,7 @@
     _supplementaryElementKind = [supplementaryElementKind copy];
     _constrainedSize = constrainedSize;
     _owningNode = owningNode;
-    _primitiveTraitCollection = primitiveTraitCollection;
+    _traitCollection = traitCollection;
   }
   return self;
 }
@@ -56,7 +56,7 @@
     }
     node.owningNode = _owningNode;
     node.collectionElement = self;
-    ASTraitCollectionPropagateDown(node, _primitiveTraitCollection);
+    ASTraitCollectionPropagateDown(node, _traitCollection);
     _node = node;
   }
   return _node;
@@ -68,20 +68,20 @@
   return _node;
 }
 
-- (void)setPrimitiveTraitCollection:(ASPrimitiveTraitCollection)primitiveTraitCollection
+- (void)setTraitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASCellNode *nodeIfNeedsPropagation;
   
   {
     std::lock_guard<std::mutex> l(_lock);
-    if (! ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(_primitiveTraitCollection, primitiveTraitCollection)) {
-      _primitiveTraitCollection = primitiveTraitCollection;
+    if (! ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(_traitCollection, traitCollection)) {
+      _traitCollection = traitCollection;
       nodeIfNeedsPropagation = _node;
     }
   }
   
   if (nodeIfNeedsPropagation != nil) {
-    ASTraitCollectionPropagateDown(nodeIfNeedsPropagation, primitiveTraitCollection);
+    ASTraitCollectionPropagateDown(nodeIfNeedsPropagation, traitCollection);
   }
 }
 

@@ -267,14 +267,14 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  * @param indexPaths The index paths belongs to sections whose supplementary nodes need to be repopulated.
  * @param changeSet The changeset that triggered this repopulation.
  * @param owningNode The node that owns the new elements.
- * @param primitiveTraitCollection The trait collection needed to initialize elements
+ * @param traitCollection The trait collection needed to initialize elements
  * @param indexPathsAreNew YES if index paths are "after the update," NO otherwise.
  */
 - (void)_repopulateSupplementaryNodesIntoMap:(ASMutableElementMap *)map
              forSectionsContainingIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
                                    changeSet:(_ASHierarchyChangeSet *)changeSet
                                   owningNode:(ASDisplayNode *)owningNode
-                    primitiveTraitCollection:(ASPrimitiveTraitCollection)primitiveTraitCollection
+                             traitCollection:(ASPrimitiveTraitCollection)traitCollection
                             indexPathsAreNew:(BOOL)indexPathsAreNew
 {
   ASDisplayNodeAssertMainThread();
@@ -298,7 +298,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
 
   for (NSString *kind in [self supplementaryKindsInSections:newSections]) {
-    [self _insertElementsIntoMap:map kind:kind forSections:newSections owningNode:owningNode primitiveTraitCollection:primitiveTraitCollection];
+    [self _insertElementsIntoMap:map kind:kind forSections:newSections owningNode:owningNode traitCollection:traitCollection];
   }
 }
 
@@ -308,13 +308,13 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  * @param kind The kind of the elements, e.g ASDataControllerRowNodeKind
  * @param sections The sections that should be populated by new elements
  * @param owningNode The node that owns the new elements.
- * @param primitiveTraitCollection The trait collection needed to initialize elements
+ * @param traitCollection The trait collection needed to initialize elements
  */
 - (void)_insertElementsIntoMap:(ASMutableElementMap *)map
                           kind:(NSString *)kind
                    forSections:(NSIndexSet *)sections
                     owningNode:(ASDisplayNode *)owningNode
-      primitiveTraitCollection:(ASPrimitiveTraitCollection)primitiveTraitCollection
+               traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASDisplayNodeAssertMainThread();
   
@@ -323,7 +323,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   NSArray<NSIndexPath *> *indexPaths = [self _allIndexPathsForItemsOfKind:kind inSections:sections];
-  [self _insertElementsIntoMap:map kind:kind atIndexPaths:indexPaths owningNode:owningNode primitiveTraitCollection:primitiveTraitCollection];
+  [self _insertElementsIntoMap:map kind:kind atIndexPaths:indexPaths owningNode:owningNode traitCollection:traitCollection];
 }
 
 /**
@@ -333,13 +333,13 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  * @param kind The kind of the elements, e.g ASDataControllerRowNodeKind
  * @param indexPaths The index paths at which new elements should be populated
  * @param owningNode The node that owns the new elements.
- * @param primitiveTraitCollection The trait collection needed to initialize elements
+ * @param traitCollection The trait collection needed to initialize elements
  */
 - (void)_insertElementsIntoMap:(ASMutableElementMap *)map
                           kind:(NSString *)kind
                   atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
                     owningNode:(ASDisplayNode *)owningNode
-      primitiveTraitCollection:(ASPrimitiveTraitCollection)primitiveTraitCollection
+               traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASDisplayNodeAssertMainThread();
   
@@ -367,7 +367,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
                                                          supplementaryElementKind:isRowKind ? nil : kind
                                                                   constrainedSize:constrainedSize
                                                                        owningNode:owningNode
-                                                         primitiveTraitCollection:primitiveTraitCollection];
+                                                                  traitCollection:traitCollection];
     [map insertElement:element atIndexPath:indexPath];
   }
 }
@@ -485,8 +485,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   //TODO If _elements is the same, use a fast path
   __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   __weak ASDisplayNode *owningNode = (ASDisplayNode *)environment; // This is gross!
-  ASPrimitiveTraitCollection primitiveTraitCollection = [environment primitiveTraitCollection];
-  [self _updateElementsInMap:mutableMap changeSet:changeSet owningNode:owningNode primitiveTraitCollection:primitiveTraitCollection];
+  ASPrimitiveTraitCollection existingTraitCollection = [environment primitiveTraitCollection];
+  [self _updateElementsInMap:mutableMap changeSet:changeSet owningNode:owningNode traitCollection:existingTraitCollection];
   
   // Step 2: Clone the new data
   ASElementMap *newMap = [mutableMap copy];
@@ -509,10 +509,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
         
         // Step 5: If the environment changed mid-update, notify all visible elements
         __weak id<ASTraitEnvironment> newEnvironment = [self.environmentDelegate dataControllerEnvironment];
-        ASPrimitiveTraitCollection newPrimitiveTraitCollection = [newEnvironment primitiveTraitCollection];
-        if (! ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(primitiveTraitCollection, newPrimitiveTraitCollection)) {
+        ASPrimitiveTraitCollection newTraitCollection = [newEnvironment primitiveTraitCollection];
+        if (! ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(existingTraitCollection, newTraitCollection)) {
           for (ASCollectionElement *element in _visibleMap) {
-            element.primitiveTraitCollection = newPrimitiveTraitCollection;
+            element.traitCollection = newTraitCollection;
           }
         }
       }];
@@ -576,7 +576,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (void)_updateElementsInMap:(ASMutableElementMap *)map
                    changeSet:(_ASHierarchyChangeSet *)changeSet
                   owningNode:(ASDisplayNode *)owningNode
-    primitiveTraitCollection:(ASPrimitiveTraitCollection)primitiveTraitCollection
+             traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASDisplayNodeAssertMainThread();
   
@@ -589,7 +589,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     NSUInteger sectionCount = [self itemCountsFromDataSource].size();
     if (sectionCount > 0) {
       NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-      [self _insertElementsIntoMap:map sections:sectionIndexes owningNode:owningNode primitiveTraitCollection:primitiveTraitCollection];
+      [self _insertElementsIntoMap:map sections:sectionIndexes owningNode:owningNode traitCollection:traitCollection];
     }
     // Return immediately because reloadData can't be used in conjuntion with other updates.
     return;
@@ -601,7 +601,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     [self _repopulateSupplementaryNodesIntoMap:map forSectionsContainingIndexPaths:change.indexPaths
                                      changeSet:changeSet
                                     owningNode:owningNode
-                      primitiveTraitCollection:primitiveTraitCollection
+                               traitCollection:traitCollection
                               indexPathsAreNew:NO];
   }
 
@@ -612,16 +612,16 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertElementsIntoMap:map sections:change.indexSet owningNode:owningNode primitiveTraitCollection:primitiveTraitCollection];
+    [self _insertElementsIntoMap:map sections:change.indexSet owningNode:owningNode traitCollection:traitCollection];
   }
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind atIndexPaths:change.indexPaths owningNode:owningNode primitiveTraitCollection:primitiveTraitCollection];
+    [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind atIndexPaths:change.indexPaths owningNode:owningNode traitCollection:traitCollection];
     // Aggressively reload supplementary nodes (#1773 & #1629)
     [self _repopulateSupplementaryNodesIntoMap:map forSectionsContainingIndexPaths:change.indexPaths
                                      changeSet:changeSet
                                     owningNode:owningNode
-                      primitiveTraitCollection:primitiveTraitCollection
+                               traitCollection:traitCollection
                               indexPathsAreNew:YES];
   }
 }
@@ -629,7 +629,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (void)_insertElementsIntoMap:(ASMutableElementMap *)map
                       sections:(NSIndexSet *)sectionIndexes
                     owningNode:(ASDisplayNode *)owningNode
-      primitiveTraitCollection:(ASPrimitiveTraitCollection)primitiveTraitCollection
+               traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASDisplayNodeAssertMainThread();
   
@@ -639,12 +639,12 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 
   // Items
   [map insertEmptySectionsOfItemsAtIndexes:sectionIndexes];
-  [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind forSections:sectionIndexes owningNode:owningNode primitiveTraitCollection:primitiveTraitCollection];
+  [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind forSections:sectionIndexes owningNode:owningNode traitCollection:traitCollection];
 
   // Supplementaries
   for (NSString *kind in [self supplementaryKindsInSections:sectionIndexes]) {
     // Step 2: Populate new elements for all sections
-    [self _insertElementsIntoMap:map kind:kind forSections:sectionIndexes owningNode:owningNode primitiveTraitCollection:primitiveTraitCollection];
+    [self _insertElementsIntoMap:map kind:kind forSections:sectionIndexes owningNode:owningNode traitCollection:traitCollection];
   }
 }
 
