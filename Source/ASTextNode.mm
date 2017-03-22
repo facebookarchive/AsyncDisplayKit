@@ -397,9 +397,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 #endif
   }
     
-  // Sync the truncation string with attributes from the updated _attributedString
-  // Without this, the size calculation of the text with truncation applied will
-  // not take into account the attributes of attributedText in the last line
+  // Since truncation text matches style of attributedText, invalidate it now.
   [self _invalidateTruncationText];
   
   NSUInteger length = attributedText.length;
