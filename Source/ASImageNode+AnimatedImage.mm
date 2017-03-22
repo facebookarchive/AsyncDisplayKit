@@ -97,7 +97,7 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
 - (void)setCoverImageCompleted:(UIImage *)coverImage
 {
   ASDN::MutexLocker l(_animatedImageLock);
-  [self _locked_setCoverImage:coverImage];
+  [self _locked_setCoverImageCompleted:coverImage];
 }
 
 - (void)_locked_setCoverImageCompleted:(UIImage *)coverImage
