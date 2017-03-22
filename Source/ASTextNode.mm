@@ -392,7 +392,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
       return;
     }
 
-    _composedTruncationText = DefaultTruncationAttributedString();
     _attributedText = ASCleanseAttributedStringOfCoreTextAttributes(attributedText);
 #if AS_TEXTNODE_RECORD_ATTRIBUTED_STRINGS
 	  [ASTextNode _registerAttributedText:_attributedText];
@@ -1293,7 +1292,7 @@ static NSAttributedString *DefaultTruncationAttributedString()
 {
   //If we have neither return the default
   if (!_additionalTruncationMessage && !_truncationAttributedText) {
-    return _composedTruncationText;
+    return DefaultTruncationAttributedString();
   }
   // Short circuit if we only have one or the other.
   if (!_additionalTruncationMessage) {
