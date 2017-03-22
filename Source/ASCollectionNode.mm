@@ -138,8 +138,7 @@
   if (self = [super init]) {
     __weak __typeof__(self) weakSelf = self;
     [self setViewBlock:^{
-      // Variable will be unused if event logging is off.
-      __unused __typeof__(self) strongSelf = weakSelf;
+      __typeof__(self) strongSelf = weakSelf;
       return [[[strongSelf collectionViewClass] alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
     }];
   }
