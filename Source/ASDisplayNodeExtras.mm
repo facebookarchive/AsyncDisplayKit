@@ -24,7 +24,7 @@ extern void ASPerformMainThreadDeallocation(_Nullable id object)
   static ASRunLoopQueue *queue;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    queue = [[ASRunLoopQueue alloc] initWithRunLoop:CFRunLoopGetMain() andHandler:nil];
+    queue = [[ASRunLoopQueue alloc] initWithRunLoop:CFRunLoopGetMain() retainObjects:YES handler:nil];
     queue.batchSize = 10;
   });
   if (object != nil) {
