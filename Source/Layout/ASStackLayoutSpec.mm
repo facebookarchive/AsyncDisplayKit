@@ -136,7 +136,7 @@
   
   const ASStackLayoutSpecStyle style = {.direction = _direction, .spacing = _spacing, .justifyContent = _justifyContent, .alignItems = _alignItems, .flexWrap = _flexWrap, .alignContent = _alignContent};
   
-  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize);
+  const auto unpositionedLayout = ASStackUnpositionedLayout::compute(stackChildren, style, constrainedSize, _concurrent);
   const auto positionedLayout = ASStackPositionedLayout::compute(unpositionedLayout, style, constrainedSize);
   
   if (style.direction == ASStackLayoutDirectionVertical) {

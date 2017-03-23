@@ -22,7 +22,7 @@
 
 static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
-@interface ASVideoPlayerNode() <ASVideoNodeDelegate>
+@interface ASVideoPlayerNode() <ASVideoNodeDelegate, ASVideoPlayerNodeDelegate>
 {
   __weak id<ASVideoPlayerNodeDelegate> _delegate;
 
@@ -53,11 +53,13 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
     unsigned int delegateVideoPlayerNodeDidRecoverFromStall:1;
   } _delegateFlags;
   
-  NSURL *_url;
-  AVAsset *_asset;
-  AVVideoComposition *_videoComposition;
-  AVAudioMix *_audioMix;
+  // The asset passed in the initializer will be assigned as pending asset. As soon as the first
+  // preload state happened all further asset handling is made by using the asset of the backing
+  // video node
+  AVAsset *_pendingAsset;
   
+  // The backing video node. Ideally this is the source of truth and the video player node should
+  // not handle anything related to asset management
   ASVideoNode *_videoNode;
 
   NSArray *_neededDefaultControls;
@@ -72,7 +74,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   ASStackLayoutSpec *_controlFlexGrowSpacerSpec;
   ASDisplayNode *_spinnerNode;
 
-  BOOL _loadAssetWhenNodeBecomesVisible;
   BOOL _isSeeking;
   CMTime _duration;
 
@@ -95,121 +96,132 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
 
 @dynamic placeholderImageURL;
 
+#pragma mark - Lifecycle
+
 - (instancetype)init
 {
   if (!(self = [super init])) {
     return nil;
   }
 
-  [self _init];
+  [self _initControlsAndVideoNode];
 
-  return self;
-}
-
-- (instancetype)initWithUrl:(NSURL*)url
-{
-  if (!(self = [super init])) {
-    return nil;
-  }
-  
-  _url = url;
-  _asset = [AVAsset assetWithURL:_url];
-  _loadAssetWhenNodeBecomesVisible = YES;
-  
-  [self _init];
-  
   return self;
 }
 
 - (instancetype)initWithAsset:(AVAsset *)asset
 {
-  if (!(self = [super init])) {
+  if (!(self = [self init])) {
     return nil;
   }
+  
+  _pendingAsset = asset;
+  
+  return self;
+}
 
-  _asset = asset;
-  _loadAssetWhenNodeBecomesVisible = YES;
+- (instancetype)initWithURL:(NSURL *)URL
+{
+  return [self initWithAsset:[AVAsset assetWithURL:URL]];
+}
 
-  [self _init];
+- (instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix
+{
+  if (!(self = [self initWithAsset:asset])) {
+    return nil;
+  }
+  
+  _videoNode.videoComposition = videoComposition;
+  _videoNode.audioMix = audioMix;
 
   return self;
 }
 
--(instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix
+- (void)_initControlsAndVideoNode
 {
-  if (!(self = [super init])) {
-    return nil;
-  }
+  _defaultControlsColor = [UIColor whiteColor];
+  _cachedControls = [[NSMutableDictionary alloc] init];
+  
+  _videoNode = [[ASVideoNode alloc] init];
+  _videoNode.delegate = self;
+  [self addSubnode:_videoNode];
+}
 
-  _asset = asset;
-  _videoComposition = videoComposition;
-  _audioMix = audioMix;
-  _loadAssetWhenNodeBecomesVisible = YES;
+#pragma mark Deprecated
 
-  [self _init];
-
-  return self;
+- (instancetype)initWithUrl:(NSURL *)url
+{
+  return [self initWithURL:url];
 }
 
 - (instancetype)initWithUrl:(NSURL *)url loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible
 {
-  if (!(self = [super init])) {
-    return nil;
-  }
-
-  _url = url;
-  _asset = [AVAsset assetWithURL:_url];
-  _loadAssetWhenNodeBecomesVisible = loadAssetWhenNodeBecomesVisible;
-
-  [self _init];
-
-  return self;
+  return [self initWithURL:url];
 }
 
 - (instancetype)initWithAsset:(AVAsset *)asset loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible
 {
-  if (!(self = [super init])) {
-    return nil;
-  }
-
-  _asset = asset;
-  _loadAssetWhenNodeBecomesVisible = loadAssetWhenNodeBecomesVisible;
-
-  [self _init];
-
-  return self;
+  return [self initWithAsset:asset];
 }
 
--(instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible
+- (instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible
 {
-  if (!(self = [super init])) {
-    return nil;
-  }
-
-  _asset = asset;
-  _videoComposition = videoComposition;
-  _audioMix = audioMix;
-  _loadAssetWhenNodeBecomesVisible = loadAssetWhenNodeBecomesVisible;
-
-  [self _init];
-
-  return self;
+  return [self initWithAsset:asset videoComposition:videoComposition audioMix:audioMix];
 }
 
-- (void)_init
+#pragma mark - Setter / Getter
+
+- (void)setAssetURL:(NSURL *)assetURL
 {
-  _defaultControlsColor = [UIColor whiteColor];
-  _cachedControls = [[NSMutableDictionary alloc] init];
-
-  _videoNode = [[ASVideoNode alloc] init];
-  _videoNode.delegate = self;
-  if (_loadAssetWhenNodeBecomesVisible == NO) {
-    _videoNode.asset = _asset;
-    _videoNode.videoComposition = _videoComposition;
-    _videoNode.audioMix = _audioMix;
-  }
-  [self addSubnode:_videoNode];
+  ASDisplayNodeAssertMainThread();
+  
+  self.asset = [AVAsset assetWithURL:assetURL];
 }
+
+- (NSURL *)assetURL
+{
+  NSURL *url = nil;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if ([_pendingAsset isKindOfClass:AVURLAsset.class]) {
+      url = ((AVURLAsset *)_pendingAsset).URL;
+    }
+  }
+  
+  return url ?: _videoNode.assetURL;
+}
+
+- (void)setAsset:(AVAsset *)asset
+{
+  ASDisplayNodeAssertMainThread();
+
+  __instanceLock__.lock();
+  
+  // Clean out pending asset
+  _pendingAsset = nil;
+  
+  // Set asset based on interface state
+  if ((ASInterfaceStateIncludesPreload(self.interfaceState))) {
+    // Don't hold the lock while accessing the subnode
+    __instanceLock__.unlock();
+    _videoNode.asset = asset;
+    return;
+  }
+  
+  _pendingAsset = asset;
+  __instanceLock__.unlock();
+}
+
+- (AVAsset *)asset
+{
+  __instanceLock__.lock();
+  AVAsset *asset = _pendingAsset;
+  __instanceLock__.unlock();
+
+  return asset ?: _videoNode.asset;
+}
+
+#pragma mark - ASDisplayNode
 
 - (void)didLoad
 {
@@ -220,23 +232,85 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
-- (void)didEnterVisibleState
+- (void)didEnterPreloadState
 {
-  [super didEnterVisibleState];
+  [super didEnterPreloadState];
   
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_loadAssetWhenNodeBecomesVisible) {
-    if (_asset != _videoNode.asset) {
-      _videoNode.asset = _asset;
+  AVAsset *pendingAsset = nil;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    pendingAsset = _pendingAsset;
+    _pendingAsset = nil;
+  }
+
+  // If we enter preload state we apply the pending asset to load to the video node so it can start and fetch the asset
+  if (pendingAsset != nil && _videoNode.asset != pendingAsset) {
+    _videoNode.asset = pendingAsset;
+  }
+}
+
+#pragma mark - UI
+
+- (void)createControls
+{
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+
+    if (_controlsDisabled) {
+      return;
     }
-    if (_videoComposition != _videoNode.videoComposition) {
-      _videoNode.videoComposition = _videoComposition;
+
+    if (_neededDefaultControls == nil) {
+      _neededDefaultControls = [self createDefaultControlElementArray];
     }
-    if (_audioMix != _videoNode.audioMix) {
-      _videoNode.audioMix = _audioMix;
+
+    if (_cachedControls == nil) {
+      _cachedControls = [[NSMutableDictionary alloc] init];
+    }
+
+    for (id object in _neededDefaultControls) {
+      ASVideoPlayerNodeControlType type = (ASVideoPlayerNodeControlType)[object integerValue];
+      switch (type) {
+        case ASVideoPlayerNodeControlTypePlaybackButton:
+          [self _locked_createPlaybackButton];
+          break;
+        case ASVideoPlayerNodeControlTypeElapsedText:
+          [self _locked_createElapsedTextField];
+          break;
+        case ASVideoPlayerNodeControlTypeDurationText:
+          [self _locked_createDurationTextField];
+          break;
+        case ASVideoPlayerNodeControlTypeScrubber:
+          [self _locked_createScrubber];
+          break;
+        case ASVideoPlayerNodeControlTypeFullScreenButton:
+          [self _locked_createFullScreenButton];
+          break;
+        case ASVideoPlayerNodeControlTypeFlexGrowSpacer:
+          [self _locked_createControlFlexGrowSpacer];
+          break;
+        default:
+          break;
+      }
+    }
+
+    if (_delegateFlags.delegateCustomControls && _delegateFlags.delegateLayoutSpecForControls) {
+      NSDictionary *customControls = [_delegate videoPlayerNodeCustomControls:self];
+      for (id key in customControls) {
+        id node = customControls[key];
+        if (![node isKindOfClass:[ASDisplayNode class]]) {
+          continue;
+        }
+
+        [self addSubnode:node];
+        [_cachedControls setObject:node forKey:key];
+      }
     }
   }
+
+  ASPerformBlockOnMainThread(^{
+    [self setNeedsLayout];
+  });
 }
 
 - (NSArray *)createDefaultControlElementArray
@@ -249,68 +323,6 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
             @(ASVideoPlayerNodeControlTypeElapsedText),
             @(ASVideoPlayerNodeControlTypeScrubber),
             @(ASVideoPlayerNodeControlTypeDurationText) ];
-}
-
-#pragma mark - UI
-- (void)createControls
-{
-  ASDN::MutexLocker l(__instanceLock__);
-
-  if (_controlsDisabled) {
-    return;
-  }
-
-  if (_neededDefaultControls == nil) {
-    _neededDefaultControls = [self createDefaultControlElementArray];
-  }
-
-  if (_cachedControls == nil) {
-    _cachedControls = [[NSMutableDictionary alloc] init];
-  }
-
-  for (id object in _neededDefaultControls) {
-    ASVideoPlayerNodeControlType type = (ASVideoPlayerNodeControlType)[object integerValue];
-    switch (type) {
-      case ASVideoPlayerNodeControlTypePlaybackButton:
-        [self createPlaybackButton];
-        break;
-      case ASVideoPlayerNodeControlTypeElapsedText:
-        [self createElapsedTextField];
-        break;
-      case ASVideoPlayerNodeControlTypeDurationText:
-        [self createDurationTextField];
-        break;
-      case ASVideoPlayerNodeControlTypeScrubber:
-        [self createScrubber];
-        break;
-      case ASVideoPlayerNodeControlTypeFullScreenButton:
-        [self createFullScreenButton];
-        break;
-      case ASVideoPlayerNodeControlTypeFlexGrowSpacer:
-        [self createControlFlexGrowSpacer];
-        break;
-      default:
-        break;
-    }
-  }
-
-  if (_delegateFlags.delegateCustomControls && _delegateFlags.delegateLayoutSpecForControls) {
-    NSDictionary *customControls = [_delegate videoPlayerNodeCustomControls:self];
-    for (id key in customControls) {
-      id node = customControls[key];
-      if (![node isKindOfClass:[ASDisplayNode class]]) {
-        continue;
-      }
-
-      [self addSubnode:node];
-      [_cachedControls setObject:node forKey:key];
-    }
-  }
-
-  ASPerformBlockOnMainThread(^{
-    ASDN::MutexLocker l(__instanceLock__);
-    [self setNeedsLayout];
-  });
 }
 
 - (void)removeControls
@@ -333,7 +345,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   _scrubberNode = nil;
 }
 
-- (void)createPlaybackButton
+- (void)_locked_createPlaybackButton
 {
   if (_playbackButtonNode == nil) {
     _playbackButtonNode = [[ASDefaultPlaybackButton alloc] init];
@@ -356,7 +368,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_playbackButtonNode];
 }
 
-- (void)createFullScreenButton
+- (void)_locked_createFullScreenButton
 {
   if (_fullScreenButtonNode == nil) {
     _fullScreenButtonNode = [[ASButtonNode alloc] init];
@@ -373,7 +385,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_fullScreenButtonNode];
 }
 
-- (void)createElapsedTextField
+- (void)_locked_createElapsedTextField
 {
   if (_elapsedTextNode == nil) {
     _elapsedTextNode = [[ASTextNode alloc] init];
@@ -386,7 +398,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_elapsedTextNode];
 }
 
-- (void)createDurationTextField
+- (void)_locked_createDurationTextField
 {
   if (_durationTextNode == nil) {
     _durationTextNode = [[ASTextNode alloc] init];
@@ -400,7 +412,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_durationTextNode];
 }
 
-- (void)createScrubber
+- (void)_locked_createScrubber
 {
   if (_scrubberNode == nil) {
     __weak __typeof__(self) weakSelf = self;
@@ -444,7 +456,7 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   [self addSubnode:_scrubberNode];
 }
 
-- (void)createControlFlexGrowSpacer
+- (void)_locked_createControlFlexGrowSpacer
 {
   if (_controlFlexGrowSpacerSpec == nil) {
     _controlFlexGrowSpacerSpec = [[ASStackLayoutSpec alloc] init];

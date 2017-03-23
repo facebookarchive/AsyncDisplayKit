@@ -125,9 +125,9 @@ ASDISPLAYNODE_EXTERN_C_END
     /* Must dispatch to main for self.view && [self.view.dataController visibleMap]*/\
     ASPerformBlockOnMainThread(^{\
       ASElementMap *map = self.view.dataController.visibleMap; \
-      [map enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) { \
+      for (ASCollectionElement *element in map) { \
          ASTraitCollectionPropagateDown(element.nodeIfAllocated, currentTraits); \
-      }]; \
+      } \
     });\
   }\
 }\

@@ -13,6 +13,7 @@
 #import <UIKit/UIKit.h>
 
 #import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASElementMap.h>
 
 @interface ASTableLayoutController()
 @end
@@ -30,28 +31,24 @@
 
 #pragma mark - ASLayoutController
 
-/**
- * IndexPath array for the element in the working range.
- */
-
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+- (NSSet<ASCollectionElement *> *)elementsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType map:(ASElementMap *)map
 {
   CGRect bounds = _tableView.bounds;
 
   ASRangeTuningParameters tuningParameters = [self tuningParametersForRangeMode:rangeMode rangeType:rangeType];
   CGRect rangeBounds = CGRectExpandToRangeWithScrollableDirections(bounds, tuningParameters, ASScrollDirectionVerticalDirections, scrollDirection);
   NSArray *array = [_tableView indexPathsForRowsInRect:rangeBounds];
-  return [NSSet setWithArray:array];
+  return ASSetByFlatMapping(array, NSIndexPath *indexPath, [map elementForItemAtIndexPath:indexPath]);
 }
 
-- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet **)displaySet preloadSet:(NSSet **)preloadSet
+- (void)allElementsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet<ASCollectionElement *> *__autoreleasing  _Nullable *)displaySet preloadSet:(NSSet<ASCollectionElement *> *__autoreleasing  _Nullable *)preloadSet map:(ASElementMap *)map
 {
   if (displaySet == NULL || preloadSet == NULL) {
     return;
   }
 
-  *displaySet = [self indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypeDisplay];
-  *preloadSet = [self indexPathsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypePreload];
+  *displaySet = [self elementsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypeDisplay map:map];
+  *preloadSet = [self elementsForScrolling:scrollDirection rangeMode:rangeMode rangeType:ASLayoutRangeTypePreload map:map];
   return;
 }
 

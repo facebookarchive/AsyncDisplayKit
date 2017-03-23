@@ -33,6 +33,7 @@
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 #import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
 #import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
+#import <AsyncDisplayKit/ASLayout.h>
 
 /**
  * A macro to get self.collectionNode and assign it to a local variable, or return
@@ -362,10 +363,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
   
   [_dataController waitUntilAllUpdatesAreCommitted];
-  
-  // reloadData of UICollectionView doesn't requery its data source but defers until the next layout pass.
-  // A forced layout pass is neccessary here to make sure everything is ready after this method returns.
-  [self layoutIfNeeded];
 }
 
 - (void)setDataSource:(id<UICollectionViewDataSource>)dataSource
@@ -606,9 +603,31 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   return _zeroContentInsets;
 }
 
+/// Uses latest size range from data source and -layoutThatFits:.
+- (CGSize)sizeForElement:(ASCollectionElement *)element
+{
+  ASDisplayNodeAssertMainThread();
+  if (element == nil) {
+    return CGSizeZero;
+  }
+
+  NSString *supplementaryKind = element.supplementaryElementKind;
+  NSIndexPath *indexPath = [_dataController.visibleMap indexPathForElement:element];
+  ASSizeRange sizeRange;
+  if (supplementaryKind == nil) {
+    sizeRange = [self dataController:_dataController constrainedSizeForNodeAtIndexPath:indexPath];
+  } else {
+    sizeRange = [self dataController:_dataController constrainedSizeForSupplementaryNodeOfKind:supplementaryKind atIndexPath:indexPath];
+  }
+  return [element.node layoutThatFits:sizeRange].size;
+}
+
 - (CGSize)calculatedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
 {
-  return [[self nodeForItemAtIndexPath:indexPath] calculatedSize];
+  ASDisplayNodeAssertMainThread();
+
+  ASCollectionElement *e = [_dataController.visibleMap elementForItemAtIndexPath:indexPath];
+  return [self sizeForElement:e];
 }
 
 - (ASCellNode *)nodeForItemAtIndexPath:(NSIndexPath *)indexPath
@@ -893,37 +912,45 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath
 {
+  ASDisplayNodeAssertMainThread();
   ASCellNode *cell = [self nodeForItemAtIndexPath:indexPath];
   if (cell.shouldUseUIKitCell) {
     if ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)]) {
       return [(id)_asyncDelegate collectionView:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
     }
   }
-  return cell.calculatedSize;
+  ASCollectionElement *e = [_dataController.visibleMap elementForItemAtIndexPath:indexPath];
+  return [self sizeForElement:e];
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)layout referenceSizeForHeaderInSection:(NSInteger)section
 {
+  ASDisplayNodeAssertMainThread();
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:section];
   ASCellNode *cell = [self supplementaryNodeForElementKind:UICollectionElementKindSectionHeader
-                                               atIndexPath:[NSIndexPath indexPathForItem:0 inSection:section]];
+                                               atIndexPath:indexPath];
   if (cell.shouldUseUIKitCell && _asyncDelegateFlags.interop) {
     if ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:referenceSizeForHeaderInSection:)]) {
       return [(id)_asyncDelegate collectionView:collectionView layout:layout referenceSizeForHeaderInSection:section];
     }
   }
-  return cell.calculatedSize;
+  ASCollectionElement *e = [_dataController.visibleMap supplementaryElementOfKind:UICollectionElementKindSectionHeader atIndexPath:indexPath];
+  return [self sizeForElement:e];
 }
 
 - (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)layout referenceSizeForFooterInSection:(NSInteger)section
 {
+  ASDisplayNodeAssertMainThread();
+  NSIndexPath *indexPath = [NSIndexPath indexPathForItem:0 inSection:section];
   ASCellNode *cell = [self supplementaryNodeForElementKind:UICollectionElementKindSectionFooter
-                                               atIndexPath:[NSIndexPath indexPathForItem:0 inSection:section]];
+                                               atIndexPath:indexPath];
   if (cell.shouldUseUIKitCell && _asyncDelegateFlags.interop) {
     if ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:referenceSizeForFooterInSection:)]) {
       return [(id)_asyncDelegate collectionView:collectionView layout:layout referenceSizeForFooterInSection:section];
     }
   }
-  return cell.calculatedSize;
+  ASCollectionElement *e = [_dataController.visibleMap supplementaryElementOfKind:UICollectionElementKindSectionFooter atIndexPath:indexPath];
+  return [self sizeForElement:e];
 }
 
 - (UICollectionReusableView *)collectionView:(UICollectionView *)collectionView viewForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -969,7 +996,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
   if (_ASCollectionViewCell *asCell = ASDynamicCast(cell, _ASCollectionViewCell)) {
     asCell.node = node;
-    asCell.selectedBackgroundView = node.selectedBackgroundView;
     [_rangeController configureContentView:cell.contentView forCellNode:node];
   }
   
@@ -991,6 +1017,10 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   
   ASCellNode *cellNode = [cell node];
   cellNode.scrollView = collectionView;
+
+  // Update the selected background view in collectionView:willDisplayCell:forItemAtIndexPath: otherwise it could be to
+  // early e.g. if the selectedBackgroundView was set in didLoad()
+  cell.selectedBackgroundView = cellNode.selectedBackgroundView;
   
   // Under iOS 10+, cells may be removed/re-added to the collection view without
   // receiving prepareForReuse/applyLayoutAttributes, as an optimization for e.g.
@@ -1676,13 +1706,59 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   return _rangeController;
 }
 
-- (NSArray *)visibleNodeIndexPathsForRangeController:(ASRangeController *)rangeController
+/// The UIKit version of this method is only available on iOS >= 9
+- (NSArray<NSIndexPath *> *)asdk_indexPathsForVisibleSupplementaryElementsOfKind:(NSString *)kind
 {
-  ASDisplayNodeAssertMainThread();
-  // Calling -indexPathsForVisibleItems will trigger UIKit to call reloadData if it never has, which can result
-  // in incorrect layout if performed at zero size.  We can use the fact that nothing can be visible at zero size to return fast.
-  BOOL isZeroSized = CGSizeEqualToSize(self.bounds.size, CGSizeZero);
-  return isZeroSized ? @[] : [self indexPathsForVisibleItems];
+  if (NSFoundationVersionNumber >= NSFoundationVersionNumber_iOS_9_0) {
+    return [self indexPathsForVisibleSupplementaryElementsOfKind:kind];
+  }
+
+  // iOS 8 workaround
+  // We cannot use willDisplaySupplementaryView/didEndDisplayingSupplementaryView
+  // because those methods send index paths for _deleted items_ (invalid index paths)
+  [self layoutIfNeeded];
+  NSArray<UICollectionViewLayoutAttributes *> *visibleAttributes = [self.collectionViewLayout layoutAttributesForElementsInRect:self.bounds];
+  NSMutableArray *result = [NSMutableArray array];
+  for (UICollectionViewLayoutAttributes *attributes in visibleAttributes) {
+    if (attributes.representedElementCategory == UICollectionElementCategorySupplementaryView
+        && [attributes.representedElementKind isEqualToString:kind]) {
+      [result addObject:attributes.indexPath];
+    }
+  }
+  return result;
+}
+
+- (NSArray<ASCollectionElement *> *)visibleElementsForRangeController:(ASRangeController *)rangeController
+{
+  if (CGRectIsEmpty(self.bounds)) {
+    return @[];
+  }
+
+  ASElementMap *map = _dataController.visibleMap;
+  NSMutableArray<ASCollectionElement *> *result = [NSMutableArray array];
+
+  // Visible items
+  for (NSIndexPath *indexPath in self.indexPathsForVisibleItems) {
+    ASCollectionElement *element = [map elementForItemAtIndexPath:indexPath];
+    if (element != nil) {
+      [result addObject:element];
+    } else {
+      ASDisplayNodeFailAssert(@"Couldn't find 'visible' item at index path %@ in map %@", indexPath, map);
+    }
+  }
+
+  // Visible supplementary elements
+  for (NSString *kind in map.supplementaryElementKinds) {
+    for (NSIndexPath *indexPath in [self asdk_indexPathsForVisibleSupplementaryElementsOfKind:kind]) {
+      ASCollectionElement *element = [map supplementaryElementOfKind:kind atIndexPath:indexPath];
+      if (element != nil) {
+        [result addObject:element];
+      } else {
+        ASDisplayNodeFailAssert(@"Couldn't find 'visible' supplementary element of kind %@ at index path %@ in map %@", kind, indexPath, map);
+      }
+    }
+  }
+  return result;
 }
 
 - (ASElementMap *)elementMapForRangeController:(ASRangeController *)rangeController
@@ -1918,6 +1994,15 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 #pragma mark ASCALayerExtendedDelegate
 
 /**
+ * TODO: This code was added when we used @c calculatedSize as the size for 
+ * items (e.g. collectionView:layout:sizeForItemAtIndexPath:) and so it
+ * was critical that we remeasured all nodes at this time.
+ *
+ * The assumption was that cv-bounds-size-change -> constrained-size-change, so
+ * this was the time when we get new constrained sizes for all items and remeasure
+ * them. However, the constrained sizes for items can be invalidated for many other
+ * reasons, hence why we never reuse the old constrained size anymore.
+ *
  * UICollectionView inadvertently triggers a -prepareLayout call to its layout object
  * between [super setFrame:] and [self layoutSubviews] during size changes. So we need
  * to get in there and re-measure our nodes before that -prepareLayout call.

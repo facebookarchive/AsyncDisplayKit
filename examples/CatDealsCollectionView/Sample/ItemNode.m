@@ -223,11 +223,11 @@ const CGFloat kSoldOutGBHeight = 50.0;
 
 - (void)displayWillStart {
   [super displayWillStart];
-  [self fetchData];
+  [self didEnterPreloadState];
 }
 
-- (void)fetchData {
-  [super fetchData];
+- (void)didEnterPreloadState {
+  [super didEnterPreloadState];
   if (self.viewModel) {
     [self loadImage];
   }

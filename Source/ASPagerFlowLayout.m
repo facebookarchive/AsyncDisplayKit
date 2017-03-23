@@ -101,4 +101,12 @@
   return [super shouldInvalidateLayoutForBoundsChange:newBounds];
 }
 
+- (UICollectionViewLayoutInvalidationContext *)invalidationContextForBoundsChange:(CGRect)newBounds
+{
+  UICollectionViewFlowLayoutInvalidationContext *ctx = (UICollectionViewFlowLayoutInvalidationContext *)[super invalidationContextForBoundsChange:newBounds];
+  ctx.invalidateFlowLayoutDelegateMetrics = YES;
+  ctx.invalidateFlowLayoutAttributes = YES;
+  return ctx;
+}
+
 @end

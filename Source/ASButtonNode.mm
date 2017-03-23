@@ -154,7 +154,7 @@
 
 - (void)updateImage
 {
-  ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
 
   UIImage *newImage;
   if (self.enabled == NO && _disabledImage) {
@@ -171,13 +171,19 @@
   
   if ((_imageNode != nil || newImage != nil) && newImage != self.imageNode.image) {
     _imageNode.image = newImage;
+    __instanceLock__.unlock();
+
     [self setNeedsLayout];
+    return;
   }
+  
+  __instanceLock__.unlock();
 }
 
 - (void)updateTitle
 {
-  ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
+
   NSAttributedString *newTitle;
   if (self.enabled == NO && _disabledAttributedTitle) {
     newTitle = _disabledAttributedTitle;
@@ -191,16 +197,22 @@
     newTitle = _normalAttributedTitle;
   }
 
+  // Calling self.titleNode is essential here because _titleNode is lazily created by the getter.
   if ((_titleNode != nil || newTitle.length > 0) && [self.titleNode.attributedText isEqualToAttributedString:newTitle] == NO) {
     _titleNode.attributedText = newTitle;
+    __instanceLock__.unlock();
+    
     self.accessibilityLabel = _titleNode.accessibilityLabel;
     [self setNeedsLayout];
+    return;
   }
+  
+  __instanceLock__.unlock();
 }
 
 - (void)updateBackgroundImage
 {
-  ASDN::MutexLocker l(__instanceLock__);
+  __instanceLock__.lock();
   
   UIImage *newImage;
   if (self.enabled == NO && _disabledBackgroundImage) {
@@ -217,8 +229,13 @@
   
   if ((_backgroundImageNode != nil || newImage != nil) && newImage != self.backgroundImageNode.image) {
     _backgroundImageNode.image = newImage;
+    __instanceLock__.unlock();
+    
     [self setNeedsLayout];
+    return;
   }
+  
+  __instanceLock__.unlock();
 }
 
 - (CGFloat)contentSpacing
@@ -229,11 +246,15 @@
 
 - (void)setContentSpacing:(CGFloat)contentSpacing
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  if (contentSpacing == _contentSpacing)
-    return;
-  
-  _contentSpacing = contentSpacing;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if (contentSpacing == _contentSpacing) {
+      return;
+    }
+    
+    _contentSpacing = contentSpacing;
+  }
+
   [self setNeedsLayout];
 }
 
@@ -245,11 +266,15 @@
 
 - (void)setLaysOutHorizontally:(BOOL)laysOutHorizontally
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  if (laysOutHorizontally == _laysOutHorizontally)
-    return;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if (laysOutHorizontally == _laysOutHorizontally) {
+      return;
+    }
   
-  _laysOutHorizontally = laysOutHorizontally;
+    _laysOutHorizontally = laysOutHorizontally;
+  }
+
   [self setNeedsLayout];
 }
 
@@ -306,12 +331,11 @@
 - (void)setTitle:(NSString *)title withFont:(UIFont *)font withColor:(UIColor *)color forState:(UIControlState)state
 {
   NSDictionary *attributes = @{
-                               NSFontAttributeName: font ? : [UIFont systemFontOfSize:[UIFont buttonFontSize]],
-                               NSForegroundColorAttributeName : color ? : [UIColor blackColor]
-                               };
+    NSFontAttributeName: font ? : [UIFont systemFontOfSize:[UIFont buttonFontSize]],
+    NSForegroundColorAttributeName : color ? : [UIColor blackColor]
+  };
     
-  NSAttributedString *string = [[NSAttributedString alloc] initWithString:title
-                                                               attributes:attributes];
+  NSAttributedString *string = [[NSAttributedString alloc] initWithString:title attributes:attributes];
   [self setAttributedTitle:string forState:state];
 }
 #endif
@@ -342,30 +366,32 @@
 
 - (void)setAttributedTitle:(NSAttributedString *)title forState:(UIControlState)state
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  switch (state) {
-    case UIControlStateNormal:
-      _normalAttributedTitle = [title copy];
-      break;
-      
-    case UIControlStateHighlighted:
-      _highlightedAttributedTitle = [title copy];
-      break;
-      
-    case UIControlStateSelected:
-      _selectedAttributedTitle = [title copy];
-      break;
-          
-    case UIControlStateSelected | UIControlStateHighlighted:
-      _selectedHighlightedAttributedTitle = [title copy];
-      break;
-      
-    case UIControlStateDisabled:
-      _disabledAttributedTitle = [title copy];
-      break;
-      
-    default:
-      break;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    switch (state) {
+      case UIControlStateNormal:
+        _normalAttributedTitle = [title copy];
+        break;
+        
+      case UIControlStateHighlighted:
+        _highlightedAttributedTitle = [title copy];
+        break;
+        
+      case UIControlStateSelected:
+        _selectedAttributedTitle = [title copy];
+        break;
+            
+      case UIControlStateSelected | UIControlStateHighlighted:
+        _selectedHighlightedAttributedTitle = [title copy];
+        break;
+        
+      case UIControlStateDisabled:
+        _disabledAttributedTitle = [title copy];
+        break;
+        
+      default:
+        break;
+    }
   }
 
   [self updateTitle];
@@ -397,31 +423,34 @@
 
 - (void)setImage:(UIImage *)image forState:(UIControlState)state
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  switch (state) {
-    case UIControlStateNormal:
-      _normalImage = image;
-      break;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    switch (state) {
+      case UIControlStateNormal:
+        _normalImage = image;
+        break;
+        
+      case UIControlStateHighlighted:
+        _highlightedImage = image;
+        break;
+        
+      case UIControlStateSelected:
+        _selectedImage = image;
+        break;
       
-    case UIControlStateHighlighted:
-      _highlightedImage = image;
-      break;
-      
-    case UIControlStateSelected:
-      _selectedImage = image;
-      break;
-    
-    case UIControlStateSelected | UIControlStateHighlighted:
-      _selectedHighlightedImage = image;
-      break;
-          
-    case UIControlStateDisabled:
-      _disabledImage = image;
-      break;
-      
-    default:
-      break;
+      case UIControlStateSelected | UIControlStateHighlighted:
+        _selectedHighlightedImage = image;
+        break;
+            
+      case UIControlStateDisabled:
+        _disabledImage = image;
+        break;
+        
+      default:
+        break;
+    }
   }
+
   [self updateImage];
 }
 
@@ -451,31 +480,34 @@
 
 - (void)setBackgroundImage:(UIImage *)image forState:(UIControlState)state
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  switch (state) {
-    case UIControlStateNormal:
-      _normalBackgroundImage = image;
-      break;
-      
-    case UIControlStateHighlighted:
-      _highlightedBackgroundImage = image;
-      break;
-      
-    case UIControlStateSelected:
-      _selectedBackgroundImage = image;
-      break;
-          
-    case UIControlStateSelected | UIControlStateHighlighted:
-      _selectedHighlightedBackgroundImage = image;
-      break;
-      
-    case UIControlStateDisabled:
-      _disabledBackgroundImage = image;
-      break;
-      
-    default:
-      break;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    switch (state) {
+      case UIControlStateNormal:
+        _normalBackgroundImage = image;
+        break;
+        
+      case UIControlStateHighlighted:
+        _highlightedBackgroundImage = image;
+        break;
+        
+      case UIControlStateSelected:
+        _selectedBackgroundImage = image;
+        break;
+            
+      case UIControlStateSelected | UIControlStateHighlighted:
+        _selectedHighlightedBackgroundImage = image;
+        break;
+        
+      case UIControlStateDisabled:
+        _disabledBackgroundImage = image;
+        break;
+        
+      default:
+        break;
+    }
   }
+
   [self updateBackgroundImage];
 }
 

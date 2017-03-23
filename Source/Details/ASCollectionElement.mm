@@ -27,9 +27,10 @@
 }
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
-         supplementaryElementKind:(nullable NSString *)supplementaryElementKind
+         supplementaryElementKind:(NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
-                      environment:(id<ASTraitEnvironment>)environment
+                       owningNode:(ASDisplayNode *)owningNode
+                  traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   NSAssert(nodeBlock != nil, @"Node block must not be nil");
   self = [super init];
@@ -37,7 +38,8 @@
     _nodeBlock = nodeBlock;
     _supplementaryElementKind = [supplementaryElementKind copy];
     _constrainedSize = constrainedSize;
-    _traitEnvironment = environment;
+    _owningNode = owningNode;
+    _traitCollection = traitCollection;
   }
   return self;
 }
@@ -52,9 +54,9 @@
       ASDisplayNodeFailAssert(@"Node block returned nil node!");
       node = [[ASCellNode alloc] init];
     }
-    node.owningNode = (ASDisplayNode *)_traitEnvironment;
+    node.owningNode = _owningNode;
     node.collectionElement = self;
-    ASTraitCollectionPropagateDown(node, [_traitEnvironment primitiveTraitCollection]);
+    ASTraitCollectionPropagateDown(node, _traitCollection);
     _node = node;
   }
   return _node;
@@ -64,6 +66,23 @@
 {
   std::lock_guard<std::mutex> l(_lock);
   return _node;
+}
+
+- (void)setTraitCollection:(ASPrimitiveTraitCollection)traitCollection
+{
+  ASCellNode *nodeIfNeedsPropagation;
+  
+  {
+    std::lock_guard<std::mutex> l(_lock);
+    if (! ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(_traitCollection, traitCollection)) {
+      _traitCollection = traitCollection;
+      nodeIfNeedsPropagation = _node;
+    }
+  }
+  
+  if (nodeIfNeedsPropagation != nil) {
+    ASTraitCollectionPropagateDown(nodeIfNeedsPropagation, traitCollection);
+  }
 }
 
 @end

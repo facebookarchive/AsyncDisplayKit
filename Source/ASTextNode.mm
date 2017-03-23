@@ -177,7 +177,6 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
     self.needsDisplayOnBoundsChange = YES;
 
     _truncationMode = NSLineBreakByWordWrapping;
-    _composedTruncationText = DefaultTruncationAttributedString();
 
     // The common case is for a text node to be non-opaque and blended over some background.
     self.opaque = NO;
@@ -288,7 +287,7 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   
   return {
     .attributedString = _attributedText,
-    .truncationAttributedString = _composedTruncationText,
+    .truncationAttributedString = [self _locked_composedTruncationText],
     .lineBreakMode = _truncationMode,
     .maximumNumberOfLines = _maximumNumberOfLines,
     .exclusionPaths = _exclusionPaths,
@@ -305,11 +304,14 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)setTextContainerInset:(UIEdgeInsets)textContainerInset
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  BOOL needsUpdate = !UIEdgeInsetsEqualToEdgeInsets(textContainerInset, _textContainerInset);
+  __instanceLock__.lock();
+    BOOL needsUpdate = !UIEdgeInsetsEqualToEdgeInsets(textContainerInset, _textContainerInset);
+    if (needsUpdate) {
+      _textContainerInset = textContainerInset;
+    }
+  __instanceLock__.unlock();
+
   if (needsUpdate) {
-    _textContainerInset = textContainerInset;
     [self setNeedsLayout];
   }
 }
@@ -393,11 +395,10 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 #if AS_TEXTNODE_RECORD_ATTRIBUTED_STRINGS
 	  [ASTextNode _registerAttributedText:_attributedText];
 #endif
-    // Sync the truncation string with attributes from the updated _attributedString
-    // Without this, the size calculation of the text with truncation applied will
-    // not take into account the attributes of attributedText in the last line
-    [self _updateComposedTruncationText];
   }
+    
+  // Since truncation text matches style of attributedText, invalidate it now.
+  [self _invalidateTruncationText];
   
   NSUInteger length = attributedText.length;
   if (length > 0) {
@@ -421,13 +422,16 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
 
 - (void)setExclusionPaths:(NSArray *)exclusionPaths
 {
-  ASDN::MutexLocker l(__instanceLock__);
+  {
+    ASDN::MutexLocker l(__instanceLock__);
   
-  if (ASObjectIsEqual(exclusionPaths, _exclusionPaths)) {
-    return;
+    if (ASObjectIsEqual(exclusionPaths, _exclusionPaths)) {
+      return;
+    }
+    
+    _exclusionPaths = [exclusionPaths copy];
   }
   
-  _exclusionPaths = [exclusionPaths copy];
   [self setNeedsLayout];
   [self setNeedsDisplay];
 }
@@ -1046,14 +1050,19 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
 
 - (void)setShadowColor:(CGColorRef)shadowColor
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
+  __instanceLock__.lock();
+
   if (_shadowColor != shadowColor && CGColorEqualToColor(shadowColor, _shadowColor) == NO) {
     CGColorRelease(_shadowColor);
     _shadowColor = CGColorRetain(shadowColor);
     _cachedShadowUIColor = [UIColor colorWithCGColor:shadowColor];
+    __instanceLock__.unlock();
+    
     [self setNeedsDisplay];
+    return;
   }
+
+  __instanceLock__.unlock();
 }
 
 - (CGSize)shadowOffset
@@ -1065,12 +1074,16 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
 
 - (void)setShadowOffset:(CGSize)shadowOffset
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (!CGSizeEqualToSize(_shadowOffset, shadowOffset)) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (CGSizeEqualToSize(_shadowOffset, shadowOffset)) {
+      return;
+    }
     _shadowOffset = shadowOffset;
-    [self setNeedsDisplay];
   }
+
+  [self setNeedsDisplay];
 }
 
 - (CGFloat)shadowOpacity
@@ -1082,12 +1095,17 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
 
 - (void)setShadowOpacity:(CGFloat)shadowOpacity
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_shadowOpacity != shadowOpacity) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (_shadowOpacity == shadowOpacity) {
+      return;
+    }
+    
     _shadowOpacity = shadowOpacity;
-    [self setNeedsDisplay];
   }
+  
+  [self setNeedsDisplay];
 }
 
 - (CGFloat)shadowRadius
@@ -1099,12 +1117,17 @@ static CGRect ASTextNodeAdjustRenderRectForShadowPadding(CGRect rendererRect, UI
 
 - (void)setShadowRadius:(CGFloat)shadowRadius
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_shadowRadius != shadowRadius) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (_shadowRadius == shadowRadius) {
+      return;
+    }
+    
     _shadowRadius = shadowRadius;
-    [self setNeedsDisplay];
   }
+  
+  [self setNeedsDisplay];
 }
 
 - (UIEdgeInsets)shadowPadding
@@ -1133,36 +1156,47 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 - (void)setTruncationAttributedText:(NSAttributedString *)truncationAttributedText
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (ASObjectIsEqual(_truncationAttributedText, truncationAttributedText)) {
-    return;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (ASObjectIsEqual(_truncationAttributedText, truncationAttributedText)) {
+      return;
+    }
+
+    _truncationAttributedText = [truncationAttributedText copy];
   }
 
-  _truncationAttributedText = [truncationAttributedText copy];
   [self _invalidateTruncationText];
 }
 
 - (void)setAdditionalTruncationMessage:(NSAttributedString *)additionalTruncationMessage
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (ASObjectIsEqual(_additionalTruncationMessage, additionalTruncationMessage)) {
-    return;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (ASObjectIsEqual(_additionalTruncationMessage, additionalTruncationMessage)) {
+      return;
+    }
+
+    _additionalTruncationMessage = [additionalTruncationMessage copy];
   }
 
-  _additionalTruncationMessage = [additionalTruncationMessage copy];
   [self _invalidateTruncationText];
 }
 
 - (void)setTruncationMode:(NSLineBreakMode)truncationMode
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_truncationMode != truncationMode) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (_truncationMode == truncationMode) {
+      return;
+    }
+
     _truncationMode = truncationMode;
-    [self setNeedsDisplay];
   }
+  
+  [self setNeedsDisplay];
 }
 
 - (BOOL)isTruncated
@@ -1175,21 +1209,31 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 - (void)setPointSizeScaleFactors:(NSArray *)pointSizeScaleFactors
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if ([_pointSizeScaleFactors isEqualToArray:pointSizeScaleFactors] == NO) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if ([_pointSizeScaleFactors isEqualToArray:pointSizeScaleFactors]) {
+      return;
+    }
+    
     _pointSizeScaleFactors = pointSizeScaleFactors;
-    [self setNeedsDisplay];
-  }}
+  }
+
+  [self setNeedsDisplay];
+}
 
 - (void)setMaximumNumberOfLines:(NSUInteger)maximumNumberOfLines
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_maximumNumberOfLines != maximumNumberOfLines) {
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    
+    if (_maximumNumberOfLines == maximumNumberOfLines) {
+      return;
+    }
+
     _maximumNumberOfLines = maximumNumberOfLines;
-    [self setNeedsDisplay];
   }
+  
+  [self setNeedsDisplay];
 }
 
 - (NSUInteger)lineCount
@@ -1201,16 +1245,13 @@ static NSAttributedString *DefaultTruncationAttributedString()
 
 #pragma mark - Truncation Message
 
-- (void)_updateComposedTruncationText
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  _composedTruncationText = [self _prepareTruncationStringForDrawing:[self _composedTruncationText]];
-}
-
 - (void)_invalidateTruncationText
 {
-  [self _updateComposedTruncationText];
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    _composedTruncationText = nil;
+  }
+
   [self setNeedsDisplay];
 }
 
@@ -1241,29 +1282,24 @@ static NSAttributedString *DefaultTruncationAttributedString()
  * additional truncation message and a truncation attributed string, they will
  * be properly composed.
  */
-- (NSAttributedString *)_composedTruncationText
+- (NSAttributedString *)_locked_composedTruncationText
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  //If we have neither return the default
-  if (!_additionalTruncationMessage && !_truncationAttributedText) {
-    return _composedTruncationText;
+  if (_composedTruncationText == nil) {
+    if (_truncationAttributedText != nil && _additionalTruncationMessage != nil) {
+      NSMutableAttributedString *newComposedTruncationString = [[NSMutableAttributedString alloc] initWithAttributedString:_truncationAttributedText];
+      [newComposedTruncationString.mutableString appendString:@" "];
+      [newComposedTruncationString appendAttributedString:_additionalTruncationMessage];
+      _composedTruncationText = newComposedTruncationString;
+    } else if (_truncationAttributedText != nil) {
+      _composedTruncationText = _truncationAttributedText;
+    } else if (_additionalTruncationMessage != nil) {
+      _composedTruncationText = _additionalTruncationMessage;
+    } else {
+      _composedTruncationText = DefaultTruncationAttributedString();
+    }
+    _composedTruncationText = [self _locked_prepareTruncationStringForDrawing:_composedTruncationText];
   }
-  // Short circuit if we only have one or the other.
-  if (!_additionalTruncationMessage) {
-    return _truncationAttributedText;
-  }
-  if (!_truncationAttributedText) {
-    return _additionalTruncationMessage;
-  }
-
-  // If we've reached this point, both _additionalTruncationMessage and
-  // _truncationAttributedText are present.  Compose them.
-
-  NSMutableAttributedString *newComposedTruncationString = [[NSMutableAttributedString alloc] initWithAttributedString:_truncationAttributedText];
-  [newComposedTruncationString replaceCharactersInRange:NSMakeRange(newComposedTruncationString.length, 0) withString:@" "];
-  [newComposedTruncationString appendAttributedString:_additionalTruncationMessage];
-  return newComposedTruncationString;
+  return _composedTruncationText;
 }
 
 /**
@@ -1271,10 +1307,8 @@ static NSAttributedString *DefaultTruncationAttributedString()
  * - Adds whole-string attributes so the truncation message matches the styling
  * of the body text
  */
-- (NSAttributedString *)_prepareTruncationStringForDrawing:(NSAttributedString *)truncationString
+- (NSAttributedString *)_locked_prepareTruncationStringForDrawing:(NSAttributedString *)truncationString
 {
-  ASDN::MutexLocker l(__instanceLock__);
-  
   truncationString = ASCleanseAttributedStringOfCoreTextAttributes(truncationString);
   NSMutableAttributedString *truncationMutableString = [truncationString mutableCopy];
   // Grab the attributes from the full string

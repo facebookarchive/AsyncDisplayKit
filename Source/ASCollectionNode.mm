@@ -100,6 +100,7 @@
 @interface ASCollectionNode ()
 {
   ASDN::RecursiveMutex _environmentStateLock;
+  Class _collectionViewClass;
 }
 @property (nonatomic) _ASCollectionPendingState *pendingState;
 @end
@@ -107,6 +108,20 @@
 @implementation ASCollectionNode
 
 #pragma mark Lifecycle
+
+- (Class)collectionViewClass
+{
+  return _collectionViewClass ? : [ASCollectionView class];
+}
+
+- (void)setCollectionViewClass:(Class)collectionViewClass
+{
+  if (_collectionViewClass != collectionViewClass) {
+    ASDisplayNodeAssert([collectionViewClass isSubclassOfClass:[ASCollectionView class]] || collectionViewClass == Nil, @"ASCollectionNode requires that .collectionViewClass is an ASCollectionView subclass");
+    ASDisplayNodeAssert([self isNodeLoaded] == NO, @"ASCollectionNode's .collectionViewClass cannot be changed after the view is loaded");
+    _collectionViewClass = collectionViewClass;
+  }
+}
 
 - (instancetype)init
 {
@@ -118,7 +133,7 @@
 
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
 {
-  return [self initWithFrame:CGRectZero collectionViewLayout:layout];
+  return [self initWithFrame:CGRectZero collectionViewLayout:layout layoutFacilitator:nil];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout
@@ -132,10 +147,10 @@
   ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
     // Variable will be unused if event logging is off.
     __unused __typeof__(self) strongSelf = weakSelf;
-    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
+    return [[[strongSelf collectionViewClass] alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
   };
 
-  if (self = [super initWithViewBlock:collectionViewBlock]) {
+  if (self = [super initWithViewBlock:collectionViewBlock didLoadBlock:nil]) {
     return self;
   }
   return nil;
@@ -519,7 +534,10 @@
 
 - (void)waitUntilAllUpdatesAreCommitted
 {
-  [self.view waitUntilAllUpdatesAreCommitted];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view waitUntilAllUpdatesAreCommitted];
+  }
 }
 
 - (void)reloadDataWithCompletion:(void (^)())completion
