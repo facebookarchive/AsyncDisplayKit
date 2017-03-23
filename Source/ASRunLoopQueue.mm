@@ -235,10 +235,9 @@ static void runLoopSourceCallback(void *info) {
 {
   BOOL hasExecutionBlock = (_queueConsumer != nil);
 
-  // If we have an execution block, this array will be populated, otherwise remains empty.
+  // If we have an execution block, this vector will be populated, otherwise remains empty.
   // This is to avoid needlessly retaining/releasing the objects if we don't have a block.
-  NSMutableArray *itemsToProcess = nil;
-  NSInteger itemsToProcessCount = 0;
+  std::vector<id> itemsToProcess;
 
   BOOL isQueueDrained = NO;
   {
@@ -255,17 +254,14 @@ static void runLoopSourceCallback(void *info) {
     // Snatch the next batch of items.
     NSInteger maxCountToProcess = MIN(internalQueueCount, self.batchSize);
 
-    if (hasExecutionBlock) {
-      itemsToProcess = [NSMutableArray arrayWithCapacity:maxCountToProcess];
-    }
-
     /**
      * For each item in the next batch, if it's non-nil then NULL it out
      * and if itemsToProcess != nil (that is, we have an execution block)
      * then add it in. This could be written a bunch of different ways but
      * this particular one nicely balances readability, safety, and efficiency.
      */
-    for (NSInteger i = 0; i < internalQueueCount && itemsToProcessCount < maxCountToProcess; i++) {
+    NSInteger foundItemCount = 0;
+    for (NSInteger i = 0; i < internalQueueCount && foundItemCount < maxCountToProcess; i++) {
       /**
        * It is safe to use unsafe_unretained here. If the queue is weak, the
        * object will be added to the autorelease pool. If the queue is strong,
@@ -273,8 +269,10 @@ static void runLoopSourceCallback(void *info) {
        */
       __unsafe_unretained id ptr = (__bridge id)[_internalQueue pointerAtIndex:i];
       if (ptr != nil) {
-        itemsToProcess[itemsToProcessCount] = ptr;
-        itemsToProcessCount++;
+        foundItemCount++;
+        if (hasExecutionBlock) {
+          itemsToProcess.push_back(ptr);
+        }
         [_internalQueue replacePointerAtIndex:i withPointer:NULL];
       }
     }
@@ -286,17 +284,16 @@ static void runLoopSourceCallback(void *info) {
   }
 
   // itemsToProcess will be empty if _queueConsumer == nil so no need to check again.
-  if (itemsToProcessCount > 0) {
+  if (itemsToProcess.empty() == false) {
 #if ASRunloopQueueLoggingEnabled
     NSLog(@"<%@> - Starting processing of: %ld", self, itemsToProcess.size());
 #endif
-    NSInteger i = 0;
-    for (id obj in itemsToProcess) {
-      _queueConsumer(obj, isQueueDrained && i == itemsToProcessCount - 1);
+    auto itemsEnd = itemsToProcess.cend();
+    for (auto iterator = itemsToProcess.begin(); iterator < itemsEnd; iterator++) {
+      _queueConsumer(*iterator, isQueueDrained && iterator == itemsEnd - 1);
 #if ASRunloopQueueLoggingEnabled
       NSLog(@"<%@> - Finished processing 1 item", self);
 #endif
-      i++;
     }
   }
 
