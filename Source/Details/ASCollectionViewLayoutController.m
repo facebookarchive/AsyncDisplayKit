@@ -85,10 +85,10 @@ typedef struct ASRangeGeometry ASRangeGeometry;
     
     // Avoid excessive retains and releases, as well as property calls. We know the element is kept alive by map.
     __unsafe_unretained ASCollectionElement *e = [map elementForLayoutAttributes:la];
-    if (intersectsDisplay) {
+    if (e != nil && intersectsDisplay) {
       [display addObject:e];
     }
-    if (intersectsPreload) {
+    if (e != nil && intersectsPreload) {
       [preload addObject:e];
     }
   }
