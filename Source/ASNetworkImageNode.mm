@@ -464,7 +464,6 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 }
 
-// We don't have a _locked_cancelDownloadAndClearImage as this needs to happen in one transaction
 - (void)_cancelDownloadAndClearImage
 {
   ASDN::MutexLocker l(__instanceLock__);

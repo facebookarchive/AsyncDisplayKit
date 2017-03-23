@@ -39,7 +39,6 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
 {
   ASDN::MutexLocker l(_animatedImageLock);
   [self _locked_setAnimatedImage:animatedImage];
-
 }
 
 - (void)_locked_setAnimatedImage:(id <ASAnimatedImageProtocol>)animatedImage
@@ -54,15 +53,17 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
     __weak ASImageNode *weakSelf = self;
     if ([animatedImage respondsToSelector:@selector(setCoverImageReadyCallback:)]) {
       animatedImage.coverImageReadyCallback = ^(UIImage *coverImage) {
-        [weakSelf _locked_setCoverImageCompleted:coverImage];
+        // In this case the lock is already gone we have to call the unlocked version therefore
+        [weakSelf setCoverImageCompleted:coverImage];
       };
     }
     
     if (animatedImage.playbackReady) {
-      [weakSelf _locked_animatedImageFileReady];
+      [self _locked_setShouldAnimate:YES];
     } else {
       animatedImage.playbackReadyCallback = ^{
-        [weakSelf _locked_animatedImageFileReady];
+        // In this case the lock is already gone we have to call the unlocked version therefore
+        [self setShouldAnimate:YES];
       };
     }
   }
@@ -79,13 +80,8 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
   ASDN::MutexLocker l(_animatedImageLock);
 
   _animatedImagePaused = animatedImagePaused;
-  ASPerformBlockOnMainThread(^{
-    if (animatedImagePaused) {
-      [self _locked_stopAnimating];
-    } else {
-      [self _locked_startAnimating];
-    }
-  });
+
+  [self _locked_setShouldAnimate:!animatedImagePaused];
 }
 
 - (BOOL)animatedImagePaused
@@ -149,12 +145,36 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
   _animatedImageRunLoopMode = runLoopMode;
 }
 
-- (void)_locked_animatedImageFileReady
+- (void)setShouldAnimate:(BOOL)shouldAnimate
 {
-  ASPerformBlockOnMainThread(^{
-    [self _locked_startAnimating];
-  });
+  ASDN::MutexLocker l(_animatedImageLock);
+  [self _locked_setShouldAnimate:shouldAnimate];
 }
+
+- (void)_locked_setShouldAnimate:(BOOL)shouldAnimate
+{
+  // This test is explicitly done and not ASPerformBlockOnMainThread as this would perform the block immediately
+  // on main if called on main thread and we have to call methods locked or unlocked based on which thread we are on
+  if (ASDisplayNodeThreadIsMain()) {
+    if (shouldAnimate) {
+      [self _locked_startAnimating];
+    } else {
+      [self _locked_stopAnimating];
+    }
+  } else {
+    // We have to dispatch to the main thread and call the regular methods as the lock is already gone if the
+    // block is called
+    dispatch_async(dispatch_get_main_queue(), ^{
+      if (shouldAnimate) {
+        [self startAnimating];
+      } else {
+        [self stopAnimating];
+      }
+    });
+  }
+}
+
+#pragma mark - Animating
 
 - (void)startAnimating
 {
@@ -218,6 +238,8 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
   [_animatedImage clearAnimatedImageCache];
 }
 
+#pragma mark - ASDisplayNode
+
 - (void)didEnterVisibleState
 {
   ASDisplayNodeAssertMainThread();
@@ -236,6 +258,8 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
   
   [self stopAnimating];
 }
+
+#pragma mark - Display Link Callbacks
 
 - (void)displayLinkFired:(CADisplayLink *)displayLink
 {
@@ -290,6 +314,8 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
 }
 
 @end
+
+#pragma mark - ASImageNode(AnimatedImageInvalidation)
 
 @implementation ASImageNode(AnimatedImageInvalidation)
 
