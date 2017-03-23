@@ -256,8 +256,8 @@ static void runLoopSourceCallback(void *info) {
 
     /**
      * For each item in the next batch, if it's non-nil then NULL it out
-     * and if itemsToProcess != nil (that is, we have an execution block)
-     * then add it in. This could be written a bunch of different ways but
+     * and if we have an execution block then add it in.
+     * This could be written a bunch of different ways but
      * this particular one nicely balances readability, safety, and efficiency.
      */
     NSInteger foundItemCount = 0;
