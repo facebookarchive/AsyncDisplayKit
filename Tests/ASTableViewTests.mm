@@ -606,9 +606,10 @@
   [node waitUntilAllUpdatesAreCommitted];
   XCTAssertGreaterThan(node.view.numberOfSections, 0);
 
-  // Assert that the beginning of the call pattern is correct.
-  // There is currently noise that comes after that we will allow for this test.
-  NSArray *expectedSelectors = @[ NSStringFromSelector(@selector(reloadData)) ];
+  // The first reloadData call helps prevent UITableView from calling it multiple times while ASDataController is working.
+  // The second reloadData call is the real one.
+  NSArray *expectedSelectors = @[ NSStringFromSelector(@selector(reloadData)),
+                                  NSStringFromSelector(@selector(reloadData)) ];
   XCTAssertEqualObjects(selectors, expectedSelectors);
 
   [UITableView deswizzleAllInstanceMethods];

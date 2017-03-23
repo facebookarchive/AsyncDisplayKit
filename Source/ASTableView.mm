@@ -483,6 +483,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 {
   ASDisplayNodeAssertMainThread();
   
+  if (! _dataController.initialReloadDataHasBeenCalled) {
+    // If this is the first reload, forward to super immediately to prevent it from triggering more "initial" loads while our data controller is working. 
+    [super reloadData];
+  }
+  
   void (^batchUpdatesCompletion)(BOOL);
   if (completion) {
     batchUpdatesCompletion = ^(BOOL) {
