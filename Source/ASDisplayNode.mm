@@ -1414,19 +1414,26 @@ ASLayoutElementFinalLayoutElementDefault
 
 - (void)layout
 {
-  ASDisplayNodeAssertMainThread();
-  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
-
-  ASDN::MutexLocker l(__instanceLock__);
-  if (! _calculatedDisplayNodeLayout->isDirty()) {
-    [self _locked_layoutSublayouts];
-  }
+  [self _layoutSublayouts];
 }
 
-- (void)_locked_layoutSublayouts
+- (void)_layoutSublayouts
 {
-  ASLayout *layout = _calculatedDisplayNodeLayout->layout;
-  for (ASDisplayNode *node in _subnodes) {
+  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
+  
+  ASLayout *layout;
+  NSArray<ASDisplayNode *> *subnodes;
+  {
+    ASDN::MutexLocker l(__instanceLock__);
+    if (_calculatedDisplayNodeLayout->isDirty() || _subnodes.count == 0) {
+      return;
+    }
+    layout = _calculatedDisplayNodeLayout->layout;
+    subnodes = [_subnodes copy];
+  }
+  
+  for (ASDisplayNode *node in subnodes) {
     CGRect frame = [layout frameForElement:node];
     if (CGRectIsNull(frame)) {
       // There is no frame for this node in our layout.
@@ -1710,10 +1717,7 @@ ASLayoutElementFinalLayoutElementDefault
 - (void)animateLayoutTransition:(id<ASContextTransitioning>)context
 {
   if ([context isAnimated] == NO) {
-    __instanceLock__.lock();
-    [self _locked_layoutSublayouts];
-    __instanceLock__.unlock();
-
+    [self _layoutSublayouts];
     [context completeTransition:YES];
     return;
   }
