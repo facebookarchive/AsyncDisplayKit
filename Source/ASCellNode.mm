@@ -90,7 +90,7 @@
     } else {
       // Careful to avoid retain cycle
       UIViewController *viewController = _viewController;
-      _viewControllerNode = [[ASDisplayNode alloc] initWithViewBlock:^{
+      _viewControllerNode = [[ASViewWrapperNode alloc] initWithViewBlock:^{
         return viewController.view;
       }];
     }

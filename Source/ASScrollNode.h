@@ -8,7 +8,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASViewWrapperNode.h>
 #import <AsyncDisplayKit/ASScrollDirection.h>
 
 NS_ASSUME_NONNULL_BEGIN
@@ -18,7 +18,9 @@ NS_ASSUME_NONNULL_BEGIN
 /**
  * Simple node that wraps UIScrollView.
  */
-@interface ASScrollNode : ASDisplayNode
+@interface ASScrollNode : ASViewWrapperNode
+
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 /**
  * @abstract The node's UIScrollView.
@@ -45,6 +47,10 @@ NS_ASSUME_NONNULL_BEGIN
  * @default ASScrollDirectionVerticalDirections
  */
 @property (nonatomic, assign) ASScrollDirection scrollableDirections;
+
+#pragma mark Unavailable
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock NS_UNAVAILABLE;
 
 @end
 

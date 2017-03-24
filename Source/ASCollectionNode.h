@@ -11,7 +11,7 @@
 //
 
 #import <UIKit/UICollectionView.h>
-#import <AsyncDisplayKit/ASDisplayNode.h>
+#import <AsyncDisplayKit/ASViewWrapperNode.h>
 #import <AsyncDisplayKit/ASRangeControllerUpdateRangeProtocol+Beta.h>
 #import <AsyncDisplayKit/ASCollectionView.h>
 #import <AsyncDisplayKit/ASBlockTypes.h>
@@ -27,7 +27,7 @@ NS_ASSUME_NONNULL_BEGIN
  * ASCollectionNode is a node based class that wraps an ASCollectionView. It can be used
  * as a subnode of another node, and provide room for many (great) features and improvements later on.
  */
-@interface ASCollectionNode : ASDisplayNode <ASRangeControllerUpdateRangeProtocol>
+@interface ASCollectionNode : ASViewWrapperNode <ASRangeControllerUpdateRangeProtocol>
 
 /**
  * Initializes an ASCollectionNode
@@ -47,6 +47,8 @@ NS_ASSUME_NONNULL_BEGIN
  * @param layout The layout object to use for organizing items. The collection view stores a strong reference to the specified object. Must not be nil.
  */
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout;
+
+- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock NS_UNAVAILABLE;
 
 /**
  * Returns the corresponding ASCollectionView
@@ -532,7 +534,7 @@ NS_ASSUME_NONNULL_BEGIN
  *   not implement reuse (it will be called once per row).  Unlike UICollectionView's version,
  *   this method is not called when the row is about to display.
  */
-- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath ASDISPLAYNODE_DEPRECATED_MSG("Use ASCollectionNode's method instead.");
+- (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForItemAtIndexPath:(NSIndexPath *)indexPath API_DEPRECATED_WITH_REPLACEMENT("collectionNode:nodeForItemAtIndexPath:", ios(8.0, 10.0));
 
 /**
  * Similar to -collectionView:nodeForItemAtIndexPath:

@@ -16,9 +16,11 @@
 #import <AsyncDisplayKit/ASImageNode.h>
 #import <AsyncDisplayKit/ASTextNode.h>
 #import <AsyncDisplayKit/ASButtonNode.h>
+#import <AsyncDisplayKit/ASLayerWrapperNode.h>
 #import <AsyncDisplayKit/ASMapNode.h>
 #import <AsyncDisplayKit/ASVideoNode.h>
 #import <AsyncDisplayKit/ASVideoPlayerNode.h>
+#import <AsyncDisplayKit/ASViewWrapperNode.h>
 #import <AsyncDisplayKit/ASEditableTextNode.h>
 
 #import <AsyncDisplayKit/ASImageProtocols.h>

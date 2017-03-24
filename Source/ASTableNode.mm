@@ -72,40 +72,21 @@
 
 #pragma mark Lifecycle
 
-- (instancetype)_initWithTableView:(ASTableView *)tableView
-{
-  // Avoid a retain cycle.  In this case, the ASTableView is creating us, and strongly retains us.
-  ASTableView * __weak weakTableView = tableView;
-  if (self = [super initWithViewBlock:^UIView *{ return weakTableView; }]) {
-    __unused __weak ASTableView *view = [self view];
-    return self;
-  }
-  return nil;
-}
-
-- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass
+- (instancetype)initWithStyle:(UITableViewStyle)style
 {
   __weak __typeof__(self) weakSelf = self;
   ASDisplayNodeViewBlock tableViewBlock = ^UIView *{
     // Variable will be unused if event logging is off.
     __unused __typeof__(self) strongSelf = weakSelf;
-    return [[ASTableView alloc] _initWithFrame:frame style:style dataControllerClass:dataControllerClass eventLog:ASDisplayNodeGetEventLog(strongSelf)];
+    return [[ASTableView alloc] _initWithFrame:CGRectZero style:style dataControllerClass:nil eventLog:ASDisplayNodeGetEventLog(strongSelf)];
   };
 
-  if (self = [super initWithViewBlock:tableViewBlock]) {
-    return self;
-  }
-  return nil;
-}
-
-- (instancetype)initWithStyle:(UITableViewStyle)style
-{
-  return [self _initWithFrame:CGRectZero style:style dataControllerClass:nil];
+  return [super initWithViewBlock:tableViewBlock];
 }
 
 - (instancetype)init
 {
-  return [self _initWithFrame:CGRectZero style:UITableViewStylePlain dataControllerClass:nil];
+  return [self initWithStyle:UITableViewStylePlain];
 }
 
 #pragma mark ASDisplayNode

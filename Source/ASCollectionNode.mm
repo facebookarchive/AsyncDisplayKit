@@ -150,7 +150,7 @@
     return [[[strongSelf collectionViewClass] alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
   };
 
-  if (self = [super initWithViewBlock:collectionViewBlock didLoadBlock:nil]) {
+  if (self = [super initWithViewBlock:collectionViewBlock]) {
     return self;
   }
   return nil;

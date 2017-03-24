@@ -13,6 +13,7 @@
 #import <AsyncDisplayKit/ASVideoNode.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
+#import <AsyncDisplayKit/ASLayerWrapperNode.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 
 static BOOL ASAssetIsEqual(AVAsset *asset1, AVAsset *asset2) {
@@ -108,7 +109,7 @@ static NSString * const kRate = @"rate";
 {
   ASVideoNode * __weak weakSelf = self;
 
-  return [[ASDisplayNode alloc] initWithLayerBlock:^CALayer *{
+  return [[ASLayerWrapperNode alloc] initWithLayerBlock:^CALayer *{
     AVPlayerLayer *playerLayer = [[AVPlayerLayer alloc] init];
     playerLayer.player = weakSelf.player;
     playerLayer.videoGravity = weakSelf.gravity;

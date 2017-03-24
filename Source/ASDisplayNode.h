@@ -125,50 +125,7 @@ extern NSInteger const ASDefaultDrawingPriority;
  * @return An ASDisplayNode instance whose view will be a subclass that enables asynchronous rendering, and passes 
  * through -layout and touch handling methods.
  */
-- (instancetype)init;
-
-
-/**
- * @abstract Alternative initializer with a block to create the backing view.
- *
- * @param viewBlock The block that will be used to create the backing view.
- *
- * @return An ASDisplayNode instance that loads its view with the given block that is guaranteed to run on the main
- * queue. The view will render synchronously and -layout and touch handling methods on the node will not be called.
- */
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock;
-
-/**
- * @abstract Alternative initializer with a block to create the backing view.
- *
- * @param viewBlock The block that will be used to create the backing view.
- * @param didLoadBlock The block that will be called after the view created by the viewBlock is loaded
- *
- * @return An ASDisplayNode instance that loads its view with the given block that is guaranteed to run on the main
- * queue. The view will render synchronously and -layout and touch handling methods on the node will not be called.
- */
-- (instancetype)initWithViewBlock:(ASDisplayNodeViewBlock)viewBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
-
-/**
- * @abstract Alternative initializer with a block to create the backing layer.
- *
- * @param layerBlock The block that will be used to create the backing layer.
- *
- * @return An ASDisplayNode instance that loads its layer with the given block that is guaranteed to run on the main
- * queue. The layer will render synchronously and -layout and touch handling methods on the node will not be called.
- */
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock;
-
-/**
- * @abstract Alternative initializer with a block to create the backing layer.
- *
- * @param layerBlock The block that will be used to create the backing layer.
- * @param didLoadBlock The block that will be called after the layer created by the layerBlock is loaded
- *
- * @return An ASDisplayNode instance that loads its layer with the given block that is guaranteed to run on the main
- * queue. The layer will render synchronously and -layout and touch handling methods on the node will not be called.
- */
-- (instancetype)initWithLayerBlock:(ASDisplayNodeLayerBlock)layerBlock didLoadBlock:(nullable ASDisplayNodeDidLoadBlock)didLoadBlock;
+- (instancetype)init NS_DESIGNATED_INITIALIZER;
 
 /**
  * @abstract Add a block of work to be performed on the main thread when the node's view or layer is loaded. Thread safe.
