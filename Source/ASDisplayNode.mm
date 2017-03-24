@@ -1252,13 +1252,18 @@ ASLayoutElementFinalLayoutElementDefault
 - (void)setCalculatedDisplayNodeLayout:(std::shared_ptr<ASDisplayNodeLayout>)displayNodeLayout
 {
   ASDN::MutexLocker l(__instanceLock__);
-  
+  [self _locked_setCalculatedDisplayNodeLayout:displayNodeLayout];
+}
+
+- (void)_locked_setCalculatedDisplayNodeLayout:(std::shared_ptr<ASDisplayNodeLayout>)displayNodeLayout
+{
   ASDisplayNodeAssertTrue(displayNodeLayout->layout.layoutElement == self);
   ASDisplayNodeAssertTrue(displayNodeLayout->layout.size.width >= 0.0);
   ASDisplayNodeAssertTrue(displayNodeLayout->layout.size.height >= 0.0);
   
   _calculatedDisplayNodeLayout = displayNodeLayout;
 }
+
 
 - (CGSize)calculatedSize
 {
@@ -1484,22 +1489,35 @@ ASLayoutElementFinalLayoutElementDefault
     }
     
     ASPerformBlockOnMainThread(^{
-      // Grab __instanceLock__ here to make sure this transition isn't invalidated
-      // right after it passed the validation test and before it proceeds
-      ASDN::MutexLocker l(__instanceLock__);
-
-      if ([self _shouldAbortTransitionWithID:transitionID]) {
-        return;
+      ASLayoutTransition *pendingLayoutTransition;
+      _ASTransitionContext *pendingLayoutTransitionContext;
+      {
+        // Grab __instanceLock__ here to make sure this transition isn't invalidated
+        // right after it passed the validation test and before it proceeds
+        ASDN::MutexLocker l(__instanceLock__);
+        
+        if ([self _locked_shouldAbortTransitionWithID:transitionID]) {
+          return;
+        }
+        
+        // Update calculated layout
+        auto previousLayout = _calculatedDisplayNodeLayout;
+        auto pendingLayout = std::make_shared<ASDisplayNodeLayout>(
+                                                                   newLayout,
+                                                                   constrainedSize,
+                                                                   constrainedSize.max
+                                                                   );
+        [self _locked_setCalculatedDisplayNodeLayout:pendingLayout];
+        
+        // Setup pending layout transition for animation
+        _pendingLayoutTransition = pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
+                                                                                        pendingLayout:pendingLayout
+                                                                                       previousLayout:previousLayout];
+        // Setup context for pending layout transition. we need to hold a strong reference to the context
+        _pendingLayoutTransitionContext = pendingLayoutTransitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
+                                                                                                            layoutDelegate:_pendingLayoutTransition
+                                                                                                        completionDelegate:self];
       }
-
-      // Update calculated layout
-      auto previousLayout = _calculatedDisplayNodeLayout;
-      auto pendingLayout = std::make_shared<ASDisplayNodeLayout>(
-        newLayout,
-        constrainedSize,
-        constrainedSize.max
-      );
-      [self setCalculatedDisplayNodeLayout:pendingLayout];
       
       // Apply complete layout transitions for all subnodes
       ASDisplayNodePerformBlockOnEverySubnode(self, NO, ^(ASDisplayNode * _Nonnull node) {
@@ -1514,20 +1532,11 @@ ASLayoutElementFinalLayoutElementDefault
         completion();
       }
       
-      // Setup pending layout transition for animation
-      _pendingLayoutTransition = [[ASLayoutTransition alloc] initWithNode:self
-                                                            pendingLayout:pendingLayout
-                                                           previousLayout:previousLayout];
-      // Setup context for pending layout transition. we need to hold a strong reference to the context
-      _pendingLayoutTransitionContext = [[_ASTransitionContext alloc] initWithAnimation:animated
-                                                                         layoutDelegate:_pendingLayoutTransition
-                                                                     completionDelegate:self];
-      
       // Apply the subnode insertion immediately to be able to animate the nodes
-      [_pendingLayoutTransition applySubnodeInsertions];
+      [pendingLayoutTransition applySubnodeInsertions];
       
       // Kick off animating the layout transition
-      [self animateLayoutTransition:_pendingLayoutTransitionContext];
+      [self animateLayoutTransition:pendingLayoutTransitionContext];
       
       // Mark transaction as finished
       [self _finishOrCancelTransition];
@@ -1610,6 +1619,11 @@ ASLayoutElementFinalLayoutElementDefault
 - (BOOL)_shouldAbortTransitionWithID:(int32_t)transitionID
 {
   ASDN::MutexLocker l(__instanceLock__);
+  return [self _locked_shouldAbortTransitionWithID:transitionID];
+}
+
+- (BOOL)_locked_shouldAbortTransitionWithID:(int32_t)transitionID
+{
   return (!_transitionInProgress || _transitionID != transitionID);
 }
 
