@@ -681,7 +681,8 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
         }
       };
 
-      // As the _cache and _downloader is only set once in the intializer we don't have to use a lock in here
+      // As the _cache and _downloader is only set once in the intializer we don't have to use a
+      // lock in here
       if (_cache != nil) {
         NSUUID *cacheUUID = [NSUUID UUID];
         __instanceLock__.lock();
