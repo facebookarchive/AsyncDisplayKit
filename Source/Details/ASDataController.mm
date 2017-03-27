@@ -423,13 +423,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 
 - (void)waitUntilAllUpdatesAreCommitted
 {
-  ASDisplayNodeAssertMainThread();
-  
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
-  
   // Schedule block in main serial queue to wait until all operations are finished that are
   // where scheduled while waiting for the _editingTransactionQueue to finish
-  [_mainSerialQueue performBlockOnMainThread:^{ }];
+  [self _scheduleBlockOnMainSerialQueue:^{ }];
 }
 
 - (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
@@ -669,16 +665,12 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     return;
   }
   
+  // Can't relayout right away because _visibleMap may not be up-to-date,
+  // i.e there might be some nodes that were measured using the old constrained size but haven't been added to _visibleMap
   LOG(@"Edit Command - relayoutRows");
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
-  
-  // Can't relayout right away because _completedElements may not be up-to-date,
-  // i.e there might be some nodes that were measured using the old constrained size but haven't been added to _completedElements
-  dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
-    [_mainSerialQueue performBlockOnMainThread:^{
-      [self _relayoutAllNodes];
-    }];
-  });
+  [self _scheduleBlockOnMainSerialQueue:^{
+    [self _relayoutAllNodes];
+  }];
 }
 
 - (void)_relayoutAllNodes
@@ -699,6 +691,35 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       }
     }
   }
+}
+
+# pragma mark - ASPrimitiveTraitCollection
+
+- (void)environmentDidChange
+{
+  ASPerformBlockOnMainThread(^{
+    if (!_initialReloadDataHasBeenCalled) {
+      return;
+    }
+
+    // Can't update the trait collection right away because _visibleMap may not be up-to-date,
+    // i.e there might be some elements that were allocated using the old trait collection but haven't been added to _visibleMap
+    [self _scheduleBlockOnMainSerialQueue:^{
+      ASPrimitiveTraitCollection newTraitCollection = [[_environmentDelegate dataControllerEnvironment] primitiveTraitCollection];
+      for (ASCollectionElement *element in _visibleMap) {
+        element.traitCollection = newTraitCollection;
+      }
+    }];
+  });
+}
+
+# pragma mark - Helper methods
+
+- (void)_scheduleBlockOnMainSerialQueue:(dispatch_block_t)block
+{
+  ASDisplayNodeAssertMainThread();
+  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
+  [_mainSerialQueue performBlockOnMainThread:block];
 }
 
 + (NSArray<ASCollectionElement *> *)unmeasuredElementsFromMap:(ASElementMap *)map
