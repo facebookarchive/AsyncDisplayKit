@@ -167,13 +167,13 @@ extern CGRect CGRectExpandToRangeWithScrollableDirections(CGRect rect, ASRangeTu
 
 #pragma mark - Abstract Index Path Range Support
 
-- (NSSet *)indexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType
+- (NSSet<ASCollectionElement *> *)elementsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode rangeType:(ASLayoutRangeType)rangeType map:(ASElementMap *)map
 {
   ASDisplayNodeAssertNotSupported();
   return nil;
 }
 
-- (void)allIndexPathsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet *__autoreleasing  _Nullable *)displaySet preloadSet:(NSSet *__autoreleasing  _Nullable *)preloadSet
+- (void)allElementsForScrolling:(ASScrollDirection)scrollDirection rangeMode:(ASLayoutRangeMode)rangeMode displaySet:(NSSet<ASCollectionElement *> *__autoreleasing  _Nullable *)displaySet preloadSet:(NSSet<ASCollectionElement *> *__autoreleasing  _Nullable *)preloadSet map:(ASElementMap *)map
 {
   ASDisplayNodeAssertNotSupported();
 }

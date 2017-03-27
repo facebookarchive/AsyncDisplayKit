@@ -86,7 +86,9 @@ extern NSString * const ASCollectionInvalidUpdateException;
 @end
 
 @protocol ASDataControllerEnvironmentDelegate
-- (id<ASTraitEnvironment>)dataControllerEnvironment;
+
+- (nullable id<ASTraitEnvironment>)dataControllerEnvironment;
+
 @end
 
 /**

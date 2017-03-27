@@ -1044,8 +1044,28 @@ static NSArray<ASTextNode*> *defaultTextNodes()
   
   // In this scenario a width of 400 results in a negative violation of 200.
   // The first and third child components specify a flex shrink factor of 0.25 and will flex by 50.
-  // The second child component specifies a flex shrink factor of 0.50 and will flex by -57. It will have a width of 43.
+  // The second child specifies a flex shrink factor of 0.50 and will flex by -57. It will have a width of 43.
   static ASSizeRange kSize = {{400, 400}, {400, 400}};
+  [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
+}
+
+
+- (void)testNegativeViolationAndFlexFactorIsNotRespected
+{
+  ASStackLayoutSpecStyle style = {.direction = ASStackLayoutDirectionHorizontal};
+  
+  NSArray<ASDisplayNode *> *subnodes = @[
+    ASDisplayNodeWithBackgroundColor([UIColor redColor], {50, 50}),
+    ASDisplayNodeWithBackgroundColor([UIColor yellowColor], CGSizeZero),
+  ];
+  
+  subnodes[0].style.flexShrink = 0;
+  subnodes[1].style.flexShrink = 1;
+  
+  // In this scenario a width of 40 results in a negative violation of 10.
+  // The first child will not flex.
+  // The second child specifies a flex shrink factor of 1 but it has a zero size, so the factor won't be respected and it will not shrink.
+  static ASSizeRange kSize = {{40, 50}, {40, 50}};
   [self testStackLayoutSpecWithStyle:style sizeRange:kSize subnodes:subnodes identifier:nil];
 }
 

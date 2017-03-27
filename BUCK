@@ -101,6 +101,12 @@ for name in ['AsyncDisplayKit', 'AsyncDisplayKit-PINRemoteImage']:
 # Test Host
 # TODO: Split to smaller BUCK files and parse in parallel
 #####################################
+apple_resource(		
+  name = 'TestHostResources',		
+  files = ['Tests/TestHost/Default-568h@2x.png'],		
+  dirs = [],		
+ )
+
 apple_bundle(
   name = 'TestHost',
   binary = ':TestHostBinary',
@@ -119,6 +125,7 @@ apple_binary(
   lang_preprocessor_flags = COMMON_LANG_PREPROCESSOR_FLAGS,
   linker_flags = COMMON_LINKER_FLAGS,
   deps = [
+    ':TestHostResources',
     ':AsyncDisplayKit-Core',
   ],
   frameworks = [

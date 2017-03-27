@@ -155,7 +155,7 @@ static void runLoopSourceCallback(void *info) {
   CFRunLoopRef _runLoop;
   CFRunLoopSourceRef _runLoopSource;
   CFRunLoopObserverRef _runLoopObserver;
-  std::deque<id> _internalQueue;
+  NSPointerArray *_internalQueue; // Use NSPointerArray so we can decide __strong or __weak per-instance.
   ASDN::RecursiveMutex _internalQueueLock;
   
 #if ASRunLoopQueueLoggingEnabled
@@ -169,11 +169,12 @@ static void runLoopSourceCallback(void *info) {
 
 @implementation ASRunLoopQueue
 
-- (instancetype)initWithRunLoop:(CFRunLoopRef)runloop andHandler:(void(^)(id dequeuedItem, BOOL isQueueDrained))handlerBlock
+- (instancetype)initWithRunLoop:(CFRunLoopRef)runloop retainObjects:(BOOL)retainsObjects handler:(void (^)(id _Nullable, BOOL))handlerBlock
 {
   if (self = [super init]) {
     _runLoop = runloop;
-    _internalQueue = std::deque<id>();
+    NSPointerFunctionsOptions options = retainsObjects ? NSPointerFunctionsStrongMemory : NSPointerFunctionsWeakMemory;
+    _internalQueue = [[NSPointerArray alloc] initWithOptions:options];
     _queueConsumer = handlerBlock;
     _batchSize = 1;
     _ensureExclusiveMembership = YES;
@@ -189,16 +190,13 @@ static void runLoopSourceCallback(void *info) {
     
     // It is not guaranteed that the runloop will turn if it has no scheduled work, and this causes processing of
     // the queue to stop. Attaching a custom loop source to the run loop and signal it if new work needs to be done
-    CFRunLoopSourceContext *runLoopSourceContext = (CFRunLoopSourceContext *)calloc(1, sizeof(CFRunLoopSourceContext));
-    if (runLoopSourceContext) {
-      runLoopSourceContext->perform = runLoopSourceCallback;
+    CFRunLoopSourceContext sourceContext = {};
+    sourceContext.perform = runLoopSourceCallback;
 #if ASRunLoopQueueLoggingEnabled
-      runLoopSourceContext->info = (__bridge void *)self;
+    sourceContext.info = (__bridge void *)self;
 #endif
-      _runLoopSource = CFRunLoopSourceCreate(NULL, 0, runLoopSourceContext);
-      CFRunLoopAddSource(runloop, _runLoopSource, kCFRunLoopCommonModes);
-      free(runLoopSourceContext);
-    }
+    _runLoopSource = CFRunLoopSourceCreate(NULL, 0, &sourceContext);
+    CFRunLoopAddSource(runloop, _runLoopSource, kCFRunLoopCommonModes);
 
 #if ASRunLoopQueueLoggingEnabled
     _runloopQueueLoggingTimer = [NSTimer timerWithTimeInterval:1.0 target:self selector:@selector(checkRunLoop) userInfo:nil repeats:YES];
@@ -243,22 +241,41 @@ static void runLoopSourceCallback(void *info) {
     ASDN::MutexLocker l(_internalQueueLock);
 
     // Early-exit if the queue is empty.
-    if (_internalQueue.empty()) {
+    NSInteger internalQueueCount = _internalQueue.count;
+    if (internalQueueCount == 0) {
       return;
     }
     
     ASProfilingSignpostStart(0, self);
 
     // Snatch the next batch of items.
-    auto firstItemToProcess = _internalQueue.cbegin();
-    auto lastItemToProcess = MIN(_internalQueue.cend(), firstItemToProcess + self.batchSize);
+    NSInteger maxCountToProcess = MIN(internalQueueCount, self.batchSize);
 
-    if (hasExecutionBlock) {
-      itemsToProcess = std::vector<id>(firstItemToProcess, lastItemToProcess);
+    /**
+     * For each item in the next batch, if it's non-nil then NULL it out
+     * and if we have an execution block then add it in.
+     * This could be written a bunch of different ways but
+     * this particular one nicely balances readability, safety, and efficiency.
+     */
+    NSInteger foundItemCount = 0;
+    for (NSInteger i = 0; i < internalQueueCount && foundItemCount < maxCountToProcess; i++) {
+      /**
+       * It is safe to use unsafe_unretained here. If the queue is weak, the
+       * object will be added to the autorelease pool. If the queue is strong,
+       * it will retain the object until we transfer it (retain it) in itemsToProcess.
+       */
+      __unsafe_unretained id ptr = (__bridge id)[_internalQueue pointerAtIndex:i];
+      if (ptr != nil) {
+        foundItemCount++;
+        if (hasExecutionBlock) {
+          itemsToProcess.push_back(ptr);
+        }
+        [_internalQueue replacePointerAtIndex:i withPointer:NULL];
+      }
     }
-    _internalQueue.erase(firstItemToProcess, lastItemToProcess);
 
-    if (_internalQueue.empty()) {
+    [_internalQueue compact];
+    if (_internalQueue.count == 0) {
       isQueueDrained = YES;
     }
   }
@@ -298,7 +315,7 @@ static void runLoopSourceCallback(void *info) {
   BOOL foundObject = NO;
     
   if (_ensureExclusiveMembership) {
-    for (id currentObject : _internalQueue) {
+    for (id currentObject in _internalQueue) {
       if (currentObject == object) {
         foundObject = YES;
         break;
@@ -307,7 +324,7 @@ static void runLoopSourceCallback(void *info) {
   }
 
   if (!foundObject) {
-    _internalQueue.push_back(object);
+    [_internalQueue addPointer:(__bridge void *)object];
     
     CFRunLoopSourceSignal(_runLoopSource);
     CFRunLoopWakeUp(_runLoop);

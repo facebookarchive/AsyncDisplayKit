@@ -58,7 +58,8 @@ struct ASStackUnpositionedLayout {
   /** Given a set of children, computes the unpositioned layouts for those children. */
   static ASStackUnpositionedLayout compute(const std::vector<ASStackLayoutSpecChild> &children,
                                            const ASStackLayoutSpecStyle &style,
-                                           const ASSizeRange &sizeRange);
+                                           const ASSizeRange &sizeRange,
+                                           const BOOL concurrent);
   
   static CGFloat baselineForItem(const ASStackLayoutSpecStyle &style,
                                  const ASStackLayoutSpecItem &l);

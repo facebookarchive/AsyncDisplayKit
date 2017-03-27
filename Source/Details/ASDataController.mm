@@ -15,7 +15,7 @@
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASMainSerialQueue.h>
-#import <AsyncDisplayKit/ASMultidimensionalArrayUtils.h>
+#import <AsyncDisplayKit/ASTwoDimensionalArrayUtils.h>
 #import <AsyncDisplayKit/ASSection.h>
 #import <AsyncDisplayKit/ASThread.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
@@ -266,13 +266,15 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  * @param map The element map into which to apply the change.
  * @param indexPaths The index paths belongs to sections whose supplementary nodes need to be repopulated.
  * @param changeSet The changeset that triggered this repopulation.
- * @param environment The trait environment needed to initialize elements
+ * @param owningNode The node that owns the new elements.
+ * @param traitCollection The trait collection needed to initialize elements
  * @param indexPathsAreNew YES if index paths are "after the update," NO otherwise.
  */
 - (void)_repopulateSupplementaryNodesIntoMap:(ASMutableElementMap *)map
              forSectionsContainingIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
                                    changeSet:(_ASHierarchyChangeSet *)changeSet
-                                 environment:(id<ASTraitEnvironment>)environment
+                                  owningNode:(ASDisplayNode *)owningNode
+                             traitCollection:(ASPrimitiveTraitCollection)traitCollection
                             indexPathsAreNew:(BOOL)indexPathsAreNew
 {
   ASDisplayNodeAssertMainThread();
@@ -296,7 +298,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
 
   for (NSString *kind in [self supplementaryKindsInSections:newSections]) {
-    [self _insertElementsIntoMap:map kind:kind forSections:newSections environment:environment];
+    [self _insertElementsIntoMap:map kind:kind forSections:newSections owningNode:owningNode traitCollection:traitCollection];
   }
 }
 
@@ -305,12 +307,14 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  *
  * @param kind The kind of the elements, e.g ASDataControllerRowNodeKind
  * @param sections The sections that should be populated by new elements
- * @param environment The trait environment needed to initialize elements
+ * @param owningNode The node that owns the new elements.
+ * @param traitCollection The trait collection needed to initialize elements
  */
 - (void)_insertElementsIntoMap:(ASMutableElementMap *)map
                           kind:(NSString *)kind
                    forSections:(NSIndexSet *)sections
-                   environment:(id<ASTraitEnvironment>)environment
+                    owningNode:(ASDisplayNode *)owningNode
+               traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASDisplayNodeAssertMainThread();
   
@@ -319,7 +323,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   NSArray<NSIndexPath *> *indexPaths = [self _allIndexPathsForItemsOfKind:kind inSections:sections];
-  [self _insertElementsIntoMap:map kind:kind atIndexPaths:indexPaths environment:environment];
+  [self _insertElementsIntoMap:map kind:kind atIndexPaths:indexPaths owningNode:owningNode traitCollection:traitCollection];
 }
 
 /**
@@ -328,12 +332,14 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  * @param map The map to insert the elements into.
  * @param kind The kind of the elements, e.g ASDataControllerRowNodeKind
  * @param indexPaths The index paths at which new elements should be populated
- * @param environment The trait environment needed to initialize elements
+ * @param owningNode The node that owns the new elements.
+ * @param traitCollection The trait collection needed to initialize elements
  */
 - (void)_insertElementsIntoMap:(ASMutableElementMap *)map
                           kind:(NSString *)kind
                   atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
-                   environment:(id<ASTraitEnvironment>)environment
+                    owningNode:(ASDisplayNode *)owningNode
+               traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASDisplayNodeAssertMainThread();
   
@@ -358,9 +364,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     
     ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
     ASCollectionElement *element = [[ASCollectionElement alloc] initWithNodeBlock:nodeBlock
-                                           supplementaryElementKind:isRowKind ? nil : kind
-                                                    constrainedSize:constrainedSize
-                                                        environment:environment];
+                                                         supplementaryElementKind:isRowKind ? nil : kind
+                                                                  constrainedSize:constrainedSize
+                                                                       owningNode:owningNode
+                                                                  traitCollection:traitCollection];
     [map insertElement:element atIndexPath:indexPath];
   }
 }
@@ -476,7 +483,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   // Step 1: update the mutable copies to match the data source's state
   [self _updateSectionContextsInMap:mutableMap changeSet:changeSet];
   //TODO If _elements is the same, use a fast path
-  [self _updateElementsInMap:mutableMap changeSet:changeSet];
+  __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
+  __weak ASDisplayNode *owningNode = (ASDisplayNode *)environment; // This is gross!
+  ASPrimitiveTraitCollection existingTraitCollection = [environment primitiveTraitCollection];
+  [self _updateElementsInMap:mutableMap changeSet:changeSet owningNode:owningNode traitCollection:existingTraitCollection];
   
   // Step 2: Clone the new data
   ASElementMap *newMap = [mutableMap copy];
@@ -496,6 +506,15 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
         _visibleMap = newMap;
 
         [_delegate dataController:self didUpdateWithChangeSet:changeSet];
+        
+        // Step 5: If the environment changed mid-update, notify all visible elements
+        __weak id<ASTraitEnvironment> newEnvironment = [self.environmentDelegate dataControllerEnvironment];
+        ASPrimitiveTraitCollection newTraitCollection = [newEnvironment primitiveTraitCollection];
+        if (! ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(existingTraitCollection, newTraitCollection)) {
+          for (ASCollectionElement *element in _visibleMap) {
+            element.traitCollection = newTraitCollection;
+          }
+        }
       }];
     }];
   });
@@ -554,11 +573,12 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 /**
  * Update elements based on the given change set.
  */
-- (void)_updateElementsInMap:(ASMutableElementMap *)map changeSet:(_ASHierarchyChangeSet *)changeSet
+- (void)_updateElementsInMap:(ASMutableElementMap *)map
+                   changeSet:(_ASHierarchyChangeSet *)changeSet
+                  owningNode:(ASDisplayNode *)owningNode
+             traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASDisplayNodeAssertMainThread();
-  
-  __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   
   // TODO if the change set includes solely section reloads that together are equivalent to reloadData (i.e reload the only section),
   // do a reloadData here as an optimization.
@@ -569,7 +589,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     NSUInteger sectionCount = [self itemCountsFromDataSource].size();
     if (sectionCount > 0) {
       NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-      [self _insertElementsIntoMap:map sections:sectionIndexes environment:environment];
+      [self _insertElementsIntoMap:map sections:sectionIndexes owningNode:owningNode traitCollection:traitCollection];
     }
     // Return immediately because reloadData can't be used in conjuntion with other updates.
     return;
@@ -580,7 +600,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     // Aggressively repopulate supplementary nodes (#1773 & #1629)
     [self _repopulateSupplementaryNodesIntoMap:map forSectionsContainingIndexPaths:change.indexPaths
                                      changeSet:changeSet
-                                   environment:environment
+                                    owningNode:owningNode
+                               traitCollection:traitCollection
                               indexPathsAreNew:NO];
   }
 
@@ -591,22 +612,24 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertElementsIntoMap:map sections:change.indexSet environment:environment];
+    [self _insertElementsIntoMap:map sections:change.indexSet owningNode:owningNode traitCollection:traitCollection];
   }
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind atIndexPaths:change.indexPaths environment:environment];
+    [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind atIndexPaths:change.indexPaths owningNode:owningNode traitCollection:traitCollection];
     // Aggressively reload supplementary nodes (#1773 & #1629)
     [self _repopulateSupplementaryNodesIntoMap:map forSectionsContainingIndexPaths:change.indexPaths
                                      changeSet:changeSet
-                                   environment:environment
+                                    owningNode:owningNode
+                               traitCollection:traitCollection
                               indexPathsAreNew:YES];
   }
 }
 
 - (void)_insertElementsIntoMap:(ASMutableElementMap *)map
                       sections:(NSIndexSet *)sectionIndexes
-                   environment:(id<ASTraitEnvironment>)environment
+                    owningNode:(ASDisplayNode *)owningNode
+               traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASDisplayNodeAssertMainThread();
   
@@ -616,12 +639,12 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 
   // Items
   [map insertEmptySectionsOfItemsAtIndexes:sectionIndexes];
-  [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind forSections:sectionIndexes environment:environment];
+  [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind forSections:sectionIndexes owningNode:owningNode traitCollection:traitCollection];
 
   // Supplementaries
   for (NSString *kind in [self supplementaryKindsInSections:sectionIndexes]) {
     // Step 2: Populate new elements for all sections
-    [self _insertElementsIntoMap:map kind:kind forSections:sectionIndexes environment:environment];
+    [self _insertElementsIntoMap:map kind:kind forSections:sectionIndexes owningNode:owningNode traitCollection:traitCollection];
   }
 }
 
@@ -670,7 +693,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (void)_relayoutAllNodes
 {
   ASDisplayNodeAssertMainThread();
-  [_visibleMap enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
+  for (ASCollectionElement *element in _visibleMap) {
+    NSIndexPath *indexPath = [_visibleMap indexPathForElement:element];
     NSString *kind = element.supplementaryElementKind ?: ASDataControllerRowNodeKind;
     ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
     if (ASSizeRangeHasSignificantArea(constrainedSize)) {
@@ -683,17 +707,17 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
         [self _layoutNode:node withConstrainedSize:constrainedSize];
       }
     }
-  }];
+  }
 }
 
 + (NSArray<ASCollectionElement *> *)unmeasuredElementsFromMap:(ASElementMap *)map
 {
   NSMutableArray<ASCollectionElement *> *unloadedContexts = [NSMutableArray array];
-  [map enumerateUsingBlock:^(NSIndexPath * _Nonnull indexPath, ASCollectionElement * _Nonnull element, BOOL * _Nonnull stop) {
+  for (ASCollectionElement *element in map) {
     if (element.nodeIfAllocated.calculatedLayout == nil) {
       [unloadedContexts addObject:element];
     }
-  }];
+  }
   return unloadedContexts;
 }
 

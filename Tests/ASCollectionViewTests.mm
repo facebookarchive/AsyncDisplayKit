@@ -827,6 +827,7 @@
 
   ASCollectionNode *cn = testController.collectionNode;
   [cn waitUntilAllUpdatesAreCommitted];
+  [cn.view layoutIfNeeded];
   ASCellNode *node = [cn nodeForItemAtIndexPath:[NSIndexPath indexPathForItem:0 inSection:0]];
   XCTAssertTrue(node.visible);
   testController.asyncDelegate->_itemCounts = {0};
@@ -984,9 +985,13 @@
   window.rootViewController = testController;
 
   [window makeKeyAndVisible];
+  // Trigger the initial reload to start
   [view layoutIfNeeded];
   
+  // Wait for ASDK reload to finish
   [cn waitUntilAllUpdatesAreCommitted];
+  // Force UIKit to read updated data & range controller to update and account for it
+  [cn.view layoutIfNeeded];
   [self waitForExpectationsWithTimeout:60 handler:nil];
   
   CGFloat contentHeight = cn.view.contentSize.height;
@@ -1011,9 +1016,13 @@
   window.rootViewController = testController;
 
   [window makeKeyAndVisible];
+  // Trigger the initial reload to start
   [window layoutIfNeeded];
 
+  // Wait for ASDK reload to finish
   [cn waitUntilAllUpdatesAreCommitted];
+  // Force UIKit to read updated data & range controller to update and account for it
+  [cn.view layoutIfNeeded];
 
   CGRect preloadBounds = ({
     CGRect r = CGRectNull;

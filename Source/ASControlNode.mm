@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASControlNode.h>
 #import <AsyncDisplayKit/ASControlNode+Subclasses.h>
+#import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASImageNode.h>
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
@@ -110,30 +111,39 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
   self.isAccessibilityElement = userInteractionEnabled;
 }
 
+- (void)__exitHierarchy
+{
+  [super __exitHierarchy];
+  
+  // If a control node is exit the hierarchy and is tracking we have to cancel it
+  if (self.tracking) {
+    [self _cancelTrackingWithEvent:nil];
+  }
+}
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 
 #pragma mark - ASDisplayNode Overrides
+
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.enabled)
+  if (!self.enabled) {
     return;
-
-  ASControlNodeEvent controlEventMask = 0;
+  }
+  
+  // Check if the tracking should start
+  UITouch *theTouch = [touches anyObject];
+  if (![self beginTrackingWithTouch:theTouch withEvent:event]) {
+    return;
+  }
 
   // If we get more than one touch down on us, cancel.
   // Additionally, if we're already tracking a touch, a second touch beginning is cause for cancellation.
-  if ([touches count] > 1 || self.tracking)
-  {
-    self.tracking = NO;
-    self.touchInside = NO;
-    [self cancelTrackingWithEvent:event];
-    controlEventMask |= ASControlNodeEventTouchCancel;
-  }
-  else
-  {
+  if (touches.count > 1 || self.tracking) {
+    [self _cancelTrackingWithEvent:event];
+  } else {
     // Otherwise, begin tracking.
     self.tracking = YES;
 
@@ -141,24 +151,28 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
     self.touchInside = YES;
     self.highlighted = YES;
 
-    UITouch *theTouch = [touches anyObject];
-    [self beginTrackingWithTouch:theTouch withEvent:event];
-
     // Send the appropriate touch-down control event depending on how many times we've been tapped.
-    controlEventMask |= (theTouch.tapCount == 1) ? ASControlNodeEventTouchDown : ASControlNodeEventTouchDownRepeat;
+    ASControlNodeEvent controlEventMask = (theTouch.tapCount == 1) ? ASControlNodeEventTouchDown : ASControlNodeEventTouchDownRepeat;
+    [self sendActionsForControlEvents:controlEventMask withEvent:event];
   }
-
-  [self sendActionsForControlEvents:controlEventMask withEvent:event];
 }
 
 - (void)touchesMoved:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.enabled)
+  if (!self.enabled) {
     return;
+  }
 
-  NSParameterAssert([touches count] == 1);
+  NSParameterAssert(touches.count == 1);
   UITouch *theTouch = [touches anyObject];
+  
+  // Check if tracking should continue
+  if (!self.tracking || ![self continueTrackingWithTouch:theTouch withEvent:event]) {
+    self.tracking = NO;
+    return;
+  }
+  
   CGPoint touchLocation = [theTouch locationInView:self.view];
 
   // Update our touchInside state.
@@ -170,9 +184,6 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
   self.touchInside = dragIsInsideExpandedBounds;
   self.highlighted = dragIsInsideExpandedBounds;
 
-  // Note we are continuing to track the touch.
-  [self continueTrackingWithTouch:theTouch withEvent:event];
-
   [self sendActionsForControlEvents:(dragIsInsideBounds ? ASControlNodeEventTouchDragInside : ASControlNodeEventTouchDragOutside)
                           withEvent:event];
 }
@@ -180,35 +191,29 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
 - (void)touchesCancelled:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.enabled)
+  if (!self.enabled) {
     return;
-
-  // We're no longer tracking and there is no touch to be inside.
-  self.tracking = NO;
-  self.touchInside = NO;
-  self.highlighted = NO;
+  }
 
   // Note that we've cancelled tracking.
-  [self cancelTrackingWithEvent:event];
-
-  // Send the cancel event.
-  [self sendActionsForControlEvents:ASControlNodeEventTouchCancel
-                          withEvent:event];
+  [self _cancelTrackingWithEvent:event];
 }
 
 - (void)touchesEnded:(NSSet *)touches withEvent:(UIEvent *)event
 {
   // If we're not interested in touches, we have nothing to do.
-  if (!self.enabled)
+  if (!self.enabled) {
     return;
+  }
 
   // On iPhone 6s, iOS 9.2 (and maybe other versions) sometimes calls -touchesEnded:withEvent:
   // twice on the view for one call to -touchesBegan:withEvent:. On ASControlNode, it used to
   // trigger an action twice unintentionally. Now, we ignore that event if we're not in a tracking
   // state in order to have a correct behavior.
   // It might be related to that issue: http://www.openradar.me/22910171
-  if (!self.tracking)
+  if (!self.tracking) {
     return;
+  }
 
   NSParameterAssert([touches count] == 1);
   UITouch *theTouch = [touches anyObject];
@@ -230,7 +235,30 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
                           withEvent:event];
 }
 
+- (void)_cancelTrackingWithEvent:(UIEvent *)event
+{
+  // We're no longer tracking and there is no touch to be inside.
+  self.tracking = NO;
+  self.touchInside = NO;
+  self.highlighted = NO;
+  
+  // Send the cancel event.
+  [self sendActionsForControlEvents:ASControlNodeEventTouchCancel withEvent:event];
+}
+
 #pragma clang diagnostic pop
+
+- (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event
+{
+  ASDisplayNodeAssertMainThread();
+
+  // If not enabled we should not care about receving touches
+  if (! self.enabled) {
+    return nil;
+  }
+
+  return [super hitTest:point withEvent:event];
+}
 
 - (BOOL)gestureRecognizerShouldBegin:(UIGestureRecognizer *)gestureRecognizer
 {
@@ -246,13 +274,14 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
 }
 
 #pragma mark - Action Messages
+
 - (void)addTarget:(id)target action:(SEL)action forControlEvents:(ASControlNodeEvent)controlEventMask
 {
   NSParameterAssert(action);
   NSParameterAssert(controlEventMask != 0);
-  // This assertion would likely be helpful to users who aren't familiar with the implications of layer-backing.
-  // However, it would represent an API change (in debug) as it did not used to assert.
-  // ASDisplayNodeAssert(!self.isLayerBacked, @"ASControlNode is layer backed, will never be able to call target in target:action: pair.");
+  
+  // ASControlNode cannot be layer backed if adding a target
+  ASDisplayNodeAssert(!self.isLayerBacked, @"ASControlNode is layer backed, will never be able to call target in target:action: pair.");
   
   ASDN::MutexLocker l(_controlLock);
 
@@ -383,6 +412,7 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
 }
 
 #pragma mark -
+
 - (void)sendActionsForControlEvents:(ASControlNodeEvent)controlEvents withEvent:(UIEvent *)event
 {
   NSParameterAssert(controlEvents != 0);
@@ -440,6 +470,7 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode) {
 }
 
 #pragma mark - For Subclasses
+
 - (BOOL)beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)touchEvent
 {
   return YES;
@@ -452,10 +483,12 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode) {
 
 - (void)cancelTrackingWithEvent:(UIEvent *)touchEvent
 {
+  // Subclass hook
 }
 
 - (void)endTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)touchEvent
 {
+  // Subclass hook
 }
 
 #pragma mark - Debug

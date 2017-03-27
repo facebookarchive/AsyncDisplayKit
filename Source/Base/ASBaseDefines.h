@@ -217,3 +217,31 @@
   id __val = x;\
   ((c *) ([__val isKindOfClass:[c class]] ? __val : nil));\
 })
+
+/**
+ * Create a new set by mapping `collection` over `work`, ignoring nil.
+ */
+#define ASSetByFlatMapping(collection, decl, work) ({ \
+  NSMutableSet *s = [NSMutableSet set]; \
+  for (decl in collection) {\
+    id result = work; \
+    if (result != nil) { \
+      [s addObject:result]; \
+    } \
+  } \
+  s; \
+})
+
+/**
+ * Create a new array by mapping `collection` over `work`, ignoring nil.
+ */
+#define ASArrayByFlatMapping(collection, decl, work) ({ \
+  NSMutableArray *a = [NSMutableArray array]; \
+  for (decl in collection) {\
+    id result = work; \
+    if (result != nil) { \
+      [a addObject:result]; \
+    } \
+  } \
+  a; \
+})

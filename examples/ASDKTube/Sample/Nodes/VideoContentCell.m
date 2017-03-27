@@ -69,7 +69,7 @@
     _muteButtonNode.style.height = ASDimensionMakeWithPoints(22.0);
     [_muteButtonNode addTarget:self action:@selector(didTapMuteButton) forControlEvents:ASControlNodeEventTouchUpInside];
 
-    _videoPlayerNode = [[ASVideoPlayerNode alloc] initWithUrl:_videoModel.url loadAssetWhenNodeBecomesVisible:YES];
+    _videoPlayerNode = [[ASVideoPlayerNode alloc] initWithURL:_videoModel.url];
     _videoPlayerNode.delegate = self;
     _videoPlayerNode.backgroundColor = [UIColor blackColor];
     [self addSubnode:_videoPlayerNode];
@@ -142,7 +142,6 @@
 - (void)didTapVideoPlayerNode:(ASVideoPlayerNode *)videoPlayer
 {
   if (_videoPlayerNode.playerState == ASVideoNodePlayerStatePlaying) {
-    NSLog(@"TRANSITION");
     _videoPlayerNode.controlsDisabled = !_videoPlayerNode.controlsDisabled;
     [_videoPlayerNode pause];
   } else {

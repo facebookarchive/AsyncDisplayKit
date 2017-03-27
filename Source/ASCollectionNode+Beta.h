@@ -16,6 +16,13 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASCollectionNode (Beta)
 
+/**
+ * Allows providing a custom subclass of ASCollectionView to be managed by ASCollectionNode.
+ *
+ * @default [ASCollectionView class] is used whenever this property is unset or nil.
+ */
+@property (strong, nonatomic, nullable) Class collectionViewClass;
+
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(nullable id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator;
 
 - (void)beginUpdates ASDISPLAYNODE_DEPRECATED_MSG("Use -performBatchUpdates:completion: instead.");

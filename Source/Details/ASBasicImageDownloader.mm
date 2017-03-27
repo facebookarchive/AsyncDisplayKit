@@ -266,10 +266,6 @@ static const char *kContextKey = NSStringFromClass(ASBasicImageDownloaderContext
 
 - (void)cancelImageDownloadForIdentifier:(id)downloadIdentifier
 {
-  if (!downloadIdentifier) {
-    return;
-  }
-
   ASDisplayNodeAssert([downloadIdentifier isKindOfClass:ASBasicImageDownloaderContext.class], @"unexpected downloadIdentifier");
   ASBasicImageDownloaderContext *context = (ASBasicImageDownloaderContext *)downloadIdentifier;
 

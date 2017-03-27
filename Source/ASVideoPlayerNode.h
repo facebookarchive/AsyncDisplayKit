@@ -39,7 +39,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 @property (nonatomic, assign) BOOL controlsDisabled;
 
-@property (nonatomic, assign, readonly) BOOL loadAssetWhenNodeBecomesVisible;
+@property (nonatomic, assign, readonly) BOOL loadAssetWhenNodeBecomesVisible ASDISPLAYNODE_DEPRECATED_MSG("Asset is always loaded when this node enters preload state. This flag does nothing.");
 
 #pragma mark - ASVideoNode property proxy
 /**
@@ -52,6 +52,16 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign, readonly) ASVideoNodePlayerState playerState;
 @property (nonatomic, assign, readwrite) BOOL shouldAggressivelyRecoverFromStall;
 @property (nullable, nonatomic, strong, readwrite) NSURL *placeholderImageURL;
+
+@property (nullable, nonatomic, strong, readwrite) AVAsset *asset;
+/**
+ ** @abstract The URL with which the asset was initialized.
+ ** @discussion Setting the URL will override the current asset with a newly created AVURLAsset created from the given URL, and AVAsset *asset will point to that newly created AVURLAsset.  Please don't set both assetURL and asset.
+ ** @return Current URL the asset was initialized or nil if no URL was given.
+ **/
+@property (nullable, nonatomic, strong, readwrite) NSURL *assetURL;
+
+/// You should never set any value on the backing video node. Use exclusivively the video player node to set properties
 @property (nonatomic, strong, readonly) ASVideoNode *videoNode;
 
 //! Defaults to 100
@@ -59,12 +69,16 @@ NS_ASSUME_NONNULL_BEGIN
 //! Defaults to AVLayerVideoGravityResizeAspect
 @property (nonatomic, copy) NSString *gravity;
 
-- (instancetype)initWithUrl:(NSURL*)url;
-- (instancetype)initWithAsset:(AVAsset*)asset;
+#pragma mark - Lifecycle
+- (instancetype)initWithURL:(NSURL *)URL;
+- (instancetype)initWithAsset:(AVAsset *)asset;
 - (instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix;
-- (instancetype)initWithUrl:(NSURL *)url loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible;
-- (instancetype)initWithAsset:(AVAsset *)asset loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible;
-- (instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible;
+
+#pragma mark Lifecycle Deprecated
+- (instancetype)initWithUrl:(NSURL *)url ASDISPLAYNODE_DEPRECATED_MSG("Asset is always loaded when this node enters preload state, therefore loadAssetWhenNodeBecomesVisible is deprecated and not used anymore.");
+- (instancetype)initWithUrl:(NSURL *)url loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible ASDISPLAYNODE_DEPRECATED_MSG("Asset is always loaded when this node enters preload state, therefore loadAssetWhenNodeBecomesVisible is deprecated and not used anymore.");
+- (instancetype)initWithAsset:(AVAsset *)asset loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible ASDISPLAYNODE_DEPRECATED_MSG("Asset is always loaded when this node enters preload state, therefore loadAssetWhenNodeBecomesVisible is deprecated and not used anymore.");
+- (instancetype)initWithAsset:(AVAsset *)asset videoComposition:(AVVideoComposition *)videoComposition audioMix:(AVAudioMix *)audioMix loadAssetWhenNodeBecomesVisible:(BOOL)loadAssetWhenNodeBecomesVisible ASDISPLAYNODE_DEPRECATED_MSG("Asset is always loaded when this node enters preload state, therefore loadAssetWhenNodeBecomesVisible is deprecated and not used anymore.");
 
 #pragma mark - Public API
 - (void)seekToTime:(CGFloat)percentComplete;
