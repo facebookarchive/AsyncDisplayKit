@@ -793,9 +793,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   [_changeSet addCompletionHandler:completion];
   
   if (_batchUpdateCount == 0) {
-    _changeSet.animated = animated;
-    [_dataController updateWithChangeSet:_changeSet];
+    _ASHierarchyChangeSet *changeSet = _changeSet;
+    // Nil out _changeSet before forwarding to _dataController to allow the change set to cause subsequent batch updates on the same run loop
     _changeSet = nil;
+    changeSet.animated = animated;
+    [_dataController updateWithChangeSet:changeSet];
   }
 }
 
