@@ -506,15 +506,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
         _visibleMap = newMap;
 
         [_delegate dataController:self didUpdateWithChangeSet:changeSet];
-        
-        // Step 5: If the environment changed mid-update, notify all visible elements
-        __weak id<ASTraitEnvironment> newEnvironment = [self.environmentDelegate dataControllerEnvironment];
-        ASPrimitiveTraitCollection newTraitCollection = [newEnvironment primitiveTraitCollection];
-        if (! ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(existingTraitCollection, newTraitCollection)) {
-          for (ASCollectionElement *element in _visibleMap) {
-            element.traitCollection = newTraitCollection;
-          }
-        }
       }];
     }];
   });
