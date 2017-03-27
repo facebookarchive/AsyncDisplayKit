@@ -13,9 +13,10 @@
 		871BB3571C7C98B1005CF62A /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 871BB3551C7C98B1005CF62A /* Main.storyboard */; };
 		871BB3591C7C98B1005CF62A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 871BB3581C7C98B1005CF62A /* Assets.xcassets */; };
 		871BB35C1C7C98B1005CF62A /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 871BB35A1C7C98B1005CF62A /* LaunchScreen.storyboard */; };
-		871BB3651C7C99B0005CF62A /* AsyncDisplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 871BB3641C7C99B0005CF62A /* AsyncDisplayKit.framework */; };
-		DEAE185D1D1A504A0083FAD0 /* PINCache.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DEAE185B1D1A504A0083FAD0 /* PINCache.framework */; };
-		DEAE185E1D1A504A0083FAD0 /* PINRemoteImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DEAE185C1D1A504A0083FAD0 /* PINRemoteImage.framework */; };
+		FE6D6C991E83CC5800AD095D /* PINCache.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DEAE185B1D1A504A0083FAD0 /* PINCache.framework */; };
+		FE6D6C9A1E83CC5C00AD095D /* PINRemoteImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = DEAE185C1D1A504A0083FAD0 /* PINRemoteImage.framework */; };
+		FE6D6C9B1E83CC5F00AD095D /* AsyncDisplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 871BB3641C7C99B0005CF62A /* AsyncDisplayKit.framework */; };
+		FE6D6C9D1E83CDD300AD095D /* PINOperation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FE6D6C9C1E83CDD300AD095D /* PINOperation.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -32,6 +33,7 @@
 		871BB3641C7C99B0005CF62A /* AsyncDisplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AsyncDisplayKit.framework; path = Carthage/Build/iOS/AsyncDisplayKit.framework; sourceTree = SOURCE_ROOT; };
 		DEAE185B1D1A504A0083FAD0 /* PINCache.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PINCache.framework; path = ../Carthage/Build/iOS/PINCache.framework; sourceTree = "<group>"; };
 		DEAE185C1D1A504A0083FAD0 /* PINRemoteImage.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = PINRemoteImage.framework; path = ../Carthage/Build/iOS/PINRemoteImage.framework; sourceTree = "<group>"; };
+		FE6D6C9C1E83CDD300AD095D /* PINOperation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; path = PINOperation.framework; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,9 +41,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				871BB3651C7C99B0005CF62A /* AsyncDisplayKit.framework in Frameworks */,
-				DEAE185D1D1A504A0083FAD0 /* PINCache.framework in Frameworks */,
-				DEAE185E1D1A504A0083FAD0 /* PINRemoteImage.framework in Frameworks */,
+				FE6D6C9A1E83CC5C00AD095D /* PINRemoteImage.framework in Frameworks */,
+				FE6D6C991E83CC5800AD095D /* PINCache.framework in Frameworks */,
+				FE6D6C9D1E83CDD300AD095D /* PINOperation.framework in Frameworks */,
+				FE6D6C9B1E83CC5F00AD095D /* AsyncDisplayKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,6 +95,7 @@
 		871BB3631C7C9994005CF62A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				FE6D6C9C1E83CDD300AD095D /* PINOperation.framework */,
 				871BB3641C7C99B0005CF62A /* AsyncDisplayKit.framework */,
 				DEAE185B1D1A504A0083FAD0 /* PINCache.framework */,
 				DEAE185C1D1A504A0083FAD0 /* PINRemoteImage.framework */,
@@ -173,6 +177,9 @@
 			);
 			inputPaths = (
 				"$(SRCROOT)/Carthage/Build/iOS/AsyncDisplayKit.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/PINRemoteImage.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/PINCache.framework",
+				"$(SRCROOT)/Carthage/Build/iOS/PINOperation.framework",
 			);
 			name = "Copy Framworks";
 			outputPaths = (
@@ -304,6 +311,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
+					"$(PROJECT_DIR)/CarthageExample",
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				INFOPLIST_FILE = CarthageExample/Info.plist;
@@ -321,6 +329,7 @@
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)/Carthage/Build/iOS",
+					"$(PROJECT_DIR)/CarthageExample",
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				INFOPLIST_FILE = CarthageExample/Info.plist;
