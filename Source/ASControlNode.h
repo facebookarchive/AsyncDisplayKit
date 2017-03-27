@@ -14,6 +14,8 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
+@class ASControlNode;
+
 /**
   @abstract Kinds of events possible for control nodes.
   @discussion These events are identical to their UIControl counterparts.
@@ -56,6 +58,12 @@ static UIControlState const ASControlStateNormal ASDISPLAYNODE_DEPRECATED_MSG("U
 static UIControlState const ASControlStateDisabled ASDISPLAYNODE_DEPRECATED_MSG("Use UIControlStateDisabled.") = UIControlStateDisabled;
 static UIControlState const ASControlStateHighlighted ASDISPLAYNODE_DEPRECATED_MSG("Use UIControlStateHighlighted.") = UIControlStateHighlighted;
 static UIControlState const ASControlStateSelected ASDISPLAYNODE_DEPRECATED_MSG("Use UIControlStateSelected.") = UIControlStateSelected;
+
+/**
+ @abstract Block type for event handling.
+ @discussion Mainly used for addTarget with block.
+ */
+typedef void(^ASControlBlock)(ASControlNode *sender);
 
 /**
   @abstract ASControlNode is the base class for control nodes (such as buttons), or nodes that track touches to invoke targets with action messages.
@@ -105,6 +113,14 @@ static UIControlState const ASControlStateSelected ASDISPLAYNODE_DEPRECATED_MSG(
   @discussion You may call this method multiple times, and you may specify multiple target-action pairs for a particular event. Targets are held weakly.
  */
 - (void)addTarget:(nullable id)target action:(SEL)action forControlEvents:(ASControlNodeEvent)controlEvents;
+
+/**
+ @abstract Adds a block action for a particular event (or events).
+ @param action A block for event handler. May not be NULL.
+ @param controlEvents A bitmask specifying the control events for which the action message is sent. May not be 0. See "Control Events" for bitmask constants.
+ @discussion You may call this method multiple times, and you may specify multiple target-action pairs for a particular event. Targets are held weakly.
+ */
+- (void)addAction:(ASControlBlock)action forControlEvents:(ASControlNodeEvent)controlEvents;
 
 /**
   @abstract Returns the actions that are associated with a target and a particular control event.

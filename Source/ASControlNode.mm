@@ -45,6 +45,8 @@
   NSMutableDictionary<id<NSCopying>, NSMutableArray<ASControlTargetAction *> *> *_controlEventDispatchTable;
 }
 
+@property (nonatomic, weak) ASControlBlock controlBlock;
+
 // Read-write overrides.
 @property (nonatomic, readwrite, assign, getter=isTracking) BOOL tracking;
 @property (nonatomic, readwrite, assign, getter=isTouchInside) BOOL touchInside;
@@ -332,6 +334,12 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
   self.userInteractionEnabled = YES;
 }
 
+- (void)addAction:(ASControlBlock)action forControlEvents:(ASControlNodeEvent)controlEvents
+{
+  self.controlBlock = action;
+  [self addTarget:self action:@selector(_handleTargetActionBlock:) forControlEvents:controlEvents];
+}
+
 - (NSArray *)actionsForTarget:(id)target forControlEvent:(ASControlNodeEvent)controlEvent
 {
   NSParameterAssert(target);
@@ -409,6 +417,14 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
         [_controlEventDispatchTable removeObjectForKey:eventKey];
       }
     });
+}
+
+#pragma mark -
+// Handle target action with block.
+- (void)_handleTargetActionBlock:(ASControlNode *)sender {
+  if (self.controlBlock) {
+    self.controlBlock(sender);
+  }
 }
 
 #pragma mark -
