@@ -115,7 +115,7 @@
 - (void)testActionWithBlock {
   ASActionSenderController *controller = [[ASActionSenderController alloc] init];
   ASControlNode *node = [[ASControlNode alloc] init];
-  [node addAction:^(ASControlNode * _Nonnull sender) {
+  [node addActionWithBlock:^(ASControlNode * _Nonnull sender) {
     [controller action:sender];
   } forControlEvents:EVENT];
   [controller.view addSubview:node.view];

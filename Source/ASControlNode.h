@@ -116,11 +116,11 @@ typedef void(^ASControlBlock)(ASControlNode *sender);
 
 /**
  @abstract Adds a block action for a particular event (or events).
- @param action A block for event handler. May not be NULL.
+ @param actionBlock A block for event handler. May not be NULL.
  @param controlEvents A bitmask specifying the control events for which the action message is sent. May not be 0. See "Control Events" for bitmask constants.
  @discussion You may call this method multiple times, and you may specify multiple target-action pairs for a particular event. Targets are held weakly.
  */
-- (void)addAction:(ASControlBlock)action forControlEvents:(ASControlNodeEvent)controlEvents;
+- (void)addActionWithBlock:(ASControlBlock)actionBlock forControlEvents:(ASControlNodeEvent)controlEvents;
 
 /**
   @abstract Returns the actions that are associated with a target and a particular control event.
