@@ -71,3 +71,27 @@
 }
 
 @end
+
+/**
+ * A category that makes _ASCollectionViewCell conform to IGListBindable.
+ *
+ * We don't need to do anything to bind the view model – the cell node
+ * serves the same purpose.
+ */
+#if __has_include(<IGListKit/IGListBindable.h>)
+
+#import <IGListKit/IGListBindable.h>
+
+@interface _ASCollectionViewCell (IGListBindable) <IGListBindable>
+@end
+
+@implementation _ASCollectionViewCell (IGListBindable)
+
+- (void)bindViewModel:(id)viewModel
+{
+  // nop
+}
+
+@end
+
+#endif
