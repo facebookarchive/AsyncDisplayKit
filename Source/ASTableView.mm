@@ -121,10 +121,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 #pragma mark -
 #pragma mark ASTableView
 
-@interface ASTableNode ()
-- (instancetype)_initWithTableView:(ASTableView *)tableView;
-@end
-
 @interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate>
 {
   ASTableViewProxy *_proxyDataSource;
