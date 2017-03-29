@@ -970,8 +970,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   UICollectionReusableView *view = nil;
   ASCellNode *node = [_dataController.visibleMap supplementaryElementOfKind:kind atIndexPath:indexPath].node;
 
-  BOOL shouldUseUIKitCell = node.shouldUseUIKitCell;
-  BOOL shouldDequeueExternally = _asyncDataSourceFlags.interopViewForSupplementaryElement && (_asyncDataSourceFlags.interopAlwaysDequeue || shouldUseUIKitCell);
+  BOOL shouldDequeueExternally = _asyncDataSourceFlags.interopViewForSupplementaryElement && (_asyncDataSourceFlags.interopAlwaysDequeue || node.shouldUseUIKitCell);
   if (shouldDequeueExternally) {
     // This codepath is used for both IGListKit mode, and app-level UICollectionView interop.
     view = [(id<ASCollectionDataSourceInterop>)_asyncDataSource collectionView:collectionView viewForSupplementaryElementOfKind:kind atIndexPath:indexPath];
@@ -980,7 +979,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kReuseIdentifier forIndexPath:indexPath];
   }
 
-  if (node && shouldUseUIKitCell == NO) {
+  if (node) {
     [_rangeController configureContentView:view forCellNode:node];
   }
 
