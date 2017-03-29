@@ -17,11 +17,17 @@
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASImageNode+Private.h>
 #import <AsyncDisplayKit/ASImageNode+AnimatedImagePrivate.h>
 #import <AsyncDisplayKit/ASImageProtocols.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASNetworkImageNode.h>
 #import <AsyncDisplayKit/ASWeakProxy.h>
+
+
+@interface ASNetworkImageNode (Private)
+- (void)_locked_setDefaultImage:(UIImage *)image;
+@end
 
 NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
 
@@ -32,6 +38,11 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
 - (void)setAnimatedImage:(id <ASAnimatedImageProtocol>)animatedImage
 {
   ASDN::MutexLocker l(_animatedImageLock);
+  [self _locked_setAnimatedImage:animatedImage];
+}
+
+- (void)_locked_setAnimatedImage:(id <ASAnimatedImageProtocol>)animatedImage
+{
   if (ASObjectIsEqual(_animatedImage, animatedImage)) {
     return;
   }
@@ -42,17 +53,19 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
     __weak ASImageNode *weakSelf = self;
     if ([animatedImage respondsToSelector:@selector(setCoverImageReadyCallback:)]) {
       animatedImage.coverImageReadyCallback = ^(UIImage *coverImage) {
-        [weakSelf coverImageCompleted:coverImage];
+        // In this case the lock is already gone we have to call the unlocked version therefore
+        [weakSelf setCoverImageCompleted:coverImage];
       };
     }
     
     if (animatedImage.playbackReady) {
-      [self animatedImageFileReady];
+      [self _locked_setShouldAnimate:YES];
+    } else {
+      animatedImage.playbackReadyCallback = ^{
+        // In this case the lock is already gone we have to call the unlocked version therefore
+        [self setShouldAnimate:YES];
+      };
     }
-
-    animatedImage.playbackReadyCallback = ^{
-      [weakSelf animatedImageFileReady];
-    };
   }
 }
 
@@ -65,14 +78,10 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
 - (void)setAnimatedImagePaused:(BOOL)animatedImagePaused
 {
   ASDN::MutexLocker l(_animatedImageLock);
+
   _animatedImagePaused = animatedImagePaused;
-  ASPerformBlockOnMainThread(^{
-    if (animatedImagePaused) {
-      [self stopAnimating];
-    } else {
-      [self startAnimating];
-    }
-  });
+
+  [self _locked_setShouldAnimate:!animatedImagePaused];
 }
 
 - (BOOL)animatedImagePaused
@@ -81,29 +90,37 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
   return _animatedImagePaused;
 }
 
-- (void)coverImageCompleted:(UIImage *)coverImage
+- (void)setCoverImageCompleted:(UIImage *)coverImage
 {
-  BOOL setCoverImage = YES;
-  {
-    ASDN::MutexLocker l(_displayLinkLock);
-    if (_displayLink != nil && _displayLink.paused == NO) {
-      setCoverImage = NO;
-    }
-  }
+  ASDN::MutexLocker l(_animatedImageLock);
+  [self _locked_setCoverImageCompleted:coverImage];
+}
+
+- (void)_locked_setCoverImageCompleted:(UIImage *)coverImage
+{
+  _displayLinkLock.lock();
+  BOOL setCoverImage = (_displayLink == nil) || _displayLink.paused;
+  _displayLinkLock.unlock();
   
   if (setCoverImage) {
-    [self setCoverImage:coverImage];
+    [self _locked_setCoverImage:coverImage];
   }
 }
 
 - (void)setCoverImage:(UIImage *)coverImage
 {
+  ASDN::MutexLocker l(_animatedImageLock);
+  [self _locked_setCoverImage:coverImage];
+}
+
+- (void)_locked_setCoverImage:(UIImage *)coverImage
+{
   //If we're a network image node, we want to set the default image so
   //that it will correctly be restored if it exits the range.
   if ([self isKindOfClass:[ASNetworkImageNode class]]) {
-    [(ASNetworkImageNode *)self setDefaultImage:coverImage];
+    [(ASNetworkImageNode *)self _locked_setDefaultImage:coverImage];
   } else {
-    self.image = coverImage;
+    [self _locked_setImage:coverImage];
   }
 }
 
@@ -128,31 +145,64 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
   _animatedImageRunLoopMode = runLoopMode;
 }
 
-- (void)animatedImageFileReady
+- (void)setShouldAnimate:(BOOL)shouldAnimate
 {
-  ASPerformBlockOnMainThread(^{
-    [self startAnimating];
-  });
+  ASDN::MutexLocker l(_animatedImageLock);
+  [self _locked_setShouldAnimate:shouldAnimate];
 }
+
+- (void)_locked_setShouldAnimate:(BOOL)shouldAnimate
+{
+  // This test is explicitly done and not ASPerformBlockOnMainThread as this would perform the block immediately
+  // on main if called on main thread and we have to call methods locked or unlocked based on which thread we are on
+  if (ASDisplayNodeThreadIsMain()) {
+    if (shouldAnimate) {
+      [self _locked_startAnimating];
+    } else {
+      [self _locked_stopAnimating];
+    }
+  } else {
+    // We have to dispatch to the main thread and call the regular methods as the lock is already gone if the
+    // block is called
+    dispatch_async(dispatch_get_main_queue(), ^{
+      if (shouldAnimate) {
+        [self startAnimating];
+      } else {
+        [self stopAnimating];
+      }
+    });
+  }
+}
+
+#pragma mark - Animating
 
 - (void)startAnimating
 {
   ASDisplayNodeAssertMainThread();
-  if (ASInterfaceStateIncludesVisible(self.interfaceState) == NO) {
+
+  ASDN::MutexLocker l(_animatedImageLock);
+  [self _locked_startAnimating];
+}
+
+- (void)_locked_startAnimating
+{
+  // It should be safe to call self.interfaceState in this case as it will only grab the lock of the superclass
+  if (!ASInterfaceStateIncludesVisible(self.interfaceState)) {
     return;
   }
   
-  if (self.animatedImagePaused) {
+  if (_animatedImagePaused) {
     return;
   }
   
-  if (self.animatedImage.playbackReady == NO) {
+  if (_animatedImage.playbackReady == NO) {
     return;
   }
   
 #if ASAnimatedImageDebug
   NSLog(@"starting animation: %p", self);
 #endif
+
   ASDN::MutexLocker l(_displayLinkLock);
   if (_displayLink == nil) {
     _playHead = 0;
@@ -167,6 +217,16 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
 
 - (void)stopAnimating
 {
+  ASDisplayNodeAssertMainThread();
+  
+  ASDN::MutexLocker l(_animatedImageLock);
+  [self _locked_stopAnimating];
+}
+
+- (void)_locked_stopAnimating
+{
+  ASDisplayNodeAssertMainThread();
+  
 #if ASAnimatedImageDebug
   NSLog(@"stopping animation: %p", self);
 #endif
@@ -175,8 +235,10 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
   _displayLink.paused = YES;
   self.lastDisplayLinkFire = 0;
   
-  [self.animatedImage clearAnimatedImageCache];
+  [_animatedImage clearAnimatedImageCache];
 }
+
+#pragma mark - ASDisplayNode
 
 - (void)didEnterVisibleState
 {
@@ -196,6 +258,8 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
   
   [self stopAnimating];
 }
+
+#pragma mark - Display Link Callbacks
 
 - (void)displayLinkFired:(CADisplayLink *)displayLink
 {
@@ -250,6 +314,8 @@ NSString *const ASAnimatedImageDefaultRunLoopMode = NSRunLoopCommonModes;
 }
 
 @end
+
+#pragma mark - ASImageNode(AnimatedImageInvalidation)
 
 @implementation ASImageNode(AnimatedImageInvalidation)
 

@@ -24,8 +24,6 @@
 #import <AsyncDisplayKit/ASInsetLayoutSpec.h>
 #import <AsyncDisplayKit/ASCenterLayoutSpec.h>
 
-static CGFloat kFixedHeight = 200.0f;
-
 @interface LoadingNode ()
 {
   ASDisplayNode *_loadingSpinner;

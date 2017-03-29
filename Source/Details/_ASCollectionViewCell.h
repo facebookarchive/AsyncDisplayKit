@@ -7,11 +7,16 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 @class ASCellNode;
 
+NS_ASSUME_NONNULL_BEGIN
+
+AS_SUBCLASSING_RESTRICTED
 @interface _ASCollectionViewCell : UICollectionViewCell
 @property (nonatomic, weak) ASCellNode *node;
-@property (nonatomic, strong) UICollectionViewLayoutAttributes *layoutAttributes;
+@property (nonatomic, strong, nullable) UICollectionViewLayoutAttributes *layoutAttributes;
 @end
 
+NS_ASSUME_NONNULL_END

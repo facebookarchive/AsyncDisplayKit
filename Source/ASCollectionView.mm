@@ -317,6 +317,12 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 {
   ASDisplayNodeAssertMainThread();
   
+  if (! _dataController.initialReloadDataHasBeenCalled) {
+    // If this is the first reload, forward to super immediately to prevent it from triggering more "initial" loads while our data controller is working.
+    _superIsPendingDataLoad = YES;
+    [super reloadData];
+  }
+  
   void (^batchUpdatesCompletion)(BOOL);
   if (completion) {
     batchUpdatesCompletion = ^(BOOL) {

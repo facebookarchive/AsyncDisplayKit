@@ -100,6 +100,7 @@
 @interface ASCollectionNode ()
 {
   ASDN::RecursiveMutex _environmentStateLock;
+  Class _collectionViewClass;
 }
 @property (nonatomic) _ASCollectionPendingState *pendingState;
 @end
@@ -108,12 +109,18 @@
 
 #pragma mark Lifecycle
 
-- (instancetype)init
+- (Class)collectionViewClass
 {
-  ASDISPLAYNODE_NOT_DESIGNATED_INITIALIZER();
-  UICollectionViewLayout *nilLayout = nil;
-  self = [self initWithCollectionViewLayout:nilLayout]; // Will throw an exception for lacking a UICV Layout.
-  return nil;
+  return _collectionViewClass ? : [ASCollectionView class];
+}
+
+- (void)setCollectionViewClass:(Class)collectionViewClass
+{
+  if (_collectionViewClass != collectionViewClass) {
+    ASDisplayNodeAssert([collectionViewClass isSubclassOfClass:[ASCollectionView class]] || collectionViewClass == Nil, @"ASCollectionNode requires that .collectionViewClass is an ASCollectionView subclass");
+    ASDisplayNodeAssert([self isNodeLoaded] == NO, @"ASCollectionNode's .collectionViewClass cannot be changed after the view is loaded");
+    _collectionViewClass = collectionViewClass;
+  }
 }
 
 - (instancetype)initWithCollectionViewLayout:(UICollectionViewLayout *)layout
@@ -128,17 +135,14 @@
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
-  __weak __typeof__(self) weakSelf = self;
-  ASDisplayNodeViewBlock collectionViewBlock = ^UIView *{
-    // Variable will be unused if event logging is off.
-    __unused __typeof__(self) strongSelf = weakSelf;
-    return [[ASCollectionView alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
-  };
-
-  if (self = [super initWithViewBlock:collectionViewBlock didLoadBlock:nil]) {
-    return self;
+  if (self = [super init]) {
+    __weak __typeof__(self) weakSelf = self;
+    [self setViewBlock:^{
+      __typeof__(self) strongSelf = weakSelf;
+      return [[[strongSelf collectionViewClass] alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
+    }];
   }
-  return nil;
+  return self;
 }
 
 #pragma mark ASDisplayNode
@@ -519,7 +523,10 @@
 
 - (void)waitUntilAllUpdatesAreCommitted
 {
-  [self.view waitUntilAllUpdatesAreCommitted];
+  ASDisplayNodeAssertMainThread();
+  if (self.nodeLoaded) {
+    [self.view waitUntilAllUpdatesAreCommitted];
+  }
 }
 
 - (void)reloadDataWithCompletion:(void (^)())completion

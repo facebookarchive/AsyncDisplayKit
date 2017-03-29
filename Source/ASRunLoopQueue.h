@@ -22,6 +22,7 @@ AS_SUBCLASSING_RESTRICTED
  * Create a new queue with the given run loop and handler.
  *
  * @param runloop The run loop that will drive this queue.
+ * @param retainsObjects Whether the queue should retain its objects.
  * @param handlerBlock An optional block to be run for each enqueued object.
  *
  * @discussion You may pass @c nil for the handler if you simply want the objects to
@@ -30,7 +31,8 @@ AS_SUBCLASSING_RESTRICTED
  * worker thread with its own run loop.
  */
 - (instancetype)initWithRunLoop:(CFRunLoopRef)runloop
-                     andHandler:(nullable void(^)(ObjectType dequeuedItem, BOOL isQueueDrained))handlerBlock;
+                  retainObjects:(BOOL)retainsObjects
+                        handler:(nullable void(^)(ObjectType dequeuedItem, BOOL isQueueDrained))handlerBlock;
 
 - (void)enqueue:(ObjectType)object;
 

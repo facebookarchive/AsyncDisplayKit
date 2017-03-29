@@ -29,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface ASTableNode : ASDisplayNode <ASRangeControllerUpdateRangeProtocol>
 
 - (instancetype)init; // UITableViewStylePlain
-- (instancetype)initWithStyle:(UITableViewStyle)style;
+- (instancetype)initWithStyle:(UITableViewStyle)style NS_DESIGNATED_INITIALIZER;
 
 @property (strong, nonatomic, readonly) ASTableView *view;
 

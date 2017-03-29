@@ -125,7 +125,10 @@ static inline BOOL ASLayoutCanTransitionAsynchronous(ASLayout *layout) {
 
   ASDisplayNodeLogEvent(_node, @"removeSubnodes: %@", _removedSubnodes);
   for (ASDisplayNode *subnode in _removedSubnodes) {
-    [subnode _removeFromSupernode];
+    // In this case we should only remove the subnode if it's still a subnode of the _node that executes a layout transition.
+    // It can happen that a node already did a layout transition and added this subnode, in this case the subnode
+    // would be removed from the new node instead of _node
+    [subnode _removeFromSupernodeIfEqualTo:_node];
   }
 }
 

@@ -13,6 +13,8 @@
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASTraitCollection.h>
 
+@class ASDisplayNode;
+
 NS_ASSUME_NONNULL_BEGIN
 
 AS_SUBCLASSING_RESTRICTED
@@ -21,12 +23,14 @@ AS_SUBCLASSING_RESTRICTED
 //TODO change this to be a generic "kind" or "elementKind" that exposes `nil` for row kind
 @property (nonatomic, readonly, copy, nullable) NSString *supplementaryElementKind;
 @property (nonatomic, assign) ASSizeRange constrainedSize;
-@property (weak, nonatomic) id<ASTraitEnvironment> traitEnvironment;
+@property (nonatomic, weak) ASDisplayNode *owningNode;
+@property (nonatomic, assign) ASPrimitiveTraitCollection traitCollection;
 
 - (instancetype)initWithNodeBlock:(ASCellNodeBlock)nodeBlock
          supplementaryElementKind:(nullable NSString *)supplementaryElementKind
                   constrainedSize:(ASSizeRange)constrainedSize
-                      environment:(id<ASTraitEnvironment>)environment;
+                       owningNode:(ASDisplayNode *)owningNode
+                  traitCollection:(ASPrimitiveTraitCollection)traitCollection;
 
 /**
  * @return The node, running the node block if necessary. The node block will be discarded

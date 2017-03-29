@@ -200,9 +200,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 /// Bitmask to check which methods an object overrides.
 @property (nonatomic, assign, readonly) ASDisplayNodeMethodOverrides methodOverrides;
 
-// Swizzle to extend the builtin functionality with custom logic
-- (BOOL)__shouldLoadViewOrLayer;
-
 /**
  * Invoked before a call to setNeedsLayout to the underlying view
  */
@@ -218,11 +215,6 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  */
 - (void)__layout;
 
-/*
- * Internal method to set the supernode
- */
-- (void)__setSupernode:(nullable ASDisplayNode *)supernode;
-
 /**
  * Internal method to add / replace / insert subnode and remove from supernode without checking if
  * node has automaticallyManagesSubnodes set to YES.
@@ -232,6 +224,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)_insertSubnode:(ASDisplayNode *)subnode belowSubnode:(ASDisplayNode *)below;
 - (void)_insertSubnode:(ASDisplayNode *)subnode aboveSubnode:(ASDisplayNode *)above;
 - (void)_insertSubnode:(ASDisplayNode *)subnode atIndex:(NSInteger)idx;
+- (void)_removeFromSupernodeIfEqualTo:(ASDisplayNode *)supernode;
 - (void)_removeFromSupernode;
 
 // Private API for helper functions / unit tests.  Use ASDisplayNodeDisableHierarchyNotifications() to control this.
@@ -241,16 +234,16 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
 - (void)__decrementVisibilityNotificationsDisabled;
 
 /// Helper method to summarize whether or not the node run through the display process
-- (BOOL)__implementsDisplay;
+- (BOOL)_implementsDisplay;
 
 /// Display the node's view/layer immediately on the current thread, bypassing the background thread rendering. Will be deprecated.
 - (void)displayImmediately;
 
 /// Alternative initialiser for backing with a custom view class.  Supports asynchronous display with _ASDisplayView subclasses.
-- (nullable instancetype)initWithViewClass:(Class)viewClass;
+- (instancetype)initWithViewClass:(Class)viewClass;
 
 /// Alternative initialiser for backing with a custom layer class.  Supports asynchronous display with _ASDisplayLayer subclasses.
-- (nullable instancetype)initWithLayerClass:(Class)layerClass;
+- (instancetype)initWithLayerClass:(Class)layerClass;
 
 @property (nonatomic, assign) CGFloat contentsScaleForDisplay;
 

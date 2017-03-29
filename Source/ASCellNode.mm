@@ -88,8 +88,10 @@
       _viewControllerNode = asViewController.node;
       [_viewController view];
     } else {
+      // Careful to avoid retain cycle
+      UIViewController *viewController = _viewController;
       _viewControllerNode = [[ASDisplayNode alloc] initWithViewBlock:^{
-        return _viewController.view;
+        return viewController.view;
       }];
     }
     [self addSubnode:_viewControllerNode];
@@ -118,12 +120,12 @@
   _viewControllerNode.frame = self.bounds;
 }
 
-- (void)_locked_rootNodeDidInvalidateSize
+- (void)_rootNodeDidInvalidateSize
 {
   if (_interactionDelegate != nil) {
     [_interactionDelegate nodeDidInvalidateSize:self];
   } else {
-    [super _locked_rootNodeDidInvalidateSize];
+    [super _rootNodeDidInvalidateSize];
   }
 }
 

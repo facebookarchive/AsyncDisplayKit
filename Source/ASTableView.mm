@@ -121,10 +121,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 #pragma mark -
 #pragma mark ASTableView
 
-@interface ASTableNode ()
-- (instancetype)_initWithTableView:(ASTableView *)tableView;
-@end
-
 @interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate>
 {
   ASTableViewProxy *_proxyDataSource;
@@ -482,6 +478,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 - (void)reloadDataWithCompletion:(void (^)())completion
 {
   ASDisplayNodeAssertMainThread();
+  
+  if (! _dataController.initialReloadDataHasBeenCalled) {
+    // If this is the first reload, forward to super immediately to prevent it from triggering more "initial" loads while our data controller is working. 
+    [super reloadData];
+  }
   
   void (^batchUpdatesCompletion)(BOOL);
   if (completion) {

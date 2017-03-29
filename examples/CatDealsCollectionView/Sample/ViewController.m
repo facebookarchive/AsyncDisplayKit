@@ -27,7 +27,6 @@ static const BOOL kSimulateWebResponse = YES;
 static const NSInteger kBatchSize = 20;
 
 static const CGFloat kHorizontalSectionPadding = 10.0f;
-static const CGFloat kVerticalSectionPadding = 20.0f;
 
 @interface ViewController () <ASCollectionDataSource, ASCollectionDelegate, ASCollectionDelegateFlowLayout>
 {
