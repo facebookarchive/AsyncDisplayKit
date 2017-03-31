@@ -438,12 +438,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
-  /**
-   * If the initial reloadData has not been called, just bail because we don't have
-   * our old data source counts.
-   * See ASUICollectionViewTests.testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
-   * For the issue that UICollectionView has that we're choosing to workaround.
-   */
+  // If the initial reloadData has not been called, just bail because we don't have our old data source counts.
+  // See ASUICollectionViewTests.testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
+  // for the issue that UICollectionView has that we're choosing to workaround.
   if (!_initialReloadDataHasBeenCalled) {
     [changeSet executeCompletionHandlerWithFinished:YES];
     return;
@@ -451,6 +448,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   
   [self invalidateDataSourceItemCounts];
   
+  // Log events
   ASDataControllerLogEvent(self, @"triggeredUpdate: %@", changeSet);
 #if ASEVENTLOG_ENABLE
   NSString *changeSetDescription = ASObjectDescriptionMakeTiny(changeSet);
@@ -472,13 +470,22 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       @throw e;
     }
   }
-
+  
+  // Since we waited for _editingTransactionGroup at the beginning of this method, at this point we can guarantee that _pendingMap equals to _visibleMap.
+  // So if the change set is empty, we don't need to modify data and can safely schedule to notify the delegate.
+  if (changeSet.isEmpty) {
+    [_mainSerialQueue performBlockOnMainThread:^{
+      [_delegate dataController:self willUpdateWithChangeSet:changeSet];
+      [_delegate dataController:self didUpdateWithChangeSet:changeSet];
+    }];
+    return;
+  }
+  
   // Mutable copy of current data.
   ASMutableElementMap *mutableMap = [_pendingMap mutableCopy];
   
   // Step 1: update the mutable copies to match the data source's state
   [self _updateSectionContextsInMap:mutableMap changeSet:changeSet];
-  //TODO If _elements is the same, use a fast path
   __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   __weak ASDisplayNode *owningNode = (ASDisplayNode *)environment; // This is gross!
   ASPrimitiveTraitCollection existingTraitCollection = [environment primitiveTraitCollection];
@@ -492,7 +499,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     // Step 3: Layout **all** new elements without batching in background.
     NSArray<ASCollectionElement *> *unmeasuredElements = [ASDataController unmeasuredElementsFromMap:newMap];
-    // TODO layout in batches, esp reloads
     [self batchLayoutNodesFromContexts:unmeasuredElements batchSize:unmeasuredElements.count batchCompletion:^(id, id) {
       ASSERT_ON_EDITING_QUEUE;
       [_mainSerialQueue performBlockOnMainThread:^{
@@ -518,11 +524,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     return;
   }
   
-  // TODO if the change set includes solely section reloads that together are equivalent to reloadData (i.e reload the only section),
-  // do a reloadData here as an optimization.
-  
   if (changeSet.includesReloadData) {
-
     [map removeAllSectionContexts];
     
     NSUInteger sectionCount = [self itemCountsFromDataSource].size();
@@ -566,9 +568,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
              traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASDisplayNodeAssertMainThread();
-  
-  // TODO if the change set includes solely section reloads that together are equivalent to reloadData (i.e reload the only section),
-  // do a reloadData here as an optimization.
   
   if (changeSet.includesReloadData) {
     [map removeAllElements];

@@ -149,6 +149,11 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 #pragma mark External API
 
+- (BOOL)isEmpty
+{
+  return (! _includesReloadData) && (! [self _includesPerItemOrSectionChanges]);
+}
+
 - (void)addCompletionHandler:(void (^)(BOOL))completion
 {
   [self _ensureNotCompleted];
@@ -423,13 +428,10 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
 
 - (void)_validateUpdate
 {
-  // Assert that if reloadData exists, it's the only change
-  // TODO: remove this and be lenient on them?
+  // If reloadData exists, ignore other changes
   if (_includesReloadData) {
-    if (0 < (_originalDeleteSectionChanges.count + _originalDeleteItemChanges.count
-             +_originalInsertSectionChanges.count + _originalInsertItemChanges.count
-             + _reloadSectionChanges.count + _reloadItemChanges.count)) {
-      ASFailUpdateValidation(@"Attempt to reload data in conjuntion with other updates.");
+    if ([self _includesPerItemOrSectionChanges]) {
+      NSLog(@"Warning: A reload data shouldn't be used in conjuntion with other updates.");
     }
     return;
   }
@@ -542,6 +544,13 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType)
       return;
     }
   }
+}
+
+- (BOOL)_includesPerItemOrSectionChanges
+{
+  return 0 < (_originalDeleteSectionChanges.count + _originalDeleteItemChanges.count
+              +_originalInsertSectionChanges.count + _originalInsertItemChanges.count
+              + _reloadSectionChanges.count + _reloadItemChanges.count);
 }
 
 #pragma mark - Debugging (Private)
