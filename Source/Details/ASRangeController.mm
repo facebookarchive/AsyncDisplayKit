@@ -410,9 +410,16 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 #pragma mark - Notification observers
 
+/**
+ * If we're in a restricted range mode, but we're going to change to a full range mode soon,
+ * go ahead and schedule the transition as soon as all the currently-scheduled rendering is done #1163.
+ */
 - (void)registerForNodeDisplayNotificationsForInterfaceStateIfNeeded:(ASInterfaceState)interfaceState
 {
-  if (!_didRegisterForNodeDisplayNotifications) {
+  // Do not schedule to listen if we're already in full range mode.
+  // This avoids updating the range controller during a collection teardown when it is removed
+  // from the hierarchy and its data source is cleared, causing UIKit to call -reloadData.
+  if (!_didRegisterForNodeDisplayNotifications && _currentRangeMode != ASLayoutRangeModeFull) {
     ASLayoutRangeMode nextRangeMode = [ASRangeController rangeModeForInterfaceState:interfaceState
                                                                    currentRangeMode:_currentRangeMode];
     if (_currentRangeMode != nextRangeMode) {
