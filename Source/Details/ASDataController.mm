@@ -170,6 +170,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 - (void)_layoutNode:(ASCellNode *)node withConstrainedSize:(ASSizeRange)constrainedSize
 {
   ASDisplayNodeAssert(ASSizeRangeHasSignificantArea(constrainedSize), @"Attempt to layout cell node with invalid size range %@", NSStringFromASSizeRange(constrainedSize));
+  ASDisplayNodeAssert(!ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(node.primitiveTraitCollection, ASPrimitiveTraitCollectionMakeDefault()), @"Attempt to layout cell node before it has a trait collection.");
 
   CGRect frame = CGRectZero;
   frame.size = [node layoutThatFits:constrainedSize].size;
@@ -199,10 +200,14 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
     }
 
-    // Layout the node if the size range is valid.
-    ASSizeRange sizeRange = context.constrainedSize;
-    if (ASSizeRangeHasSignificantArea(sizeRange)) {
-      [self _layoutNode:node withConstrainedSize:sizeRange];
+    // Layout the node if we have a trait collection & the size range is valid.
+    // When the collection gets layoutSubviews with a new size (i.e. new trait collection
+    // and probably new sizeRange) we will perform another layout on it.
+    if (!ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(ASPrimitiveTraitCollectionMakeDefault(), node.primitiveTraitCollection)) {
+      ASSizeRange sizeRange = context.constrainedSize;
+      if (ASSizeRangeHasSignificantArea(sizeRange)) {
+        [self _layoutNode:node withConstrainedSize:sizeRange];
+      }
     }
 
 #if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
@@ -683,9 +688,10 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       element.constrainedSize = constrainedSize;
 
       // Node may not be allocated yet (e.g node virtualization or same size optimization)
+      // or it may not have a trait collection yet.
       // Call context.nodeIfAllocated here to avoid immature node allocation and layout
       ASCellNode *node = element.nodeIfAllocated;
-      if (node) {
+      if (node != nil && !ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(node.primitiveTraitCollection, ASPrimitiveTraitCollectionMakeDefault())) {
         [self _layoutNode:node withConstrainedSize:constrainedSize];
       }
     }
