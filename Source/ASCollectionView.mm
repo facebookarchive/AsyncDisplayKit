@@ -1742,6 +1742,10 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     return @[];
   }
 
+  // If we are layout pending, -indexPathsForVisibleItems will reflect the previous data set, not the current one,
+  // and we may find the wrong element. https://github.com/facebook/AsyncDisplayKit/issues/3235
+  [self layoutIfNeeded];
+
   ASElementMap *map = _dataController.visibleMap;
   NSMutableArray<ASCollectionElement *> *result = [NSMutableArray array];
 
