@@ -154,7 +154,7 @@
 
 #pragma mark Setter / Getter
 
-// TODO: Implement this without the view.
+// TODO: Implement this without the view. Then revisit ASLayoutElementCollectionTableSetTraitCollection
 - (ASDataController *)dataController
 {
   return self.view.dataController;
