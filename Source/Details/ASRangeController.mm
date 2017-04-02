@@ -12,7 +12,7 @@
 
 #import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
 #import <AsyncDisplayKit/ASAssert.h>
-#import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASCellNode+Internal.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h> // Required for interfaceState and hierarchyState setter methods.
@@ -444,7 +444,13 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(node, @"Cannot move a nil node to a view");
   ASDisplayNodeAssert(contentView, @"Cannot move a node to a non-existent view");
-  
+
+  if (node.shouldUseUIKitCell) {
+    // When using UIKit cells, the ASCellNode is just a placeholder object with a preferredSize.
+    // In this case, we should not disrupt the subviews of the contentView.
+    return;
+  }
+
   if (node.view.superview == contentView) {
     // this content view is already correctly configured
     return;
