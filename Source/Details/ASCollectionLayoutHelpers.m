@@ -9,12 +9,12 @@
 #import <AsyncDisplayKit/ASCollectionLayoutHelpers.h>
 
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
-#import <AsyncDisplayKit/ASCollectionContentAttributes.h>
+#import <AsyncDisplayKit/ASCollectionLayoutState.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASLayout.h>
 
-ASCollectionContentAttributes *ASLayoutToCollectionContentAttributes(ASLayout *layout, ASElementMap *elementMap)
+ASCollectionLayoutState *ASLayoutToCollectionContentAttributes(ASLayout *layout, ASElementMap *elementMap)
 {
   NSMapTable<ASCollectionElement *, UICollectionViewLayoutAttributes *> *attrsMap = [NSMapTable weakToStrongObjectsMapTable];
   for (ASLayout *sublayout in layout.sublayouts) {
@@ -32,6 +32,6 @@ ASCollectionContentAttributes *ASLayoutToCollectionContentAttributes(ASLayout *l
     [attrsMap setObject:attrs forKey:element];
   }
   
-  return [[ASCollectionContentAttributes alloc] initWithElementMap:elementMap contentSize:layout.size elementToLayoutArrtibutesMap:attrsMap];
+  return [[ASCollectionLayoutState alloc] initWithElementMap:elementMap contentSize:layout.size elementToLayoutArrtibutesMap:attrsMap];
 }
 

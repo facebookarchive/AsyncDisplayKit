@@ -11,7 +11,7 @@
 
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
-#import <AsyncDisplayKit/ASCollectionContentAttributes.h>
+#import <AsyncDisplayKit/ASCollectionLayoutState.h>
 #import <AsyncDisplayKit/ASCollectionNode.h>
 #import <AsyncDisplayKit/ASDataControllerLayoutContext.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
@@ -23,12 +23,12 @@
   ASDN::Mutex __instanceLock__; // Non-recursive mutex, ftw!
   
   // Main thread only.
-  ASCollectionContentAttributes *_currentContentAttributes;
+  ASCollectionLayoutState *_state;
   
-  // The pending content calculated ahead of time, if any.
-  ASCollectionContentAttributes *_pendingContentAttributes;
-  // The context used to calculate _pendingContentAttributes
-  ASDataControllerLayoutContext *_layoutContextForPendingContentAttributes;
+  // The pending state calculated ahead of time, if any.
+  ASCollectionLayoutState *_pendingState;
+  // The context used to calculate _pendingState
+  ASDataControllerLayoutContext *_layoutContextForPendingState;
 }
 
 @end
@@ -40,17 +40,17 @@
   return [super init];
 }
 
-- (ASCollectionContentAttributes *)currentContentAttributes
+- (ASCollectionLayoutState *)state
 {
   ASDisplayNodeAssertMainThread();
-  return _currentContentAttributes;
+  return _state;
 }
 
-- (void)setCurrentContentAttributes:(ASCollectionContentAttributes *)newAttrs
+- (void)setState:(ASCollectionLayoutState *)newState
 {
   ASDisplayNodeAssertMainThread();
-  if (! ASObjectIsEqual(_currentContentAttributes, newAttrs)) {
-    _currentContentAttributes = newAttrs;
+  if (! ASObjectIsEqual(_state, newState)) {
+    _state = newState;
   }
 }
 
@@ -64,11 +64,11 @@
 
 - (void)prepareLayoutForLayoutContext:(ASDataControllerLayoutContext *)context
 {
-  ASCollectionContentAttributes *attrs = [self calculateLayoutForLayoutContext:context];
+  ASCollectionLayoutState *state = [self calculateLayoutForLayoutContext:context];
   
   ASDN::MutexLocker l(__instanceLock__);
-  _pendingContentAttributes = attrs;
-  _layoutContextForPendingContentAttributes = context;
+  _pendingState = state;
+  _layoutContextForPendingState = context;
 }
 
 #pragma mark - UICollectionViewLayout overrides
@@ -78,40 +78,40 @@
   ASDisplayNodeAssertMainThread();
   ASDataControllerLayoutContext *context =  [self layoutContextWithElementMap:[_dataSource elementMapForCollectionLayout:self]];
   
-  ASCollectionContentAttributes *attrs;
+  ASCollectionLayoutState *state;
   {
     ASDN::MutexLocker l(__instanceLock__);
-    if (_pendingContentAttributes != nil && ASObjectIsEqual(_layoutContextForPendingContentAttributes, context)) {
+    if (_pendingState != nil && ASObjectIsEqual(_layoutContextForPendingState, context)) {
       // Looks like we can use the pending attrs. Great!
-      attrs = _pendingContentAttributes;
-      _pendingContentAttributes = nil;
-      _layoutContextForPendingContentAttributes = nil;
+      state = _pendingState;
+      _pendingState = nil;
+      _layoutContextForPendingState = nil;
     }
   }
   
-  if (attrs == nil) {
-    attrs = [self calculateLayoutForLayoutContext:context];
+  if (state == nil) {
+    state = [self calculateLayoutForLayoutContext:context];
   }
   
-  _currentContentAttributes = attrs;
+  _state = state;
 }
 
 - (void)invalidateLayout
 {
   ASDisplayNodeAssertMainThread();
   [super invalidateLayout];
-  _currentContentAttributes = nil;
+  _state = nil;
 }
 
 - (CGSize)collectionViewContentSize
 {
   ASDisplayNodeAssertMainThread();
-  return _currentContentAttributes.contentSize;
+  return _state.contentSize;
 }
 
 #pragma mark - Subclass hooks
 
-- (ASCollectionContentAttributes *)calculateLayoutForLayoutContext:(ASDataControllerLayoutContext *)context
+- (ASCollectionLayoutState *)calculateLayoutForLayoutContext:(ASDataControllerLayoutContext *)context
 {
   // Subclass hooks
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);

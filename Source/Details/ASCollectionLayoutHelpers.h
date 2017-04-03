@@ -8,6 +8,6 @@
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
-@class ASCollectionContentAttributes, ASLayout, ASElementMap;
+@class ASCollectionLayoutState, ASLayout, ASElementMap;
 
-extern AS_WARN_UNUSED_RESULT ASCollectionContentAttributes *ASLayoutToCollectionContentAttributes(ASLayout *layout, ASElementMap *elementMap);
+extern AS_WARN_UNUSED_RESULT ASCollectionLayoutState *ASLayoutToCollectionContentAttributes(ASLayout *layout, ASElementMap *elementMap);

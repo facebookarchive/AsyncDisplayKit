@@ -1,5 +1,5 @@
 //
-//  ASCollectionContentAttributes.h
+//  ASCollectionLayoutState.h
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 9/3/17.
@@ -15,7 +15,7 @@
 NS_ASSUME_NONNULL_BEGIN
 
 AS_SUBCLASSING_RESTRICTED
-@interface ASCollectionContentAttributes : NSObject
+@interface ASCollectionLayoutState : NSObject
 
 /// The element map used to calculate this object
 @property (nonatomic, weak, readonly) ASElementMap *elementMap;

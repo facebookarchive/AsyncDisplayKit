@@ -9,7 +9,7 @@
 #import <AsyncDisplayKit/ASCollectionLayout+Subclasses.h>
 
 #import <AsyncDisplayKit/ASCellNode.h>
-#import <AsyncDisplayKit/ASCollectionContentAttributes.h>
+#import <AsyncDisplayKit/ASCollectionLayoutState.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASCollectionLayoutHelpers.h>
 #import <AsyncDisplayKit/ASDataControllerLayoutContext.h>
@@ -53,12 +53,12 @@
   return sizeRange;
 }
 
-- (ASCollectionContentAttributes *)calculateLayoutForLayoutContext:(ASDataControllerLayoutContext *)context
+- (ASCollectionLayoutState *)calculateLayoutForLayoutContext:(ASDataControllerLayoutContext *)context
 {
   ASElementMap *elementMap = context.elementMap;
   NSMutableArray<ASCellNode *> *children = ASArrayByFlatMapping(elementMap.itemElements, ASCollectionElement *element, element.node);
   if (children.count == 0) {
-    return [[ASCollectionContentAttributes alloc] initWithElementMap:elementMap
+    return [[ASCollectionLayoutState alloc] initWithElementMap:elementMap
                                                          contentSize:CGSizeZero
                                         elementToLayoutArrtibutesMap:[NSMapTable weakToStrongObjectsMapTable]];
   }
@@ -90,16 +90,16 @@
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath
 {
-  ASCollectionContentAttributes *content = self.currentContentAttributes;
-  ASCollectionElement *element = [content.elementMap elementForItemAtIndexPath:indexPath];
-  return [content.elementToLayoutArrtibutesMap objectForKey:element];
+  ASCollectionLayoutState *state = self.currentContentAttributes;
+  ASCollectionElement *element = [state.elementMap elementForItemAtIndexPath:indexPath];
+  return [state.elementToLayoutArrtibutesMap objectForKey:element];
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
-  ASCollectionContentAttributes *content = self.currentContentAttributes;
-  ASCollectionElement *element = [content.elementMap supplementaryElementOfKind:elementKind atIndexPath:indexPath];
-  return [content.elementToLayoutArrtibutesMap objectForKey:element];
+  ASCollectionLayoutState *state = self.currentContentAttributes;
+  ASCollectionElement *element = [state.elementMap supplementaryElementOfKind:elementKind atIndexPath:indexPath];
+  return [state.elementToLayoutArrtibutesMap objectForKey:element];
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForDecorationViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
