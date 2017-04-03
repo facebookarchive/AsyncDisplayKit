@@ -11,7 +11,6 @@
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASCollectionLayoutState.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
-#import <AsyncDisplayKit/ASCollectionLayoutHelpers.h>
 #import <AsyncDisplayKit/ASDataControllerLayoutContext.h>
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASLayout.h>
@@ -53,7 +52,7 @@
   return sizeRange;
 }
 
-- (ASCollectionLayoutState *)calculateLayoutForLayoutContext:(ASDataControllerLayoutContext *)context
+- (ASCollectionLayoutState *)calculateLayoutWithContext:(ASDataControllerLayoutContext *)context
 {
   ASElementMap *elementMap = context.elementMap;
   NSMutableArray<ASCellNode *> *children = ASArrayByFlatMapping(elementMap.itemElements, ASCollectionElement *element, element.node);
@@ -72,39 +71,7 @@
                                                                         children:children];
   stackSpec.concurrent = YES;
   ASLayout *layout = [stackSpec layoutThatFits:[self sizeRangeThatFits:context.viewportSize]];
-  return ASLayoutToCollectionContentAttributes(layout, elementMap);
-}
-
-- (NSArray<UICollectionViewLayoutAttributes *> *)layoutAttributesForElementsInRect:(CGRect)rect
-{
-  NSMutableArray *attributesInRect = [NSMutableArray array];
-  NSMapTable *attrsMap = self.currentContentAttributes.elementToLayoutArrtibutesMap;
-  for (ASCollectionElement *element in attrsMap) {
-    UICollectionViewLayoutAttributes *attrs = [attrsMap objectForKey:element];
-    if (CGRectIntersectsRect(rect, attrs.frame)) {
-      [attributesInRect addObject:attrs];
-    }
-  }
-  return attributesInRect;
-}
-
-- (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath
-{
-  ASCollectionLayoutState *state = self.currentContentAttributes;
-  ASCollectionElement *element = [state.elementMap elementForItemAtIndexPath:indexPath];
-  return [state.elementToLayoutArrtibutesMap objectForKey:element];
-}
-
-- (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
-{
-  ASCollectionLayoutState *state = self.currentContentAttributes;
-  ASCollectionElement *element = [state.elementMap supplementaryElementOfKind:elementKind atIndexPath:indexPath];
-  return [state.elementToLayoutArrtibutesMap objectForKey:element];
-}
-
-- (UICollectionViewLayoutAttributes *)layoutAttributesForDecorationViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
-{
-  return [self layoutAttributesForSupplementaryViewOfKind:elementKind atIndexPath:indexPath];
+  return [[ASCollectionLayoutState alloc] initWithElementMap:elementMap layout:layout];
 }
 
 @end

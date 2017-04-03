@@ -39,8 +39,6 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, weak) ASCollectionNode *collectionNode;
 
-- (instancetype)init NS_DESIGNATED_INITIALIZER;
-
 - (instancetype)initWithCoder:(NSCoder *)aDecoder __unavailable;
 
 @end

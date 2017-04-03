@@ -35,25 +35,6 @@
 
 @implementation ASCollectionLayout
 
-- (instancetype)init
-{
-  return [super init];
-}
-
-- (ASCollectionLayoutState *)state
-{
-  ASDisplayNodeAssertMainThread();
-  return _state;
-}
-
-- (void)setState:(ASCollectionLayoutState *)newState
-{
-  ASDisplayNodeAssertMainThread();
-  if (! ASObjectIsEqual(_state, newState)) {
-    _state = newState;
-  }
-}
-
 #pragma mark - ASDataControllerLayoutDelegate
 
 - (ASDataControllerLayoutContext *)layoutContextWithElementMap:(ASElementMap *)map
@@ -64,7 +45,7 @@
 
 - (void)prepareLayoutForLayoutContext:(ASDataControllerLayoutContext *)context
 {
-  ASCollectionLayoutState *state = [self calculateLayoutForLayoutContext:context];
+  ASCollectionLayoutState *state = [self calculateLayoutWithContext:context];
   
   ASDN::MutexLocker l(__instanceLock__);
   _pendingState = state;
@@ -90,7 +71,7 @@
   }
   
   if (state == nil) {
-    state = [self calculateLayoutForLayoutContext:context];
+    state = [self calculateLayoutWithContext:context];
   }
   
   _state = state;
@@ -106,12 +87,40 @@
 - (CGSize)collectionViewContentSize
 {
   ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertNotNil(_state, @"Collection layout state should not be nil at this point");
   return _state.contentSize;
+}
+
+- (NSArray<UICollectionViewLayoutAttributes *> *)layoutAttributesForElementsInRect:(CGRect)rect
+{
+  NSMutableArray *attributesInRect = [NSMutableArray array];
+  NSMapTable *attrsMap = _state.elementToLayoutArrtibutesMap;
+  for (ASCollectionElement *element in attrsMap) {
+    UICollectionViewLayoutAttributes *attrs = [attrsMap objectForKey:element];
+    if (CGRectIntersectsRect(rect, attrs.frame)) {
+      [attributesInRect addObject:attrs];
+    }
+  }
+  return attributesInRect;
+}
+
+- (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+  ASCollectionLayoutState *state = _state;
+  ASCollectionElement *element = [state.elementMap elementForItemAtIndexPath:indexPath];
+  return [state.elementToLayoutArrtibutesMap objectForKey:element];
+}
+
+- (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
+{
+  ASCollectionLayoutState *state = _state;
+  ASCollectionElement *element = [state.elementMap supplementaryElementOfKind:elementKind atIndexPath:indexPath];
+  return [state.elementToLayoutArrtibutesMap objectForKey:element];
 }
 
 #pragma mark - Subclass hooks
 
-- (ASCollectionLayoutState *)calculateLayoutForLayoutContext:(ASDataControllerLayoutContext *)context
+- (ASCollectionLayoutState *)calculateLayoutWithContext:(ASDataControllerLayoutContext *)context
 {
   // Subclass hooks
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);

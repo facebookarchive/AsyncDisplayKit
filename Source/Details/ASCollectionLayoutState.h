@@ -10,7 +10,7 @@
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
-@class ASElementMap, ASCollectionElement;
+@class ASElementMap, ASCollectionElement, ASLayout;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -33,9 +33,21 @@ AS_SUBCLASSING_RESTRICTED
  *
  * @param contentSize The content size of the collection's layout
  *
- * @param elementToLayoutArrtibutesMap Map between elements to their layout attributes. The map may contain all elements, or a subset of them and to be updated later. Should use weak pointers for elements.
+ * @param elementToLayoutArrtibutesMap Map between elements to their layout attributes. The map may contain all elements, or a subset of them and will be updated later. 
+ * Also, it should have NSMapTableObjectPointerPersonality and NSMapTableWeakMemory as key options.
  */
 - (instancetype)initWithElementMap:(ASElementMap *)elementMap contentSize:(CGSize)contentSize elementToLayoutArrtibutesMap:(NSMapTable<ASCollectionElement *, UICollectionViewLayoutAttributes *> *)attrsMap NS_DESIGNATED_INITIALIZER;
+
+/**
+ * Convenience initializer.
+ *
+ * @param elementMap The element map used to calculate this object
+ *
+ * @param layout The layout describes size and position of all elements, or a subset of them and will be updated later.
+ *
+ * @discussion The sublayouts that describe position of elements must be direct children of the root layout object parameter.
+ */
+- (instancetype)initWithElementMap:(ASElementMap *)elementMap layout:(ASLayout *)layout;
 
 @end
 

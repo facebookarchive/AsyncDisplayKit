@@ -15,9 +15,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @interface ASCollectionLayout () <ASDataControllerLayoutDelegate>
 
-/// The current state of this layout object, if any. This property must be accessed on main thread.
-@property (nonatomic, strong, nullable) ASCollectionLayoutState *state;
-
 /**
  * @abstract Prepares and returns a new layout for given context.
  *
@@ -32,7 +29,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @discussion This method must block its calling thread but can dispatch to other theads to reduce blocking time.
  */
-- (ASCollectionLayoutState *)calculateLayoutForLayoutContext:(ASDataControllerLayoutContext *)context;
+- (ASCollectionLayoutState *)calculateLayoutWithContext:(ASDataControllerLayoutContext *)context;
 
 @end
 

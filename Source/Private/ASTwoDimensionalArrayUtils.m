@@ -21,9 +21,10 @@
 NSMutableArray<NSMutableArray *> *ASTwoDimensionalArrayDeepMutableCopy(NSArray<NSArray *> *array)
 {
   NSMutableArray *newArray = [NSMutableArray arrayWithCapacity:array.count];
+  NSInteger i = 0;
   for (NSArray *subarray in array) {
     ASDisplayNodeCAssert([subarray isKindOfClass:[NSArray class]], @"This function expects NSArray<NSArray *> *");
-    [newArray addObject:[subarray mutableCopy]];
+    newArray[i++] = [subarray mutableCopy];
   }
   return newArray;
 }
@@ -65,11 +66,12 @@ NSArray *ASIndexPathsForTwoDimensionalArray(NSArray <NSArray *>* twoDimensionalA
 {
   NSMutableArray *result = [NSMutableArray array];
   NSInteger section = 0;
+  NSInteger i = 0;
   for (NSArray *subarray in twoDimensionalArray) {
     ASDisplayNodeCAssert([subarray isKindOfClass:[NSArray class]], @"This function expects NSArray<NSArray *> *");
     NSInteger itemCount = subarray.count;
     for (NSInteger item = 0; item < itemCount; item++) {
-      [result addObject:[NSIndexPath indexPathForItem:item inSection:section]];
+      result[i++] = [NSIndexPath indexPathForItem:item inSection:section];
     }
     section++;
   }
@@ -79,10 +81,11 @@ NSArray *ASIndexPathsForTwoDimensionalArray(NSArray <NSArray *>* twoDimensionalA
 NSArray *ASElementsInTwoDimensionalArray(NSArray <NSArray *>* twoDimensionalArray)
 {
   NSMutableArray *result = [NSMutableArray array];
+  NSInteger i = 0;
   for (NSArray *subarray in twoDimensionalArray) {
     ASDisplayNodeCAssert([subarray isKindOfClass:[NSArray class]], @"This function expects NSArray<NSArray *> *");
     for (id element in subarray) {
-      [result addObject:element];
+      result[i++] = element;
     }
   }
   return result;
