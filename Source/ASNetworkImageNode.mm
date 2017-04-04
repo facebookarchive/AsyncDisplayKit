@@ -133,10 +133,11 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   [self _locked__setImage:image];
 }
 
-/// Setter for private image property. See @c setImage why this is needed
+/// Setter for private image property. See @c _locked_setImage why this is needed
 - (void)_setImage:(UIImage *)image
 {
-  super.image = image;
+  ASDN::MutexLocker l(__instanceLock__);
+  [self _locked__setImage:image];
 }
 
 - (void)_locked__setImage:(UIImage *)image
