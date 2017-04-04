@@ -54,7 +54,8 @@
           selector == @selector(tableView:didEndDisplayingCell:forRowAtIndexPath:) ||
           
           // used for batch fetching API
-          selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)
+          selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:) ||
+          selector == @selector(scrollViewDidEndDecelerating:)
           );
 }
 
@@ -96,6 +97,7 @@
           
           // used for batch fetching API
           selector == @selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:) ||
+          selector == @selector(scrollViewDidEndDecelerating:) ||
           
           // used for ASCellNode visibility
           selector == @selector(scrollViewDidScroll:) ||
