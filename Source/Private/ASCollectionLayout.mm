@@ -7,13 +7,13 @@
 //
 
 #import <AsyncDisplayKit/ASCollectionLayout.h>
-#import <AsyncDisplayKit/ASCollectionLayout+Subclasses.h>
 
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
+#import <AsyncDisplayKit/ASCollectionLayoutContext.h>
+#import <AsyncDisplayKit/ASCollectionLayoutDelegate.h>
 #import <AsyncDisplayKit/ASCollectionLayoutState.h>
-#import <AsyncDisplayKit/ASCollectionNode.h>
-#import <AsyncDisplayKit/ASDataControllerLayoutContext.h>
+#import <AsyncDisplayKit/ASCollectionNode+Beta.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
@@ -28,24 +28,40 @@
   // The pending state calculated ahead of time, if any.
   ASCollectionLayoutState *_pendingState;
   // The context used to calculate _pendingState
-  ASDataControllerLayoutContext *_layoutContextForPendingState;
+  ASCollectionLayoutContext *_layoutContextForPendingState;
+  
+  BOOL _layoutDelegateImplementsLayoutContextWithElementMap;
 }
 
 @end
 
 @implementation ASCollectionLayout
 
-#pragma mark - ASDataControllerLayoutDelegate
-
-- (ASDataControllerLayoutContext *)layoutContextWithElementMap:(ASElementMap *)map
+- (instancetype)initWithLayoutDelegate:(id<ASCollectionLayoutDelegate>)layoutDelegate
 {
-  ASDisplayNodeAssertMainThread();
-  return [[ASDataControllerLayoutContext alloc] initWithViewportSize:[self viewportSize] elementMap:map];
+  self = [super init];
+  if (self) {
+    ASDisplayNodeAssertNotNil(layoutDelegate, @"Collection layout delegate cannot be nil");
+    _layoutDelegate = layoutDelegate;
+    _layoutDelegateImplementsLayoutContextWithElementMap = [layoutDelegate respondsToSelector:@selector(layoutContextWithElementMap:)];
+  }
+  return self;
 }
 
-- (void)prepareLayoutForLayoutContext:(ASDataControllerLayoutContext *)context
+#pragma mark - ASDataControllerLayoutDelegate
+
+- (ASCollectionLayoutContext *)layoutContextWithElementMap:(ASElementMap *)map
 {
-  ASCollectionLayoutState *state = [self calculateLayoutWithContext:context];
+  ASDisplayNodeAssertMainThread();
+  if (_layoutDelegateImplementsLayoutContextWithElementMap) {
+    return [_layoutDelegate layoutContextWithElementMap:map];
+  }
+  return [[ASCollectionLayoutContext alloc] initWithViewportSize:self.viewportSize elementMap:map];
+}
+
+- (void)prepareLayoutWithContext:(ASCollectionLayoutContext *)context
+{
+  ASCollectionLayoutState *state = [_layoutDelegate calculateLayoutWithContext:context];
   
   ASDN::MutexLocker l(__instanceLock__);
   _pendingState = state;
@@ -57,7 +73,7 @@
 - (void)prepareLayout
 {
   ASDisplayNodeAssertMainThread();
-  ASDataControllerLayoutContext *context =  [self layoutContextWithElementMap:[_dataSource elementMapForCollectionLayout:self]];
+  ASCollectionLayoutContext *context =  [self layoutContextWithElementMap:_collectionNode.visibleMap];
   
   ASCollectionLayoutState *state;
   {
@@ -71,7 +87,7 @@
   }
   
   if (state == nil) {
-    state = [self calculateLayoutWithContext:context];
+    state = [_layoutDelegate calculateLayoutWithContext:context];
   }
   
   _state = state;
@@ -118,20 +134,11 @@
   return [state.elementToLayoutArrtibutesMap objectForKey:element];
 }
 
-#pragma mark - Subclass hooks
-
-- (ASCollectionLayoutState *)calculateLayoutWithContext:(ASDataControllerLayoutContext *)context
-{
-  // Subclass hooks
-  ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
-  return nil;
-}
-
 #pragma mark - Private methods
 
 - (CGSize)viewportSize
 {
-  ASCollectionNode *collectionNode = self.collectionNode;
+  ASCollectionNode *collectionNode = _collectionNode;
   if (collectionNode != nil && !collectionNode.isNodeLoaded) {
     // TODO consider calculatedSize as well
     return collectionNode.threadSafeBounds.size;

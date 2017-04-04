@@ -1,17 +1,17 @@
 //
-//  ASDataControllerLayoutContext.m
+//  ASCollectionLayoutContext.m
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 21/3/17.
 //  Copyright © 2017 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/ASDataControllerLayoutContext.h>
+#import <AsyncDisplayKit/ASCollectionLayoutContext.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
 
-@implementation ASDataControllerLayoutContext
+@implementation ASCollectionLayoutContext
 
 - (instancetype)initWithViewportSize:(CGSize)viewportSize elementMap:(ASElementMap *)map
 {
@@ -23,7 +23,7 @@
   return self;
 }
 
-- (BOOL)isEqualToContext:(ASDataControllerLayoutContext *)context
+- (BOOL)isEqualToContext:(ASCollectionLayoutContext *)context
 {
   if (context == nil) {
     return NO;
@@ -36,7 +36,7 @@
   if (self == other) {
     return YES;
   }
-  if (! [other isKindOfClass:[ASDataControllerLayoutContext class]]) {
+  if (! [other isKindOfClass:[ASCollectionLayoutContext class]]) {
     return NO;
   }
   return [self isEqualToContext:other];

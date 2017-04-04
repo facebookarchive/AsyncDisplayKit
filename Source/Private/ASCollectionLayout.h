@@ -8,25 +8,16 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
+@protocol ASCollectionLayoutDelegate;
 @class ASElementMap, ASCollectionLayout, ASCollectionNode;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@protocol ASCollectionLayoutDataSource <NSObject>
-
-/**
- * Current element map that can be used by the collection layout, usually the visible map that is in the "UIKit index space."
- *
- * @discussion This method is always called on main.
- */
-- (ASElementMap *)elementMapForCollectionLayout:(ASCollectionLayout *)collectionLayout;
-
-@end
+AS_SUBCLASSING_RESTRICTED
 
 @interface ASCollectionLayout : UICollectionViewLayout
-
-@property (nonatomic, weak) id<ASCollectionLayoutDataSource> dataSource;
 
 /**
  * The collection node object currently using this layout object.
@@ -38,6 +29,20 @@ NS_ASSUME_NONNULL_BEGIN
  *  2. The collection node and data source are thread-safe.
  */
 @property (nonatomic, weak) ASCollectionNode *collectionNode;
+
+@property (nonatomic, strong, readonly) id<ASCollectionLayoutDelegate> layoutDelegate;
+
+/**
+ * Initializes with a layout delegate.
+ *
+ * @discussion For developers' convenience, the delegate is retained by this layout object, similar to UICollectionView retains its UICollectionViewLayout object.
+ *
+ * @discussion For simplicity, the delegate is read-only. If a new layout delegate is needed, construct a new layout object with that delegate and notify ASCollectionView about it.
+ * This ensures the underlying UICollectionView purges its cache and properly loads the new layout.
+ */
+- (instancetype)initWithLayoutDelegate:(id<ASCollectionLayoutDelegate>)layoutDelegate NS_DESIGNATED_INITIALIZER;
+
+- (instancetype)init __unavailable;
 
 - (instancetype)initWithCoder:(NSCoder *)aDecoder __unavailable;
 

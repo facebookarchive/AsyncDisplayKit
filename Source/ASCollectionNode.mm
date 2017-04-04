@@ -11,7 +11,7 @@
 //
 
 #import <AsyncDisplayKit/ASCollectionNode.h>
-#import <AsyncDisplayKit/ASCollectionNode+FrameworkPrivate.h>
+#import <AsyncDisplayKit/ASCollectionNode+Beta.h>
 
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASElementMap.h>
@@ -100,7 +100,7 @@
 
 #pragma mark - ASCollectionNode
 
-@interface ASCollectionNode () <ASCollectionLayoutDataSource>
+@interface ASCollectionNode ()
 {
   ASDN::RecursiveMutex _environmentStateLock;
   Class _collectionViewClass;
@@ -136,15 +136,22 @@
   return [self initWithFrame:frame collectionViewLayout:layout layoutFacilitator:nil];
 }
 
+- (instancetype)initWithFrame:(CGRect)frame collectionLayoutDelegate:(id<ASCollectionLayoutDelegate>)layoutDelegate layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
+{
+  return [self initWithFrame:frame collectionViewLayout:[[ASCollectionLayout alloc] initWithLayoutDelegate:layoutDelegate] layoutFacilitator:layoutFacilitator];
+}
+
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
   if (self = [super init]) {
+    // Must call the setter here to make sure pendingState is created and the layout is configured.
+    [self setCollectionViewLayout:layout];
+    
     __weak __typeof__(self) weakSelf = self;
     [self setViewBlock:^{
       __typeof__(self) strongSelf = weakSelf;
-      return [[[strongSelf collectionViewClass] alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
+      return [[[strongSelf collectionViewClass] alloc] _initWithFrame:frame collectionViewLayout:strongSelf->_pendingState.collectionViewLayout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
     }];
-    [self configureNewCollectionViewLayout:layout];
   }
   return self;
 }
@@ -171,9 +178,7 @@
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
     }
     
-    if (pendingState.collectionViewLayout != nil) {
-      view.collectionViewLayout = pendingState.collectionViewLayout;
-    }
+    // Don't need to set collectionViewLayout to the view as the layout was already used to init the view in view block.
   }
 }
 
@@ -351,11 +356,11 @@
 - (void)setCollectionViewLayout:(UICollectionViewLayout *)layout
 {
   if ([self pendingState]) {
+    [self _configureCollectionViewLayout:layout];
     _pendingState.collectionViewLayout = layout;
-    [self configureNewCollectionViewLayout:layout];
   } else {
+    [self _configureCollectionViewLayout:layout];
     self.view.collectionViewLayout = layout;
-    // Don't call -configureNewCollectionViewLayout: as the view will call on us.
   }
 }
 
@@ -366,6 +371,28 @@
   } else {
     return self.view.collectionViewLayout;
   }
+}
+
+- (ASElementMap *)visibleMap
+{
+  ASDisplayNodeAssertMainThread();
+  // TODO Own the data controller when view is not yet loaded
+  return self.dataController.visibleMap;
+}
+
+- (void)setCollectionLayoutDelegate:(id<ASCollectionLayoutDelegate>)collectionLayoutDelegate
+{
+  ASDisplayNodeAssertNotNil(collectionLayoutDelegate, @"Collection layout delegate cannot be nil. Consider using -setCollectionViewLayout: instead");
+  [self setCollectionViewLayout:[[ASCollectionLayout alloc] initWithLayoutDelegate:collectionLayoutDelegate]];
+}
+
+- (id<ASCollectionLayoutDelegate>)collectionLayoutDelegate
+{
+  UICollectionViewLayout *layout = self.collectionViewLayout;
+  if ([layout isKindOfClass:[ASCollectionLayout class]]) {
+    return ((ASCollectionLayout *)layout).layoutDelegate;
+  }
+  return nil;
 }
 
 #pragma mark - Range Tuning
@@ -690,22 +717,12 @@ ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
   return result;
 }
 
-#pragma mark - ASCollectionLayoutDataSource
+#pragma mark - Private methods
 
-- (ASElementMap *)elementMapForCollectionLayout:(ASCollectionLayout *)collectionLayout
-{
-  ASDisplayNodeAssertMainThread();
-  // TODO Own the data controller when view is not yet loaded
-  return self.dataController.visibleMap;
-}
-
-#pragma mark - Framework private methods
-
-- (void)configureNewCollectionViewLayout:(UICollectionViewLayout *)layout
+- (void)_configureCollectionViewLayout:(UICollectionViewLayout *)layout
 {
   if ([layout isKindOfClass:[ASCollectionLayout class]]) {
     ASCollectionLayout *collectionLayout = (ASCollectionLayout *)layout;
-    collectionLayout.dataSource = self;
     collectionLayout.collectionNode = self;
   }
 }

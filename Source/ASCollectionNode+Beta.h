@@ -10,7 +10,8 @@
 
 #import <AsyncDisplayKit/ASCollectionNode.h>
 
-@protocol ASCollectionViewLayoutFacilitatorProtocol;
+@protocol ASCollectionViewLayoutFacilitatorProtocol, ASCollectionLayoutDelegate;
+@class ASElementMap;
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -23,7 +24,18 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (strong, nonatomic, nullable) Class collectionViewClass;
 
+/**
+ * The map that is currently displayed. The "UIKit index space.". Must be accessed on main thread.
+ */
+@property (strong, nonatomic, readonly) ASElementMap *visibleMap;
+
+- (instancetype)initWithFrame:(CGRect)frame collectionLayoutDelegate:(id<ASCollectionLayoutDelegate>)layoutDelegate layoutFacilitator:(nullable id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator;
+
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(nullable id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator;
+
+- (void)setCollectionLayoutDelegate:(nonnull id<ASCollectionLayoutDelegate>)collectionLayoutDelegate;
+
+- (nullable id<ASCollectionLayoutDelegate>)collectionLayoutDelegate;
 
 - (void)beginUpdates ASDISPLAYNODE_DEPRECATED_MSG("Use -performBatchUpdates:completion: instead.");
 

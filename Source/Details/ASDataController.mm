@@ -9,13 +9,12 @@
 //
 
 #import <AsyncDisplayKit/ASDataController.h>
-#import <AsyncDisplayKit/ASDataController+Beta.h>
 
 #import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
-#import <AsyncDisplayKit/ASDataControllerLayoutContext.h>
+#import <AsyncDisplayKit/ASCollectionLayoutContext.h>
 #import <AsyncDisplayKit/ASDispatch.h>
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASLayout.h>
@@ -548,7 +547,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   _pendingMap = newMap;
   
   // Step 3: Ask layout delegate for contexts
-  ASDataControllerLayoutContext *layoutContext;
+  ASCollectionLayoutContext *layoutContext;
   if (canDelegateLayout) {
     layoutContext = [_layoutDelegate layoutContextWithElementMap:newMap];
   }
@@ -557,8 +556,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     // Step 4: Allocate and layout elements if can't delegate
     NSArray<ASCollectionElement *> *elementsToProcess;
     if (canDelegateLayout) {
-      // Allocate all nodes before handling them to the layout delegate
-      // In the future, we may want to let the delegate to drive allocation as well.
+      // Allocate all nodes before handling them to the layout delegate.
+      // In the future, we may want to let the delegate drive allocation as well.
       elementsToProcess = ASArrayByFlatMapping(newMap,
                                                ASCollectionElement *element,
                                                (element.nodeIfAllocated == nil ? element : nil));
@@ -572,7 +571,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       ASSERT_ON_EDITING_QUEUE;
 
       if (canDelegateLayout) {
-        [_layoutDelegate prepareLayoutForLayoutContext:layoutContext];
+        [_layoutDelegate prepareLayoutWithContext:layoutContext];
       }
       
       [_mainSerialQueue performBlockOnMainThread:^{

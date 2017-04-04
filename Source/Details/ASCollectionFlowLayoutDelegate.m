@@ -1,22 +1,21 @@
-//  ASCollectionFlowLayout.m
+//  ASCollectionFlowLayoutDelegate.m
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 28/2/17.
 //  Copyright © 2017 Facebook. All rights reserved.
 //
 
-#import <AsyncDisplayKit/ASCollectionFlowLayout.h>
-#import <AsyncDisplayKit/ASCollectionLayout+Subclasses.h>
+#import <AsyncDisplayKit/ASCollectionFlowLayoutDelegate.h>
 
 #import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASCollectionLayoutState.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
-#import <AsyncDisplayKit/ASDataControllerLayoutContext.h>
+#import <AsyncDisplayKit/ASCollectionLayoutContext.h>
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASStackLayoutSpec.h>
 
-@implementation ASCollectionFlowLayout {
+@implementation ASCollectionFlowLayoutDelegate {
   ASScrollDirection _scrollableDirections;
 }
 
@@ -52,7 +51,7 @@
   return sizeRange;
 }
 
-- (ASCollectionLayoutState *)calculateLayoutWithContext:(ASDataControllerLayoutContext *)context
+- (ASCollectionLayoutState *)calculateLayoutWithContext:(ASCollectionLayoutContext *)context
 {
   ASElementMap *elementMap = context.elementMap;
   NSMutableArray<ASCellNode *> *children = ASArrayByFlatMapping(elementMap.itemElements, ASCollectionElement *element, element.node);

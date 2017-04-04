@@ -1,5 +1,5 @@
 //
-//  ASDataControllerLayoutContext.h
+//  ASCollectionLayoutContext.h
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 21/3/17.
@@ -13,7 +13,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface ASDataControllerLayoutContext : NSObject
+@interface ASCollectionLayoutContext : NSObject
 
 @property (nonatomic, assign, readonly) CGSize viewportSize;
 @property (nonatomic, weak, readonly) ASElementMap *elementMap;

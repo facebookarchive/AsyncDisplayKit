@@ -40,7 +40,7 @@ extern NSArray<NSIndexPath *> *ASIndexPathsForTwoDimensionalArray(NSArray<NSArra
 /**
  * Return all the elements of a two-dimensional array, in ascending order.
  */
-extern NSArray<NSIndexPath *> *ASElementsInTwoDimensionalArray(NSArray<NSArray *>* twoDimensionalArray) AS_WARN_UNUSED_RESULT;
+extern NSArray *ASElementsInTwoDimensionalArray(NSArray<NSArray *>* twoDimensionalArray) AS_WARN_UNUSED_RESULT;
 
 /**
  * Attempt to get the object at the given index path. Returns @c nil if the index path is out of bounds.

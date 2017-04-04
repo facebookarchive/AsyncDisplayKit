@@ -19,14 +19,12 @@
 #import <AsyncDisplayKit/ASCollectionViewLayoutFacilitatorProtocol.h>
 #import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
 #import <AsyncDisplayKit/ASDataController.h>
-#import <AsyncDisplayKit/ASDataController+Beta.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkPrivate.h>
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
 #import <AsyncDisplayKit/ASRangeController.h>
-#import <AsyncDisplayKit/ASCollectionNode+FrameworkPrivate.h>
 #import <AsyncDisplayKit/_ASCollectionViewCell.h>
 #import <AsyncDisplayKit/_ASDisplayLayer.h>
 #import <AsyncDisplayKit/ASPagerNode.h>
@@ -217,7 +215,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     unsigned int didChangeCollectionViewDelegate:1;
   } _layoutInspectorFlags;
   
-  BOOL _hasCollectionLayoutDelegate;
+  BOOL _hasDataControllerLayoutDelegate;
 }
 
 @end
@@ -297,7 +295,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     _retainedLayer = self.layer;
   }
   
-  [self _configureNewCollectionViewLayout:layout];
+  [self _configureCollectionViewLayout:layout];
   
   return self;
 }
@@ -543,9 +541,9 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 - (void)setCollectionViewLayout:(nonnull UICollectionViewLayout *)collectionViewLayout
 {
   ASDisplayNodeAssertMainThread();
-  
   [super setCollectionViewLayout:collectionViewLayout];
-  [self _configureNewCollectionViewLayout:collectionViewLayout];
+  
+  [self _configureCollectionViewLayout:collectionViewLayout];
   
   // Trigger recreation of layout inspector with new collection view layout
   if (_layoutInspector != nil) {
@@ -757,14 +755,13 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
 #pragma mark Internal
 
-- (void)_configureNewCollectionViewLayout:(nonnull UICollectionViewLayout *)layout
+- (void)_configureCollectionViewLayout:(nonnull UICollectionViewLayout *)layout
 {
-  _hasCollectionLayoutDelegate = [layout conformsToProtocol:@protocol(ASDataControllerLayoutDelegate)];
-  if (_hasCollectionLayoutDelegate) {
+  _hasDataControllerLayoutDelegate = [layout conformsToProtocol:@protocol(ASDataControllerLayoutDelegate)];
+  if (_hasDataControllerLayoutDelegate) {
     _dataController.layoutDelegate = (id<ASDataControllerLayoutDelegate>)layout;
   }
   GET_COLLECTIONNODE_OR_RETURN(collectionNode, (void)0);
-  [collectionNode configureNewCollectionViewLayout:layout];
 }
 
 /**
@@ -2050,8 +2047,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
  */
 - (void)layer:(CALayer *)layer didChangeBoundsWithOldValue:(CGRect)oldBounds newValue:(CGRect)newBounds
 {
-  if (_hasCollectionLayoutDelegate) {
-    // Let the collection layout delegate handle bounds changes if it's available.
+  if (_hasDataControllerLayoutDelegate) {
+    // Let the layout delegate handle bounds changes if it's available.
     return;
   }
   if (self.collectionViewLayout == nil) {
