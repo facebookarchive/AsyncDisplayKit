@@ -12,7 +12,7 @@
 
 #import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
 #import <AsyncDisplayKit/ASAssert.h>
-#import <AsyncDisplayKit/ASCellNode.h>
+#import <AsyncDisplayKit/ASCellNode+Internal.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNodeInternal.h> // Required for interfaceState and hierarchyState setter methods.
@@ -410,9 +410,16 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
 
 #pragma mark - Notification observers
 
+/**
+ * If we're in a restricted range mode, but we're going to change to a full range mode soon,
+ * go ahead and schedule the transition as soon as all the currently-scheduled rendering is done #1163.
+ */
 - (void)registerForNodeDisplayNotificationsForInterfaceStateIfNeeded:(ASInterfaceState)interfaceState
 {
-  if (!_didRegisterForNodeDisplayNotifications) {
+  // Do not schedule to listen if we're already in full range mode.
+  // This avoids updating the range controller during a collection teardown when it is removed
+  // from the hierarchy and its data source is cleared, causing UIKit to call -reloadData.
+  if (!_didRegisterForNodeDisplayNotifications && _currentRangeMode != ASLayoutRangeModeFull) {
     ASLayoutRangeMode nextRangeMode = [ASRangeController rangeModeForInterfaceState:interfaceState
                                                                    currentRangeMode:_currentRangeMode];
     if (_currentRangeMode != nextRangeMode) {
@@ -444,7 +451,13 @@ static UIApplicationState __ApplicationState = UIApplicationStateActive;
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssert(node, @"Cannot move a nil node to a view");
   ASDisplayNodeAssert(contentView, @"Cannot move a node to a non-existent view");
-  
+
+  if (node.shouldUseUIKitCell) {
+    // When using UIKit cells, the ASCellNode is just a placeholder object with a preferredSize.
+    // In this case, we should not disrupt the subviews of the contentView.
+    return;
+  }
+
   if (node.view.superview == contentView) {
     // this content view is already correctly configured
     return;

@@ -42,7 +42,7 @@ typedef struct {
  * and then we use it and clear it in beginBatchFetchWithContext: (on default queue).
  *
  * It is safe to use it without a lock in this limited way, since those two methods will
- * never execute in parallel.6
+ * never execute in parallel.
  */
 @property (nonatomic, weak) ASIGSectionController *sectionControllerForBatchFetching;
 @end
@@ -52,7 +52,9 @@ typedef struct {
 - (instancetype)initWithListAdapter:(IGListAdapter *)listAdapter
 {
   if (self = [super init]) {
+#if IG_LIST_COLLECTION_VIEW
     [ASIGListAdapterBasedDataSource setASCollectionViewSuperclass];
+#endif
     [ASIGListAdapterBasedDataSource configureUpdater:listAdapter.updater];
 
     ASDisplayNodeAssert([listAdapter conformsToProtocol:@protocol(UICollectionViewDataSource)], @"Expected IGListAdapter to conform to UICollectionViewDataSource.");
@@ -244,12 +246,8 @@ typedef struct {
   return ctrl;
 }
 
-/**
- * Set ASCollectionView's superclass to IGListCollectionView.
- * Scary! If IGListKit removed the subclassing restriction, we could
- * use #if in the @interface to choose the superclass based on
- * whether we have IGListKit available.
- */
+/// If needed, set ASCollectionView's superclass to IGListCollectionView (IGListKit < 3.0).
+#if IG_LIST_COLLECTION_VIEW
 + (void)setASCollectionViewSuperclass
 {
 #pragma clang diagnostic push
@@ -260,6 +258,7 @@ typedef struct {
   });
 #pragma clang diagnostic pop
 }
+#endif
 
 /// Ensure updater won't call reloadData on us.
 + (void)configureUpdater:(id<IGListUpdatingDelegate>)updater

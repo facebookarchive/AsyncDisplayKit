@@ -32,6 +32,12 @@ extern NSString *const ASAnimatedImageDefaultRunLoopMode;
 
 @end
 
+@interface ASImageNode (AnimatedImagePrivate)
+
+- (void)_locked_setAnimatedImage:(id <ASAnimatedImageProtocol>)animatedImage;
+
+@end
+
 
 @interface ASImageNode (AnimatedImageInvalidation)
 

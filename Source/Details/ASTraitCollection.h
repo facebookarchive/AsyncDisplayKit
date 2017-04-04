@@ -117,18 +117,12 @@ ASDISPLAYNODE_EXTERN_C_END
 \
   /* Extra Trait Collection Handling */\
 \
-  /* If the node is not loaded  yet don't do anything as otherwise the access of the view will trigger a load*/\
-  if (!self.isNodeLoaded) { return; }\
+  /* If the node is not loaded  yet don't do anything as otherwise the access of the view will trigger a load */\
+  if (! self.isNodeLoaded) { return; }\
 \
   ASPrimitiveTraitCollection currentTraits = self.primitiveTraitCollection;\
   if (ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(currentTraits, oldTraits) == NO) {\
-    /* Must dispatch to main for self.view && [self.view.dataController visibleMap]*/\
-    ASPerformBlockOnMainThread(^{\
-      ASElementMap *map = self.view.dataController.visibleMap; \
-      for (ASCollectionElement *element in map) { \
-         ASTraitCollectionPropagateDown(element.nodeIfAllocated, currentTraits); \
-      } \
-    });\
+    [self.dataController environmentDidChange];\
   }\
 }\
 

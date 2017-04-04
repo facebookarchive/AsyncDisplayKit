@@ -423,13 +423,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 
 - (void)waitUntilAllUpdatesAreCommitted
 {
-  ASDisplayNodeAssertMainThread();
-  
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
-  
   // Schedule block in main serial queue to wait until all operations are finished that are
   // where scheduled while waiting for the _editingTransactionQueue to finish
-  [_mainSerialQueue performBlockOnMainThread:^{ }];
+  [self _scheduleBlockOnMainSerialQueue:^{ }];
 }
 
 - (void)updateWithChangeSet:(_ASHierarchyChangeSet *)changeSet
@@ -442,12 +438,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   
-  /**
-   * If the initial reloadData has not been called, just bail because we don't have
-   * our old data source counts.
-   * See ASUICollectionViewTests.testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
-   * For the issue that UICollectionView has that we're choosing to workaround.
-   */
+  // If the initial reloadData has not been called, just bail because we don't have our old data source counts.
+  // See ASUICollectionViewTests.testThatIssuingAnUpdateBeforeInitialReloadIsUnacceptable
+  // for the issue that UICollectionView has that we're choosing to workaround.
   if (!_initialReloadDataHasBeenCalled) {
     [changeSet executeCompletionHandlerWithFinished:YES];
     return;
@@ -455,6 +448,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   
   [self invalidateDataSourceItemCounts];
   
+  // Log events
   ASDataControllerLogEvent(self, @"triggeredUpdate: %@", changeSet);
 #if ASEVENTLOG_ENABLE
   NSString *changeSetDescription = ASObjectDescriptionMakeTiny(changeSet);
@@ -476,13 +470,22 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       @throw e;
     }
   }
-
+  
+  // Since we waited for _editingTransactionGroup at the beginning of this method, at this point we can guarantee that _pendingMap equals to _visibleMap.
+  // So if the change set is empty, we don't need to modify data and can safely schedule to notify the delegate.
+  if (changeSet.isEmpty) {
+    [_mainSerialQueue performBlockOnMainThread:^{
+      [_delegate dataController:self willUpdateWithChangeSet:changeSet];
+      [_delegate dataController:self didUpdateWithChangeSet:changeSet];
+    }];
+    return;
+  }
+  
   // Mutable copy of current data.
   ASMutableElementMap *mutableMap = [_pendingMap mutableCopy];
   
   // Step 1: update the mutable copies to match the data source's state
   [self _updateSectionContextsInMap:mutableMap changeSet:changeSet];
-  //TODO If _elements is the same, use a fast path
   __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   __weak ASDisplayNode *owningNode = (ASDisplayNode *)environment; // This is gross!
   ASPrimitiveTraitCollection existingTraitCollection = [environment primitiveTraitCollection];
@@ -496,7 +499,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
     // Step 3: Layout **all** new elements without batching in background.
     NSArray<ASCollectionElement *> *unmeasuredElements = [ASDataController unmeasuredElementsFromMap:newMap];
-    // TODO layout in batches, esp reloads
     [self batchLayoutNodesFromContexts:unmeasuredElements batchSize:unmeasuredElements.count batchCompletion:^(id, id) {
       ASSERT_ON_EDITING_QUEUE;
       [_mainSerialQueue performBlockOnMainThread:^{
@@ -506,15 +508,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
         _visibleMap = newMap;
 
         [_delegate dataController:self didUpdateWithChangeSet:changeSet];
-        
-        // Step 5: If the environment changed mid-update, notify all visible elements
-        __weak id<ASTraitEnvironment> newEnvironment = [self.environmentDelegate dataControllerEnvironment];
-        ASPrimitiveTraitCollection newTraitCollection = [newEnvironment primitiveTraitCollection];
-        if (! ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(existingTraitCollection, newTraitCollection)) {
-          for (ASCollectionElement *element in _visibleMap) {
-            element.traitCollection = newTraitCollection;
-          }
-        }
       }];
     }];
   });
@@ -531,11 +524,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     return;
   }
   
-  // TODO if the change set includes solely section reloads that together are equivalent to reloadData (i.e reload the only section),
-  // do a reloadData here as an optimization.
-  
   if (changeSet.includesReloadData) {
-
     [map removeAllSectionContexts];
     
     NSUInteger sectionCount = [self itemCountsFromDataSource].size();
@@ -579,9 +568,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
              traitCollection:(ASPrimitiveTraitCollection)traitCollection
 {
   ASDisplayNodeAssertMainThread();
-  
-  // TODO if the change set includes solely section reloads that together are equivalent to reloadData (i.e reload the only section),
-  // do a reloadData here as an optimization.
   
   if (changeSet.includesReloadData) {
     [map removeAllElements];
@@ -678,16 +664,12 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     return;
   }
   
+  // Can't relayout right away because _visibleMap may not be up-to-date,
+  // i.e there might be some nodes that were measured using the old constrained size but haven't been added to _visibleMap
   LOG(@"Edit Command - relayoutRows");
-  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
-  
-  // Can't relayout right away because _completedElements may not be up-to-date,
-  // i.e there might be some nodes that were measured using the old constrained size but haven't been added to _completedElements
-  dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
-    [_mainSerialQueue performBlockOnMainThread:^{
-      [self _relayoutAllNodes];
-    }];
-  });
+  [self _scheduleBlockOnMainSerialQueue:^{
+    [self _relayoutAllNodes];
+  }];
 }
 
 - (void)_relayoutAllNodes
@@ -708,6 +690,35 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       }
     }
   }
+}
+
+# pragma mark - ASPrimitiveTraitCollection
+
+- (void)environmentDidChange
+{
+  ASPerformBlockOnMainThread(^{
+    if (!_initialReloadDataHasBeenCalled) {
+      return;
+    }
+
+    // Can't update the trait collection right away because _visibleMap may not be up-to-date,
+    // i.e there might be some elements that were allocated using the old trait collection but haven't been added to _visibleMap
+    [self _scheduleBlockOnMainSerialQueue:^{
+      ASPrimitiveTraitCollection newTraitCollection = [[_environmentDelegate dataControllerEnvironment] primitiveTraitCollection];
+      for (ASCollectionElement *element in _visibleMap) {
+        element.traitCollection = newTraitCollection;
+      }
+    }];
+  });
+}
+
+# pragma mark - Helper methods
+
+- (void)_scheduleBlockOnMainSerialQueue:(dispatch_block_t)block
+{
+  ASDisplayNodeAssertMainThread();
+  dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
+  [_mainSerialQueue performBlockOnMainThread:block];
 }
 
 + (NSArray<ASCollectionElement *> *)unmeasuredElementsFromMap:(ASElementMap *)map

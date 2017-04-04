@@ -65,6 +65,7 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
 @property (nonatomic, readonly) ASDataControllerAnimationOptions animationOptions;
 
 @property (nonatomic, strong, readonly) NSIndexSet *indexSet;
+
 @property (nonatomic, readonly) _ASHierarchyChangeType changeType;
 
 /**
@@ -72,9 +73,11 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
  * with type .Insert or .Delete. Calling this on changes of other types is an error.
  */
 - (_ASHierarchySectionChange *)changeByFinalizingType;
+
 @end
 
 @interface _ASHierarchyItemChange : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider>
+
 @property (nonatomic, readonly) ASDataControllerAnimationOptions animationOptions;
 
 /// Index paths are sorted descending for changeType .Delete, ascending otherwise
@@ -89,9 +92,27 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
  * with type .Insert or .Delete. Calling this on changes of other types is an error.
  */
 - (_ASHierarchyItemChange *)changeByFinalizingType;
+
 @end
 
 @interface _ASHierarchyChangeSet : NSObject <ASDescriptionProvider, ASDebugDescriptionProvider>
+
+/// @precondition The change set must be completed.
+@property (nonatomic, strong, readonly) NSIndexSet *deletedSections;
+
+/// @precondition The change set must be completed.
+@property (nonatomic, strong, readonly) NSIndexSet *insertedSections;
+
+@property (nonatomic, readonly) BOOL completed;
+
+/// Whether or not changes should be animated.
+// TODO: if any update in this chagne set is non-animated, the whole update should be non-animated.
+@property (nonatomic, readwrite) BOOL animated;
+
+@property (nonatomic, readonly) BOOL includesReloadData;
+
+/// Indicates whether the change set is empty, that is it includes neither reload data nor per item or section changes.
+@property (nonatomic, readonly) BOOL isEmpty;
 
 - (instancetype)initWithOldData:(std::vector<NSInteger>)oldItemCounts NS_DESIGNATED_INITIALIZER;
 
@@ -113,30 +134,20 @@ NSString *NSStringFromASHierarchyChangeType(_ASHierarchyChangeType changeType);
  */
 - (void)executeCompletionHandlerWithFinished:(BOOL)finished;
 
-/// @precondition The change set must be completed.
-@property (nonatomic, strong, readonly) NSIndexSet *deletedSections;
-/// @precondition The change set must be completed.
-@property (nonatomic, strong, readonly) NSIndexSet *insertedSections;
-
 /**
- Get the section index after the update for the given section before the update.
- 
- @precondition The change set must be completed.
- @return The new section index, or NSNotFound if the given section was deleted.
+ * Get the section index after the update for the given section before the update.
+ *
+ * @precondition The change set must be completed.
+ * @return The new section index, or NSNotFound if the given section was deleted.
  */
 - (NSUInteger)newSectionForOldSection:(NSUInteger)oldSection;
-
-@property (nonatomic, readonly) BOOL completed;
-/// Whether or not changes should be animated.
-// TODO: if any update in this chagne set is non-animated, the whole update should be non-animated.
-@property (nonatomic, readwrite) BOOL animated;
-@property (nonatomic, readonly) BOOL includesReloadData;
 
 /// Call this once the change set has been constructed to prevent future modifications to the changeset. Calling this more than once is a programmer error.
 /// NOTE: Calling this method will cause the changeset to convert all reloads into delete/insert pairs.
 - (void)markCompletedWithNewItemCounts:(std::vector<NSInteger>)newItemCounts;
 
 - (nullable NSArray <_ASHierarchySectionChange *> *)sectionChangesOfType:(_ASHierarchyChangeType)changeType;
+
 - (nullable NSArray <_ASHierarchyItemChange *> *)itemChangesOfType:(_ASHierarchyChangeType)changeType;
 
 /// Returns all item indexes affected by changes of the given type in the given section.

@@ -1044,6 +1044,38 @@
   XCTAssertEqual([[cn valueForKeyPath:@"rangeController.currentRangeMode"] integerValue], ASLayoutRangeModeMinimum, @"Expected range mode to be minimum before scrolling begins.");
 }
 
+- (void)testTraitCollectionChangesMidUpdate
+{
+  CGRect screenBounds = [UIScreen mainScreen].bounds;
+  UIWindow *window = [[UIWindow alloc] initWithFrame:screenBounds];
+  ASCollectionViewTestController *testController = [[ASCollectionViewTestController alloc] initWithNibName:nil bundle:nil];
+  ASCollectionNode *cn = testController.collectionNode;
+  window.rootViewController = testController;
+  
+  [window makeKeyAndVisible];
+  // Trigger the initial reload to start
+  [window layoutIfNeeded];
+  
+  // The initial reload is async, changing the trait collection here should be "mid-update"
+  ASPrimitiveTraitCollection traitCollection;
+  traitCollection.displayScale = cn.primitiveTraitCollection.displayScale + 1; // Just a dummy change
+  traitCollection.containerSize = screenBounds.size;
+  cn.primitiveTraitCollection = traitCollection;
+  
+  [cn waitUntilAllUpdatesAreCommitted];
+  [cn.view layoutIfNeeded];
+  
+  // Assert that the new trait collection is picked up by all cell nodes, including ones that were not allocated but are forced to allocate now
+  for (NSInteger s = 0; s < cn.numberOfSections; s++) {
+    NSInteger c = [cn numberOfItemsInSection:s];
+    for (NSInteger i = 0; i < c; i++) {
+      NSIndexPath *ip = [NSIndexPath indexPathForItem:i inSection:s];
+      ASCellNode *node = [cn.view nodeForItemAtIndexPath:ip];
+      XCTAssertTrue(ASPrimitiveTraitCollectionIsEqualToASPrimitiveTraitCollection(traitCollection, node.primitiveTraitCollection));
+    }
+  }
+}
+
 /**
  * This tests an issue where, since subnode insertions aren't applied until the UIKit layout pass,
  * which we trigger during the display phase, subnodes like network image nodes are not preloading

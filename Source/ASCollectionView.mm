@@ -793,9 +793,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   [_changeSet addCompletionHandler:completion];
   
   if (_batchUpdateCount == 0) {
-    _changeSet.animated = animated;
-    [_dataController updateWithChangeSet:_changeSet];
+    _ASHierarchyChangeSet *changeSet = _changeSet;
+    // Nil out _changeSet before forwarding to _dataController to allow the change set to cause subsequent batch updates on the same run loop
     _changeSet = nil;
+    changeSet.animated = animated;
+    [_dataController updateWithChangeSet:changeSet];
   }
 }
 
@@ -922,7 +924,9 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   ASCellNode *cell = [self nodeForItemAtIndexPath:indexPath];
   if (cell.shouldUseUIKitCell) {
     if ([_asyncDelegate respondsToSelector:@selector(collectionView:layout:sizeForItemAtIndexPath:)]) {
-      return [(id)_asyncDelegate collectionView:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
+      CGSize size = [(id)_asyncDelegate collectionView:collectionView layout:collectionViewLayout sizeForItemAtIndexPath:indexPath];
+      cell.style.preferredSize = size;
+      return size;
     }
   }
   ASCollectionElement *e = [_dataController.visibleMap elementForItemAtIndexPath:indexPath];
@@ -970,13 +974,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 
   BOOL shouldDequeueExternally = _asyncDataSourceFlags.interopViewForSupplementaryElement && (_asyncDataSourceFlags.interopAlwaysDequeue || node.shouldUseUIKitCell);
   if (shouldDequeueExternally) {
+    // This codepath is used for both IGListKit mode, and app-level UICollectionView interop.
     view = [(id<ASCollectionDataSourceInterop>)_asyncDataSource collectionView:collectionView viewForSupplementaryElementOfKind:kind atIndexPath:indexPath];
   } else {
-    view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kReuseIdentifier forIndexPath:indexPath];
-  }
-
-  if (!node.shouldUseUIKitCell) {
     ASDisplayNodeAssert(node != nil, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self);
+    view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kReuseIdentifier forIndexPath:indexPath];
   }
 
   if (node) {

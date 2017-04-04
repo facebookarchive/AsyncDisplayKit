@@ -121,10 +121,6 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 #pragma mark -
 #pragma mark ASTableView
 
-@interface ASTableNode ()
-- (instancetype)_initWithTableView:(ASTableView *)tableView;
-@end
-
 @interface ASTableView () <ASRangeControllerDataSource, ASRangeControllerDelegate, ASDataControllerSource, _ASTableViewCellDelegate, ASCellNodeInteractionDelegate, ASDelegateProxyInterceptor, ASBatchFetchingScrollView, ASDataControllerEnvironmentDelegate>
 {
   ASTableViewProxy *_proxyDataSource;
@@ -693,9 +689,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
   [_changeSet addCompletionHandler:completion];
 
   if (_batchUpdateCount == 0) {
-    _changeSet.animated = animated;
-    [_dataController updateWithChangeSet:_changeSet];
+    _ASHierarchyChangeSet *changeSet = _changeSet;
+    // Nil out _changeSet before forwarding to _dataController to allow the change set to cause subsequent batch updates on the same run loop
     _changeSet = nil;
+    changeSet.animated = animated;
+    [_dataController updateWithChangeSet:changeSet];
   } 
 }
 
