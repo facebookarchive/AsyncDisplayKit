@@ -1204,11 +1204,11 @@ static NSString * const kCellReuseIdentifier = @"_ASTableViewCell";
 
 - (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
 {
-    _deceleratingVelocity = CGPointZero;
-    
-    if (_asyncDelegateFlags.scrollViewDidEndDecelerating) {
-        [_asyncDelegate scrollViewDidEndDecelerating:scrollView];
-    }
+  _deceleratingVelocity = CGPointZero;
+
+  if (_asyncDelegateFlags.scrollViewDidEndDecelerating) {
+      [_asyncDelegate scrollViewDidEndDecelerating:scrollView];
+  }
 }
 
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
