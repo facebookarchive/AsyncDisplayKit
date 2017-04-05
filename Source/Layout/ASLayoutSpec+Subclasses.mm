@@ -54,9 +54,7 @@
   if (self.isFinalLayoutElement == NO) {
     id<ASLayoutElement> finalLayoutElement = [child finalLayoutElement];
     if (finalLayoutElement != child) {
-#if AS_TARGET_OS_IOS
       finalLayoutElement.primitiveTraitCollection = child.primitiveTraitCollection;
-#endif
       return finalLayoutElement;
     }
   }

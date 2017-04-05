@@ -9,11 +9,7 @@
 #import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 
-#if AS_TARGET_OS_IOS
 #import <UIKit/UIGeometry.h>
-#else
-#import <Foundation/NSGeometry.h>
-#endif
 
 #import <AsyncDisplayKit/NSIndexSet+ASHelpers.h>
 

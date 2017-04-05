@@ -10,11 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#if AS_TARGET_OS_IOS
 #import <UIKit/UIGeometry.h>
-#else
-#import <Foundation/NSGeometry.h>
-#endif
 
 #import <objc/runtime.h>
 

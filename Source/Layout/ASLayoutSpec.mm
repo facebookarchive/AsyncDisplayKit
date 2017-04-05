@@ -49,9 +49,7 @@
   }
   
   _isMutable = YES;
-#if AS_TARGET_OS_IOS
   _primitiveTraitCollection = ASPrimitiveTraitCollectionMakeDefault();
-#endif
   _childrenArray = [[NSMutableArray alloc] init];
   
   return self;
@@ -174,8 +172,6 @@ ASLayoutElementFinalLayoutElementDefault
 
 #pragma mark - ASTraitEnvironment
 
-#if AS_TARGET_OS_IOS
-
 - (ASPrimitiveTraitCollection)primitiveTraitCollection
 {
   return _primitiveTraitCollection;
@@ -192,11 +188,7 @@ ASLayoutElementFinalLayoutElementDefault
   return [ASTraitCollection traitCollectionWithASPrimitiveTraitCollection:self.primitiveTraitCollection];
 }
 
-#endif
-
-#if AS_TARGET_OS_IOS
 ASPrimitiveTraitCollectionDeprecatedImplementation
-#endif
 
 #pragma mark - ASLayoutElementStyleExtensibility
 
