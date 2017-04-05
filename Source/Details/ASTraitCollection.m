@@ -11,9 +11,6 @@
 //
 
 #import <AsyncDisplayKit/ASTraitCollection.h>
-
-#if AS_TARGET_OS_IOS
-
 #import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 #import <AsyncDisplayKit/ASLayoutElement.h>
 
@@ -196,9 +193,3 @@ NSString *NSStringFromASPrimitiveTraitCollection(ASPrimitiveTraitCollection trai
 }
 
 @end
-
-#else
-
-// Non iOS
-
-#endif

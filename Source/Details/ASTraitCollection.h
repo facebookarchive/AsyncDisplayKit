@@ -10,8 +10,6 @@
 
 #import <AsyncDisplayKit/ASAvailability.h>
 
-#if AS_TARGET_OS_IOS
-
 #import <UIKit/UIKit.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
@@ -158,9 +156,3 @@ AS_SUBCLASSING_RESTRICTED
 @end
 
 NS_ASSUME_NONNULL_END
-
-#else
-
-// Non iOS
-
-#endif

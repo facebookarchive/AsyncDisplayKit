@@ -10,11 +10,7 @@
 
 #import "ASAvailability.h"
 
-#if AS_TARGET_OS_IOS
 #import <UIKit/UIKit.h>
-#else
-#import <QuartzCore/QuartzCore.h>
-#endif
 
 #import <AsyncDisplayKit/ASBaseDefines.h>
 
@@ -77,14 +73,7 @@ ASDISPLAYNODE_INLINE BOOL ASImageAlphaInfoIsOpaque(CGImageAlphaInfo info) {
  */
 ASDISPLAYNODE_INLINE void ASPerformBlockWithoutAnimation(BOOL withoutAnimation, void (^block)()) {
   if (withoutAnimation) {
-#if AS_TARGET_OS_IOS
     [UIView performWithoutAnimation:block];
-#else
-    [CATransaction begin];
-    [CATransaction setDisableActions: YES];
-    block();
-    [CATransaction commit];
-#endif
   } else {
     block();
   }

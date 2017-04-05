@@ -14,15 +14,13 @@
 #import <AsyncDisplayKit/ASDimensionInternal.h>
 #import <AsyncDisplayKit/ASStackLayoutElement.h>
 #import <AsyncDisplayKit/ASAbsoluteLayoutElement.h>
+#import <AsyncDisplayKit/ASTraitCollection.h>
 
 @class ASLayout;
 @class ASLayoutSpec;
 @protocol ASLayoutElementStylability;
 
-#if AS_TARGET_OS_IOS
-#import "ASTraitCollection.h"
 @protocol ASTraitEnvironment;
-#endif
 
 NS_ASSUME_NONNULL_BEGIN
 
@@ -66,11 +64,7 @@ ASDISPLAYNODE_EXTERN_C_END
  * access to the options via convenience properties. If you are creating custom layout spec, then you can
  * extend the backing layout options class to accommodate any new layout options.
  */
-#if AS_TARGET_OS_IOS
 @protocol ASLayoutElement <ASLayoutElementExtensibility, ASLayoutElementFinalLayoutElement, ASTraitEnvironment>
-#else
-@protocol ASLayoutElement <ASLayoutElementExtensibility, ASLayoutElementFinalLayoutElement>
-#endif
 
 #pragma mark - Getter
 
