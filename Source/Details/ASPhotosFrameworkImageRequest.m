@@ -12,7 +12,6 @@
 
 #import <AsyncDisplayKit/ASPhotosFrameworkImageRequest.h>
 #import <AsyncDisplayKit/ASBaseDefines.h>
-#import <AsyncDisplayKit/ASAvailability.h>
 
 NSString *const ASPhotosURLScheme = @"ph";
 
