@@ -44,16 +44,12 @@ Pod::Spec.new do |spec|
   end
   
   spec.subspec 'PINRemoteImage' do |pin|
-      # Note: The core.prefix_header_file includes setup of PIN_REMOTE_IMAGE, so the line below could be removed.
-      pin.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) PIN_REMOTE_IMAGE=1' }
       pin.dependency 'PINRemoteImage/iOS', '= 3.0.0-beta.8'
       pin.dependency 'PINRemoteImage/PINCache'
       pin.dependency 'AsyncDisplayKit/Core'
   end
 
   spec.subspec 'IGListKit' do |igl|
-      # Note: The core.prefix_header_file includes setup of IG_LIST_KIT, so the line below could be removed.
-      igl.xcconfig = { 'GCC_PREPROCESSOR_DEFINITIONS' => '$(inherited) IG_LIST_KIT=1' }
       igl.dependency 'IGListKit', '2.1.0'
       igl.dependency 'AsyncDisplayKit/Core'
   end
