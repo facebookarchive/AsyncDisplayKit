@@ -51,6 +51,13 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (PINRemoteImageManager *)sharedPINRemoteImageManager;
 
+/**
+ * @param shouldStoreResumeDataForCanceledDownloads If resume data should ever be stored for canceled downloads.
+ *
+ * @c ASImageProtocals.h
+ */
+@property (atomic, assign) BOOL shouldStoreResumeDataForCanceledDownloads;
+
 @end
 
 NS_ASSUME_NONNULL_END

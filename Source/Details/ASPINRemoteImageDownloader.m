@@ -250,8 +250,8 @@ static ASPINRemoteImageDownloader *sharedDownloader = nil;
 
 - (void)cancelImageDownloadWithResumePossibilityForIdentifier:(id)downloadIdentifier
 {
-  ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
-  [[self sharedPINRemoteImageManager] cancelTaskWithUUID:downloadIdentifier storeResumeData:YES];
+    ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
+    [[self sharedPINRemoteImageManager] cancelTaskWithUUID:downloadIdentifier storeResumeData:self.shouldStoreResumeDataForCanceledDownloads];
 }
 
 - (void)setProgressImageBlock:(ASImageDownloaderProgressImage)progressBlock callbackQueue:(dispatch_queue_t)callbackQueue withDownloadIdentifier:(id)downloadIdentifier
