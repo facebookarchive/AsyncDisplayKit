@@ -85,7 +85,8 @@ they will be resolved again, causing justifyContent and alignItems to be updated
  Thus, it is preferred to those properties.
 - `justifyContent`. The amount of space between each child.
 - `alignItems`. Orientation of children along cross axis.
-- `baselineRelativeArrangement`. If `YES` the vertical spacing between two views is measured from the last baseline of the top view to the top of the bottom view.
+- `flexWrap`. Whether children are stacked into a single or multiple lines. Defaults to single line.
+- `alignContent`. Orientation of lines along cross axis if there are multiple lines.
 
 <div class = "highlight-group">
 <span class="language-toggle">
@@ -130,7 +131,7 @@ override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec
 </div>
 </div>
 
-Flexbox works the same way in AsyncDisplayKit as it does in CSS on the web, with a few exceptions. The defaults are different, there is no `flex` parameter and `flexGrow` and `flexShrink` only supports a boolean value.
+Flexbox works the same way in AsyncDisplayKit as it does in CSS on the web, with a few exceptions. For example, the defaults are different and there is no `flex` parameter. See <a href = "layout2-web-flexbox-differences.html">Web Flexbox Differences</a> for more information.
 
 <br>
 
@@ -242,7 +243,7 @@ override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec
   let backgroundNode = ASDisplayNodeWithBackgroundColor(UIColor.blue)
   let foregroundNode = ASDisplayNodeWithBackgroundColor(UIColor.red)
 
-  return ASBackgroundLayoutSpec(child: backgroundNode, background: backgroundNode)
+  return ASBackgroundLayoutSpec(child: foregroundNode, background: backgroundNode)
 }
 </pre>
 </div>

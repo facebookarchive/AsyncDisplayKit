@@ -64,11 +64,57 @@ It is recommended that you use the node block version of the method so that your
 As noted in the previous section:
 
 <ul>
-  <li>ASCollectionNodes do not utilize cell resuse.</li>
+  <li>ASCollectionNodes do not utilize cell reuse.</li>
   <li>Using the "nodeBlock" method is preferred.</li>
   <li>It is very important that the returned node blocks are thread-safe.</li>
   <li>ASCellNodes can be used by ASTableNode, ASCollectionNode and ASPagerNode.</li>
 </ul>
+
+### Node Block Thread Safety Warning
+
+It is very important that node blocks be thread-safe. One aspect of that is ensuring that the data model is accessed _outside_ of the node block. Therefore, it is unlikely that you should need to use the index inside of the block. 
+
+Consider the following `-collectionNode:nodeBlockForItemAtIndexPath:` method.
+
+<div class = "highlight-group">
+<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<div class = "code">
+  <pre lang="objc" class="objcCode">
+- (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
+{
+    PhotoModel *photoModel = [_photoFeed objectAtIndex:indexPath.row];
+    
+    // this may be executed on a background thread - it is important to make sure it is thread safe
+    ASCellNode *(^cellNodeBlock)() = ^ASCellNode *() {
+        PhotoCellNode *cellNode = [[PhotoCellNode alloc] initWithPhoto:photoModel];
+        cellNode.delegate = self;
+        return cellNode;
+    };
+    
+    return cellNodeBlock;
+}
+  </pre>
+
+  <pre lang="swift" class = "swiftCode hidden">
+func tableNode(_ collectionNode: ASCollectionNode, nodeBlockForItemAt indexPath: IndexPath) -> ASCellNodeBlock {
+  guard photoFeed.count > indexPath.row else { return { ASCellNode() } }
+    
+  let photoModel = photoFeed[indexPath.row]
+    
+  // this may be executed on a background thread - it is important to make sure it is thread safe
+  let cellNodeBlock = { () -> ASCellNode in
+    let cellNode = PhotoCellNode(photo: photoModel)
+    cellNode.delegate = self
+    return cellNode
+  }
+    
+  return cellNodeBlock
+}
+</pre>
+</div>
+</div>
+
+In the example above, you can see how the index is used to access the photo model before creating the node block.
 
 ### Replacing a UICollectionViewController with an ASViewController
 

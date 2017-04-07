@@ -405,10 +405,22 @@ Use `-[ASDisplayNode layoutThatFits:]` instead to get an `ASLayout` and call `si
 CGSize size = [displayNode measure:CGSizeMake(100, 100)];
 
 // 2.0:
-ASLayout *layout = [displayNode layoutThatFits:ASSizeMake(CGSizeZero, CGSizeMake(100, 100))];
+// Creates an ASSizeRange with min and max sizes.
+ASLayout *layout = [displayNode layoutThatFits:ASSizeRangeMake(CGSizeZero, CGSizeMake(100, 100))];
+// Or an exact size
+// ASLayout *layout = [displayNode layoutThatFits:ASSizeRangeMake(CGSizeMake(100, 100))];
 CGSize size = layout.size;
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
+// 1.x
+let size = displayNode.measure(CGSize(width: 100, height: 100))
+
+// 2.0:
+// Creates an ASSizeRange with min and max sizes.
+let layout = displayNode.layoutThatFits(ASSizeRange(min: CGSizeZero, max: CGSize(width: 100, height: 100)))
+// Or an exact size
+// let layout = displayNode.layoutThatFits(ASSizeRangeMake(CGSize(width: 100, height: 100)))
+let size = layout.size
 </pre>
 </div>
 </div>

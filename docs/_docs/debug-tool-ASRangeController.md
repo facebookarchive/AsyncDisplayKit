@@ -36,7 +36,7 @@ The <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/Ve
 In your `AppDelegate.m` file, 
 <ul>
   <li>import <code>AsyncDisplayKit+Debug.h</code></li>
-  <li>add <code>[ASRangeController setShouldShowRangeDebugOverlay:YES]</code> at the top of your AppDelegate's <code>didFinishLaunchingWithOptions:</code> method</li>
+  <li>add <code>[ASDisplayNode setShouldShowRangeDebugOverlay:YES]</code> at the top of your AppDelegate's <code>didFinishLaunchingWithOptions:</code> method</li>
 </ul>
 
 **Make sure to call this method before initializing any component that uses an ASRangeControllers (ASTableView, ASCollectionView).**

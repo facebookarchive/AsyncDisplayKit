@@ -24,7 +24,7 @@ NSLog(@"Underlying view: %@", node.view);
 
 	<pre lang="swift" class = "swiftCode hidden">
 let node = ASDisplayNode()
-node.backgroundColor = UIColor.orangeColor()
+node.backgroundColor = .orange
 node.bounds = CGRect(x: 0, y: 0, width: 100, height: 100)
 
 print("Underlying view: \(node.view)")
@@ -51,7 +51,7 @@ NSLog(@"Backing layer: %@", node.layer);
 	<pre lang="swift" class = "swiftCode hidden">
 let node = ASDisplayNode()
 node.clipsToBounds = true			     // not .masksToBounds
-node.borderColor = UIColor.blueColor()  //layer name when there is no UIView equivalent
+node.borderColor = UIColor.blue.cgColor  // layer name when there is no UIView equivalent
 
 print("Backing layer: \(node.layer)")
 	</pre>
@@ -78,10 +78,10 @@ ASDisplayNode *node = [ASDisplayNode alloc] initWithViewBlock:^{
 	</pre>
 
 	<pre lang="swift" class = "swiftCode hidden">
-let node = ASDisplayNode(viewBlock: { () -> UIView! in
-    let view = SomeView();
-    return view
-})
+let node = ASDisplayNode { () -> UIView in
+	let view = SomeView()
+	return view
+}
 	</pre>
 </div>
 </div>
