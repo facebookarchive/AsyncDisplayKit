@@ -30,7 +30,7 @@ AsyncDisplayKit's layout system is centered around two basic concepts:
 
 ### Layout Specs 
 
-A layout spec, short for "layout specification", has no physical presence. Instead, layout specs act as containers for other layout elements by understanding how these children layout elments relate to each other.
+A layout spec, short for "layout specification", has no physical presence. Instead, layout specs act as containers for other layout elements by understanding how these children layout elements relate to each other.
 
 AsyncDisplayKit provides several <a hfref = "layout2-layoutspec-types.html">subclasses</a> of `ASLayoutSpec`, from a simple layout specification that insets a single child, to a more complex layout specification that arranges multiple children in varying stack configurations.
 
@@ -62,7 +62,7 @@ Some elements have an "intrinsic size" based on their immediately available cont
 - `ASTextNode`
 - `ASButtonNode`
 
-All other nodes either do not have an intrinsic size or lack an intrinsic size until their external resource is loaded. For example, an `ASNetworkImageNode` does not know its size until the image has been downloaded from the URL. These sorts of elments inlcude 
+All other nodes either do not have an intrinsic size or lack an intrinsic size until their external resource is loaded. For example, an `ASNetworkImageNode` does not know its size until the image has been downloaded from the URL. These sorts of elements include 
 
 - `ASVideoNode`
 - `ASVideoPlayerNode`
@@ -73,7 +73,7 @@ These nodes that lack an initial intrinsic size must have an initial size set fo
 
 ### Layout Debugging
 
-Calling `-asciiArtString` on any `ASDisplayNode` or `ASLayoutSpec` returns an ascii-art representation of the object and its children. Optionally, if you set the `.debugName` on any node or layout spec, that will also included in the ascii art. An example is seen below.
+Calling `-asciiArtString` on any `ASDisplayNode` or `ASLayoutSpec` returns an ascii-art representation of the object and its children. Optionally, if you set the `.debugName` on any node or layout spec, that will also be included in the ascii art. An example is seen below.
 
 <div class = "highlight-group">
 <div class = "code">

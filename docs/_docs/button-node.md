@@ -22,7 +22,7 @@ If you've used `-setTitle:forControlState:` then you already know how to set up 
 [buttonNode setTitle:@"Button Title Normal" withFont:nil withColor:[UIColor blueColor] forState:ASControlStateNormal];
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
-button.setTitle("Button Title Normal", withFont: nil, withColor: UIColor.blueColor(), forState: .Normal)
+buttonNode.setTitle("Button Title Normal", with: nil, with: .blue, for: .normal)
 </pre>
 </div>
 </div>
@@ -37,7 +37,7 @@ If you need even more control, you can also opt to use the attributed string ver
 [self.buttonNode setAttributedTitle:attributedTitle forState:ASControlStateNormal];
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
-buttonNode.setAttributedTitle(attributedTitle, for: [])
+buttonNode.setAttributedTitle(attributedTitle, for: .normal)
 </pre>
 </div>
 </div>
@@ -54,7 +54,7 @@ Again, analagous to UIKit, you can add sets of target-action pairs to respond to
 [buttonNode addTarget:self action:@selector(buttonPressed:) forControlEvents:ASControlNodeEventTouchUpInside];
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
-button.addTarget(self, action: #selector(buttonPressed(_:)), forControlEvents: .TouchUpInside)
+buttonNode.addTarget(self, action: #selector(buttonPressed), forControlEvents: .touchUpInside)
 </pre>
 </div>
 </div>
@@ -72,8 +72,8 @@ self.buttonNode.contentVerticalAlignment = ASVerticalAlignmentTop;
 self.buttonNode.contentHorizontalAlignment = ASHorizontalAlignmentMiddle;
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
-buttonNode.contentVerticalAlignment = .Top
-buttonNode.contentHorizontalAlignment = .Middle
+buttonNode.contentVerticalAlignment = .top
+buttonNode.contentHorizontalAlignment = .middle
 </pre>
 </div>
 </div>

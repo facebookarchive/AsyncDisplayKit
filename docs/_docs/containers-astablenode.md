@@ -22,7 +22,7 @@ nextPage: containers-ascollectionnode.html
   </pre>
 
   <pre lang="swift" class = "swiftCode hidden">
-override func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell
+func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell
   </pre>
 </div>
 </div>
@@ -41,7 +41,7 @@ with your choice of **_one_** of the following methods
   </pre>
 
   <pre lang="swift" class = "swiftCode hidden">
-override func tableNode(tableNode: ASTableNode, nodeForRowAtIndexPath indexPath: NSIndexPath) -> ASCellNode
+func tableNode(_ tableNode: ASTableNode, nodeForRowAt indexPath: IndexPath) -> ASCellNode
   </pre>
 </div>
 </div>
@@ -60,14 +60,14 @@ or
   </pre>
 
   <pre lang="swift" class = "swiftCode hidden">
-override func tableNode(tableNode: ASTableNode, nodeBlockForRowAtIndexPath indexPath: NSIndexPath) -> ASCellNodeBlock
+func tableNode(_ tableNode: ASTableNode, nodeBlockForRowAt indexPath: IndexPath) -> ASCellNodeBlock
   </pre>
 </div>
 </div>
 
 <br>
 <div class = "note">
-It is recommended that you use the node block version of these methods so that your collection node will be able to prepare and display all of its cells concurrently. This means that all subnode initialization methods can be run in the background.  Make sure to keep 'em thread safe.
+It is recommended that you use the node block version of these methods so that your table node will be able to prepare and display all of its cells concurrently. This means that all subnode initialization methods can be run in the background.  Make sure to keep 'em thread safe.
 </div>
 
 These two methods, need to return either an <a href = "cell-node.html">`ASCellNode`</a> or an `ASCellNodeBlock`. An `ASCellNodeBlock` is a block that creates a `ASCellNode` which can be run on a background thread. Note that `ASCellNodes` are used by `ASTableNode`, `ASCollectionNode` and `ASPagerNode`. 
@@ -101,10 +101,10 @@ An `ASTableNode` is assigned to be managed by an `ASViewController` in its `-ini
   </pre>
 
   <pre lang="swift" class = "swiftCode hidden">
-func initWithModel(models: Array&lt;Model&gt;) {
-    let tableNode = ASTableNode(style:.Plain)
+init(models: [Model]) {
+    let tableNode = ASTableNode(style: .plain)
 
-    super.initWithNode(tableNode)
+    super.init(node: tableNode)
 
     self.models = models  
     self.tableNode = tableNode
@@ -121,8 +121,6 @@ func initWithModel(models: Array&lt;Model&gt;) {
 It is very important that node blocks be thread-safe. One aspect of that is ensuring that the data model is accessed _outside_ of the node block. Therefore, it is unlikely that you should need to use the index inside of the block. 
 
 Consider the following `-tableNode:nodeBlockForRowAtIndexPath:` method from the `PhotoFeedNodeController.m` file in the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a>.
-
-In the example below, you can see how the index is used to access the photo model before creating the node block.
 
 <div class = "highlight-group">
 <span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
@@ -144,24 +142,25 @@ In the example below, you can see how the index is used to access the photo mode
   </pre>
 
   <pre lang="swift" class = "swiftCode hidden">
-func tableNode(tableNode: UITableNode!, nodeBlockForRowAtIndexPath indexPath: NSIndexPath) -> ASCellNodeBlock! {
-    guard photoFeed.count > indexPath.row else { return nil }
-
-    let photoModel = photoFeed[indexPath.row]
-
-    // this may be executed on a background thread - it is important to make sure it is thread safe
-    let cellNodeBlock = { () -> ASCellNode in
-        let cellNode = PhotoCellNode(photo: photoModel)
-        cellNode.delegate = self;
-        return ASCellNode()
-    }
-
-    return cellNodeBlock
+func tableNode(_ tableNode: ASTableNode, nodeBlockForRowAt indexPath: IndexPath) -> ASCellNodeBlock {
+  guard photoFeed.count > indexPath.row else { return { ASCellNode() } }
+    
+  let photoModel = photoFeed[indexPath.row]
+    
+  // this may be executed on a background thread - it is important to make sure it is thread safe
+  let cellNodeBlock = { () -> ASCellNode in
+    let cellNode = PhotoCellNode(photo: photoModel)
+    cellNode.delegate = self
+    return cellNode
+  }
+    
+  return cellNodeBlock
 }
 </pre>
 </div>
 </div>
 
+In the example above, you can see how the index is used to access the photo model before creating the node block.
 
 ### Accessing the ASTableView
 
@@ -194,7 +193,7 @@ override func viewDidLoad() {
   super.viewDidLoad()
 
   tableNode.view.allowsSelection = false
-  tableNode.view.separatorStyle = .None
+  tableNode.view.separatorStyle = .none
   tableNode.view.leadingScreensForBatching = 3.0  // default is 2.0
 }
 </pre>

@@ -14,14 +14,16 @@ When enabled, ASM means that your nodes no longer require `addSubnode:` or `remo
 <br>
 Consider the following intialization method from the PhotoCellNode class in <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a>. This <code>ASCellNode</code> subclass produces a simple social media photo feed cell. 
 
-In the "Original Code" we see the familiar `addSubnode:` calls in bold. In the "Code with ASM" (switch at top right of code block) these have been removed and replaced with a single line that enables ASM. 
+In the "Original Code" we see the familiar `addSubnode:` calls in bold. In the "Code with ASM" these have been removed and replaced with a single line that enables ASM. 
 
 By setting `.automaticallyManagesSubnodes` to `YES` on the `ASCellNode`, we _no longer_ need to call `addSubnode:` for each of the `ASCellNode`'s subnodes. These `subNodes` will be present in the node hierarchy as long as this class' `layoutSpecThatFits:` method includes them. 
 
-<div class = "highlight-group">
+
+<i>Original code</i>
+<div class="highlight-group">
 <span class="language-toggle">
-  <a data-lang="swift" class="swiftButton">Code with ASM</a>
-  <a data-lang="objective-c" class = "active objcButton">Original Code</a>
+  <a data-lang="objective-c" class="active objcButton">Objective-C</a>
+  <a data-lang="swift" class="swiftButton">Swift</a>
 </span>
 <div class = "code">
 <pre lang="objc" class="objcCode">
@@ -57,8 +59,50 @@ By setting `.automaticallyManagesSubnodes` to `YES` on the `ASCellNode`, we _no 
   return self;
 }
 </pre>
+<pre lang="swift" class="swiftCode hidden">
+class PhotoCellNode {
+  private let photoModel: PhotoModel
+  
+  private let userAvatarImageNode = ASNetworkImageNode()
+  private let photoImageNode = ASNetworkImageNode()
+  private let userNameTextNode = ASTextNode()
+  private let photoLocationTextNode = ASTextNode()
 
-<pre lang="swift" class = "swiftCode hidden">
+  init(photo: PhotoModel) {
+    photoModel = photo
+    
+    super.init()
+    
+    userAvatarImageNode.URL = photo.ownerUserProfile.userPicURL
+    <b>addSubnode(userAvatarImageNode)</b>
+    
+    photoImageNode.URL = photo.URL
+    <b>addSubnode(photoImageNode)</b>
+    
+    userNameTextNode.attributedText = poto.ownerUserProfile.usernameAttributedString(fontSize: fontSize)
+    <b>addSubnode(userNameTextNode)</b>
+    
+    photo.location.reverseGeocodeLocation { [weak self] location in 
+      if locationModel == self?.photoModel.location {
+        self?.photoLocationTextNode.attributedText = photo.locationAttributedString(fontSize: fontSize)
+        self?.setNeedsLayout()
+      }
+    }
+    <b>addSubnode(photoLocationTextNode)</b>
+  }
+}
+</pre>
+</div>
+</div>
+
+<i>Code with ASM</i>
+<div class="highlight-group">
+<span class="language-toggle">
+  <a data-lang="objective-c" class="active objcButton">Objective-C</a>
+  <a data-lang="swift" class="swiftButton">Swift</a>
+</span>
+<div class = "code">
+<pre lang="objc" class="objcCode">
 - (instancetype)initWithPhotoObject:(PhotoModel *)photo;
 {
   self = [super init];
@@ -89,6 +133,37 @@ By setting `.automaticallyManagesSubnodes` to `YES` on the `ASCellNode`, we _no 
   return self;
 }
 </pre>
+<pre lang="swift" class="swiftCode hidden">
+class PhotoCellNode {
+  private let photoModel: PhotoModel
+  
+  private let userAvatarImageNode = ASNetworkImageNode()
+  private let photoImageNode = ASNetworkImageNode()
+  private let userNameTextNode = ASTextNode()
+  private let photoLocationTextNode = ASTextNode()
+
+  init(photo: PhotoModel) {
+    photoModel = photo
+    
+    super.init()
+    
+    <b>automaticallyManagesSubnodes = true</b>
+    
+    userAvatarImageNode.URL = photo.ownerUserProfile.userPicURL
+    
+    photoImageNode.URL = photo.URL
+    
+    userNameTextNode.attributedText = poto.ownerUserProfile.usernameAttributedString(fontSize: fontSize)
+    
+    photo.location.reverseGeocodeLocation { [weak self] location in 
+      if locationModel == self?.photoModel.location {
+        self?.photoLocationTextNode.attributedText = photo.locationAttributedString(fontSize: fontSize)
+        self?.setNeedsLayout()
+      }
+    }
+  }
+}
+</pre>
 </div>
 </div>
 
@@ -105,7 +180,10 @@ An <code>ASLayoutSpec</code> completely describes the UI of a view in your app b
 Consider the abreviated `layoutSpecThatFits:` method for the `ASCellNode` subclass above.
 
 <div class = "highlight-group">
-<span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
+<span class="language-toggle">
+<a data-lang="objective-c" class="active objcButton">Objective-C</a>
+<a data-lang="swift" class="swiftButton">Swift</a>
+</span>
 
 <div class = "code">
 <pre lang="objc" class="objcCode">
@@ -153,7 +231,47 @@ Consider the abreviated `layoutSpecThatFits:` method for the `ASCellNode` subcla
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
+override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
+  let headerSubStack: ASStackLayoutSpec = .vertical()
+  headerSubStack.style.flexShrink = 1
 
+  <b>if photoLocationLabel.attributedText != nil {</b>
+    headerSubStack.children = [userNameLabel, photoLocationLabel]
+  <b>} else {</b>
+    headerSubStack.children = [userNameLabel]
+  <b>}</b>
+
+  userAvatarImageNode.style.preferredSize = CGSize(width: userImageHeight, height: userImageHeight) //  constrain avatar image frame size
+
+  let spacer = ASLayoutSpec()
+  spacer.style.flexGrow = 1
+
+  let avatarInsets = UIEdgeInsets(top: horizontalBuffer, left: 0, bottom: horizontalBuffer, right: horizontalBuffer)
+  let avatarInset = ASInsetLayoutSpec(insets: avatarInsets, child: <b>userAvatarImageNode</b>)
+
+  let headerStack: ASStackLayoutSpec = .horizontal()
+  headerStack.alignItems = .center      // center items vertically in horizontal stack
+  headerStack.justifyContent = .start   // justify content to the left side of the header stack
+  headerStack.children = [avatarInset, headerSubStack, spacer]
+
+  // header inset stack
+  let insets = UIEdgeInsets(top: 0, left: horizontalBuffer, bottom: 0, right: horizontalBuffer)
+  let headerWithInset = ASInsetLayoutSpec(insets: insets, child: headerStack)
+
+  // footer inset stack
+  let footerInsets = UIEdgeInsets(top: verticalBuffer, left: horizontalBuffer, bottom: verticalBuffer, right: horizontalBuffer)
+  let footerWithInset = ASInsetLayoutSpec(insets: footerInsets, child: <b>photoCommentsNode</b>)
+
+  // vertical stack
+  let cellWidth = constrainedSize.max.width
+  photoImageNode.style.preferredSize = CGSize(width: cellWidth, height: cellWidth)  // constrain photo frame size
+
+  let verticalStack: ASStackLayoutSpec = .vertical()
+  verticalStack.alignItems = .stretch   // stretch headerStack to fill horizontal space
+  verticalStack.children = [headerWithInset, <b>photoImageNode</b>, footerWithInset]
+
+  return verticalStack
+}
 </pre>
 </div>
 </div>

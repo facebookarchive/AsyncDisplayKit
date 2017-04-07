@@ -20,7 +20,7 @@ NSDictionary *attrs = @{ NSFontAttributeName: [UIFont fontWithName:@"HelveticaNe
 NSAttributedString *string = [[NSAttributedString alloc] initWithString:@"Hey, here's some text." attributes:attrs];
 
 _node = [[ASTextNode alloc] init];
-_node.attributedString = string;
+_node.attributedText = string;
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
@@ -28,7 +28,7 @@ let attrs = [NSFontAttributeName: UIFont(name: "HelveticaNeue", size: 12.0)]
 let string = NSAttributedString(string: "Hey, here's some text.", attributes: attrs)
 
 node = ASTextNode()
-node.attributedString = string
+node.attributedText = string
 </pre>
 </div>
 </div>
@@ -46,15 +46,15 @@ In any case where you need your text node to fit into a space that is smaller th
 <div class = "code">
 <pre lang="objc" class="objcCode">
 _textNode = [[ASTextNode alloc] init];
-_textNode.attributedString = string;
-_textNode.truncationAttributedString = [[NSAttributedString alloc] 
+_textNode.attributedText = string;
+_textNode.truncationAttributedText = [[NSAttributedString alloc] 
 												initWithString:@"¶¶¶"];
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
 textNode = ASTextNode()
-textNode.attributedString = string
-textNode.truncationAttributedString = NSAttributedString(string: "¶¶¶")
+textNode.attributedText = string
+textNode.truncationAttributedText = NSAttributedString(string: "¶¶¶")
 </pre>
 </div>
 </div>
@@ -86,20 +86,22 @@ NSMutableAttributedString *string = [[NSMutableAttributedString alloc] initWithS
                       NSUnderlineStyleAttributeName: @(NSUnderlineStyleSingle | NSUnderlinePatternDot),
                       }
               range:[blurb rangeOfString:@"placekitten.com"]];
-_textNode.attributedString = string;
+_textNode.attributedText = string;
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
+textNode.linkAttributeNames = [kLinkAttributeName]
+
 let blurb: NSString = "kittens courtesy placekitten.com 😸"
 let attributedString = NSMutableAttributedString(string: blurb as String)
 
 attributedString.addAttribute(NSFontAttributeName, value: UIFont(name: "HelveticaNeue-Light", size: 16.0)!, range: NSRange(location: 0, length: blurb.length))
 
 attributedString.addAttributes([kLinkAttributeName: NSURL(string: "http://placekitten.com/")!,
-                      NSForegroundColorAttributeName: UIColor.grayColor(),
-                      NSUnderlineStyleAttributeName: (NSUnderlineStyle.StyleSingle.rawValue | NSUnderlineStyle.PatternDashDot.rawValue)],
-                     range: blurb.rangeOfString("placekitten.com"))
-textNode.attributedString = attributedString
+                      NSForegroundColorAttributeName: UIColor.gray,
+                      NSUnderlineStyleAttributeName: (NSUnderlineStyle.styleSingle.rawValue | NSUnderlineStyle.patternDashDot.rawValue)],
+                     range: blurb.range(of: "placekitten.com"))
+textNode.attributedText = attributedString
 </pre>
 </div>
 </div>
@@ -127,10 +129,11 @@ Conforming to `ASTextNodeDelegate` allows your class to react to various events 
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
-func textNode(textNode: ASTextNode, tappedLinkAttribute attribute: String, value: AnyObject, atPoint point: CGPoint, textRange: NSRange) {
-    guard let url = value as? NSURL else { return }
+func textNode(_ textNode: ASTextNode, tappedLinkAttribute attribute: String, value: Any, at point: CGPoint, textRange: NSRange) {
+    guard let url = value as? URL else { return }
     
-    UIApplication.sharedApplication().openURL(url)
+    // the link was tapped, open it
+    UIApplication.shared.openURL(url)
 }
 </pre>
 </div>

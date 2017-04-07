@@ -18,4 +18,4 @@ Layoutables don't have a padding or margin property. Instead wrapping a layoutab
 
 ### Missing features
 
-Certain features like `flexWrap` on a `ASStackLayoutSpec` are not supported currently. See <a href = "layout2-properties.html">Layout Properties</a> for the full list of properties that are supported.
+Certain features are not supported currently. See <a href = "layout2-layout-element-properties.html">Layout Properties</a> for the full list of properties that are supported.
