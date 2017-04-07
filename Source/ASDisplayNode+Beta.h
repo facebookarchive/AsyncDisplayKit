@@ -8,7 +8,6 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASDisplayNode.h>
 #import <AsyncDisplayKit/ASLayoutRangeType.h>
 #import <AsyncDisplayKit/ASEventLog.h>
