@@ -51,6 +51,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 - (PINRemoteImageManager *)sharedPINRemoteImageManager;
 
+/**
+ * When downloading images ignore all caches. Defaults to NO.
+ */
+@property (nonatomic, assign) BOOL shouldIgnoreCache;
+
 @end
 
 NS_ASSUME_NONNULL_END
