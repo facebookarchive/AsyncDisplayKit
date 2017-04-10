@@ -10,7 +10,6 @@
 
 #pragma once
 
-#import <AsyncDisplayKit/ASAvailability.h>
 
 #define ASMultiplexImageNodeLogDebug(...)
 #define ASMultiplexImageNodeCLogDebug(...)

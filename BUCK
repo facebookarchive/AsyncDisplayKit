@@ -88,7 +88,6 @@ asyncdisplaykit_library(
 for name in ['AsyncDisplayKit', 'AsyncDisplayKit-PINRemoteImage']:
   asyncdisplaykit_library(
     name = name,
-    additional_preprocessor_flags = ['-DPIN_REMOTE_IMAGE=1'],
     deps = [
       '//Pods/PINRemoteImage:PINRemoteImage-PINCache',
     ],
