@@ -74,6 +74,7 @@
 - (void)prepareLayout
 {
   ASDisplayNodeAssertMainThread();
+  [super prepareLayout];
   ASCollectionLayoutContext *context = [self layoutContextWithElements:_collectionNode.visibleElements];
   
   ASCollectionLayoutState *state = nil;
