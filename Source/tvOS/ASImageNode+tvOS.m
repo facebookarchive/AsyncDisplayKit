@@ -10,6 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <Foundation/Foundation.h>
 #if TARGET_OS_TV
 #import <AsyncDisplayKit/ASImageNode+tvOS.h>
 

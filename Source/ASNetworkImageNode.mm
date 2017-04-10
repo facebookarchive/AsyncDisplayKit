@@ -20,10 +20,6 @@
 #import <AsyncDisplayKit/ASImageNode+AnimatedImagePrivate.h>
 #import <AsyncDisplayKit/ASImageContainerProtocolCategories.h>
 
-#ifndef AS_PIN_REMOTE_IMAGE
-#error AS_PIN_REMOTE_IMAGE must be defined
-#endif
-
 #if AS_PIN_REMOTE_IMAGE
 #import <AsyncDisplayKit/ASPINRemoteImageDownloader.h>
 #endif

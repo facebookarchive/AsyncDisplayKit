@@ -18,10 +18,6 @@
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 
-#ifndef AS_PIN_REMOTE_IMAGE
-#error AS_PIN_REMOTE_IMAGE must be defined
-#endif
-
 #if AS_PIN_REMOTE_IMAGE
 #import <AsyncDisplayKit/ASPINRemoteImageDownloader.h>
 #else
