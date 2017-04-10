@@ -10,6 +10,7 @@
 
 #import <AsyncDisplayKit/ASNetworkImageNode.h>
 
+#import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASBasicImageDownloader.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>

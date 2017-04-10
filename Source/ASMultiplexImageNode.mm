@@ -11,6 +11,7 @@
 #import <AsyncDisplayKit/ASMultiplexImageNode.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 
+#import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASPhotosFrameworkImageRequest.h>
