@@ -75,7 +75,7 @@
   ASDisplayNodeAssertMainThread();
   ASCollectionLayoutContext *context =  [self layoutContextWithElementMap:_collectionNode.visibleMap];
   
-  ASCollectionLayoutState *state;
+  ASCollectionLayoutState *state = nil;
   {
     ASDN::MutexLocker l(__instanceLock__);
     if (_pendingState != nil && ASObjectIsEqual(_layoutContextForPendingState, context)) {

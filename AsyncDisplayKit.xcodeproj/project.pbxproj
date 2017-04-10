@@ -378,7 +378,7 @@
 		E58E9E421E941D74004CFC59 /* ASCollectionFlowLayoutDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = E58E9E3D1E941D74004CFC59 /* ASCollectionFlowLayoutDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E58E9E431E941D74004CFC59 /* ASCollectionFlowLayoutDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = E58E9E3E1E941D74004CFC59 /* ASCollectionFlowLayoutDelegate.m */; };
 		E58E9E441E941D74004CFC59 /* ASCollectionLayoutContext.h in Headers */ = {isa = PBXBuildFile; fileRef = E58E9E3F1E941D74004CFC59 /* ASCollectionLayoutContext.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		E58E9E451E941D74004CFC59 /* ASCollectionLayoutContext.m in Sources */ = {isa = PBXBuildFile; fileRef = E58E9E401E941D74004CFC59 /* ASCollectionLayoutContext.m */; };
+		E58E9E451E941D74004CFC59 /* ASCollectionLayoutContext.mm in Sources */ = {isa = PBXBuildFile; fileRef = E58E9E401E941D74004CFC59 /* ASCollectionLayoutContext.mm */; };
 		E58E9E461E941D74004CFC59 /* ASCollectionLayoutDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = E58E9E411E941D74004CFC59 /* ASCollectionLayoutDelegate.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		E58E9E491E941DA5004CFC59 /* ASCollectionLayout.h in Headers */ = {isa = PBXBuildFile; fileRef = E58E9E471E941DA5004CFC59 /* ASCollectionLayout.h */; settings = {ATTRIBUTES = (Private, ); }; };
 		E58E9E4A1E941DA5004CFC59 /* ASCollectionLayout.mm in Sources */ = {isa = PBXBuildFile; fileRef = E58E9E481E941DA5004CFC59 /* ASCollectionLayout.mm */; };
@@ -793,7 +793,7 @@
 		E58E9E3D1E941D74004CFC59 /* ASCollectionFlowLayoutDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionFlowLayoutDelegate.h; sourceTree = "<group>"; };
 		E58E9E3E1E941D74004CFC59 /* ASCollectionFlowLayoutDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionFlowLayoutDelegate.m; sourceTree = "<group>"; };
 		E58E9E3F1E941D74004CFC59 /* ASCollectionLayoutContext.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionLayoutContext.h; sourceTree = "<group>"; };
-		E58E9E401E941D74004CFC59 /* ASCollectionLayoutContext.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = ASCollectionLayoutContext.m; sourceTree = "<group>"; };
+		E58E9E401E941D74004CFC59 /* ASCollectionLayoutContext.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASCollectionLayoutContext.mm; sourceTree = "<group>"; };
 		E58E9E411E941D74004CFC59 /* ASCollectionLayoutDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionLayoutDelegate.h; sourceTree = "<group>"; };
 		E58E9E471E941DA5004CFC59 /* ASCollectionLayout.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ASCollectionLayout.h; sourceTree = "<group>"; };
 		E58E9E481E941DA5004CFC59 /* ASCollectionLayout.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ASCollectionLayout.mm; sourceTree = "<group>"; };
@@ -1415,7 +1415,7 @@
 			isa = PBXGroup;
 			children = (
 				E58E9E3F1E941D74004CFC59 /* ASCollectionLayoutContext.h */,
-				E58E9E401E941D74004CFC59 /* ASCollectionLayoutContext.m */,
+				E58E9E401E941D74004CFC59 /* ASCollectionLayoutContext.mm */,
 				E5E281731E71C833006B67C2 /* ASCollectionLayoutState.h */,
 				E5E281751E71C845006B67C2 /* ASCollectionLayoutState.m */,
 				E58E9E411E941D74004CFC59 /* ASCollectionLayoutDelegate.h */,
@@ -1908,7 +1908,7 @@
 				B35062141B010EFD0018CF92 /* ASBasicImageDownloader.mm in Sources */,
 				B35062161B010EFD0018CF92 /* ASBatchContext.mm in Sources */,
 				AC47D9421B3B891B00AAEE9D /* ASCellNode.mm in Sources */,
-				E58E9E451E941D74004CFC59 /* ASCollectionLayoutContext.m in Sources */,
+				E58E9E451E941D74004CFC59 /* ASCollectionLayoutContext.mm in Sources */,
 				34EFC7641B701CC600AD841F /* ASCenterLayoutSpec.mm in Sources */,
 				18C2ED831B9B7DE800F627B3 /* ASCollectionNode.mm in Sources */,
 				E55D86331CA8A14000A0C26F /* ASLayoutElement.mm in Sources */,

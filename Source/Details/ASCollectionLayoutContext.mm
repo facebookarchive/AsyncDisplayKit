@@ -1,5 +1,5 @@
 //
-//  ASCollectionLayoutContext.m
+//  ASCollectionLayoutContext.mm
 //  AsyncDisplayKit
 //
 //  Created by Huy Nguyen on 21/3/17.
@@ -10,6 +10,7 @@
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
+#import <AsyncDisplayKit/ASEqualityHashHelpers.h>
 
 @implementation ASCollectionLayoutContext
 
@@ -44,7 +45,7 @@
 
 - (NSUInteger)hash
 {
-  return [_elementMap hash] ^ (((NSUInteger)(_viewportSize.width * 255) << 8) + (NSUInteger)(_viewportSize.height * 255));
+  return ASHash64ToNative(ASHashCombine([_elementMap hash], ASCGSizeHash(_viewportSize)));
 }
 
 @end

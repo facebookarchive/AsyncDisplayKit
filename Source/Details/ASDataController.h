@@ -82,7 +82,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
 /**
- The constrained size range for layout. Called only if a collection layout calculator is not provided.
+ The constrained size range for layout. Called only if no data controller layout delegate is provided.
  */
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 

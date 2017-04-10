@@ -18,9 +18,10 @@ AS_SUBCLASSING_RESTRICTED
 @interface ASCollectionLayoutState : NSObject
 
 /// The element map used to calculate this object
-@property (nonatomic, weak, readonly) ASElementMap *elementMap;
+@property (nonatomic, strong, readonly) ASElementMap *elementMap;
 
 @property (nonatomic, assign, readonly) CGSize contentSize;
+
 /// Element to layout attributes map. Should use weak pointers for elements.
 @property (nonatomic, strong, readonly) NSMapTable<ASCollectionElement *, UICollectionViewLayoutAttributes *> *elementToLayoutArrtibutesMap;
 

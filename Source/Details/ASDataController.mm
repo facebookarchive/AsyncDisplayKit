@@ -547,7 +547,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   _pendingMap = newMap;
   
   // Step 3: Ask layout delegate for contexts
-  ASCollectionLayoutContext *layoutContext;
+  ASCollectionLayoutContext *layoutContext = nil;
   if (canDelegateLayout) {
     layoutContext = [_layoutDelegate layoutContextWithElementMap:newMap];
   }

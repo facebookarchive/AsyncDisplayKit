@@ -136,9 +136,9 @@
   return [self initWithFrame:frame collectionViewLayout:layout layoutFacilitator:nil];
 }
 
-- (instancetype)initWithFrame:(CGRect)frame collectionLayoutDelegate:(id<ASCollectionLayoutDelegate>)layoutDelegate layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
+- (instancetype)initWithLayoutDelegate:(id<ASCollectionLayoutDelegate>)layoutDelegate layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
-  return [self initWithFrame:frame collectionViewLayout:[[ASCollectionLayout alloc] initWithLayoutDelegate:layoutDelegate] layoutFacilitator:layoutFacilitator];
+  return [self initWithFrame:CGRectZero collectionViewLayout:[[ASCollectionLayout alloc] initWithLayoutDelegate:layoutDelegate] layoutFacilitator:layoutFacilitator];
 }
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
@@ -380,13 +380,7 @@
   return self.dataController.visibleMap;
 }
 
-- (void)setCollectionLayoutDelegate:(id<ASCollectionLayoutDelegate>)collectionLayoutDelegate
-{
-  ASDisplayNodeAssertNotNil(collectionLayoutDelegate, @"Collection layout delegate cannot be nil. Consider using -setCollectionViewLayout: instead");
-  [self setCollectionViewLayout:[[ASCollectionLayout alloc] initWithLayoutDelegate:collectionLayoutDelegate]];
-}
-
-- (id<ASCollectionLayoutDelegate>)collectionLayoutDelegate
+- (id<ASCollectionLayoutDelegate>)layoutDelegate
 {
   UICollectionViewLayout *layout = self.collectionViewLayout;
   if ([layout isKindOfClass:[ASCollectionLayout class]]) {

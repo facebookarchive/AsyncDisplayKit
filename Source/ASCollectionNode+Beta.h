@@ -29,13 +29,11 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (strong, nonatomic, readonly) ASElementMap *visibleMap;
 
-- (instancetype)initWithFrame:(CGRect)frame collectionLayoutDelegate:(id<ASCollectionLayoutDelegate>)layoutDelegate layoutFacilitator:(nullable id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator;
+@property (strong, readonly, nullable) id<ASCollectionLayoutDelegate> layoutDelegate;
 
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(nullable id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator;
 
-- (void)setCollectionLayoutDelegate:(nonnull id<ASCollectionLayoutDelegate>)collectionLayoutDelegate;
-
-- (nullable id<ASCollectionLayoutDelegate>)collectionLayoutDelegate;
+- (instancetype)initWithLayoutDelegate:(id<ASCollectionLayoutDelegate>)layoutDelegate layoutFacilitator:(nullable id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator;
 
 - (void)beginUpdates ASDISPLAYNODE_DEPRECATED_MSG("Use -performBatchUpdates:completion: instead.");
 
