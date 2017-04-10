@@ -16,12 +16,12 @@
 
 @implementation ASCollectionLayoutState
 
-- (instancetype)initWithElementMap:(ASElementMap *)elementMap layout:(ASLayout *)layout
+- (instancetype)initWithElements:(ASElementMap *)elements layout:(ASLayout *)layout
 {
   NSMapTable<ASCollectionElement *, UICollectionViewLayoutAttributes *> *attrsMap = [NSMapTable mapTableWithKeyOptions:(NSMapTableObjectPointerPersonality | NSMapTableWeakMemory) valueOptions:NSMapTableStrongMemory];
   for (ASLayout *sublayout in layout.sublayouts) {
     ASCollectionElement *element = ((ASCellNode *)sublayout.layoutElement).collectionElement;
-    NSIndexPath *indexPath = [elementMap indexPathForElement:element];
+    NSIndexPath *indexPath = [elements indexPathForElement:element];
     NSString *supplementaryElementKind = element.supplementaryElementKind;
     
     UICollectionViewLayoutAttributes *attrs;
@@ -35,14 +35,14 @@
     [attrsMap setObject:attrs forKey:element];
   }
 
-  return [self initWithElementMap:elementMap contentSize:layout.size elementToLayoutArrtibutesMap:attrsMap];
+  return [self initWithElements:elements contentSize:layout.size elementToLayoutArrtibutesMap:attrsMap];
 }
 
-- (instancetype)initWithElementMap:(ASElementMap *)elementMap contentSize:(CGSize)contentSize elementToLayoutArrtibutesMap:(NSMapTable<ASCollectionElement *,UICollectionViewLayoutAttributes *> *)attrsMap
+- (instancetype)initWithElements:(ASElementMap *)elements contentSize:(CGSize)contentSize elementToLayoutArrtibutesMap:(NSMapTable<ASCollectionElement *,UICollectionViewLayoutAttributes *> *)attrsMap
 {
   self = [super init];
   if (self) {
-    _elementMap = elementMap;
+    _elements = elements;
     _contentSize = contentSize;
     _elementToLayoutArrtibutesMap = attrsMap;
   }

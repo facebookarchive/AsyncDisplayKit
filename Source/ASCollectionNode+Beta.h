@@ -25,9 +25,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property (strong, nonatomic, nullable) Class collectionViewClass;
 
 /**
- * The map that is currently displayed. The "UIKit index space.". Must be accessed on main thread.
+ * The elements that are currently displayed. The "UIKit index space". Must be accessed on main thread.
  */
-@property (strong, nonatomic, readonly) ASElementMap *visibleMap;
+@property (strong, nonatomic, readonly) ASElementMap *visibleElements;
 
 @property (strong, readonly, nullable) id<ASCollectionLayoutDelegate> layoutDelegate;
 

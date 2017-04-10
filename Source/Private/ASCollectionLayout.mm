@@ -10,7 +10,7 @@
 
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
-#import <AsyncDisplayKit/ASCollectionLayoutContext.h>
+#import <AsyncDisplayKit/ASCollectionLayoutContext+Private.h>
 #import <AsyncDisplayKit/ASCollectionLayoutDelegate.h>
 #import <AsyncDisplayKit/ASCollectionLayoutState.h>
 #import <AsyncDisplayKit/ASCollectionNode+Beta.h>
@@ -19,7 +19,7 @@
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
 #import <AsyncDisplayKit/ASThread.h>
 
-@interface ASCollectionLayout () {
+@interface ASCollectionLayout () <ASDataControllerLayoutDelegate> {
   ASDN::Mutex __instanceLock__; // Non-recursive mutex, ftw!
   
   // Main thread only.
@@ -30,7 +30,7 @@
   // The context used to calculate _pendingState
   ASCollectionLayoutContext *_layoutContextForPendingState;
   
-  BOOL _layoutDelegateImplementsLayoutContextWithElementMap;
+  BOOL _layoutDelegateImplementsAdditionalInfoForLayoutWithElements;
 }
 
 @end
@@ -43,23 +43,24 @@
   if (self) {
     ASDisplayNodeAssertNotNil(layoutDelegate, @"Collection layout delegate cannot be nil");
     _layoutDelegate = layoutDelegate;
-    _layoutDelegateImplementsLayoutContextWithElementMap = [layoutDelegate respondsToSelector:@selector(layoutContextWithElementMap:)];
+    _layoutDelegateImplementsAdditionalInfoForLayoutWithElements = [layoutDelegate respondsToSelector:@selector(additionalInfoForLayoutWithElements:)];
   }
   return self;
 }
 
 #pragma mark - ASDataControllerLayoutDelegate
 
-- (ASCollectionLayoutContext *)layoutContextWithElementMap:(ASElementMap *)map
+- (id)layoutContextWithElements:(ASElementMap *)elements
 {
   ASDisplayNodeAssertMainThread();
-  if (_layoutDelegateImplementsLayoutContextWithElementMap) {
-    return [_layoutDelegate layoutContextWithElementMap:map];
+  id additionalInfo = nil;
+  if (_layoutDelegateImplementsAdditionalInfoForLayoutWithElements) {
+    additionalInfo = [_layoutDelegate additionalInfoForLayoutWithElements:elements];
   }
-  return [[ASCollectionLayoutContext alloc] initWithViewportSize:self.viewportSize elementMap:map];
+  return [[ASCollectionLayoutContext alloc] initWithViewportSize:[self viewportSize] elements:elements additionalInfo:additionalInfo];
 }
 
-- (void)prepareLayoutWithContext:(ASCollectionLayoutContext *)context
+- (void)prepareLayoutWithContext:(id)context
 {
   ASCollectionLayoutState *state = [_layoutDelegate calculateLayoutWithContext:context];
   
@@ -73,13 +74,13 @@
 - (void)prepareLayout
 {
   ASDisplayNodeAssertMainThread();
-  ASCollectionLayoutContext *context =  [self layoutContextWithElementMap:_collectionNode.visibleMap];
+  ASCollectionLayoutContext *context = [self layoutContextWithElements:_collectionNode.visibleElements];
   
   ASCollectionLayoutState *state = nil;
   {
     ASDN::MutexLocker l(__instanceLock__);
     if (_pendingState != nil && ASObjectIsEqual(_layoutContextForPendingState, context)) {
-      // Looks like we can use the pending attrs. Great!
+      // Looks like we can use the pending state. Great!
       state = _pendingState;
       _pendingState = nil;
       _layoutContextForPendingState = nil;
@@ -123,14 +124,14 @@
 - (UICollectionViewLayoutAttributes *)layoutAttributesForItemAtIndexPath:(NSIndexPath *)indexPath
 {
   ASCollectionLayoutState *state = _state;
-  ASCollectionElement *element = [state.elementMap elementForItemAtIndexPath:indexPath];
+  ASCollectionElement *element = [state.elements elementForItemAtIndexPath:indexPath];
   return [state.elementToLayoutArrtibutesMap objectForKey:element];
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
   ASCollectionLayoutState *state = _state;
-  ASCollectionElement *element = [state.elementMap supplementaryElementOfKind:elementKind atIndexPath:indexPath];
+  ASCollectionElement *element = [state.elements supplementaryElementOfKind:elementKind atIndexPath:indexPath];
   return [state.elementToLayoutArrtibutesMap objectForKey:element];
 }
 

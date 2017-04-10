@@ -8,17 +8,19 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 @class ASElementMap;
 
 NS_ASSUME_NONNULL_BEGIN
 
+AS_SUBCLASSING_RESTRICTED
+
 @interface ASCollectionLayoutContext : NSObject
 
 @property (nonatomic, assign, readonly) CGSize viewportSize;
-@property (nonatomic, weak, readonly) ASElementMap *elementMap;
-
-- (instancetype)initWithViewportSize:(CGSize)viewportSize elementMap:(ASElementMap *)map NS_DESIGNATED_INITIALIZER;
+@property (nonatomic, strong, readonly) ASElementMap *elements;
+@property (nonatomic, strong, readonly, nullable) id additionalInfo;
 
 - (instancetype)init __unavailable;
 

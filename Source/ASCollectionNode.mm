@@ -373,7 +373,7 @@
   }
 }
 
-- (ASElementMap *)visibleMap
+- (ASElementMap *)visibleElements
 {
   ASDisplayNodeAssertMainThread();
   // TODO Own the data controller when view is not yet loaded

@@ -28,7 +28,6 @@ NS_ASSUME_NONNULL_BEGIN
 
 @class ASCellNode;
 @class ASCollectionElement;
-@class ASCollectionLayoutContext;
 @class ASDataController;
 @class ASElementMap;
 @class ASLayout;
@@ -121,25 +120,27 @@ extern NSString * const ASCollectionInvalidUpdateException;
 @protocol ASDataControllerLayoutDelegate <NSObject>
 
 /**
- * @abstract Returns a layout context for given element map that will be used to prepare a new layout.
- * The context should return the element map and any additional information needed for the coming layout pass.
+ * @abstract Returns a layout context needed for a coming layout pass with the given elements.
+ * The context should contain the elements and any additional information needed.
  *
  * @discussion This method will be called on main thread.
  */
-- (ASCollectionLayoutContext *)layoutContextWithElementMap:(ASElementMap *)map;
+- (id)layoutContextWithElements:(ASElementMap *)elements;
 
 /**
- * @abstract Prepares in advance a new layout for given context.
+ * @abstract Prepares in advance a new layout with the given context.
  *
- * @param context A context that was previously returned by `-layoutContextWithElementMap:`. It contains all elements to be laid out and any additional information needed.
+ * @param context A context that was previously returned by `-layoutContextWithElements:`.
  *
  * @discussion This method is called ahead of time, i.e before the underlying collection/table view is aware of the provided elements.
  * As a result, this method should rely solely on the given context and should not reach out to its collection/table view for information regarding items.
  *
  * @discussion This method will be called on background theads. It must be thread-safe and should not change any internal state of the conforming object.
  * It's recommended to put the resulting layouts of this method into a thread-safe cache that can be looked up later on.
+ *
+ * @discussion This method must block its calling thread. It can dispatch to other theads to reduce blocking time.
  */
-- (void)prepareLayoutWithContext:(ASCollectionLayoutContext *)context;
+- (void)prepareLayoutWithContext:(id)context;
 
 @end
 

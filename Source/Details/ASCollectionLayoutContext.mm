@@ -7,6 +7,8 @@
 //
 
 #import <AsyncDisplayKit/ASCollectionLayoutContext.h>
+#import <AsyncDisplayKit/ASCollectionLayoutContext+Private.h>
+
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
@@ -14,12 +16,13 @@
 
 @implementation ASCollectionLayoutContext
 
-- (instancetype)initWithViewportSize:(CGSize)viewportSize elementMap:(ASElementMap *)map
+- (instancetype)initWithViewportSize:(CGSize)viewportSize elements:(ASElementMap *)elements additionalInfo:(id)additionalInfo
 {
   self = [super init];
   if (self) {
     _viewportSize = viewportSize;
-    _elementMap = map;
+    _elements = elements;
+    _additionalInfo = additionalInfo;
   }
   return self;
 }
@@ -29,7 +32,7 @@
   if (context == nil) {
     return NO;
   }
-  return CGSizeEqualToSize(_viewportSize, context.viewportSize) && ASObjectIsEqual(_elementMap, context.elementMap);
+  return CGSizeEqualToSize(_viewportSize, context.viewportSize) && ASObjectIsEqual(_elements, context.elements) && ASObjectIsEqual(_additionalInfo, context.additionalInfo);
 }
 
 - (BOOL)isEqual:(id)other
@@ -45,7 +48,12 @@
 
 - (NSUInteger)hash
 {
-  return ASHash64ToNative(ASHashCombine([_elementMap hash], ASCGSizeHash(_viewportSize)));
+  NSUInteger subhashes[] = {
+    ASCGSizeHash(_viewportSize),
+    [_elements hash],
+    [_additionalInfo hash]
+  };
+  return ASIntegerArrayHash(subhashes, sizeof(subhashes) / sizeof(subhashes[0]));
 }
 
 @end

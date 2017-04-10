@@ -17,8 +17,8 @@ NS_ASSUME_NONNULL_BEGIN
 AS_SUBCLASSING_RESTRICTED
 @interface ASCollectionLayoutState : NSObject
 
-/// The element map used to calculate this object
-@property (nonatomic, strong, readonly) ASElementMap *elementMap;
+/// The elements used to calculate this object
+@property (nonatomic, strong, readonly) ASElementMap *elements;
 
 @property (nonatomic, assign, readonly) CGSize contentSize;
 
@@ -30,25 +30,25 @@ AS_SUBCLASSING_RESTRICTED
 /**
  * Designated initializer.
  *
- * @param elementMap The element map used to calculate this object
+ * @param elements The elements used to calculate this object
  *
  * @param contentSize The content size of the collection's layout
  *
  * @param elementToLayoutArrtibutesMap Map between elements to their layout attributes. The map may contain all elements, or a subset of them and will be updated later. 
  * Also, it should have NSMapTableObjectPointerPersonality and NSMapTableWeakMemory as key options.
  */
-- (instancetype)initWithElementMap:(ASElementMap *)elementMap contentSize:(CGSize)contentSize elementToLayoutArrtibutesMap:(NSMapTable<ASCollectionElement *, UICollectionViewLayoutAttributes *> *)attrsMap NS_DESIGNATED_INITIALIZER;
+- (instancetype)initWithElements:(ASElementMap *)elements contentSize:(CGSize)contentSize elementToLayoutArrtibutesMap:(NSMapTable<ASCollectionElement *, UICollectionViewLayoutAttributes *> *)attrsMap NS_DESIGNATED_INITIALIZER;
 
 /**
  * Convenience initializer.
  *
- * @param elementMap The element map used to calculate this object
+ * @param elements The elements used to calculate this object
  *
  * @param layout The layout describes size and position of all elements, or a subset of them and will be updated later.
  *
  * @discussion The sublayouts that describe position of elements must be direct children of the root layout object parameter.
  */
-- (instancetype)initWithElementMap:(ASElementMap *)elementMap layout:(ASLayout *)layout;
+- (instancetype)initWithElements:(ASElementMap *)elements layout:(ASLayout *)layout;
 
 @end
 

@@ -51,14 +51,19 @@
   return sizeRange;
 }
 
+- (id)additionalInfoForLayoutWithElements:(ASElementMap *)elements
+{
+  return nil;
+}
+
 - (ASCollectionLayoutState *)calculateLayoutWithContext:(ASCollectionLayoutContext *)context
 {
-  ASElementMap *elementMap = context.elementMap;
-  NSMutableArray<ASCellNode *> *children = ASArrayByFlatMapping(elementMap.itemElements, ASCollectionElement *element, element.node);
+  ASElementMap *elements = context.elements;
+  NSMutableArray<ASCellNode *> *children = ASArrayByFlatMapping(elements.itemElements, ASCollectionElement *element, element.node);
   if (children.count == 0) {
-    return [[ASCollectionLayoutState alloc] initWithElementMap:elementMap
-                                                         contentSize:CGSizeZero
-                                        elementToLayoutArrtibutesMap:[NSMapTable weakToStrongObjectsMapTable]];
+    return [[ASCollectionLayoutState alloc] initWithElements:elements
+                                                 contentSize:CGSizeZero
+                                elementToLayoutArrtibutesMap:[NSMapTable weakToStrongObjectsMapTable]];
   }
   
   ASStackLayoutSpec *stackSpec = [ASStackLayoutSpec stackLayoutSpecWithDirection:ASStackLayoutDirectionHorizontal
@@ -70,7 +75,7 @@
                                                                         children:children];
   stackSpec.concurrent = YES;
   ASLayout *layout = [stackSpec layoutThatFits:[self sizeRangeThatFits:context.viewportSize]];
-  return [[ASCollectionLayoutState alloc] initWithElementMap:elementMap layout:layout];
+  return [[ASCollectionLayoutState alloc] initWithElements:elements layout:layout];
 }
 
 @end
