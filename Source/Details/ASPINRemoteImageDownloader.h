@@ -12,7 +12,11 @@
 
 #import <AsyncDisplayKit/ASAvailability.h>
 
-#if PIN_REMOTE_IMAGE
+#ifndef AS_PIN_REMOTE_IMAGE
+#error AS_PIN_REMOTE_IMAGE must be defined
+#endif
+
+#if AS_PIN_REMOTE_IMAGE
 
 #import <AsyncDisplayKit/ASImageProtocols.h>
 

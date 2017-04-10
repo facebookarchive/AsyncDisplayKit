@@ -40,7 +40,12 @@
 
 #import <AsyncDisplayKit/ASSectionController.h>
 #import <AsyncDisplayKit/ASSupplementaryNodeSource.h>
-#if IG_LIST_KIT
+
+#ifndef AS_IG_LIST_KIT
+#error AS_IG_LIST_KIT must be defined
+#endif
+
+#if AS_IG_LIST_KIT
 #import <AsyncDisplayKit/IGListAdapter+AsyncDisplayKit.h>
 #import <AsyncDisplayKit/AsyncDisplayKit+IGListKitMethods.h>
 #endif

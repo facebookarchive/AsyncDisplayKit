@@ -8,7 +8,11 @@
 
 #import <AsyncDisplayKit/ASAvailability.h>
 
-#if IG_LIST_KIT
+#ifndef AS_IG_LIST_KIT
+#error AS_IG_LIST_KIT must be defined
+#endif
+
+#if AS_IG_LIST_KIT
 
 #import <IGListKit/IGListKit.h>
 #import <AsyncDisplayKit/ASCollectionView.h>

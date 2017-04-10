@@ -6,7 +6,13 @@
 //  Copyright © 2017 Facebook. All rights reserved.
 //
 
-#if IG_LIST_KIT
+#import <AsyncDisplayKit/ASAvailability.h>
+
+#ifndef AS_IG_LIST_KIT
+#error AS_IG_LIST_KIT must be defined
+#endif
+
+#if AS_IG_LIST_KIT
 
 #import "ASIGListAdapterBasedDataSource.h"
 #import <AsyncDisplayKit/AsyncDisplayKit.h>
@@ -316,4 +322,4 @@ typedef struct {
 
 @end
 
-#endif // IG_LIST_KIT
+#endif // AS_IG_LIST_KIT

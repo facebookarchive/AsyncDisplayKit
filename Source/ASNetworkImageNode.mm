@@ -20,7 +20,11 @@
 #import <AsyncDisplayKit/ASImageNode+AnimatedImagePrivate.h>
 #import <AsyncDisplayKit/ASImageContainerProtocolCategories.h>
 
-#if PIN_REMOTE_IMAGE
+#ifndef AS_PIN_REMOTE_IMAGE
+#error AS_PIN_REMOTE_IMAGE must be defined
+#endif
+
+#if AS_PIN_REMOTE_IMAGE
 #import <AsyncDisplayKit/ASPINRemoteImageDownloader.h>
 #endif
 
@@ -101,7 +105,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (instancetype)init
 {
-#if PIN_REMOTE_IMAGE
+#if AS_PIN_REMOTE_IMAGE
   return [self initWithCache:[ASPINRemoteImageDownloader sharedDownloader] downloader:[ASPINRemoteImageDownloader sharedDownloader]];
 #else
   return [self initWithCache:nil downloader:[ASBasicImageDownloader sharedImageDownloader]];
