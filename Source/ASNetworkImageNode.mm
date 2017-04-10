@@ -109,7 +109,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)dealloc
 {
-  [self _cancelImageDownload:NO];
+  [self _cancelImageDownloadWithResumePossibility:NO];
 }
 
 #pragma mark - Public methods -- must lock
@@ -129,7 +129,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   if (shouldCancelAndClear) {
     ASDisplayNodeAssertNil(_URL, @"Directly setting an image on an ASNetworkImageNode causes it to behave like an ASImageNode instead of an ASNetworkImageNode. If this is what you want, set the URL to nil first.");
     _URL = nil;
-    [self _locked_cancelDownloadAndClearImage:NO];
+    [self _locked_cancelDownloadAndClearImageWithResumePossibility:NO];
   }
   
   [self _locked__setImage:image];
@@ -165,7 +165,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       return;
     }
     
-    [self _locked_cancelImageDownload:NO];
+    [self _locked_cancelImageDownloadWithResumePossibility:NO];
 
     _imageLoaded = NO;
     
@@ -387,7 +387,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     return;
   }
 
-  [self _cancelDownloadAndClearImage:YES];
+  [self _cancelDownloadAndClearImageWithResumePossibility:YES];
 }
 
 - (void)didEnterPreloadState
@@ -471,15 +471,15 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 }
 
-- (void)_cancelDownloadAndClearImage:(BOOL)storeResume
+- (void)_cancelDownloadAndClearImageWithResumePossibility:(BOOL)storeResume
 {
   ASDN::MutexLocker l(__instanceLock__);
-  [self _locked_cancelDownloadAndClearImage:storeResume];
+  [self _locked_cancelDownloadAndClearImageWithResumePossibility:storeResume];
 }
 
-- (void)_locked_cancelDownloadAndClearImage:(BOOL)storeResume
+- (void)_locked_cancelDownloadAndClearImageWithResumePossibility:(BOOL)storeResume
 {
-  [self _locked_cancelImageDownload:storeResume];
+  [self _locked_cancelImageDownloadWithResumePossibility:storeResume];
   
   // Destruction of bigger images on the main thread can be expensive
   // and can take some time, so we dispatch onto a bg queue to
@@ -506,13 +506,13 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 }
 
-- (void)_cancelImageDownload:(BOOL)storeResume
+- (void)_cancelImageDownloadWithResumePossibility:(BOOL)storeResume
 {
   ASDN::MutexLocker l(__instanceLock__);
-  [self _locked_cancelImageDownload:storeResume];
+  [self _locked_cancelImageDownloadWithResumePossibility:storeResume];
 }
 
-- (void)_locked_cancelImageDownload:(BOOL)storeResume
+- (void)_locked_cancelImageDownloadWithResumePossibility:(BOOL)storeResume
 {
   if (!_downloadIdentifier) {
     return;

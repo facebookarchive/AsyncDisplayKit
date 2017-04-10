@@ -115,7 +115,7 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
  `downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:`.
  @discussion This method has no effect if `downloadIdentifier` is nil. If implemented, this method
  may be called instead of `cancelImageDownloadForIdentifier:` in cases where ASDK believes there's a chance
- the image download will be resumed (currently when an image exits display range). You can use this to store
+ the image download will be resumed (currently when an image exits preload range). You can use this to store
  any data that has already been downloaded for use in resuming the download later.
  */
 - (void)cancelImageDownloadWithResumePossibilityForIdentifier:(id)downloadIdentifier;
