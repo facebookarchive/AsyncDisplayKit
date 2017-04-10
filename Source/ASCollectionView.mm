@@ -145,6 +145,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     unsigned int scrollViewWillBeginDragging:1;
     unsigned int scrollViewDidEndDragging:1;
     unsigned int scrollViewWillEndDragging:1;
+    unsigned int scrollViewDidEndDecelerating:1;
     unsigned int collectionViewWillDisplayNodeForItem:1;
     unsigned int collectionViewWillDisplayNodeForItemDeprecated:1;
     unsigned int collectionViewDidEndDisplayingNodeForItem:1;
@@ -481,6 +482,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     
     _asyncDelegateFlags.scrollViewDidScroll = [_asyncDelegate respondsToSelector:@selector(scrollViewDidScroll:)];
     _asyncDelegateFlags.scrollViewWillEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillEndDragging:withVelocity:targetContentOffset:)];
+    _asyncDelegateFlags.scrollViewDidEndDecelerating = [_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDecelerating:)];
     _asyncDelegateFlags.scrollViewWillBeginDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewWillBeginDragging:)];
     _asyncDelegateFlags.scrollViewDidEndDragging = [_asyncDelegate respondsToSelector:@selector(scrollViewDidEndDragging:willDecelerate:)];
     _asyncDelegateFlags.collectionViewWillDisplayNodeForItem = [_asyncDelegate respondsToSelector:@selector(collectionView:willDisplayNode:forItemAtIndexPath:)];
@@ -1315,6 +1317,15 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   
   if (_asyncDelegateFlags.scrollViewWillEndDragging) {
     [_asyncDelegate scrollViewWillEndDragging:scrollView withVelocity:velocity targetContentOffset:(targetContentOffset ? : &contentOffset)];
+  }
+}
+
+- (void)scrollViewDidEndDecelerating:(UIScrollView *)scrollView
+{
+  _deceleratingVelocity = CGPointZero;
+    
+  if (_asyncDelegateFlags.scrollViewDidEndDecelerating) {
+    [_asyncDelegate scrollViewDidEndDecelerating:scrollView];
   }
 }
 
