@@ -49,7 +49,7 @@
 - (NSUInteger)hash
 {
   NSUInteger subhashes[] = {
-    ASCGSizeHash(_viewportSize),
+    ASHashFromCGSize(_viewportSize),
     [_elements hash],
     [_additionalInfo hash]
   };

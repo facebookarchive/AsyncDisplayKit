@@ -12,7 +12,7 @@
 
 #import <functional>
 
-NSUInteger ASCGSizeHash(const CGSize size)
+NSUInteger ASHashFromCGSize(const CGSize size)
 {
   return ASHash64ToNative(ASHashCombine(std::hash<CGFloat>()(size.width), std::hash<CGFloat>()(size.height)));
 }

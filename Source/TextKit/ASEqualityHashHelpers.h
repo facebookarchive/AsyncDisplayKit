@@ -47,7 +47,7 @@ ASDISPLAYNODE_INLINE size_t ASHash64ToNative(uint64_t key) {
 }
 #endif
 
-NSUInteger ASCGSizeHash(const CGSize size);
+NSUInteger ASHashFromCGSize(const CGSize size);
 
 NSUInteger ASIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count);
 
