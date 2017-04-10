@@ -761,7 +761,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   if (_hasDataControllerLayoutDelegate) {
     _dataController.layoutDelegate = (id<ASDataControllerLayoutDelegate>)layout;
   }
-  GET_COLLECTIONNODE_OR_RETURN(collectionNode, (void)0);
 }
 
 /**
