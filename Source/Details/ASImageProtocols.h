@@ -110,6 +110,17 @@ typedef NS_ENUM(NSUInteger, ASImageDownloaderPriority) {
 @optional
 
 /**
+ @abstract Cancels an image download, however indicating resume data should be stored in case of redownload.
+ @param downloadIdentifier The opaque download identifier object returned from
+ `downloadImageWithURL:callbackQueue:downloadProgressBlock:completion:`.
+ @discussion This method has no effect if `downloadIdentifier` is nil. If implemented, this method
+ may be called instead of `cancelImageDownloadForIdentifier:` in cases where ASDK believes there's a chance
+ the image download will be resumed (currently when an image exits preload range). You can use this to store
+ any data that has already been downloaded for use in resuming the download later.
+ */
+- (void)cancelImageDownloadWithResumePossibilityForIdentifier:(id)downloadIdentifier;
+
+/**
  @abstract Return an object that conforms to ASAnimatedImageProtocol
  @param animatedImageData Data that represents an animated image.
  */

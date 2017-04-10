@@ -58,6 +58,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     unsigned int downloaderImplementsSetProgress:1;
     unsigned int downloaderImplementsSetPriority:1;
     unsigned int downloaderImplementsAnimatedImage:1;
+    unsigned int downloaderImplementsCancelWithResume:1;
   } _downloaderFlags;
 
   // Immutable and set on init only. We don't need to lock in this case.
@@ -85,6 +86,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   _downloaderFlags.downloaderImplementsSetProgress = [downloader respondsToSelector:@selector(setProgressImageBlock:callbackQueue:withDownloadIdentifier:)];
   _downloaderFlags.downloaderImplementsSetPriority = [downloader respondsToSelector:@selector(setPriority:withDownloadIdentifier:)];
   _downloaderFlags.downloaderImplementsAnimatedImage = [downloader respondsToSelector:@selector(animatedImageWithData:)];
+  _downloaderFlags.downloaderImplementsCancelWithResume = [downloader respondsToSelector:@selector(cancelImageDownloadWithResumePossibilityForIdentifier:)];
 
   _cacheFlags.cacheSupportsClearing = [cache respondsToSelector:@selector(clearFetchedImageFromCacheWithURL:)];
   _cacheFlags.cacheSupportsSynchronousFetch = [cache respondsToSelector:@selector(synchronouslyFetchedCachedImageWithURL:)];
@@ -107,7 +109,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)dealloc
 {
-  [self _cancelImageDownload];
+  [self _cancelImageDownloadWithResumePossibility:NO];
 }
 
 #pragma mark - Public methods -- must lock
@@ -127,7 +129,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   if (shouldCancelAndClear) {
     ASDisplayNodeAssertNil(_URL, @"Directly setting an image on an ASNetworkImageNode causes it to behave like an ASImageNode instead of an ASNetworkImageNode. If this is what you want, set the URL to nil first.");
     _URL = nil;
-    [self _locked_cancelDownloadAndClearImage];
+    [self _locked_cancelDownloadAndClearImageWithResumePossibility:NO];
   }
   
   [self _locked__setImage:image];
@@ -163,7 +165,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
       return;
     }
     
-    [self _locked_cancelImageDownload];
+    [self _locked_cancelImageDownloadWithResumePossibility:NO];
 
     _imageLoaded = NO;
     
@@ -385,7 +387,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
     return;
   }
 
-  [self _cancelDownloadAndClearImage];
+  [self _cancelDownloadAndClearImageWithResumePossibility:YES];
 }
 
 - (void)didEnterPreloadState
@@ -469,15 +471,15 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 }
 
-- (void)_cancelDownloadAndClearImage
+- (void)_cancelDownloadAndClearImageWithResumePossibility:(BOOL)storeResume
 {
   ASDN::MutexLocker l(__instanceLock__);
-  [self _locked_cancelDownloadAndClearImage];
+  [self _locked_cancelDownloadAndClearImageWithResumePossibility:storeResume];
 }
 
-- (void)_locked_cancelDownloadAndClearImage
+- (void)_locked_cancelDownloadAndClearImageWithResumePossibility:(BOOL)storeResume
 {
-  [self _locked_cancelImageDownload];
+  [self _locked_cancelImageDownloadWithResumePossibility:storeResume];
   
   // Destruction of bigger images on the main thread can be expensive
   // and can take some time, so we dispatch onto a bg queue to
@@ -504,20 +506,24 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   }
 }
 
-- (void)_cancelImageDownload
+- (void)_cancelImageDownloadWithResumePossibility:(BOOL)storeResume
 {
   ASDN::MutexLocker l(__instanceLock__);
-  [self _locked_cancelImageDownload];
+  [self _locked_cancelImageDownloadWithResumePossibility:storeResume];
 }
 
-- (void)_locked_cancelImageDownload
+- (void)_locked_cancelImageDownloadWithResumePossibility:(BOOL)storeResume
 {
   if (!_downloadIdentifier) {
     return;
   }
 
   if (_downloadIdentifier) {
-    [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
+    if (storeResume && _downloaderFlags.downloaderImplementsCancelWithResume) {
+      [_downloader cancelImageDownloadWithResumePossibilityForIdentifier:_downloadIdentifier];
+    } else {
+      [_downloader cancelImageDownloadForIdentifier:_downloadIdentifier];
+    }
   }
   _downloadIdentifier = nil;
 

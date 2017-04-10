@@ -245,7 +245,13 @@ static ASPINRemoteImageDownloader *sharedDownloader = nil;
 - (void)cancelImageDownloadForIdentifier:(id)downloadIdentifier
 {
   ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
-  [[self sharedPINRemoteImageManager] cancelTaskWithUUID:downloadIdentifier];
+  [[self sharedPINRemoteImageManager] cancelTaskWithUUID:downloadIdentifier storeResumeData:NO];
+}
+
+- (void)cancelImageDownloadWithResumePossibilityForIdentifier:(id)downloadIdentifier
+{
+  ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
+  [[self sharedPINRemoteImageManager] cancelTaskWithUUID:downloadIdentifier storeResumeData:YES];
 }
 
 - (void)setProgressImageBlock:(ASImageDownloaderProgressImage)progressBlock callbackQueue:(dispatch_queue_t)callbackQueue withDownloadIdentifier:(id)downloadIdentifier
@@ -270,15 +276,15 @@ static ASPINRemoteImageDownloader *sharedDownloader = nil;
   PINRemoteImageManagerPriority pi_priority = PINRemoteImageManagerPriorityMedium;
   switch (priority) {
     case ASImageDownloaderPriorityPreload:
-      pi_priority = PINRemoteImageManagerPriorityMedium;
+      pi_priority = PINRemoteImageManagerPriorityLow;
       break;
 
     case ASImageDownloaderPriorityImminent:
-      pi_priority = PINRemoteImageManagerPriorityHigh;
+      pi_priority = PINRemoteImageManagerPriorityDefault;
       break;
 
     case ASImageDownloaderPriorityVisible:
-      pi_priority = PINRemoteImageManagerPriorityVeryHigh;
+      pi_priority = PINRemoteImageManagerPriorityHigh;
       break;
   }
   [[self sharedPINRemoteImageManager] setPriority:pi_priority ofTaskWithUUID:downloadIdentifier];
