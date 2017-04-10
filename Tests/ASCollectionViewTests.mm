@@ -114,7 +114,7 @@
 
 - (ASCellNode *)collectionView:(ASCollectionView *)collectionView nodeForSupplementaryElementOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
-  return [[ASCellNode alloc] init];
+  return [[ASTextCellNodeWithSetSelectedCounter alloc] init];
 }
 
 - (void)collectionNode:(ASCollectionNode *)collectionNode willBeginBatchFetchWithContext:(ASBatchContext *)context
@@ -487,11 +487,23 @@
   updateValidationTestPrologue
   NSSet *nodeBatch1 = [NSSet setWithArray:[cn visibleNodes]];
   XCTAssertGreaterThan(nodeBatch1.count, 0);
+  
+  NSArray<UICollectionViewLayoutAttributes *> *visibleLayoutAttributesBatch1 = [cv.collectionViewLayout layoutAttributesForElementsInRect:cv.bounds];
+  XCTAssertGreaterThan(visibleLayoutAttributesBatch1.count, 0);
 
   // Expect all visible nodes get 1 applyLayoutAttributes and have a non-nil value.
   for (ASTextCellNodeWithSetSelectedCounter *node in nodeBatch1) {
     XCTAssertEqual(node.applyLayoutAttributesCount, 1, @"Expected applyLayoutAttributes to be called exactly once for visible nodes.");
     XCTAssertNotNil(node.layoutAttributes, @"Expected layoutAttributes to be non-nil for visible cell node.");
+  }
+  
+  for (UICollectionViewLayoutAttributes *layoutAttributes in visibleLayoutAttributesBatch1) {
+    if (layoutAttributes.representedElementCategory != UICollectionElementCategorySupplementaryView) {
+      continue;
+    }
+    ASTextCellNodeWithSetSelectedCounter *node = (ASTextCellNodeWithSetSelectedCounter *)[cv supplementaryNodeForElementKind:layoutAttributes.representedElementKind atIndexPath:layoutAttributes.indexPath];
+    XCTAssertEqual(node.applyLayoutAttributesCount, 1, @"Expected applyLayoutAttributes to be called exactly once for visible supplementary nodes.");
+    XCTAssertNotNil(node.layoutAttributes, @"Expected layoutAttributes to be non-nil for visible supplementary node.");
   }
 
   // Scroll to next batch of items.
@@ -507,6 +519,15 @@
   for (ASTextCellNodeWithSetSelectedCounter *node in nodeBatch1) {
     XCTAssertEqual(node.applyLayoutAttributesCount, 1, @"Expected applyLayoutAttributes to be called exactly once for visible nodes, even after node is removed.");
     XCTAssertNil(node.layoutAttributes, @"Expected layoutAttributes to be nil for removed cell node.");
+  }
+  
+  for (UICollectionViewLayoutAttributes *layoutAttributes in visibleLayoutAttributesBatch1) {
+    if (layoutAttributes.representedElementCategory != UICollectionElementCategorySupplementaryView) {
+      continue;
+    }
+    ASTextCellNodeWithSetSelectedCounter *node = (ASTextCellNodeWithSetSelectedCounter *)[cv supplementaryNodeForElementKind:layoutAttributes.representedElementKind atIndexPath:layoutAttributes.indexPath];
+    XCTAssertEqual(node.applyLayoutAttributesCount, 1, @"Expected applyLayoutAttributes to be called exactly once for visible supplementary nodes, even after node is removed.");
+    XCTAssertNil(node.layoutAttributes, @"Expected layoutAttributes to be nil for removed supplementary node.");
   }
 }
 
