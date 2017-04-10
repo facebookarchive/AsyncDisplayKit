@@ -24,6 +24,7 @@
 #import <AsyncDisplayKit/ASNetworkImageNode.h>
 #import <AsyncDisplayKit/ASWeakProxy.h>
 
+#define ASAnimatedImageDebug  0
 
 @interface ASNetworkImageNode (Private)
 - (void)_locked_setDefaultImage:(UIImage *)image;

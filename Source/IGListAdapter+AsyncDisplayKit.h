@@ -6,7 +6,9 @@
 //  Copyright © 2017 Facebook. All rights reserved.
 //
 
-#if IG_LIST_KIT
+#import <AsyncDisplayKit/ASAvailability.h>
+
+#if AS_IG_LIST_KIT
 
 #import <IGListKit/IGListKit.h>
 
@@ -31,4 +33,4 @@ NS_ASSUME_NONNULL_BEGIN
 
 NS_ASSUME_NONNULL_END
 
-#endif // IG_LIST_KIT
+#endif // AS_IG_LIST_KIT

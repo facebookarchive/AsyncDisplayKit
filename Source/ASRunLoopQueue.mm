@@ -10,6 +10,7 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
+#import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASRunLoopQueue.h>
 #import <AsyncDisplayKit/ASThread.h>
 #import <AsyncDisplayKit/ASLog.h>
@@ -282,13 +283,13 @@ static void runLoopSourceCallback(void *info) {
 
   // itemsToProcess will be empty if _queueConsumer == nil so no need to check again.
   if (itemsToProcess.empty() == false) {
-#if ASRunloopQueueLoggingEnabled
+#if ASRunLoopQueueLoggingEnabled
     NSLog(@"<%@> - Starting processing of: %ld", self, itemsToProcess.size());
 #endif
     auto itemsEnd = itemsToProcess.cend();
     for (auto iterator = itemsToProcess.begin(); iterator < itemsEnd; iterator++) {
       _queueConsumer(*iterator, isQueueDrained && iterator == itemsEnd - 1);
-#if ASRunloopQueueLoggingEnabled
+#if ASRunLoopQueueLoggingEnabled
       NSLog(@"<%@> - Finished processing 1 item", self);
 #endif
     }
