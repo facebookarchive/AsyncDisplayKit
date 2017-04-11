@@ -6,7 +6,7 @@ prevPage: map-node.html
 nextPage: scroll-node.html
 ---
 
-`ASControlNode` is the ASDK equivalent to `UIControl`.  You don't create instances of `ASControlNode` directly.  Instead, you can use it as a subclassing point when creating controls of your own.  In fact, <a href = "/docs/text-node.html">ASTextNode</a>, <a href = "/docs/image-node.html">ASImageNode</a>, <a href = "/docs/video-node.html">ASVideoNode</a> and <a href = "/docs/map-node.html">ASMapNode</a> are all subclasses of `ASControlNode`.
+`ASControlNode` is the Texture equivalent to `UIControl`.  You don't create instances of `ASControlNode` directly.  Instead, you can use it as a subclassing point when creating controls of your own.  In fact, <a href = "/docs/text-node.html">ASTextNode</a>, <a href = "/docs/image-node.html">ASImageNode</a>, <a href = "/docs/video-node.html">ASVideoNode</a> and <a href = "/docs/map-node.html">ASMapNode</a> are all subclasses of `ASControlNode`.
 
 This fact is especially useful when it comes to image and text nodes.  Having the ability to add target-action pairs means that you can use any text or image node as a button without having to rely on creating gesture recognizers, as you would with text in UIKit, or creating extraneous views as you might when using `UIButton`.
 

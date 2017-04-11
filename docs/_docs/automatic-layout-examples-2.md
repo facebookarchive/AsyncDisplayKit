@@ -6,7 +6,7 @@ prevPage: layout2-quickstart.html
 nextPage: layout2-layoutspec-types.html
 ---
 
-Check out the layout specs <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/LayoutSpecExamples">example project</a> to play around with the code below. 
+Check out the layout specs <a href="https://github.com/texturegroup/texture/tree/master/examples/LayoutSpecExamples">example project</a> to play around with the code below. 
 
 ## Simple Header with Left and Right Justified Text
 
@@ -161,7 +161,7 @@ override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec
 
   let absoluteSpec = ASAbsoluteLayoutSpec(children: [photoNode, iconNode])
 
-  // ASAbsoluteLayoutSpec's .sizing property recreates the behavior of ASDK Layout API 1.0's "ASStaticLayoutSpec"
+  // ASAbsoluteLayoutSpec's .sizing property recreates the behavior of Texture Layout API 1.0's "ASStaticLayoutSpec"
   absoluteSpec.sizing = .sizeToFit
 
   return absoluteSpec;

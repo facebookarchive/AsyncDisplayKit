@@ -92,7 +92,7 @@ Three examples in increasing order of complexity.
 
 ###Discussion
 
-Get the full ASDK project at examples/ASDKgram.
+Get the full Texture project at examples/ASDKgram.
 
 #Social App Layout 2
 
@@ -201,4 +201,4 @@ Get the full ASDK project at examples/ASDKgram.
 
 ###Discussion
 
-Get the full ASDK project at examples/CatDealsCollectionView.
+Get the full Texture project at examples/CatDealsCollectionView.

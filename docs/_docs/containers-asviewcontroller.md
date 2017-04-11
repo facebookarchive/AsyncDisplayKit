@@ -22,7 +22,7 @@ More features will be added over time, so it is a good idea to base your view co
 
 A `UIViewController` provides a view of its own. An `ASViewController` is assigned a node to manage in its designated initializer `-initWithNode:`. 
 
-Consider the following `ASViewController` subclass, `PhotoFeedNodeController`, from the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram example project</a> that would like to use a table node as its managed node. 
+Consider the following `ASViewController` subclass, `PhotoFeedNodeController`, from the <a href="https://github.com/texturegroup/texture/tree/master/examples/ASDKgram">ASDKgram example project</a> that would like to use a table node as its managed node. 
 
 This table node is assigned to the `ASViewController` in its `-initWithNode:` designated initializer method.
 

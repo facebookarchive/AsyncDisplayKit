@@ -6,7 +6,7 @@ prevPage: text-node.html
 nextPage: network-image-node.html
 ---
 
-`ASImageNode` is the ASDK equivalent to `UIImageView`.  The most basic difference is that images are decoded asynchronously by default.  Of course, there are more advanced improvments as well such as GIF support and `imageModificationBlock`s.
+`ASImageNode` is the Texture equivalent to `UIImageView`.  The most basic difference is that images are decoded asynchronously by default.  Of course, there are more advanced improvments as well such as GIF support and `imageModificationBlock`s.
 
 ### Basic Usage
 

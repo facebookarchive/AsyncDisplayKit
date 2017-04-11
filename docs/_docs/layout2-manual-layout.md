@@ -5,7 +5,7 @@ permalink: /docs/layout2-manual-layout.html
 ---
 
 ## Manual Layout
-After diving in to the automatic way for layout in ASDK there is still the _old_ way to layout manually available. For the sake of completness here is a short description how to accomplish that within ASDK.
+After diving in to the automatic way for layout in Texture there is still the _old_ way to layout manually available. For the sake of completness here is a short description how to accomplish that within Texture.
 
 ### Manual Layout UIKit
 
@@ -68,9 +68,9 @@ Further, even with a cache, we'll still be blocking the main thread on sizing *s
 
 This is a pretty deep rabbit hole.  We could attempt to work around the fact that UILabels and UITextViews cannot safely be sized on background threads by manually creating a TextKit stack and sizing the text ourselves... but that's a laborious duplication of work.  Further, if UITextView's layout behaviour changes in an iOS update, our sizing code will break.  (And did we mention that TextKit isn't thread-safe either?)
 
-### Manual Layout ASDK
+### Manual Layout Texture
 
-Manual layout within ASDK are realized within two methods:
+Manual layout within Texture are realized within two methods:
 
 #### `calculateSizeThatFits` and `layout`
 
@@ -161,7 +161,7 @@ Our custom node looks like this:
 </div>
 </div>
 
-`ASImageNode` and `ASTextNode`, like the rest of AsyncDisplayKit, are thread-safe, so we can size them on background threads.  The `-layoutThatFits:` method is like `-sizeThatFits:`, but with side effects:  it caches the (`calculatedSize`) for quick access later on &mdash; like in our now-snappy `-layout` implementation.
+`ASImageNode` and `ASTextNode`, like the rest of Texture, are thread-safe, so we can size them on background threads.  The `-layoutThatFits:` method is like `-sizeThatFits:`, but with side effects:  it caches the (`calculatedSize`) for quick access later on &mdash; like in our now-snappy `-layout` implementation.
 
 As you can see, node hierarchies are sized and laid out in much the same way as their view counterparts.  Manually layed out nodes do need to be written with a few things in mind:
 

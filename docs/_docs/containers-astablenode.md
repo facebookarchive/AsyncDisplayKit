@@ -76,9 +76,9 @@ Note that neither of these methods require a reuse mechanism.
 
 ### Replacing UITableViewController with ASViewController
 
-AsyncDisplayKit does not offer an equivalent to `UITableViewController`. Instead, use an `ASViewController` initialized with an `ASTableNode`. 
+Texture does not offer an equivalent to `UITableViewController`. Instead, use an `ASViewController` initialized with an `ASTableNode`. 
 
-Consider, again, the `ASViewController` subclass - PhotoFeedNodeController - from the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">`ASDKgram sample app`</a> that uses a table node as its managed node.
+Consider, again, the `ASViewController` subclass - PhotoFeedNodeController - from the <a href="https://github.com/texturegroup/texture/tree/master/examples/ASDKgram">`ASDKgram sample app`</a> that uses a table node as its managed node.
 
 An `ASTableNode` is assigned to be managed by an `ASViewController` in its `-initWithNode:` designated initializer method. 
 
@@ -120,7 +120,7 @@ init(models: [Model]) {
 
 It is very important that node blocks be thread-safe. One aspect of that is ensuring that the data model is accessed _outside_ of the node block. Therefore, it is unlikely that you should need to use the index inside of the block. 
 
-Consider the following `-tableNode:nodeBlockForRowAtIndexPath:` method from the `PhotoFeedNodeController.m` file in the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a>.
+Consider the following `-tableNode:nodeBlockForRowAtIndexPath:` method from the `PhotoFeedNodeController.m` file in the <a href="https://github.com/texturegroup/texture/tree/master/examples/ASDKgram">ASDKgram sample app</a>.
 
 <div class = "highlight-group">
 <span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
@@ -164,7 +164,7 @@ In the example above, you can see how the index is used to access the photo mode
 
 ### Accessing the ASTableView
 
-If you've used previous versions of ASDK, you'll notice that `ASTableView` has been removed in favor of `ASTableNode`.
+If you've used previous versions of Texture, you'll notice that `ASTableView` has been removed in favor of `ASTableNode`.
 
 <div class = "note">
 <code>ASTableView</code>, an actual <code>UITableView</code> subclass, is still used internally by <code>ASTableNode</code>. While it should not be created directly, it can still be used directly by accessing the <code>.view</code> property of an <code>ASTableNode</code>.
@@ -216,13 +216,13 @@ This is all to say, a `tableNode`'s cells will always fill the full width of the
 
 If you call `-setNeedsLayout` on an `ASCellNode`, it will automatically perform another layout pass and if its overall desired size has changed, the table will be informed and will update itself. 
 
-This is different from `UIKit` where normally you would have to call reload row / item. This saves tons of code, check out the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a> to see side by side implementations of an `UITableView` and `ASTableNode` implemented social media feed. 
+This is different from `UIKit` where normally you would have to call reload row / item. This saves tons of code, check out the <a href="https://github.com/texturegroup/texture/tree/master/examples/ASDKgram">ASDKgram sample app</a> to see side by side implementations of an `UITableView` and `ASTableNode` implemented social media feed. 
 
 ### Sample Apps using ASTableNode
 <ul>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a></li>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/Kittens">Kittens</a></li>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/HorizontalWithinVerticalScrolling">HorizontalWithinVerticalScrolling</a></li>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/VerticalWithinHorizontalScrolling">VerticalWithinHorizontalScrolling</a></li>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/SocialAppLayout">SocialAppLayout</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/ASDKgram">ASDKgram</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/Kittens">Kittens</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/HorizontalWithinVerticalScrolling">HorizontalWithinVerticalScrolling</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/VerticalWithinHorizontalScrolling">VerticalWithinHorizontalScrolling</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/SocialAppLayout">SocialAppLayout</a></li>
 </ul>

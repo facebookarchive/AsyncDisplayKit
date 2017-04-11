@@ -12,11 +12,11 @@ ASLayout is an automatic, asynchronous, purely Objective-C box model layout feat
 
 `UIView` instances store position and size in their `center` and `bounds` properties. As constraints change, Core Animation performs a layout pass to call `layoutSubviews`, asking views to update these properties on their subviews. 
 
-`<ASLayoutable>` instances (all ASDisplayNodes and subclasses) do not have any size or position information. Instead, AsyncDisplayKit calls the `layoutSpecThatFits:` method with a given size constraint and the component must return a structure describing both its size, and the position and sizes of its children.
+`<ASLayoutable>` instances (all ASDisplayNodes and subclasses) do not have any size or position information. Instead, Texture calls the `layoutSpecThatFits:` method with a given size constraint and the component must return a structure describing both its size, and the position and sizes of its children.
 
 ##Terminology
 
-The terminology is a bit confusing, so here is a brief description of all of the ASDK automatic layout players:
+The terminology is a bit confusing, so here is a brief description of all of the Texture automatic layout players:
 
 Items that conform to the **\<ASLayoutable\> protocol** declares a method for measuring the layout of an object.  A layout is defined by an ASLayout return value, and must specify 1) the size (but not position) of the layoutable object, and 2) the size and position of all of its immediate child objects. The tree recursion is driven by parents requesting layouts from their children in order to determine their size, followed by the parents setting the position of the children once the size is known.
  
@@ -24,7 +24,7 @@ This protocol also implements a "family" of layoutable protocols - the `AS{*}Lay
 
 All ASDisplayNodes and subclasses as well as the `ASLayoutSpecs` conform to this protocol. 
 
-An **`ASLayoutSpec`** is an immutable object that describes a layout. Creation of a layout spec should only happen by a user in layoutSpecThatFits:. During that method, a layout spec can be created and mutated. Once it is passed back to ASDK, the isMutable flag will be set to NO and any further mutations will cause an assert.
+An **`ASLayoutSpec`** is an immutable object that describes a layout. Creation of a layout spec should only happen by a user in layoutSpecThatFits:. During that method, a layout spec can be created and mutated. Once it is passed back to Texture, the isMutable flag will be set to NO and any further mutations will cause an assert.
 
 Every ASLayoutSpec must act on at least one child. The ASLayoutSpec has the responsibility of holding on to the spec children. Some layout specs, like ASInsetLayoutSpec, only require a single child. Others, have multiple. 
 

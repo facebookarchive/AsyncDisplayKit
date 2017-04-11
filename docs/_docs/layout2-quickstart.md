@@ -8,7 +8,7 @@ nextPage: automatic-layout-examples-2.html
 
 ## Motivation & Benefits
 
-The Layout API was created as a performant alternative to UIKit's Auto Layout, which becomes exponentially expensive for complicated view hierarchies. AsyncDisplayKit's Layout API has many benefits over using UIKit's Auto Layout:
+The Layout API was created as a performant alternative to UIKit's Auto Layout, which becomes exponentially expensive for complicated view hierarchies. Texture's Layout API has many benefits over using UIKit's Auto Layout:
 
 - **Fast**: As fast as manual layout code and significantly faster than Auto Layout
 - **Asynchronous & Concurrent:** Layouts can be computed on background threads so user interactions are not interrupted. 
@@ -18,11 +18,11 @@ The Layout API was created as a performant alternative to UIKit's Auto Layout, w
 
 ## Inspired by CSS Flexbox 
 
-Those who are familiar with Flexbox will notice many similarities in the two systems. However, AsyncDisplayKit's Layout API <a href = "layout2-web-flexbox-differences.html">does not</a> re-implement all of CSS.
+Those who are familiar with Flexbox will notice many similarities in the two systems. However, Texture's Layout API <a href = "layout2-web-flexbox-differences.html">does not</a> re-implement all of CSS.
 
 ## Basic Concepts
 
-AsyncDisplayKit's layout system is centered around two basic concepts: 
+Texture's layout system is centered around two basic concepts: 
 
 1. Layout Specs
 2. Layout Elements
@@ -32,7 +32,7 @@ AsyncDisplayKit's layout system is centered around two basic concepts:
 
 A layout spec, short for "layout specification", has no physical presence. Instead, layout specs act as containers for other layout elements by understanding how these children layout elements relate to each other.
 
-AsyncDisplayKit provides several <a hfref = "layout2-layoutspec-types.html">subclasses</a> of `ASLayoutSpec`, from a simple layout specification that insets a single child, to a more complex layout specification that arranges multiple children in varying stack configurations.
+Texture provides several <a hfref = "layout2-layoutspec-types.html">subclasses</a> of `ASLayoutSpec`, from a simple layout specification that insets a single child, to a more complex layout specification that arranges multiple children in varying stack configurations.
 
 ### Layout Elements 
 
@@ -54,7 +54,7 @@ The play button on top of the `ASVideoNode` (top image) is placed using an `ASCe
 
 ### Some nodes need Sizes Set
 
-<!-- With manual layout, each element gets its position and size set individually. With AsyncDisplayKit's Layout API, very -->
+<!-- With manual layout, each element gets its position and size set individually. With Texture's Layout API, very -->
 
 Some elements have an "intrinsic size" based on their immediately available content. For example, ASTextNode can calculate its size based on its attributed string. Other nodes that have an intrinsic size include 
 

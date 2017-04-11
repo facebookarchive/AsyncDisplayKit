@@ -6,7 +6,7 @@ prevPage: subclassing.html
 nextPage: containers-overview.html
 ---
 
-AsyncDisplayKit's layout engine is based on the CSS Box Model.  While it is the feature of the framework that bears the weakest resemblance to the UIKit equivalent (AutoLayout), it is also among the most useful features once you've gotten used to it.  With enough practice, you may just come to prefer creating declarative layouts to the constraint based approach. ;]
+Texture's layout engine is based on the CSS Box Model.  While it is the feature of the framework that bears the weakest resemblance to the UIKit equivalent (AutoLayout), it is also among the most useful features once you've gotten used to it.  With enough practice, you may just come to prefer creating declarative layouts to the constraint based approach. ;]
 
 The main way you participate in this system is by implementing `-layoutSpecThatFits:` in a node subclass.  Here, you declaratively build up layout specs from the inside out, returning the final spec which will contain the rest.
 

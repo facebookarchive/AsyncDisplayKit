@@ -155,12 +155,12 @@ To resolve the error message add `[self.pagerNode waitUntilAllUpdatesAreCommitte
 Unfortunately the disadvantage of this is that the first measurement pass will block the main thread until it finishes.
 
 #### Some more details about the error messages above
-The reason for this error message is that due to the asynchronous nature of AsyncDisplayKit, measurement of nodes will happen on a background thread as UIKit will resize the view of the `ASViewController`  on  on the main thread. The new layout pass has to wait until the old layout pass finishes with an old layout constrained size. Unfortunately while the measurement pass with the old constrained size is still in progress the `ASPagerFlowLayout` that is backing a `ASPagerNode` will print some errors in the console as it expects sizes for nodes already measured with the new constrained size.
+The reason for this error message is that due to the asynchronous nature of Texture, measurement of nodes will happen on a background thread as UIKit will resize the view of the `ASViewController`  on  on the main thread. The new layout pass has to wait until the old layout pass finishes with an old layout constrained size. Unfortunately while the measurement pass with the old constrained size is still in progress the `ASPagerFlowLayout` that is backing a `ASPagerNode` will print some errors in the console as it expects sizes for nodes already measured with the new constrained size.
 
 ### Sample Apps
 
 Check out the following sample apps to see an `ASPagerNode` in action:
 <ul>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/PagerNode">PagerNode</a></li>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/VerticalWithinHorizontalScrolling">VerticalWithinHorizontalScrolling</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/PagerNode">PagerNode</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/VerticalWithinHorizontalScrolling">VerticalWithinHorizontalScrolling</a></li>
 </ul>

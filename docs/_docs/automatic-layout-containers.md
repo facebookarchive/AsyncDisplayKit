@@ -6,7 +6,7 @@ prevPage: scroll-node.html
 nextPage: layout-api-debugging.html 
 ---
 
-AsyncDisplayKit includes a library of `layoutSpec` components that can be composed to declaratively specify a layout. 
+Texture includes a library of `layoutSpec` components that can be composed to declaratively specify a layout. 
 
 The **child(ren) of a layoutSpec may be a node, a layoutSpec or a combination of the two types.**  In the below image, an `ASStackLayoutSpec` (vertical) containing a text node and an image node, is wrapped in another `ASStackLayoutSpec` (horizontal) with another text node. 
 
@@ -47,7 +47,7 @@ Both nodes and layoutSpecs conform to the `<ASLayoutable>` protocol.  Any `ASLay
   </tr>
   <tr>
     <td><b><code>ASLayoutSpec</code></b></td>
-    <td><p>Can be used as a spacer in a stack spec with other children, when <code>.flexGrow</code> and/or <code>.flexShrink</code> is applied.</p> <p><i>This class can also be subclassed to create custom layout specs - advanced ASDK only!</i></p></td> 
+    <td><p>Can be used as a spacer in a stack spec with other children, when <code>.flexGrow</code> and/or <code>.flexShrink</code> is applied.</p> <p><i>This class can also be subclassed to create custom layout specs - advanced Texture only!</i></p></td> 
   </tr>
 </table> 
 
@@ -138,7 +138,7 @@ The following properties may be set on any node or `layoutSpec`s, but will only 
 
 ### Providing Intrinsic Sizes for Leaf Nodes
 
-AsyncDisplayKit's layout is recursive, starting at the layoutSpec returned from `layoutSpecThatFits:` and proceeding down until it reaches the leaf nodes included in any nested `layoutSpec`s. 
+Texture's layout is recursive, starting at the layoutSpec returned from `layoutSpecThatFits:` and proceeding down until it reaches the leaf nodes included in any nested `layoutSpec`s. 
 
 Some leaf nodes provide their own intrinsic size, such as `ASTextNode` or `ASImageNode`. An attributed string or an image have their own sizes. Other leaf nodes require an intrinsic size to be set.
 
@@ -187,6 +187,6 @@ An inset spec requires its object to have an intrinsic size. It adds the inset p
 <img src="/static/images/overlay-vs-inset-spec.png">
 
 ### Best Practices
-  - AsyncDisplayKit layout is called on a background thread. Do not access the device screen bounds, or any other UIKit methods in `layoutSpecThatFits:`.
+  - Texture layout is called on a background thread. Do not access the device screen bounds, or any other UIKit methods in `layoutSpecThatFits:`.
   - don't wrap everything in a staticLayoutSpec?
   - avoid using preferred frame size for everything - won't respond nicely to device rotation or device sizing differences?

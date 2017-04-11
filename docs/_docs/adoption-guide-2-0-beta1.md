@@ -25,7 +25,7 @@ Add the following to your podfile
 <div class = "highlight-group">
 <div class = "code">
 <pre lang="objc" class="objcCode">
-pod 'AsyncDisplayKit', '>= 2.0'
+pod 'Texture', '>= 2.0'
 </pre>
 </div>
 </div>
@@ -36,7 +36,7 @@ then run
 <div class = "code">
 <pre lang="objc" class="objcCode">
 pod repo update
-pod update AsyncDisplayKit
+pod update Texture
 </pre>
 </div>
 </div>
@@ -53,7 +53,7 @@ If your app fails to build instead of just showing the warnings, you might have 
 
 1. Disable deprecation warnings in the Xcode project settings
 2. Disable warnings as errors in the project's build settings.
-3. Disable deprecation warnings in ASDK. To do this,  change `line 74` in `ASBaseDefines.h` to `# define ASDISPLAYNODE_WARN_DEPRECATED 0`
+3. Disable deprecation warnings in Texture. To do this,  change `line 74` in `ASBaseDefines.h` to `# define ASDISPLAYNODE_WARN_DEPRECATED 0`
 
 Once your app builds and runs, test it to make sure everything is working normally. If you find any problems, try adopting the new API in that area and re-test. 
 
@@ -71,7 +71,7 @@ A full API changelog from `1.9.92` to `2.0-beta.1` is available <a href="apidiff
 
 #### ASDisplayNode Changes
 
-- ASDisplayNode's `.usesImplicitHierarchyManagement` has been renamed to `.automaticallyManagesSubnodes`. The <a href = "http://asyncdisplaykit.org/docs/automatic-subnode-mgmt.html">Automatic Subnode Management</a> API has been moved out of Beta, but has a few documented [limitations]().
+- ASDisplayNode's `.usesImplicitHierarchyManagement` has been renamed to `.automaticallyManagesSubnodes`. The <a href = "http://texturegroup.org/docs/automatic-subnode-mgmt.html">Automatic Subnode Management</a> API has been moved out of Beta, but has a few documented [limitations]().
 
 - ASDisplayNode's `-cancelLayoutTransitionsInProgress` has been renamed to `-cancelLayoutTransition`. The <a href = "layout-transition-api.html">Layout Transition API</a> has been moved out of Beta. Significant new functionality is planed for future dot releases. 
 
@@ -92,11 +92,11 @@ These new methods replace the following:
 
 #### Collection / Table API Updates
 
-AsyncDisplayKit's collection and table APIs have been moved from the view space (`collectionView`, `tableView`) to the node space (`collectionNode`, `tableNode`). 
+Texture's collection and table APIs have been moved from the view space (`collectionView`, `tableView`) to the node space (`collectionNode`, `tableNode`). 
 
 - Search your project for `tableView` and `collectionView`. Most, if not all, of the data source / delegate methods have new node versions. 
 
-It is important that developers using AsyncDisplayKit understand that an ASCollectionNode is backed by an ASCollectionView (a subclass of UICollectionView). ASCollectionNode runs asynchronously, so calling number -numberOfRowsInSection on the collectionNode is different than calling it on the collectionView. 
+It is important that developers using Texture understand that an ASCollectionNode is backed by an ASCollectionView (a subclass of UICollectionView). ASCollectionNode runs asynchronously, so calling number -numberOfRowsInSection on the collectionNode is different than calling it on the collectionView. 
 
 For example, let's say you have an empty table. You insert `100` rows and then immediately call -tableView:numberOfRowsInSection. This will return `0` rows. If you call -waitUntilAllUpdatesAreCommitted after insertion (waits until the collectionNode synchronizes with the collectionView), you will get 100, _but_ you might block the main thread. A good developer should rarely (or never) need to use -waitUntilAllUpdatesAreCommitted. If you update the collectionNode and then need to read back immediately, you should use the collectionNode API. You shouldn't need to talk to the collectionView.  
 
@@ -134,7 +134,7 @@ Resources:
 
 - [Video](https://youtu.be/yuDqvE5n_1g) of the ASCollectionNode Behind-the-Scenes talk at Pinterest. The <a href="/static/talks/10_3_2016_ASCollectionNode_Sequence_Diagrams.pdf">diagrams</a> seen in the talk.
 
-- PR [#2390](https://github.com/facebook/AsyncDisplayKit/pull/2390) and PR [#2381](https://github.com/facebook/AsyncDisplayKit/pull/2381) show how we converted AsyncDisplayKit's [example projects](https://github.com/facebook/AsyncDisplayKit/tree/master/examples) to conform to this new API. 
+- PR [#2390](https://github.com/facebook/AsyncDisplayKit/pull/2390) and PR [#2381](https://github.com/facebook/AsyncDisplayKit/pull/2381) show how we converted AsyncDisplayKit's [example projects](https://github.com/texturegroup/texture/tree/master/examples) to conform to this new API. 
 
 
 #### Layout API Updates

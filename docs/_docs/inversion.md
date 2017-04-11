@@ -6,7 +6,7 @@ prevPage: automatic-subnode-mgmt.html
 nextPage: image-modification-block.html
 ---
 
-`ASTableNode` and `ASCollectionNode` have a `inverted` property of type `BOOL` that when set to `YES`, will automatically invert the content so that it's layed out bottom to top, that is the 'first' (indexPath 0, 0) node is at the bottom rather than the top as usual. <b>This is extremely covenient for chat/messaging apps, and with AsyncDisplayKit it only takes one property</b>.
+`ASTableNode` and `ASCollectionNode` have a `inverted` property of type `BOOL` that when set to `YES`, will automatically invert the content so that it's layed out bottom to top, that is the 'first' (indexPath 0, 0) node is at the bottom rather than the top as usual. <b>This is extremely covenient for chat/messaging apps, and with Texture it only takes one property</b>.
 
 When this is enabled, developers only have to take one more step to have full inversion support and that is to adjust the `contentInset` of their `ASTableNode` or `ASCollectionNode` like so:
 
@@ -29,4 +29,4 @@ When this is enabled, developers only have to take one more step to have full in
 </div>
 </div>
 
-See the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/SocialAppLayout-Inverted">SocialAppLayout-Inverted</a> example project for more details.
+See the <a href="https://github.com/texturegroup/texture/tree/master/examples/SocialAppLayout-Inverted">SocialAppLayout-Inverted</a> example project for more details.

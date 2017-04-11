@@ -7,8 +7,8 @@ permalink: /showcase.html
 <div class="container container-margin">
 	
 	<article>
-		<h1>Who's using AsyncDisplayKit?</h1>
-		<p>If you're curious to see what can be accomplished with AsyncDisplayKit, check out these apps.</p>
+		<h1>Who's using Texture?</h1>
+		<p>If you're curious to see what can be accomplished with Texture, check out these apps.</p>
 		
 		<table cellpadding="100"  border="0" width="100%" style="margin-top:30px;">
 		<tr>
@@ -192,8 +192,8 @@ permalink: /showcase.html
 		</table>
 		
 		<br />
-		<p>If you built an app using AsyncDisplayKit, we'd love to have your app in this showcase!</p>
-		<p>If you would like to have your app added or do not want your app featured on this page, please email asyncdisplaykit@gmail.com.</p>
+		<p>If you built an app using Texture, we'd love to have your app in this showcase!</p>
+		<p>If you would like to have your app added or do not want your app featured on this page, please email textureframework@gmail.com.</p>
 	
 	</article>
 

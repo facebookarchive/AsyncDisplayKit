@@ -118,7 +118,7 @@ In the example above, you can see how the index is used to access the photo mode
 
 ### Replacing a UICollectionViewController with an ASViewController
 
-AsyncDisplayKit does not offer an equivalent to UICollectionViewController. Instead, you can use the flexibility of ASViewController to recreate any type of UI<em>...</em>ViewController. 
+Texture does not offer an equivalent to UICollectionViewController. Instead, you can use the flexibility of ASViewController to recreate any type of UI<em>...</em>ViewController. 
 
 Consider, the following ASViewController subclass.
 
@@ -160,7 +160,7 @@ init() {
 This works just as well with any node including as an ASTableNode, ASPagerNode, etc.
 
 ### Accessing the ASCollectionView
-If you've used previous versions of ASDK, you'll notice that `ASCollectionView` has been removed in favor of `ASCollectionNode`.
+If you've used previous versions of Texture, you'll notice that `ASCollectionView` has been removed in favor of `ASCollectionNode`.
 
 <div class = "note">
 `ASCollectionView`, an actual `UICollectionView` subclass, is still used internally by `ASCollectionNode`. While it should not be created directly, it can still be used directly by accessing the `.view` property of an `ASCollectionNode`.
@@ -208,15 +208,15 @@ Soon, there will be a method such as `ASTableNode`'s `-constrainedSizeForRow:` b
 
 ### Examples
 
-The most detailed example of laying out the cells of an `ASCollectionNode` is the <a href = "https://github.com/facebook/AsyncDisplayKit/tree/master/examples/CustomCollectionView">CustomCollectionView</a> app.  It includes a Pinterest style cell layout using an `ASCollectionNode` and a custom `UICollectionViewLayout`.
+The most detailed example of laying out the cells of an `ASCollectionNode` is the <a href = "https://github.com/texturegroup/texture/tree/master/examples/CustomCollectionView">CustomCollectionView</a> app.  It includes a Pinterest style cell layout using an `ASCollectionNode` and a custom `UICollectionViewLayout`.
 
 #### More Sample Apps with ASCollectionNodes
 
 <ul>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a></li>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/CatDealsCollectionView">CatDealsCollectionView</a></li>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASCollectionView">ASCollectionView</a></li>
-  <li><a href = "https://github.com/facebook/AsyncDisplayKit/tree/master/examples/CustomCollectionView">CustomCollectionView</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/ASDKgram">ASDKgram</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/CatDealsCollectionView">CatDealsCollectionView</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/ASCollectionView">ASCollectionView</a></li>
+  <li><a href = "https://github.com/texturegroup/texture/tree/master/examples/CustomCollectionView">CustomCollectionView</a></li>
 </ul>
 
 ### Interoperability with UICollectionViewCells

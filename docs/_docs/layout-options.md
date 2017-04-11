@@ -6,10 +6,10 @@ prevPage: automatic-layout-debugging.html
 nextPage: layer-backing.html
 ---
 
-When using ASDK, you have three options for layout. Note that UIKit Autolayout is **not** supported by ASDK. 
+When using Texture, you have three options for layout. Note that UIKit Autolayout is **not** supported by Texture. 
 #Manual Sizing & Layout
 
-This original layout method shipped with ASDK 1.0 and is analogous to UIKit's layout methods. Use this method for ASViewControllers (unless you subclass the node).
+This original layout method shipped with Texture 1.0 and is analogous to UIKit's layout methods. Use this method for ASViewControllers (unless you subclass the node).
 
 `[ASDisplayNode calculateSizeThatFits:]` **vs.** `[UIView sizeThatFits:]`
 

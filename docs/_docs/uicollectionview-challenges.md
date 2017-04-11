@@ -86,7 +86,7 @@ There is no easy, universal way to handle loading content such as:
 
 <h4><b>Unified Cell Measurement & Allocation</b></h4>
 
-AsyncDisplayKit takes both of the important collection methods explained above:
+Texture takes both of the important collection methods explained above:
 
 <div class = "highlight-group">
 <span class="language-toggle"><a data-lang="swift" class="swiftButton">Swift</a><a data-lang="objective-c" class = "active objcButton">Objective-C</a></span>
@@ -138,13 +138,13 @@ func collectionNode(collectionNode: ASCollectionNode, nodeBlockForItemAtIndexPat
 
 *Note that there is an optional method to provide a constrained size for the cell, but it is not needed by most apps.
 
-<a href="/docs/cell-node.html"><code>ASCellNode</code></a>, is AsyncDisplayKit's universal cell class. They are light-weight enough to be created an an earlier time in the program (concurrently in the background) and they understand how to calculate their own size. `ASCellNode` automatically caches its measurement so that it can be quickly applied during the layout pass. 
+<a href="/docs/cell-node.html"><code>ASCellNode</code></a>, is Texture's universal cell class. They are light-weight enough to be created an an earlier time in the program (concurrently in the background) and they understand how to calculate their own size. `ASCellNode` automatically caches its measurement so that it can be quickly applied during the layout pass. 
 
 <div class = "note">
 As a comparison to the diagram above, this detailed <a href="/static/talks/ASCollectionView.pdf">diagram</a> shows the full process of an <code>ASCollectionView</code> communicating with its data source and delegate to display itself.. Note that <code>ASCollectionView</code> is <code>ASCollectionNode</code>'s underlying <code>UICollectionView</code> subclass. 
 </div> 
 
-<h4><b>Benefits of AsyncDisplayKit's Architecture</b></h4>
+<h4><b>Benefits of Texture's Architecture</b></h4>
 
 <b>Elimination of all of the types of main thread work</b> described above (cell allocation, measurement, layout, display)! In addition, all of this work is preformed <b>concurrently</b> on multiple threads.
 
@@ -153,7 +153,7 @@ Because `ASCollectionNode` is aware of the position of all of its nodes, it can 
 Lastly, almost all of the concepts we've discussed here apply to `UITableView` / `ASTableNode` and `UIPageViewController` / `ASPagerNode`.
 
 ## iOS 10 Cell Pre-fetching
-Inspired by ASDK, iOS 10 introduced a <a href="">cell pre-fetching</a>. This API increases the number of cells that the collection tracks at any given time, which helps, but isn't anywhere as performance centric as being aware of all cells in the data source. 
+Inspired by Texture, iOS 10 introduced a <a href="">cell pre-fetching</a>. This API increases the number of cells that the collection tracks at any given time, which helps, but isn't anywhere as performance centric as being aware of all cells in the data source. 
 
 Additionally, iOS9 still constitutes a substantial precentage of most app's userbase and will not reduce in number anywhere close to as quickly as the sunset trajectory of iOS 7 and iOS 8 devices. Whereas iOS 9 is the last supported version for about a half-dozen devices, there were zero devices that were deprecated on iOS 8 and only one deivce deprecated on iOS 7. 
 

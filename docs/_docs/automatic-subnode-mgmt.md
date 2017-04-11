@@ -12,7 +12,7 @@ When enabled, ASM means that your nodes no longer require `addSubnode:` or `remo
 
 ### Example ###
 <br>
-Consider the following intialization method from the PhotoCellNode class in <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a>. This <code>ASCellNode</code> subclass produces a simple social media photo feed cell. 
+Consider the following intialization method from the PhotoCellNode class in <a href="https://github.com/texturegroup/texture/tree/master/examples/ASDKgram">ASDKgram sample app</a>. This <code>ASCellNode</code> subclass produces a simple social media photo feed cell. 
 
 In the "Original Code" we see the familiar `addSubnode:` calls in bold. In the "Code with ASM" these have been removed and replaced with a single line that enables ASM. 
 
@@ -287,7 +287,7 @@ The `_userAvatarImageNode`, `_photoImageNode`, and `_photoCommentsNode` are adde
 
 An appropriately constructed ASLayoutSpec will know which subnodes need to be added, removed or animated. 
 
-Try out the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram sample app</a> after looking at the code above, and you will see how simple it is to code an `ASCellNode` whose layout is responsive to numerous, individual data fetches and returns. While the `ASLayoutSpec` is coded in a way that leaves holes for the avatar and photo to populate, you can see how the cell's height will automatically adjust to accomodate the comments node at the bottom of the photo. 
+Try out the <a href="https://github.com/texturegroup/texture/tree/master/examples/ASDKgram">ASDKgram sample app</a> after looking at the code above, and you will see how simple it is to code an `ASCellNode` whose layout is responsive to numerous, individual data fetches and returns. While the `ASLayoutSpec` is coded in a way that leaves holes for the avatar and photo to populate, you can see how the cell's height will automatically adjust to accomodate the comments node at the bottom of the photo. 
 
 This is just a simple example, but this feature has many more powerful uses. 
 
