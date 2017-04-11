@@ -275,7 +275,7 @@ static ASPINRemoteImageDownloader *sharedDownloader = nil;
 {
   ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
 
-  PINRemoteImageManagerPriority pi_priority = PINRemoteImageManagerPriorityMedium;
+  PINRemoteImageManagerPriority pi_priority = PINRemoteImageManagerPriorityDefault;
   switch (priority) {
     case ASImageDownloaderPriorityPreload:
       pi_priority = PINRemoteImageManagerPriorityLow;
