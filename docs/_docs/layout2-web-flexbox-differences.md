@@ -4,7 +4,7 @@ layout: docs
 permalink: /docs/layout2-web-flexbox-differences.html
 ---
 
-The goal of AsyncDisplayKit's Layout API is *not* to re-implement all of CSS. It only targets a subset of CSS and Flexbox container, and there are no plans to implement support for tables, floats, or any other CSS concepts. The AsyncDisplayKit Layout API also does not plan to support styling properties which do not affect layout such as color or background properties.
+The goal of Texture's Layout API is *not* to re-implement all of CSS. It only targets a subset of CSS and Flexbox container, and there are no plans to implement support for tables, floats, or any other CSS concepts. The Texture Layout API also does not plan to support styling properties which do not affect layout such as color or background properties.
 
 The layout system tries to stay as close as possible to CSS. There are, however, certain cases where it differs from the web, these include:
 

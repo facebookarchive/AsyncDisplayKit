@@ -6,7 +6,7 @@ prevPage: hit-test-slop.html
 nextPage: automatic-subnode-mgmt.html
 ---
 
-AsyncDisplayKit's Batch Fetching API makes it easy to add fetching chunks of new data.  Usually this would be done in a `-scrollViewDidScroll:` method, but ASDK provides a more structured mechanism.
+Texture's Batch Fetching API makes it easy to add fetching chunks of new data.  Usually this would be done in a `-scrollViewDidScroll:` method, but Texture provides a more structured mechanism.
 
 By default, as a user is scrolling, when they approach the point in the table or collection where they are 2 "screens" away from the end of the current content, the table will try to fetch more data.
 
@@ -140,12 +140,12 @@ func tableNode(tableNode: ASTableNode, willBeginBatchFetchWithContext context: A
 </div>
 </div>
 
-Once you've finished fetching your data, it is very important to let ASDK know that you have finished the process. To do that, you need to call `-completeBatchFetching:` on the `context` object that was passed in with a parameter value of `YES`. This assures that the whole batch fetching mechanism stays in sync and the next batch fetching cycle can happen.  Only by passing `YES` will the context know to attempt another batch update when necessary.
+Once you've finished fetching your data, it is very important to let Texture know that you have finished the process. To do that, you need to call `-completeBatchFetching:` on the `context` object that was passed in with a parameter value of `YES`. This assures that the whole batch fetching mechanism stays in sync and the next batch fetching cycle can happen.  Only by passing `YES` will the context know to attempt another batch update when necessary.
 
 Check out the following sample apps to see the batch fetching API in action:
 <ul>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a></li>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/Kittens">Kittens</a></li>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/CatDealsCollectionView">CatDealsCollectionView</a></li>
-  <li><a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASCollectionView">ASCollectionView</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/ASDKgram">ASDKgram</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/Kittens">Kittens</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/CatDealsCollectionView">CatDealsCollectionView</a></li>
+  <li><a href="https://github.com/texturegroup/texture/tree/master/examples/ASCollectionView">ASCollectionView</a></li>
 </ul>

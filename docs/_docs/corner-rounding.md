@@ -12,7 +12,7 @@ When it comes to corner rounding, many developers stick with CALayer's `.cornerR
 <li>why you shouldn’t use CALayer’s .cornerRadius</li>
 <li>more performant corner rounding options and when to use them</li>
 <li><a href = "corner-rounding.html#corner-rounding-strategy-flowchart">a flow chart for choosing your ideal corner rounding strategy</a></li>
-<li>AsyncDisplayKit corner rounding methods</li>
+<li>Texture corner rounding methods</li>
 </ul>
 
 ## CALayer's .cornerRadius is Expensive
@@ -61,10 +61,10 @@ The second method involves using bezier paths with **precomposited alpha corners
 
 A key limitation of precomposited corners is that the corners must only touch one node and not intersect with any subnodes.  If either of these conditions exist, clip corners must be used.
 
-Note that AsyncDisplayKit nodes have a special optimization of `.cornerRadius` that automatically implements precomposited corners **only when using** `.shouldRasterizeDescendants`.  It's important to think carefully before you enable rasterization, so don't use this option without first reading all about the <a href = "subtree-rasterization.html">concept</a>.
+Note that Texture nodes have a special optimization of `.cornerRadius` that automatically implements precomposited corners **only when using** `.shouldRasterizeDescendants`.  It's important to think carefully before you enable rasterization, so don't use this option without first reading all about the <a href = "subtree-rasterization.html">concept</a>.
 
 <div class = "note">
-If you're looking for a simple, flat-color rounded rectangle or circle, AsyncDisplayKit offers a variety of conveniences to provide this.  See `UIImage+ASConveniences.h` for methods to create flat-colored, rounded-corner resizable images using precomposited corners (both alpha and opaque are supported). These are great for use as placeholders for image nodes or backgrounds for ASButtonNode. <b>More precomposited corner methods will be released with AsyncDisplayKit 2.0 release</b>.
+If you're looking for a simple, flat-color rounded rectangle or circle, Texture offers a variety of conveniences to provide this.  See `UIImage+ASConveniences.h` for methods to create flat-colored, rounded-corner resizable images using precomposited corners (both alpha and opaque are supported). These are great for use as placeholders for image nodes or backgrounds for ASButtonNode. <b>More precomposited corner methods will be released with Texture 2.0 release</b>.
 </div>
 
 ### Clip Corner
@@ -81,7 +81,7 @@ Clip corners applies to two main types of corner rounding situations:
 </ul>
 
 <div class = "note">
-<b>Check back soon! Clip corner methods may be released in AsyncDisplayKit 2.0 release</b>.
+<b>Check back soon! Clip corner methods may be released in Texture 2.0 release</b>.
 </div>
 
 ## Is it ever okay to use CALayer's .cornerRadius property?
@@ -94,7 +94,7 @@ It is much less bad, and okay as a shortcut, to use `.cornerRadius.` for screens
 
 Some people have suggested that using CALayer's `.shouldRasterize` can improve the performance of the `.cornerRadius` property.  This is not well understood option that is generally perilous.  As long as nothing causes it to re-rasterize (no movement, no tap to change color, not on a table view that moves, etc), it is okay to use.  Generally we don't encourage this because it is very easy to cause much worse performance.  For people who have not great app architecture and insist on using CALayer's `.cornerRadius` (e.g. their app is not very performant), this _can_ make a meaningful difference.  However, if you are building your app from the ground up, we highly reccommend that you choose one of the better corner rounding strategies above. 
 
-CALayer's `.shouldRasterize` is unrelated to AsyncDisplayKit `node.shouldRasterizeDescendents`. When enabled, `.shouldRasterizeDescendents` will prevent the actual view and layer of the subnode children from being created. 
+CALayer's `.shouldRasterize` is unrelated to Texture `node.shouldRasterizeDescendents`. When enabled, `.shouldRasterizeDescendents` will prevent the actual view and layer of the subnode children from being created. 
 
 ## Corner Rounding Strategy Flowchart
 

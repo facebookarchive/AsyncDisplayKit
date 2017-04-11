@@ -16,9 +16,9 @@ This debug feature adds a semi-transparent subview in the bottom right hand corn
 - The white debug label above the RangeController bar displays the RangeController dataSource’s class name to differentiate between nested views.
 - The overlay can be moved with a panning gesture in order to see content under it.
 
-This debug feature is useful for highly optimized ASDK apps that require tuning of any ASRangeController. Or for anyone who is curious about how ASRangeControllers work. 
+This debug feature is useful for highly optimized Texture apps that require tuning of any ASRangeController. Or for anyone who is curious about how ASRangeControllers work. 
 
-The <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/VerticalWithinHorizontalScrolling">VerticalWithinHorizontal example app</a> contains an ASPagerNode with embedded ASTableViews. In the screenshot with this feature enabled, you can see the two range controllers - ASTableView and ASCollectionView (ASPagerNode) - in the overlay. 
+The <a href="https://github.com/texturegroup/texture/tree/master/examples/VerticalWithinHorizontalScrolling">VerticalWithinHorizontal example app</a> contains an ASPagerNode with embedded ASTableViews. In the screenshot with this feature enabled, you can see the two range controllers - ASTableView and ASCollectionView (ASPagerNode) - in the overlay. 
 
 - The white arrows to the right of the rangeController bars indicate that the user is currently scrolling down through the table and right through the ASCollectionView/PagerNode. 
 - The ASTableView rangeController bar indicates that the range parameters are tuned to both fetch and decode more data in the downward table direction rather than in the reverse direction (which makes sense as the user is scrolling down). 

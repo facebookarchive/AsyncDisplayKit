@@ -8,15 +8,15 @@ nextPage: installation.html
 
 ### Slack
 
-Join 700+ AsyncDisplayKit developers and the AsyncDisplayKit <a href="team.html">core team</a> on Slack for real-time debugging, the latest updates, and asynchronous banter. Signup <a href="/slack.html">here</a>.
+Join 700+ Texture developers and the Texture <a href="team.html">core team</a> on Slack for real-time debugging, the latest updates, and asynchronous banter. Signup <a href="/slack.html">here</a>.
 
 ### Examples
-Browse through our many <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples">example projects</a>. 
+Browse through our many <a href="https://github.com/texturegroup/texture/tree/master/examples">example projects</a>. 
 
-If you are new to AsyncDisplayKit, we recommend that you start with the <a href="https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram">ASDKgram</a> example app which compares a photo feed implemented with UIKit to an identical feed implemented with AsyncDisplayKit. The app features:
+If you are new to Texture, we recommend that you start with the <a href="https://github.com/texturegroup/texture/tree/master/examples/ASDKgram">ASDKgram</a> example app which compares a photo feed implemented with UIKit to an identical feed implemented with Texture. The app features:
 <ol>
-	<li>An infinitely scrolling home feed that demonstrates ASDK's smoother scrolling performance. </li>
-	<li>A significantly sized code base to demonstrate how much less code it takes to design apps using AsyncDisplayKit.</li>
+	<li>An infinitely scrolling home feed that demonstrates Texture's smoother scrolling performance. </li>
+	<li>A significantly sized code base to demonstrate how much less code it takes to design apps using Texture.</li>
 </ol>
 
 ### Videos
@@ -41,7 +41,7 @@ Smooth Scrolling in Buffer for iOS: How (and Why) We Implemented AsyncDisplayKit
 
 
 ### Layout Resources
-AsyncDisplayKit's powerful layout system is based on the CSS FlexBox model. These sites are useful for learning the basics of this system. 
+Texture's powerful layout system is based on the CSS FlexBox model. These sites are useful for learning the basics of this system. 
 <ul>
   <li><a href = "http://nguyenhuy.github.io/froggy-asdk-layout/">ASStackLayout Game</a></li>
   <li><a href = "https://demos.scotch.io/visual-guide-to-css3-flexbox-flexbox-playground/demos/">Visual Guide to CSS3 Flexbox</a></li>

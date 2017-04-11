@@ -6,7 +6,7 @@ prevPage: upgrading.html
 nextPage: containers-overview.html
 ---
 
-While a node's ability to be rendered and measured asynchronously and concurrently makes it quite powerful, another crucially important layer to ASDK is the idea of intelligent preloading.
+While a node's ability to be rendered and measured asynchronously and concurrently makes it quite powerful, another crucially important layer to Texture is the idea of intelligent preloading.
 
 As was pointed out in <a href = "getting-started.html">Getting Started</a>, it is rarely advantageous to use a node outside of the context of one of the node containers.  This is due to the fact that all nodes have a notion of their current interface state.  
 

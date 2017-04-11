@@ -8,7 +8,7 @@ nextPage: batch-fetching-api.html
 
 `ASDisplayNode` has a `hitTestSlop` property of type `UIEdgeInsets` that when set to a non-zero inset, increase the bounds for hit testing to make it easier to tap or perform gestures on this node. 
 
-ASDisplayNode is the base class for all nodes, so this property is available on any of AsyncDisplayKit's nodes. 
+ASDisplayNode is the base class for all nodes, so this property is available on any of Texture's nodes. 
 
 <div class = "note">
 <strong>Note:</strong> This affects the default implementation of <code>-hitTest</code> and <code>-pointInside</code>, so subclasses should call super if you override it and want hitTestSlop applied.

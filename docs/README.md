@@ -1,4 +1,4 @@
-# AsyncDisplayKit Documentation 
+# Texture Documentation 
 
 We use [Jekyll](http://jekyllrb.com/) to build the site using Markdown and host it on [Github Pages](https://pages.github.com/).
 

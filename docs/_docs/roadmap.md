@@ -4,9 +4,9 @@ layout: docs
 permalink: /docs/roadmap.html
 ---
 
-This document outlines some of the upcoming plans for AsyncDisplayKit. Since AsyncDisplayKit is a fast-moving project with a small <a href="team.md">core team</a>, this roadmap will change over time. 
+This document outlines some of the upcoming plans for Texture. Since Texture is a fast-moving project with a small <a href="team.md">core team</a>, this roadmap will change over time. 
 
-The AsyncDisplayKit roadmap is driven by the framework's four key qualities. You can read read more about the principles <a href="principles.md">here</a>.
+The Texture roadmap is driven by the framework's four key qualities. You can read read more about the principles <a href="principles.md">here</a>.
 
 ## 2.1 Release
 
@@ -44,6 +44,6 @@ The AsyncDisplayKit roadmap is driven by the framework's four key qualities. You
 
 - Connect on GitHub, Slack and Twitter.
 - Vet our documentation. Submit or suggest ways to improve.
-- Share your experience using AsyncDisplayKit. Thanks Buffer!
+- Share your experience using Texture. Thanks Buffer!
 - Contribute layout examples.
 - Contribute code. Try to implement one of our <a href="">"Needs Volunteer"</a> issues.

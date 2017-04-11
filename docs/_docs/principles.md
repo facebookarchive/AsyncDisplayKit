@@ -4,7 +4,7 @@ layout: docs
 permalink: /docs/principles.html
 ---
 
-The following principles guide the design and development of the AsyncDisplayKit framework.  
+The following principles guide the design and development of the Texture framework.  
 
 ## 1. Reliable
 
@@ -21,7 +21,7 @@ The following principles guide the design and development of the AsyncDisplayKit
 ## 3. Lean
 
 - **What:** Speed and memory conservation should be industry-leading, the API should be concise, and implementation code should be short and organized.
-- **Why:** Performance is at the heart of AsyncDisplayKit. It's what we do and we do it better than anyone else. In addition, a concise codebase and API are easier to maintain and learn. Plus it's just the right thing to do.
+- **Why:** Performance is at the heart of Texture. It's what we do and we do it better than anyone else. In addition, a concise codebase and API are easier to maintain and learn. Plus it's just the right thing to do.
 - **How:** Look for opportunities to improve performance. Think about the performance implications of each line of code. Dedicate resources to refactoring. Build tools to gather and expose performance metrics.
 
 ## 4. Bold

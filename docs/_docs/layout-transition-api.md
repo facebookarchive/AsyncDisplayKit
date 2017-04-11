@@ -6,9 +6,9 @@ prevPage: layout2-api-sizing.html
 nextPage: hit-test-slop.html
 ---
 
-The Layout Transition API was designed to make all animations with AsyncDisplayKit easy - even transforming an entire set of views into a completely different set of views!
+The Layout Transition API was designed to make all animations with Texture easy - even transforming an entire set of views into a completely different set of views!
 
-With this system, you simply specify the desired layout and AsyncDisplayKit will do the work to figure out differences from the current layout. It will automatically add new elements, remove unneeded elements after the transiton, and update the position of any existing elements. 
+With this system, you simply specify the desired layout and Texture will do the work to figure out differences from the current layout. It will automatically add new elements, remove unneeded elements after the transiton, and update the position of any existing elements. 
 
 There are also easy to use APIs that allow you to fully customize the starting position of newly introduced elements, as well as the ending position of removed elements. 
 
@@ -184,11 +184,11 @@ override func animateLayoutTransition(_ context: ASContextTransitioning) {
 </div>
 </div>
 
-The passed <a href="https://github.com/facebook/AsyncDisplayKit/blob/master/AsyncDisplayKit/ASContextTransitioning.h">`ASContextTransitioning`</a> context object in this method contains relevant information to help you determine the state of the nodes before and after the transition. It includes getters into old and new constrained sizes, inserted and removed nodes, and even the raw old and new `ASLayout` objects. In the `SignupNode` example, we're using it to determine the frame for each of the fields and animate them in an out of place.
+The passed <a href="https://github.com/texturegroup/texture/blob/master/AsyncDisplayKit/ASContextTransitioning.h">`ASContextTransitioning`</a> context object in this method contains relevant information to help you determine the state of the nodes before and after the transition. It includes getters into old and new constrained sizes, inserted and removed nodes, and even the raw old and new `ASLayout` objects. In the `SignupNode` example, we're using it to determine the frame for each of the fields and animate them in an out of place.
 
 It is imperative to call `completeTransition:` on the context object once your animation has finished, as it will perform the necessary internal steps for the newly calculated layout to become the current `calculatedLayout`.
 
-Note that there hasn't been a use of `addSubnode:` or `removeFromSupernode` during the transition. AsyncDisplayKit's layout transition API analyzes the differences in the node hierarchy between the old and new layout, implicitly performing node insertions and removals via <a href="automatic-subnode-mgmt.html">Automatic Subnode Management</a>. 
+Note that there hasn't been a use of `addSubnode:` or `removeFromSupernode` during the transition. Texture's layout transition API analyzes the differences in the node hierarchy between the old and new layout, implicitly performing node insertions and removals via <a href="automatic-subnode-mgmt.html">Automatic Subnode Management</a>. 
 
 Nodes are inserted before your implementation of `animateLayoutTransition:` is called and this is a good place to manually manage the hierarchy before you begin the animation. Removals are performed in `didCompleteLayoutTransition:` after you call `completeTransition:` on the context object. If you need to manually perform deletions, override `didCompleteLayoutTransition:` and perform your custom operations. Note that this will override the default behavior and it is recommended to either call `super` or walk through the `removedSubnodes` getter in the context object to perform the cleanup.
 
@@ -256,4 +256,4 @@ override func viewWillTransition(to size: CGSize, with coordinator: UIViewContro
 
 ## Examples that use the Layout Transition API
 
-- [ASDKLayoutTransition](https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKLayoutTransition)
+- [ASDKLayoutTransition](https://github.com/texturegroup/texture/tree/master/examples/ASDKLayoutTransition)

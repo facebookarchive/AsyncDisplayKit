@@ -10,13 +10,13 @@ nextPage: containers-astablenode.html
 To use this feature, you will need to import "ASNodeController+Beta.h" 
 </div>
 
-The ASDK team has many exciting ideas for expanding `ASNodeController`. Follow along [here](https://github.com/facebook/AsyncDisplayKit/issues/2964) if you'd like to participate in shaping the future of node controllers.
+The Texture team has many exciting ideas for expanding `ASNodeController`. Follow along [here](https://github.com/facebook/AsyncDisplayKit/issues/2964) if you'd like to participate in shaping the future of node controllers.
 
 For now, `ASNodeController` remains a simple, but powerful class. 
 
 ### Example
 
-The [example project](https://github.com/facebook/AsyncDisplayKit/pull/2945) attached in the initial PR modifies the normal [ASDKgram](https://github.com/facebook/AsyncDisplayKit/tree/master/examples/ASDKgram) project to use an `ASNodeController`.
+The [example project](https://github.com/texturegroup/texture/pull/2945) attached in the initial PR modifies the normal [ASDKgram](https://github.com/texturegroup/texture/tree/master/examples/ASDKgram) project to use an `ASNodeController`.
 This `PhotoCellNodeController` is used to manage the fetching of the comments data for a photo in a photo feed, once the photo enters the preload range.  This node controller allows us to separate the preloading logic from where it previously existed in the `PhotoCellNode` "view" class.
 
 To convert ASDKgram to use an `ASNodeController`, we first create a `PhotoCellNodeController` class. 
@@ -106,7 +106,7 @@ Next, we add a mutable array to the `PhotoFeedNodeController` to store our node 
   self = [super initWithNode:_tableNode];
   
   if (self) {
-    self.navigationItem.title = @"ASDK";
+    self.navigationItem.title = @"Texture";
     [self.navigationController setNavigationBarHidden:YES];
     
     _tableNode.dataSource = self;
@@ -129,7 +129,7 @@ final class PhotoFeedNodeController: PhotoFeedBaseController {
   init() {
     super.init(node: tableNode)
         
-    navigationItem.title = "ASDK"
+    navigationItem.title = "Texture"
     navigationController.isNavigationBarHidden = true
         
     tableNode.dataSource = self

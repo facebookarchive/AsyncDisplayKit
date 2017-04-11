@@ -4,7 +4,7 @@ layout: docs
 permalink: /docs/tip-1-nodeBlocks.html
 ---
 
-AsyncDisplayKit’s `ASCollectionNode` replaces `UICollectionView`’s required method
+Texture’s `ASCollectionNode` replaces `UICollectionView`’s required method
 
 <div class = "highlight-group">
 <span class="language-toggle">

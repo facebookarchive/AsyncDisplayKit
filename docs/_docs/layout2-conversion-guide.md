@@ -19,7 +19,7 @@ A list of the changes:
 - Rename `ASRelativeDimension` to `ASDimension`
 - Introduction of `ASDimensionUnitAuto`
  
-In addition to the inline examples comparing **1.x** layout code vs **2.0** layout code, the [example projects](https://github.com/facebook/AsyncDisplayKit/tree/master/examples) and <a href = "layout2-quickstart.html">layout documentation</a> have been updated to use the new API.
+In addition to the inline examples comparing **1.x** layout code vs **2.0** layout code, the [example projects](https://github.com/texturegroup/texture/tree/master/examples) and <a href = "layout2-quickstart.html">layout documentation</a> have been updated to use the new API.
 
 All other **2.0** changes not related to the Layout API are documented <a href="adoption-guide-2-0-beta1.html">here</a>. 
 
@@ -390,7 +390,7 @@ In certain advanced cases, you may want to override this method. Overriding this
 
 Call this on children`layoutElements` to compute their layouts within your implementation of `-calculateLayoutThatFits:`.
 
-For sample implementations of layout specs and the usage of the `calculateLayoutThatFits:` family of methods, check out the layout specs in AsyncDisplayKit itself!
+For sample implementations of layout specs and the usage of the `calculateLayoutThatFits:` family of methods, check out the layout specs in Texture itself!
 
 ## Deprecation of `-[ASDisplayNode measure:]` 
 
@@ -458,7 +458,7 @@ Due to the removal of `-[ASAbsoluteLayoutElement sizeRange]`, we also removed th
 
 ## Rename `ASRelativeDimension` to `ASDimension`
 
-To simplify the naming and support the fact that dimensions are widely used in ASDK now, `ASRelativeDimension` was renamed to `ASDimension`. Having a shorter name and handy functions to create it was an important goal for us.
+To simplify the naming and support the fact that dimensions are widely used in Texture now, `ASRelativeDimension` was renamed to `ASDimension`. Having a shorter name and handy functions to create it was an important goal for us.
 
 `ASRelativeDimensionTypePercent` and associated functions were renamed to use `Fraction` to be consistent with Apple terminology.
 

@@ -6,19 +6,19 @@ prevPage: containers-overview.html
 nextPage: subclassing.html
 ---
 
-AsyncDisplayKit offers the following nodes.  
+Texture offers the following nodes.  
 
 A key advantage of using nodes over UIKit components is that **all nodes preform layout and display off of the main thread**, so that the main thread is available to immediately respond to user interaction events.  
 
 <table style="width:100%" class = "paddingBetweenCols">
   <tr>
-    <th>ASDK Node</th>
+    <th>Texture Node</th>
     <th>UIKit Equivalent</th> 
   </tr>
   <tr>
     <td><a href = "display-node.html"><code>ASDisplayNode</code></a></td>
     <td>in place of UIKit's <code>UIView</code><br> 
-        <i>The root AsyncDisplayKit node, from which all other nodes inherit.</i></td> 
+        <i>The root Texture node, from which all other nodes inherit.</i></td> 
   </tr>
   <tr>
     <td><a href = "cell-node.html"><code>ASCellNode</code></a></td>
@@ -63,14 +63,14 @@ A key advantage of using nodes over UIKit components is that **all nodes preform
 </table>
 
 <br>
-Despite having rough equivalencies to UIKit components, in general, AsyncDisplayKit nodes offer more advanced features and conveniences. For example, an `ASNetworkImageNode` does automatic loading and cache management, and even supports progressive jpeg and animated gifs. 
+Despite having rough equivalencies to UIKit components, in general, Texture nodes offer more advanced features and conveniences. For example, an `ASNetworkImageNode` does automatic loading and cache management, and even supports progressive jpeg and animated gifs. 
 
-The <a href = "https://github.com/facebook/AsyncDisplayKit/tree/master/examples/AsyncDisplayKitOverview">`AsyncDisplayKitOverview`</a> example app gives basic implementations of each of the nodes listed above. 
+The <a href = "https://github.com/texturegroup/texture/tree/master/examples/AsyncDisplayKitOverview">`AsyncDisplayKitOverview`</a> example app gives basic implementations of each of the nodes listed above. 
  
 
 # Node Inheritance Hierarchy 
 
-All AsyncDisplayKit nodes inherit from `ASDisplayNode`. 
+All Texture nodes inherit from `ASDisplayNode`. 
 
 <img src="/static/images/node-hierarchy.png" alt="node inheritance flowchart">
 
