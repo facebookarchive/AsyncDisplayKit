@@ -58,6 +58,7 @@
  */
 - (void)applyLayoutAttributes:(UICollectionViewLayoutAttributes *)layoutAttributes
 {
+  [super applyLayoutAttributes:layoutAttributes];
   self.layoutAttributes = layoutAttributes;
 }
 
