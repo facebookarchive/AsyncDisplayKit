@@ -193,16 +193,25 @@
   [self.rangeController clearContents];
 }
 
-- (void)didExitPreloadState
-{
-  [super didExitPreloadState];
-  [self.rangeController clearPreloadedData];
-}
-
 - (void)interfaceStateDidChange:(ASInterfaceState)newState fromState:(ASInterfaceState)oldState
 {
   [super interfaceStateDidChange:newState fromState:oldState];
   [ASRangeController layoutDebugOverlayIfNeeded];
+}
+
+- (void)didEnterPreloadState
+{
+  // Intentionally allocate the collection view here so that super will trigger a layout pass on it which in turn will loads its intial data.
+  // We can get rid of this later when ASDataController, ASRangeController and the collection layout object can operate without the view.
+  [self view];
+  [super didEnterPreloadState];
+}
+
+- (void)didEnterDisplayState
+{
+  [super didEnterDisplayState];
+  // Since an initial data load was triggered when this node enter preloads state, wait for it to finish
+  [self waitUntilAllUpdatesAreCommitted];
 }
 
 #if ASRangeControllerLoggingEnabled
@@ -218,6 +227,12 @@
   NSLog(@"%@ - visible: NO", self);
 }
 #endif
+
+- (void)didExitPreloadState
+{
+  [super didExitPreloadState];
+  [self.rangeController clearPreloadedData];
+}
 
 #pragma mark Setter / Getter
 
