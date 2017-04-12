@@ -1014,6 +1014,8 @@ ASLayoutElementFinalLayoutElementDefault
     [self _locked_layoutPlaceholderIfNecessary];
   }
   
+  [self _layoutSublayouts];
+  
   ASPerformBlockOnMainThread(^{
     [self layout];
     [self layoutDidFinish];
@@ -1407,12 +1409,13 @@ ASLayoutElementFinalLayoutElementDefault
 
 - (void)layout
 {
-  [self _layoutSublayouts];
+  ASDisplayNodeAssertMainThread();
+  // Subclass hook
 }
 
 - (void)_layoutSublayouts
 {
-  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertThreadAffinity(self);
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   ASLayout *layout;
