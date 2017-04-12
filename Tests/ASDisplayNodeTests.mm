@@ -225,13 +225,6 @@ for (ASDisplayNode *n in @[ nodes ]) {\
   XCTAssertFalse([node becomeFirstResponder]);
 }
 
-- (void)testLayerBackedFirstResponderBehavior {
-  ASTestDisplayNode *node = [[ASTestResponderNode alloc] init];
-  node.layerBacked = YES;
-  XCTAssertTrue([node canBecomeFirstResponder]);
-  XCTAssertFalse([node becomeFirstResponder]);
-}
-
 - (void)setUp
 {
   [super setUp];

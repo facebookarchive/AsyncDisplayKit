@@ -67,6 +67,7 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   struct ASDisplayNodeFlags {
     // public properties
     unsigned synchronous:1;
+    unsigned viewEverHadAGestureRecognizerAttached:1;
     unsigned layerBacked:1;
     unsigned displaysAsynchronously:1;
     unsigned shouldRasterizeDescendants:1;
@@ -140,8 +141,8 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
   ASDisplayNodeViewBlock _viewBlock;
   ASDisplayNodeLayerBlock _layerBlock;
   NSMutableArray<ASDisplayNodeDidLoadBlock> *_onDidLoadBlocks;
-  Class _viewClass;
-  Class _layerClass;
+  Class _viewClass; // nil -> _ASDisplayView
+  Class _layerClass; // nil -> _ASDisplayLayer
   
   UIImage *_placeholderImage;
   CALayer *_placeholderLayer;
@@ -282,6 +283,8 @@ FOUNDATION_EXPORT NSString * const ASRenderingEngineDidDisplayNodesScheduledBefo
  * is in ASDisplayNode+Beta.h
  */
 @property (nonatomic, assign) BOOL shouldRasterizeDescendants;
+
+- (void)nodeViewDidAddGestureRecognizer;
 
 @end
 

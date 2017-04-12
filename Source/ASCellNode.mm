@@ -368,6 +368,11 @@
   return self.collectionElement.supplementaryElementKind;
 }
 
+- (BOOL)supportsLayerBacking
+{
+  return NO;
+}
+
 @end
 
 

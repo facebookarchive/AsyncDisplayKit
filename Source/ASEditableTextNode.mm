@@ -306,6 +306,11 @@
   [super setLayerBacked:layerBacked];
 }
 
+- (BOOL)supportsLayerBacking
+{
+  return NO;
+}
+
 #pragma mark - Configuration
 @synthesize delegate = _delegate;
 

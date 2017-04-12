@@ -427,5 +427,11 @@
     }
   }
 }
+
+- (BOOL)supportsLayerBacking
+{
+  return NO;
+}
+
 @end
 #endif

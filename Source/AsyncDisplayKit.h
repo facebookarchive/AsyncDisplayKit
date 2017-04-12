@@ -115,6 +115,7 @@
 #import <AsyncDisplayKit/UIResponder+AsyncDisplayKit.h>
 
 #import <AsyncDisplayKit/AsyncDisplayKit+Debug.h>
+#import <AsyncDisplayKit/AsyncDisplayKit+Tips.h>
 #import <AsyncDisplayKit/ASDisplayNode+Deprecated.h>
 
 #import <AsyncDisplayKit/ASCollectionNode+Beta.h>

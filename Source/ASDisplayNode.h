@@ -592,6 +592,11 @@ extern NSInteger const ASDefaultDrawingPriority;
  */
 - (CGRect)convertRect:(CGRect)rect fromNode:(nullable ASDisplayNode *)node AS_WARN_UNUSED_RESULT;
 
+/**
+ * Whether or not the node would support having .layerBacked = YES.
+ */
+@property (nonatomic, readonly) BOOL supportsLayerBacking;
+
 @end
 
 /**
