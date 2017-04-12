@@ -44,25 +44,15 @@
 {
   [super viewDidLoad];
   
-  UICollectionViewFlowLayout *layout = [[UICollectionViewFlowLayout alloc] init];
-  layout.headerReferenceSize = CGSizeMake(50.0, 50.0);
-  layout.footerReferenceSize = CGSizeMake(50.0, 50.0);
-  
-  // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
-  // This functionality & example project remains for users who insist on using ASCollectionView.
-  self.collectionNode = [[ASCollectionNode alloc] initWithFrame:self.view.bounds collectionViewLayout:layout];
+  self.collectionNode = [[ASCollectionNode alloc] initWithLayoutDelegate:[[ASCollectionFlowLayoutDelegate alloc] init] layoutFacilitator:nil];
   self.collectionNode.dataSource = self;
   self.collectionNode.delegate = self;
   
   self.collectionNode.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
   self.collectionNode.backgroundColor = [UIColor whiteColor];
   
-  // This method is deprecated because we reccommend using ASCollectionNode instead of ASCollectionView.
-  // This functionality & example project remains for users who insist on using ASCollectionView.
-  [self.collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionHeader];
-  [self.collectionNode registerSupplementaryNodeOfKind:UICollectionElementKindSectionFooter];
-  
   [self.view addSubnode:self.collectionNode];
+  self.collectionNode.frame = self.view.bounds;
   
 #if !SIMULATE_WEB_RESPONSE
   self.navigationItem.leftItemsSupplementBackButton = YES;

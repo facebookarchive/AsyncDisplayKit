@@ -11,13 +11,14 @@
 #import <AsyncDisplayKit/ASMultiplexImageNode.h>
 #import <AssetsLibrary/AssetsLibrary.h>
 
+#import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASDisplayNode+FrameworkSubclasses.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
 #import <AsyncDisplayKit/ASPhotosFrameworkImageRequest.h>
 #import <AsyncDisplayKit/ASEqualityHelpers.h>
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 
-#if PIN_REMOTE_IMAGE
+#if AS_PIN_REMOTE_IMAGE
 #import <AsyncDisplayKit/ASPINRemoteImageDownloader.h>
 #else
 #import <AsyncDisplayKit/ASBasicImageDownloader.h>
@@ -171,7 +172,7 @@ typedef void(^ASMultiplexImageLoadCompletionBlock)(UIImage *image, id imageIdent
 
 - (instancetype)init
 {
-#if PIN_REMOTE_IMAGE
+#if AS_PIN_REMOTE_IMAGE
   return [self initWithCache:[ASPINRemoteImageDownloader sharedDownloader] downloader:[ASPINRemoteImageDownloader sharedDownloader]];
 #else
   return [self initWithCache:nil downloader:[ASBasicImageDownloader sharedImageDownloader]];

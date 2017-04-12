@@ -10,7 +10,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#if PIN_REMOTE_IMAGE
+#import <AsyncDisplayKit/ASAvailability.h>
+
+#if AS_PIN_REMOTE_IMAGE
 
 #import <AsyncDisplayKit/ASImageProtocols.h>
 

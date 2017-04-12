@@ -38,19 +38,6 @@
 #import <AsyncDisplayKit/ASWeakProxy.h>
 #import <AsyncDisplayKit/ASResponderChainEnumerator.h>
 
-/**
- * Assert if the current thread owns a mutex.
- * This assertion is useful when you want to indicate and enforce the locking policy/expectation of methods.
- * To determine when and which methods acquired a (recursive) mutex (to debug deadlocks, for example), 
- * put breakpoints at some of these assertions. When the breakpoints hit, walk through stack trace frames 
- * and check ownership count of the mutex.
- */
-#if CHECK_LOCKING_SAFETY
-  #define ASDisplayNodeAssertLockUnownedByCurrentThread(lock) ASDisplayNodeAssertFalse(lock.ownedByCurrentThread())
-#else
-  #define ASDisplayNodeAssertLockUnownedByCurrentThread(lock)
-#endif
-
 #if ASDisplayNodeLoggingEnabled
   #define LOG(...) NSLog(__VA_ARGS__)
 #else

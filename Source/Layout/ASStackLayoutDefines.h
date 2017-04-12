@@ -86,13 +86,13 @@ typedef NS_ENUM(NSUInteger, ASStackLayoutAlignSelf) {
   ASStackLayoutAlignSelfStretch,
 };
 
-// TODO documentation
+/** Whether children are stacked into a single or multiple lines. */
 typedef NS_ENUM(NSUInteger, ASStackLayoutFlexWrap) {
   ASStackLayoutFlexWrapNoWrap,
   ASStackLayoutFlexWrapWrap,
 };
 
-// TODO documentation
+/** Orientation of lines along cross axis if there are multiple lines. */
 typedef NS_ENUM(NSUInteger, ASStackLayoutAlignContent) {
   ASStackLayoutAlignContentStart,
   ASStackLayoutAlignContentCenter,

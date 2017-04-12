@@ -27,9 +27,10 @@ NS_ASSUME_NONNULL_BEGIN
 #endif
 
 @class ASCellNode;
+@class ASCollectionElement;
 @class ASDataController;
 @class ASElementMap;
-@class ASCollectionElement;
+@class ASLayout;
 @class _ASHierarchyChangeSet;
 @protocol ASTraitEnvironment;
 @protocol ASSectionContext;
@@ -52,11 +53,6 @@ extern NSString * const ASCollectionInvalidUpdateException;
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath;
 
 /**
- The constrained size range for layout.
- */
-- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
-
-/**
  Fetch the number of rows in specific section.
  */
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section;
@@ -73,12 +69,20 @@ extern NSString * const ASCollectionInvalidUpdateException;
 
 @optional
 
+/**
+ The constrained size range for layout. Called only if collection layout delegate is not provided.
+ */
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath;
+
 - (NSArray<NSString *> *)dataController:(ASDataController *)dataController supplementaryNodeKindsInSections:(NSIndexSet *)sections;
 
 - (NSUInteger)dataController:(ASDataController *)dataController supplementaryNodesOfKind:(NSString *)kind inSection:(NSUInteger)section;
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController supplementaryNodeBlockOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
+/**
+ The constrained size range for layout. Called only if no data controller layout delegate is provided.
+ */
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath;
 
 - (nullable id<ASSectionContext>)dataController:(ASDataController *)dataController contextForSection:(NSInteger)section;
@@ -110,6 +114,33 @@ extern NSString * const ASCollectionInvalidUpdateException;
  * @param changeSet The change set that includes all updates
  */
 - (void)dataController:(ASDataController *)dataController didUpdateWithChangeSet:(_ASHierarchyChangeSet *)changeSet;
+
+@end
+
+@protocol ASDataControllerLayoutDelegate <NSObject>
+
+/**
+ * @abstract Returns a layout context needed for a coming layout pass with the given elements.
+ * The context should contain the elements and any additional information needed.
+ *
+ * @discussion This method will be called on main thread.
+ */
+- (id)layoutContextWithElements:(ASElementMap *)elements;
+
+/**
+ * @abstract Prepares in advance a new layout with the given context.
+ *
+ * @param context A context that was previously returned by `-layoutContextWithElements:`.
+ *
+ * @discussion This method is called ahead of time, i.e before the underlying collection/table view is aware of the provided elements.
+ * As a result, this method should rely solely on the given context and should not reach out to its collection/table view for information regarding items.
+ *
+ * @discussion This method will be called on background theads. It must be thread-safe and should not change any internal state of the conforming object.
+ * It's recommended to put the resulting layouts of this method into a thread-safe cache that can be looked up later on.
+ *
+ * @discussion This method must block its calling thread. It can dispatch to other theads to reduce blocking time.
+ */
+- (void)prepareLayoutWithContext:(id)context;
 
 @end
 
@@ -154,6 +185,11 @@ extern NSString * const ASCollectionInvalidUpdateException;
  */
 @property (nonatomic, weak) id<ASDataControllerEnvironmentDelegate> environmentDelegate;
 
+/**
+ * Delegate for preparing layouts. Main thead only.
+ */
+@property (nonatomic, weak) id<ASDataControllerLayoutDelegate> layoutDelegate;
+
 #ifdef __cplusplus
 /**
  * Returns the most recently gathered item counts from the data source. If the counts
@@ -193,7 +229,7 @@ extern NSString * const ASCollectionInvalidUpdateException;
 - (void)relayoutAllNodes;
 
 /**
- * Re-measures given noades in the backing store.
+ * Re-measures given nodes in the backing store.
  *
  * @discussion Used to respond to setNeedsLayout calls in ASCellNode
  */

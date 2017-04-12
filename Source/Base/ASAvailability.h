@@ -33,8 +33,8 @@
   #define YOGA __has_include(YOGA_HEADER_PATH)
 #endif
 
-#define PIN_REMOTE_IMAGE __has_include(<PINRemoteImage/PINRemoteImage.h>)
-#define IG_LIST_KIT __has_include(<IGListKit/IGListKit.h>)
+#define AS_PIN_REMOTE_IMAGE __has_include(<PINRemoteImage/PINRemoteImage.h>)
+#define AS_IG_LIST_KIT __has_include(<IGListKit/IGListKit.h>)
 
 /**
  * For IGListKit versions < 3.0, you have to use IGListCollectionView.

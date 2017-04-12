@@ -10,6 +10,13 @@
 
 #import <AsyncDisplayKit/ASEqualityHashHelpers.h>
 
+#import <functional>
+
+NSUInteger ASHashFromCGSize(const CGSize size)
+{
+  return ASHash64ToNative(ASHashCombine(std::hash<CGFloat>()(size.width), std::hash<CGFloat>()(size.height)));
+}
+
 NSUInteger ASIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count)
 {
   uint64_t result = subhashes[0];

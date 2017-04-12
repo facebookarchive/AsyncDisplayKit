@@ -69,6 +69,11 @@
   return ASIndexPathsForTwoDimensionalArray(_sectionsOfItems);
 }
 
+- (NSArray<ASCollectionElement *> *)itemElements
+{
+  return ASElementsInTwoDimensionalArray(_sectionsOfItems);
+}
+
 - (NSInteger)numberOfSections
 {
   return _sectionsOfItems.count;

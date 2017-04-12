@@ -11,10 +11,12 @@
 //
 
 #import <AsyncDisplayKit/ASCollectionNode.h>
+#import <AsyncDisplayKit/ASCollectionNode+Beta.h>
 
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASElementMap.h>
 #import <AsyncDisplayKit/ASCollectionInternal.h>
+#import <AsyncDisplayKit/ASCollectionLayout.h>
 #import <AsyncDisplayKit/ASCollectionViewLayoutFacilitatorProtocol.h>
 #import <AsyncDisplayKit/ASDisplayNode+Beta.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
@@ -33,6 +35,7 @@
 @interface _ASCollectionPendingState : NSObject
 @property (weak, nonatomic) id <ASCollectionDelegate>   delegate;
 @property (weak, nonatomic) id <ASCollectionDataSource> dataSource;
+@property (strong, nonatomic) UICollectionViewLayout *collectionViewLayout;
 @property (nonatomic, assign) ASLayoutRangeMode rangeMode;
 @property (nonatomic, assign) BOOL allowsSelection; // default is YES
 @property (nonatomic, assign) BOOL allowsMultipleSelection; // default is NO
@@ -133,13 +136,21 @@
   return [self initWithFrame:frame collectionViewLayout:layout layoutFacilitator:nil];
 }
 
+- (instancetype)initWithLayoutDelegate:(id<ASCollectionLayoutDelegate>)layoutDelegate layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
+{
+  return [self initWithFrame:CGRectZero collectionViewLayout:[[ASCollectionLayout alloc] initWithLayoutDelegate:layoutDelegate] layoutFacilitator:layoutFacilitator];
+}
+
 - (instancetype)initWithFrame:(CGRect)frame collectionViewLayout:(UICollectionViewLayout *)layout layoutFacilitator:(id<ASCollectionViewLayoutFacilitatorProtocol>)layoutFacilitator
 {
   if (self = [super init]) {
+    // Must call the setter here to make sure pendingState is created and the layout is configured.
+    [self setCollectionViewLayout:layout];
+    
     __weak __typeof__(self) weakSelf = self;
     [self setViewBlock:^{
       __typeof__(self) strongSelf = weakSelf;
-      return [[[strongSelf collectionViewClass] alloc] _initWithFrame:frame collectionViewLayout:layout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
+      return [[[strongSelf collectionViewClass] alloc] _initWithFrame:frame collectionViewLayout:strongSelf->_pendingState.collectionViewLayout layoutFacilitator:layoutFacilitator eventLog:ASDisplayNodeGetEventLog(strongSelf)];
     }];
   }
   return self;
@@ -162,10 +173,12 @@
     view.inverted                = pendingState.inverted;
     view.allowsSelection         = pendingState.allowsSelection;
     view.allowsMultipleSelection = pendingState.allowsMultipleSelection;
-
+    
     if (pendingState.rangeMode != ASLayoutRangeModeUnspecified) {
       [view.rangeController updateCurrentRangeWithMode:pendingState.rangeMode];
     }
+    
+    // Don't need to set collectionViewLayout to the view as the layout was already used to init the view in view block.
   }
 }
 
@@ -338,6 +351,42 @@
   } else {
     return self.view.allowsMultipleSelection;
   }
+}
+
+- (void)setCollectionViewLayout:(UICollectionViewLayout *)layout
+{
+  if ([self pendingState]) {
+    [self _configureCollectionViewLayout:layout];
+    _pendingState.collectionViewLayout = layout;
+  } else {
+    [self _configureCollectionViewLayout:layout];
+    self.view.collectionViewLayout = layout;
+  }
+}
+
+- (UICollectionViewLayout *)collectionViewLayout
+{
+  if ([self pendingState]) {
+    return _pendingState.collectionViewLayout;
+  } else {
+    return self.view.collectionViewLayout;
+  }
+}
+
+- (ASElementMap *)visibleElements
+{
+  ASDisplayNodeAssertMainThread();
+  // TODO Own the data controller when view is not yet loaded
+  return self.dataController.visibleMap;
+}
+
+- (id<ASCollectionLayoutDelegate>)layoutDelegate
+{
+  UICollectionViewLayout *layout = self.collectionViewLayout;
+  if ([layout isKindOfClass:[ASCollectionLayout class]]) {
+    return ((ASCollectionLayout *)layout).layoutDelegate;
+  }
+  return nil;
 }
 
 #pragma mark - Range Tuning
@@ -660,6 +709,16 @@ ASLayoutElementCollectionTableSetTraitCollection(_environmentStateLock)
   [result addObject:@{ @"dataSource" : ASObjectDescriptionMakeTiny(self.dataSource) }];
   [result addObject:@{ @"delegate" : ASObjectDescriptionMakeTiny(self.delegate) }];
   return result;
+}
+
+#pragma mark - Private methods
+
+- (void)_configureCollectionViewLayout:(UICollectionViewLayout *)layout
+{
+  if ([layout isKindOfClass:[ASCollectionLayout class]]) {
+    ASCollectionLayout *collectionLayout = (ASCollectionLayout *)layout;
+    collectionLayout.collectionNode = self;
+  }
 }
 
 @end

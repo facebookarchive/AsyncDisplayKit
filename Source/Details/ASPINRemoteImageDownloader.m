@@ -10,7 +10,9 @@
 //  of patent rights can be found in the PATENTS file in the same directory.
 //
 
-#if PIN_REMOTE_IMAGE
+#import <AsyncDisplayKit/ASAvailability.h>
+
+#if AS_PIN_REMOTE_IMAGE
 #import <AsyncDisplayKit/ASPINRemoteImageDownloader.h>
 
 #import <AsyncDisplayKit/ASAssert.h>
@@ -273,7 +275,7 @@ static ASPINRemoteImageDownloader *sharedDownloader = nil;
 {
   ASDisplayNodeAssert([downloadIdentifier isKindOfClass:[NSUUID class]], @"downloadIdentifier must be NSUUID");
 
-  PINRemoteImageManagerPriority pi_priority = PINRemoteImageManagerPriorityMedium;
+  PINRemoteImageManagerPriority pi_priority = PINRemoteImageManagerPriorityDefault;
   switch (priority) {
     case ASImageDownloaderPriorityPreload:
       pi_priority = PINRemoteImageManagerPriorityLow;

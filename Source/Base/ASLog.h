@@ -18,7 +18,7 @@
 #define ASMultiplexImageNodeCLogError(...)
 
 // Note: `<sys/kdebug_signpost.h>` only exists in Xcode 8 and later.
-#if PROFILE && __has_include("<sys/kdebug_signpost.h>")
+#if defined(PROFILE) && __has_include("<sys/kdebug_signpost.h>")
 
 #import <sys/kdebug_signpost.h>
 

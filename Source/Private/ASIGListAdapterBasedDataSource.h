@@ -6,7 +6,9 @@
 //  Copyright © 2017 Facebook. All rights reserved.
 //
 
-#if IG_LIST_KIT
+#import <AsyncDisplayKit/ASAvailability.h>
+
+#if AS_IG_LIST_KIT
 
 #import <IGListKit/IGListKit.h>
 #import <AsyncDisplayKit/ASCollectionView.h>

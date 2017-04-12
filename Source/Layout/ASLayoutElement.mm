@@ -11,6 +11,7 @@
 //
 
 #import "ASDisplayNode+FrameworkPrivate.h"
+#import <AsyncDisplayKit/ASAvailability.h>
 #import <AsyncDisplayKit/ASLayout.h>
 #import <AsyncDisplayKit/ASLayoutElement.h>
 #import <AsyncDisplayKit/ASThread.h>
