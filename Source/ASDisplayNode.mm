@@ -3722,6 +3722,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   [_interfaceStateDelegate didEnterPreloadState];
   
+  [self layoutIfNeeded];
+  
   if (_methodOverrides & ASDisplayNodeMethodOverrideFetchData) {
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
