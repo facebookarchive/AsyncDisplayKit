@@ -96,6 +96,12 @@ NS_ASSUME_NONNULL_BEGIN
  */
 @property (nonatomic, assign) BOOL allowsMultipleSelection;
 
+/**
+ * The layout used to organize the node's items.
+ *
+ * @discussion Assigning a new layout object to this property causes the new layout to be applied (without animations) to the node’s items.
+ */
+@property (nonatomic, strong) UICollectionViewLayout *collectionViewLayout;
 
 /**
  * Tuning parameters for a range type in full mode.

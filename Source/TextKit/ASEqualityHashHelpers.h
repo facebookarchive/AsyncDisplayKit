@@ -9,6 +9,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+#import <AsyncDisplayKit/ASBaseDefines.h>
 
 #import <string>
 
@@ -16,7 +18,7 @@
 // This is the Hash128to64 function from Google's cityhash (available
 // under the MIT License).  We use it to reduce multiple 64 bit hashes
 // into a single hash.
-inline uint64_t ASHashCombine(const uint64_t upper, const uint64_t lower) {
+ASDISPLAYNODE_INLINE uint64_t ASHashCombine(const uint64_t upper, const uint64_t lower) {
   // Murmur-inspired hashing.
   const uint64_t kMul = 0x9ddfea08eb382d69ULL;
   uint64_t a = (lower ^ upper) * kMul;
@@ -28,13 +30,13 @@ inline uint64_t ASHashCombine(const uint64_t upper, const uint64_t lower) {
 }
 
 #if __LP64__
-inline size_t ASHash64ToNative(uint64_t key) {
+ASDISPLAYNODE_INLINE size_t ASHash64ToNative(uint64_t key) {
   return key;
 }
 #else
 
 // Thomas Wang downscaling hash function
-inline size_t ASHash64ToNative(uint64_t key) {
+ASDISPLAYNODE_INLINE size_t ASHash64ToNative(uint64_t key) {
   key = (~key) + (key << 18);
   key = key ^ (key >> 31);
   key = key * 21;
@@ -44,6 +46,8 @@ inline size_t ASHash64ToNative(uint64_t key) {
   return (uint32_t) key;
 }
 #endif
+
+NSUInteger ASHashFromCGSize(const CGSize size);
 
 NSUInteger ASIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count);
 

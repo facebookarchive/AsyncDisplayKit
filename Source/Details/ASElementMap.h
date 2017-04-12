@@ -50,6 +50,11 @@ AS_SUBCLASSING_RESTRICTED
 @property (copy, readonly) NSArray<NSIndexPath *> *itemIndexPaths;
 
 /**
+ * All the item elements in this map, in ascending order. O(N)
+ */
+@property (copy, readonly) NSArray<ASCollectionElement *> *itemElements;
+
+/**
  * Returns the index path that corresponds to the same element in @c map at the given @c indexPath. O(1)
  */
 - (nullable NSIndexPath *)convertIndexPath:(NSIndexPath *)indexPath fromMap:(ASElementMap *)map;

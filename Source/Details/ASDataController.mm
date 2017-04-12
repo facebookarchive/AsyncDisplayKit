@@ -13,15 +13,17 @@
 #import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
 #import <AsyncDisplayKit/ASAssert.h>
 #import <AsyncDisplayKit/ASCellNode.h>
-#import <AsyncDisplayKit/ASLayout.h>
-#import <AsyncDisplayKit/ASMainSerialQueue.h>
-#import <AsyncDisplayKit/ASTwoDimensionalArrayUtils.h>
-#import <AsyncDisplayKit/ASSection.h>
-#import <AsyncDisplayKit/ASThread.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
+#import <AsyncDisplayKit/ASCollectionLayoutContext.h>
 #import <AsyncDisplayKit/ASDispatch.h>
 #import <AsyncDisplayKit/ASElementMap.h>
+#import <AsyncDisplayKit/ASLayout.h>
+#import <AsyncDisplayKit/ASMainSerialQueue.h>
 #import <AsyncDisplayKit/ASMutableElementMap.h>
+#import <AsyncDisplayKit/ASThread.h>
+#import <AsyncDisplayKit/ASTwoDimensionalArrayUtils.h>
+#import <AsyncDisplayKit/ASSection.h>
+
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
 #import <AsyncDisplayKit/ASDisplayNode+Subclasses.h>
@@ -52,6 +54,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 #endif
 
 @interface ASDataController () {
+  id<ASDataControllerLayoutDelegate> _layoutDelegate;
 
   NSInteger _nextSectionID;
   
@@ -69,6 +72,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     unsigned int supplementaryNodeKindsInSections:1;
     unsigned int supplementaryNodesOfKindInSection:1;
     unsigned int supplementaryNodeBlockOfKindAtIndexPath:1;
+    unsigned int constrainedSizeForNodeAtIndexPath:1;
     unsigned int constrainedSizeForSupplementaryNodeOfKindAtIndexPath:1;
     unsigned int contextForSection:1;
   } _dataSourceFlags;
@@ -91,6 +95,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   _dataSourceFlags.supplementaryNodeKindsInSections = [_dataSource respondsToSelector:@selector(dataController:supplementaryNodeKindsInSections:)];
   _dataSourceFlags.supplementaryNodesOfKindInSection = [_dataSource respondsToSelector:@selector(dataController:supplementaryNodesOfKind:inSection:)];
   _dataSourceFlags.supplementaryNodeBlockOfKindAtIndexPath = [_dataSource respondsToSelector:@selector(dataController:supplementaryNodeBlockOfKind:atIndexPath:)];
+  _dataSourceFlags.constrainedSizeForNodeAtIndexPath = [_dataSource respondsToSelector:@selector(dataController:constrainedSizeForNodeAtIndexPath:)];
   _dataSourceFlags.constrainedSizeForSupplementaryNodeOfKindAtIndexPath = [_dataSource respondsToSelector:@selector(dataController:constrainedSizeForSupplementaryNodeOfKind:atIndexPath:)];
   _dataSourceFlags.contextForSection = [_dataSource respondsToSelector:@selector(dataController:contextForSection:)];
   
@@ -132,9 +137,23 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   return parallelProcessorCount;
 }
 
+- (id<ASDataControllerLayoutDelegate>)layoutDelegate
+{
+  ASDisplayNodeAssertMainThread();
+  return _layoutDelegate;
+}
+
+- (void)setLayoutDelegate:(id<ASDataControllerLayoutDelegate>)layoutDelegate
+{
+  ASDisplayNodeAssertMainThread();
+  if (layoutDelegate != _layoutDelegate) {
+    _layoutDelegate = layoutDelegate;
+  }
+}
+
 #pragma mark - Cell Layout
 
-- (void)batchLayoutNodesFromContexts:(NSArray<ASCollectionElement *> *)elements batchSize:(NSInteger)batchSize batchCompletion:(ASDataControllerCompletionBlock)batchCompletionHandler
+- (void)batchAllocateNodesFromElements:(NSArray<ASCollectionElement *> *)elements andLayout:(BOOL)shouldLayout batchSize:(NSInteger)batchSize batchCompletion:(ASDataControllerCompletionBlock)batchCompletionHandler
 {
   ASSERT_ON_EDITING_QUEUE;
 #if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
@@ -156,9 +175,9 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   // Processing in batches
   for (NSUInteger i = 0; i < count; i += batchSize) {
     NSRange batchedRange = NSMakeRange(i, MIN(count - i, batchSize));
-    NSArray<ASCollectionElement *> *batchedContexts = [elements subarrayWithRange:batchedRange];
-    NSArray<ASCellNode *> *nodes = [self _layoutNodesFromContexts:batchedContexts];
-    batchCompletionHandler(batchedContexts, nodes);
+    NSArray<ASCollectionElement *> *batchedElements = [elements subarrayWithRange:batchedRange];
+    NSArray<ASCellNode *> *nodes = [self _allocateNodesFromElements:batchedElements andLayout:shouldLayout];
+    batchCompletionHandler(batchedElements, nodes);
   }
   
   ASProfilingSignpostEnd(2, _dataSource);
@@ -176,7 +195,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   node.frame = frame;
 }
 
-- (NSArray<ASCellNode *> *)_layoutNodesFromContexts:(NSArray<ASCollectionElement *> *)elements
+// TODO Is returned array still needed? Can it be removed?
+- (NSArray<ASCellNode *> *)_allocateNodesFromElements:(NSArray<ASCollectionElement *> *)elements andLayout:(BOOL)shouldLayout
 {
   ASSERT_ON_EDITING_QUEUE;
   
@@ -198,16 +218,19 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       ASDisplayNodeAssertNotNil(node, @"Node block created nil node; %@, %@", self, self.dataSource);
       node = [[ASCellNode alloc] init]; // Fallback to avoid crash for production apps.
     }
-
-    // Layout the node if the size range is valid.
-    ASSizeRange sizeRange = context.constrainedSize;
-    if (ASSizeRangeHasSignificantArea(sizeRange)) {
-      [self _layoutNode:node withConstrainedSize:sizeRange];
-    }
+    
+    if (shouldLayout) {
+      // Layout the node if the size range is valid.
+      ASSizeRange sizeRange = context.constrainedSize;
+      if (ASSizeRangeHasSignificantArea(sizeRange)) {
+        [self _layoutNode:node withConstrainedSize:sizeRange];
+      }
 
 #if AS_MEASURE_AVOIDED_DATACONTROLLER_WORK
-    [ASDataController _didLayoutNode];
+      [ASDataController _didLayoutNode];
 #endif
+    }
+
     allocatedNodeBuffer[i] = node;
   });
 
@@ -269,6 +292,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  * @param owningNode The node that owns the new elements.
  * @param traitCollection The trait collection needed to initialize elements
  * @param indexPathsAreNew YES if index paths are "after the update," NO otherwise.
+ * @param shouldFetchSizeRanges Whether constrained sizes should be fetched from data source
  */
 - (void)_repopulateSupplementaryNodesIntoMap:(ASMutableElementMap *)map
              forSectionsContainingIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
@@ -276,6 +300,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
                                   owningNode:(ASDisplayNode *)owningNode
                              traitCollection:(ASPrimitiveTraitCollection)traitCollection
                             indexPathsAreNew:(BOOL)indexPathsAreNew
+                       shouldFetchSizeRanges:(BOOL)shouldFetchSizeRanges
 {
   ASDisplayNodeAssertMainThread();
 
@@ -298,7 +323,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
 
   for (NSString *kind in [self supplementaryKindsInSections:newSections]) {
-    [self _insertElementsIntoMap:map kind:kind forSections:newSections owningNode:owningNode traitCollection:traitCollection];
+    [self _insertElementsIntoMap:map kind:kind forSections:newSections owningNode:owningNode traitCollection:traitCollection shouldFetchSizeRanges:shouldFetchSizeRanges];
   }
 }
 
@@ -309,12 +334,14 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  * @param sections The sections that should be populated by new elements
  * @param owningNode The node that owns the new elements.
  * @param traitCollection The trait collection needed to initialize elements
+ * @param shouldFetchSizeRanges Whether constrained sizes should be fetched from data source
  */
 - (void)_insertElementsIntoMap:(ASMutableElementMap *)map
                           kind:(NSString *)kind
                    forSections:(NSIndexSet *)sections
                     owningNode:(ASDisplayNode *)owningNode
                traitCollection:(ASPrimitiveTraitCollection)traitCollection
+         shouldFetchSizeRanges:(BOOL)shouldFetchSizeRanges
 {
   ASDisplayNodeAssertMainThread();
   
@@ -323,7 +350,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   NSArray<NSIndexPath *> *indexPaths = [self _allIndexPathsForItemsOfKind:kind inSections:sections];
-  [self _insertElementsIntoMap:map kind:kind atIndexPaths:indexPaths owningNode:owningNode traitCollection:traitCollection];
+  [self _insertElementsIntoMap:map kind:kind atIndexPaths:indexPaths owningNode:owningNode traitCollection:traitCollection shouldFetchSizeRanges:shouldFetchSizeRanges];
 }
 
 /**
@@ -334,12 +361,14 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
  * @param indexPaths The index paths at which new elements should be populated
  * @param owningNode The node that owns the new elements.
  * @param traitCollection The trait collection needed to initialize elements
+ * @param shouldFetchSizeRanges Whether constrained sizes should be fetched from data source
  */
 - (void)_insertElementsIntoMap:(ASMutableElementMap *)map
                           kind:(NSString *)kind
                   atIndexPaths:(NSArray<NSIndexPath *> *)indexPaths
                     owningNode:(ASDisplayNode *)owningNode
                traitCollection:(ASPrimitiveTraitCollection)traitCollection
+         shouldFetchSizeRanges:(BOOL)shouldFetchSizeRanges
 {
   ASDisplayNodeAssertMainThread();
   
@@ -362,7 +391,11 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
       nodeBlock = [_dataSource dataController:self supplementaryNodeBlockOfKind:kind atIndexPath:indexPath];
     }
     
-    ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+    ASSizeRange constrainedSize;
+    if (shouldFetchSizeRanges) {
+      constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+    }
+    
     ASCollectionElement *element = [[ASCollectionElement alloc] initWithNodeBlock:nodeBlock
                                                          supplementaryElementKind:isRowKind ? nil : kind
                                                                   constrainedSize:constrainedSize
@@ -404,18 +437,34 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   return @[];
 }
 
+- (ASSizeRange)constrainedSizeForElement:(ASCollectionElement *)element inElementMap:(ASElementMap *)map
+{
+  ASDisplayNodeAssertMainThread();
+  NSString *kind = element.supplementaryElementKind ?: ASDataControllerRowNodeKind;
+  NSIndexPath *indexPath = [map indexPathForElement:element];
+  return [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+}
+
+
 - (ASSizeRange)constrainedSizeForNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
 {
   ASDisplayNodeAssertMainThread();
+  
+  id<ASDataControllerSource> dataSource = _dataSource;
+  if (dataSource == nil) {
+    return ASSizeRangeZero;
+  }
+  
   if ([kind isEqualToString:ASDataControllerRowNodeKind]) {
-    return [_dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
+    ASDisplayNodeAssert(_dataSourceFlags.constrainedSizeForNodeAtIndexPath, @"-dataController:constrainedSizeForNodeAtIndexPath: must also be implemented");
+    return [dataSource dataController:self constrainedSizeForNodeAtIndexPath:indexPath];
   }
   
   if (_dataSourceFlags.constrainedSizeForSupplementaryNodeOfKindAtIndexPath){
-    return [_dataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
+    return [dataSource dataController:self constrainedSizeForSupplementaryNodeOfKind:kind atIndexPath:indexPath];
   }
   
-  ASDisplayNodeAssert(NO, @"Unknown constrained size for node of kind %@ by data source %@", kind, _dataSource);
+  ASDisplayNodeAssert(NO, @"Unknown constrained size for node of kind %@ by data source %@", kind, dataSource);
   return ASSizeRangeZero;
 }
 
@@ -480,33 +529,57 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
     }];
     return;
   }
-  
+
   // Mutable copy of current data.
   ASMutableElementMap *mutableMap = [_pendingMap mutableCopy];
   
-  // Step 1: update the mutable copies to match the data source's state
+  BOOL canDelegateLayout = (_layoutDelegate != nil);
+
+  // Step 1: Update the mutable copies to match the data source's state
   [self _updateSectionContextsInMap:mutableMap changeSet:changeSet];
   __weak id<ASTraitEnvironment> environment = [self.environmentDelegate dataControllerEnvironment];
   __weak ASDisplayNode *owningNode = (ASDisplayNode *)environment; // This is gross!
   ASPrimitiveTraitCollection existingTraitCollection = [environment primitiveTraitCollection];
-  [self _updateElementsInMap:mutableMap changeSet:changeSet owningNode:owningNode traitCollection:existingTraitCollection];
+  [self _updateElementsInMap:mutableMap changeSet:changeSet owningNode:owningNode traitCollection:existingTraitCollection shouldFetchSizeRanges:(! canDelegateLayout)];
   
   // Step 2: Clone the new data
   ASElementMap *newMap = [mutableMap copy];
-
   _pendingMap = newMap;
   
+  // Step 3: Ask layout delegate for contexts
+  id layoutContext = nil;
+  if (canDelegateLayout) {
+    layoutContext = [_layoutDelegate layoutContextWithElements:newMap];
+  }
+  
   dispatch_group_async(_editingTransactionGroup, _editingTransactionQueue, ^{
-    // Step 3: Layout **all** new elements without batching in background.
-    NSArray<ASCollectionElement *> *unmeasuredElements = [ASDataController unmeasuredElementsFromMap:newMap];
-    [self batchLayoutNodesFromContexts:unmeasuredElements batchSize:unmeasuredElements.count batchCompletion:^(id, id) {
+    // Step 4: Allocate and layout elements if can't delegate
+    NSArray<ASCollectionElement *> *elementsToProcess;
+    if (canDelegateLayout) {
+      // Allocate all nodes before handling them to the layout delegate.
+      // In the future, we may want to let the delegate drive allocation as well.
+      elementsToProcess = ASArrayByFlatMapping(newMap,
+                                               ASCollectionElement *element,
+                                               (element.nodeIfAllocated == nil ? element : nil));
+    } else {
+      elementsToProcess = ASArrayByFlatMapping(newMap,
+                                               ASCollectionElement *element,
+                                               (element.nodeIfAllocated.calculatedLayout == nil ? element : nil));
+    }
+    
+    [self batchAllocateNodesFromElements:elementsToProcess andLayout:(! canDelegateLayout) batchSize:elementsToProcess.count batchCompletion:^(NSArray<ASCollectionElement *> *elements, NSArray<ASCellNode *> *nodes) {
       ASSERT_ON_EDITING_QUEUE;
+
+      if (canDelegateLayout) {
+        [_layoutDelegate prepareLayoutWithContext:layoutContext];
+      }
+      
       [_mainSerialQueue performBlockOnMainThread:^{
         [_delegate dataController:self willUpdateWithChangeSet:changeSet];
 
-        // Step 4: Deploy the new data as "completed" and inform delegate
+        // Step 5: Deploy the new data as "completed" and inform delegate
         _visibleMap = newMap;
-
+        
         [_delegate dataController:self didUpdateWithChangeSet:changeSet];
       }];
     }];
@@ -566,16 +639,17 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
                    changeSet:(_ASHierarchyChangeSet *)changeSet
                   owningNode:(ASDisplayNode *)owningNode
              traitCollection:(ASPrimitiveTraitCollection)traitCollection
+       shouldFetchSizeRanges:(BOOL)shouldFetchSizeRanges
 {
   ASDisplayNodeAssertMainThread();
-  
+
   if (changeSet.includesReloadData) {
     [map removeAllElements];
     
     NSUInteger sectionCount = [self itemCountsFromDataSource].size();
     if (sectionCount > 0) {
       NSIndexSet *sectionIndexes = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(0, sectionCount)];
-      [self _insertElementsIntoMap:map sections:sectionIndexes owningNode:owningNode traitCollection:traitCollection];
+      [self _insertElementsIntoMap:map sections:sectionIndexes owningNode:owningNode traitCollection:traitCollection shouldFetchSizeRanges:shouldFetchSizeRanges];
     }
     // Return immediately because reloadData can't be used in conjuntion with other updates.
     return;
@@ -588,7 +662,8 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
                                      changeSet:changeSet
                                     owningNode:owningNode
                                traitCollection:traitCollection
-                              indexPathsAreNew:NO];
+                              indexPathsAreNew:NO
+                         shouldFetchSizeRanges:shouldFetchSizeRanges];
   }
 
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeDelete]) {
@@ -598,17 +673,18 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   for (_ASHierarchySectionChange *change in [changeSet sectionChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertElementsIntoMap:map sections:change.indexSet owningNode:owningNode traitCollection:traitCollection];
+    [self _insertElementsIntoMap:map sections:change.indexSet owningNode:owningNode traitCollection:traitCollection shouldFetchSizeRanges:shouldFetchSizeRanges];
   }
   
   for (_ASHierarchyItemChange *change in [changeSet itemChangesOfType:_ASHierarchyChangeTypeInsert]) {
-    [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind atIndexPaths:change.indexPaths owningNode:owningNode traitCollection:traitCollection];
+    [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind atIndexPaths:change.indexPaths owningNode:owningNode traitCollection:traitCollection shouldFetchSizeRanges:shouldFetchSizeRanges];
     // Aggressively reload supplementary nodes (#1773 & #1629)
     [self _repopulateSupplementaryNodesIntoMap:map forSectionsContainingIndexPaths:change.indexPaths
                                      changeSet:changeSet
                                     owningNode:owningNode
                                traitCollection:traitCollection
-                              indexPathsAreNew:YES];
+                              indexPathsAreNew:YES
+                         shouldFetchSizeRanges:shouldFetchSizeRanges];
   }
 }
 
@@ -616,6 +692,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
                       sections:(NSIndexSet *)sectionIndexes
                     owningNode:(ASDisplayNode *)owningNode
                traitCollection:(ASPrimitiveTraitCollection)traitCollection
+         shouldFetchSizeRanges:(BOOL)shouldFetchSizeRanges
 {
   ASDisplayNodeAssertMainThread();
   
@@ -625,12 +702,12 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 
   // Items
   [map insertEmptySectionsOfItemsAtIndexes:sectionIndexes];
-  [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind forSections:sectionIndexes owningNode:owningNode traitCollection:traitCollection];
+  [self _insertElementsIntoMap:map kind:ASDataControllerRowNodeKind forSections:sectionIndexes owningNode:owningNode traitCollection:traitCollection shouldFetchSizeRanges:shouldFetchSizeRanges];
 
   // Supplementaries
   for (NSString *kind in [self supplementaryKindsInSections:sectionIndexes]) {
     // Step 2: Populate new elements for all sections
-    [self _insertElementsIntoMap:map kind:kind forSections:sectionIndexes owningNode:owningNode traitCollection:traitCollection];
+    [self _insertElementsIntoMap:map kind:kind forSections:sectionIndexes owningNode:owningNode traitCollection:traitCollection shouldFetchSizeRanges:shouldFetchSizeRanges];
   }
 }
 
@@ -646,9 +723,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   }
   
   for (ASCellNode *node in nodes) {
-    NSString *kind = node.collectionElement.supplementaryElementKind ?: ASDataControllerRowNodeKind;
-    NSIndexPath *indexPath = [_pendingMap indexPathForElement:node.collectionElement];
-    ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+    ASSizeRange constrainedSize = [self constrainedSizeForElement:node.collectionElement inElementMap:_pendingMap];
     [self _layoutNode:node withConstrainedSize:constrainedSize];
     BOOL matchesSize = [_dataSource dataController:self presentedSizeForElement:node.collectionElement matchesSize:node.frame.size];
     if (! matchesSize) {
@@ -676,9 +751,7 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
 {
   ASDisplayNodeAssertMainThread();
   for (ASCollectionElement *element in _visibleMap) {
-    NSIndexPath *indexPath = [_visibleMap indexPathForElement:element];
-    NSString *kind = element.supplementaryElementKind ?: ASDataControllerRowNodeKind;
-    ASSizeRange constrainedSize = [self constrainedSizeForNodeOfKind:kind atIndexPath:indexPath];
+    ASSizeRange constrainedSize = [self constrainedSizeForElement:element inElementMap:_visibleMap];
     if (ASSizeRangeHasSignificantArea(constrainedSize)) {
       element.constrainedSize = constrainedSize;
 
@@ -719,17 +792,6 @@ typedef void (^ASDataControllerCompletionBlock)(NSArray<ASCollectionElement *> *
   ASDisplayNodeAssertMainThread();
   dispatch_group_wait(_editingTransactionGroup, DISPATCH_TIME_FOREVER);
   [_mainSerialQueue performBlockOnMainThread:block];
-}
-
-+ (NSArray<ASCollectionElement *> *)unmeasuredElementsFromMap:(ASElementMap *)map
-{
-  NSMutableArray<ASCollectionElement *> *unloadedContexts = [NSMutableArray array];
-  for (ASCollectionElement *element in map) {
-    if (element.nodeIfAllocated.calculatedLayout == nil) {
-      [unloadedContexts addObject:element];
-    }
-  }
-  return unloadedContexts;
 }
 
 @end

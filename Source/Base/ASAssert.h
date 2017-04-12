@@ -59,6 +59,19 @@
 #define ASDisplayNodeCAssertPositiveReal(description, num) ASDisplayNodeCAssert(num >= 0 && num <= CGFLOAT_MAX, @"%@ must be a real positive integer.", description)
 #define ASDisplayNodeCAssertInfOrPositiveReal(description, num) ASDisplayNodeCAssert(isinf(num) || (num >= 0 && num <= CGFLOAT_MAX), @"%@ must be infinite or a real positive integer.", description)
 
+/**
+ * Assert if the current thread owns a mutex.
+ * This assertion is useful when you want to indicate and enforce the locking policy/expectation of methods.
+ * To determine when and which methods acquired a (recursive) mutex (to debug deadlocks, for example),
+ * put breakpoints at some of these assertions. When the breakpoints hit, walk through stack trace frames
+ * and check ownership count of the mutex.
+ */
+#if CHECK_LOCKING_SAFETY
+#define ASDisplayNodeAssertLockUnownedByCurrentThread(lock) ASDisplayNodeAssertFalse(lock.ownedByCurrentThread())
+#else
+#define ASDisplayNodeAssertLockUnownedByCurrentThread(lock)
+#endif
+
 #define ASDisplayNodeErrorDomain @"ASDisplayNodeErrorDomain"
 #define ASDisplayNodeNonFatalErrorCode 1
 

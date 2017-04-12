@@ -14,7 +14,9 @@
 #import <AsyncDisplayKit/ASCellNode+Internal.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASCollectionInternal.h>
+#import <AsyncDisplayKit/ASCollectionLayout.h>
 #import <AsyncDisplayKit/ASCollectionViewLayoutController.h>
+#import <AsyncDisplayKit/ASCollectionViewLayoutFacilitatorProtocol.h>
 #import <AsyncDisplayKit/ASCollectionViewFlowLayoutInspector.h>
 #import <AsyncDisplayKit/ASDataController.h>
 #import <AsyncDisplayKit/ASDisplayNodeExtras.h>
@@ -23,16 +25,15 @@
 #import <AsyncDisplayKit/ASInternalHelpers.h>
 #import <AsyncDisplayKit/UICollectionViewLayout+ASConvenience.h>
 #import <AsyncDisplayKit/ASRangeController.h>
-#import <AsyncDisplayKit/ASCollectionNode.h>
 #import <AsyncDisplayKit/_ASCollectionViewCell.h>
 #import <AsyncDisplayKit/_ASDisplayLayer.h>
-#import <AsyncDisplayKit/ASCollectionViewLayoutFacilitatorProtocol.h>
 #import <AsyncDisplayKit/ASPagerNode.h>
 #import <AsyncDisplayKit/ASSectionContext.h>
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
 #import <AsyncDisplayKit/_ASHierarchyChangeSet.h>
 #import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
 #import <AsyncDisplayKit/ASLayout.h>
+#import <AsyncDisplayKit/ASThread.h>
 
 /**
  * A macro to get self.collectionNode and assign it to a local variable, or return
@@ -213,6 +214,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     unsigned int didChangeCollectionViewDataSource:1;
     unsigned int didChangeCollectionViewDelegate:1;
   } _layoutInspectorFlags;
+  
+  BOOL _hasDataControllerLayoutDelegate;
 }
 
 @end
@@ -291,6 +294,8 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   if (!AS_AT_LEAST_IOS9) {
     _retainedLayer = self.layer;
   }
+  
+  [self _configureCollectionViewLayout:layout];
   
   return self;
 }
@@ -533,9 +538,12 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
 }
 
-- (void)setCollectionViewLayout:(UICollectionViewLayout *)collectionViewLayout
+- (void)setCollectionViewLayout:(nonnull UICollectionViewLayout *)collectionViewLayout
 {
+  ASDisplayNodeAssertMainThread();
   [super setCollectionViewLayout:collectionViewLayout];
+  
+  [self _configureCollectionViewLayout:collectionViewLayout];
   
   // Trigger recreation of layout inspector with new collection view layout
   if (_layoutInspector != nil) {
@@ -746,6 +754,14 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 }
 
 #pragma mark Internal
+
+- (void)_configureCollectionViewLayout:(nonnull UICollectionViewLayout *)layout
+{
+  _hasDataControllerLayoutDelegate = [layout conformsToProtocol:@protocol(ASDataControllerLayoutDelegate)];
+  if (_hasDataControllerLayoutDelegate) {
+    _dataController.layoutDelegate = (id<ASDataControllerLayoutDelegate>)layout;
+  }
+}
 
 /**
  Performing nested batch updates with super (e.g. resizing a cell node & updating collection view during same frame)
@@ -1515,7 +1531,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   }
 }
 
-
 #pragma mark - ASDataControllerSource
 
 - (ASCellNodeBlock)dataController:(ASDataController *)dataController nodeBlockAtIndexPath:(NSIndexPath *)indexPath
@@ -1576,11 +1591,6 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     return node;
   };
   return block;
-}
-
-- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
-{
-  return [self.layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
 }
 
 - (NSUInteger)dataController:(ASDataController *)dataController rowsInSection:(NSUInteger)section
@@ -1675,6 +1685,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     // TODO: Lock this
     return [_registeredSupplementaryKinds allObjects];
   }
+}
+
+- (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForNodeAtIndexPath:(NSIndexPath *)indexPath
+{
+  return [self.layoutInspector collectionView:self constrainedSizeForNodeAtIndexPath:indexPath];
 }
 
 - (ASSizeRange)dataController:(ASDataController *)dataController constrainedSizeForSupplementaryNodeOfKind:(NSString *)kind atIndexPath:(NSIndexPath *)indexPath
@@ -1892,6 +1907,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 }
 
 #pragma mark - ASCellNodeDelegate
+
 - (void)nodeSelectedStateDidChange:(ASCellNode *)node
 {
   NSIndexPath *indexPath = [self indexPathForNode:node];
@@ -2030,6 +2046,10 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
  */
 - (void)layer:(CALayer *)layer didChangeBoundsWithOldValue:(CGRect)oldBounds newValue:(CGRect)newBounds
 {
+  if (_hasDataControllerLayoutDelegate) {
+    // Let the layout delegate handle bounds changes if it's available.
+    return;
+  }
   if (self.collectionViewLayout == nil) {
     return;
   }

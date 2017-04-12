@@ -63,7 +63,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) ASStackLayoutFlexWrap flexWrap;
 /** Orientation of lines along cross axis if there are multiple lines. Defaults to ASStackLayoutAlignContentStart */
 @property (nonatomic, assign) ASStackLayoutAlignContent alignContent;
-
 /** Whether this stack can dispatch to other threads, regardless of which thread it's running on */
 @property (nonatomic, assign, getter=isConcurrent) BOOL concurrent;
 
