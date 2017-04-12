@@ -639,6 +639,11 @@ extern NSInteger const ASDefaultDrawingPriority;
  */
 - (void)setNeedsLayout;
 
+/**
+ * Performs a layout pass on the node. Convenience for use whether the view / layer is loaded or not. Safe to call from a background thread.
+ */
+- (void)layoutIfNeeded;
+
 @property (nonatomic, strong, nullable) id contents;                           // default=nil
 @property (nonatomic, assign)           BOOL clipsToBounds;                    // default==NO
 @property (nonatomic, getter=isOpaque)  BOOL opaque;                           // default==YES

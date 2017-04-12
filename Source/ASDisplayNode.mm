@@ -985,7 +985,7 @@ ASLayoutElementFinalLayoutElementDefault
 
 - (void)__layout
 {
-  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertThreadAffinity(self);
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   {
@@ -1014,8 +1014,10 @@ ASLayoutElementFinalLayoutElementDefault
     [self _locked_layoutPlaceholderIfNecessary];
   }
   
-  [self layout];
-  [self layoutDidFinish];
+  ASPerformBlockOnMainThread(^{
+    [self layout];
+    [self layoutDidFinish];
+  });
 }
 
 /// Needs to be called with lock held
@@ -1054,7 +1056,7 @@ ASLayoutElementFinalLayoutElementDefault
   std::shared_ptr<ASDisplayNodeLayout> nextLayout = _pendingDisplayNodeLayout;
   #define layoutSizeDifferentFromBounds !CGSizeEqualToSize(nextLayout->layout.size, boundsSizeForLayout)
   
-  // nextLayout was likely created by a call to layoutThatFits:, check if is valid and can be applied.
+  // nextLayout was likely created by a call to layoutThatFits:, check if it is valid and can be applied.
   // If our bounds size is different than it, or invalid, recalculate.  Use #define to avoid nullptr->
   if (nextLayout == nullptr || nextLayout->isDirty() == YES || layoutSizeDifferentFromBounds) {
     // Use the last known constrainedSize passed from a parent during layout (if never, use bounds).
