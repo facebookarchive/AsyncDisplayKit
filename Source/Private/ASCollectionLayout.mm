@@ -9,6 +9,7 @@
 #import <AsyncDisplayKit/ASCollectionLayout.h>
 
 #import <AsyncDisplayKit/ASAssert.h>
+#import <AsyncDisplayKit/ASCellNode.h>
 #import <AsyncDisplayKit/ASCollectionElement.h>
 #import <AsyncDisplayKit/ASCollectionLayoutContext+Private.h>
 #import <AsyncDisplayKit/ASCollectionLayoutDelegate.h>
@@ -116,6 +117,7 @@
   for (ASCollectionElement *element in attrsMap) {
     UICollectionViewLayoutAttributes *attrs = [attrsMap objectForKey:element];
     if (CGRectIntersectsRect(rect, attrs.frame)) {
+      [ASCollectionLayout setSize:attrs.frame.size toElement:element];
       [attributesInRect addObject:attrs];
     }
   }
@@ -126,17 +128,31 @@
 {
   ASCollectionLayoutState *state = _state;
   ASCollectionElement *element = [state.elements elementForItemAtIndexPath:indexPath];
-  return [state.elementToLayoutArrtibutesMap objectForKey:element];
+  UICollectionViewLayoutAttributes *attrs = [state.elementToLayoutArrtibutesMap objectForKey:element];
+  [ASCollectionLayout setSize:attrs.frame.size toElement:element];
+  return attrs;
 }
 
 - (UICollectionViewLayoutAttributes *)layoutAttributesForSupplementaryViewOfKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
   ASCollectionLayoutState *state = _state;
   ASCollectionElement *element = [state.elements supplementaryElementOfKind:elementKind atIndexPath:indexPath];
-  return [state.elementToLayoutArrtibutesMap objectForKey:element];
+  UICollectionViewLayoutAttributes *attrs = [state.elementToLayoutArrtibutesMap objectForKey:element];
+  [ASCollectionLayout setSize:attrs.frame.size toElement:element];
+  return attrs;
 }
 
 #pragma mark - Private methods
+
++ (void)setSize:(CGSize)size toElement:(ASCollectionElement *)element
+{
+  ASCellNode *node = element.node;
+  if (! CGSizeEqualToSize(size, node.frame.size)) {
+    CGRect nodeFrame = CGRectZero;
+    nodeFrame.size = size;
+    node.frame = nodeFrame;
+  }
+}
 
 - (CGSize)viewportSize
 {
