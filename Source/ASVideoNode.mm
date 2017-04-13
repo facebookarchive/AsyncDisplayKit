@@ -101,6 +101,9 @@ static NSString * const kRate = @"rate";
   [self addTarget:self action:@selector(tapped) forControlEvents:ASControlNodeEventTouchUpInside];
   _lastPlaybackTime = kCMTimeZero;
   
+  NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
+  [notificationCenter addObserver:self selector:@selector(applicationDidBecomeActive:) name:UIApplicationDidBecomeActiveNotification object:nil];
+
   return self;
 }
 
@@ -706,6 +709,15 @@ static NSString * const kRate = @"rate";
 
 
 #pragma mark - Playback observers
+
+- (void)applicationDidBecomeActive:(NSNotification *)notification
+{
+  ASDN::MutexLocker l(__instanceLock__);
+  
+  if (_shouldBePlaying && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+    [self play];
+  }
+}
 
 - (void)didPlayToEnd:(NSNotification *)notification
 {
