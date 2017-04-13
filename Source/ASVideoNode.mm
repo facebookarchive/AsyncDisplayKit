@@ -711,10 +711,8 @@ static NSString * const kRate = @"rate";
 #pragma mark - Playback observers
 
 - (void)applicationDidBecomeActive:(NSNotification *)notification
-{
-  ASDN::MutexLocker l(__instanceLock__);
-  
-  if (_shouldBePlaying && ASInterfaceStateIncludesVisible(self.interfaceState)) {
+{  
+  if (self.shouldBePlaying && self.isVisible) {
     [self play];
   }
 }
