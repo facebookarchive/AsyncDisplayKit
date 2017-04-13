@@ -207,13 +207,6 @@
   [super didEnterPreloadState];
 }
 
-- (void)didEnterDisplayState
-{
-  [super didEnterDisplayState];
-  // Since an initial data load was triggered when this node enter preloads state, wait for it to finish
-  [self waitUntilAllUpdatesAreCommitted];
-}
-
 #if ASRangeControllerLoggingEnabled
 - (void)didEnterVisibleState
 {
