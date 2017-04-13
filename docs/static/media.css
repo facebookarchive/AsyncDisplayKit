@@ -44,3 +44,10 @@
 		float: right;
 	}
 }
+
+@media (-webkit-min-device-pixel-ratio: 2), 
+(min-resolution: 192dpi) {
+  #logo {
+    content: url(/static/images/Texturelogo@2x.png);
+  }
+}
