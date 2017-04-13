@@ -197,7 +197,7 @@ extern NSInteger const ASDefaultDrawingPriority;
 /**
  * Set the block that should be used to load this node's layer.
  *
- * @param viewBlock The block that creates a layer for this node.
+ * @param layerBlock The block that creates a layer for this node.
  *
  * @precondition The node is not yet loaded.
  *
