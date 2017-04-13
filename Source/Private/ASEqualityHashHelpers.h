@@ -47,13 +47,13 @@ ASDISPLAYNODE_INLINE size_t ASHash64ToNative(uint64_t key) {
 }
 #endif
 
-ASDISPLAYNODE_INLINE NSUInteger ASHashFromCGPoint(const CGPoint point);
+NSUInteger ASHashFromCGPoint(const CGPoint point);
 
-ASDISPLAYNODE_INLINE NSUInteger ASHashFromCGSize(const CGSize size);
+NSUInteger ASHashFromCGSize(const CGSize size);
 
-ASDISPLAYNODE_INLINE NSUInteger ASHashFromCGRect(const CGRect rect);
+NSUInteger ASHashFromCGRect(const CGRect rect);
 
-ASDISPLAYNODE_INLINE NSUInteger ASIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count);
+NSUInteger ASIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count);
 
 namespace AS {
   // Default is not an ObjC class
