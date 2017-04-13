@@ -64,10 +64,6 @@
 @property (nonatomic, strong) _ASTablePendingState *pendingState;
 @end
 
-@interface ASTableView ()
-- (instancetype)_initWithFrame:(CGRect)frame style:(UITableViewStyle)style dataControllerClass:(Class)dataControllerClass;
-@end
-
 @implementation ASTableNode
 
 #pragma mark Lifecycle
