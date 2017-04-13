@@ -47,7 +47,11 @@ ASDISPLAYNODE_INLINE size_t ASHash64ToNative(uint64_t key) {
 }
 #endif
 
+NSUInteger ASHashFromCGPoint(const CGPoint point);
+
 NSUInteger ASHashFromCGSize(const CGSize size);
+
+NSUInteger ASHashFromCGRect(const CGRect rect);
 
 NSUInteger ASIntegerArrayHash(const NSUInteger *subhashes, NSUInteger count);
 

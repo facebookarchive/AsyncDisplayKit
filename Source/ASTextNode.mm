@@ -27,6 +27,7 @@
 #import <AsyncDisplayKit/ASLayout.h>
 
 #import <AsyncDisplayKit/CoreGraphics+ASConvenience.h>
+#import <AsyncDisplayKit/ASEqualityHashHelpers.h>
 #import <AsyncDisplayKit/ASObjectDescriptionHelpers.h>
 
 /**
@@ -50,17 +51,6 @@ struct ASTextNodeDrawParameter {
 };
 
 #pragma mark - ASTextKitRenderer
-
-// Not used at the moment but handy to have
-/*ASDISPLAYNODE_INLINE NSUInteger ASHashFromCGRect(CGRect rect)
-{
-  return ((*(NSUInteger *)&rect.origin.x << 10 ^ *(NSUInteger *)&rect.origin.y) + (*(NSUInteger *)&rect.size.width << 10 ^ *(NSUInteger *)&rect.size.height));
-}*/
-
-ASDISPLAYNODE_INLINE NSUInteger ASHashFromCGSize(CGSize size)
-{
-  return ((*(NSUInteger *)&size.width << 10 ^ *(NSUInteger *)&size.height));
-}
 
 @interface ASTextNodeRendererKey : NSObject
 @property (assign, nonatomic) ASTextKitAttributes attributes;
