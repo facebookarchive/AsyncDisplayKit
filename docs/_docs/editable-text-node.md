@@ -69,8 +69,8 @@ editableTextNode.typingAttributes = @{NSForegroundColorAttributeName: [UIColor b
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
-editableTextNode.typingAttributes = [NSForegroundColorAttributeName: UIColor.blueColor(), 
-                                      NSBackgroundColorAttributeName: UIColor.redColor()]
+editableTextNode.typingAttributes = [NSForegroundColorAttributeName: UIColor.blue, 
+                                      NSBackgroundColorAttributeName: UIColor.red]
 </pre>
 </div>
 </div>

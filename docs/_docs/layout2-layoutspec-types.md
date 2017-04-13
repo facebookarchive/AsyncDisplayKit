@@ -275,7 +275,7 @@ If the center spec's width or height is unconstrained, it shrinks to the size of
 {
   ASStaticSizeDisplayNode *subnode = ASDisplayNodeWithBackgroundColor([UIColor greenColor], CGSizeMake(70, 100));
   return [ASCenterLayoutSpec centerLayoutSpecWithCenteringOptions:ASCenterLayoutSpecCenteringXY
-                                                    sizingOptions:ASRelativeLayoutSpecSizingOptionDefault
+                                                    sizingOptions:ASCenterLayoutSpecSizingOptionDefault
                                                             child:subnode]
 }
 </pre>

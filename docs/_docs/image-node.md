@@ -27,7 +27,7 @@ imageNode.contentMode = UIViewContentModeScaleAspectFill;
 let imageNode = ASImageNode()
 
 imageNode.image = UIImage(named: "someImage")
-imageNode.contentMode = .ScaleAspectFill
+imageNode.contentMode = .scaleAspectFill
 </pre>
 </div>
 </div>

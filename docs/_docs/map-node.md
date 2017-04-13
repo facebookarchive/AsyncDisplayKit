@@ -18,7 +18,7 @@ Let's say you'd like to show a snapshot of San Francisco.  All you need are the 
 <div class = "code">
 <pre lang="objc" class="objcCode">
 ASMapNode *mapNode = [[ASMapNode alloc] init];
-mapNode.preferredFrameSize = CGSizeMake(300.0, 300.0);
+mapNode.style.preferredSize = CGSizeMake(300.0, 300.0);
 
 // San Francisco
 CLLocationCoordinate2D coord = CLLocationCoordinate2DMake(37.7749, -122.4194);
@@ -29,7 +29,7 @@ mapNode.region = MKCoordinateRegionMakeWithDistance(coord, 20000, 20000);
 
 <pre lang="swift" class = "swiftCode hidden">
 let mapNode = ASMapNode()
-mapNode.preferredFrameSize = CGSize(width: 300.0, height: 300.0)
+mapNode.style.preferredSize = CGSize(width: 300.0, height: 300.0)
 
 // San Francisco
 let coord = CLLocationCoordinate2DMake(37.7749, -122.4194)
@@ -71,7 +71,7 @@ mapNode.options = options;
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
 let options = MKMapSnapshotOptions()
-options.mapType = .Satellite
+options.mapType = .satellite
 options.region = MKCoordinateRegionMakeWithDistance(coord, 20000, 20000)
 
 mapNode.options = options

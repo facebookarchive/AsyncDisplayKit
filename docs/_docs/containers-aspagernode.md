@@ -20,7 +20,7 @@ The main dataSource methods are:
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
-func numberOfPagesInPagerNode(pagerNode: ASPagerNode!) -> Int 
+func numberOfPages(in pagerNode: ASPagerNode) -> Int
 </pre>
 </div>
 </div>
@@ -35,7 +35,7 @@ and
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
-func pagerNode(pagerNode: ASPagerNode!, nodeAtIndex index: Int) -> ASCellNode!
+func pagerNode(_ pagerNode: ASPagerNode, nodeAt index: Int) -> ASCellNode
 </pre>
 </div>
 </div>
@@ -50,7 +50,7 @@ or
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
-func pagerNode(pagerNode: ASPagerNode!, nodeBlockAtIndex index: Int) -> ASCellNodeBlock!
+func pagerNode(_ pagerNode: ASPagerNode, nodeBlockAt index: Int) -> ASCellNodeBlock
 </pre>
 </div>
 </div>
@@ -86,8 +86,8 @@ In the example below, you can see how the index is used to access the photo mode
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
-func pagerNode(pagerNode: ASPagerNode!, nodeBlockAtIndex index: Int) -> ASCellNodeBlock! {
-    guard photoFeed.count > index else { return nil }
+func pagerNode(_ pagerNode: ASPagerNode, nodeBlockAt index: Int) -> ASCellNodeBlock {
+    guard photoFeed.count > index else { return { ASCellNode() } }
     
     let photoModel = photoFeed[index]
     let cellNodeBlock = { () -> ASCellNode in
@@ -123,8 +123,8 @@ One especially useful pattern is to return an `ASCellNode` that is initialized w
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
-func pagerNode(pagerNode: ASPagerNode!, nodeAtIndex index: Int) -> ASCellNode! {
-    guard animals.count > index else { return nil }
+func pagerNode(_ pagerNode: ASPagerNode, nodeAt index: Int) -> ASCellNode {
+    guard animals.count > index else { return ASCellNode() }
 
     let animal = animals[index]
     let node = ASCellNode(viewControllerBlock: { () -> UIViewController in

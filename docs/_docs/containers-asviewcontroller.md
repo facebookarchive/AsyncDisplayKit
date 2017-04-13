@@ -45,18 +45,16 @@ This table node is assigned to the `ASViewController` in its `-initWithNode:` de
   </pre>
 
   <pre lang="swift" class = "swiftCode hidden">
-func initWithModel(models: Array&lt;Model&gt;) {
-	let tableNode = ASTableNode(style:.Plain)
+init(models: [Model]) {
+  let tableNode = ASTableNode(style: .plain)
 
-    super.initWithNode(tableNode)
+  super.init(node: tableNode)
 
-    self.models = models
-    
-    self.tableNode = tableNode
-    self.tableNode.delegate = self
-    self.tableNode.dataSource = self
-    
-    return self
+  self.models = models
+  
+  self.tableNode = tableNode
+  self.tableNode.delegate = self
+  self.tableNode.dataSource = self
 }
 </pre>
 </div>

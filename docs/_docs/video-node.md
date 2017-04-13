@@ -28,7 +28,7 @@ videoNode.asset = asset;
 <pre lang="swift" class = "swiftCode hidden">
 let videoNode = ASVideoNode()
 
-let asset = AVAsset(URL: NSURL(string: "http://www.w3schools.com/html/mov_bbb.mp4"))
+let asset = AVAsset(url: URL(string: "http://www.w3schools.com/html/mov_bbb.mp4")!)
 videoNode.asset = asset
 </pre>
 </div>
@@ -78,7 +78,7 @@ There are a ton of delegate methods available to you that allow you to react to 
 - (void)videoNode:(ASVideoNode *)videoNode willChangePlayerState:(ASVideoNodePlayerState)state toState:(ASVideoNodePlayerState)toState;
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
-videoNode(videoNode:willChangePlayerState:toState:)
+videoNode(_:willChange:to:)
 </pre>
 </div>
 </div>

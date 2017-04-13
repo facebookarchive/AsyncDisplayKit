@@ -37,7 +37,7 @@ Then, assign an array of keys to the property `imageIdentifiers`.  This list sho
 init(urls: [String: NSURL]) {
     imageURLs = urls
 
-    multiplexImageNode = ASMultiplexImageNode(cache: nil, downloader: ASBasicImageDownloader.sharedImageDownloader())
+    multiplexImageNode = ASMultiplexImageNode(cache: nil, downloader: ASBasicImageDownloader.shared())
     multiplexImageNode.downloadsIntermediateImages = true
     multiplexImageNode.imageIdentifiers = ["original", "medium", "thumb" ]
 
@@ -67,7 +67,7 @@ Then, if you've set up a simple dictionary that holds the keys you provided earl
 </pre>
 
     <pre lang="swift" class = "swiftCode hidden">
-func multiplexImageNode(imageNode: ASMultiplexImageNode, URLForImageIdentifier imageIdentifier: ASImageIdentifier) -> NSURL? {
+func multiplexImageNode(_ imageNode: ASMultiplexImageNode, urlForImageIdentifier imageIdentifier: ASImageIdentifier) -> URL? {
     return imageURLs[imageIdentifier]
 }
 </pre>
@@ -96,11 +96,11 @@ For example, in the case that you want to react to the fact that a new image arr
 </pre>
 
     <pre lang="swift" class = "swiftCode hidden">
-func multiplexImageNode(imageNode: ASMultiplexImageNode, 
-             didUpdateImage image: UIImage?, 
-             withIdentifier imageIdentifier: ASImageIdentifier?, 
-             fromImage previousImage: UIImage?, 
-             withIdentifier previousImageIdentifier: ASImageIdentifier?) {
+func multiplexImageNode(_ imageNode: ASMultiplexImageNode,
+                        didUpdate image: UIImage?,
+                        withIdentifier imageIdentifier: ASImageIdentifier?,
+                        from previousImage: UIImage?,
+                        withIdentifier previousImageIdentifier: ASImageIdentifier?) {
     // this is optional, in case you want to react to the fact that a new image came in   
 }
 </pre>

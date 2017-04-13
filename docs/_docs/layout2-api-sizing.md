@@ -27,14 +27,20 @@ ASDimensionMake(@"50%");
 ASDimensionMakeWithFraction(0.5);
 
 <b>// dimension returned in points</b>
-ASDimensionMake(@"70pt")
+ASDimensionMake(@"70pt");
 ASDimensionMake(70);      
 ASDimensionMakeWithPoints(70);
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
+<b>// dimension returned is relative (%)</b>
+ASDimensionMake("50%")
+ASDimensionMakeWithFraction(0.5)
+
+<b>// dimension returned in points</b>
+ASDimensionMake("70pt")
+ASDimensionMake(70)
+ASDimensionMakeWithPoints(70)
 </pre>
-</div>
-</div>
 
 ### Example using `ASDimension`
 
@@ -59,9 +65,11 @@ self.rightStack.style.flexBasis = ASDimensionMake(@"60%");
 [horizontalStack setChildren:@[self.leftStack, self.rightStack]];
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
+self.leftStack.style.flexBasis = ASDimensionMake("40%")
+self.rightStack.style.flexBasis = ASDimensionMake("60%")
+
+horizontalStack.children = [self.leftStack, self.rightStack]]
 </pre>
-</div>
-</div>
 
 ## Sizes (`CGSize`, `ASLayoutSize`)
 
@@ -77,6 +85,7 @@ self.rightStack.style.flexBasis = ASDimensionMake(@"60%");
 ASLayoutSizeMake(ASDimension width, ASDimension height);
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
+ASLayoutSizeMake(_ width: ASDimension, _ height: ASDimension)
 </pre>
 </div>
 </div>
@@ -99,6 +108,12 @@ ASDimension height = ASDimensionMake(@"50%");
 layoutElement.style.preferredLayoutSize = ASLayoutSizeMake(width, height);
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
+// Dimension type "Auto" indicates that the layout element may 
+// be resolved in whatever way makes most sense given the circumstances
+let width = ASDimensionMake(.auto, 0)
+let height = ASDimensionMake("50%")
+        
+layoutElement.style.preferredLayoutSize = ASLayoutSizeMake(width, height)
 </pre>
 </div>
 </div>
@@ -116,6 +131,7 @@ If you do not need relative values, you can set the layout element's `.preferred
 layoutElement.style.preferredSize = CGSizeMake(30, 160);
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
+layoutElement.style.preferredSize = CGSize(width: 30, height: 60)
 </pre>
 </div>
 </div>
@@ -139,6 +155,13 @@ layoutElement.style.minHeight = ASDimensionMake(@"50%");
 layoutElement.style.maxHeight = ASDimensionMake(@"50%");
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
+layoutElement.style.width     = ASDimensionMake("50%")
+layoutElement.style.minWidth  = ASDimensionMake("50%")
+layoutElement.style.maxWidth  = ASDimensionMake("50%")
+
+layoutElement.style.height    = ASDimensionMake("50%")
+layoutElement.style.minHeight = ASDimensionMake("50%")
+layoutElement.style.maxHeight = ASDimensionMake("50%")
 </pre>
 </div>
 </div>
@@ -159,6 +182,7 @@ layoutElement.style.maxHeight = ASDimensionMake(@"50%");
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constrainedSize;
 </pre>
 <pre lang="swift" class = "swiftCode hidden">
+func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec
 </pre>
 </div>
 </div>
