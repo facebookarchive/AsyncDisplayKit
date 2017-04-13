@@ -24,7 +24,8 @@ typedef struct {
   // Properties
   int needsDisplay:1;
   int needsLayout:1;
-
+  int layoutIfNeeded:1;
+  
   // Flags indicating that a given property should be applied to the view at creation
   int setClipsToBounds:1;
   int setOpaque:1;
@@ -270,6 +271,11 @@ static BOOL defaultAllowsEdgeAntialiasing = NO;
 - (void)setNeedsLayout
 {
   _flags.needsLayout = YES;
+}
+
+- (void)layoutIfNeeded
+{
+  _flags.layoutIfNeeded = YES;
 }
 
 - (void)setClipsToBounds:(BOOL)flag
@@ -761,9 +767,6 @@ static BOOL defaultAllowsEdgeAntialiasing = NO;
   if (flags.setEdgeAntialiasingMask)
     layer.edgeAntialiasingMask = edgeAntialiasingMask;
 
-  if (flags.needsLayout)
-    [layer setNeedsLayout];
-
   if (flags.setAsyncTransactionContainer)
     layer.asyncdisplaykit_asyncTransactionContainer = asyncTransactionContainer;
 
@@ -771,6 +774,12 @@ static BOOL defaultAllowsEdgeAntialiasing = NO;
     ASDisplayNodeAssert(layer.opaque == opaque, @"Didn't set opaque as desired");
 
   ASPendingStateApplyMetricsToLayer(self, layer);
+  
+  if (flags.needsLayout)
+    [layer setNeedsLayout];
+  
+  if (flags.layoutIfNeeded)
+    [layer layoutIfNeeded];
 }
 
 - (void)applyToView:(UIView *)view withSpecialPropertiesHandling:(BOOL)specialPropertiesHandling
@@ -889,9 +898,6 @@ static BOOL defaultAllowsEdgeAntialiasing = NO;
   if (flags.setEdgeAntialiasingMask)
     layer.edgeAntialiasingMask = edgeAntialiasingMask;
 
-  if (flags.needsLayout)
-    [view setNeedsLayout];
-
   if (flags.setAsyncTransactionContainer)
     view.asyncdisplaykit_asyncTransactionContainer = asyncTransactionContainer;
 
@@ -955,6 +961,12 @@ static BOOL defaultAllowsEdgeAntialiasing = NO;
   } else {
     ASPendingStateApplyMetricsToLayer(self, layer);
   }
+  
+  if (flags.needsLayout)
+    [view setNeedsLayout];
+  
+  if (flags.layoutIfNeeded)
+    [view layoutIfNeeded];
 }
 
 // FIXME: Make this more efficient by tracking which properties are set rather than reading everything.

@@ -985,7 +985,7 @@ ASLayoutElementFinalLayoutElementDefault
 
 - (void)__layout
 {
-  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertThreadAffinity(self);
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   {
@@ -1014,8 +1014,12 @@ ASLayoutElementFinalLayoutElementDefault
     [self _locked_layoutPlaceholderIfNecessary];
   }
   
-  [self layout];
-  [self layoutDidFinish];
+  [self _layoutSublayouts];
+  
+  ASPerformBlockOnMainThread(^{
+    [self layout];
+    [self layoutDidFinish];
+  });
 }
 
 /// Needs to be called with lock held
@@ -1054,7 +1058,7 @@ ASLayoutElementFinalLayoutElementDefault
   std::shared_ptr<ASDisplayNodeLayout> nextLayout = _pendingDisplayNodeLayout;
   #define layoutSizeDifferentFromBounds !CGSizeEqualToSize(nextLayout->layout.size, boundsSizeForLayout)
   
-  // nextLayout was likely created by a call to layoutThatFits:, check if is valid and can be applied.
+  // nextLayout was likely created by a call to layoutThatFits:, check if it is valid and can be applied.
   // If our bounds size is different than it, or invalid, recalculate.  Use #define to avoid nullptr->
   if (nextLayout == nullptr || nextLayout->isDirty() == YES || layoutSizeDifferentFromBounds) {
     // Use the last known constrainedSize passed from a parent during layout (if never, use bounds).
@@ -1405,12 +1409,13 @@ ASLayoutElementFinalLayoutElementDefault
 
 - (void)layout
 {
-  [self _layoutSublayouts];
+  ASDisplayNodeAssertMainThread();
+  // Subclass hook
 }
 
 - (void)_layoutSublayouts
 {
-  ASDisplayNodeAssertMainThread();
+  ASDisplayNodeAssertThreadAffinity(self);
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   
   ASLayout *layout;
@@ -3719,6 +3724,10 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   ASDisplayNodeAssertMainThread();
   ASDisplayNodeAssertLockUnownedByCurrentThread(__instanceLock__);
   [_interfaceStateDelegate didEnterPreloadState];
+  
+  // Trigger a layout pass to ensure all subnodes have the correct size to preload their content.
+  // This is important for image nodes, as well as collection and table nodes.
+  [self layoutIfNeeded];
   
   if (_methodOverrides & ASDisplayNodeMethodOverrideFetchData) {
 #pragma clang diagnostic push
