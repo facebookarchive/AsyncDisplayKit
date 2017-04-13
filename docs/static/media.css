@@ -49,5 +49,7 @@
 (min-resolution: 192dpi) {
   #logo {
     content: url(/static/images/Texturelogo@2x.png);
+    width: 186px;
+    height: 40px;
   }
 }
