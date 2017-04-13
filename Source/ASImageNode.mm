@@ -97,14 +97,8 @@ struct ASImageNodeDrawParameters {
     // Profiling shows that the work done in UIImage's `hash` is on the order of 0.005ms on an A5 processor
     // and isn't proportional to the size of the image.
     [_image hash],
-    
-    // TODO: Hashing the floats in a CGRect or CGSize is tricky.  Equality of floats is
-    // fuzzy, but it's a 100% requirement that two equal values must produce an identical hash value.
-    // Until there's a robust solution for hashing floats, leave all float values out of the hash.
-    // This may lead to a greater number of isEqual comparisons but does not comprimise correctness.
-    //AS::hash<CGRect>()(_backingSize),
-    //AS::hash<CGRect>()(_imageDrawRect),
-
+    ASHashFromCGSize(_backingSize),
+    ASHashFromCGRect(_imageDrawRect),
     AS::hash<BOOL>()(_isOpaque),
     [_backgroundColor hash],
     AS::hash<void *>()((void*)_preContextBlock),
