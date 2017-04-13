@@ -27,6 +27,7 @@
 #import <AsyncDisplayKit/ASRangeController.h>
 #import <AsyncDisplayKit/_ASCollectionViewCell.h>
 #import <AsyncDisplayKit/_ASDisplayLayer.h>
+#import <AsyncDisplayKit/_ASCollectionReusableView.h>
 #import <AsyncDisplayKit/ASPagerNode.h>
 #import <AsyncDisplayKit/ASSectionContext.h>
 #import <AsyncDisplayKit/ASCollectionView+Undeprecated.h>
@@ -838,7 +839,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
 {
   ASDisplayNodeAssert(elementKind != nil, @"A kind is needed for supplementary node registration");
   [_registeredSupplementaryKinds addObject:elementKind];
-  [self registerClass:[UICollectionReusableView class] forSupplementaryViewOfKind:elementKind withReuseIdentifier:kReuseIdentifier];
+  [self registerClass:[_ASCollectionReusableView class] forSupplementaryViewOfKind:elementKind withReuseIdentifier:kReuseIdentifier];
 }
 
 - (void)insertSections:(NSIndexSet *)sections
@@ -997,7 +998,11 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
     ASDisplayNodeAssert(node != nil, @"Supplementary node should exist.  Kind = %@, indexPath = %@, collectionDataSource = %@", kind, indexPath, self);
     view = [self dequeueReusableSupplementaryViewOfKind:kind withReuseIdentifier:kReuseIdentifier forIndexPath:indexPath];
   }
-
+  
+  if (_ASCollectionReusableView *reusableView = ASDynamicCast(view, _ASCollectionReusableView)) {
+    reusableView.node = node;
+  }
+  
   if (node) {
     [_rangeController configureContentView:view forCellNode:node];
   }
@@ -1111,8 +1116,14 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   cell.layoutAttributes = nil;
 }
 
-- (void)collectionView:(UICollectionView *)collectionView willDisplaySupplementaryView:(UICollectionReusableView *)view forElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
+- (void)collectionView:(UICollectionView *)collectionView willDisplaySupplementaryView:(_ASCollectionReusableView *)view forElementKind:(NSString *)elementKind atIndexPath:(NSIndexPath *)indexPath
 {
+  // This is a safeguard similar to the behavior for cells in -[ASCollectionView collectionView:willDisplayCell:forItemAtIndexPath:]
+  // It ensures _ASCollectionReusableView receives layoutAttributes and calls applyLayoutAttributes.
+  if (view.layoutAttributes == nil) {
+    view.layoutAttributes = [collectionView layoutAttributesForSupplementaryElementOfKind:elementKind atIndexPath:indexPath];
+  }
+  
   if (_asyncDelegateFlags.collectionNodeWillDisplaySupplementaryElement) {
     GET_COLLECTIONNODE_OR_RETURN(collectionNode, (void)0);
     ASCellNode *node = [self supplementaryNodeForElementKind:elementKind atIndexPath:indexPath];
