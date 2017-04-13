@@ -830,6 +830,9 @@ static NSString * const kRate = @"rate";
   _timeObserver = nil;
   [self removePlayerItemObservers:_currentPlayerItem];
   [self removePlayerObservers:_player];
+
+  NSNotificationCenter *notificationCenter = [NSNotificationCenter defaultCenter];
+  [notificationCenter removeObserver:self name:UIApplicationDidBecomeActiveNotification object:nil];
 }
 
 @end
