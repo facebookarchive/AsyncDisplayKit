@@ -1121,7 +1121,7 @@ static NSString * const kReuseIdentifier = @"_ASCollectionReuseIdentifier";
   // This is a safeguard similar to the behavior for cells in -[ASCollectionView collectionView:willDisplayCell:forItemAtIndexPath:]
   // It ensures _ASCollectionReusableView receives layoutAttributes and calls applyLayoutAttributes.
   if (view.layoutAttributes == nil) {
-    view.layoutAttributes = [collectionView layoutAttributesForItemAtIndexPath:indexPath];
+    view.layoutAttributes = [collectionView layoutAttributesForSupplementaryElementOfKind:elementKind atIndexPath:indexPath];
   }
   
   if (_asyncDelegateFlags.collectionNodeWillDisplaySupplementaryElement) {
