@@ -331,7 +331,6 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
       // which may call -displayIfNeeded. We want to ensure the needsDisplay flag is set now, and then cleared.
       [viewOrLayer setNeedsDisplay];
     } else {
-      // Need to grab the lock here because _ASPendingState itself is not locked at all
       _bridge_prologue_write;
       [ASDisplayNodeGetPendingState(self) setNeedsDisplay];
     }
@@ -361,7 +360,6 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
     // The node is loaded but we're not on main.
     // We will call [self __setNeedsLayout] when we apply the pending state.
     // We need to call it on main if the node is loaded to support automatic subnode management.
-    
     _bridge_prologue_write;
     [ASDisplayNodeGetPendingState(self) setNeedsLayout];
   } else {
@@ -390,7 +388,6 @@ if (shouldApply) { _layer.layerProperty = (layerValueExpr); } else { ASDisplayNo
     // The node is loaded but we're not on main.
     // We will call layoutIfNeeded on the view or layer when we apply the pending state. __layout will in turn be called on us (see -[_ASDisplayLayer layoutSublayers]).
     // We need to call it on main if the node is loaded to support automatic subnode management.
-    
     _bridge_prologue_write;
     [ASDisplayNodeGetPendingState(self) layoutIfNeeded];
   } else {

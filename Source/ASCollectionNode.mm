@@ -201,8 +201,8 @@
 
 - (void)didEnterPreloadState
 {
-  // Intentionally allocate the collection view here so that super will trigger a layout pass on it which in turn will loads its intial data.
-  // We can get rid of this later when ASDataController, ASRangeController and the collection layout object can operate without the view.
+  // Intentionally allocate the view here so that super will trigger a layout pass on it which in turn will trigger the intial data load.
+  // We can get rid of this call later when ASDataController, ASRangeController and ASCollectionLayout can operate without the view.
   [self view];
   [super didEnterPreloadState];
 }
