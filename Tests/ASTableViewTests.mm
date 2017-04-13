@@ -382,7 +382,7 @@
   CGSize tableViewFinalSize = CGSizeMake(100, 500);
   // Width and height are swapped so that a later size change will simulate a rotation
   ASTestTableView *tableView = [[ASTestTableView alloc] __initWithFrame:CGRectMake(0, 0, tableViewFinalSize.height, tableViewFinalSize.width)
-                                                                style:UITableViewStylePlain];
+                                                                  style:UITableViewStylePlain];
   
   ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
 
@@ -475,7 +475,7 @@
 {
   CGSize tableViewSize = CGSizeMake(100, 500);
   ASTestTableView *tableView = [[ASTestTableView alloc] __initWithFrame:CGRectMake(0, 0, tableViewSize.width, tableViewSize.height)
-                                                                style:UITableViewStylePlain];
+                                                                  style:UITableViewStylePlain];
   ASTableViewFilledDataSource *dataSource = [ASTableViewFilledDataSource new];
   
   tableView.asyncDelegate = dataSource;
