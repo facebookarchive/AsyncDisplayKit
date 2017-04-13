@@ -22,7 +22,7 @@ nextPage: containers-aspagernode.html
   </pre>
 
   <pre lang="swift" class = "swiftCode hidden">
-override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell
+override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell
   </pre>
 </div>
 </div>
@@ -37,7 +37,7 @@ with your choice of **_one_** of the following methods
 - (ASCellNode *)collectionNode:(ASCollectionNode *)collectionNode nodeForItemAtIndexPath:(NSIndexPath *)indexPath
 </pre>
   <pre lang="swift" class = "swiftCode hidden">
-override func collectionNode(collectionNode: ASCollectionNode, nodeForItemAtIndexPath indexPath: NSIndexPath) -> ASCellNode
+override func collectionNode(_ collectionNode: ASCollectionNode, nodeForItemAt indexPath: IndexPath) -> ASCellNode
   </pre>
 </div>
 </div>
@@ -54,7 +54,7 @@ or
 - (ASCellNodeBlock)collectionNode:(ASCollectionNode *)collectionNode nodeBlockForItemAtIndexPath:(NSIndexPath *)indexPath
 </pre>
   <pre lang="swift" class = "swiftCode hidden">
-override func collectionNode(collectionNode: ASCollectionNode, nodeBlockForItemAtIndexPath indexPath: NSIndexPath) -> ASCellNodeBlock
+override func collectionNode(_ collectionNode: ASCollectionNode, nodeBlockForItemAt indexPath: IndexPath) -> ASCellNodeBlock
   </pre>
 </div>
 </div>
@@ -96,7 +96,7 @@ Consider the following `-collectionNode:nodeBlockForItemAtIndexPath:` method.
   </pre>
 
   <pre lang="swift" class = "swiftCode hidden">
-func tableNode(_ collectionNode: ASCollectionNode, nodeBlockForItemAt indexPath: IndexPath) -> ASCellNodeBlock {
+func collectionNode(_ collectionNode: ASCollectionNode, nodeBlockForItemAt indexPath: IndexPath) -> ASCellNodeBlock {
   guard photoFeed.count > indexPath.row else { return { ASCellNode() } }
     
   let photoModel = photoFeed[indexPath.row]
@@ -130,13 +130,13 @@ An ASCollectionNode is assigned to be managed by an `ASViewController` in its `-
   <pre lang="objc" class="objcCode">
 - (instancetype)init
 {
-  _flowLayout     = [[UICollectionViewFlowLayout alloc] init];
+  _flowLayout = [[UICollectionViewFlowLayout alloc] init];
   _collectionNode = [[ASCollectionNode alloc] initWithCollectionViewLayout:_flowLayout];
   
   self = [super initWithNode:_collectionNode];
   if (self) {
-    _flowLayout.minimumInteritemSpacing  = 1;
-    _flowLayout.minimumLineSpacing       = 1;
+    _flowLayout.minimumInteritemSpacing = 1;
+    _flowLayout.minimumLineSpacing = 1;
   }
   
   return self;
@@ -145,13 +145,13 @@ An ASCollectionNode is assigned to be managed by an `ASViewController` in its `-
 
 <pre lang="swift" class = "swiftCode hidden">
 init() {
-  flowLayout     = UICollectionViewFlowLayout()
+  flowLayout = UICollectionViewFlowLayout()
   collectionNode = ASCollectionNode(collectionViewLayout: flowLayout)
 
   super.init(node: collectionNode)
 
-  flowLayout.minimumInteritemSpacing  = 1
-  flowLayout.minimumLineSpacing       = 1
+  flowLayout.minimumInteritemSpacing = 1
+  flowLayout.minimumLineSpacing = 1
 }
 </pre>
 </div>
@@ -178,7 +178,7 @@ The `LocationCollectionNodeController` above accesses the `ASCollectionView` dir
 {
   [super viewDidLoad];
   
-  _collectionNode.delegate   = self;
+  _collectionNode.delegate = self;
   _collectionNode.dataSource = self;
   _collectionNode.view.allowsSelection = NO;
   _collectionNode.view.backgroundColor = [UIColor whiteColor];
@@ -189,10 +189,10 @@ The `LocationCollectionNodeController` above accesses the `ASCollectionView` dir
 override func viewDidLoad() {
   super.viewDidLoad()
 
-  collectionNode.delegate   = self
+  collectionNode.delegate = self
   collectionNode.dataSource = self
   collectionNode.view.allowsSelection = false
-  collectionNode.view.backgroundColor = UIColor.whiteColor()
+  collectionNode.view.backgroundColor = .white
 }
 </pre>
 </div>

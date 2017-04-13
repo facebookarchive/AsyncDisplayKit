@@ -19,7 +19,7 @@ imageNode.URL = [NSURL URLWithString:@"https://someurl.com/image_uri"];
 
 	<pre lang="swift" class = "swiftCode hidden">
 let imageNode = ASNetworkImageNode()
-imageNode.URL = NSURL(string: "https://someurl.com/image_uri")
+imageNode.url = URL(string: "https://someurl.com/image_uri")
 	</pre>
 </div>
 </div>
@@ -39,15 +39,15 @@ If you have a standard size you want the image node's frame size to be you can u
 <pre lang="objc" class="objcCode">
 - (ASLayoutSpec *)layoutSpecThatFits:(ASSizeRange)constraint
 {
-	imageNode.preferredFrameSize = CGSizeMake(100, 200);
+	imageNode.style.preferredSize = CGSizeMake(100, 200);
 	...
 	return finalLayoutSpec;
 }
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
-override func layoutSpecThatFits(constrainedSize: ASSizeRange) -> ASLayoutSpec {
-	imageNode.preferredFrameSize = CGSize(width: 100, height: 200)
+override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
+	imageNode.style.preferredSize = CGSize(width: 100, height: 200)
 	...
 	return finalLayoutSpec
 }
@@ -74,7 +74,7 @@ This is also a perfect place to use `ASRatioLayoutSpec`.  Instead of assigning a
 </pre>
 
 <pre lang="swift" class = "swiftCode hidden">
-override func layoutSpecThatFits(constrainedSize: ASSizeRange) -> ASLayoutSpec {
+override func layoutSpecThatFits(_ constrainedSize: ASSizeRange) -> ASLayoutSpec {
 	let ratio: CGFloat = 3.0/1.0
 	let imageRatioSpec = ASRatioLayoutSpec(ratio:ratio, child:self.imageNode)
 	...
