@@ -1,6 +1,6 @@
 ## AsyncDisplayKit has been moved and renamed: [Texture](https://github.com/texturegroup/texture/)
-![Texture](https://github.com/TextureGroup/Texture/raw/master/docs/static/images/logo.png)
-## [Learn more here](https://medium.com/@Pinterest_Engineering/introducing-texture-a-new-home-for-asyncdisplaykit-e7c003308f50)
+<a href="https://medium.com/@Pinterest_Engineering/introducing-texture-a-new-home-for-asyncdisplaykit-e7c003308f50"><img src="https://github.com/TextureGroup/Texture/raw/master/docs/static/images/logo.png" alt="Texture Logo" /></a>
+[Learn more here](https://medium.com/@Pinterest_Engineering/introducing-texture-a-new-home-for-asyncdisplaykit-e7c003308f50)
 
 <br/>
 <br/>
