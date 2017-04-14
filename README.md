@@ -1,20 +1,12 @@
 AsyncDisplayKit has been moved and renamed: [Texture](https://github.com/texturegroup/texture/)
 ===================================================================================
-[Learn more here](https://medium.com/@Pinterest_Engineering/introducing-texture-a-new-home-for-asyncdisplaykit-e7c003308f50)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#[Learn more here](https://medium.com/@Pinterest_Engineering/introducing-texture-a-new-home-for-asyncdisplaykit-e7c003308f50)
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
 ![AsyncDisplayKit](https://github.com/AsyncDisplayKit/Documentation/raw/master/docs/static/images/logo.png)
 
 [![Apps Using](https://img.shields.io/cocoapods/at/AsyncDisplayKit.svg?label=Apps%20Using%20ASDK&colorB=28B9FE)](http://cocoapods.org/pods/AsyncDisplayKit)
