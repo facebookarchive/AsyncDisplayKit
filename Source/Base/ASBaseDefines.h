@@ -104,6 +104,10 @@
 # define ASDISPLAYNODE_NOTHROW
 #endif
 
+#ifndef AS_ENABLE_TIPS
+#define AS_ENABLE_TIPS 0
+#endif
+
 /**
  * The event backtraces take a static 2KB of memory
  * and retain all objects present in all the registers

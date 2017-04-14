@@ -254,6 +254,28 @@ static NSArray *DefaultLinkAttributeNames = @[ NSLinkAttributeName ];
   }
 }
 
+- (BOOL)supportsLayerBacking
+{
+  if (!super.supportsLayerBacking) {
+    return NO;
+  }
+  
+  // If the text contains any links, return NO.
+  NSAttributedString *attributedText = self.attributedText;
+  NSRange range = NSMakeRange(0, attributedText.length);
+  for (NSString *linkAttributeName in _linkAttributeNames) {
+    __block BOOL hasLink = NO;
+    [attributedText enumerateAttribute:linkAttributeName inRange:range options:NSAttributedStringEnumerationLongestEffectiveRangeNotRequired usingBlock:^(id  _Nullable value, NSRange range, BOOL * _Nonnull stop) {
+      hasLink = (value != nil);
+      *stop = YES;
+    }];
+    if (hasLink) {
+      return NO;
+    }
+  }
+  return YES;
+}
+
 #pragma mark - Renderer Management
 
 - (ASTextKitRenderer *)_renderer

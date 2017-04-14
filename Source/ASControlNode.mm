@@ -273,6 +273,11 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
   return YES;
 }
 
+- (BOOL)supportsLayerBacking
+{
+  return super.supportsLayerBacking && !self.userInteractionEnabled;
+}
+
 #pragma mark - Action Messages
 
 - (void)addTarget:(id)target action:(SEL)action forControlEvents:(ASControlNodeEvent)controlEventMask
@@ -424,7 +429,7 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
     (ASControlNodeEvent controlEvent)
     {
       // Use a copy to itereate, the action perform could call remove causing a mutation crash.
-      NSMutableArray *eventTargetActionArray = [_controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)] copy];
+      NSArray *eventTargetActionArray = [_controlEventDispatchTable[_ASControlNodeEventKeyForControlEvent(controlEvent)] copy];
       
       // Iterate on each target action pair
       for (ASControlTargetAction *targetAction in eventTargetActionArray) {

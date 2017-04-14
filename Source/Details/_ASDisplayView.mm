@@ -237,6 +237,12 @@
   node.threadSafeBounds = bounds;
 }
 
+- (void)addGestureRecognizer:(UIGestureRecognizer *)gestureRecognizer
+{
+  [super addGestureRecognizer:gestureRecognizer];
+  [_asyncdisplaykit_node nodeViewDidAddGestureRecognizer];
+}
+
 #pragma mark - Event Handling + UIResponder Overrides
 - (void)touchesBegan:(NSSet *)touches withEvent:(UIEvent *)event
 {

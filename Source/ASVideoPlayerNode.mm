@@ -251,6 +251,11 @@ static void *ASVideoPlayerNodeContext = &ASVideoPlayerNodeContext;
   }
 }
 
+- (BOOL)supportsLayerBacking
+{
+  return NO;
+}
+
 #pragma mark - UI
 
 - (void)createControls
