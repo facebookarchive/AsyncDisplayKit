@@ -205,7 +205,13 @@ static ASPINRemoteImageDownloader *sharedDownloader = nil;
                    downloadProgress:(ASImageDownloaderProgress)downloadProgress
                          completion:(ASImageDownloaderCompletion)completion;
 {
-  return [[self sharedPINRemoteImageManager] downloadImageWithURL:URL options:PINRemoteImageManagerDownloadOptionsSkipDecode progressDownload:^(int64_t completedBytes, int64_t totalBytes) {
+  PINRemoteImageManagerDownloadOptions options = PINRemoteImageManagerDownloadOptionsSkipDecode;
+  
+  if (_shouldIgnoreCache) {
+    options |= PINRemoteImageManagerDownloadOptionsIgnoreCache;
+  }
+  
+  return [[self sharedPINRemoteImageManager] downloadImageWithURL:URL options:options progressDownload:^(int64_t completedBytes, int64_t totalBytes) {
     if (downloadProgress == nil) { return; }
 
     /// If we're targeting the main queue and we're on the main thread, call immediately.
