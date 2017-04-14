@@ -112,6 +112,17 @@
   XCTAssert(controller.hits == 1, @"Controller did not receive the action event");
 }
 
+- (void)testActionWithBlock {
+  ASActionSenderController *controller = [[ASActionSenderController alloc] init];
+  ASControlNode *node = [[ASControlNode alloc] init];
+  [node addActionWithBlock:^(ASControlNode * _Nonnull sender) {
+    [controller action:sender];
+  } forControlEvents:EVENT];
+  [controller.view addSubview:node.view];
+  [node sendActionsForControlEvents:EVENT withEvent:nil];
+  XCTAssert(controller.hits == 1, @"Controller did not receive the action event");
+}
+
 - (void)testRemoveWithoutTargetRemovesTargetlessAction {
   ASActionSenderEventController *controller = [[ASActionSenderEventController alloc] init];
   ASControlNode *node = [[ASControlNode alloc] init];

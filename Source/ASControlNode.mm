@@ -43,6 +43,8 @@
   // Target action pairs stored in an array for each event type
   // ASControlEvent -> [ASTargetAction0, ASTargetAction1]
   NSMutableDictionary<id<NSCopying>, NSMutableArray<ASControlTargetAction *> *> *_controlEventDispatchTable;
+  
+  NSMutableDictionary<id<NSCopying>, NSMutableArray<ASControlBlock> *> *_controlBlockDispatchTable;
 }
 
 // Read-write overrides.
@@ -332,6 +334,29 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
   self.userInteractionEnabled = YES;
 }
 
+- (void)addActionWithBlock:(ASControlBlock)actionBlock forControlEvents:(ASControlNodeEvent)controlEvents
+{
+  _ASEnumerateControlEventsIncludedInMaskWithBlock(controlEvents, ^(ASControlNodeEvent anEvent) {
+    if (!_controlBlockDispatchTable) {
+      _controlBlockDispatchTable = [[NSMutableDictionary alloc] initWithCapacity:kASControlNodeActionDispatchTableInitialCapacity];
+    }
+    id<NSCopying> eventKey = _ASControlNodeEventKeyForControlEvent(anEvent);
+    NSMutableArray *actions = _controlBlockDispatchTable[eventKey];
+    if (!actions) {
+      actions = [[NSMutableArray alloc] init];
+    }
+    
+    [actions removeObject:actionBlock];
+    [actions addObject:actionBlock];
+    
+    if (eventKey) {
+      _controlBlockDispatchTable[eventKey] = actions;
+    }
+  });
+  
+  [self addTarget:self action:@selector(_handleTargetActionBlock:) forControlEvents:controlEvents];
+}
+
 - (NSArray *)actionsForTarget:(id)target forControlEvent:(ASControlNodeEvent)controlEvent
 {
   NSParameterAssert(target);
@@ -409,6 +434,16 @@ CGRect _ASControlNodeGetExpandedBounds(ASControlNode *controlNode);
         [_controlEventDispatchTable removeObjectForKey:eventKey];
       }
     });
+}
+
+#pragma mark -
+// Handle target action with block.
+- (void)_handleTargetActionBlock:(ASControlNode *)sender {
+  [_controlBlockDispatchTable enumerateKeysAndObjectsUsingBlock:^(id<NSCopying>  _Nonnull key, NSMutableArray<ASControlBlock> * _Nonnull actions, BOOL * _Nonnull stop) {
+    [actions enumerateObjectsUsingBlock:^(ASControlBlock  _Nonnull action, NSUInteger idx, BOOL * _Nonnull stop) {
+      action(sender);
+    }];
+  }];
 }
 
 #pragma mark -
