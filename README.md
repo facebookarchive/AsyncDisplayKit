@@ -1,3 +1,43 @@
+<h1>AsyncDisplayKit has been moved and renamed: <a href="https://github.com/texturegroup/texture/">Texture</a></h1>
+<a href="https://medium.com/@Pinterest_Engineering/introducing-texture-a-new-home-for-asyncdisplaykit-e7c003308f50"><img src="https://github.com/TextureGroup/Texture/raw/master/docs/static/images/logo.png" alt="Texture Logo" /></a>
+<h2 style="border-bottom:none !important"><a href="https://medium.com/@Pinterest_Engineering/introducing-texture-a-new-home-for-asyncdisplaykit-e7c003308f50">Learn more here</a></h2>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+<br/>
+
 ![AsyncDisplayKit](https://github.com/AsyncDisplayKit/Documentation/raw/master/docs/static/images/logo.png)
 
 [![Apps Using](https://img.shields.io/cocoapods/at/AsyncDisplayKit.svg?label=Apps%20Using%20ASDK&colorB=28B9FE)](http://cocoapods.org/pods/AsyncDisplayKit)
