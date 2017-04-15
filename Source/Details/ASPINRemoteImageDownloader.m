@@ -22,13 +22,13 @@
 #if __has_include (<PINRemoteImage/PINAnimatedImage.h>)
 #define PIN_ANIMATED_AVAILABLE 1
 #import <PINRemoteImage/PINAnimatedImage.h>
+#import <PINRemoteImage/NSData+ImageDetectors.h>
 #import <PINRemoteImage/PINAlternateRepresentationProvider.h>
 #else
 #define PIN_ANIMATED_AVAILABLE 0
 #endif
 
 #import <PINRemoteImage/PINRemoteImageManager.h>
-#import <PINRemoteImage/NSData+ImageDetectors.h>
 #import <PINRemoteImage/PINRemoteImageCaching.h>
 
 #if PIN_ANIMATED_AVAILABLE

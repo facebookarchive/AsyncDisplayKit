@@ -1,0 +1,6 @@
+framework module PINOperation {
+  umbrella header "PINOperation.h"
+
+  export *
+  module * { export * }
+}

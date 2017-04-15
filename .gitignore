@@ -34,3 +34,5 @@ playground.xcworkspace
 /.buckconfig.local
 /.buckd
 
+Cartfile.resolved
+Carthage
