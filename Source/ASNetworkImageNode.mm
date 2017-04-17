@@ -403,7 +403,7 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
 
 - (void)handleProgressImage:(UIImage *)progressImage progress:(CGFloat)progress downloadIdentifier:(nullable id)downloadIdentifier
 {
-  __instanceLock__.lock();
+  ASDN::MutexLocker l(__instanceLock__);
   
   // Getting a result back for a different download identifier, download must not have been successfully canceled
   if (ASObjectIsEqual(_downloadIdentifier, downloadIdentifier) == NO && downloadIdentifier != nil) {
@@ -412,8 +412,6 @@ static const CGSize kMinReleaseImageOnBackgroundSize = {20.0, 20.0};
   
   [self _locked_setCurrentImageQuality:progress];
   [self _locked__setImage:progressImage];
-
-  __instanceLock__.unlock();
 }
 
 - (void)_updateProgressImageBlockOnDownloaderIfNeeded
