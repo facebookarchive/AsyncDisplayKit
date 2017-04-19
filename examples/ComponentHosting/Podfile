@@ -1,0 +1,6 @@
+source 'https://github.com/CocoaPods/Specs.git'
+platform :ios, '7.0'
+target 'Sample' do
+  pod 'ComponentKit', :git => 'https://github.com/facebook/componentkit.git', :commit => '115d2012580f17276b5383cd1dad2b306b24aeb1'
+  pod 'AsyncDisplayKit', :path => '../..'
+end
