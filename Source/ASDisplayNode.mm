@@ -2624,6 +2624,16 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
   return _supernode;
 }
 
+- (void)willMoveToSupernode:(ASDisplayNode * _Nullable)newSupernode
+{
+  //  No op. Subclasses may override.
+}
+
+- (void)didMoveToSupernode
+{
+  //  No op. Subclasses may override.
+}
+
 - (void)_setSupernode:(ASDisplayNode *)newSupernode
 {
   BOOL supernodeDidChange = NO;
@@ -2633,6 +2643,7 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
     if (_supernode != newSupernode) {
       oldSupernode = _supernode;  // Access supernode properties outside of lock to avoid remote chance of deadlock,
                                   // in case supernode implementation must access one of our properties.
+      [self willMoveToSupernode:newSupernode];
       _supernode = newSupernode;
       supernodeDidChange = YES;
     }
@@ -2694,6 +2705,8 @@ ASDISPLAYNODE_INLINE BOOL nodeIsInRasterizedTree(ASDisplayNode *node) {
         [self __exitHierarchy];
       }
     }
+    
+    [self didMoveToSupernode];
   }
 }
 
