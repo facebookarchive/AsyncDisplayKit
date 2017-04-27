@@ -1,15 +1,15 @@
 Pod::Spec.new do |spec|
   spec.name         = 'Texture'
-  spec.version      = '2.3'
+  spec.version      = '2.3.1'
   spec.license      =  { :type => 'BSD and Apache 2',  }
-  spec.homepage     = 'http://asyncdisplaykit.org'
+  spec.homepage     = 'http://texturegroup.org'
   spec.authors      = { 'Huy Nguyen' => 'huy@pinterest.com', 'Garrett Moon' => 'garrett@excitedpixel.com', 'Scott Goodson' => 'scottgoodson@gmail.com', 'Michael Schneider' => 'schneider@pinterest.com', 'Adlai Hollar' => 'adlai@pinterest.com' }
   spec.summary      = 'Smooth asynchronous user interfaces for iOS apps.'
   spec.source       = { :git => 'https://github.com/TextureGroup/Texture.git', :tag => spec.version.to_s }
   spec.module_name  = 'AsyncDisplayKit'
   spec.header_dir   = 'AsyncDisplayKit'
 
-  spec.documentation_url = 'http://asyncdisplaykit.org/appledoc/'
+  spec.documentation_url = 'http://texturegroup.org/appledoc/'
 
   spec.weak_frameworks = 'Photos','MapKit','AssetsLibrary'
   spec.requires_arc = true
@@ -26,7 +26,7 @@ Pod::Spec.new do |spec|
         'Source/Details/**/*.h',
         'Source/Layout/**/*.h',
         'Source/Base/*.h',
-        'Source/Debug/AsyncDisplayKit+Debug.h',
+        'Source/Debug/**/*.h',
         'Source/TextKit/ASTextNodeTypes.h',
         'Source/TextKit/ASTextKitComponents.h'
     ]
@@ -64,7 +64,7 @@ Pod::Spec.new do |spec|
   # Include optional PINRemoteImage module
   spec.default_subspec = 'PINRemoteImage'
 
-  spec.social_media_url = 'https://twitter.com/AsyncDisplayKit'
+  spec.social_media_url = 'https://twitter.com/TextureiOS'
   spec.library = 'c++'
   spec.pod_target_xcconfig = {
        'CLANG_CXX_LANGUAGE_STANDARD' => 'c++11',
