@@ -194,7 +194,7 @@ NS_ASSUME_NONNULL_BEGIN
  *
  * @note Called on the display queue and/or main queue (MUST BE THREAD SAFE)
  */
-+ (void)drawRect:(CGRect)bounds withParameters:(nullable id <NSObject>)parameters
++ (void)drawRect:(CGRect)bounds withParameters:(nullable id)parameters
                                    isCancelled:(__attribute((noescape)) asdisplaynode_iscancelled_block_t)isCancelledBlock
                                  isRasterizing:(BOOL)isRasterizing;
 
