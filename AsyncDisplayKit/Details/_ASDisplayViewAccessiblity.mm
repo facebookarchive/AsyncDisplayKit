@@ -168,7 +168,9 @@ static void CollectAccessibilityElementsForView(_ASDisplayView *view, NSMutableA
 
 - (id)accessibilityElementAtIndex:(NSInteger)index
 {
-  return self.accessibleElements[index];
+  if (index < [self.accessibilityElements count])
+    return [self.accessibilityElements objectAtIndex:index];
+  return nil;
 }
 
 - (NSInteger)indexOfAccessibilityElement:(id)element
