@@ -203,7 +203,7 @@
     __instanceLock__.unlock();
     
     self.accessibilityLabel = _titleNode.accessibilityLabel;
-    [self setNeedsLayout];
+    [_titleNode setNeedsLayout];
     return;
   }
   
